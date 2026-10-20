@@ -9,7 +9,7 @@ use std::{
     path::PathBuf,
     sync::{
         atomic::{AtomicUsize, Ordering},
-        Arc, Mutex,
+        Arc, Condvar, Mutex,
     },
 };
 struct Settings(Mutex<Json>);
@@ -37,7 +37,7 @@ impl ServiceHostOwner for NoChatOwner {
     }
 }
 static SERIAL: AtomicUsize = AtomicUsize::new(0);
-fn open(s: Arc<Settings>, synthetic: bool) -> (PathBuf, AgentServiceController, AgentClientRef) {
+fn open(s: Arc<dyn ToolSettingsSource>, synthetic: bool) -> (PathBuf, AgentServiceController, AgentClientRef) {
     let p = std::env::temp_dir().join(format!(
         "muyon-send-{}-{}",
         std::process::id(),
@@ -111,6 +111,73 @@ fn clean(p: PathBuf, c: AgentServiceController) {
     c.await_settled();
     drop(c);
     std::fs::remove_dir_all(p).unwrap();
+}
+// Hold the real route at its execution-time settings check, after durable admission.
+// No Service, runtime or provider result is replaced by a test double.
+struct PausedSettings {
+    reads: AtomicUsize,
+    gate: Mutex<(bool, bool)>,
+    changed: Condvar,
+}
+impl ToolSettingsSource for PausedSettings {
+    fn snapshot(&self) -> Result<Json> {
+        if self.reads.fetch_add(1, Ordering::SeqCst) == 1 {
+            let mut gate = self.gate.lock().unwrap();
+            gate.0 = true;
+            self.changed.notify_all();
+            while !gate.1 {
+                gate = self.changed.wait(gate).unwrap();
+            }
+        }
+        Ok(cfg(true, "search-connection", 1))
+    }
+}
+#[test]
+fn admitted_registered_send_stays_pollable_until_real_result_is_available() {
+    let settings = Arc::new(PausedSettings {
+        reads: AtomicUsize::new(0),
+        gate: Mutex::new((false, false)),
+        changed: Condvar::new(),
+    });
+    let (p, c, client) = open(settings.clone(), true);
+    let first = c.submit_ordinary_chat(client.clone(), "pending".into(), "conversation1".into(), "find fixture".into());
+    let gate = settings.gate.lock().unwrap();
+    let (gate, _) = settings.changed.wait_timeout_while(gate, std::time::Duration::from_secs(5), |state| !state.0).unwrap();
+    let entered = gate.0;
+    drop(gate);
+    let early = c.supplier_read_events(client.clone(), "pending".into(), 0);
+    {
+        let mut gate = settings.gate.lock().unwrap();
+        gate.1 = true;
+        settings.changed.notify_all();
+    }
+    c.await_settled();
+    let complete = c.supplier_read_events(client, "pending".into(), 0);
+    clean(p, c);
+    assert!(entered, "real route did not reach its execution-time settings check");
+    assert!(first.contains("accepted"), "{first}");
+    let early = parse(early.as_bytes()).unwrap();
+    let fields = early.object().unwrap();
+    assert_eq!(fields["status"], string("events"), "{}", early.encode());
+    assert_eq!(fields["terminal"], Json::Bool(false), "{}", early.encode());
+    assert_eq!(fields["events"], Json::Array(Vec::new()));
+    assert_ne!(fields["run_id"], Json::Null);
+    assert!(complete.contains("completed") && complete.contains("tool_receipt"), "{complete}");
+}
+#[test]
+fn registered_source_label_is_frozen_from_trusted_route_not_host_mode() {
+    for synthetic in [true, false] {
+        let settings = Arc::new(Settings(Mutex::new(cfg(true, "search-connection", 1))));
+        let (p, c, client) = open(settings, synthetic);
+        let first = c.submit_ordinary_chat(client.clone(), "source-kind".into(), "conversation1".into(), "find fixture".into());
+        c.await_settled();
+        let complete = c.supplier_read_events(client, "source-kind".into(), 0);
+        clean(p, c);
+        for wire in [first, complete] {
+            let value = parse(wire.as_bytes()).unwrap();
+            assert_eq!(value.object().unwrap()["synthetic"], Json::Bool(synthetic), "{wire}");
+        }
+    }
 }
 #[test]
 fn ordinary_send_reaches_registered_provider_and_returns_bound_sources_empty_and_error() {

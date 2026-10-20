@@ -33,9 +33,15 @@ pub trait RegisteredChatRoute: Send + Sync {
 pub(crate) fn is_registered(b: &BusinessRead) -> bool {
     field(&b.payload, "intent").ok() == Some(&string("registered-chat-v1"))
 }
+pub(crate) fn is_synthetic(b: &BusinessRead) -> bool {
+    b.source_binding.as_ref().and_then(|route| field(route, "synthetic").ok()) == Some(&Json::Bool(true))
+}
 pub(crate) fn make(conversation: String, text: String, route: Json) -> Result<BusinessRead> {
     let mut b = BusinessRead::ordinary(conversation, text)?;
     if route.encode().len() > 4096 || route.object().is_err() {
+        return Err("tool_route_invalid".into());
+    }
+    if !matches!(field(&route, "synthetic")?, Json::Bool(_)) {
         return Err("tool_route_invalid".into());
     }
     if let Json::Object(m) = &mut b.payload {

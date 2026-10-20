@@ -613,7 +613,13 @@ pub(crate) fn reply(
     if let Some(b) = business {
         let disclosed = (|| {
             validate_events(b)?;
-            if crate::service_tools::is_registered(b){crate::service_tools::disclose(b,identity.ok_or("tool_identity_missing")?,request)?;return Ok(())}
+            if crate::service_tools::is_registered(b) {
+                // The controller retains this metadata-only copy while its worker runs.
+                // A result ledger does not exist yet; no source values are disclosed.
+                if b.dir.is_none() && b.events.is_empty() { return Ok(()); }
+                crate::service_tools::disclose(b,identity.ok_or("tool_identity_missing")?,request)?;
+                return Ok(())
+            }
             if crate::ordinary_chat::is_chat(b){crate::ordinary_chat::disclose(b)?;return Ok(())}
             if let Some(mode)=b.mode.filter(|_|!b.events.is_empty()) {
                 let host=b.host.as_ref().filter(|h|h.mode==mode).ok_or("host_owner_unavailable")?;
@@ -696,7 +702,7 @@ pub(crate) fn reply(
         ("events", Json::Array(events)),
         ("next_cursor", Json::Number(next.to_string())),
         ("terminal", Json::Bool(terminal)),
-        ("synthetic", Json::Bool(business.map(|b|if crate::ordinary_chat::is_chat(b){b.chat_synthetic.unwrap_or(false)}else{b.mode.is_none()}).unwrap_or(true))),
+        ("synthetic", Json::Bool(business.map(|b|if crate::ordinary_chat::is_chat(b){b.chat_synthetic.unwrap_or(false)}else if crate::service_tools::is_registered(b){crate::service_tools::is_synthetic(b)}else{b.mode.is_none()}).unwrap_or(true))),
     ])
     .encode()
 }

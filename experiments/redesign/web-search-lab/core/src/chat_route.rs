@@ -323,6 +323,7 @@ impl RegisteredChatRoute for ConfiguredToolRoute {
         let c = fixture_config(&s)?;
         Ok(Some(object([
             ("tool", string("web_search.search")),
+            ("synthetic", Json::Bool(self.synthetic)),
             ("settings", s),
             ("scope", string("registered-chat")),
             ("scope_refs", Json::Array(vec![connection(&c)])),
@@ -340,6 +341,9 @@ impl RegisteredChatRoute for ConfiguredToolRoute {
     ) -> Result<RegisteredChatResult> {
         if get(route, "status")?.string()? != "ready" {
             return Err(get(route, "status")?.string()?.into());
+        }
+        if get(route, "synthetic")? != &Json::Bool(self.synthetic) {
+            return Err("search_route_identity".into());
         }
         same(self.settings.as_ref(), route)?;
         if !self.synthetic {
@@ -417,6 +421,9 @@ impl RegisteredChatRoute for ConfiguredToolRoute {
         let path = dir.join("search-outbound.db");
         if !completed && !path.exists() {
             return Ok(());
+        }
+        if get(route, "synthetic")? != &Json::Bool(self.synthetic) {
+            return Err("search_route_identity".into());
         }
         let meta = std::fs::symlink_metadata(&path).map_err(|_| "search_outbound_missing")?;
         if !meta.is_file() || meta.file_type().is_symlink() || meta.len() > 8192 {

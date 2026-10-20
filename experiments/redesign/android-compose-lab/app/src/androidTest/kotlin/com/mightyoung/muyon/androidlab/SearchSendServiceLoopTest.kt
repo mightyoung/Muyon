@@ -30,7 +30,19 @@ class SearchSendServiceLoopTest {
         compose.onNodeWithTag("send-service-read").assertIsEnabled().performClick()
         lateinit var request:String
         compose.runOnIdle{request=checkNotNull(app.chats.snapshot.conversations.values.single{it.text==text}.requestId)}
-        compose.waitUntil(60_000){var done=false;compose.runOnIdle{done=app.chats.snapshot.conversations.values.any{it.requestId==request&&it.status==status}};done}
+        try {
+            compose.waitUntil(60_000){var done=false;compose.runOnIdle{done=app.chats.snapshot.conversations.values.any{it.requestId==request&&it.status==status}};done}
+        } catch (timeout:ComposeTimeoutException) {
+            var diagnostic="request_missing"
+            compose.runOnIdle {
+                app.chats.snapshot.conversations.values.singleOrNull{it.requestId==request}?.let { value->
+                    // Fixed protocol states and presence flags only; no business text or secrets.
+                    val state=value.status.takeIf{it in setOf("submitting","reconciling","accepted","existing","events","completed","failed","cancelled","outcome_unknown","unknown","rejected")} ?: "invalid"
+                    diagnostic="state=$state cursor=${value.cursor} run=${value.runId!=null} synthetic=${value.synthetic} receipt=${value.receipt!=null} tool=${value.toolResult!=null}"
+                }
+            }
+            throw AssertionError("search_send_terminal_timeout expected=$status $diagnostic",timeout)
+        }
         compose.activityRule.scenario.onActivity{activity->(activity.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager).hideSoftInputFromWindow(activity.window.decorView.windowToken,0);activity.window.decorView.clearFocus()}
         compose.waitForIdle()
         var value:ChatReadConversation?=null;compose.runOnIdle{value=app.chats.snapshot.conversations.values.single{it.requestId==request}}

@@ -596,7 +596,7 @@ impl AgentServiceController {
         if let Some(old)=old {if crate::field(&old.payload,"conversation").ok()!=Some(&crate::string(&conversation))||crate::field(&old.payload,"text").ok()!=Some(&crate::string(&text)){return self.host_marker(supplier_business::reply("rejected","RequestConflict",&request_id,None,None,0))}return self.submit_business(client,request_id,old)}
         if self.shared.lock().runs.iter().any(|r|intent_of(r).request_id==request_id){return self.host_marker(supplier_business::reply("unknown","original_evidence_unavailable",&request_id,None,None,0))}
         let frozen=self.host.as_ref().and_then(|h|h.tools.as_ref()).map(|r|r.prepare(&conversation,&text));
-        let prepared=match frozen {Some(Ok(Some(route)))=>crate::service_tools::make(conversation,text,route),Some(Err(_))=>crate::service_tools::make(conversation,text,crate::object([("tool",crate::string("unavailable")),("status",crate::string("search_config_corrupt"))])),_=>BusinessRead::ordinary(conversation,text)};
+        let prepared=match frozen {Some(Ok(Some(route)))=>crate::service_tools::make(conversation,text,route),Some(Err(_))=>crate::service_tools::make(conversation,text,crate::object([("tool",crate::string("unavailable")),("status",crate::string("search_config_corrupt")),("synthetic",crate::Json::Bool(false))])),_=>BusinessRead::ordinary(conversation,text)};
         let business=match prepared{Ok(mut b)=>{b.attach_host(self.host.clone());b},Err(e)=>return supplier_business::reply("rejected",&e,&request_id,None,None,0)};
         self.submit_business(client,request_id,business)
     }
@@ -645,7 +645,12 @@ impl AgentServiceController {
             .iter()
             .find(|s| intent_of(s).request_id == request_id)
             .and_then(identity_of);
-        let ordinary=g.business.get(&request_id).filter(|b|crate::ordinary_chat::is_chat(b)).cloned().map(|mut b|{b.events.clear();b});
+        let ordinary=g.business.get(&request_id).filter(|b|crate::ordinary_chat::is_chat(b) || crate::service_tools::is_registered(b)).cloned().map(|mut b|{
+            b.events.clear();
+            // Acceptance exposes only frozen source metadata, never a result replay.
+            if crate::service_tools::is_registered(&b){b.dir=None;}
+            b
+        });
         supplier_business::reply(status, &reason, &request_id, identity.as_ref(), ordinary.as_ref(), 0)
     }
     /// Cursor polling and reconnect lookup share this operation; it never executes a read.
