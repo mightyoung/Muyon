@@ -132,6 +132,11 @@ fun WorkbenchShell(
             }
         }
         if (expanded) body() else ModalNavigationDrawer(drawerState = drawer,
-            drawerContent = { ModalDrawerSheet { sidebar() } }, content = body)
+            drawerContent = {
+                ModalDrawerSheet(Modifier.width(240.dp)) {
+                    // Off-screen navigation must not duplicate live bottom-bar controls.
+                    if (drawer.currentValue == DrawerValue.Open) sidebar()
+                }
+            }, content = body)
     }
 }

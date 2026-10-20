@@ -1,0 +1,168 @@
+INSTRUMENTATION_STATUS: numtests=5
+INSTRUMENTATION_STATUS: stream=
+com.mightyoung.muyon.product.agents.AgentCatalogTest:
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=escapedInstructionsCannotCommitAnUnreadableExpandedDirectory
+INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.product.agents.AgentCatalogTest
+INSTRUMENTATION_STATUS: current=1
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: numtests=5
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=escapedInstructionsCannotCommitAnUnreadableExpandedDirectory
+INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.product.agents.AgentCatalogTest
+INSTRUMENTATION_STATUS: current=1
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: numtests=5
+INSTRUMENTATION_STATUS: stream=
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=reopenedCatalogPreservesEditsAndGroupArchiveNeverDeletesAgents
+INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.product.agents.AgentCatalogTest
+INSTRUMENTATION_STATUS: current=2
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: numtests=5
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=reopenedCatalogPreservesEditsAndGroupArchiveNeverDeletesAgents
+INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.product.agents.AgentCatalogTest
+INSTRUMENTATION_STATUS: current=2
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: numtests=5
+INSTRUMENTATION_STATUS: stream=
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=invalidMembersAndCorruptDataCannotOverwritePersistedDirectory
+INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.product.agents.AgentCatalogTest
+INSTRUMENTATION_STATUS: current=3
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: numtests=5
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=invalidMembersAndCorruptDataCannotOverwritePersistedDirectory
+INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.product.agents.AgentCatalogTest
+INSTRUMENTATION_STATUS: current=3
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: numtests=5
+INSTRUMENTATION_STATUS: stream=
+com.mightyoung.muyon.product.ChatOriginPresentationTest:
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=oldRequestRecoveryShowsOriginalIdentityInsideAnotherGroup
+INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.product.ChatOriginPresentationTest
+INSTRUMENTATION_STATUS: current=4
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: numtests=5
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=oldRequestRecoveryShowsOriginalIdentityInsideAnotherGroup
+INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.product.ChatOriginPresentationTest
+INSTRUMENTATION_STATUS: current=4
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: numtests=5
+INSTRUMENTATION_STATUS: stream=
+com.mightyoung.muyon.product.WorkbenchNavigationTest:
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=agentAndGroupNavigationPreservesSeparateConversationsAndGlobalReceiptMarkers
+INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.product.WorkbenchNavigationTest
+INSTRUMENTATION_STATUS: current=5
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: numtests=5
+INSTRUMENTATION_STATUS: stream=
+Error in agentAndGroupNavigationPreservesSeparateConversationsAndGlobalReceiptMarkers(com.mightyoung.muyon.product.WorkbenchNavigationTest):
+java.lang.AssertionError: Failed to inject touch input.
+Reason: Expected exactly '1' node but found '2' nodes that satisfy: (TestTag = 'nav-agents')
+Nodes found:
+1) Node #163 at (l=246.0, t=560.0, r=320.0, b=640.0)px, Tag: 'nav-agents'
+Focused = 'false'
+Role = 'Tab'
+Selected = 'false'
+Text = '[智能体]'
+Actions = [ClearTextSubstitution, GetTextLayoutResult, OnClick, RequestFocus, SetTextSubstitution, ShowTextSubstitution]
+MergeDescendants = 'true'
+Has 3 siblings
+2) Node #106 at (l=-224.0, t=364.0, r=-16.0, b=420.0)px, Tag: 'nav-agents'
+Focused = 'false'
+Role = 'Tab'
+Selected = 'false'
+Text = '[智能体]'
+Actions = [ClearTextSubstitution, GetTextLayoutResult, OnClick, RequestFocus, SetTextSubstitution, ShowTextSubstitution]
+MergeDescendants = 'true'
+Has 7 siblings
+
+	at androidx.compose.ui.test.SemanticsNodeInteraction.fetchOneOrThrow(SemanticsNodeInteraction.kt:178)
+	at androidx.compose.ui.test.SemanticsNodeInteraction.fetchOneOrThrow$default(SemanticsNodeInteraction.kt:150)
+	at androidx.compose.ui.test.SemanticsNodeInteraction.fetchSemanticsNode(SemanticsNodeInteraction.kt:84)
+	at androidx.compose.ui.test.ActionsKt.performTouchInput(Actions.kt:402)
+	at androidx.compose.ui.test.AndroidActions.performClickImpl(Actions.android.kt:23)
+	at androidx.compose.ui.test.ActionsKt.performClick(Actions.kt:60)
+	at com.mightyoung.muyon.product.WorkbenchNavigationTest.agentAndGroupNavigationPreservesSeparateConversationsAndGlobalReceiptMarkers(WorkbenchNavigationTest.kt:49)
+
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=agentAndGroupNavigationPreservesSeparateConversationsAndGlobalReceiptMarkers
+INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.product.WorkbenchNavigationTest
+INSTRUMENTATION_STATUS: stack=java.lang.AssertionError: Failed to inject touch input.
+Reason: Expected exactly '1' node but found '2' nodes that satisfy: (TestTag = 'nav-agents')
+Nodes found:
+1) Node #163 at (l=246.0, t=560.0, r=320.0, b=640.0)px, Tag: 'nav-agents'
+Focused = 'false'
+Role = 'Tab'
+Selected = 'false'
+Text = '[智能体]'
+Actions = [ClearTextSubstitution, GetTextLayoutResult, OnClick, RequestFocus, SetTextSubstitution, ShowTextSubstitution]
+MergeDescendants = 'true'
+Has 3 siblings
+2) Node #106 at (l=-224.0, t=364.0, r=-16.0, b=420.0)px, Tag: 'nav-agents'
+Focused = 'false'
+Role = 'Tab'
+Selected = 'false'
+Text = '[智能体]'
+Actions = [ClearTextSubstitution, GetTextLayoutResult, OnClick, RequestFocus, SetTextSubstitution, ShowTextSubstitution]
+MergeDescendants = 'true'
+Has 7 siblings
+
+	at androidx.compose.ui.test.SemanticsNodeInteraction.fetchOneOrThrow(SemanticsNodeInteraction.kt:178)
+	at androidx.compose.ui.test.SemanticsNodeInteraction.fetchOneOrThrow$default(SemanticsNodeInteraction.kt:150)
+	at androidx.compose.ui.test.SemanticsNodeInteraction.fetchSemanticsNode(SemanticsNodeInteraction.kt:84)
+	at androidx.compose.ui.test.ActionsKt.performTouchInput(Actions.kt:402)
+	at androidx.compose.ui.test.AndroidActions.performClickImpl(Actions.android.kt:23)
+	at androidx.compose.ui.test.ActionsKt.performClick(Actions.kt:60)
+	at com.mightyoung.muyon.product.WorkbenchNavigationTest.agentAndGroupNavigationPreservesSeparateConversationsAndGlobalReceiptMarkers(WorkbenchNavigationTest.kt:49)
+
+INSTRUMENTATION_STATUS: current=5
+INSTRUMENTATION_STATUS_CODE: -2
+INSTRUMENTATION_RESULT: stream=
+
+Time: 10.259
+There was 1 failure:
+1) agentAndGroupNavigationPreservesSeparateConversationsAndGlobalReceiptMarkers(com.mightyoung.muyon.product.WorkbenchNavigationTest)
+java.lang.AssertionError: Failed to inject touch input.
+Reason: Expected exactly '1' node but found '2' nodes that satisfy: (TestTag = 'nav-agents')
+Nodes found:
+1) Node #163 at (l=246.0, t=560.0, r=320.0, b=640.0)px, Tag: 'nav-agents'
+Focused = 'false'
+Role = 'Tab'
+Selected = 'false'
+Text = '[智能体]'
+Actions = [ClearTextSubstitution, GetTextLayoutResult, OnClick, RequestFocus, SetTextSubstitution, ShowTextSubstitution]
+MergeDescendants = 'true'
+Has 3 siblings
+2) Node #106 at (l=-224.0, t=364.0, r=-16.0, b=420.0)px, Tag: 'nav-agents'
+Focused = 'false'
+Role = 'Tab'
+Selected = 'false'
+Text = '[智能体]'
+Actions = [ClearTextSubstitution, GetTextLayoutResult, OnClick, RequestFocus, SetTextSubstitution, ShowTextSubstitution]
+MergeDescendants = 'true'
+Has 7 siblings
+
+	at androidx.compose.ui.test.SemanticsNodeInteraction.fetchOneOrThrow(SemanticsNodeInteraction.kt:178)
+	at androidx.compose.ui.test.SemanticsNodeInteraction.fetchOneOrThrow$default(SemanticsNodeInteraction.kt:150)
+	at androidx.compose.ui.test.SemanticsNodeInteraction.fetchSemanticsNode(SemanticsNodeInteraction.kt:84)
+	at androidx.compose.ui.test.ActionsKt.performTouchInput(Actions.kt:402)
+	at androidx.compose.ui.test.AndroidActions.performClickImpl(Actions.android.kt:23)
+	at androidx.compose.ui.test.ActionsKt.performClick(Actions.kt:60)
+	at com.mightyoung.muyon.product.WorkbenchNavigationTest.agentAndGroupNavigationPreservesSeparateConversationsAndGlobalReceiptMarkers(WorkbenchNavigationTest.kt:49)
+
+FAILURES!!!
+Tests run: 5,  Failures: 1
+
+
+INSTRUMENTATION_CODE: -1
