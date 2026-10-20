@@ -1,5 +1,15 @@
 # Current delivery — first real attempt unknown; batch stopped
 
+**Offline follow-up:** diagnostic source
+`ca29d3a86d595be93dd25e4b33112cfa57a38b04`, independent SOURCE APPROVE;
+68 HTTPS checks,11 budget groups,4 reference fixtures, exact-source both-ABI
+native/APK/lint and13/13 API36 no-INTERNET device cases passed (99.742s).
+The new diagnostic preserves fixed phase/status without secret/raw-error logging;
+I/O failure leaves unknown stop and reservation intact. It was tested only in
+liveFixture; real liveChat was not upgraded or invoked. No new real requests.
+Details: [FAILURE-DIAGNOSTIC-RESULT.md](FAILURE-DIAGNOSTIC-RESULT.md).
+This does not recover the previous discarded cause or reopen the stopped batch.
+
 **Authoritative update, 2026-10-20:** executed source
 `20a2411e970a256f1b86e8199846a9aeb27410c5`. Remote `.env` handover succeeded
 through the reviewed stdin/FIFO route and original installer; the Service was
