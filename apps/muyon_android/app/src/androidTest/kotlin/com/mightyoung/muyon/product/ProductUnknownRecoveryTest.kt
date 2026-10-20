@@ -77,6 +77,11 @@ class ProductUnknownRecoveryTest {
             assertEquals(intent, preferences.getString("intent_id", null))
             compose.activityRule.scenario.recreate()
             compose.waitUntil(20_000) {
+                compose.onAllNodesWithContentDescription("打开工作空间导航").fetchSemanticsNodes().isNotEmpty()
+            }
+            compose.onNodeWithContentDescription("打开工作空间导航").performClick()
+            compose.onNodeWithTag("nav-supplier").performClick()
+            compose.waitUntil(20_000) {
                 compose.onAllNodes(hasTestTag("supplier-lookup") and isEnabled()).fetchSemanticsNodes().isNotEmpty()
             }
             compose.onNodeWithTag("supplier-receipt").assertDoesNotExist()
@@ -89,7 +94,8 @@ class ProductUnknownRecoveryTest {
             assertNull(preferences.getString("intent_id", null))
             // Chat must query an original business receipt after losing its
             // runtime tool origin, without configuring or contacting a model.
-            compose.onNodeWithText("助手").performClick()
+            compose.onNodeWithContentDescription("打开工作空间导航").performClick()
+            compose.onNodeWithTag("nav-chat").performClick()
             compose.waitUntil(15_000) {
                 compose.onAllNodesWithTag("chat-business-original-lookup").fetchSemanticsNodes().isNotEmpty()
             }

@@ -33,6 +33,8 @@ class ProductLifecycleTest {
             compose.waitUntil(15_000) { compose.onAllNodesWithText("创建新工作台").fetchSemanticsNodes().isNotEmpty() }
             compose.onNodeWithText("创建新工作台").performClick()
         } else assertEquals("existing real workspace must be readable: $health", "ok", health.getString("status"))
+        compose.onNodeWithContentDescription("打开工作空间导航").performClick()
+        compose.onNodeWithTag("nav-supplier").performClick()
         waitEnabled("supplier-new")
         assertNull("prior unresolved intent requires its own recovery", context.getSharedPreferences("muyon_product_supplier_v2", 0).getString("intent_id", null))
     }

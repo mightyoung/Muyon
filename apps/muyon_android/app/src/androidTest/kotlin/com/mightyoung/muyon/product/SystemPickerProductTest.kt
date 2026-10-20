@@ -133,6 +133,10 @@ class SystemPickerProductTest {
 
     private fun openResearch() {
         compose.waitUntil(20_000) {
+            compose.onAllNodesWithContentDescription("打开工作空间导航").fetchSemanticsNodes().isNotEmpty()
+        }
+        compose.onNodeWithContentDescription("打开工作空间导航").performClick()
+        compose.waitUntil(20_000) {
             compose.onAllNodesWithText("创建新工作台").fetchSemanticsNodes().isNotEmpty() ||
                 compose.onAllNodes(hasText("科研工作台") and hasClickAction()).fetchSemanticsNodes().isNotEmpty()
         }

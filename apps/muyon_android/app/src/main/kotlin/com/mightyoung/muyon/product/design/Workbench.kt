@@ -2,6 +2,7 @@ package com.mightyoung.muyon.product.design
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -14,34 +15,50 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.selected
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.mightyoung.muyon.product.R
 import kotlinx.coroutines.launch
 
-/** Shared neutral tokens translated from the observed reference bundles. */
+val ClaudeSansFont = FontFamily(Font(R.font.claude_sans), Font(R.font.claude_sans, FontWeight.Medium), Font(R.font.claude_sans, FontWeight.SemiBold))
+val ClaudeReplyFont = FontFamily(Font(R.font.claude_serif))
+
+/** Muse token values and Claude UI/response typography from the selected packages. */
 @Composable
 fun MuyonTheme(content: @Composable () -> Unit) {
     val dark = isSystemInDarkTheme()
     val scheme = if (dark) darkColorScheme(
-        primary = Color(0xFF91BFF4), onPrimary = Color(0xFF10273F),
-        background = Color(0xFF181818), surface = Color(0xFF181818),
-        surfaceVariant = Color(0xFF292929), onSurface = Color(0xFFF0F0F0),
-        surfaceContainerLow = Color(0xFF202020), surfaceContainerHigh = Color(0xFF303030), surfaceTint = Color.Transparent,
-        onSurfaceVariant = Color(0xFFB7B7BB), outlineVariant = Color(0xFF3B3B3D),
-        secondaryContainer = Color(0xFF303033), onSecondaryContainer = Color(0xFFF0F0F0)
+        primary = Color(0xFF8BC5FF), onPrimary = Color(0xFF111112),
+        background = Color(0xFF181819), surface = Color(0xFF28292B),
+        surfaceVariant = Color(0xFF28292B), onSurface = Color.White,
+        surfaceContainerLow = Color(0xFF28292B), surfaceContainerHigh = Color(0xFF333437), surfaceTint = Color.Transparent,
+        onSurfaceVariant = Color(0xFF999DA4), outlineVariant = Color(0x1FFFFFFF),
+        secondaryContainer = Color(0xFF333437), onSecondaryContainer = Color.White
     ) else lightColorScheme(
-        primary = Color(0xFF254F83), onPrimary = Color.White,
-        background = Color(0xFFFAFAFA), surface = Color.White,
-        surfaceVariant = Color(0xFFF3F3F4), onSurface = Color(0xFF111112),
-        surfaceContainerLow = Color(0xFFF7F7F8), surfaceContainerHigh = Color(0xFFEBEBEE), surfaceTint = Color.Transparent,
-        onSurfaceVariant = Color(0xFF626469), outlineVariant = Color(0xFFE5E5E7),
-        secondaryContainer = Color(0xFFEDEDF0), onSecondaryContainer = Color(0xFF111112)
+        primary = Color(0xFF0064D4), onPrimary = Color.White,
+        background = Color(0xFFFCFCFC), surface = Color.White,
+        surfaceVariant = Color(0xFFF3F4F5), onSurface = Color(0xFF111112),
+        surfaceContainerLow = Color(0xFFF3F4F5), surfaceContainerHigh = Color(0xFFF2F2F2), surfaceTint = Color.Transparent,
+        onSurfaceVariant = Color(0xFF696B6E), outline = Color(0xFF96989C), outlineVariant = Color(0x1A000000),
+        secondaryContainer = Color(0xFFF2F2F2), onSecondaryContainer = Color(0xFF111112)
     )
+    fun type(size: Int, height: Int, weight: FontWeight = FontWeight.Normal) =
+        TextStyle(fontFamily = ClaudeSansFont, fontSize = size.sp, lineHeight = height.sp, fontWeight = weight)
     MaterialTheme(colorScheme = scheme, shapes = Shapes(
         small = RoundedCornerShape(8.dp), medium = RoundedCornerShape(12.dp),
-        large = RoundedCornerShape(16.dp), extraLarge = RoundedCornerShape(24.dp)
+        large = RoundedCornerShape(16.dp), extraLarge = RoundedCornerShape(32.dp)
+    ), typography = Typography(
+        headlineLarge = type(32, 40, FontWeight.SemiBold), headlineMedium = type(28, 36, FontWeight.SemiBold), headlineSmall = type(24, 32, FontWeight.SemiBold),
+        titleLarge = type(20, 28, FontWeight.SemiBold), titleMedium = type(16, 22, FontWeight.Medium), titleSmall = type(14, 20, FontWeight.Medium),
+        bodyLarge = type(16, 24), bodyMedium = type(14, 20), bodySmall = type(13, 18),
+        labelLarge = type(14, 20, FontWeight.Medium), labelMedium = type(13, 18, FontWeight.Medium), labelSmall = type(12, 16, FontWeight.Medium)
     ), content = content)
 }
 
@@ -70,62 +87,51 @@ fun WorkbenchShell(
     }
     BoxWithConstraints(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
         val expanded = maxWidth >= 840.dp
-        val imeOpen = WindowInsets.ime.getBottom(LocalDensity.current) > 0
         val sidebar: @Composable () -> Unit = {
             Column(Modifier.width(240.dp).fillMaxHeight()
-                .background(MaterialTheme.colorScheme.surfaceVariant)
+                .background(MaterialTheme.colorScheme.background)
                 .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Vertical))
-                .verticalScroll(rememberScrollState()).padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text("muyon", Modifier.padding(12.dp, 20.dp),
-                    style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.SemiBold)
-                Text("个人工作空间", Modifier.padding(12.dp), color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    style = MaterialTheme.typography.labelMedium)
+                .verticalScroll(rememberScrollState()).padding(12.dp),
+                verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                Text("muyon", Modifier.padding(12.dp, 24.dp),
+                    style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.SemiBold)
                 destinations.forEach { item ->
-                    NavigationDrawerItem(label = { Text(item.label) }, selected = selected == item.id,
-                        icon = { Icon(painterResource(item.icon), null, Modifier.size(22.dp)) },
-                        onClick = { select(item.id) }, shape = RoundedCornerShape(12.dp), modifier = Modifier.testTag("nav-${item.id}"))
+                    val active = selected == item.id
+                    Box(Modifier.fillMaxWidth().heightIn(min = 48.dp)
+                        .testTag("nav-${item.id}").semantics { this.selected = active }
+                        .clickable(role = Role.Tab) { select(item.id) }, contentAlignment = Alignment.Center) {
+                        Surface(Modifier.fillMaxWidth(), color = if (active) MaterialTheme.colorScheme.secondaryContainer else Color.Transparent,
+                            shape = RoundedCornerShape(12.dp)) {
+                            Row(Modifier.heightIn(min = 36.dp).padding(horizontal = 8.dp, vertical = 8.dp), verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                                Icon(painterResource(item.icon), null, Modifier.size(18.dp))
+                                Text(item.label, style = MaterialTheme.typography.bodyMedium)
+                            }
+                        }
+                    }
                 }
                 Spacer(Modifier.weight(1f))
                 HorizontalDivider(Modifier.padding(vertical = 12.dp))
-                Text("本地工作台", Modifier.padding(horizontal = 12.dp), style = MaterialTheme.typography.labelLarge)
-                Text(status, Modifier.padding(12.dp), style = MaterialTheme.typography.bodySmall,
+                Text("个人工作空间", Modifier.padding(12.dp), style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
         }
         val body: @Composable () -> Unit = {
             Row(Modifier.fillMaxSize()) {
                 if (expanded) sidebar()
-                Scaffold(Modifier.weight(1f), containerColor = MaterialTheme.colorScheme.surface,
+                if (expanded) VerticalDivider(Modifier.fillMaxHeight(), color = MaterialTheme.colorScheme.outlineVariant)
+                Scaffold(Modifier.weight(1f), containerColor = MaterialTheme.colorScheme.background,
                     contentWindowInsets = WindowInsets.safeDrawing,
                     topBar = {
                         Column {
-                            Row(Modifier.fillMaxWidth().statusBarsPadding().heightIn(min = 64.dp).padding(horizontal = 12.dp),
+                            Row(Modifier.fillMaxWidth().statusBarsPadding().heightIn(min = 56.dp).padding(horizontal = 12.dp),
                                 verticalAlignment = Alignment.CenterVertically) {
                                 if (!expanded) IconButton(onClick = { coroutine.launch { drawer.open() } }) {
                                     Icon(painterResource(R.drawable.wb_menu), "打开工作空间导航")
                                 }
                                 Column(Modifier.weight(1f).padding(8.dp)) {
                                     Text(title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
-                                    Text(status, style = MaterialTheme.typography.labelSmall,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant)
                                 }
-                                Surface(shape = RoundedCornerShape(8.dp), color = MaterialTheme.colorScheme.surfaceVariant,
-                                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)) {
-                                    Text("M", Modifier.padding(12.dp, 8.dp), style = MaterialTheme.typography.labelLarge)
-                                }
-                            }
-                            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-                        }
-                    }, bottomBar = {
-                        if (!expanded && !imeOpen) NavigationBar(containerColor = MaterialTheme.colorScheme.surface,
-                            tonalElevation = 0.dp) {
-                            destinations.forEach { item ->
-                                NavigationBarItem(selected = selected == item.id, onClick = { onSelect(item.id) }, modifier = Modifier.testTag("nav-${item.id}"),
-                                    icon = { Icon(painterResource(item.icon), null, Modifier.size(22.dp)) },
-                                    label = { Text(item.label, maxLines = 2) },
-                                    colors = NavigationBarItemDefaults.colors(
-                                        indicatorColor = MaterialTheme.colorScheme.surfaceVariant))
                             }
                         }
                     }) { padding ->

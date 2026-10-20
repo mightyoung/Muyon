@@ -1,21 +1,20 @@
 package com.mightyoung.muyon.product.chat
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import com.mightyoung.muyon.product.agentipc.ProductClient
+import com.mightyoung.muyon.product.design.ClaudeReplyFont
 import org.json.JSONObject
 
 /** Local reads are shown as local records, never as a fabricated model answer. */
@@ -43,6 +42,9 @@ private fun ChatConversation(client: ProductClient, projectId: String?, conversa
     var originalConversationKey by remember { mutableStateOf(saved.getString("original_request_conversation_key", null)) }
     var originalDisplayName by remember { mutableStateOf(saved.getString("original_request_display_name", null)) }
     var settingsOpen by remember { mutableStateOf(false) }
+    var moreOpen by remember { mutableStateOf(false) }
+    var historyOpen by remember { mutableStateOf(false) }
+    var requestDetailsOpen by remember { mutableStateOf(false) }
     var key by remember { mutableStateOf("") }
     var cap by remember { mutableStateOf("1000000") }
     var calls by remember { mutableStateOf("10") }
@@ -138,6 +140,7 @@ private fun ChatConversation(client: ProductClient, projectId: String?, conversa
     fun queryBusinessOriginal() {
         val intent = businessIntent ?: return
         if (businessLookupRunning) return
+        historyOpen = true
         businessLookupRunning = true
         client.call("health") { health ->
             val workspace = health.optJSONObject("data")?.optString("workspace").orEmpty()
@@ -211,46 +214,23 @@ private fun ChatConversation(client: ProductClient, projectId: String?, conversa
 
     Column(Modifier.fillMaxSize().imePadding()) {
         Column(Modifier.weight(1f).fillMaxWidth().verticalScroll(rememberScrollState())) {
-        Column(Modifier.fillMaxWidth().padding(horizontal = 18.dp, vertical = 12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                ChatAvatar(displayName, memberNames)
-                Column(Modifier.weight(1f)) {
-                    Text(displayName, style = MaterialTheme.typography.titleLarge, maxLines = 2, overflow = TextOverflow.Ellipsis)
-                    Text(if (memberNames.isEmpty()) "聊天与工作台" else "群组 · ${memberNames.size} 位成员", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                }
-                TextButton(onClick = { settingsOpen = true }, modifier = Modifier.semantics { contentDescription = "模型与预算设置" }) { Text("设置") }
-            }
-            if (memberNames.isNotEmpty()) Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                memberNames.forEach { name -> ChatMemberChip(name) }
-            }
-            Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                TextButton(onClick = {
-            val next = java.util.UUID.randomUUID().toString()
-            if (saved.edit().putString(conversationPreference, next).commit()) {
-                conversation = next; pendingTool = null; disclosure = null; suggestion = null; followupReady = false
-                conversationNotice = "已开始新会话，不会携带之前披露的业务数据；原请求仍可独立查询。"
-            }
-        }) { Text("开始新会话") }
-                TextButton(onClick = { refreshStatus() }) { Text("刷新连接状态") }
-            }
-            Text(if (availability == null) "连接状态未读取" else "本地读取已连接；实际外发仍需通过计费证明与预算检查", Modifier.testTag("chat-availability"), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        }
-        HorizontalDivider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = .08f))
         Column(Modifier.fillMaxWidth().padding(18.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
-        if (original == null && resultText.isEmpty() && source.isEmpty() && businessIntent == null && businessOriginalText.isEmpty()) {
-            ChatEmptyState(displayName, memberNames, !loading, projectId != null,
-                onSuppliers = { read("supplier_list", 0) }, onPapers = { read("paper_list", 0) })
+        if (resultText.isEmpty() && source.isEmpty() && businessIntent == null && !historyOpen) {
+            ChatEmptyState(displayName, memberNames)
         }
         if (conversationNotice.isNotEmpty()) Text(conversationNotice, style = MaterialTheme.typography.bodySmall)
         if (original != null || resultText.isNotEmpty()) ChatPanel {
-            Text(originalOriginLabel, Modifier.testTag("chat-original-origin"), style = MaterialTheme.typography.titleSmall)
-            Text("全局原请求恢复 · 结果与动作属于以上原始身份，不代表当前助手或群组的回复。", style = MaterialTheme.typography.bodySmall)
-            Text("原请求：$original")
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                OutlinedButton(onClick = { observe() }) { Text("查询原结果") }
-                OutlinedButton(onClick = { client.call("chat_cancel", JSONObject().put("request_id", original)) { observe() } }) { Text("取消原请求") }
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(originalOriginLabel, Modifier.weight(1f).testTag("chat-original-origin"), style = MaterialTheme.typography.labelMedium)
+                TextButton(onClick = { observe() }) { Text("查询原结果") }
             }
-        if (resultText.isNotEmpty()) Text(resultText, Modifier.testTag("chat-original-result"))
+            TextButton(onClick = { requestDetailsOpen = !requestDetailsOpen }) { Text(if (requestDetailsOpen) "收起原请求详情" else "原请求详情") }
+            if (requestDetailsOpen) {
+                Text("全局原请求恢复 · 结果与动作属于以上原始身份，不代表当前助手或群组的回复。", style = MaterialTheme.typography.bodySmall)
+                Text("原请求：$original")
+                TextButton(onClick = { client.call("chat_cancel", JSONObject().put("request_id", original)) { observe() } }) { Text("取消原请求") }
+            }
+        if (resultText.isNotEmpty()) Text(resultText, Modifier.testTag("chat-original-result"), style = MaterialTheme.typography.bodyLarge.copy(fontFamily = ClaudeReplyFont))
         pendingTool?.takeIf { scopeReady }?.let { call ->
             ChatPanel {
             Text("原请求待处理动作 · $originalOriginLabel", style = MaterialTheme.typography.labelLarge)
@@ -283,14 +263,7 @@ private fun ChatConversation(client: ProductClient, projectId: String?, conversa
             Text("待核实的原业务意图：$businessIntent")
             OutlinedButton(onClick = { queryBusinessOriginal() }, enabled = !businessLookupRunning, modifier = Modifier.testTag("chat-business-original-lookup")) { Text("查询原业务回执") }
         }
-        if (businessOriginalText.isNotEmpty()) Text(businessOriginalText, Modifier.testTag("chat-business-original-result"))
-        if (accounting.isNotEmpty()) ChatDetails("预算与用量") { Text(accounting) }
-        Text("可以先查看当前业务记录。这里的本地内容不会自动发送给模型；业务修改需在对应页面预览并确认。", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            OutlinedButton(onClick = { read("supplier_list", 0) }, enabled = !loading) { Text("读取供应商") }
-            OutlinedButton(onClick = { read("paper_list", 0) }, enabled = !loading && projectId != null) { Text("读取项目论文") }
-        }
-        if (projectId == null) Text("选择科研项目后可读取该项目论文。")
+        if (historyOpen && businessOriginalText.isNotEmpty()) Text(businessOriginalText, Modifier.testTag("chat-business-original-result"))
         if (loading) CircularProgressIndicator()
         if (error.isNotEmpty()) Text(error, color = MaterialTheme.colorScheme.error, modifier = Modifier.testTag("chat-error"))
         if (source.isNotEmpty()) {
@@ -315,12 +288,36 @@ private fun ChatConversation(client: ProductClient, projectId: String?, conversa
         }
         }
         ChatInputDock(draft, { draft = it.take(4096) }, configured && scopeReady && draft.isNotBlank(),
-            onChat = { preview(false) }, onSearch = { preview(true) })
+            onChat = { preview(false) }, onMore = { moreOpen = true }, moreMenu = {
+                DropdownMenu(expanded = moreOpen, onDismissRequest = { moreOpen = false }) {
+                    DropdownMenuItem(text = { Text("模型与预算设置") }, onClick = { moreOpen = false; settingsOpen = true })
+                    DropdownMenuItem(text = { Text("开始新会话") }, onClick = {
+                        moreOpen = false
+                        val next = java.util.UUID.randomUUID().toString()
+                        if (saved.edit().putString(conversationPreference, next).commit()) {
+                            conversation = next; pendingTool = null; disclosure = null; suggestion = null; followupReady = false
+                            resultText = ""; searchResults = emptyList(); records = emptyList(); source = ""; historyOpen = false
+                            conversationNotice = "已开始新会话；原请求仍可独立查询。"
+                        }
+                    })
+                    DropdownMenuItem(text = { Text("刷新连接状态") }, onClick = { moreOpen = false; refreshStatus() })
+                    DropdownMenuItem(text = { Text("预览搜索请求") }, enabled = configured && scopeReady && draft.isNotBlank(), onClick = { moreOpen = false; preview(true) })
+                    DropdownMenuItem(text = { Text("读取供应商") }, enabled = !loading, onClick = { moreOpen = false; read("supplier_list", 0) })
+                    DropdownMenuItem(text = { Text("读取项目论文") }, enabled = !loading && projectId != null, onClick = { moreOpen = false; read("paper_list", 0) })
+                    DropdownMenuItem(text = { Text("历史业务回执") }, enabled = businessOriginalText.isNotEmpty() || businessIntent != null, onClick = {
+                        moreOpen = false; historyOpen = true
+                        if (businessIntent != null) queryBusinessOriginal()
+                    })
+                }
+            })
     }
     if (settingsOpen) AlertDialog(
+        shape = RoundedCornerShape(32.dp),
         onDismissRequest = { settingsOpen = false; key = "" },
         title = { Text("确认新的产品配置") },
         text = { Column(Modifier.verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Text(if (availability == null) "连接状态未读取" else "本地读取已连接；实际外发仍需通过计费证明与预算检查", Modifier.testTag("chat-availability"))
+            if (accounting.isNotEmpty()) Text(accounting)
             Text("DeepSeek · 独立产品配置与累计预算。所有助手与群组共享此工作台的模型配置和累计预算；成员资料不会自动发送给模型，也不会自动调度成员。")
             Text("配置不会发出请求。凭据仅保留在当前 Service 内存，重启后需重新输入。当前托管聊天计费上界与搜索价格证明尚未安装，预览会明确阻止外发。")
             Text("供应商：DeepSeek；端点固定为 api.deepseek.com。不会读取历史凭据或预算。")
@@ -341,6 +338,7 @@ private fun ChatConversation(client: ProductClient, projectId: String?, conversa
         dismissButton = { TextButton(onClick = { settingsOpen = false; key = "" }) { Text("取消") } }
     )
     review?.let { plan -> AlertDialog(
+        shape = RoundedCornerShape(32.dp),
         onDismissRequest = { client.call("chat_cancel", JSONObject().put("request_id", plan.optString("request_id"))) {}; review = null }, title = { Text("请求预览") },
         text = { Column(Modifier.verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Text("${if (plan.optString("purpose") == "search") "外部搜索" else "模型聊天"} · DeepSeek")
@@ -364,6 +362,7 @@ private fun ChatConversation(client: ProductClient, projectId: String?, conversa
         dismissButton = { TextButton(onClick = { client.call("chat_cancel", JSONObject().put("request_id", plan.optString("request_id"))) {}; review = null }) { Text("返回") } }
     ) }
     disclosure?.let { data -> AlertDialog(
+        shape = RoundedCornerShape(32.dp),
         onDismissRequest = { disclosure = null }, title = { Text("批准本次业务信息披露") },
         text = { Column(Modifier.verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Text(originalOriginLabel)
@@ -380,6 +379,7 @@ private fun ChatConversation(client: ProductClient, projectId: String?, conversa
         dismissButton = { TextButton(onClick = { disclosure = null }) { Text("取消披露") } }
     ) }
     suggestion?.let { data -> AlertDialog(
+        shape = RoundedCornerShape(32.dp),
         onDismissRequest = { suggestion = null }, title = { Text("确认本次业务修改") },
         text = { Column(Modifier.verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Text(originalOriginLabel)

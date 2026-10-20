@@ -19,6 +19,13 @@ class WorkbenchNavigationTest {
     private val instrumentation = InstrumentationRegistry.getInstrumentation()
     private val context get() = instrumentation.targetContext
 
+    private fun navigate(destination: String) {
+        if (compose.onAllNodesWithTag("nav-$destination").fetchSemanticsNodes().isEmpty()) {
+            compose.onNodeWithContentDescription("打开工作空间导航").performClick()
+        }
+        compose.onNodeWithTag("nav-$destination").performClick()
+    }
+
     private fun capture(name: String) {
         compose.waitForIdle()
         val bitmap = requireNotNull(instrumentation.uiAutomation.takeScreenshot())
@@ -30,12 +37,20 @@ class WorkbenchNavigationTest {
     @Test fun agentAndGroupNavigationPreservesSeparateConversationsAndGlobalReceiptMarkers() {
         compose.waitUntil(15_000) {
             compose.onAllNodesWithText("创建新工作台").fetchSemanticsNodes().isNotEmpty() ||
-                compose.onAllNodesWithTag("supplier-new").fetchSemanticsNodes().isNotEmpty()
+                compose.onAllNodesWithTag("chat-send").fetchSemanticsNodes().isNotEmpty()
         }
         if (compose.onAllNodesWithText("创建新工作台").fetchSemanticsNodes().isNotEmpty()) {
             compose.onNodeWithText("创建新工作台").performClick()
         }
-        compose.waitUntil(15_000) { compose.onAllNodesWithTag("supplier-new").fetchSemanticsNodes().isNotEmpty() }
+        compose.waitUntil(15_000) { compose.onAllNodesWithTag("chat-send").fetchSemanticsNodes().isNotEmpty() }
+        compose.onNodeWithTag("chat-availability").assertDoesNotExist()
+        compose.onNodeWithText("模型与预算设置").assertDoesNotExist()
+        compose.onNodeWithText("读取供应商").assertDoesNotExist()
+        compose.onNodeWithTag("chat-more").performClick()
+        compose.onNodeWithText("模型与预算设置").performClick()
+        compose.onNodeWithTag("chat-availability").assertExists()
+        compose.onNodeWithText("取消").performClick()
+        capture("00-chat-home")
         InstrumentationRegistry.getArguments().getString("expected_font_scale")?.toFloat()?.let { expected ->
             assertEquals(expected, compose.activity.resources.configuration.fontScale, 0.01f)
         }
@@ -52,16 +67,26 @@ class WorkbenchNavigationTest {
         val originalRequest = saved.getString("original_request", null)
         val originalIntent = saved.getString("original_business_intent", null)
         try {
-            compose.onNodeWithTag("nav-agents").performClick()
+            navigate("agents")
             compose.waitUntil(10_000) { compose.onAllNodesWithTag("agent_card_${a.id}").fetchSemanticsNodes().isNotEmpty() }
             capture("01-agent-library")
             compose.onNodeWithTag("agent_card_${a.id}").performScrollTo().performClick()
             capture("02-agent-detail")
+            compose.onNodeWithText("编辑智能体").performScrollTo().performClick()
+            compose.onNodeWithTag("agent_role").performScrollTo().performTextReplacement("梳理论文并追踪来源")
+            capture("02b-agent-editor")
+            compose.onNodeWithTag("agent_next").performScrollTo().performClick()
+            compose.onNodeWithTag("agent_instructions").assertTextContains("区分观察和推断")
+            compose.onNodeWithTag("agent_next").performScrollTo().performClick()
+            capture("02c-agent-review")
+            compose.onNodeWithTag("agent_next").performScrollTo().performClick()
+            compose.waitUntil(10_000) { catalog.read().agents.single { it.id == a.id }.role == "梳理论文并追踪来源" }
+            compose.onNodeWithTag("agent_card_${a.id}").performScrollTo().performClick()
             compose.onNodeWithText("打开对话").performScrollTo().performClick()
             compose.onNodeWithText("消息草稿").assertExists()
             val agentConversation = saved.getString("conversation:agent:${a.id}", null)
             assertNotNull(agentConversation)
-            compose.onNodeWithTag("nav-agents").performClick()
+            navigate("agents")
             compose.onNodeWithText("群组").performClick()
             compose.onNodeWithTag("group_card_${group.id}").performScrollTo().performClick()
             capture("03-group-detail")

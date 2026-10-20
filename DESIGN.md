@@ -1,18 +1,20 @@
 # Design
 
 ## Source of truth
-Active · 2026-10-21 · native Android workbench. The latest user instruction assigns
-WorkBuddy to layout, Muse to individual agent management, and Grok Bot to chat and
-group organization. This overrides the earlier original-only reference brief.
+Active · 2026-10-21 · native Android workbench. The latest user correction assigns
+Muse to the complete UI (components, interactions, colors, buttons and corner
+geometry), Claude to typography, and requires a quiet conversation without
+permanent configuration controls. Earlier WorkBuddy/Grok references remain only
+where compatible with this correction; they no longer determine visual styling.
 Observed packages: WorkBuddy 2.6.1 (`com.tencent.workbuddy.app`), Muse
 11.0.0.8.164 (`com.facebook.aura`), Grok Bot 1.14.1 (`ai.x.grok.bot`). Desktop
 Muse hatch and Grok Bot 0.70.2 renderer supply readable component evidence.
 Static evidence establishes component structures, not measured screen parity.
 
 ## Brand
-Quiet, precise, personal. Use Muyon identity and system typography. Reuse neutral
-reference geometry and icons; retain their provenance. Do not transplant vendor
-logos, credentials, analytics or proprietary fonts into the app.
+Quiet, precise, personal. Use Muyon identity, the selected Claude Sans/Serif font
+resources with system Chinese fallback, and Muse component geometry. Retain
+provenance. Do not transplant vendor logos, credentials or analytics.
 
 ## Product goals
 Make the existing supplier/research functions reachable in one workbench. Make
@@ -26,8 +28,9 @@ on a phone or larger Android window. New local records survive restart; historic
 Flutter data migration remains out of scope.
 
 ## Information architecture
-Four stable destinations: supplier, research, assistant, agent library. Compact
-windows use bottom navigation plus a drawer; expanded windows use a left sidebar.
+Four stable destinations: supplier, research, assistant, agent library. Start in
+the conversation. Compact windows use a menu drawer; expanded windows use a left
+sidebar. There is no permanent bottom tab bar competing with the composer.
 Agent library has agents and groups. Agent details separate identity, role and
 instructions; group details show independent member identities. Opening either
 selects a durable conversation namespace. Original unresolved receipts stay global
@@ -40,16 +43,22 @@ grant tool permission or silently alter a model prompt. Group membership does no
 create independent model executors. Group archival never deletes its members.
 
 ## Visual language
-Neutral white / light-gray surfaces; dark sidebar #181818 and text #F0F0F0 in dark
-mode, Muse primary text #111112, Grok blue accent #599CE7. 4dp rhythm; 16–24dp
-content margins; 12/16dp corners; restrained one-pixel dividers; no ornamental
-gradients or fake activity. System body typography with clear title hierarchy.
+Muse light: background #fcfcfc, surface white, secondary #f3f4f5, divider
+#0000001a, primary text #111112, primary action #0064d4. Muse dark: background
+#181819, surface #28292b, divider #ffffff1f, primary text white. 4dp rhythm;
+navigation radius12, cards16, composer/dialogs32; pill action buttons. Composer
+send tile32 inside48 touch target, #cbe5ff/#111112 light and #0074e8/white dark.
+Claude Sans for interface/user text, Claude Serif16/24 for assistant replies;
+Chinese follows system fallback as in the reference CSS.
 
 ## Components
-Shared Material3 tokens, adaptive workbench shell, reusable neutral SVG-derived
-icons, identity tiles, member composite avatars, outlined identity/review cards,
-scrolling chat content and bottom composer. Supplier/research screens and all
-business approval dialogs keep their real actions and semantics.
+Shared Muse tokens over native Compose primitives, 240dp sidebar, 36dp visual
+navigation rows inside48dp targets, reusable SVG-derived icons, member avatars,
+agent directory cards16dp/padding20/minheight256 with two columns when wide.
+The32dp composer has a plain textarea, left plus menu, right compact send action.
+Settings, budget, new chat, local reads and history live in the plus menu. Pending
+unknown recovery and consequential approvals remain explicit. Supplier/research
+screens and business dialogs retain their real actions and semantics.
 
 ## Accessibility
 48dp minimum interactive targets, descriptive labels, visible selection, readable
@@ -57,7 +66,7 @@ contrast and scrollable forms. Essential unknown/approval information cannot be
 hidden only in secondary metadata. Respect system dark mode and font scaling.
 
 ## Responsive behavior
-Below 840dp use compact navigation. Above it show a 240dp sidebar and bounded
+Below 840dp use compact drawer navigation. Above it show a240dp sidebar and bounded
 content. Insets follow system bars and IME; composer remains reachable. Test a
 compact device and larger/font-scaled window rather than inferring usability.
 

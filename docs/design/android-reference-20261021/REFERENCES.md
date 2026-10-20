@@ -1,7 +1,8 @@
 # Android page reference evidence
 
-User instruction: WorkBuddy layout; Muse individual agent management; Grok Bot
-chat/group organization; reuse available components/resources, generate missing art.
+Latest user correction: Muse for the complete UI, Claude typography, quiet chat
+without permanent configuration/button clutter. The initial WorkBuddy/Grok split
+is superseded for visuals; neutral icons and member relationships are retained.
 Source folder: https://drive.google.com/drive/folders/1ifCHLvXiRAThyWUyCb6FbP8CfvKjnrVi
 
 ## Package identity (observed with Android SDK aapt)
@@ -49,10 +50,36 @@ WorkBuddy ZIP `assets/flutter_assets/assets/icons/` directly supplies neutral
 vector drawables `wb_chat`, `wb_add`, `wb_menu`, `wb_document`; only tint and
 container sizing adapt to the shared theme. No new icon dependency is added.
 
-No vendor logo, private font, analytics module or provider code is imported.
+No vendor logo, analytics module or provider code is imported.
 The bundles do not establish an application open-source license; reuse is recorded
 as user-directed reference-resource reuse, not represented as third-party open
 source. Existing business components, dialogs and runtime are reused directly.
+
+## Muse correction and Claude font resources
+
+Muse `HatchComposer` at character38592964: radius32, inner padding12,
+textarea15/24 and maxheight192, left attachment/+ and right32px action. Chat send
+overrides generic blue primary: light #cbe5ff/#111112, dark #0074e8/white,
+disabled40%. No provider/budget/config label belongs to this component.
+Generic buttons: pill, visual heights32/36/44 and horizontal padding12/14/16.
+Navigation:240px sidebar, row36px/radius12/label14/20; dialogs squircle32.
+Agent management cards: white/divider/radius16/padding20/minheight256; gap16,
+wide two-column grid. These are exact observed component values adapted to Android
+dp and48dp touch targets; they do not establish pixel parity across platforms.
+
+Muse dark values, `.dark` at42841932–42846220: bg#181819, fill#28292b,
+divider#ffffff1f, text white, secondary#f2f7ff87.
+
+Claude selected packaged fonts are copied into `app/src/main/res/font/`:
+- `claude_sans.ttf` from `Claude.app/Contents/Resources/fonts/AnthropicSans-Romans-Variable-25x258.ttf`;
+  SHA256 `4eda2c42031a090a3d01cd58ada3de00f467e3e359efad36572f26e43ecba65f`.
+- `claude_serif.ttf` from `AnthropicSerif-Romans-Variable-25x258.ttf`;
+  SHA256 `cb2c65e0d0d326181f2a2525ad344cacc850a41c24aeaea51cc70df8c88a3231`.
+
+Claude `ion-dist/assets/v1/c6a992d55-C0zTICcS.css` assigns Sans to UI/user and
+Serif to response; reply16px/1.5, headings20px/600/1.4, title28px/600/1.3.
+The original CSS uses system Chinese fallback; these fonts do not supply CJK glyphs.
+This records user-directed resource reuse and does not label the fonts open-source.
 
 ## Generated asset
 

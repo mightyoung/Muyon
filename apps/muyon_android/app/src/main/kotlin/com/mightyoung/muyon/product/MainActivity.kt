@@ -40,7 +40,7 @@ class MainActivity : ComponentActivity() {
         }
         setContent {
             MuyonTheme {
-                var tab by rememberSaveable { mutableStateOf("supplier") }
+                var tab by rememberSaveable { mutableStateOf("chat") }
                 var conversationKey by rememberSaveable { mutableStateOf("default") }
                 var conversationTitle by rememberSaveable { mutableStateOf("Muyon 助手") }
                 var memberNames by rememberSaveable { mutableStateOf(arrayListOf<String>()) }

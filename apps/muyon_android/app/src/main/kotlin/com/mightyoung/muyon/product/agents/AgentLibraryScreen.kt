@@ -1,8 +1,9 @@
 package com.mightyoung.muyon.product.agents
 
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.background
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -14,16 +15,32 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
-import com.mightyoung.muyon.product.R
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.mightyoung.muyon.product.R
 import java.util.UUID
+
+private val Ink: Color
+    @Composable get() = MaterialTheme.colorScheme.onSurface
+private val SecondaryInk: Color
+    @Composable get() = MaterialTheme.colorScheme.onSurfaceVariant
+private val CanvasColor: Color
+    @Composable get() = MaterialTheme.colorScheme.background
+private val QuietSurface: Color
+    @Composable get() = MaterialTheme.colorScheme.surfaceVariant
+private val DividerColor: Color
+    @Composable get() = MaterialTheme.colorScheme.outlineVariant
+private val ActionBlue: Color
+    @Composable get() = MaterialTheme.colorScheme.primary
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -44,150 +61,301 @@ fun AgentLibraryScreen(onOpenChat: (agentId: String?, groupId: String?) -> Unit)
         try { snapshot = catalog.read(); readable = true; error = null }
         catch (failure: Exception) { error = failure.message; readable = false }
     }
+    fun close() { agentDraft = null; groupDraft = null; detailAgent = null; detailGroup = null; step = 0 }
     fun write(action: () -> Unit) {
-        try { action(); reload(); agentDraft = null; groupDraft = null; detailAgent = null; detailGroup = null; step = 0 }
+        try { action(); reload(); close() }
         catch (failure: Exception) { error = failure.message ?: "保存失败" }
     }
     LaunchedEffect(catalog) { reload() }
-    BackHandler(agentDraft != null || groupDraft != null || detailAgent != null || detailGroup != null) {
-        agentDraft = null; groupDraft = null; detailAgent = null; detailGroup = null; step = 0
-    }
-    Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(20.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
-        Text("你的智能体", style = MaterialTheme.typography.headlineMedium)
-        Text("独立角色，有序协作", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        error?.let { Text(it, color = MaterialTheme.colorScheme.error, modifier = Modifier.testTag("agent_catalog_error")); TextButton(onClick = { reload() }) { Text("重新读取") } }
-        if (!readable) return@Column
-        val activeAgents = snapshot.agents.filterNot { it.archived }
-        if (agentDraft != null) {
-            val draft = requireNotNull(agentDraft)
-            EditorHeader("${if (snapshot.agents.any { it.id == draft.id }) "编辑" else "创建"}智能体", step) { agentDraft = null; step = 0 }
-            if (step == 0) {
-                Avatar(draft)
-                OutlinedTextField(draft.name, { agentDraft = draft.copy(name = it) }, label = { Text("名称 · 最多 60 字") }, modifier = Modifier.fillMaxWidth().testTag("agent_name"))
-                OutlinedTextField(draft.role, { agentDraft = draft.copy(role = it) }, label = { Text("身份与职责 · 最多 160 字") }, modifier = Modifier.fillMaxWidth().testTag("agent_role"))
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    listOf("✦", "◈", "✺", "◎").forEach { glyph -> FilterChip(draft.avatar == glyph, { agentDraft = draft.copy(avatar = glyph) }, label = { Text(glyph) }, modifier = Modifier.semantics { contentDescription = "头像 $glyph" }) }
+    BackHandler(agentDraft != null || groupDraft != null || detailAgent != null || detailGroup != null) { close() }
+    Box(Modifier.fillMaxSize().background(CanvasColor), contentAlignment = Alignment.TopCenter) {
+        BoxWithConstraints(Modifier.widthIn(max = 1152.dp).fillMaxWidth().verticalScroll(rememberScrollState()).padding(20.dp)) {
+            val columns = if (maxWidth >= 720.dp) 2 else 1
+            Column(verticalArrangement = Arrangement.spacedBy(24.dp)) {
+                error?.let {
+                    Text(it, color = MaterialTheme.colorScheme.error, modifier = Modifier.testTag("agent_catalog_error"))
+                    TextButton(onClick = { reload() }) { Text("重新读取") }
                 }
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    listOf("#7564D8", "#34866C", "#C37543", "#427BB8").forEach { accent ->
-                        val selected = draft.accent == accent
-                        Box(Modifier.size(48.dp).padding(5.dp).background(Color(android.graphics.Color.parseColor(accent)), CircleShape)
-                            .border(if (selected) 3.dp else 0.dp, MaterialTheme.colorScheme.onSurface, CircleShape)
-                            .clickable { agentDraft = draft.copy(accent = accent) }.semantics { contentDescription = "头像颜色 $accent${if (selected) "，已选中" else ""}" })
+                if (!readable) return@Column
+                val activeAgents = snapshot.agents.filterNot { it.archived }
+                val agent = agentDraft
+                val group = groupDraft
+                when {
+                    agent != null -> {
+                        EditorHeader(if (snapshot.agents.any { it.id == agent.id }) "编辑智能体" else "创建智能体", step, ::close)
+                        FormPanel {
+                            when (step) {
+                                0 -> {
+                                    Avatar(agent, Modifier.size(64.dp))
+                                    QuietField(agent.name, { agentDraft = agent.copy(name = it) }, "名称", "agent_name")
+                                    QuietField(agent.role, { agentDraft = agent.copy(role = it) }, "身份与职责", "agent_role", minLines = 2)
+                                    Text("头像", style = MaterialTheme.typography.labelLarge, color = SecondaryInk)
+                                    FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                                        listOf("✦", "◈", "✺", "◎").forEach { glyph ->
+                                            val selected = agent.avatar == glyph
+                                            Box(Modifier.size(48.dp).clip(RoundedCornerShape(12.dp)).background(if (selected) MaterialTheme.colorScheme.surface else QuietSurface)
+                                                .border(1.dp, if (selected) ActionBlue else Color.Transparent, RoundedCornerShape(12.dp))
+                                                .clickable { agentDraft = agent.copy(avatar = glyph) }.semantics { contentDescription = "头像 $glyph" }, contentAlignment = Alignment.Center) {
+                                                if (glyph == "✦") Image(painterResource(R.drawable.muyon_avatar), null, Modifier.size(32.dp)) else Text(glyph, color = Ink)
+                                            }
+                                        }
+                                    }
+                                    FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                                        listOf("#7564D8", "#34866C", "#C37543", "#427BB8").forEach { accent ->
+                                            Box(Modifier.size(48.dp).clip(CircleShape).clickable { agentDraft = agent.copy(accent = accent) }
+                                                .semantics { contentDescription = "头像颜色 $accent${if (agent.accent == accent) "，已选中" else ""}" }.padding(8.dp)
+                                                .background(Color(android.graphics.Color.parseColor(accent)), CircleShape)
+                                                .border(if (agent.accent == accent) 2.dp else 0.dp, Ink, CircleShape))
+                                        }
+                                    }
+                                }
+                                1 -> QuietField(agent.instructions, { agentDraft = agent.copy(instructions = it) }, "指令", "agent_instructions", 8)
+                                else -> {
+                                    IdentityReview(agent)
+                                    Text("本地角色配置；保存不会连接模型或启动任务。", color = SecondaryInk, style = MaterialTheme.typography.bodySmall)
+                                }
+                            }
+                            EditorActions(step, { step-- }, { if (step < 2) step++ else write { catalog.saveAgent(agent) } },
+                                agent.name.isNotBlank() && agent.name.length <= 60 && agent.role.isNotBlank() && agent.role.length <= 160 && agent.instructions.length <= 8000, "agent_next")
+                        }
+                    }
+                    group != null -> {
+                        EditorHeader("${if (snapshot.groups.any { it.id == group.id }) "编辑" else "创建"}群组", step, ::close)
+                        FormPanel {
+                            when (step) {
+                                0 -> QuietField(group.name, { groupDraft = group.copy(name = it) }, "群组名称", "group_name")
+                                1 -> {
+                                    Text("成员 · ${group.members.size}/20", style = MaterialTheme.typography.titleMedium, color = Ink)
+                                    if (activeAgents.isEmpty()) Text("请先创建智能体。", color = SecondaryInk)
+                                    activeAgents.forEach { member ->
+                                        Row(Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp)).background(QuietSurface).clickable {
+                                            groupDraft = group.copy(members = if (member.id in group.members) group.members - member.id else group.members + member.id)
+                                        }.padding(12.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                                            Avatar(member)
+                                            Column(Modifier.weight(1f)) { Text(member.name, color = Ink); Text(member.role, color = SecondaryInk, style = MaterialTheme.typography.bodySmall, maxLines = 2, overflow = TextOverflow.Ellipsis) }
+                                            Checkbox(member.id in group.members, { checked -> groupDraft = group.copy(members = if (checked) (group.members + member.id).distinct() else group.members - member.id) },
+                                                colors = CheckboxDefaults.colors(checkedColor = ActionBlue), modifier = Modifier.semantics { contentDescription = "选择成员 ${member.name}" })
+                                        }
+                                    }
+                                }
+                                else -> {
+                                    CatalogCard { Text(group.name, style = MaterialTheme.typography.headlineSmall, color = Ink); GroupMembers(group, snapshot) }
+                                    Text("群组仅组织角色与会话，不会自动执行多智能体任务。", color = SecondaryInk, style = MaterialTheme.typography.bodySmall)
+                                }
+                            }
+                            EditorActions(step, { step-- }, { if (step < 2) step++ else write { catalog.saveGroup(group) } },
+                                group.name.isNotBlank() && group.name.length <= 60 && (step == 0 || group.members.size in 1..20), "group_next")
+                        }
+                    }
+                    detailAgent != null -> {
+                        TextButton({ close() }) { Text("返回目录", color = SecondaryInk) }
+                        snapshot.agents.firstOrNull { it.id == detailAgent }?.let { selected ->
+                            FormPanel {
+                                IdentityReview(selected)
+                                if (!selected.archived) {
+                                    PrimaryAction("打开对话", { onOpenChat(selected.id, null) })
+                                    OutlinedButton({ agentDraft = selected; step = 0 }, shape = CircleShape) { Text("编辑智能体", color = Ink) }
+                                    TextButton({ write { catalog.archiveAgent(selected.id) } }) { Text("归档智能体", color = SecondaryInk) }
+                                } else PrimaryAction("恢复智能体", { write { catalog.saveAgent(selected.copy(archived = false)) } })
+                            }
+                        }
+                    }
+                    detailGroup != null -> {
+                        TextButton({ close() }) { Text("返回目录", color = SecondaryInk) }
+                        snapshot.groups.firstOrNull { it.id == detailGroup }?.let { selected ->
+                            FormPanel {
+                                CatalogCard { Text(selected.name, style = MaterialTheme.typography.headlineSmall, color = Ink); GroupMembers(selected, snapshot) }
+                                if (!selected.archived) {
+                                    PrimaryAction("打开群组会话", { onOpenChat(null, selected.id) })
+                                    OutlinedButton({ groupDraft = selected; step = 0 }, shape = CircleShape) { Text("编辑群组与成员", color = Ink) }
+                                    TextButton({ write { catalog.archiveGroup(selected.id) } }) { Text("归档群组", color = SecondaryInk) }
+                                } else PrimaryAction("恢复群组", { write { catalog.saveGroup(selected.copy(archived = false)) } })
+                            }
+                        }
+                    }
+                    else -> {
+                        FlowRow(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                            Text(if (groupsTab) "群组" else "智能体", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.SemiBold, color = Ink)
+                            PrimaryAction(if (groupsTab) "＋ 创建群组" else "＋ 创建智能体", {
+                                step = 0
+                                if (groupsTab) groupDraft = AgentGroup(UUID.randomUUID().toString(), "", emptyList())
+                                else agentDraft = AgentProfile(UUID.randomUUID().toString(), "", "", "")
+                            }, modifier = Modifier.testTag("catalog_create"))
+                        }
+                        FlowRow(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                            FlowRow(Modifier.clip(CircleShape).background(QuietSurface).padding(4.dp), horizontalArrangement = Arrangement.spacedBy(4.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                                Segment("智能体", !groupsTab) { groupsTab = false }
+                                Segment("群组", groupsTab) { groupsTab = true }
+                            }
+                            Segment("已归档", archived) { archived = !archived }
+                        }
+                        if (groupsTab) {
+                            val groups = snapshot.groups.filter { it.archived == archived }
+                            if (groups.isEmpty()) EmptyCatalog("还没有${if (archived) "归档" else ""}群组")
+                            CatalogGrid(groups, columns) { item ->
+                                CatalogCard(Modifier.heightIn(min = 256.dp).clickable { detailGroup = item.id }.testTag("group_card_${item.id}")) {
+                                    Row(Modifier.heightIn(min = 80.dp), verticalAlignment = Alignment.Top) {
+                                        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                                            Text(item.name, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.SemiBold, color = Ink, maxLines = 2, overflow = TextOverflow.Ellipsis)
+                                            Text("${item.members.size} 位成员", style = MaterialTheme.typography.bodyMedium, color = SecondaryInk)
+                                        }
+                                        Chevron()
+                                    }
+                                    GroupMembers(item, snapshot)
+                                }
+                            }
+                        } else {
+                            val agents = snapshot.agents.filter { it.archived == archived }
+                            if (agents.isEmpty()) EmptyCatalog("还没有${if (archived) "归档" else ""}智能体")
+                            CatalogGrid(agents, columns) { item ->
+                                CatalogCard(Modifier.heightIn(min = 256.dp).clickable { detailAgent = item.id }.testTag("agent_card_${item.id}")) {
+                                    Row(Modifier.heightIn(min = 80.dp), horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.Top) {
+                                        Avatar(item)
+                                        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                                            Text(item.name, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.SemiBold, color = Ink, maxLines = 2, overflow = TextOverflow.Ellipsis)
+                                            Text(item.role, style = MaterialTheme.typography.bodyMedium, color = SecondaryInk, maxLines = 2, overflow = TextOverflow.Ellipsis)
+                                        }
+                                        Chevron()
+                                    }
+                                    if (item.instructions.isNotBlank()) Text(item.instructions, style = MaterialTheme.typography.bodyMedium, color = SecondaryInk, maxLines = 4, overflow = TextOverflow.Ellipsis)
+                                }
+                            }
+                        }
                     }
                 }
-            } else if (step == 1) {
-                Text("定义这个角色如何思考与回应。保存的指令仅为角色配置。")
-                OutlinedTextField(draft.instructions, { agentDraft = draft.copy(instructions = it) }, label = { Text("独立指令 · 最多 8000 字") }, minLines = 6, modifier = Modifier.fillMaxWidth().testTag("agent_instructions"))
-            } else {
-                CatalogCard { Avatar(draft); Text(draft.name, style = MaterialTheme.typography.titleLarge); Text(draft.role); HorizontalDivider(); Text(draft.instructions.ifBlank { "未设置额外指令" }) }
-                Text("本地角色配置；保存不会连接模型或启动任务。", color = MaterialTheme.colorScheme.onSurfaceVariant)
-            }
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                if (step > 0) OutlinedButton({ step-- }) { Text("上一步") }
-                Button({ if (step < 2) step++ else write { catalog.saveAgent(draft) } }, enabled = draft.name.isNotBlank() && draft.name.length <= 60 && draft.role.isNotBlank() && draft.role.length <= 160 && draft.instructions.length <= 8000, modifier = Modifier.testTag("agent_next")) { Text(if (step == 2) "确认保存" else "下一步") }
-            }
-        } else if (groupDraft != null) {
-            val draft = requireNotNull(groupDraft)
-            EditorHeader("组织群组", step) { groupDraft = null; step = 0 }
-            if (step < 2) {
-                OutlinedTextField(draft.name, { groupDraft = draft.copy(name = it) }, label = { Text("群组名称 · 最多 60 字") }, modifier = Modifier.fillMaxWidth().testTag("group_name"))
-                Text("选择成员 · ${draft.members.size}/20")
-                if (activeAgents.isEmpty()) Text("请先创建智能体，再组织群组。")
-                activeAgents.forEach { agent ->
-                    Row(Modifier.fillMaxWidth().clickable { groupDraft = draft.copy(members = if (agent.id in draft.members) draft.members - agent.id else draft.members + agent.id) }.padding(vertical = 4.dp), verticalAlignment = Alignment.CenterVertically) {
-                        Checkbox(agent.id in draft.members, { checked -> groupDraft = draft.copy(members = if (checked) (draft.members + agent.id).distinct() else draft.members - agent.id) }, modifier = Modifier.semantics { contentDescription = "选择成员 ${agent.name}" })
-                        Avatar(agent); Spacer(Modifier.width(12.dp)); Text(agent.name)
-                    }
-                }
-            } else {
-                CatalogCard { Text(draft.name, style = MaterialTheme.typography.titleLarge); GroupMembers(draft, snapshot) }
-            }
-            Text("群组只用于组织角色和会话，不会自动执行多智能体任务，也不会新增网络请求。", color = MaterialTheme.colorScheme.onSurfaceVariant)
-            Button({ if (step < 2) step = 2 else write { catalog.saveGroup(draft) } }, enabled = draft.name.isNotBlank() && draft.name.length <= 60 && draft.members.size in 1..20, modifier = Modifier.testTag("group_next")) { Text(if (step == 2) "确认保存" else "预览群组") }
-            if (step == 2) TextButton({ step = 0 }) { Text("返回修改") }
-        } else if (detailAgent != null) {
-            val agent = snapshot.agents.firstOrNull { it.id == detailAgent }
-            TextButton({ detailAgent = null }) { Text("返回目录") }
-            agent?.let {
-                CatalogCard { Avatar(it); Text(it.name, style = MaterialTheme.typography.headlineSmall); Text(it.role); HorizontalDivider(); Text("独立指令", style = MaterialTheme.typography.labelLarge); Text(it.instructions.ifBlank { "未设置额外指令" }) }
-                Text("本地角色 · 未声明模型连接")
-                if (!it.archived) {
-                    Button({ onOpenChat(it.id, null) }) { Text("打开对话") }
-                    OutlinedButton({ agentDraft = it; step = 0 }) { Text("编辑智能体") }
-                    TextButton({ write { catalog.archiveAgent(it.id) } }) { Text("归档智能体") }
-                } else Button({ write { catalog.saveAgent(it.copy(archived = false)) } }) { Text("恢复智能体") }
-            }
-        } else if (detailGroup != null) {
-            val group = snapshot.groups.firstOrNull { it.id == detailGroup }
-            TextButton({ detailGroup = null }) { Text("返回目录") }
-            group?.let {
-                CatalogCard { Text(it.name, style = MaterialTheme.typography.headlineSmall); GroupMembers(it, snapshot) }
-                Text("角色组织会话；成员不会自动轮流执行。归档群组不删除智能体或聊天。")
-                if (!it.archived) {
-                    Button({ onOpenChat(null, it.id) }) { Text("打开群组会话") }
-                    OutlinedButton({ groupDraft = it; step = 0 }) { Text("编辑群组与成员") }
-                    TextButton({ write { catalog.archiveGroup(it.id) } }) { Text("归档群组") }
-                } else Button({ write { catalog.saveGroup(it.copy(archived = false)) } }) { Text("恢复群组") }
-            }
-        } else {
-            FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                FilterChip(!groupsTab, { groupsTab = false }, { Text("智能体") })
-                FilterChip(groupsTab, { groupsTab = true }, { Text("群组") })
-                FilterChip(archived, { archived = !archived }, { Text("已归档") })
-            }
-            Button({ step = 0; if (groupsTab) groupDraft = AgentGroup(UUID.randomUUID().toString(), "", emptyList()) else agentDraft = AgentProfile(UUID.randomUUID().toString(), "", "", "") }, modifier = Modifier.testTag("catalog_create")) { Text(if (groupsTab) "＋ 创建群组" else "＋ 创建智能体") }
-            if (groupsTab) {
-                val groups = snapshot.groups.filter { it.archived == archived }
-                if (groups.isEmpty()) EmptyCatalog("还没有${if (archived) "归档" else ""}群组", "把不同角色组织在一起，保留各自身份与指令。")
-                groups.forEach { group -> CatalogCard(Modifier.clickable { detailGroup = group.id }.testTag("group_card_${group.id}")) { Text(group.name, style = MaterialTheme.typography.titleMedium); GroupMembers(group, snapshot) } }
-            } else {
-                val agents = snapshot.agents.filter { it.archived == archived }
-                if (agents.isEmpty()) EmptyCatalog("还没有${if (archived) "归档" else ""}智能体", "从一个清晰的身份和职责开始。")
-                agents.forEach { agent -> CatalogCard(Modifier.clickable { detailAgent = agent.id }.testTag("agent_card_${agent.id}")) {
-                    Row(verticalAlignment = Alignment.CenterVertically) { Avatar(agent); Spacer(Modifier.width(12.dp)); Column(Modifier.weight(1f)) { Text(agent.name, style = MaterialTheme.typography.titleMedium, maxLines = 2, overflow = TextOverflow.Ellipsis); Text(agent.role, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 3, overflow = TextOverflow.Ellipsis) } }
-                    Text("独立指令 · 本地角色", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                } }
             }
         }
     }
 }
 
 @Composable
+private fun <T> CatalogGrid(items: List<T>, columns: Int, content: @Composable (T) -> Unit) {
+    Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+        items.chunked(columns).forEach { row ->
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                row.forEach { item -> Box(Modifier.weight(1f)) { content(item) } }
+                repeat(columns - row.size) { Spacer(Modifier.weight(1f)) }
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
 private fun EditorHeader(title: String, step: Int, onCancel: () -> Unit) {
-    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) { Text(title, Modifier.weight(1f), style = MaterialTheme.typography.titleLarge); TextButton(onCancel) { Text("取消") } }
-    Text(listOf("01  简介", "02  定义", "03  检查").mapIndexed { index, label -> if (index == step) "[$label]" else label }.joinToString("   ·   "), style = MaterialTheme.typography.labelLarge)
+    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp), verticalAlignment = Alignment.CenterVertically) {
+        Text(title, Modifier.weight(1f), style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.SemiBold, color = Ink)
+        TextButton(onCancel) { Text("取消", color = SecondaryInk) }
+    }
+    FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        listOf("简介", "定义", "检查").forEachIndexed { index, label ->
+            Text("${index + 1}  $label", Modifier.clip(CircleShape).background(if (index == step) QuietSurface else Color.Transparent).padding(horizontal = 14.dp, vertical = 10.dp),
+                color = if (index == step) Ink else SecondaryInk, style = MaterialTheme.typography.labelLarge)
+        }
+    }
+}
+
+@Composable
+private fun FormPanel(content: @Composable ColumnScope.() -> Unit) {
+    Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.TopCenter) {
+        Column(Modifier.widthIn(max = 640.dp).fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(20.dp), content = content)
+    }
+}
+
+@Composable
+private fun QuietField(value: String, onChange: (String) -> Unit, label: String, tag: String, minLines: Int = 1) {
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Text(label, style = MaterialTheme.typography.labelLarge, color = Ink)
+        OutlinedTextField(value, onChange, modifier = Modifier.fillMaxWidth().testTag(tag).semantics { contentDescription = label }, minLines = minLines,
+            shape = RoundedCornerShape(12.dp), colors = OutlinedTextFieldDefaults.colors(
+                focusedContainerColor = QuietSurface, unfocusedContainerColor = QuietSurface,
+                focusedBorderColor = ActionBlue, unfocusedBorderColor = DividerColor, focusedTextColor = Ink, unfocusedTextColor = Ink,
+                cursorColor = ActionBlue))
+    }
+}
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun EditorActions(step: Int, onBack: () -> Unit, onNext: () -> Unit, enabled: Boolean, tag: String) {
+    FlowRow(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.End), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        if (step > 0) TextButton(onBack) { Text("上一步", color = SecondaryInk) }
+        PrimaryAction(if (step == 2) "确认保存" else "下一步", onNext, enabled, Modifier.testTag(tag))
+    }
+}
+
+@Composable
+private fun PrimaryAction(text: String, onClick: () -> Unit, enabled: Boolean = true, modifier: Modifier = Modifier) {
+    Button(onClick, modifier.heightIn(min = 48.dp), enabled = enabled, shape = CircleShape,
+        colors = ButtonDefaults.buttonColors(containerColor = ActionBlue, contentColor = MaterialTheme.colorScheme.onPrimary), contentPadding = PaddingValues(horizontal = 20.dp, vertical = 12.dp)) { Text(text) }
+}
+
+@Composable
+private fun Segment(label: String, selected: Boolean, onClick: () -> Unit) {
+    TextButton(onClick, Modifier.heightIn(min = 48.dp), shape = CircleShape, colors = ButtonDefaults.textButtonColors(containerColor = if (selected) MaterialTheme.colorScheme.surface else Color.Transparent, contentColor = if (selected) Ink else SecondaryInk),
+        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)) { Text(label) }
 }
 
 @Composable
 private fun CatalogCard(modifier: Modifier = Modifier, content: @Composable ColumnScope.() -> Unit) {
-    Column(modifier.fillMaxWidth().border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(16.dp)).background(MaterialTheme.colorScheme.surface, RoundedCornerShape(16.dp)).padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp), content = content)
+    Column(modifier.fillMaxWidth().clip(RoundedCornerShape(16.dp)).background(MaterialTheme.colorScheme.surface).border(1.dp, DividerColor, RoundedCornerShape(16.dp)).padding(20.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp), content = content)
 }
 
 @Composable
-private fun Avatar(agent: AgentProfile) {
-    Box(Modifier.size(44.dp).background(Color(android.graphics.Color.parseColor(agent.accent)).copy(alpha = .14f), RoundedCornerShape(14.dp)).semantics { contentDescription = "${agent.name.ifBlank { "智能体" }}的头像" }, contentAlignment = Alignment.Center) {
-        Text(agent.avatar, color = Color(android.graphics.Color.parseColor(agent.accent)), style = MaterialTheme.typography.titleLarge)
+private fun IdentityReview(agent: AgentProfile) {
+    CatalogCard {
+        Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
+            Avatar(agent, Modifier.size(56.dp))
+            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                Text(agent.name, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.SemiBold, color = Ink)
+                Text(agent.role, color = SecondaryInk)
+            }
+        }
+        Column(Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp)).background(QuietSurface).padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Text("指令", style = MaterialTheme.typography.labelLarge, color = SecondaryInk)
+            Text(agent.instructions.ifBlank { "未设置额外指令" }, color = Ink, style = MaterialTheme.typography.bodyMedium)
+        }
+    }
+}
+
+@Composable
+private fun Avatar(agent: AgentProfile, modifier: Modifier = Modifier.size(48.dp)) {
+    Box(modifier.clip(RoundedCornerShape(12.dp)).background(Color(android.graphics.Color.parseColor(agent.accent)).copy(alpha = .12f))
+        .semantics { contentDescription = "${agent.name.ifBlank { "智能体" }}的头像" }, contentAlignment = Alignment.Center) {
+        if (agent.avatar == "✦") Image(painterResource(R.drawable.muyon_avatar), null, Modifier.fillMaxSize().padding(5.dp))
+        else Text(agent.avatar, color = Color(android.graphics.Color.parseColor(agent.accent)), style = MaterialTheme.typography.titleLarge)
     }
 }
 
 @Composable
 private fun GroupMembers(group: AgentGroup, snapshot: CatalogSnapshot) {
-    Row(horizontalArrangement = Arrangement.spacedBy((-10).dp), modifier = Modifier.semantics { contentDescription = "群组组合头像，${group.members.size} 位成员" }) { group.members.take(4).forEach { id -> snapshot.agents.find { it.id == id }?.let { Avatar(it) } } }
+    Row(horizontalArrangement = Arrangement.spacedBy((-10).dp), modifier = Modifier.semantics { contentDescription = "群组组合头像，${group.members.size} 位成员" }) {
+        group.members.take(4).forEach { id -> snapshot.agents.find { it.id == id }?.let { Avatar(it) } }
+    }
     group.members.chunked(3).forEach { row ->
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-            row.forEach { id ->
-                snapshot.agents.find { it.id == id }?.let { agent ->
-                    Surface(Modifier.weight(1f), shape = RoundedCornerShape(8.dp), color = MaterialTheme.colorScheme.surfaceVariant) {
-                        Text(agent.name, Modifier.padding(8.dp), maxLines = 1, overflow = TextOverflow.Ellipsis, style = MaterialTheme.typography.labelMedium)
-                    }
+            row.forEach { id -> snapshot.agents.find { it.id == id }?.let { member ->
+                Surface(Modifier.weight(1f), shape = RoundedCornerShape(8.dp), color = QuietSurface) {
+                    Text(member.name, Modifier.padding(8.dp), color = SecondaryInk, maxLines = 1, overflow = TextOverflow.Ellipsis, style = MaterialTheme.typography.labelMedium)
                 }
-            }
+            } }
         }
     }
 }
 
 @Composable
-private fun EmptyCatalog(title: String, description: String) {
-    CatalogCard { Image(painterResource(R.drawable.muyon_avatar), null, Modifier.size(64.dp)); Text(title, style = MaterialTheme.typography.titleMedium); Text(description, color = MaterialTheme.colorScheme.onSurfaceVariant) }
+private fun Chevron() {
+    val color = SecondaryInk
+    Canvas(Modifier.size(20.dp).padding(4.dp)) {
+        drawLine(color, Offset(size.width * .3f, 0f), Offset(size.width * .8f, size.height * .5f), strokeWidth = 1.5.dp.toPx())
+        drawLine(color, Offset(size.width * .8f, size.height * .5f), Offset(size.width * .3f, size.height), strokeWidth = 1.5.dp.toPx())
+    }
+}
+
+@Composable
+private fun EmptyCatalog(title: String) {
+    CatalogCard(Modifier.heightIn(min = 256.dp)) {
+        Image(painterResource(R.drawable.muyon_avatar), null, Modifier.size(64.dp))
+        Text(title, style = MaterialTheme.typography.titleMedium, color = SecondaryInk)
+    }
 }
