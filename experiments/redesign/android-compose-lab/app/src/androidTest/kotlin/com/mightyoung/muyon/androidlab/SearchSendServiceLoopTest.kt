@@ -58,7 +58,7 @@ class SearchSendServiceLoopTest {
         assertTrue(first.synthetic);assertTrue(first.toolReceipt);assertNotNull(first.toolResult);assertEquals("https://example.org/source",first.toolResult!!.sources.single().url)
         compose.onNodeWithTag("local-chat-list").performScrollToNode(hasTestTag("search-source-url-1"))
         compose.onNodeWithTag("search-source-url-1").assertTextEquals("https://example.org/source")
-        compose.onNodeWithTag("local-chat-list").performScrollToNode(hasTestTag("search-cost"));compose.onNodeWithTag("search-cost").assertTextContains("非真实计费")
+        compose.onNodeWithTag("local-chat-list").performScrollToNode(hasTestTag("search-cost"));compose.onNodeWithTag("search-cost").assertTextEquals("USD 750/1,000,000 · 合成账本估值，非真实计费")
         val ledger=JSONObject(outbound(first).readText());assertTrue(ledger.getBoolean("synthetic"));assertEquals("nonempty",ledger.getString("status"))
         val payload=JSONObject(ledger.getString("payload"));assertEquals(setOf("query","count","need_content"),payload.keys().asSequence().toSet())
         val empty=send("empty fixture","completed");assertNotEquals(first.requestId,empty.requestId);assertTrue(empty.toolResult!!.empty);assertEquals(0L,empty.toolResult!!.costMicros)
