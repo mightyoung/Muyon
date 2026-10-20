@@ -1,5 +1,12 @@
 # Current delivery — real wiring built; credential handover pending
 
+Remote-operation update: the user explicitly authorized loading the original
+project `.env` because manual emulator entry is unavailable. The reviewed temporary
+local FIFO design and its separate implementation/verification gate are in
+[REMOTE-CREDENTIAL-HANDOVER.md](REMOTE-CREDENTIAL-HANDOVER.md). It reuses the
+original installer/owner and does not relax the two-request/CNY budget gates.
+The manual-only handover instructions below describe the earlier checkpoint.
+
 Updated 2026-10-20. Real DeepSeek requests: **0 / 2**. Provider fees: **no model
 request sent, no provider usage or charge evidence yet**. The two-request real
 acceptance is incomplete until secure local handover and actual ordinary Send.
