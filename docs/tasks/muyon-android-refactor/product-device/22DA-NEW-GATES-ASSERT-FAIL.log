@@ -1,0 +1,98 @@
+INSTRUMENTATION_STATUS: numtests=3
+INSTRUMENTATION_STATUS: stream=
+com.mightyoung.muyon.product.ContractVectorsProductTest:
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=sharedVectorsRejectWithoutPlansAndOneEightFieldReceiptSurvivesServiceReopen
+INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.product.ContractVectorsProductTest
+INSTRUMENTATION_STATUS: current=1
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: numtests=3
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=sharedVectorsRejectWithoutPlansAndOneEightFieldReceiptSurvivesServiceReopen
+INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.product.ContractVectorsProductTest
+INSTRUMENTATION_STATUS: current=1
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: numtests=3
+INSTRUMENTATION_STATUS: stream=
+com.mightyoung.muyon.product.ProductRecoveryTest:
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=rapidCloseAndRebindWaitsForPriorOwnersWithoutKillingTheProcess
+INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.product.ProductRecoveryTest
+INSTRUMENTATION_STATUS: current=2
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: numtests=3
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=rapidCloseAndRebindWaitsForPriorOwnersWithoutKillingTheProcess
+INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.product.ProductRecoveryTest
+INSTRUMENTATION_STATUS: current=2
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: numtests=3
+INSTRUMENTATION_STATUS: stream=
+com.mightyoung.muyon.product.ProductUnknownRecoveryTest:
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=committedWriteWithLostClientReplyRecoversOnlyOriginalReceiptInUi
+INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.product.ProductUnknownRecoveryTest
+INSTRUMENTATION_STATUS: current=3
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: numtests=3
+INSTRUMENTATION_STATUS: stream=
+Error in committedWriteWithLostClientReplyRecoversOnlyOriginalReceiptInUi(com.mightyoung.muyon.product.ProductUnknownRecoveryTest):
+java.lang.AssertionError: Failed to assert the following: (Text + InputText + EditableText contains 'intent:e7401988ac2216fdac2155d342f63f4d' (ignoreCase: false))
+Semantics of the node:
+Node #98 at (l=32.0, t=1993.0, r=288.0, b=2089.0)px, Tag: 'supplier-receipt'
+Text = '[intent:e7401988ac2216fdac2155d342f63f4d · aa02eae3-115e-4c0d-bde9-df9ae9874df5 · 版本 1]'
+Actions = [ClearTextSubstitution, GetTextLayoutResult, SetTextSubstitution, ShowTextSubstitution]
+Has 29 siblings
+Selector used: (TestTag = 'supplier-receipt')
+
+	at androidx.compose.ui.test.AssertionsKt.assert(Assertions.kt:264)
+	at androidx.compose.ui.test.AssertionsKt.assert$default(Assertions.kt:254)
+	at androidx.compose.ui.test.AssertionsKt.assertTextContains(Assertions.kt:208)
+	at androidx.compose.ui.test.AssertionsKt.assertTextContains$default(Assertions.kt:204)
+	at com.mightyoung.muyon.product.ProductUnknownRecoveryTest.committedWriteWithLostClientReplyRecoversOnlyOriginalReceiptInUi(ProductUnknownRecoveryTest.kt:81)
+
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=committedWriteWithLostClientReplyRecoversOnlyOriginalReceiptInUi
+INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.product.ProductUnknownRecoveryTest
+INSTRUMENTATION_STATUS: stack=java.lang.AssertionError: Failed to assert the following: (Text + InputText + EditableText contains 'intent:e7401988ac2216fdac2155d342f63f4d' (ignoreCase: false))
+Semantics of the node:
+Node #98 at (l=32.0, t=1993.0, r=288.0, b=2089.0)px, Tag: 'supplier-receipt'
+Text = '[intent:e7401988ac2216fdac2155d342f63f4d · aa02eae3-115e-4c0d-bde9-df9ae9874df5 · 版本 1]'
+Actions = [ClearTextSubstitution, GetTextLayoutResult, SetTextSubstitution, ShowTextSubstitution]
+Has 29 siblings
+Selector used: (TestTag = 'supplier-receipt')
+
+	at androidx.compose.ui.test.AssertionsKt.assert(Assertions.kt:264)
+	at androidx.compose.ui.test.AssertionsKt.assert$default(Assertions.kt:254)
+	at androidx.compose.ui.test.AssertionsKt.assertTextContains(Assertions.kt:208)
+	at androidx.compose.ui.test.AssertionsKt.assertTextContains$default(Assertions.kt:204)
+	at com.mightyoung.muyon.product.ProductUnknownRecoveryTest.committedWriteWithLostClientReplyRecoversOnlyOriginalReceiptInUi(ProductUnknownRecoveryTest.kt:81)
+
+INSTRUMENTATION_STATUS: current=3
+INSTRUMENTATION_STATUS_CODE: -2
+INSTRUMENTATION_RESULT: stream=
+
+Time: 5.068
+There was 1 failure:
+1) committedWriteWithLostClientReplyRecoversOnlyOriginalReceiptInUi(com.mightyoung.muyon.product.ProductUnknownRecoveryTest)
+java.lang.AssertionError: Failed to assert the following: (Text + InputText + EditableText contains 'intent:e7401988ac2216fdac2155d342f63f4d' (ignoreCase: false))
+Semantics of the node:
+Node #98 at (l=32.0, t=1993.0, r=288.0, b=2089.0)px, Tag: 'supplier-receipt'
+Text = '[intent:e7401988ac2216fdac2155d342f63f4d · aa02eae3-115e-4c0d-bde9-df9ae9874df5 · 版本 1]'
+Actions = [ClearTextSubstitution, GetTextLayoutResult, SetTextSubstitution, ShowTextSubstitution]
+Has 29 siblings
+Selector used: (TestTag = 'supplier-receipt')
+
+	at androidx.compose.ui.test.AssertionsKt.assert(Assertions.kt:264)
+	at androidx.compose.ui.test.AssertionsKt.assert$default(Assertions.kt:254)
+	at androidx.compose.ui.test.AssertionsKt.assertTextContains(Assertions.kt:208)
+	at androidx.compose.ui.test.AssertionsKt.assertTextContains$default(Assertions.kt:204)
+	at com.mightyoung.muyon.product.ProductUnknownRecoveryTest.committedWriteWithLostClientReplyRecoversOnlyOriginalReceiptInUi(ProductUnknownRecoveryTest.kt:81)
+
+FAILURES!!!
+Tests run: 3,  Failures: 1
+
+
+INSTRUMENTATION_CODE: -1

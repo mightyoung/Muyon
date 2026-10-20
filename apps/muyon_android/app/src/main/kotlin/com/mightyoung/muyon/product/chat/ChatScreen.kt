@@ -35,6 +35,9 @@ fun ChatScreen(client: ProductClient, projectId: String?) {
     var suggestion by remember { mutableStateOf<JSONObject?>(null) }
     var followupReady by remember { mutableStateOf(false) }
     var businessPlan by remember { mutableStateOf(saved.getString("original_business_plan", null)) }
+    var businessIntent by remember { mutableStateOf(saved.getString("original_business_intent", null)) }
+    var businessOriginalText by remember { mutableStateOf(saved.getString("last_business_receipt_fact", "").orEmpty()) }
+    var businessLookupRunning by remember { mutableStateOf(false) }
     var scopeReady by remember(projectId) { mutableStateOf(false) }
     var availability by remember { mutableStateOf<JSONObject?>(null) }
     var error by remember { mutableStateOf("") }
@@ -101,6 +104,43 @@ fun ChatScreen(client: ProductClient, projectId: String?) {
             else error = "工具动作未完成；请查询原结果，作用域改变或结果未知时不会自动重试。"
         }
     }
+    fun queryBusinessOriginal() {
+        val intent = businessIntent ?: return
+        if (businessLookupRunning) return
+        businessLookupRunning = true
+        client.call("health") { health ->
+            val workspace = health.optJSONObject("data")?.optString("workspace").orEmpty()
+            if (health.optString("status") != "ok" || workspace.isBlank() || health.optJSONObject("data")?.optInt("protocol") != 1) {
+                businessLookupRunning = false
+                businessOriginalText = "原业务意图 $intent：工作台连接尚未核实，保留原身份，未重新执行。"
+            } else client.call("lookup", JSONObject().put("intent_id", intent)) lookupReply@{ reply ->
+                businessLookupRunning = false
+                if (businessIntent != intent) return@lookupReply
+                val result = reply.optJSONObject("data")
+                val receipt = result?.optJSONObject("receipt")
+                val scope = receipt?.optJSONObject("scope")
+                val storedScope = try { saved.getString("original_business_scope", null)?.let(::JSONObject) } catch (_: Exception) { null }
+                val scopeMatches = scope?.optString("workspace_id") == workspace &&
+                    (storedScope == null || (storedScope.optString("workspace_id") == workspace && storedScope.opt("project_id") == scope?.opt("project_id")))
+                val committed = reply.optString("status") == "ok" && result?.optString("status") == "committed" && receipt != null &&
+                    receipt.optString("intent_id") == intent && receipt.optString("status") == "committed" &&
+                    receipt.optInt("protocol_version") == 1 && scopeMatches
+                val noCommitTerminal = reply.optString("status") == "ok" && result?.optString("status") in setOf("cancelled", "rejected") && receipt == null
+                if (committed) {
+                    businessOriginalText = "历史业务回执：原意图 $intent 已提交，目标 ${receipt!!.optString("target_id")}，修订 ${receipt.optString("revision")}，原作用域 $scope。此为历史事实，不代表当前记录状态；未批准模型披露，也未再次执行。"
+                } else if (noCommitTerminal) {
+                    businessOriginalText = "原业务意图 $intent：查询终态 ${result!!.optString("status")}，没有提交回执；未声称业务成功，未再次执行。"
+                } else {
+                    businessOriginalText = "原业务意图 $intent：结果未知或回执身份尚未核实，保留原身份继续查询，不会重新执行。"
+                }
+                if (committed || noCommitTerminal) {
+                    if (saved.getString("original_business_intent", null) == intent && saved.edit().putString("last_business_receipt_fact", businessOriginalText).remove("original_business_intent").remove("original_business_scope").commit()) {
+                        businessIntent = null
+                    }
+                }
+            }
+        }
+    }
     fun read(selectedTool: String, selectedOffset: Int) {
         if (loading) return
         loading = true
@@ -165,6 +205,11 @@ fun ChatScreen(client: ProductClient, projectId: String?) {
             }
         }
         if (resultText.isNotEmpty()) Text(resultText, Modifier.testTag("chat-original-result"))
+        if (businessIntent != null) {
+            Text("待核实的原业务意图：$businessIntent")
+            OutlinedButton(onClick = { queryBusinessOriginal() }, enabled = !businessLookupRunning, modifier = Modifier.testTag("chat-business-original-lookup")) { Text("查询原业务回执") }
+        }
+        if (businessOriginalText.isNotEmpty()) Text(businessOriginalText, Modifier.testTag("chat-business-original-result"))
         if (accounting.isNotEmpty()) Text(accounting)
         pendingTool?.takeIf { scopeReady }?.let { call ->
             Text("待处理动作：${call.optString("name")}")
@@ -173,7 +218,7 @@ fun ChatScreen(client: ProductClient, projectId: String?) {
                 OutlinedButton(onClick = { toolAction("prepare_suggestion") { suggestion = it } }) { Text("查看业务修改建议") }
                 businessPlan?.let { plan -> OutlinedButton(onClick = {
                     toolAction("review_suggestion", plan) { disclosureSuggestion = true; disclosure = it }
-                }) { Text("查询原业务结果") } }
+                }) { Text("查看原业务结果披露") } }
             } else OutlinedButton(onClick = {
                 toolAction("review_read") { disclosureSuggestion = false; disclosure = it }
             }) { Text("查看将披露的实际字段") }
@@ -281,11 +326,15 @@ fun ChatScreen(client: ProductClient, projectId: String?) {
         confirmButton = { TextButton(onClick = {
             val plan = data.getString("plan_id")
             val intent = data.getJSONObject("business_preview").getString("intent_id")
-            if (saved.edit().putString("original_business_plan", plan).putString("original_business_intent", intent).commit()) {
-                businessPlan = plan; suggestion = null
+            val unresolved = saved.getString("original_business_intent", null)
+            if (unresolved != null) {
+                businessIntent = unresolved; error = "请先查询并核实原业务回执，未执行新的修改。"
+            } else if (saved.edit().putString("original_business_plan", plan).putString("original_business_intent", intent)
+                    .putString("original_business_scope", data.getJSONObject("business_preview").getJSONObject("scope").toString()).commit()) {
+                businessPlan = plan; businessIntent = intent; suggestion = null
                 toolAction("confirm_suggestion", plan) { disclosureSuggestion = true; disclosure = it }
             } else error = "原业务身份未能保存，未执行修改。"
-        }, enabled = data.optJSONObject("business_preview")?.has("command") == true) { Text("确认以上完整修改") } },
+        }, enabled = businessIntent == null && data.optJSONObject("business_preview")?.has("command") == true) { Text("确认以上完整修改") } },
         dismissButton = { TextButton(onClick = { suggestion = null }) { Text("取消修改") } }
     ) }
 }

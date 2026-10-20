@@ -28,9 +28,13 @@ class ProductUnknownRecoveryTest {
     @Test fun committedWriteWithLostClientReplyRecoversOnlyOriginalReceiptInUi() {
         val owner = connect()
         val preferences = context.getSharedPreferences("muyon_product_supplier_v2", 0)
+        val chatPreferences = context.getSharedPreferences("product-chat-state", 0)
         assertNull("an earlier unresolved original must not be overwritten", preferences.getString("intent_id", null))
+        assertNull("an earlier unresolved chat business original must not be overwritten", chatPreferences.getString("original_business_intent", null))
         try {
-            val ready = call(owner, if (owner.workspaceExists) "health" else "initialize")
+            val admission = call(owner, if (owner.workspaceExists) "health" else "initialize")
+            assertEquals(admission.toString(), "ok", admission.getString("status"))
+            val ready = call(owner, "health")
             assertEquals(ready.toString(), "ok", ready.getString("status"))
             val pid = ready.getJSONObject("data").getInt("service_pid")
             assertNotEquals(Process.myPid(), pid)
@@ -45,6 +49,8 @@ class ProductUnknownRecoveryTest {
             // This test writes the same durable client journal as SupplierScreen before
             // its send. It tests protocol-loss plus real UI recovery, not a synthetic UI click.
             assertTrue(preferences.edit().putString("intent_id", intent).putString("supplier_id", id).commit())
+            assertTrue(chatPreferences.edit().putString("original_business_intent", intent)
+                .putString("original_business_plan", plan.getString("plan_id")).commit())
             var observedReceipt: String? = null
             var callback: JSONObject? = null
             val path = File(context.filesDir, "muyon-product-v2/business-v2.sqlite")
@@ -78,9 +84,23 @@ class ProductUnknownRecoveryTest {
             compose.waitUntil(20_000) {
                 compose.onAllNodesWithTag("supplier-receipt").fetchSemanticsNodes().isNotEmpty()
             }
-            compose.onNodeWithTag("supplier-receipt").assertTextContains(intent)
-            compose.onNodeWithTag("supplier-receipt").assertTextContains(id)
+            compose.onNodeWithTag("supplier-receipt").assertTextContains(intent, substring = true)
+            compose.onNodeWithTag("supplier-receipt").assertTextContains(id, substring = true)
             assertNull(preferences.getString("intent_id", null))
+            // Chat must query an original business receipt after losing its
+            // runtime tool origin, without configuring or contacting a model.
+            compose.onNodeWithText("助手").performClick()
+            compose.waitUntil(15_000) {
+                compose.onAllNodesWithTag("chat-business-original-lookup").fetchSemanticsNodes().isNotEmpty()
+            }
+            compose.onNodeWithTag("chat-business-original-lookup").performScrollTo().performClick()
+            compose.waitUntil(15_000) {
+                compose.onAllNodes(hasTestTag("chat-business-original-result") and
+                    hasText(intent, substring = true) and hasText(id, substring = true)).fetchSemanticsNodes().isNotEmpty()
+            }
+            compose.onNodeWithTag("chat-business-original-result").assertTextContains(intent, substring = true)
+            compose.onNodeWithTag("chat-business-original-result").assertTextContains(id, substring = true)
+            assertNull(chatPreferences.getString("original_business_intent", null))
             val fresh = connect()
             try {
                 val recovered = call(fresh, "lookup", JSONObject().put("intent_id", intent)).getJSONObject("data")
