@@ -25,6 +25,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import java.util.UUID
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun AgentLibraryScreen(onOpenChat: (agentId: String?, groupId: String?) -> Unit) {
     val context = LocalContext.current
@@ -130,7 +131,7 @@ fun AgentLibraryScreen(onOpenChat: (agentId: String?, groupId: String?) -> Unit)
                 } else Button({ write { catalog.saveGroup(it.copy(archived = false)) } }) { Text("恢复群组") }
             }
         } else {
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 FilterChip(!groupsTab, { groupsTab = false }, { Text("智能体") })
                 FilterChip(groupsTab, { groupsTab = true }, { Text("群组") })
                 FilterChip(archived, { archived = !archived }, { Text("已归档") })
@@ -154,7 +155,7 @@ fun AgentLibraryScreen(onOpenChat: (agentId: String?, groupId: String?) -> Unit)
 
 @Composable
 private fun EditorHeader(title: String, step: Int, onCancel: () -> Unit) {
-    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) { Text(title, style = MaterialTheme.typography.titleLarge); TextButton(onCancel) { Text("取消") } }
+    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) { Text(title, Modifier.weight(1f), style = MaterialTheme.typography.titleLarge); TextButton(onCancel) { Text("取消") } }
     Text(listOf("01  简介", "02  定义", "03  检查").mapIndexed { index, label -> if (index == step) "[$label]" else label }.joinToString("   ·   "), style = MaterialTheme.typography.labelLarge)
 }
 

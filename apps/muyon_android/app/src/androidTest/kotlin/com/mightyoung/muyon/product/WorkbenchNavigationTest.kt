@@ -36,6 +36,12 @@ class WorkbenchNavigationTest {
             compose.onNodeWithText("创建新工作台").performClick()
         }
         compose.waitUntil(15_000) { compose.onAllNodesWithTag("supplier-new").fetchSemanticsNodes().isNotEmpty() }
+        InstrumentationRegistry.getArguments().getString("expected_font_scale")?.toFloat()?.let { expected ->
+            assertEquals(expected, compose.activity.resources.configuration.fontScale, 0.01f)
+        }
+        if (InstrumentationRegistry.getArguments().getString("expected_expanded") == "true") {
+            assertTrue(compose.activity.resources.configuration.screenWidthDp >= 840)
+        }
         val suffix = UUID.randomUUID().toString()
         val catalog = AgentCatalog(context)
         val a = AgentProfile("ui-a-$suffix", "文献助手", "梳理来源与研究问题", "区分观察和推断")

@@ -11,6 +11,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.mightyoung.muyon.product.R
@@ -101,11 +102,18 @@ internal fun ChatInputDock(draft: String, onDraft: (String) -> Unit, enabled: Bo
                 shape = RoundedCornerShape(12.dp),
                 colors = OutlinedTextFieldDefaults.colors(unfocusedBorderColor = Color.Transparent,
                     focusedBorderColor = ChatAccent, unfocusedContainerColor = Color.Transparent))
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
-                TextButton(onClick = onSearch, enabled = enabled, modifier = Modifier.weight(1f)) { Text("预览搜索请求") }
-                Button(onClick = onChat, enabled = enabled, modifier = Modifier.testTag("chat-send"),
+            val searchButton: @Composable (Modifier) -> Unit = { modifier ->
+                TextButton(onClick = onSearch, enabled = enabled, modifier = modifier) { Text("预览搜索请求") }
+            }
+            val sendButton: @Composable (Modifier) -> Unit = { modifier ->
+                Button(onClick = onChat, enabled = enabled, modifier = modifier.testTag("chat-send"),
                     shape = RoundedCornerShape(12.dp), colors = ButtonDefaults.buttonColors(containerColor = ChatAccent,
                         contentColor = Color(0xFF10233A))) { Text("预览聊天请求") }
+            }
+            if (LocalDensity.current.fontScale >= 1.4f) {
+                Column(Modifier.fillMaxWidth()) { searchButton(Modifier.fillMaxWidth()); sendButton(Modifier.fillMaxWidth()) }
+            } else Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
+                searchButton(Modifier.weight(1f)); sendButton(Modifier)
             }
         }
     }

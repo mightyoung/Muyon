@@ -28,12 +28,14 @@ fun MuyonTheme(content: @Composable () -> Unit) {
         primary = Color(0xFF91BFF4), onPrimary = Color(0xFF10273F),
         background = Color(0xFF181818), surface = Color(0xFF181818),
         surfaceVariant = Color(0xFF292929), onSurface = Color(0xFFF0F0F0),
+        surfaceContainerLow = Color(0xFF202020), surfaceContainerHigh = Color(0xFF303030), surfaceTint = Color.Transparent,
         onSurfaceVariant = Color(0xFFB7B7BB), outlineVariant = Color(0xFF3B3B3D),
         secondaryContainer = Color(0xFF303033), onSecondaryContainer = Color(0xFFF0F0F0)
     ) else lightColorScheme(
         primary = Color(0xFF254F83), onPrimary = Color.White,
         background = Color(0xFFFAFAFA), surface = Color.White,
         surfaceVariant = Color(0xFFF3F3F4), onSurface = Color(0xFF111112),
+        surfaceContainerLow = Color(0xFFF7F7F8), surfaceContainerHigh = Color(0xFFEBEBEE), surfaceTint = Color.Transparent,
         onSurfaceVariant = Color(0xFF626469), outlineVariant = Color(0xFFE5E5E7),
         secondaryContainer = Color(0xFFEDEDF0), onSecondaryContainer = Color(0xFF111112)
     )

@@ -3,6 +3,7 @@ package com.mightyoung.muyon.product
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -29,6 +30,7 @@ class MainActivity : ComponentActivity() {
     private var status by mutableStateOf("正在连接本地内核")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
         client = ProductClient(this) { ready ->
             connected = ready
             if (ready) { existing = client.workspaceExists; client.call("health") { reply ->
