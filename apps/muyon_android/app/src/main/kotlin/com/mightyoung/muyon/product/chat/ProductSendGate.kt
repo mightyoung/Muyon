@@ -65,3 +65,7 @@ internal class ProductScopeRegistry {
     fun matches(session: String, project: String?, generation: Long): Boolean = current[session]?.let { it.project == project && it.generation == generation } == true
     fun release(session: String) { current.remove(session) }
 }
+
+/** Any surviving request owner is authoritative, including a settled tool call
+ * that no longer has an active network task or unconfirmed HTTP plan. */
+internal fun productRequestOwnedBy(session: String, vararg owners: String?): Boolean = owners.all { it == null || it == session }

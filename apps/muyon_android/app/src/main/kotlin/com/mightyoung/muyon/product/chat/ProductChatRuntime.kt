@@ -248,7 +248,8 @@ class ProductChatRuntime(private val port: ProductChatPort) : AutoCloseable {
             // before revocation can affect another session's in-flight ticket.
             val owner = active[request]
             val plan = plans[request]
-            if ((owner != null && owner != session) || (plan != null && plan.session != session)) return@submit failure("chat_session_mismatch")
+            val toolOwner = toolOrigins[request]?.session
+            if (!productRequestOwnedBy(session, owner, plan?.session, toolOwner)) return@submit failure("chat_session_mismatch")
             sendGate.cancel(request)
             cancelled.add(request)
             plans.remove(request)

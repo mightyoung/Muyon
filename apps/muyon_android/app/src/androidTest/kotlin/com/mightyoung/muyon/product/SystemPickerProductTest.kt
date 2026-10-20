@@ -8,12 +8,17 @@ import android.view.accessibility.AccessibilityNodeInfo
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.semantics.SemanticsProperties
+import androidx.compose.ui.semantics.Role
 import androidx.test.platform.app.InstrumentationRegistry
+import com.mightyoung.muyon.product.agentipc.ProductClient
+import org.json.JSONObject
 import org.junit.Assert.*
 import org.junit.Rule
 import org.junit.Test
 import java.io.File
 import java.util.UUID
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
 import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
 
@@ -65,7 +70,8 @@ class SystemPickerProductTest {
         waitTag("research-preview")
         compose.onNodeWithTag("research-preview").assertTextContains(title, substring = true)
         // Visible review is still a proposal: there must be no published paper button yet.
-        compose.onAllNodes(hasText(title, substring = true) and hasClickAction()).assertCountEquals(0)
+        compose.onAllNodes(paperButton(title)).assertCountEquals(0)
+        assertNoPublishedPaper(title)
         clickTag("research-confirm")
         waitPaper(title)
         assertTrue(preferences.edit().putString("paper_title", title).putString("project_name", project).commit())
@@ -141,10 +147,11 @@ class SystemPickerProductTest {
         clickTag("research-import-preview")
         waitTag("research-preview")
         compose.onNodeWithTag("research-preview").assertTextContains(source, substring = true)
-        compose.onAllNodes(hasText("System picker imported paper", substring = true) and hasClickAction()).assertCountEquals(0)
+        compose.onAllNodes(paperButton("System picker imported paper")).assertCountEquals(0)
+        assertNoPublishedPaper("System picker imported paper")
         clickTag("research-confirm")
         waitPaper("System picker imported paper")
-        compose.onNode(hasText("System picker imported paper", substring = true) and hasClickAction()).performScrollTo().performClick()
+        compose.onNode(paperButton("System picker imported paper")).performScrollTo().performClick()
         waitTag("research-paper-detail")
         compose.onNodeWithTag("research-paper-detail").assertTextContains("System picker imported paper", substring = true)
         println("PICKER_IMPORT_COMMITTED=$source")
@@ -178,7 +185,7 @@ class SystemPickerProductTest {
 
     private fun openAttachment(title: String) {
         waitPaper(title)
-        compose.onNode(hasText(title, substring = true) and hasClickAction()).performScrollTo().performClick()
+        compose.onNode(paperButton(title)).performScrollTo().performClick()
         waitTag("research-paper-detail")
         clickTag("research-open-attachment-0")
         compose.waitUntil(20_000) { compose.onAllNodesWithContentDescription("论文 PDF 第 1 页").fetchSemanticsNodes().isNotEmpty() }
@@ -187,7 +194,44 @@ class SystemPickerProductTest {
     }
 
     private fun waitPaper(title: String) = compose.waitUntil(20_000) {
-        compose.onAllNodes(hasText(title, substring = true) and hasClickAction()).fetchSemanticsNodes().isNotEmpty()
+        compose.onAllNodes(paperButton(title)).fetchSemanticsNodes().isNotEmpty()
+    }
+    private fun paperButton(title: String): SemanticsMatcher = hasText("$title · ", substring = true) and
+        hasClickAction() and SemanticsMatcher.expectValue(SemanticsProperties.Role, Role.Button)
+
+    private fun assertNoPublishedPaper(title: String) {
+        val projectId = requireNotNull(context.getSharedPreferences("muyon_product_research_v2", 0).getString("project_id", null))
+        val connected = CountDownLatch(1)
+        lateinit var reader: ProductClient
+        instrumentation.runOnMainSync {
+            reader = ProductClient(context) { if (it) connected.countDown() }
+            reader.bind()
+        }
+        try {
+            assertTrue("real read-only observer must connect", connected.await(15, TimeUnit.SECONDS))
+            var offset = 0
+            val seen = mutableSetOf<String>()
+            do {
+                val done = CountDownLatch(1)
+                var reply: JSONObject? = null
+                instrumentation.runOnMainSync {
+                    reader.call("papers", JSONObject().put("project_id", projectId).put("limit", 10).put("offset", offset)) {
+                        reply = it; done.countDown()
+                    }
+                }
+                assertTrue("real paper page must return", done.await(35, TimeUnit.SECONDS))
+                val response = requireNotNull(reply)
+                assertEquals("a failed read cannot prove absence: $response", "ok", response.getString("status"))
+                val rows = response.getJSONArray("data")
+                assertTrue(rows.length() <= 10)
+                for (index in 0 until rows.length()) {
+                    val row = rows.getJSONObject(index)
+                    assertTrue("real paper pages must not repeat ids", seen.add(row.getString("id")))
+                    assertNotEquals("preview must not publish this exact title", title, row.getString("title"))
+                }
+                offset += rows.length()
+            } while (rows.length() == 10)
+        } finally { instrumentation.runOnMainSync { reader.close() } }
     }
     private fun waitTag(tag: String, timeout: Long = 20_000) = compose.waitUntil(timeout) {
         compose.onAllNodesWithTag(tag).fetchSemanticsNodes().isNotEmpty()

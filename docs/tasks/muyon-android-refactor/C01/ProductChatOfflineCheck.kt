@@ -58,6 +58,20 @@ fun main(args: Array<String>) {
         val fresh=registry.update("session","project-a");check(fresh.generation>a.generation)
         check(!registry.matches("session","project-a",a.generation));check(registry.matches("session","project-a",fresh.generation))
     }
+    run("settled-tool-origin-cannot-be-cancelled-by-other-client") {
+        var cancelled = false
+        var preview = "original-owner-preview"
+        fun cancel(caller: String) {
+            if (!productRequestOwnedBy(caller, null, null, "session-owner")) return
+            cancelled = true; preview = ""
+        }
+        cancel("different-live-session")
+        check(!cancelled && preview == "original-owner-preview")
+        cancel("session-owner")
+        check(cancelled && preview.isEmpty())
+        check(!productRequestOwnedBy("session-owner", "other-active", null, "session-owner"))
+        check(!productRequestOwnedBy("session-owner", null, "other-plan", "session-owner"))
+    }
     println("RESULT $passed passed; 0 failed; no network")
 }
 

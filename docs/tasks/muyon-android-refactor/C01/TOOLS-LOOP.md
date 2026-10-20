@@ -39,15 +39,15 @@ After a successful tool follow-up, ordinary automatic history reuse deliberately
 
 ```text
 cargo test --manifest-path crates/Cargo.toml -p muyon-core --test agent_tools --test agent_owner --test agent_product --offline --locked
-6 tools + 11 owner + 6 local read/parser = 23 passed; 0 failed; 0 ignored
+7 tools + 11 owner + 6 local read/parser = 24 passed; 0 failed; 0 ignored
 
 cargo clippy --manifest-path crates/Cargo.toml -p muyon-core --test agent_tools --test agent_owner --test agent_product --offline --locked --no-deps -- -D warnings
 exit 0
 
 python3 docs/tasks/muyon-android-refactor/C01/run-offline-check.py
-20 offline protocol/send-gate checks passed; transport/runtime compile exit 0
+23 offline protocol/send-gate/scope checks passed; transport/runtime compile exit 0
 ```
 
-The six tool-loop tests cover real SQLite supplier reads, exact-byte disclosure, generation/source-change rejection, independent follow-up identity/budget, production missing-proof blocking, pure write preparation, independent P04 commit, original-receipt verification, result-disclosure approval, strict malformed-call rejection, cancellation/restart and the explicit fresh-conversation recovery path. The separate local-read tests cover actual newly added PDF paper reads. No real model function-call, paid search, or API26 tool-dialog behavior was executed in this lane. Parent-owned full Service/Compose build, UI wiring and device acceptance remain separate evidence.
+The seven tool-loop tests cover real SQLite supplier reads, exact-byte disclosure, generation/source-change rejection, independent follow-up identity/budget, production missing-proof blocking, pure write preparation, independent P04 commit, original-receipt verification, result-disclosure approval, strict malformed-call rejection, cancellation/restart, pre-confirmation suggestion revocation and the explicit fresh-conversation recovery path. The separate local-read tests cover actual newly added PDF paper reads. No real model function-call, paid search, or API26 tool-dialog behavior was executed in this lane. Parent-owned full Service/Compose build, UI wiring and device acceptance remain separate evidence. Current-project and pending-plan revocation are detailed in [SCOPE-REPAIR.md](SCOPE-REPAIR.md).
 
 The product agent ledger schema is now version 3, with the same new-product ledger filename and explicit rejection of older schemas. The parent confirmed this candidate had not initialized the agent ledger on the device; the existing business database and its imported papers were preserved. Historical canary ledgers and I04 HOLD were untouched.

@@ -31,14 +31,14 @@ From the candidate worktree:
 
 ```text
 cargo test --manifest-path crates/Cargo.toml -p muyon-core --test agent_tools --test agent_owner --test agent_product --offline --locked
-owner: 11 passed; local read/parser: 6 passed; tools: 6 passed; 0 failed; 0 ignored; exit 0
+owner: 11 passed; local read/parser: 6 passed; tools: 7 passed; 0 failed; 0 ignored; exit 0
 
 cargo clippy --manifest-path crates/Cargo.toml -p muyon-core --test agent_tools --test agent_owner --test agent_product --offline --locked --no-deps -- -D warnings
 exit 0
 
 python3 docs/tasks/muyon-android-refactor/C01/run-offline-check.py
 transport compile: exit 0
-memory-stream protocol/send-gate checks: 20 passed; 0 failed; no network
+memory-stream protocol/send-gate/scope checks: 23 passed; 0 failed; no network
 runtime + transport compile against SDK36, JVM target17: exit 0
 
 rustfmt --edition 2021 --check crates/muyon-core/src/agent/mod.rs crates/muyon-core/src/agent/owner.rs crates/muyon-core/tests/agent_product.rs crates/muyon-core/tests/agent_owner.rs
