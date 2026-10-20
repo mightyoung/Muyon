@@ -223,8 +223,8 @@ internal class DurableServiceHostOwner(
             })
             if(state.chat?.synthetic==false) {
                 val live=checkNotNull(state.live)
-                val proof=OrdinaryChatProductionConfig.prove(bytes)
-                livePermits[token]=live.budget.reserve(requestId,bytes,proof,"CNY",OrdinaryChatProductionConfig.verifier)
+                val proof=live.prove(bytes)
+                livePermits[token]=live.budget.reserve(requestId,bytes,proof,"CNY",live.verifier)
             }
             token
         }
@@ -345,7 +345,7 @@ internal class DurableServiceHostOwner(
                 }
             }
             stage=OrdinaryChatFailureStage.RESPONSE_VALIDATION
-            val candidate=live.decode(response,OrdinaryChatProductionConfig.prove(payload),held)
+            val candidate=live.decode(response,live.prove(payload),held)
             stage=OrdinaryChatFailureStage.OWNER_AUTHORITY
             synchronized(this) {
                 read { state->

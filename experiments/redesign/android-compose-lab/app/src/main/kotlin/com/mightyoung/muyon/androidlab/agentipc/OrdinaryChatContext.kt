@@ -10,7 +10,7 @@ internal fun ordinaryContextAllowed(db:SQLiteDatabase,state:ServiceAdmissionAuth
     val a=checkNotNull(state.chat)
     fun closed(o:JSONObject,keys:Set<String>)=o.keys().asSequence().toSet()==keys
     check(closed(body,setOf("model","messages","n","stream","max_tokens") + if(a.synthetic)emptySet() else setOf("thinking")))
-    if(!a.synthetic)check(OrdinaryChatProductionConfig.prove(payload).fullInputTokenUpperBound<=16384)
+    if(!a.synthetic)check(checkNotNull(state.live).prove(payload).fullInputTokenUpperBound<=16384)
     check(body.getString("model")==state.provider?.profile?.model && body.getInt("n")==1 && !body.getBoolean("stream") && body.getLong("max_tokens") in 1..1024)
     val base=setOf("authority","workspace","conversation","input_ref","task","attempt","input_version")
     fun history(c:JSONObject):JSONArray {

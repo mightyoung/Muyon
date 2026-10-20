@@ -12,18 +12,23 @@ import java.nio.file.StandardOpenOption
 
 /** Installed in the existing owner, never a second owner or a SearchHost. */
 internal class OrdinaryChatLiveInstallation(val root:File,val credentials:OrdinaryChatTemporaryCredential,
+    private val authorizedFollowup:Boolean=false,
     val exchange:(ByteArray,CharArray,()->Boolean,((()->Unit)->Boolean))->ByteArray=OrdinaryChatHttpsTransport()::exchange) {
     val budget:OrdinaryChatCanaryBudget
+    val verifier=if(authorizedFollowup)OrdinaryChatProductionConfig.followupVerifier else OrdinaryChatProductionConfig.verifier
+    fun prove(payload:ByteArray)=OrdinaryChatProductionConfig.prove(payload,authorizedFollowup)
     init {
         val marker=root.toPath().resolve("ordinary-chat-canary-20261019.lock")
-        budget=if(Files.exists(marker))OrdinaryChatCanaryBudget.openExisting(root.toPath()) else OrdinaryChatCanaryBudget.provisionNewBatch(root.toPath())
+        budget=if(authorizedFollowup)OrdinaryChatCanaryBudget.openAuthorizedFollowup(root.toPath())
+            else if(Files.exists(marker))OrdinaryChatCanaryBudget.openExisting(root.toPath()) else OrdinaryChatCanaryBudget.provisionNewBatch(root.toPath())
     }
     fun facts(cap:ServiceOwnerCredentialCapability=credentials.current() ?: error("chat_credential_unavailable")):ServiceAdmissionAuthority.State {
-        val quota=ServiceOwnerBudget(OrdinaryChatCanaryBudget.BATCH,OrdinaryChatProductionConfig.QUOTA_PROOF,2uL,33024uL,1000000uL)
-        val provider=ServiceOwnerProvider(OrdinaryChatProductionConfig.profile,"live-profile-v1","canary-policy-v1","canary-grant-v1","ordinary-live-owner",true,true,quota,true)
-        val authority=ServiceOwnerChatAuthority("ordinary-live-synthetic-workspace","*","ordinary-live-owner","full-allow","canary-policy-v1","canary-grant-v1","USER-TEXT-v1","synthetic-only-v1","personal",true,true,true,true,false)
-        return ServiceAdmissionAuthority.State(null,provider,{_,bytes->try{OrdinaryChatProductionConfig.prove(bytes);true}catch(_:Exception){false}},
-            {_,bytes,call->try{if(call!=OrdinaryChatProductionConfig.call)null else {OrdinaryChatProductionConfig.prove(bytes);OrdinaryChatProductionConfig.QUOTA_PROOF}}catch(_:Exception){null}},authority,cap,null,this)
+        val grant=if(authorizedFollowup)"canary-followup-grant-v1" else "canary-grant-v1"
+        val quota=ServiceOwnerBudget(budget.batchIdentity,OrdinaryChatProductionConfig.QUOTA_PROOF,2uL,33024uL,budget.ceilingMicroCny.toULong())
+        val provider=ServiceOwnerProvider(OrdinaryChatProductionConfig.profile,"live-profile-v1","canary-policy-v1",grant,"ordinary-live-owner",true,true,quota,true)
+        val authority=ServiceOwnerChatAuthority("ordinary-live-synthetic-workspace","*","ordinary-live-owner","full-allow","canary-policy-v1",grant,"USER-TEXT-v1","synthetic-only-v1","personal",true,true,true,true,false)
+        return ServiceAdmissionAuthority.State(null,provider,{_,bytes->try{prove(bytes);true}catch(_:Exception){false}},
+            {_,bytes,call->try{if(call!=OrdinaryChatProductionConfig.call)null else {prove(bytes);OrdinaryChatProductionConfig.QUOTA_PROOF}}catch(_:Exception){null}},authority,cap,null,this)
     }
     data class Candidate(val permit:OrdinaryChatCanaryBudget.Permit,val response:ServiceOwnerChatResponse,val usage:OrdinaryChatCanaryBudget.Usage,val providerMetadata:JSONObject)
     fun candidateFile(admission:String)=File(root,"live-chat-${OrdinaryChatProductionConfig.sha(admission.toByteArray())}.json")

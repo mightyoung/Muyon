@@ -34,6 +34,7 @@ android {
         versionName = "0.0.1-lab"
         buildConfigField("int", "MUYON_BRIDGE_PROTOCOL", "1")
         buildConfigField("String", "MUYON_BRIDGE_SOURCE_SHA", "\"${bridgeSourceSha.orEmpty()}\"")
+        buildConfigField("boolean", "MUYON_AUTHORIZED_FOLLOWUP", "false")
         ndk { abiFilters += listOf("arm64-v8a", "x86_64") }
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -42,6 +43,12 @@ android {
             initWith(getByName("debug"))
             applicationIdSuffix=".liveFixture"
             matchingFallbacks += listOf("debug")
+        }
+        create("followupFixture") {
+            initWith(getByName("debug"))
+            applicationIdSuffix=".followupFixture"
+            matchingFallbacks+=listOf("debug")
+            buildConfigField("boolean","MUYON_AUTHORIZED_FOLLOWUP","true")
         }
         create("liveChat") {
             initWith(getByName("debug"))
@@ -62,6 +69,8 @@ android {
         }
     }
     val failureScenarios=listOf("Setup","SetupOwner","Unknown","Owner","Native","Inflight","Ready","ConstructDestroy")
+    sourceSets.getByName("followupFixture").java.srcDir("src/liveFixture/kotlin")
+    sourceSets.getByName("followupFixture").manifest.srcFile("src/liveFixture/AndroidManifest.xml")
     failureScenarios.forEach { scenario->
         val variant="fail$scenario"
         buildTypes.create(variant) {
@@ -72,7 +81,7 @@ android {
         sourceSets.getByName(variant).java.srcDir("src/failureFixture/kotlin")
     }
     // Dedicated synthetic Service composition; ordinary debug/release never contain its installer.
-    testBuildType = if(providers.gradleProperty("muyonLiveChatInstrumentation").orNull=="true")"liveFixture" else if(providers.gradleProperty("muyonSearchInstrumentation").orNull=="true")"searchFixture" else if(providers.gradleProperty("muyonOrdinaryChatInstrumentation").orNull=="true")"ordinaryChat" else providers.gradleProperty("muyonFailureInstrumentation").orNull?.also { require(it in failureScenarios.map{scenario->"fail$scenario"}) } ?: if(providers.gradleProperty("muyonLifecycleInstrumentation").orNull == "true") "lifecycle" else "debug"
+    testBuildType = if(providers.gradleProperty("muyonFollowupInstrumentation").orNull=="true")"followupFixture" else if(providers.gradleProperty("muyonLiveChatInstrumentation").orNull=="true")"liveFixture" else if(providers.gradleProperty("muyonSearchInstrumentation").orNull=="true")"searchFixture" else if(providers.gradleProperty("muyonOrdinaryChatInstrumentation").orNull=="true")"ordinaryChat" else providers.gradleProperty("muyonFailureInstrumentation").orNull?.also { require(it in failureScenarios.map{scenario->"fail$scenario"}) } ?: if(providers.gradleProperty("muyonLifecycleInstrumentation").orNull == "true") "lifecycle" else "debug"
     buildFeatures { compose = true; buildConfig = true; aidl = true }
     packaging { jniLibs { keepDebugSymbols += setOf("**/libmuyon_android_contract_bridge.so", "**/libjnidispatch.so") } }
     if (bridgeRoot != null) sourceSets.getByName("main").jniLibs.srcDir(bridgeRoot.resolve("jniLibs"))

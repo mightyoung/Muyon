@@ -12,7 +12,12 @@ import java.nio.file.StandardOpenOption
 import java.security.MessageDigest
 
 /** Offline accounting only. The owner must call handoff before any network side effect. */
-internal class OrdinaryChatCanaryBudget private constructor(private val directory: Path) {
+internal class OrdinaryChatCanaryBudget private constructor(
+    private val directory: Path,
+    val batchIdentity: String = BATCH,
+    val ceilingMicroCny: Long = CEILING,
+    private val priorDirectory: Path? = null,
+) {
     data class TokenProof(val identity: String, val payloadSha256: String, val fullInputTokenUpperBound: Long)
 
     /** A trusted installation fact, NOT a byte/character counter or a caller assertion.
@@ -52,7 +57,8 @@ internal class OrdinaryChatCanaryBudget private constructor(private val director
         require(!ledger.stopped && ledger.entries.size < ATTEMPT_LIMIT)
         require(ledger.entries.none { it.request == request || it.digest == proof.payloadSha256 })
         require(ledger.entries.none { it.state == "reserved" || it.state == "handed_off" })
-        require(reserve <= CEILING - total(ledger))
+        require(reserve <= ceilingMicroCny - total(ledger))
+        if (priorDirectory != null) require(request != PRIOR_REQUEST && proof.payloadSha256 != PRIOR_DIGEST)
         ledger.entries.add(Entry(request, proof.payloadSha256, proof.identity, proof.fullInputTokenUpperBound, reserve, "reserved"))
         write(ledger)
         Permit(request, proof.payloadSha256, reserve)
@@ -101,17 +107,34 @@ internal class OrdinaryChatCanaryBudget private constructor(private val director
     private fun total(ledger: Ledger) = ledger.entries.fold(0L) { sum, entry -> Math.addExact(sum, entry.reserved) }
 
     private fun <T> guarded(action: () -> T): T = sanitized {
+        if (priorDirectory == null) guardedOwn(action) else {
+            val prior = OrdinaryChatCanaryBudget(priorDirectory)
+            prior.locked {
+                prior.validatePinnedPrior()
+                validateFollowupMarker(priorDirectory)
+                validateFollowupDirectory(priorDirectory, directory)
+                guardedOwn(action)
+            }
+        }
+    }
+
+    private fun <T> guardedOwn(action: () -> T): T = locked {
+        if (Files.exists(mutationPath)) {
+            val ledger = read(); ledger.stopped = true
+            ledger.entries.forEach { it.state = "unknown" }
+            write(ledger)
+        }
+        action()
+    }
+
+    private fun <T> locked(action: () -> T): T {
+        require(Files.isDirectory(directory) && !Files.isSymbolicLink(directory))
         require(Files.isRegularFile(lockPath) && !Files.isSymbolicLink(lockPath))
         val channel = FileChannel.open(lockPath, StandardOpenOption.WRITE)
         var lock: java.nio.channels.FileLock? = null
         try {
             lock = channel.lock()
-            if (Files.exists(mutationPath)) {
-                val ledger = read(); ledger.stopped = true
-                ledger.entries.forEach { it.state = "unknown" }
-                write(ledger)
-            }
-            action()
+            return action()
         } finally {
             // A release/close failure cannot turn an already durable commit into an ambiguous failure.
             try { lock?.release() } catch (_: Exception) { }
@@ -119,20 +142,24 @@ internal class OrdinaryChatCanaryBudget private constructor(private val director
         }
     }
 
-    private fun read(): Ledger {
+    private fun ledgerBytes(): ByteArray {
         require(Files.isRegularFile(ledgerPath) && !Files.isSymbolicLink(ledgerPath))
         require(Files.size(ledgerPath) in 33..MAX_LEDGER.toLong())
-        val bytes = FileChannel.open(ledgerPath, StandardOpenOption.READ).use { channel ->
+        return FileChannel.open(ledgerPath, StandardOpenOption.READ).use { channel ->
             val buffer = java.nio.ByteBuffer.allocate(MAX_LEDGER + 1)
             while (buffer.hasRemaining() && channel.read(buffer) >= 0) { /* bounded even if file grows */ }
             require(buffer.position() in 33..MAX_LEDGER)
             buffer.array().copyOf(buffer.position())
         }
+    }
+
+    private fun read(): Ledger {
+        val bytes = ledgerBytes()
         val body = bytes.copyOfRange(0, bytes.size - 32)
         require(MessageDigest.isEqual(MessageDigest.getInstance("SHA-256").digest(body), bytes.copyOfRange(body.size, bytes.size)))
         return DataInputStream(ByteArrayInputStream(body)).use { input ->
-            require(input.readUTF() == BATCH && input.readInt() == 1)
-            require(input.readLong() == CEILING && input.readInt() == ATTEMPT_LIMIT)
+            require(input.readUTF() == batchIdentity && input.readInt() == 1)
+            require(input.readLong() == ceilingMicroCny && input.readInt() == ATTEMPT_LIMIT)
             require(input.readLong() == INPUT_RATE && input.readLong() == OUTPUT_RATE && input.readLong() == OUTPUT_CAP)
             val stopped = input.readUnsignedByte(); require(stopped in 0..1)
             val count = input.readInt(); require(count in 0..ATTEMPT_LIMIT)
@@ -142,7 +169,7 @@ internal class OrdinaryChatCanaryBudget private constructor(private val director
                 val tokens = input.readLong(); val reserve = input.readLong(); val state = input.readUTF()
                 require(request.matches(ID) && digest.matches(DIGEST) && proof.matches(ID) && tokens > 0)
                 require(reserve == Math.addExact(Math.multiplyExact(tokens, INPUT_RATE), OUTPUT_CAP * OUTPUT_RATE))
-                require(reserve in 1..CEILING && state in setOf("reserved", "handed_off", "success", "unknown"))
+                require(reserve in 1..ceilingMicroCny && state in setOf("reserved", "handed_off", "success", "unknown"))
                 val hasUsage = input.readUnsignedByte(); require(hasUsage in 0..1)
                 val usage = if (hasUsage == 1) Usage(input.readLong(), input.readLong(), input.readLong(), input.readUTF()) else null
                 require(state != "success" || usage != null)
@@ -153,14 +180,18 @@ internal class OrdinaryChatCanaryBudget private constructor(private val director
             }
             require(input.available() == 0 && entries.map { it.request }.distinct().size == count && entries.map { it.digest }.distinct().size == count)
             Ledger(stopped == 1, entries).also {
-                require(total(it) <= CEILING && (entries.none { e -> e.state == "unknown" } || it.stopped))
+                require(total(it) <= ceilingMicroCny && (entries.none { e -> e.state == "unknown" } || it.stopped))
+                if (priorDirectory != null) {
+                    require(Math.addExact(PRIOR_RESERVED, total(it)) <= CEILING && PRIOR_ATTEMPTS + count <= 3)
+                    require(entries.none { e -> e.request == PRIOR_REQUEST || e.digest == PRIOR_DIGEST })
+                }
             }
         }
     }
 
     private fun write(ledger: Ledger) {
         val body = ByteArrayOutputStream().also { bytes -> DataOutputStream(bytes).use { output ->
-            output.writeUTF(BATCH); output.writeInt(1); output.writeLong(CEILING); output.writeInt(ATTEMPT_LIMIT)
+            output.writeUTF(batchIdentity); output.writeInt(1); output.writeLong(ceilingMicroCny); output.writeInt(ATTEMPT_LIMIT)
             output.writeLong(INPUT_RATE); output.writeLong(OUTPUT_RATE); output.writeLong(OUTPUT_CAP)
             output.writeByte(if (ledger.stopped) 1 else 0); output.writeInt(ledger.entries.size)
             ledger.entries.forEach { entry ->
@@ -198,12 +229,73 @@ internal class OrdinaryChatCanaryBudget private constructor(private val director
         const val INPUT_RATE = 2L
         const val OUTPUT_RATE = 8L
         const val OUTPUT_CAP = 128L
+        private const val FOLLOWUP_BATCH = "muyon-ordinary-chat-20261020-authorized-followup"
+        private const val FOLLOWUP_DIRECTORY = "ordinary-chat-authorized-followup-20261020"
+        private const val FOLLOWUP_MARKER = "ordinary-chat-authorized-followup-20261020.once"
+        private const val PRIOR_SHA = "0743f051b0291623240dd4c10f8f0260f04b74ef1197a4279af13bbbfbcf3fc7"
+        private const val PRIOR_REQUEST = "chat_eb1eeb36ef9748c7900f5eb810622d00"
+        private const val PRIOR_DIGEST = "0d75468fbd364a8a6809e47880d3b329813207547b5c368d1de38fa86478e80b"
+        private const val PRIOR_RESERVED = 1310L
+        private const val PRIOR_ATTEMPTS = 1
+        private val FOLLOWUP_MARKER_BYTES = "$FOLLOWUP_BATCH\n$PRIOR_SHA\n".toByteArray(Charsets.US_ASCII)
         private const val MAX_LEDGER = 4096
         private const val MAX_PAYLOAD = 1_048_576
         private val ID = Regex("[A-Za-z0-9_-]{1,128}")
         private val DIGEST = Regex("[0-9a-f]{64}")
         private fun sha(bytes: ByteArray) = MessageDigest.getInstance("SHA-256").digest(bytes).joinToString("") { "%02x".format(it) }
         private fun <T> sanitized(action: () -> T): T = try { action() } catch (_: Exception) { throw Refused() }
+
+        private fun validateFollowupMarker(root: Path) {
+            val marker = root.resolve(FOLLOWUP_MARKER)
+            require(Files.isRegularFile(marker) && !Files.isSymbolicLink(marker))
+            require(Files.size(marker) == FOLLOWUP_MARKER_BYTES.size.toLong())
+            FileChannel.open(marker, StandardOpenOption.READ).use { channel ->
+                val buffer = java.nio.ByteBuffer.allocate(FOLLOWUP_MARKER_BYTES.size + 1)
+                while (buffer.hasRemaining() && channel.read(buffer) >= 0) { }
+                require(buffer.position() == FOLLOWUP_MARKER_BYTES.size &&
+                    buffer.array().copyOf(buffer.position()).contentEquals(FOLLOWUP_MARKER_BYTES))
+            }
+        }
+
+        private fun validateFollowupDirectory(root: Path, directory: Path) {
+            require(Files.isDirectory(directory) && !Files.isSymbolicLink(directory))
+            require(directory.toRealPath() == root.toRealPath().parent.resolve(FOLLOWUP_DIRECTORY))
+            require(Files.getOwner(directory) == Files.getOwner(root))
+            require(Files.getPosixFilePermissions(directory) == java.nio.file.attribute.PosixFilePermissions.fromString("rwx------"))
+        }
+
+        /** Fixed, explicitly authorized extra round. Cannot reset or mutate the original stopped batch. */
+        fun openAuthorizedFollowup(stablePrivateDirectory: Path): OrdinaryChatCanaryBudget = sanitized {
+            require(Files.isDirectory(stablePrivateDirectory) && !Files.isSymbolicLink(stablePrivateDirectory))
+            val root = stablePrivateDirectory.toRealPath()
+            val prior = OrdinaryChatCanaryBudget(root)
+            val budget = OrdinaryChatCanaryBudget(root.parent.resolve(FOLLOWUP_DIRECTORY),
+                FOLLOWUP_BATCH, CEILING - PRIOR_RESERVED, root)
+            prior.locked {
+                prior.validatePinnedPrior()
+                val marker = root.resolve(FOLLOWUP_MARKER)
+                if (!Files.exists(marker, java.nio.file.LinkOption.NOFOLLOW_LINKS)) {
+                    require(!Files.exists(budget.directory, java.nio.file.LinkOption.NOFOLLOW_LINKS))
+                    FileChannel.open(marker, StandardOpenOption.CREATE_NEW, StandardOpenOption.WRITE).use { channel ->
+                        val buffer = java.nio.ByteBuffer.wrap(FOLLOWUP_MARKER_BYTES)
+                        while (buffer.hasRemaining()) channel.write(buffer)
+                        channel.force(true)
+                    }
+                    FileChannel.open(root, StandardOpenOption.READ).use { it.force(true) }
+                    Files.createDirectory(budget.directory,
+                        java.nio.file.attribute.PosixFilePermissions.asFileAttribute(java.nio.file.attribute.PosixFilePermissions.fromString("rwx------")))
+                    FileChannel.open(root.parent, StandardOpenOption.READ).use { it.force(true) }
+                    FileChannel.open(budget.lockPath, StandardOpenOption.CREATE_NEW, StandardOpenOption.WRITE).use { channel ->
+                        channel.force(true)
+                        channel.lock().use { budget.write(Ledger(false, mutableListOf())) }
+                    }
+                }
+                validateFollowupMarker(root)
+                validateFollowupDirectory(root, budget.directory)
+                budget.guardedOwn { budget.recoverPending() }
+            }
+            budget
+        }
 
         /** Explicit one-time installation. An existing marker blocks recreation after loss/corruption. */
         fun provisionNewBatch(stablePrivateDirectory: Path): OrdinaryChatCanaryBudget = sanitized {
@@ -220,14 +312,25 @@ internal class OrdinaryChatCanaryBudget private constructor(private val director
         /** No epoch or credential generation parameter: the caller must use one stable private directory. */
         fun openExisting(stablePrivateDirectory: Path): OrdinaryChatCanaryBudget = sanitized {
             val budget = OrdinaryChatCanaryBudget(stablePrivateDirectory)
-            budget.guarded {
-                val ledger = budget.read()
-                if (ledger.entries.any { it.state == "reserved" || it.state == "handed_off" }) {
-                    ledger.entries.filter { it.state == "reserved" || it.state == "handed_off" }.forEach { it.state = "unknown" }
-                    ledger.stopped = true; budget.write(ledger)
-                }
-            }
+            budget.guarded { budget.recoverPending() }
             budget
         }
+    }
+
+    private fun recoverPending() {
+        val ledger = read()
+        if (ledger.entries.any { it.state == "reserved" || it.state == "handed_off" }) {
+            ledger.entries.filter { it.state == "reserved" || it.state == "handed_off" }.forEach { it.state = "unknown" }
+            ledger.stopped = true; write(ledger)
+        }
+    }
+
+    /** Called only while holding the original lock; never repairs or writes the pinned original. */
+    private fun validatePinnedPrior() {
+        require(!Files.exists(mutationPath, java.nio.file.LinkOption.NOFOLLOW_LINKS))
+        require(sha(ledgerBytes()) == PRIOR_SHA)
+        val ledger = read()
+        require(ledger.stopped && ledger.entries.size == PRIOR_ATTEMPTS && total(ledger) == PRIOR_RESERVED)
+        require(ledger.entries.single().state == "unknown")
     }
 }

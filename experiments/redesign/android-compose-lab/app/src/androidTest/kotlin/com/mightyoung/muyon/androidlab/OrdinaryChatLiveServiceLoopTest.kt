@@ -17,6 +17,8 @@ class OrdinaryChatLiveServiceLoopTest {
     @get:Rule val compose=createAndroidComposeRule<MainActivity>()
     @Test fun ordinarySendUsesSameOwnerLiveProtocolHistoryAndSettlement() {
         val app=compose.activity.application as MuyonLabApplication
+        val firstText=if(BuildConfig.MUYON_AUTHORIZED_FOLLOWUP)OrdinaryChatProductionConfig.FOLLOWUP_FIRST else OrdinaryChatProductionConfig.FIRST
+        val expectedAnswer=if(BuildConfig.MUYON_AUTHORIZED_FOLLOWUP)"CANARY-7391" else "CANARY-4827"
         compose.onNodeWithTag("new-conversation").performClick()
         // Cold JNA/native bootstrap is read-only here. Do not spend a Send or turn
         // a five-second pre-admission timeout into an UNKNOWN request to retry.
@@ -82,10 +84,10 @@ class OrdinaryChatLiveServiceLoopTest {
             assertTerminalStable()
             return result
         }
-        val first=send(OrdinaryChatProductionConfig.FIRST)
-        assertEquals("first reason=${first.reason}","completed",first.status);assertEquals("CANARY-4827",first.answer);assertFalse(first.synthetic);assertTrue(first.providerReceipt)
+        val first=send(firstText)
+        assertEquals("first reason=${first.reason}","completed",first.status);assertEquals(expectedAnswer,first.answer);assertFalse(first.synthetic);assertTrue(first.providerReceipt)
         val second=send(OrdinaryChatProductionConfig.SECOND)
-        assertEquals("second reason=${second.reason}","completed",second.status);assertEquals("CANARY-4827",second.answer);assertFalse(second.synthetic);assertTrue(second.providerReceipt)
+        assertEquals("second reason=${second.reason}","completed",second.status);assertEquals(expectedAnswer,second.answer);assertFalse(second.synthetic);assertTrue(second.providerReceipt)
         assertNotEquals(first.requestId,second.requestId);assertNotEquals(first.originalReceiptIdentity,second.originalReceiptIdentity)
         val root=File(compose.activity.filesDir,"agent-admission-root")
         val database=File(root,"muyon-ordinary-admission-v2.sqlite")
@@ -94,7 +96,7 @@ class OrdinaryChatLiveServiceLoopTest {
                 val wires=mutableListOf<JSONObject>();while(rows.moveToNext())wires+=JSONObject(String(rows.getBlob(0)))
                 assertEquals(2,wires.size)
                 val wire=wires.single{it.getJSONArray("messages").length()==3}
-                assertEquals(OrdinaryChatProductionConfig.FIRST,wire.getJSONArray("messages").getJSONObject(0).getString("content"))
+                assertEquals(firstText,wire.getJSONArray("messages").getJSONObject(0).getString("content"))
                 assertEquals(first.answer,wire.getJSONArray("messages").getJSONObject(1).getString("content"))
                 assertEquals(OrdinaryChatProductionConfig.SECOND,wire.getJSONArray("messages").getJSONObject(2).getString("content"))
                 assertEquals(128,wire.getInt("max_tokens"));assertEquals("disabled",wire.getJSONObject("thinking").getString("type"))
@@ -106,6 +108,12 @@ class OrdinaryChatLiveServiceLoopTest {
         val third=send(OrdinaryChatProductionConfig.SECOND)
         assertEquals("failed",third.status);assertEquals("provider_budget_reservation_failed",third.reason)
         SQLiteDatabase.openDatabase(database.path,null,SQLiteDatabase.OPEN_READONLY).use{db->db.rawQuery("SELECT COUNT(*) FROM chat_attempts",null).use{assertTrue(it.moveToFirst());assertEquals(2,it.getInt(0))}}
+        if(BuildConfig.MUYON_AUTHORIZED_FOLLOWUP) {
+            val original=File(root,"ordinary-chat-canary-20261019.ledger").readBytes()
+            assertEquals("0743f051b0291623240dd4c10f8f0260f04b74ef1197a4279af13bbbfbcf3fc7",OrdinaryChatProductionConfig.sha(original))
+            assertTrue(File(compose.activity.filesDir,"agent-service-authorized-followup-20261020/native-agent-service-v1/index.db").isFile)
+            assertFalse("follow-up must not initialize or repair original session",File(compose.activity.filesDir,"agent-service-root").exists())
+        }
         println("OFFLINE_LIVE_PROTOCOL_SAME_OWNER_PASS vendor_requests=0 attempts=2 history=3 settled=true")
     }
 }

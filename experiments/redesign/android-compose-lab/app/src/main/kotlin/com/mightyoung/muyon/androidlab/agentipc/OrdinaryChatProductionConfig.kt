@@ -15,6 +15,7 @@ internal object OrdinaryChatProductionConfig {
     const val COUNTING = "deepseek-flash-1017-bpe-upper-v1"
     const val PRICE = "deepseek-cny-peak-miss-20261020-v1"
     const val FIRST = "For this synthetic test, the code is CANARY-4827. Answer with that code only."
+    const val FOLLOWUP_FIRST = "For this synthetic test, the code is CANARY-7391. Answer with that code only."
     const val SECOND = "Repeat the code from my first message. Answer with the code only."
     val call = ServiceOwnerCallBudget(16512uL,33792uL,false,false)
     val profile = ServiceOwnerProfile(PROFILE,ENDPOINT,"deepseek-https-chat-v1","deepseek",MODEL,
@@ -24,7 +25,7 @@ internal object OrdinaryChatProductionConfig {
     /** Trust basis: the current provider-declared 1017 model uses its published reference format.
      * Re-render all history with the pinned encoder; no JSON-byte synthetic accounting.
      */
-    fun prove(payload:ByteArray):OrdinaryChatCanaryBudget.TokenProof {
+    fun prove(payload:ByteArray,authorizedFollowup:Boolean=false):OrdinaryChatCanaryBudget.TokenProof {
         require(payload.size in 1..8192)
         val body = parse(payload)
         require(body.keys().asSequence().toSet()==setOf("model","messages","n","stream","max_tokens","thinking"))
@@ -42,11 +43,14 @@ internal object OrdinaryChatProductionConfig {
             OrdinaryChatReferenceTokenBound.Message(msg.getString("role"),text)
         }
         val bound=OrdinaryChatReferenceTokenBound.render(MODEL,input,true)
-        require(input.first().content==FIRST && input.indices.filter{it>0 && it%2==0}.all{input[it].content==SECOND})
+        require(input.first().content==(if(authorizedFollowup)FOLLOWUP_FIRST else FIRST) && input.indices.filter{it>0 && it%2==0}.all{input[it].content==SECOND})
         return OrdinaryChatCanaryBudget.TokenProof(QUOTA_PROOF,sha(payload),bound.publishedModelInputTokenUpperBound)
     }
     val verifier=OrdinaryChatCanaryBudget.FullPayloadProofVerifier { payload,proof ->
         try { prove(payload)==proof } catch(_:Exception) { false }
+    }
+    val followupVerifier=OrdinaryChatCanaryBudget.FullPayloadProofVerifier { payload,proof ->
+        try { prove(payload,true)==proof } catch(_:Exception) { false }
     }
     fun parse(bytes:ByteArray):JSONObject {
         val text=Charsets.UTF_8.newDecoder().onMalformedInput(CodingErrorAction.REPORT).onUnmappableCharacter(CodingErrorAction.REPORT).decode(ByteBuffer.wrap(bytes)).toString()

@@ -46,6 +46,8 @@ fn provider_evidence(a:&ProviderAdmission)->Json {
     let b=a.binding();let p=a.profile();object([("profile_id",string(&p.id)),("location",string(match p.location{ModelLocation::Remote=>"remote",ModelLocation::OwnDevice=>"own-device"})),("purpose",string("chat")),("credential_ref",string(&p.credential_ref)),("model_allowed",Json::Bool(b.model_allowed)),("outbound_allowed",Json::Bool(b.outbound_allowed)),("endpoint",string(&p.endpoint)),("endpoint_identity",string(&p.endpoint_identity)),("provider",string(&p.provider)),("model",string(&p.model)),("profile_revision",string(&b.profile_revision)),("policy_revision",string(&b.policy_revision)),("grant_revision",string(&b.grant_revision)),("authorization_owner",string(&b.authorization_owner)),("credential_identity",string(a.credential_handle().identity())),("credential_generation",Json::Number(a.credential_handle().generation().unwrap_or(0).to_string())),("budget_revision",string(&b.budget.revision)),("quota_proof",string(&b.budget.quota_proof)),("max_tokens",Json::Number(a.call_budget().max_tokens.to_string())),("max_micros",Json::Number(a.call_budget().max_micros.to_string()))])
 }
 pub const LIVE_BATCH:&str="muyon-ordinary-chat-20261019-cny1-two-requests";
+const LIVE_FOLLOWUP_BATCH:&str="muyon-ordinary-chat-20261020-authorized-followup";
+fn approved_live_grant(batch:&str)->Option<&'static str> {match batch{LIVE_BATCH=>Some("canary-grant-v1"),LIVE_FOLLOWUP_BATCH=>Some("canary-followup-grant-v1"),_=>None}}
 pub const LIVE_QUOTA:&str="deepseek-flash-1017-full-prompt-bound-cny-v1";
 pub const LIVE_COUNTING:&str="deepseek-flash-1017-bpe-upper-v1";
 pub const LIVE_PRICE:&str="deepseek-cny-peak-miss-20261020-v1";
@@ -55,7 +57,8 @@ fn live_profile(profile:&crate::service_provider::ConfiguredProfile,budget:&crat
 }
 fn write_send(dir:&Path,context:&Json,body:&Json,state:&str,admission:Option<&ProviderAdmission>,response:Option<&ChatResponse>)->Result<()> {
     let is_live=field(field(context,"authority")?,"synthetic")?==&Json::Bool(false);
-    let usage=response.map(|r|if is_live {object([("input",Json::Number(r.input_tokens.to_string())),("output",Json::Number(r.output_tokens.to_string())),("counting_rule",string(LIVE_COUNTING)),("price_rule",string(LIVE_PRICE)),("currency",string("CNY")),("batch",string(LIVE_BATCH)),("fee_upper_micro_cny",Json::Number((r.input_tokens*2+r.output_tokens*8).to_string()))])}else{object([("input",Json::Number(r.input_tokens.to_string())),("output",Json::Number(r.output_tokens.to_string())),("counting_rule",string("synthetic-byte-bound-v1"))])}).unwrap_or(Json::Null);
+    let live_batch=if is_live && response.is_some() {let binding=admission.ok_or("chat_live_configuration")?.binding();let batch=binding.budget.revision.as_str();if approved_live_grant(batch)!=Some(binding.grant_revision.as_str()){return Err("chat_live_configuration".into())}batch}else{""};
+    let usage=response.map(|r|if is_live {object([("input",Json::Number(r.input_tokens.to_string())),("output",Json::Number(r.output_tokens.to_string())),("counting_rule",string(LIVE_COUNTING)),("price_rule",string(LIVE_PRICE)),("currency",string("CNY")),("batch",string(live_batch)),("fee_upper_micro_cny",Json::Number((r.input_tokens*2+r.output_tokens*8).to_string()))])}else{object([("input",Json::Number(r.input_tokens.to_string())),("output",Json::Number(r.output_tokens.to_string())),("counting_rule",string("synthetic-byte-bound-v1"))])}).unwrap_or(Json::Null);
     let encoded=object([("version",string(if is_live{"ordinary-send-live-v1"}else{"ordinary-send-v1"})),("context",context.clone()),("payload",body.clone()),("state",string(state)),("admission",string(admission.map(|a|a.record_id()).unwrap_or(""))),("provider",admission.map(provider_evidence).unwrap_or(Json::Null)),("answer",string(response.map(|r|r.answer.as_str()).unwrap_or(""))),("usage",usage)]).encode();
     if encoded.len()>65536{return Err("chat_context_limit".into())}
     store::atomic(dir,"ordinary-send-v1.db",&encoded)
@@ -97,7 +100,7 @@ impl Provider for ChatProvider<'_> {
         let admission=bridge.final_admit(prepared)?;
         {let mut shared=self.shared.borrow_mut();shared.admitted=true;shared.record=Some(admission.record_id().into());}
         write_send(self.dir,&self.context,&body,"admitted",Some(&admission),None)?;
-        if is_live && (admission.binding().budget.revision!=LIVE_BATCH || admission.binding().budget.quota_proof!=LIVE_QUOTA) {return Err("chat_live_configuration".into())}
+        if is_live && (approved_live_grant(&admission.binding().budget.revision)!=Some(admission.binding().grant_revision.as_str()) || admission.binding().grant_revision!=self.authority.grant_revision || admission.binding().budget.quota_proof!=LIVE_QUOTA) {return Err("chat_live_configuration".into())}
         validate_binding(self.host,self.intent,&self.context,self.dir.parent().ok_or("chat_run_unavailable")?)?;control.poll()?;
         // The same owner atomically validates and one-shot records the handoff.
         // No retries, fallback transport or refunds after this boundary.
@@ -194,8 +197,9 @@ pub(crate) fn receipt(dir:&Path,b:&BusinessRead)->Result<String> {
     if !is_live && versioned && (used_in!=wire.encode().len() as u64 || used_out!=answer.len() as u64){return Err("chat_usage_evidence".into())}
     if field(usage,"counting_rule")?!=&string(if is_live{LIVE_COUNTING}else{"synthetic-byte-bound-v1"}) || used_in==0 || used_out==0 || used_out>output || used_in.checked_add(used_out).filter(|n|*n<=total).is_none() || field(provider,"credential_generation")?.integer()?==0 {return Err("chat_usage_evidence".into())}
     if is_live {
-        for (key,value) in [("profile_id","ordinary-deepseek-flash-canary"),("endpoint","https://api.deepseek.com/chat/completions"),("endpoint_identity","deepseek-https-chat-v1"),("provider","deepseek"),("model","deepseek-flash"),("location","remote"),("budget_revision",LIVE_BATCH),("quota_proof",LIVE_QUOTA)] {if field(provider,key)?!=&string(value){return Err("chat_profile_evidence".into())}}
-        if total!=16512 || field(provider,"max_micros")?.integer()?!=33792 || used_in>16384 || field(usage,"price_rule")?!=&string(LIVE_PRICE) || field(usage,"currency")?!=&string("CNY") || field(usage,"batch")?!=&string(LIVE_BATCH) || field(usage,"fee_upper_micro_cny")?.integer()?!=used_in*2+used_out*8 {return Err("chat_usage_evidence".into())}
+        for (key,value) in [("profile_id","ordinary-deepseek-flash-canary"),("endpoint","https://api.deepseek.com/chat/completions"),("endpoint_identity","deepseek-https-chat-v1"),("provider","deepseek"),("model","deepseek-flash"),("location","remote"),("quota_proof",LIVE_QUOTA)] {if field(provider,key)?!=&string(value){return Err("chat_profile_evidence".into())}}
+        if approved_live_grant(field(provider,"budget_revision")?.string()?)!=Some(field(authority,"grant_revision")?.string()?){return Err("chat_profile_evidence".into())}
+        if total!=16512 || field(provider,"max_micros")?.integer()?!=33792 || used_in>16384 || field(usage,"price_rule")?!=&string(LIVE_PRICE) || field(usage,"currency")?!=&string("CNY") || field(usage,"batch")?!=field(provider,"budget_revision")? || field(usage,"fee_upper_micro_cny")?.integer()?!=used_in*2+used_out*8 {return Err("chat_usage_evidence".into())}
     }
     Ok(r.into())
 }

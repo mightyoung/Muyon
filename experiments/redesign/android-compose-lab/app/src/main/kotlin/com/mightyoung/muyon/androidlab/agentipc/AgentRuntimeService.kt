@@ -117,7 +117,8 @@ class AgentRuntimeService:Service() {
     /** Only Service Context-derived canonical private storage. No UI/Binder path parameter. */
     private fun privateRoot():String {
         val parent=filesDir.canonicalFile
-        val expected=File(parent,"agent-service-root")
+        val followup=(application as MuyonLabApplication).useAuthorizedChatFollowup(this)
+        val expected=File(parent,if(followup)OrdinaryChatAuthorizedSession.ROOT_NAME else "agent-service-root")
         val stat=try{Os.lstat(expected.absolutePath)}catch(error:ErrnoException){
             if(error.errno!=OsConstants.ENOENT)throw error
             try{Os.mkdir(expected.absolutePath,448)}catch(race:ErrnoException){
