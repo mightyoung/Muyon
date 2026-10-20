@@ -1,0 +1,4 @@
+<!-- WorkBuddy 2.6.1 assets/icons/common-add.svg; original path. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android" android:width="24dp" android:height="24dp" android:viewportWidth="16" android:viewportHeight="16">
+    <path android:fillColor="#FF111112" android:pathData="M8.75,1.5a0.75,0.75 0,0 0,-1.5 0v5.5H1.75a0.75,0.75 0,0 0,0 1.5h5.5v5.5a0.75,0.75 0,0 0,1.5 0V8.5h5.5a0.75,0.75 0,0 0,0 -1.5h-5.5z" />
+</vector>

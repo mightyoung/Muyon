@@ -1,0 +1,6 @@
+<!-- WorkBuddy 2.6.1 assets/icons/cloud-conversation-menu.svg; original path/offset. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android" android:width="24dp" android:height="24dp" android:viewportWidth="24" android:viewportHeight="24">
+    <group android:translateX="1.87448" android:translateY="6.37433">
+        <path android:fillColor="#FF111112" android:fillType="evenOdd" android:pathData="M19.1255,2.2505L1.1255,2.2505Q0.6539,2.2641 0.33,1.921Q-0.013,1.5971 0.0005,1.1255Q-0.013,0.6539 0.33,0.33Q0.6539,-0.0131 1.1255,0.0005L19.1255,0.0005Q19.5971,-0.0131 19.921,0.33Q20.2641,0.6539 20.2505,1.1255Q20.2641,1.5971 19.921,1.921Q19.5971,2.2641 19.1255,2.2505ZM1.1255,9.0003L12.1255,9.0003Q12.5971,8.9867 12.921,9.3298Q13.2641,9.6537 13.2505,10.1253Q13.2641,10.5969 12.921,10.9208Q12.5971,11.2639 12.1255,11.2503L1.1255,11.2503Q0.6539,11.2639 0.33,10.9208Q-0.0131,10.5969 0.0005,10.1253Q-0.0131,9.6537 0.33,9.3298Q0.6539,8.9867 1.1255,9.0003Z" />
+    </group>
+</vector>

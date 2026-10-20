@@ -1,11 +1,13 @@
 package com.mightyoung.muyon.product.chat
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -15,18 +17,37 @@ import org.json.JSONObject
 
 /** Local reads are shown as local records, never as a fabricated model answer. */
 @Composable
-fun ChatScreen(client: ProductClient, projectId: String?) {
+fun ChatScreen(
+    client: ProductClient,
+    projectId: String?,
+    conversationKey: String = "default",
+    displayName: String = "Muyon 助手",
+    memberNames: List<String> = emptyList(),
+) {
+    var configured by remember(client) { mutableStateOf(false) }
+    key(conversationKey) {
+        ChatConversation(client, projectId, conversationKey, displayName, memberNames, configured) { configured = it }
+    }
+}
+
+@Composable
+private fun ChatConversation(client: ProductClient, projectId: String?, conversationKey: String, displayName: String, memberNames: List<String>, configured: Boolean, onConfigured: (Boolean) -> Unit) {
     val context = LocalContext.current
     val saved = remember { context.getSharedPreferences("product-chat-state", android.content.Context.MODE_PRIVATE) }
-    var conversation by remember { mutableStateOf(saved.getString("conversation", null) ?: java.util.UUID.randomUUID().toString().also { saved.edit().putString("conversation", it).commit() }) }
+    val conversationPreference = remember(conversationKey) { if (conversationKey == "default") "conversation" else "conversation:$conversationKey" }
+    var conversation by remember { mutableStateOf(saved.getString(conversationPreference, null) ?: java.util.UUID.randomUUID().toString().also { saved.edit().putString(conversationPreference, it).commit() }) }
     var original by remember { mutableStateOf(saved.getString("original_request", null)) }
+    var originalConversationKey by remember { mutableStateOf(saved.getString("original_request_conversation_key", null)) }
+    var originalDisplayName by remember { mutableStateOf(saved.getString("original_request_display_name", null)) }
     var settingsOpen by remember { mutableStateOf(false) }
     var key by remember { mutableStateOf("") }
     var cap by remember { mutableStateOf("1000000") }
     var calls by remember { mutableStateOf("10") }
-    var configured by remember { mutableStateOf(false) }
     var review by remember { mutableStateOf<JSONObject?>(null) }
+    var reviewConversationKey by remember { mutableStateOf<String?>(null) }
+    var reviewDisplayName by remember { mutableStateOf<String?>(null) }
     var resultText by remember { mutableStateOf("") }
+    var conversationNotice by remember { mutableStateOf("") }
     var searchResults by remember { mutableStateOf<List<JSONObject>>(emptyList()) }
     var accounting by remember { mutableStateOf("") }
     var pendingTool by remember { mutableStateOf<JSONObject?>(null) }
@@ -48,6 +69,8 @@ fun ChatScreen(client: ProductClient, projectId: String?) {
     var draft by remember { mutableStateOf("") }
     var source by remember { mutableStateOf("") }
     val currentProject by rememberUpdatedState(projectId)
+    val originalOriginLabel = if (originalConversationKey.isNullOrBlank() || originalDisplayName.isNullOrBlank())
+        "历史原请求（身份未记录）" else "原请求 · $originalDisplayName · 会话 $originalConversationKey"
 
     fun refreshStatus() {
         client.call("agent_availability") { reply ->
@@ -60,7 +83,10 @@ fun ChatScreen(client: ProductClient, projectId: String?) {
     fun observe() {
         val request = original ?: return
         client.call("chat_lookup", JSONObject().put("request_id", request)) { reply ->
+            if (original != request) return@call
             val result = reply.optJSONObject("data")
+            pendingTool = null
+            searchResults = emptyList()
             if (reply.optString("status") != "ok" || result == null) {
                 resultText = "原请求结果尚未取得，请继续查询；不会自动重发。"
             } else {
@@ -91,7 +117,9 @@ fun ChatScreen(client: ProductClient, projectId: String?) {
         client.call("chat_prepare", JSONObject().put("conversation_id", conversation)
             .put("text", draft).put("search", search).put("count", 5).put("project_id", projectId ?: JSONObject.NULL)) { reply ->
             val data = reply.optJSONObject("data")
-            if (reply.optString("status") == "ok" && data?.has("request_id") == true) review = data
+            if (reply.optString("status") == "ok" && data?.has("request_id") == true) {
+                reviewConversationKey = conversationKey; reviewDisplayName = displayName; review = data
+            }
             else error = "请求预览未完成，请检查配置、输入或先查询原请求。"
         }
     }
@@ -178,40 +206,50 @@ fun ChatScreen(client: ProductClient, projectId: String?) {
         }
     }
 
-    Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        Text("聊天与工作台", style = MaterialTheme.typography.headlineSmall)
-        Text("DeepSeek · 独立产品配置与累计预算")
-        Text(if (availability == null) "连接状态未读取" else "本地读取已连接；实际外发仍需通过计费证明与预算检查", Modifier.testTag("chat-availability"))
-        OutlinedButton(onClick = { settingsOpen = true }) { Text("模型与预算设置") }
-        OutlinedButton(onClick = {
+    Column(Modifier.fillMaxSize().imePadding()) {
+        Column(Modifier.fillMaxWidth().padding(horizontal = 18.dp, vertical = 12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                ChatAvatar(displayName, memberNames)
+                Column(Modifier.weight(1f)) {
+                    Text(displayName, style = MaterialTheme.typography.titleLarge)
+                    Text(if (memberNames.isEmpty()) "聊天与工作台" else "群组 · ${memberNames.size} 位成员", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+                TextButton(onClick = { settingsOpen = true }) { Text("模型与预算设置") }
+            }
+            if (memberNames.isNotEmpty()) Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                memberNames.forEach { name -> ChatMemberChip(name) }
+            }
+            Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                TextButton(onClick = {
             val next = java.util.UUID.randomUUID().toString()
-            if (saved.edit().putString("conversation", next).commit()) {
+            if (saved.edit().putString(conversationPreference, next).commit()) {
                 conversation = next; pendingTool = null; disclosure = null; suggestion = null; followupReady = false
-                resultText = "已开始新会话，不会携带之前披露的业务数据；原请求仍可独立查询。"
+                conversationNotice = "已开始新会话，不会携带之前披露的业务数据；原请求仍可独立查询。"
             }
         }) { Text("开始新会话") }
-        OutlinedButton(onClick = { refreshStatus() }) { Text("刷新连接状态") }
-        OutlinedTextField(value = draft, onValueChange = { draft = it.take(4096) }, label = { Text("消息草稿") }, modifier = Modifier.fillMaxWidth())
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            Button(onClick = { preview(false) }, enabled = configured && scopeReady && draft.isNotBlank(), modifier = Modifier.testTag("chat-send")) { Text("预览聊天请求") }
-            OutlinedButton(onClick = { preview(true) }, enabled = configured && scopeReady && draft.isNotBlank()) { Text("预览搜索请求") }
+                TextButton(onClick = { refreshStatus() }) { Text("刷新连接状态") }
+            }
+            Text(if (availability == null) "连接状态未读取" else "本地读取已连接；实际外发仍需通过计费证明与预算检查", Modifier.testTag("chat-availability"), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
-        Text("配置不会发出请求。凭据仅保留在当前 Service 内存，重启后需重新输入。当前托管聊天计费上界与搜索价格证明尚未安装，预览会明确阻止外发。")
-        if (original != null) {
+        HorizontalDivider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = .08f))
+        Column(Modifier.weight(1f).fillMaxWidth().verticalScroll(rememberScrollState()).padding(18.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
+        if (original == null && resultText.isEmpty() && source.isEmpty() && businessIntent == null && businessOriginalText.isEmpty()) {
+            ChatEmptyState(displayName, memberNames, !loading, projectId != null,
+                onSuppliers = { read("supplier_list", 0) }, onPapers = { read("paper_list", 0) })
+        }
+        if (conversationNotice.isNotEmpty()) Text(conversationNotice, style = MaterialTheme.typography.bodySmall)
+        if (original != null || resultText.isNotEmpty()) ChatPanel {
+            Text(originalOriginLabel, Modifier.testTag("chat-original-origin"), style = MaterialTheme.typography.titleSmall)
+            Text("全局原请求恢复 · 结果与动作属于以上原始身份，不代表当前助手或群组的回复。", style = MaterialTheme.typography.bodySmall)
             Text("原请求：$original")
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 OutlinedButton(onClick = { observe() }) { Text("查询原结果") }
                 OutlinedButton(onClick = { client.call("chat_cancel", JSONObject().put("request_id", original)) { observe() } }) { Text("取消原请求") }
             }
-        }
         if (resultText.isNotEmpty()) Text(resultText, Modifier.testTag("chat-original-result"))
-        if (businessIntent != null) {
-            Text("待核实的原业务意图：$businessIntent")
-            OutlinedButton(onClick = { queryBusinessOriginal() }, enabled = !businessLookupRunning, modifier = Modifier.testTag("chat-business-original-lookup")) { Text("查询原业务回执") }
-        }
-        if (businessOriginalText.isNotEmpty()) Text(businessOriginalText, Modifier.testTag("chat-business-original-result"))
-        if (accounting.isNotEmpty()) Text(accounting)
         pendingTool?.takeIf { scopeReady }?.let { call ->
+            ChatPanel {
+            Text("原请求待处理动作 · $originalOriginLabel", style = MaterialTheme.typography.labelLarge)
             Text("待处理动作：${call.optString("name")}")
             Text(call.optJSONObject("arguments")?.toString(2) ?: "")
             if (call.optString("name").endsWith("_suggest")) {
@@ -222,7 +260,11 @@ fun ChatScreen(client: ProductClient, projectId: String?) {
             } else OutlinedButton(onClick = {
                 toolAction("review_read") { disclosureSuggestion = false; disclosure = it }
             }) { Text("查看将披露的实际字段") }
-            if (followupReady) OutlinedButton(onClick = { toolAction("followup") { review = it; followupReady = false } }) { Text("预览独立的后续模型请求") }
+            if (followupReady) OutlinedButton(onClick = { toolAction("followup") {
+                reviewConversationKey = originalConversationKey; reviewDisplayName = originalDisplayName
+                review = it; followupReady = false
+            } }) { Text("预览独立的后续模型请求") }
+            }
         }
         searchResults.forEach { result -> Card(Modifier.fillMaxWidth()) {
             Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
@@ -232,7 +274,14 @@ fun ChatScreen(client: ProductClient, projectId: String?) {
                 Text(result.optString("summary"))
             }
         } }
-        Text("可以先查看当前业务记录。这里的本地内容不会自动发送给模型；业务修改需在对应页面预览并确认。")
+        }
+        if (businessIntent != null) {
+            Text("待核实的原业务意图：$businessIntent")
+            OutlinedButton(onClick = { queryBusinessOriginal() }, enabled = !businessLookupRunning, modifier = Modifier.testTag("chat-business-original-lookup")) { Text("查询原业务回执") }
+        }
+        if (businessOriginalText.isNotEmpty()) Text(businessOriginalText, Modifier.testTag("chat-business-original-result"))
+        if (accounting.isNotEmpty()) ChatDetails("预算与用量") { Text(accounting) }
+        Text("可以先查看当前业务记录。这里的本地内容不会自动发送给模型；业务修改需在对应页面预览并确认。", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             OutlinedButton(onClick = { read("supplier_list", 0) }, enabled = !loading) { Text("读取供应商") }
             OutlinedButton(onClick = { read("paper_list", 0) }, enabled = !loading && projectId != null) { Text("读取项目论文") }
@@ -259,11 +308,16 @@ fun ChatScreen(client: ProductClient, projectId: String?) {
                 OutlinedButton(onClick = { read(tool, offset + 20) }, enabled = !loading && records.size == 20 && offset < 10_000) { Text("下一页") }
             }
         }
+        }
+        ChatInputDock(draft, { draft = it.take(4096) }, configured && scopeReady && draft.isNotBlank(),
+            onChat = { preview(false) }, onSearch = { preview(true) })
     }
     if (settingsOpen) AlertDialog(
         onDismissRequest = { settingsOpen = false; key = "" },
         title = { Text("确认新的产品配置") },
         text = { Column(Modifier.verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Text("DeepSeek · 独立产品配置与累计预算。所有助手与群组共享此工作台的模型配置和累计预算；成员资料不会自动发送给模型，也不会自动调度成员。")
+            Text("配置不会发出请求。凭据仅保留在当前 Service 内存，重启后需重新输入。当前托管聊天计费上界与搜索价格证明尚未安装，预览会明确阻止外发。")
             Text("供应商：DeepSeek；端点固定为 api.deepseek.com。不会读取历史凭据或预算。")
             OutlinedTextField(value = key, onValueChange = { key = it.take(512) }, label = { Text("新凭据（仅当前进程）") }, visualTransformation = PasswordVisualTransformation())
             OutlinedTextField(value = cap, onValueChange = { cap = it.filter(Char::isDigit).take(13) }, label = { Text("累计上限（微人民币）") })
@@ -274,16 +328,18 @@ fun ChatScreen(client: ProductClient, projectId: String?) {
             val input = key.toCharArray(); key = ""; settingsOpen = false
             client.configureChat(JSONObject().put("cap_micro_cny", cap).put("max_calls", calls).put("chat", true).put("search", true), input) { reply ->
                 input.fill('\u0000')
-                configured = reply.optString("status") == "ok" && reply.optJSONObject("data")?.has("id") == true
-                error = if (configured) "" else "配置未完成，未发出请求。"
+                val accepted = reply.optString("status") == "ok" && reply.optJSONObject("data")?.has("id") == true
+                onConfigured(accepted)
+                error = if (accepted) "" else "配置未完成，未发出请求。"
             }
         }, enabled = key.length in 16..512 && cap.isNotEmpty() && calls.isNotEmpty()) { Text("确认配置与累计预算") } },
         dismissButton = { TextButton(onClick = { settingsOpen = false; key = "" }) { Text("取消") } }
     )
     review?.let { plan -> AlertDialog(
         onDismissRequest = { client.call("chat_cancel", JSONObject().put("request_id", plan.optString("request_id"))) {}; review = null }, title = { Text("请求预览") },
-        text = { Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        text = { Column(Modifier.verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Text("${if (plan.optString("purpose") == "search") "外部搜索" else "模型聊天"} · DeepSeek")
+            Text(if (reviewConversationKey.isNullOrBlank() || reviewDisplayName.isNullOrBlank()) "历史原请求（身份未记录）" else "请求来源：$reviewDisplayName · 会话 $reviewConversationKey")
             Text("本次保留上界：${plan.optString("reserved_micro_cny")} 微人民币")
             Text("请求身份：${plan.optString("request_id")}")
             if (!plan.optBoolean("send_allowed")) Text("尚无可信的托管计费或搜索价格证明；此次请求不会发出。")
@@ -291,8 +347,12 @@ fun ChatScreen(client: ProductClient, projectId: String?) {
         } },
         confirmButton = { TextButton(onClick = {
             val request = plan.getString("request_id")
-            if (saved.edit().putString("original_request", request).commit()) {
-                original = request; review = null
+            if (saved.edit().putString("original_request", request)
+                    .putString("original_request_conversation_key", reviewConversationKey)
+                    .putString("original_request_display_name", reviewDisplayName).commit()) {
+                original = request; originalConversationKey = reviewConversationKey; originalDisplayName = reviewDisplayName
+                pendingTool = null; searchResults = emptyList(); resultText = ""; review = null
+                disclosure = null; suggestion = null; followupReady = false
                 client.call("chat_confirm", JSONObject().put("request_id", request)) { observe() }
             } else error = "原请求身份未能保存，未发出请求。"
         }, enabled = plan.optBoolean("send_allowed")) { Text("确认本次外发") } },
@@ -301,6 +361,7 @@ fun ChatScreen(client: ProductClient, projectId: String?) {
     disclosure?.let { data -> AlertDialog(
         onDismissRequest = { disclosure = null }, title = { Text("批准本次业务信息披露") },
         text = { Column(Modifier.verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Text(originalOriginLabel)
             Text("目的：下一次模型工具结果；费用预算不能代替此许可。")
             Text("作用域：${data.optJSONObject("scope")?.toString()}")
             Text(data.optString("bytes"))
@@ -316,6 +377,7 @@ fun ChatScreen(client: ProductClient, projectId: String?) {
     suggestion?.let { data -> AlertDialog(
         onDismissRequest = { suggestion = null }, title = { Text("确认本次业务修改") },
         text = { Column(Modifier.verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Text(originalOriginLabel)
             val preview = data.optJSONObject("business_preview")
             Text(data.optString("summary"))
             Text("作用域：${preview?.optJSONObject("scope")}")
