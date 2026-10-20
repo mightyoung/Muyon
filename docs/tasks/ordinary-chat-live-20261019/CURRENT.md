@@ -23,11 +23,18 @@ success. API26 runtime, CI producer/Rust1.99 and PR99 Settings→Send remain ope
 I04 and containing suites were not run. No PR, merge, deployment or HOLD change.
 
 An offline parser repair is described in [HTTP-HEADER-FIX.md](HTTP-HEADER-FIX.md).
+Repair source commit: `84223bdd0b2ebb2f4381d6056f146087a6d2952e`;
+independent SOURCE+DOC APPROVE/CLEAR and independent PASS102 socket-free checks.
 It is not deployed to the stopped real app and cannot establish this failure's
 exact cause. Full two-turn acceptance, actual usage and billing evidence remain
 blocked by the stopped unknown. The reusable build/helper entries below remain
 available for a separately reviewed and explicitly authorized future campaign;
 do not invoke them against either stopped batch.
+
+To complete a fresh dependent two-turn live acceptance would require separate
+explicit authorization for at most2 new requests (cumulative maximum4), retaining
+both unknown reservations and the original cumulative CNY1 ceiling. This report
+does not supply that authorization, create another root or relax the stop rule.
 
 ---
 

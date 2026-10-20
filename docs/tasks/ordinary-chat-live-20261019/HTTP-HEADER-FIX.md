@@ -1,5 +1,8 @@
 # Offline response-header repair
 
+Reviewed repair source commit: `84223bdd0b2ebb2f4381d6056f146087a6d2952e`.
+Actual failed live runtime remains `6f1fcb11e63f9ef04c51e2e8c59b4425eaec5f02`.
+
 ## Evidence and boundary
 
 The authorized followup ran source
