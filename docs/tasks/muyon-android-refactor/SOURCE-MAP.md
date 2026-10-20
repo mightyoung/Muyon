@@ -32,13 +32,13 @@ PR88 `2f8f4da674e871708880dcc792a1c9dafb3a17f3` is NOT an ancestor. Its review/g
 
 ## Environment evidence
 
-- Darwin arm64; Rust/Cargo 1.93.1; default Java25 (Android build will use an available supported JDK after verification).
+- Darwin arm64; Rust/Cargo 1.93.1; Android build uses the bundled Android Studio JDK25 and installed Gradle9.3.1. Offline compilation and lint have executed successfully.
 - Android SDK platforms24/34/35/36, build-tools35.0.0/35.0.1/36.0.0, NDK28.2.13676358.
-- Only API36 system image currently installed; no connected device. API26 remains NOT_RUN until its image/device is available and actual instrumentation executes.
+- Initial snapshot had only API36 and no connected device. An official ARM64 API26 image was subsequently installed and booted as `emulator-5556`; actual product instrumentation has executed. Fixed-candidate results and hashes are recorded in `product-device/` and the execution ledger; cross-compilation alone does not establish runtime acceptance.
 - I04 retains the historical platform-denial/HOLD boundary; see `i04/` evidence. No rerouting/renaming of the denied experiment.
 - Stopped live batches and unknown reservations are unchanged. This code authorization is not a new credential campaign or budget increase. No secret files are read by the refactor lanes.
 
-## Ownership
+## Initial ownership and later bounded handoffs
 
 | Surface | Exclusive writer |
 | --- | --- |
@@ -48,3 +48,5 @@ PR88 `2f8f4da674e871708880dcc792a1c9dafb3a17f3` is NOT an ancestor. Its review/g
 | I04 new evidence only | execute_i04_evidence |
 
 Later lanes receive an explicit file ownership handoff after prerequisites. No lane writes a shared manifest/dispatcher/schema without the leader's integration. Integration into develop remains a separate reviewed handoff; no merge/push is performed here.
+
+The leader owns the product Service/FFI/entry point, lifecycle handoff and final build gates. Subsequent exclusive lanes implemented supplier/research screens, archive/blob admission, schema2 research storage, schema3 agent/tool coordination, and independent device/contract/store/resource tests. Reviewers remained separate from implementation owners. The original develop checkout and its existing xcconfig edits were retained.

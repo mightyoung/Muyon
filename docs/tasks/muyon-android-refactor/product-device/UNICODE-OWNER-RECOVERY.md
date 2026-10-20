@@ -26,3 +26,8 @@ Evidence: `/private/tmp/muyon-product-api26-fifth.log`,
 The sixth run also used two incorrect test class selectors; that failed run is not
 accepted as a passing suite. These are provisional candidate results, not the
 final source-sealed suite or all 36 acceptance scenarios.
+
+Final source `7b063cb4089fe21fdaf82657bcf00408e3f138b1` passed the
+same-PID/new-epoch recovery assertions on API26. The sealed suite contains all
+21 required methods with no skips; this does not close all 36 compound scenarios.
+See [sealed core log](final/CORE.log) and [suite result](final/SUITE.json).

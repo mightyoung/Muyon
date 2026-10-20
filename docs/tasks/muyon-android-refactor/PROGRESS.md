@@ -1,40 +1,49 @@
-# Execution ledger
+# Execution ledger — local implementation delivered; overall acceptance HOLD
 
-Target: all 21 reviewed task cards. A local implementation/test result does not close API26 or live-provider acceptance.
+Branch: codex/muyon-android-refactor. Fixed installed product/test source: 7b063cb4089fe21fdaf82657bcf00408e3f138b1.
 
-| Task | State | Evidence / remaining gate |
+Rust/Compose implements supplier CRUD/delete/restore, research projects, immutable directory/ZIP snapshots, manual PDF metadata/private attachments, and guarded agent/tool coordination. The original develop checkout and existing xcconfig edits were retained. No merge, push, publication or historical Flutter migration occurred; new data and original unknown identities were preserved.
+
+## Verified local result
+
+- 21/21 API26 methods PASS: one input-generation setup and 20 behavior methods, same APK/test APK, emulator-5556, SDK26, arm64-v8a, SELinux Enforcing. No required method is omitted or skipped.
+- 127 Rust executions PASS (15 unit cases compiled in two targets; not 127 unique cases). Tested Rust tree c0bcc4306721dc39f75062c078319ec87931f1fa is identical in the test snapshot and installed candidate; crates/ and reused experiments/ did not change. Shared contract tests also traverse 32 vectors.
+- Android APK/test build and lint, strict Clippy, scoped formatting of both changed product packages, and four Python gate tests PASS. Full cargo fmt --all also visits pre-existing laboratory formatting differences; unrelated files were retained.
+- Packaging gate PASS: both product ABIs, bundled SQLite, generated bridge byte equality, native digests, ELF/APK 16KiB alignment and device runtime build ID. x86_64 was cross-built, not device-run.
+- Suite gate PASS: source/build ID, APK/test-APK hashes, individual original-log hashes and complete test inventory agree. Missing, failed, skipped, altered or mixed-build results are refused.
+
+Durable evidence: [final results and reproduction](product-device/final/README.md). The [36-scenario matrix](ACCEPTANCE-MATRIX.md) distinguishes method results from compound and live acceptance.
+
+## Task disposition
+
+| Task | State | Evidence or remaining boundary |
 | --- | --- | --- |
-| P00 | IN_PROGRESS | Isolated branch based on cebc6876, source ancestry recorded; final immutable candidate/hash pending. |
-| P01 | LOCAL_PASS | Strict Rust contract/schema/fixtures; 10 tests passed. Kotlin uses generated UniFFI surface; final device semantics pending. |
-| P02 | IN_PROGRESS | New crates and apps/muyon_android product tree; real ARM64/x86_64 bundled-SQLite builds; hash-bound APK packaging in verification. |
-| D01 | VERIFIED_TARGET | Commits 944e18b0/7039175c; two deterministic RED-to-GREEN guards, 34 Rust tests and API26 original two Settings→Send tests pass. See D01/. Does not prove new product/live provider. |
-| D02 | BLOCKED_HOLD | Existing I04 denial preserved; read-only artifact hashes verified, missing acceptable runtime evidence. No equivalent retry performed. See i04/. |
-| P03 | LOCAL_PASS | Real SQLite atomic effects/receipts, real SIGKILL recovery and three isolated behavior mutants; 12 business tests. See core-store/. |
-| P04 | IN_PROGRESS | Private :core Service, bound sessions/owner epoch and visible confirmation; no model dispatch to authority. Device lifecycle/cancellation proof pending. |
-| P05 | LOCAL_PASS_REVIEW_PENDING | Upload/read pins, same-transaction reference publication and recovery; 19 tests incl. 10 actual SIGKILL windows. Independent review pending. See blobs/. |
-| A01 | LOCAL_PASS_REVIEW_PENDING | Restricted ZIP32 metadata, 13 tests, real Dart ZIP round-trip fixture and three guard mutants. Platform DEFLATE/device proof pending. See archive/. |
-| S01/S02 | LOCAL_PASS | Full eight-field supplier CRUD/soft delete/restore/reference policy persisted in real DB; Android UI acceptance pending. |
-| R01/R02/R03 | IN_PROGRESS | Source-bound immutable snapshots and real PDF catalog implemented; first 11 Rust integration tests pass; final checks/review/device pending. |
-| U01 | COMPILED_DEVICE_PENDING | Real Service-backed supplier Compose screen and two instrumentation tests compile. |
-| U02a/U02b | IN_PROGRESS | SAF streams/private upload, frozen ZIP reader and platform PDF display implemented; tests/build/device pending. |
-| C01 | IN_PROGRESS | Product owner, separate persistent budget ledger, strict transport/cancellation gate and local parser tests implemented; schema3 model-tool scope/disclosure/P04 suggestion loop is being integrated. Production price verifiers remain None; no real paid calls authorized. |
-| V01 | IN_PROGRESS | Official ARM64 API26 AVD actually booted (SDK26/arm64-v8a); new product candidate/UI run pending. |
-| V02 | PARTIAL_LOCAL | Real SQL/file/SIGKILL tests pass; complete installed-product lifecycle/unknown-outcome evidence remains open. |
-| V03 | PENDING_HOLD | Final review, candidate seal and all acceptance gaps required; D02/live gates cannot be relabeled green. |
+| P00 | SEALED_LOCAL | Fixed candidate, two APK hashes, original logs and source ancestry retained. |
+| P01 | LOCAL_DEVICE_PASS | Strict contract/schema; same 32 cross-end vectors, eight fields, Unicode and exact large revisions. |
+| P02 | BUILT_PACKAGED_DEVICE_PASS | Real product and both native ABIs; actual API26 ARM64 runtime. |
+| D01 | VERIFIED_ORIGINAL_TARGET | 944e18b0/7039175c; two original API26 Settings→Send cases and targeted RED/GREEN checks. Reused lab scope, not new-product live proof. |
+| D02 | BLOCKED_HOLD | Historical I04 platform denial and missing original behavioral evidence; read-only audit, zero equivalent retry. |
+| P03 | LOCAL_PASS_WITH_BOUNDARIES | Real atomic SQLite effects/history/receipt, process recovery, SQL-stage refusal and OS write failure; exact SQLITE_FULL remains distinct. |
+| P04 | INTEGRATED_DEVICE_PASS | Private Service leases/epochs, predecessor drain, stale callback isolation and visible confirmation. |
+| P05 | LOCAL_REVIEW_DEVICE_PASS | Private copy/fsync/rename, durable pins/recovery, enforcing Android; no hardlink or security-policy bypass. |
+| A01 | LOCAL_REVIEW_DEVICE_PASS | Restricted ZIP32/CRC/length admission; platform DEFLATE and real ZIP/tree pickers. |
+| S01/S02 | LOCAL_DEVICE_PASS | Full supplier fields/CRUD/delete/restore, persistent IDs/revisions, original receipts and reference policy. |
+| R01/R02/R03 | LOCAL_DEVICE_PASS | Source-bound immutable snapshots/raw records and revision semantics; manual PDF/private attachments. |
+| U01 | DEVICE_METHODS_PASS | Actual supplier UI→Service→Rust→SQLite, paging, draft/rotation and receipts. |
+| U02a/U02b | DEVICE_METHODS_PASS | Real PDF/ZIP/tree selection; PDF cancellation zero-publish; source deletion then new-Activity private read. |
+| C01 | IMPLEMENTED_LOCAL_REVIEW_PASS; LIVE_BLOCKED | Durable budget/attempt ledger, strict transport/tool loop, exact disclosure/P04 review, scope/cancel guards and independent receipt recovery. Production price verifiers remain None. |
+| V01 | DEVICE_METHODS_PASS | Complete same-candidate 21-method inventory and package/runtime identity. |
+| V02 | PARTIAL_EVIDENCE | Actual SQL/file/process-kill and lost-callback recovery; remaining compound windows/resource limits stay explicit. |
+| V03 | OVERALL_HOLD | I04 and live model/search/current-price evidence remain missing; no release acceptance asserted. |
 
-No task is marked complete solely from files existing or historical CI results. D01's API26 result concerns the reused original lab stack. New product API26 UI and real-provider acceptance are separate gates.
+## Repairs and retained negative evidence
 
-## Latest provisional device evidence (2026-10-21)
+Actual Android findings were fixed rather than hidden: SELinux-denied hardlink publication; incomplete schema1 admission (explicit schema2/product-v2 namespace, old pending identities retained); malformed UTF16 leaking a generated UniFFI handle (guarded before lowering, generated bytes unchanged); immediate close/rebind owner race (frozen predecessor drains); and restart receipt lookup depending on a lost tool origin (independent local original-intent query).
 
-- API26 ARM64 real product: seventh run passed 9/10 tests. Valid/malformed Unicode,
-  same-process owner reopen, saturated close, supplier CRUD and research PDF/DEFLATE
-  import/paging passed. Recovery pagination assertion correction awaits the next build.
-- Actual device fixes: replace SELinux-denied hardlink publication with private
-  copy/fsync/rename; reject incomplete schema1 rather than silently creating tables;
-  explicit business-v2 namespace preserves old unknown rows; reject malformed Java
-  strings before UniFFI handle cloning. See product-device/ and core-store/ incident notes.
-- System picker is not yet accepted: actual DocumentsUI PDF selection still fails in
-  the provisional test helper; debugging continues against the real UI tree.
-- Final same-candidate suite, source seal, full lifecycle scenarios, I04 evidence and
-  live provider/price evidence remain open. Earlier task-table device states above
-  describe initial implementation checkpoints and must not be read as final acceptance.
+Eight same-PID close/rebind cycles require the first health read to succeed without retries. A real write is independently observed committed in SQLite, its client callback is lost, the Service is killed, and actual Supplier/Assistant UIs recover the same original receipt with revision/history remaining one. The test explicitly journals through its own real P04 client; it does not fabricate a model turn or claim the UI confirm button was clicked during the held-looper window.
+
+All actual picker failures, test-navigation races and the API26 executable-vs-shell precondition crash remain recorded separately from successful final runs.
+
+## Stop boundary
+
+No new real provider calls, real credential reads, paid requests, refunds of old reservations or I04 reruns occurred. Chat/search are visibly blocked without trusted current pricing proofs. Exact disk-full errno, inaccessible cancellation windows, complete device-scale resource proofs and the full Android model-tool dialog chain remain limited as recorded in the matrix. These local evidence limits are separate from I04/live blockers and are not claimed complete.

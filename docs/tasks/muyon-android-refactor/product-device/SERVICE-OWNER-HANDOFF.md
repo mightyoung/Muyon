@@ -20,6 +20,8 @@ poll added. A new actual device regression performs eight immediate close/rebind
 cycles, requires multiple owner epochs in one PID, and requires the first health
 read after every Binder connection to succeed without retries.
 
-Validation is pending the rebuilt candidate. Failed evidence is retained at
-`/private/tmp/muyon-product-final-core.log`; read-only diagnosis made no process,
-database, credential or paid-provider mutation.
+Final validation: source `7b063cb4089fe21fdaf82657bcf00408e3f138b1`
+passed all eight immediate close/rebind cycles on the API26 device, including
+first-health success without retries and multiple epochs in one PID.
+See [sealed core log](final/CORE.log) and [suite manifest](final/SUITE-MANIFEST.json).
+The original failure remains in `E6A1-FINAL-CORE-FAIL.log`.

@@ -19,4 +19,7 @@ the looper was held. Existing separate UI tests cover the visible confirm action
 The loss is of callback delivery to the client, including an already queued Binder
 reply; it does not assert that the Service had never sent a reply on Binder.
 This is a business-only SQLite recovery test, unrelated to the held I04 legacy HTTP
-experiment. Device validation is pending the next fixed candidate.
+experiment. Final source `7b063cb4089fe21fdaf82657bcf00408e3f138b1`
+passed this real callback-loss recovery on API26: the recreated Supplier and
+Assistant screens queried the same original receipt, with revision/history one.
+See [sealed core log](final/CORE.log) and [suite manifest](final/SUITE-MANIFEST.json).

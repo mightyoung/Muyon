@@ -16,11 +16,16 @@ def check(manifest, source):
         name = re.search(r"^class (\w+)", text, re.M).group(1)
         expected.update(f"{package}.{name}#{method}" for method in re.findall(r"@Test\s+fun (\w+)\(", text))
     assert expected, "empty required inventory"
+    assert manifest["build_id"].startswith(manifest["source_commit"] + ":"), "source identity differs"
     for key in ("apk", "test_apk"):
         assert hashlib.sha256(Path(manifest[key]).read_bytes()).hexdigest() == manifest[key + "_sha256"], key + " changed"
     actual = []
     runs = []
     for run in manifest["runs"]:
+        assert run["build_id"] == manifest["build_id"], "run build identity differs"
+        assert run["apk_sha256"] == manifest["apk_sha256"], "run APK identity differs"
+        assert run["test_apk_sha256"] == manifest["test_apk_sha256"], "run test APK identity differs"
+        assert hashlib.sha256(Path(run["log"]).read_bytes()).hexdigest() == run["log_sha256"], "run log changed"
         result = evaluate(Path(run["log"]).read_text(), run["adb_exit"], set(run["required"]))
         assert result["gate"] == "PASS", result
         assert set(result["passed"]) == set(run["required"]), "unexpected or unlisted selector result"

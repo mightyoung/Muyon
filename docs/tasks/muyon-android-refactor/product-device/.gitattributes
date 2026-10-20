@@ -1,2 +1,3 @@
 # Raw failed-run evidence retains the instrumentation runner's final newline.
 *.log whitespace=-blank-at-eof
+C00-PRIVATE-PRECONDITION-FAIL.log whitespace=-blank-at-eof,-blank-at-eol

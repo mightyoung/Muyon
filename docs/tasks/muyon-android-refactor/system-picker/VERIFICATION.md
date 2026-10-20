@@ -41,3 +41,11 @@ Directory navigation now uses a bounded state machine: each iteration reads a ne
 The first final PDF run on `4faee9dc` completed the real pick/review/discard/zero-row branch, then failed on the second chooser launch. That chooser reopened in the previous target directory: its stale toolbar satisfied the target condition before the separately queued Downloads navigation applied. The helper now requires the actual Downloads toolbar and closed drawer before entering the target-directory state machine. It does not accept a previous target title as completion of the pending root navigation. Failed log: `/private/tmp/muyon-product-final-picker-pdf.log`; the 16 core methods passed on that same candidate.
 
 On `c00d79c0`, all 16 core methods, picker setup, full PDF cancellation/save/view, ZIP import and directory import passed. The last source-deletion precondition crashed before attachment access: API26 `UiAutomation.executeShellCommand` executes a program directly, so passing `if test ...` caused `Cannot run program "if"` and killed the instrumentation shell. The precondition now runs `/system/bin/ls -1` on the exact owned fixture directory, requires the generated ZIP and directory to be visible (so a read error cannot masquerade as absence), and requires the original PDF basename to be absent. No product permission, private-copy path or renderer assertion was changed. The entire same-candidate suite remains required after this helper correction.
+
+Final source `7b063cb4089fe21fdaf82657bcf00408e3f138b1` completed
+the full same-candidate API26 suite: 16 core methods, picker setup, PDF
+review/discard/zero-row/reselect/confirm, ZIP import, directory import, and opening
+the private attachment in a new Activity after deleting its exact generated source.
+All 21 methods passed without skips. Logs, APK hashes and per-run build identities
+are sealed in [final evidence](../product-device/final/README.md).
+Source deletion does not establish separate URI-permission-revocation coverage.
