@@ -189,3 +189,56 @@ received independent SOURCE APPROVE. Kotlin test compilation plus lint passed
 in 13s, exit 0 (56 tasks, 2 executed). No production timeout, owner or Rust code
 was modified. Next: commit this exact repair and rerun native/APK and all twelve
 selected device cases before real handover.
+
+## Final exact-source no-key verification: PASS
+
+Runtime source: `20a2411e970a256f1b86e8199846a9aeb27410c5`.
+Native report `/private/tmp/muyon-live-local-20a2411e/local-build-report.json`:
+LOCAL_LINK_VERIFIED, source inputs unchanged, both API26 ABIs/ELF/JNA/imports,
+genuine bindings and PR99 retained APIs/shared verifier all pass. Actual Rust
+1.93.1 and NDK28.2; CI producer and API26 runtime remain NOT RUN.
+
+Exact inputs `/private/tmp/muyon-live-local-20a2411e/bridge-inputs`; Gradle
+assembleLiveFixture/assembleLiveFixtureAndroidTest/assembleLiveChat/lintLiveChat
+passed in 51s, exit 0, 116 tasks. Lint: 0 errors, 15 warnings. Existing global
+Gradle journal warnings remain; no shared cache was deleted.
+
+APK SHA256:
+
+- liveChat: `3754dc228a67fae7fa4e3ffb60a3735487657f2a88ec7cddc113c287f61c16d5`
+- liveFixture: `2152997b58c3e8ac8dde978900ae6048b64c3d216a8bf1ad8678c40886680dfd`
+- fixture androidTest: `90083e1c9e0f849a9271bec7da39cc17612e9566cb3e4d8f34136613cf243496`
+
+After completing the independent pre-admission diagnosis, only fixture data was
+cleared for this fresh test run. The same isolated API36 AVD used host GPU/four
+CPUs and retained production liveChat data/budget. All four explicitly selected
+classes ran without skips, all twelve individual status codes 0:
+
+```text
+Time: 56.63
+OK (12 tests)
+INSTRUMENTATION_CODE: -1
+```
+
+This includes the actual Android shell success, wrong-inode refusal 72 and regular
+file refusal 71/zero bytes; strict frame/EOF, cancel/timeout and cleanup; complete
+same-owner two-turn ordinary Send with exact history/source/receipts and third
+budget refusal at exactly two attempts. Source mode is explicitly a socket-free
+synthetic fixture with zero provider requests. Existing failed invocations and
+their diagnoses above remain part of the record.
+
+Source review and independent host dummy tests (10/10) passed. Final architecture
+review of these exact device/APK facts returned APPROVE / CLEAR. This checkpoint
+had zero actual credential transfers and zero real model attempts.
+
+## Authorized remote handover and real attempt
+
+The reviewed helper subsequently loaded the original project's `.env` once via
+stdin/private FIFO, exit 0, `PIPE_SENT; INSTALL_NOT_VERIFIED`. Activity-manager
+metadata then confirmed the credential Activity successfully returned to
+MainActivity. The same owner was read-only verified READY before one real Send.
+
+The first real attempt ended unknown: ledger attempts 1, stopped true, retained
+reservation 1310 micro-CNY, no usage/candidate. The second Send was not run, with
+no retries or reset. Provider delivery/charge remains unknown. Full sanitized
+payload, request identity, ledger and limitations: [LIVE-20261020.md](LIVE-20261020.md).

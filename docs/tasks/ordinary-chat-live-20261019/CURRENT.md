@@ -1,4 +1,35 @@
-# Current delivery — real wiring built; credential handover pending
+# Current delivery — first real attempt unknown; batch stopped
+
+**Authoritative update, 2026-10-20:** executed source
+`20a2411e970a256f1b86e8199846a9aeb27410c5`. Remote `.env` handover succeeded
+through the reviewed stdin/FIFO route and original installer; the Service was
+read-only verified READY. One real ordinary Send/handoff attempt ended unknown:
+0 accepted responses, no provider usage, retained reservation **CNY 0.001310**,
+ledger stopped. Second Send NOT RUN; no retry or reset. Provider delivery and
+actual charge are UNKNOWN. The requested real two-turn acceptance is incomplete.
+Full current result: [LIVE-20261020.md](LIVE-20261020.md).
+Final independent review APPROVE for the factual failure record; it does not
+authorize a retry or establish successful provider acceptance.
+
+Final exact-source verification: native both API26 ABIs/generated bindings pass;
+APK build PASS51s; lint0 errors/15 warnings; host handover tests10/10; API36 selected
+device cases12/12 PASS56.63s without skips. Independent architecture review
+APPROVE / CLEAR before handover. Historical failures are preserved in
+[REMOTE-CREDENTIAL-HANDOVER.md](REMOTE-CREDENTIAL-HANDOVER.md).
+Verified build inputs now `/private/tmp/muyon-live-local-20a2411e/bridge-inputs`.
+Reusable remote helper:
+`experiments/redesign/android-rust-bridge-lab/checks/handoff_live_chat_credential.py`
+with `--env /Users/muyi/Downloads/dev/muspace/.env --single-key-token`.
+Do not invoke it again or clear/reset the stopped liveChat package/budget.
+
+The remainder below is the **historical pre-handover checkpoint**, retained to
+preserve earlier evidence. Its 0-request/manual-only/source6a statements are
+superseded by the current result above and LIVE evidence. API26 runtime, CI and
+the user-reported PR99 failure remain unresolved. No PR/merge/deploy/HOLD change.
+
+---
+
+## Historical pre-handover checkpoint
 
 Remote-operation update: the user explicitly authorized loading the original
 project `.env` because manual emulator entry is unavailable. The reviewed temporary
