@@ -42,11 +42,17 @@ class LocalHandoffTests(unittest.TestCase):
     def test_fixed_fd_guard_never_places_key_in_command(self):
         script = handoff.write_command(b'1:2:10000:600')
         self.assertIn('toybox timeout 5', script)
-        self.assertLess(script.index('test -p /proc/self/fd/3'), script.index('cat >&3'))
+        self.assertLess(script.index('test -p /proc/$$/fd/3'), script.index('cat >&3'))
+        self.assertIn('stat -Lc %d:%i:%u:%a /proc/$$/fd/3', script)
+        self.assertNotIn('/proc/self/', script)
         self.assertLess(script.index('stat -Lc'), script.index('cat >&3'))
         command = handoff.adb_command(script)
         self.assertIn(handoff.PACKAGE, command)
         self.assertIn('emulator-5554', command)
+        self.assertEqual(['shell', '-T', 'run-as'], command[3:6])
+        self.assertNotIn('exec-in', command)
+        self.assertNotIn('exec-out', command)
+        self.assertEqual(['shell', '-T', 'run-as'], handoff.adb_command(handoff.identity_command())[3:6])
         self.assertNotIn(DUMMY.decode(), ' '.join(command))
         for identity in (b'1:2:3:666', b'1:2:3:600;echo unexpected'):
             with self.assertRaises(handoff.Refused):
@@ -111,6 +117,18 @@ class LocalHandoffTests(unittest.TestCase):
             self.assertEqual(1, start.call_count)
             child.kill.assert_called_once()
             self.assertEqual(2, child.communicate.call_count)
+
+    def test_remote_guard_exit71_and_exit72_are_refused_without_retry(self):
+        for code in (71, 72):
+            child = mock.Mock()
+            child.communicate.return_value = (b'', b'')
+            child.returncode = code
+            child.poll.return_value = code
+            with mock.patch.object(handoff.subprocess, 'Popen', return_value=child) as start:
+                with self.assertRaises(handoff.Refused):
+                    handoff.invoke(['dummy-command'], bytearray(DUMMY))
+                self.assertEqual(1, start.call_count)
+                child.kill.assert_not_called()
 
 
 if __name__ == '__main__':

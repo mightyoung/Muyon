@@ -82,3 +82,110 @@ lintLiveChat invocation passed in 35s, Gradle exit 0 (56 tasks). Independent
 source review approved the repaired credential path and independently ran all
 9 dummy host unit tests successfully. Exact-source native/APK packaging and
 the selected device combination are the next gate, before any actual key load.
+
+## Exact packaged source
+
+Source `9613e29b0904f4ec516fe6450d4f83b564a5ae7b`, clean during build. Native
+report `/private/tmp/muyon-live-local-9613e29b/local-build-report.json` is
+LOCAL_LINK_VERIFIED, both API26 ABIs/ELF/imports/JNA/genuine bindings/PR99 APIs and
+shared input verification pass, source inputs unchanged. Actual Rust 1.93.1;
+CI producer and API26 runtime remain unverified.
+
+Exact-input Gradle assembleLiveFixture, assembleLiveFixtureAndroidTest,
+assembleLiveChat and lintLiveChat: BUILD SUCCESSFUL in 58s, exit 0, 116 tasks.
+Lint has 0 errors, 15 warnings. Verified bridge inputs:
+`/private/tmp/muyon-live-local-9613e29b/bridge-inputs`.
+
+APK SHA256:
+
+- liveChat: `cfc337273cc0e81e18651cd6850a2de72c140645c7662573ccbcd52fdf084392`
+- liveFixture: `d828c2e1e8aa370548591cd7c409293bd45a78bcbfa2fcfb7e18b9fab269a6cb`
+- fixture androidTest: `450d92722050cb5b483d6190933f43adc341f01e7e142f17338e7866b5b53ada`
+
+Permission inspection again confirms INTERNET only on liveChat, absent from
+fixture and test APK. The isolated emulator had exited between turns and was
+restarted using the same AVD/userdata, no snapshot or wipe. First fixture-clear
+attempt failed because the device was offline; after boot, fixture-only clear
+succeeded. No liveChat app data or budget was cleared or uninstalled.
+
+The four explicitly selected test classes (PipeTest 6, LivePolicyTest 4,
+LiveOwnerTest 1, LiveServiceLoopTest 1) are running on isolated API36. No I04,
+containing suite or search test is included. Real key transfer/model requests
+remain 0 until the complete runner evidence and final review are available.
+
+The first exact-9613 device invocation did NOT run the twelve cases: runner
+returned `shortMsg=Process crashed.` / `INSTRUMENTATION_CODE: 0` before the first
+case status. Current-boot events show fixture PID3115 failed to complete startup,
+was ANR-killed, alongside startup ANRs for GMS, media, input method and Play Store;
+Launcher also crashed with a SurfaceControl NullPointerException. This is a
+failed/unverified device invocation, not a passing suite or a confirmed source
+defect. Current emulator used software GPU and two CPUs. Normal emulator shutdown
+and restart with host GPU/four CPUs is the bounded recovery, preserving userdata
+and budget; no test assertion or deadline is relaxed. No actual key or API request.
+
+The host-GPU/four-CPU rerun successfully started the selected cases. Five FIFO
+cases passed, but actualAndroidShellFdGuardAcceptsFifoAndRefusesReplacedRegularFile
+failed at line 123: expected exit 0, got 72 (identity check refused before copying
+stdin). This functional failure remains a handover blocker; the identity guard
+must not be removed or weakened. Dummy-only diagnosis will compare actual Android
+stat identities, including the shell versus child-process `/proc/.../fd/3` scope.
+No real key was transferred and no model request occurred.
+
+Complete runner result: `Time: 224.133`, `Tests run: 12, Failures: 2`.
+The second failure is OrdinaryChatLiveServiceLoopTest line 64: first ordinary
+Send expected completed but returned unknown. Policy 4, owner fault test and
+five other FIFO cases passed. This is not supplier evidence and no real batch
+was consumed. Independent read-only diagnosis is checking the actual fixture
+reason; no source deadline or assertion is relaxed, no request is re-sent.
+
+Dummy Android shell probe confirmed the FD guard cause: pathname metadata was
+`65077:362200:10212:600`; shell builtin test-p saw a FIFO, external `stat` of
+`/proc/self/fd/3` reported ENOENT, while `stat /proc/$$/fd/3` exactly matched the
+original identity. The writer shell owns fd3; the stat child does not inherit it.
+The repair must pin `/proc/$$/fd/3` and keep every identity comparison. A separate
+dummy probe also found adb37 exec-in does not return stdout, so it cannot read
+readiness metadata. The fixed helper will use explicit no-PTY shell protocol
+with stdin/stdout/exit-status, verified with dummy success and rejection cases.
+
+Independent diagnosis of the ordinary unknown: request
+`chat_ba9cf21b500348879ea75e866ea0cc79` has empty run/epoch/receipt identity in
+fixture preferences; reservations/admissions/chat_attempts are all zero, no
+candidate exists. Agent Service started at 09:04:23.253, configured native loader
+09:04:39.425, loaded JNA 09:04:45.078, and still verified its controller closure
+09:05:12.880; UI reported 2455 skipped frames. The unbound-chat window remains
+5 seconds in AgentServiceClient. The initialization window exceeded it. Logs do
+not identify whether the timer or a handshake callback supplied the null reply,
+so do not claim the exact callback branch. No fixture ANR or native exception was
+found in this later boot. Default synthetic=true before any source receipt is
+not evidence that a synthetic provider was invoked: there was no run or admission.
+
+The minimal test repair first observes existing application.agents presentation
+and read-only Service readiness/visibility, then performs the first explicit Send.
+It does not warm up by sending, extend the production timeout, retry the unknown,
+or change owner/Rust/source authorization. Failure assertions will include the
+UI reason. The current fixture data remains preserved until diagnosis completes;
+only a subsequent fresh fixture run may clear its synthetic data. Real liveChat
+data/budget remain untouched.
+
+The existing read-only DTO has no provider-source field. Do not invent one or
+add a public API for this test. Provider source=false is verified by the original
+assertion on the first successful ordinary Send envelope; no prewarm Send is used.
+Read-only refresh has no chatRpc five-second timer. INITIALIZING without a pending
+chat does not retry its handshake automatically, so a bounded test-only loop may
+explicitly refresh while observation is idle until CONNECTED, READY, epoch known
+and Activity visible. The public visible flag is not the private visibility ACK;
+the original Send authorization still checks that ACK. No test assertion claims
+it observed an unavailable private field or changes the production gate.
+
+The corrected host helper retains all directory/UID/mode/path guards and uses
+no-PTY `adb shell -T` consistently. Dummy Android probes returned success 0 with
+exact dummy bytes, wrong identity 72 with no delivered bytes, and missing-path
+regular replacement 71 with a zero-byte file; no stdout/stderr echo. Host dummy
+unit tests now pass 10/10, independently reviewed and run. These are not real key
+or provider results.
+
+The final helper/PipeTest identity repair and bounded read-only bootstrap change
+received independent SOURCE APPROVE. Kotlin test compilation plus lint passed
+in 13s, exit 0 (56 tasks, 2 executed). No production timeout, owner or Rust code
+was modified. Next: commit this exact repair and rerun native/APK and all twelve
+selected device cases before real handover.

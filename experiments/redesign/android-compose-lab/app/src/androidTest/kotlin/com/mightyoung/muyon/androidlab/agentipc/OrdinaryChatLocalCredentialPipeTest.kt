@@ -101,7 +101,7 @@ class OrdinaryChatLocalCredentialPipeTest {
 
     private fun fdGuard(path:File,identity:String):String {
         check(path.absolutePath.matches(Regex("[A-Za-z0-9_./-]+")))
-        return "exec 3> ${path.absolutePath}; test -p /proc/self/fd/3 || exit 71; test \"\$(stat -Lc %d:%i:%u:%a /proc/self/fd/3)\" = $identity || exit 72; cat >&3"
+        return "exec 3> ${path.absolutePath}; test -p /proc/\$\$/fd/3 || exit 71; test \"\$(stat -Lc %d:%i:%u:%a /proc/\$\$/fd/3)\" = $identity || exit 72; cat >&3"
     }
     private fun sendGuarded(script:String):Int {
         val process=ProcessBuilder("/system/bin/toybox","timeout","5","/system/bin/sh","-c",script).start()
@@ -111,15 +111,16 @@ class OrdinaryChatLocalCredentialPipeTest {
         }finally{process.destroyForcibly()}
     }
     @Test fun actualAndroidShellFdGuardAcceptsFifoAndRefusesReplacedRegularFile() {
-        for(replace in listOf(false,true)){
+        for(mode in listOf("fifo","wrong_identity","regular_replacement")){
             val root=root();val ready=CountDownLatch(1);val done=CountDownLatch(1);val installed=AtomicInteger()
             val pipe=OrdinaryChatLocalCredentialPipe(root,{assertArrayEquals(dummy.toCharArray(),it);installed.incrementAndGet()},{assertTrue(it);done.countDown()},{ready.countDown()},5000)
             try{
                 pipe.start();assertTrue(ready.await(3,TimeUnit.SECONDS));val stat=Os.lstat(pipe.fifo.absolutePath)
-                val identity="${stat.st_dev}:${stat.st_ino}:${stat.st_uid}:600"
-                if(replace)Os.remove(pipe.fifo.absolutePath)
+                val identity="${stat.st_dev}:${if(mode=="wrong_identity")stat.st_ino+1 else stat.st_ino}:${stat.st_uid}:600"
+                if(mode=="regular_replacement")Os.remove(pipe.fifo.absolutePath)
                 val exit=sendGuarded(fdGuard(pipe.fifo,identity))
-                if(replace){assertEquals(71,exit);assertTrue(pipe.fifo.isFile);assertEquals(0L,pipe.fifo.length());assertEquals(0,installed.get())}
+                if(mode=="regular_replacement"){assertEquals(71,exit);assertTrue(pipe.fifo.isFile);assertEquals(0L,pipe.fifo.length());assertEquals(0,installed.get())}
+                else if(mode=="wrong_identity"){assertEquals(72,exit);assertEquals(OsConstants.S_IFIFO,Os.lstat(pipe.fifo.absolutePath).st_mode and OsConstants.S_IFMT);assertEquals(0,installed.get())}
                 else{assertEquals(0,exit);assertTrue(done.await(3,TimeUnit.SECONDS));assertEquals(1,installed.get())}
             }finally{stop(pipe);root.deleteRecursively()}
         }

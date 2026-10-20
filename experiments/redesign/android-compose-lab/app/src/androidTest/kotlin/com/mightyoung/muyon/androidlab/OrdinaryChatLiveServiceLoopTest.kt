@@ -18,6 +18,28 @@ class OrdinaryChatLiveServiceLoopTest {
     @Test fun ordinarySendUsesSameOwnerLiveProtocolHistoryAndSettlement() {
         val app=compose.activity.application as MuyonLabApplication
         compose.onNodeWithTag("new-conversation").performClick()
+        // Cold JNA/native bootstrap is read-only here. Do not spend a Send or turn
+        // a five-second pre-admission timeout into an UNKNOWN request to retry.
+        compose.runOnIdle{app.agents.refresh()}
+        compose.waitUntil(90000){
+            var connected=false
+            compose.runOnIdle{
+                val state=app.agents.presentation
+                val snapshot=state.snapshot
+                connected=state.transport==UiAgentTransport.CONNECTED && snapshot?.phase==UiAgentServicePhase.READY &&
+                    snapshot.meta.serviceEpoch.isNotBlank() && state.visible && !state.observationBusy
+                if(!connected && !state.observationBusy)app.agents.refresh()
+            }
+            connected
+        }
+        compose.runOnIdle{
+            val state=app.agents.presentation
+            assertEquals(UiAgentTransport.CONNECTED,state.transport)
+            val current=checkNotNull(state.snapshot)
+            assertEquals(UiAgentServicePhase.READY,current.phase);assertTrue(current.meta.serviceEpoch.isNotBlank())
+            assertTrue(state.visible);assertFalse(state.observationBusy)
+            assertTrue("read-only bootstrap must not create a chat request",app.chats.snapshot.conversations.isEmpty())
+        }
         fun send(text:String):ChatReadConversation {
             var previous:ChatReadConversation?=null
             compose.runOnIdle{previous=app.chats.snapshot.conversations.values.singleOrNull()}
@@ -61,9 +83,9 @@ class OrdinaryChatLiveServiceLoopTest {
             return result
         }
         val first=send(OrdinaryChatProductionConfig.FIRST)
-        assertEquals("completed",first.status);assertEquals("CANARY-4827",first.answer);assertFalse(first.synthetic);assertTrue(first.providerReceipt)
+        assertEquals("first reason=${first.reason}","completed",first.status);assertEquals("CANARY-4827",first.answer);assertFalse(first.synthetic);assertTrue(first.providerReceipt)
         val second=send(OrdinaryChatProductionConfig.SECOND)
-        assertEquals("completed",second.status);assertEquals("CANARY-4827",second.answer);assertFalse(second.synthetic);assertTrue(second.providerReceipt)
+        assertEquals("second reason=${second.reason}","completed",second.status);assertEquals("CANARY-4827",second.answer);assertFalse(second.synthetic);assertTrue(second.providerReceipt)
         assertNotEquals(first.requestId,second.requestId);assertNotEquals(first.originalReceiptIdentity,second.originalReceiptIdentity)
         val root=File(compose.activity.filesDir,"agent-admission-root")
         val database=File(root,"muyon-ordinary-admission-v2.sqlite")

@@ -75,8 +75,9 @@ def _parse_key(source, single_key_token=False):
 
 
 def adb_command(remote):
-    # adb's remote shell must pass the whole fixed script as ONE sh -c argument.
-    return [str(ADB), '-s', SERIAL, 'exec-in', 'run-as', PACKAGE, 'sh', '-c', shlex.quote(remote)]
+    # No PTY: no input echo. shell-v2 preserves stdout/stderr AND the remote exit code.
+    # Raw exec-in discards stdout and cannot report a failed fd guard reliably.
+    return [str(ADB), '-s', SERIAL, 'shell', '-T', 'run-as', PACKAGE, 'sh', '-c', shlex.quote(remote)]
 
 
 def identity_command():
@@ -94,8 +95,9 @@ def write_command(identity):
     expected = identity.decode('ascii')
     # Never cat to the pathname. A missing/replaced path can create an EMPTY file,
     # but no key bytes flow until this exact opened fd is a FIFO with the pinned identity.
-    inner = (f'exec 3> {FIFO}; test -p /proc/self/fd/3 || exit 71; '
-             f'test "$(stat -Lc %d:%i:%u:%a /proc/self/fd/3)" = {expected} || exit 72; cat >&3')
+    # External stat does not inherit the shell's fd3. Pin the process that owns it.
+    inner = (f'exec 3> {FIFO}; test -p /proc/$$/fd/3 || exit 71; '
+             f'test "$(stat -Lc %d:%i:%u:%a /proc/$$/fd/3)" = {expected} || exit 72; cat >&3')
     return 'toybox timeout 5 sh -c ' + shlex.quote(inner)
 
 
