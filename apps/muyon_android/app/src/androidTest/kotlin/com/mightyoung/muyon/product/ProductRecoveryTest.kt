@@ -33,6 +33,23 @@ class ProductRecoveryTest {
         return requireNotNull(response)
     }
     private fun close() = instrumentation.runOnMainSync { client.close() }
+    @Test fun rapidCloseAndRebindWaitsForPriorOwnersWithoutKillingTheProcess() {
+        val epochs = mutableSetOf<String>()
+        val processes = mutableSetOf<Int>()
+        repeat(8) {
+            connect()
+            try {
+                // No retry: Binder readiness followed immediately by a real read.
+                val reply = call("health")
+                assertEquals(reply.toString(), "ok", reply.getString("status"))
+                val health = reply.getJSONObject("data")
+                epochs.add(health.getString("epoch"))
+                processes.add(health.getInt("service_pid"))
+            } finally { close() }
+        }
+        assertTrue("the test must cross an actual owner generation", epochs.size > 1)
+        assertEquals("a process restart must not mask a stale native owner", 1, processes.size)
+    }
     @Test fun closingWithAllRequestSlotsBusyStillRevokesTheLiveBinderLease() {
         connect()
         var other: ProductClient? = null

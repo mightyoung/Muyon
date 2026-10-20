@@ -58,6 +58,20 @@ class SystemPickerProductTest {
     @Test fun pdfSystemPickerManualReviewAndPrivateAttachment() {
         openResearch()
         val project = createProject("Picker PDF")
+        // A real picked PDF may be reviewed and discarded without publishing.
+        val cancelledTitle = "Discarded picker PDF ${UUID.randomUUID()}"
+        clickTag("research-add-pdf")
+        chooseDocument("picker-paper.pdf")
+        waitTag("research-field-title")
+        compose.onNodeWithTag("research-field-title").performScrollTo().performTextInput(cancelledTitle)
+        clickTag("research-paper-preview")
+        waitTag("research-preview")
+        assertNoPublishedPaper(cancelledTitle)
+        compose.onNodeWithText("返回科研草稿").performClick()
+        compose.onNodeWithText("放弃科研草稿").performScrollTo().performClick()
+        compose.onAllNodesWithText("放弃科研草稿").onLast().performClick()
+        waitTag("research-add-pdf")
+        assertNoPublishedPaper(cancelledTitle)
         clickTag("research-add-pdf")
         chooseDocument("picker-paper.pdf")
         waitTag("research-field-title")
@@ -103,7 +117,7 @@ class SystemPickerProductTest {
         createProject("Picker directory")
         compose.onNodeWithText("导入科研工作台目录").performScrollTo().performClick()
         enterFixtureDirectory()
-        systemClick(setOf("picker-workspace"))
+        openPickerDirectory("MuyonRefactorFixtures", "picker-workspace")
         systemClick(setOf("SELECT", "Select", "选择", "使用此文件夹"))
         // API/provider versions may show a separate directory-access grant dialog.
         val grantDeadline = SystemClock.uptimeMillis() + 2_000
@@ -256,10 +270,39 @@ class SystemPickerProductTest {
         // Open navigation roots so a prior provider/location cannot select an unrelated file.
         systemClick(setOf("Show roots", "显示根目录", "显示位置", "Open navigation drawer"), byDescription = true)
         systemClick(setOf("Downloads", "下载", "下载内容"))
-        systemClick(setOf("MuyonRefactorFixtures"))
-        waitSystem("generated fixture directory is actually open") { root ->
-            hasToolbarTitle(root, "MuyonRefactorFixtures")
+        openPickerDirectory("Downloads", "MuyonRefactorFixtures")
+    }
+
+    private fun openPickerDirectory(parentTitle: String, directory: String) {
+        waitSystem("picker directory $directory is actually open") { root ->
+            // Re-read actual navigation state before every attempt; never tap after arrival.
+            if (hasToolbarTitle(root, directory)) return@waitSystem true
+            if (!hasToolbarTitle(root, parentTitle)) return@waitSystem false
+            if (hasVisibleResource(root, "com.android.documentsui:id/roots_list")) return@waitSystem false
+            val list = findNode(root) { it.viewIdResourceName == "com.android.documentsui:id/dir_list" }
+                ?: return@waitSystem false
+            val folder = findNode(list) {
+                it.packageName?.toString() == "com.android.documentsui" &&
+                    it.viewIdResourceName == "android:id/title" && it.text?.toString() == directory &&
+                    it.isVisibleToUser && it.isEnabled
+            } ?: return@waitSystem false
+            // A drawer transition may consume an earlier tap. Only an unchanged parent
+            // and its still-visible exact child permit another bounded navigation attempt.
+            if (touchMatchedNode(folder)) automation.waitForIdle(250, 5_000)
+            automation.rootInActiveWindow?.let { hasToolbarTitle(it, directory) } == true
         }
+    }
+
+    private fun hasVisibleResource(root: AccessibilityNodeInfo, id: String): Boolean =
+        findNode(root) { it.viewIdResourceName == id && it.isVisibleToUser } != null
+
+    private fun findNode(root: AccessibilityNodeInfo, predicate: (AccessibilityNodeInfo) -> Boolean): AccessibilityNodeInfo? {
+        if (predicate(root)) return root
+        for (index in 0 until root.childCount) {
+            val child = root.getChild(index) ?: continue
+            findNode(child, predicate)?.let { return it }
+        }
+        return null
     }
 
     private fun systemClick(names: Set<String>, byDescription: Boolean = false) {

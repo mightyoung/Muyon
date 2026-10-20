@@ -16,6 +16,12 @@ import java.util.UUID
 
 /** One private process owns the native business connection. No fixture fallback. */
 class ProductService : Service() {
+    companion object {
+        private val retiringOwners = java.util.concurrent.ConcurrentHashMap<String, java.util.concurrent.CountDownLatch>()
+    }
+    // Freeze predecessors on the main lifecycle thread. Waiting on later owners
+    // could form a cycle during rapid A -> B -> C Service recreation.
+    private var predecessorDrains: List<java.util.concurrent.CountDownLatch> = emptyList()
     private lateinit var worker: HandlerThread
     private lateinit var handler: Handler
     private lateinit var messenger: Messenger
@@ -32,6 +38,7 @@ class ProductService : Service() {
 
     override fun onCreate() {
         super.onCreate()
+        predecessorDrains = retiringOwners.values.toList()
         worker = HandlerThread("MuyonProductCore").also { it.start() }
         handler = object : Handler(worker.looper) {
             override fun handleMessage(message: Message) { receive(message) }
@@ -97,6 +104,11 @@ class ProductService : Service() {
     @Synchronized private fun open(initialize: Boolean): ProductCore {
         check(!stopped)
         core?.let { return it }
+        val deadline = SystemClock.elapsedRealtime() + 10_000
+        predecessorDrains.forEach { drain ->
+            check(drain.await((deadline - SystemClock.elapsedRealtime()).coerceAtLeast(0), java.util.concurrent.TimeUnit.MILLISECONDS))
+        }
+        check(!stopped)
         val root = File(filesDir, "muyon-product-v2").absolutePath
         return ProductCore.open(root, workspace, epoch, initialize).also { core = it }
     }
@@ -263,8 +275,10 @@ class ProductService : Service() {
         } catch (_: RemoteException) { /* The original intent remains in Rust, never resend. */ }
     }
     override fun onDestroy() {
+        stopped = true
+        val drained = java.util.concurrent.CountDownLatch(1)
+        retiringOwners[epoch] = drained
         handler.post {
-            stopped = true
             deaths.forEach { (binder, recipient) -> runCatching { binder.unlinkToDeath(recipient, 0) } }; deaths.clear()
             clients.clear(); planOwners.clear(); toolPlans.clear()
             readerOwners.keys.toList().forEach { runCatching { core?.closeAttachment(it) } }; readerOwners.clear()
@@ -272,6 +286,8 @@ class ProductService : Service() {
             fun drainAndClose() {
                 if (chat.awaitDrain(1000)) {
                     synchronized(this@ProductService) { core?.close(); core = null }
+                    drained.countDown()
+                    retiringOwners.remove(epoch, drained)
                     worker.quitSafely()
                 } else handler.postDelayed({ drainAndClose() }, 1000)
             }

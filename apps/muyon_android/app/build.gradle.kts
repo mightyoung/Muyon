@@ -22,6 +22,7 @@ android {
         buildConfigField("String", "MUYON_SOURCE", "\"${providers.gradleProperty("muyonSource").orNull.orEmpty()}\"")
     }
     buildFeatures { compose = true; buildConfig = true; aidl = true }
+    sourceSets.getByName("androidTest").assets.srcDir(rootProject.file("../../docs/contracts/muyon-android/fixtures"))
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
