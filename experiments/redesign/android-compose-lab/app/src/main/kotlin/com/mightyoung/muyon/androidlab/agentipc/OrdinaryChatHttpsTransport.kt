@@ -170,6 +170,7 @@ internal class OrdinaryChatHttpsTransport {
                     val value = octet()
                     check(value >= 0)
                     if (value == 13) { check(octet() == 10); return bytes.toString("US-ASCII") }
+                    // Deliberately accept only ASCII field values plus HTAB; obs-text is unsupported.
                     check(value == 9 || value in 32..126)
                     check(bytes.size() < limit)
                     bytes.write(value)
@@ -180,6 +181,12 @@ internal class OrdinaryChatHttpsTransport {
                 headerBytes += value.length + 2
                 check(headerBytes <= 16_384)
                 return value
+            }
+            fun fieldName(value: String, colon: Int): String {
+                check(colon > 0)
+                val name = value.substring(0, colon).lowercase(java.util.Locale.ROOT)
+                check(name.all { it in 'a'..'z' || it in '0'..'9' || it in "!#$%&'*+-.^_`|~" })
+                return name
             }
             val status = headerLine()
             // Keep only the numeric code; never expose the untrusted reason phrase.
@@ -195,16 +202,19 @@ internal class OrdinaryChatHttpsTransport {
                 val value = headerLine()
                 if (value.isEmpty()) break
                 val colon = value.indexOf(':')
-                check(colon > 0)
-                val name = value.substring(0, colon).lowercase(java.util.Locale.ROOT)
-                check(name.all { it in 'a'..'z' || it in '0'..'9' || it == '-' })
-                check(!headers.containsKey(name))
-                headers[name] = value.substring(colon + 1).trim()
+                val name = fieldName(value, colon)
+                if (name in setOf("content-length", "transfer-encoding", "content-encoding")) {
+                    check(!headers.containsKey(name))
+                    headers[name] = value.substring(colon + 1).trim(' ', '\t')
+                }
+                // Unused fields are discarded independently, never combined (including Set-Cookie).
             }
             val length = headers["content-length"]
             val encoding = headers["transfer-encoding"]
             check(length == null || encoding == null)
             check(encoding == null || encoding.equals("chunked", ignoreCase = true))
+            val contentEncoding = headers["content-encoding"]
+            check(contentEncoding == null || contentEncoding.equals("identity", ignoreCase = true))
             val contentLength = length?.let {
                 check(it.isNotEmpty() && it.all { char -> char in '0'..'9' })
                 it.toLong().also { count -> check(count <= 65_536) }.toInt()
@@ -235,10 +245,8 @@ internal class OrdinaryChatHttpsTransport {
                             check(framingBytes <= 16_384)
                             if (trailer.isEmpty()) break
                             val colon = trailer.indexOf(':')
-                            check(colon > 0)
-                            val name = trailer.substring(0, colon).lowercase(java.util.Locale.ROOT)
-                            check(name.all { it in 'a'..'z' || it in '0'..'9' || it == '-' })
-                            check(name !in setOf("content-length", "transfer-encoding", "host", "authorization"))
+                            val name = fieldName(trailer, colon)
+                            check(name !in setOf("content-length", "transfer-encoding", "content-encoding", "host", "authorization"))
                         }
                         break
                     }

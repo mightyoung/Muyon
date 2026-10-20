@@ -1,4 +1,37 @@
-# Current delivery — first real attempt unknown; batch stopped
+# Current delivery — two unknown handoffs; both batches stopped
+
+## Authoritative result after explicit followup authorization
+
+Real runtime source: `6f1fcb11e63f9ef04c51e2e8c59b4425eaec5f02`.
+The user authorized up to two additional requests with the old reservation held
+and cumulative cap CNY1. Only the first additional ordinary Send was attempted:
+HTTP/1.1 200 was read, followed by HTTP_HEADERS/unknown. The batch stopped;
+the dependent second request was not sent. Cumulative handoffs **2**, accepted
+answers **0**, usage/actual charges **UNKNOWN**, retained reservations
+**CNY0.002620**. The old ledger and five native files were independently verified
+unchanged. No retry/reset or further handover followed the unknown.
+
+Same owner, Rust Agent and ordinary UI path were retained. Offline exact-runtime
+verification passed legacy device13/13 and followup15/15, HTTPS68, budget19 groups,
+reference4 and Rust live9/ordinary15. A prior followup fixture failed14/15;
+the test-only IME/local-identity synchronization repair and corrected passes are
+preserved in [AUTHORIZED-FOLLOWUP-RESULT.md](AUTHORIZED-FOLLOWUP-RESULT.md),
+along with exact APK hashes, all source SHAs and actual failure evidence.
+Independent architecture/source/device preflight was APPROVE/CLEAR; the later
+failure audit confirmed the unknown and retained state. Neither is provider
+success. API26 runtime, CI producer/Rust1.99 and PR99 Settings→Send remain open;
+I04 and containing suites were not run. No PR, merge, deployment or HOLD change.
+
+An offline parser repair is described in [HTTP-HEADER-FIX.md](HTTP-HEADER-FIX.md).
+It is not deployed to the stopped real app and cannot establish this failure's
+exact cause. Full two-turn acceptance, actual usage and billing evidence remain
+blocked by the stopped unknown. The reusable build/helper entries below remain
+available for a separately reviewed and explicitly authorized future campaign;
+do not invoke them against either stopped batch.
+
+---
+
+## Historical diagnostic and first-attempt checkpoints
 
 **Offline follow-up:** diagnostic source
 `ca29d3a86d595be93dd25e4b33112cfa57a38b04`, independent SOURCE APPROVE;

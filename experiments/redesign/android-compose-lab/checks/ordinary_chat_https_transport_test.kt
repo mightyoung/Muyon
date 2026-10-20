@@ -157,6 +157,40 @@ fun main() {
         OrdinaryChatHttpsTransport().exchange(byteArrayOf(1), outerPoisoned, { false }, { it(); true })
     }
     check(outerPoisoned.all { it == '\u0000' }); checks++
+    check(checks == 68) // Keep all original protocol, bounds, redaction and stage assertions.
+    fun headers(value: String) = "HTTP/1.1 200 OK\r\n$value\r\n{}"
+    // Independent non-framing fields are discarded, including Set-Cookie (never combined).
+    check(run(headers("Set-Cookie: one=a\r\nSet-Cookie: two=b\r\nVary: Accept\r\nVary: Origin\r\nContent-Length: 2\r\n")).first == "{}"); checks++
+    check(run(headers("sEt-CoOkIe: one=a\r\nSET-COOKIE: two=b\r\nvArY: Accept\r\nVARY: Origin\r\nContent-Length: 2\r\n")).first == "{}"); checks++
+    check(run(headers("X_Underscore: yes\r\n!#$%&'*+-.^_`|~: tokens\r\nContent-Length: 2\r\n")).first == "{}"); checks++
+    check(run(headers("Content-Length:\t 2 \t\r\nContent-Encoding: \tIdEnTiTy\t \r\n")).first == "{}"); checks++
+    check(run("HTTP/1.1 200 OK\r\nTransfer-Encoding:\tchunked \t\r\n\r\n2\r\n{}\r\n0\r\nX_Underscore: yes\r\n!#$%&'*+-.^_`|~: tokens\r\nVary: A\r\nVary: B\r\n\r\n").first == "{}"); checks++
+    for (name in listOf("Bad Name", "Bad\tName", "Bad(Name)", "Bad/Name", "Bad@Name", "Bad[Name]", "", "Content-Length ")) {
+        failureAt(OrdinaryChatFailureStage.HTTP_HEADERS, 200) { run(headers("$name: 2\r\nContent-Length: 2\r\n")) }
+    }
+    for (fields in listOf(
+        "Content-Length: 2\r\ncontent-length: 2\r\n",
+        "Transfer-Encoding: chunked\r\nTRANSFER-ENCODING: chunked\r\n",
+        "Content-Length: 2\r\nTransfer-Encoding: chunked\r\n",
+        "Transfer-Encoding: chunked\r\nContent-Length: 2\r\n",
+        "Content-Length: 2, 2\r\n",
+        "Content-Length: 2\r\nContent-Encoding: gzip\r\n",
+        "Content-Length: 2\r\nContent-Encoding: br\r\n",
+        "Content-Length: 2\r\nContent-Encoding: identity, gzip\r\n",
+        "Content-Length: 2\r\nContent-Encoding: \r\n",
+        "Content-Length: 2\r\nContent-Encoding: identity\r\ncontent-encoding: identity\r\n",
+        "Content-Length: 2\r\nX-Value: forbidden\u000bwhitespace\r\n",
+        "Content-Length: 2\r\nX-Value: non-ASCII-\u0080\r\n",
+        "Content-Length: 2\r\nX-Huge: " + "a".repeat(16_384) + "\r\n",
+    )) {
+        failureAt(OrdinaryChatFailureStage.HTTP_HEADERS, 200) { run(headers(fields)) }
+    }
+    for (trailer in listOf("Bad Name: x", "Bad/Name: x", "CONTENT-LENGTH: 2", "Transfer-Encoding: chunked", "Host: elsewhere", "Authorization: secret",
+        "Content-Encoding: identity", "cOnTeNt-EnCoDiNg: gzip")) {
+        failureAt(OrdinaryChatFailureStage.HTTP_BODY, 200) {
+            run("HTTP/1.1 200 OK\r\nTransfer-Encoding: chunked\r\n\r\n2\r\n{}\r\n0\r\n$trailer\r\n\r\n")
+        }
+    }
     credential.fill('\u0000')
     println("HTTPS offline protocol checks passed: $checks; no network or real credential used")
 }
