@@ -27,7 +27,7 @@ fun ChatScreen(
     memberNames: List<String> = emptyList(),
 ) {
     var configured by remember(client) { mutableStateOf(false) }
-    key(conversationKey) {
+    key(conversationKey, projectId) {
         ChatConversation(client, projectId, conversationKey, displayName, memberNames, configured) { configured = it }
     }
 }
@@ -78,21 +78,44 @@ private fun ChatConversation(client: ProductClient, projectId: String?, conversa
     var draft by remember { mutableStateOf("") }
     var source by remember { mutableStateOf("") }
     val currentProject by rememberUpdatedState(projectId)
+    val currentReview by rememberUpdatedState(review)
+    val callbacks = remember(client) { ChatCallbackScope() }
+    callbacks.select(conversation, projectId)
+    DisposableEffect(callbacks) { onDispose {
+        callbacks.close()
+        currentReview?.optString("request_id")?.takeIf { it.isNotBlank() }?.let {
+            client.call("chat_cancel", JSONObject().put("request_id", it)) {}
+        }
+    } }
+    fun scopedCall(method: String, payload: JSONObject = JSONObject(), callback: (JSONObject) -> Unit) {
+        val token = callbacks.capture()
+        client.call(method, payload) { reply ->
+            if (callbacks.accepts(token)) callback(reply)
+            else if (method == "chat_prepare" || (method == "chat_tool" && payload.optString("action") == "followup")) {
+                // A prepared request is not sent. Revoke a late preview rather
+                // than making it available for confirmation in another scope.
+                reply.optJSONObject("data")?.optString("request_id")?.takeIf { it.isNotBlank() }?.let {
+                    client.call("chat_cancel", JSONObject().put("request_id", it)) {}
+                }
+            }
+        }
+    }
     val originalOriginLabel = if (originalConversationKey.isNullOrBlank() || originalDisplayName.isNullOrBlank())
         "历史原请求（身份未记录）" else "原请求 · $originalDisplayName · 会话 $originalConversationKey"
 
     fun refreshStatus() {
-        client.call("agent_availability") { reply ->
+        scopedCall("agent_availability") { reply ->
             if (reply.optString("status") == "ok") {
                 availability = reply.optJSONObject("data")
+                onConfigured(availability?.optBoolean("configured", false) == true)
                 error = ""
-            } else error = "暂时无法读取聊天状态，请重新连接后刷新。"
+            } else { onConfigured(false); error = "暂时无法读取聊天状态，请重新连接后刷新。" }
         }
     }
     fun observe() {
         val request = original ?: return
-        client.call("chat_lookup", JSONObject().put("request_id", request)) { reply ->
-            if (original != request) return@call
+        scopedCall("chat_lookup", JSONObject().put("request_id", request)) { reply ->
+            if (original != request) return@scopedCall
             val result = reply.optJSONObject("data")
             pendingTool = null
             searchResults = emptyList()
@@ -119,14 +142,14 @@ private fun ChatConversation(client: ProductClient, projectId: String?, conversa
                 }
             }
         }
-        client.call("chat_budget") { reply ->
+        scopedCall("chat_budget") { reply ->
             reply.optJSONObject("data")?.let { data ->
                 accounting = "累计成本上界 ${data.optString("charged_micro_cny")} / ${data.optString("cap_micro_cny")} 微人民币；未知或待发保留 ${data.optString("held_micro_cny")} 微人民币。"
             }
         }
     }
     fun preview(search: Boolean) {
-        client.call("chat_prepare", JSONObject().put("conversation_id", conversation)
+        scopedCall("chat_prepare", JSONObject().put("conversation_id", conversation)
             .put("text", draft).put("search", search).put("count", 5).put("project_id", projectId ?: JSONObject.NULL)) { reply ->
             val data = reply.optJSONObject("data")
             if (reply.optString("status") == "ok" && data?.has("request_id") == true) {
@@ -137,7 +160,7 @@ private fun ChatConversation(client: ProductClient, projectId: String?, conversa
     }
     fun toolAction(action: String, planId: String? = null, digest: String? = null, callback: (JSONObject) -> Unit) {
         val request = original ?: return
-        client.call("chat_tool", JSONObject().put("action", action).put("request_id", request)
+        scopedCall("chat_tool", JSONObject().put("action", action).put("request_id", request)
             .put("plan_id", planId ?: JSONObject.NULL).put("digest", digest ?: JSONObject.NULL)) { reply ->
             val data = reply.optJSONObject("data")
             if (reply.optString("status") == "ok" && data != null && !data.has("error")) callback(data)
@@ -149,12 +172,12 @@ private fun ChatConversation(client: ProductClient, projectId: String?, conversa
         if (businessLookupRunning) return
         historyOpen = true
         businessLookupRunning = true
-        client.call("health") { health ->
+        scopedCall("health") { health ->
             val workspace = health.optJSONObject("data")?.optString("workspace").orEmpty()
             if (health.optString("status") != "ok" || workspace.isBlank() || health.optJSONObject("data")?.optInt("protocol") != 1) {
                 businessLookupRunning = false
                 businessOriginalText = "原业务意图 $intent：工作台连接尚未核实，保留原身份，未重新执行。"
-            } else client.call("lookup", JSONObject().put("intent_id", intent)) lookupReply@{ reply ->
+            } else scopedCall("lookup", JSONObject().put("intent_id", intent)) lookupReply@{ reply ->
                 businessLookupRunning = false
                 if (businessIntent != intent) return@lookupReply
                 val result = reply.optJSONObject("data")
@@ -188,11 +211,11 @@ private fun ChatConversation(client: ProductClient, projectId: String?, conversa
         if (loading) return
         loading = true
         val requestedProject = projectId
-        client.call("agent_read", JSONObject()
+        scopedCall("agent_read", JSONObject()
             .put("project_id", projectId ?: JSONObject.NULL)
             .put("request", JSONObject().put("tool", selectedTool).put("limit", 20).put("offset", selectedOffset))) { reply ->
             loading = false
-            if (currentProject != requestedProject) return@call
+            if (currentProject != requestedProject) return@scopedCall
             if (reply.optString("status") == "ok") {
                 val data = reply.optJSONObject("data")
                 if (data == null || data.optString("source") != "current_local_business" || data.optBoolean("outbound_authorized", true) ||
@@ -211,12 +234,12 @@ private fun ChatConversation(client: ProductClient, projectId: String?, conversa
             }
         }
     }
-    LaunchedEffect(client) { refreshStatus() }
+    LaunchedEffect(client, conversation) { refreshStatus() }
     LaunchedEffect(client, projectId) {
         records = emptyList(); source = ""; offset = 0
         pendingTool = null; disclosure = null; suggestion = null; followupReady = false
         val requested = projectId
-        client.call("chat_scope", JSONObject().put("project_id", projectId ?: JSONObject.NULL)) { reply ->
+        scopedCall("chat_scope", JSONObject().put("project_id", projectId ?: JSONObject.NULL)) { reply ->
             if (currentProject == requested) scopeReady = reply.optString("status") == "ok" && reply.optJSONObject("data")?.has("scope_generation") == true
         }
     }
@@ -238,7 +261,7 @@ private fun ChatConversation(client: ProductClient, projectId: String?, conversa
                 Text("全局原请求恢复 · 结果与动作属于以上原始身份，不代表当前助手或群组的回复。", style = MaterialTheme.typography.bodySmall)
                 Text("原请求：$original")
                 if (usageDetails.isNotBlank()) Text(usageDetails, style = MaterialTheme.typography.bodySmall)
-                TextButton(onClick = { client.call("chat_cancel", JSONObject().put("request_id", original)) { observe() } }) { Text("取消原请求") }
+                TextButton(onClick = { scopedCall("chat_cancel", JSONObject().put("request_id", original)) { observe() } }) { Text("取消原请求") }
             }
         requestObservation?.let { ChatRequestActivity(it) }
         if (resultText.isNotEmpty()) ConversationRichText(resultText, Modifier.testTag("chat-original-result"))
@@ -315,7 +338,12 @@ private fun ChatConversation(client: ProductClient, projectId: String?, conversa
                         moreOpen = false
                         val next = java.util.UUID.randomUUID().toString()
                         if (saved.edit().putString(conversationPreference, next).commit()) {
-                            conversation = next; pendingTool = null; disclosure = null; suggestion = null; followupReady = false
+                            callbacks.invalidate()
+                            review?.optString("request_id")?.takeIf { it.isNotBlank() }?.let {
+                                client.call("chat_cancel", JSONObject().put("request_id", it)) {}
+                            }
+                            conversation = next; review = null; reviewConversationKey = null; reviewDisplayName = null
+                            pendingTool = null; disclosure = null; suggestion = null; followupReady = false
                             resultText = ""; requestObservation = null; usageDetails = ""; searchResults = emptyList(); records = emptyList(); source = ""; historyOpen = false
                             conversationNotice = "已开始新会话；原请求仍可独立查询。"
                         }
@@ -348,8 +376,12 @@ private fun ChatConversation(client: ProductClient, projectId: String?, conversa
         } },
         confirmButton = { TextButton(onClick = {
             val input = key.toCharArray(); key = ""; settingsOpen = false
+            // In-flight status replies belong to the previous configuration.
+            callbacks.invalidate()
+            val token = callbacks.capture()
             client.configureChat(JSONObject().put("cap_micro_cny", cap).put("max_calls", calls).put("chat", true).put("search", true), input) { reply ->
                 input.fill('\u0000')
+                if (!callbacks.accepts(token)) return@configureChat
                 val accepted = reply.optString("status") == "ok" && reply.optJSONObject("data")?.has("id") == true
                 onConfigured(accepted)
                 error = if (accepted) "" else "配置未完成，未发出请求。"
@@ -365,6 +397,7 @@ private fun ChatConversation(client: ProductClient, projectId: String?, conversa
             Text(if (reviewConversationKey.isNullOrBlank() || reviewDisplayName.isNullOrBlank()) "历史原请求（身份未记录）" else "请求来源：$reviewDisplayName · 会话 $reviewConversationKey")
             Text("本次保留上界：${plan.optString("reserved_micro_cny")} 微人民币")
             Text("请求身份：${plan.optString("request_id")}")
+            ChatOutboundPreview(plan)
             plan.optString("input_preview").takeIf { it.isNotBlank() }?.let {
                 Text("本次子任务的完整输入", style = MaterialTheme.typography.titleSmall)
                 ConversationRichText(it)
@@ -380,9 +413,9 @@ private fun ChatConversation(client: ProductClient, projectId: String?, conversa
                 original = request; originalConversationKey = reviewConversationKey; originalDisplayName = reviewDisplayName
                 pendingTool = null; searchResults = emptyList(); resultText = ""; requestObservation = null; usageDetails = ""; review = null
                 disclosure = null; suggestion = null; followupReady = false
-                client.call("chat_confirm", JSONObject().put("request_id", request)) { observe() }
+                scopedCall("chat_confirm", JSONObject().put("request_id", request)) { observe() }
             } else error = "原请求身份未能保存，未发出请求。"
-        }, enabled = plan.optBoolean("send_allowed")) { Text("确认本次外发") } },
+        }, enabled = plan.optBoolean("send_allowed") && hasCompleteOutboundPreview(plan)) { Text("确认本次外发") } },
         dismissButton = { TextButton(onClick = { client.call("chat_cancel", JSONObject().put("request_id", plan.optString("request_id"))) {}; review = null }) { Text("返回") } }
     ) }
     disclosure?.let { data -> AlertDialog(

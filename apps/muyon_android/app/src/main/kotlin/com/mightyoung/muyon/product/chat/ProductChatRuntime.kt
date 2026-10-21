@@ -71,6 +71,7 @@ class ProductChatRuntime(private val port: ProductChatPort) : AutoCloseable {
     private val plans = mutableMapOf<String, Plan>() // control thread only
     private val active = java.util.concurrent.ConcurrentHashMap<String, String>()
     private val cancelled = java.util.concurrent.ConcurrentHashMap.newKeySet<String>()
+    private var configurationReady = false // control queue only
     private fun failure(code: String) = JSONObject().put("status", "unavailable").put("error", code)
     private fun unknown(request: String) = JSONObject().put("request_id", request).put("status", "unknown").put("recovery_action", "query_original")
     private fun operationFailure(error: Exception): JSONObject {
@@ -95,6 +96,7 @@ class ProductChatRuntime(private val port: ProductChatPort) : AutoCloseable {
             try {
                 require(session.isNotEmpty() && input.size in 16..512 && input.all { it.code in 33..126 })
                 val generation = UUID.randomUUID().toString()
+                configurationReady = false
                 val gateGeneration = sendGate.invalidateConfiguration()
                 businessPreviews.toMap().forEach { (request, preview) ->
                     val owner = toolOrigins[request]?.session
@@ -108,6 +110,7 @@ class ProductChatRuntime(private val port: ProductChatPort) : AutoCloseable {
                 check(result.has("id"))
                 credentials.install(input, generation)
                 sendGate.activateConfiguration(gateGeneration)
+                configurationReady = true
                 plans.clear()
                 businessPreviews.clear()
                 result.put("credential_persistence", "service_memory_only").put("pricing_proof", "unavailable")
@@ -204,6 +207,9 @@ class ProductChatRuntime(private val port: ProductChatPort) : AutoCloseable {
     }
     fun lookup(session: String, request: String, callback: (JSONObject) -> Unit) = submit(callback) { require(session.isNotEmpty()); port.lookup(request) }
     fun budget(callback: (JSONObject) -> Unit) = submit(callback) { port.budget() }
+    fun availability(base: JSONObject, callback: (JSONObject) -> Unit) = submit(callback) {
+        JSONObject(base.toString()).put("configured", configurationReady && credentials.current() != null)
+    }
     private fun toolOrigin(session: String, request: String): ToolOrigin {
         val origin = checkNotNull(toolOrigins[request])
         check(origin.session == session && origin.generation == credentials.current() && scopes.matches(session, origin.project, origin.scopeGeneration))

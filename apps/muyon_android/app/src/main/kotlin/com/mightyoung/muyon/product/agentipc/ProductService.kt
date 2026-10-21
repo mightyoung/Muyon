@@ -179,12 +179,13 @@ class ProductService : Service() {
                     error("stale_session", "rejected")
                 } else {
                     val session = clients.getValue(reply.binder)
-                    if (method in setOf("chat_configure", "chat_prepare", "chat_confirm", "chat_lookup", "chat_cancel", "chat_budget", "chat_scope", "chat_tool", "agent_workflow", "workflow_prepare")) {
+                    if (method in setOf("agent_availability", "chat_configure", "chat_prepare", "chat_confirm", "chat_lookup", "chat_cancel", "chat_budget", "chat_scope", "chat_tool", "agent_workflow", "workflow_prepare")) {
                         val callback: (JSONObject) -> Unit = { result -> handler.post {
                             if (!stopped && clients[reply.binder] == session) send(reply, request,
                                 JSONObject().put("status", "ok").put("data", result))
                         } }
                         when (method) {
+                            "agent_availability" -> chat.availability(nativeData(open(false).agentAvailability()) as JSONObject, callback)
                             "agent_workflow" -> chat.workflow(session, payload.getString("conversation_id"), payload.getJSONObject("operation"), callback)
                             "workflow_prepare" -> chat.workflowPrepare(session, payload.getString("conversation_id"), payload.getString("run_id"), callback)
                             "chat_configure" -> chat.configure(session, requireNotNull(message.data.getCharArray("credential")),
@@ -214,7 +215,6 @@ class ProductService : Service() {
                     val data: Any = when (method) {
                         "initialize" -> nativeData(open(true).health())
                         "health" -> nativeData(open(false).health()).also { (it as JSONObject).put("active_clients", clients.size).put("service_pid", Process.myPid()) }
-                        "agent_availability" -> nativeData(open(false).agentAvailability())
                         "agent_read" -> nativeData(open(false).agentRead(payload.getJSONObject("request").toString(),
                             payload.optString("project_id").takeIf { it.isNotBlank() }))
                         "suppliers" -> nativeData(open(false).listSuppliers(limit, offset))

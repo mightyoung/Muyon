@@ -122,9 +122,8 @@ internal object OcrGeometry {
             val points = listOf(minU to minV, maxU to minV, maxU to maxV, minU to maxV).map { (u, v) ->
                 PointF(((u * cosine - v * sine) * sourceWidth / width).coerceIn(0.0, sourceWidth - 1.0).toFloat(),
                     ((u * sine + v * cosine) * sourceHeight / height).coerceIn(0.0, sourceHeight - 1.0).toFloat())
-            }.sortedWith(compareBy<PointF> { it.y }.thenBy { it.x })
-            val ordered = points.take(2).sortedBy { it.x } + points.drop(2).sortedByDescending { it.x }
-            results.add(Box(ordered, (sum / count).toFloat()))
+            }
+            results.add(Box(orderCorners(points), (sum / count).toFloat()))
         }
         return readingOrder(results)
     }
@@ -145,7 +144,18 @@ internal object OcrGeometry {
         return ordered
     }
 
-    fun perspectiveCrop(source: Bitmap, box: List<PointF>): Bitmap {
+    internal fun orderCorners(points: List<PointF>): List<PointF> {
+        require(points.size == 4 && points.all { it.x.isFinite() && it.y.isFinite() }) { "Invalid OCR quadrilateral" }
+        // Split left/right first. Splitting top/bottom instead turns a long
+        // positive-slope line into a tall crop whose later rotation reverses it.
+        val horizontal = points.sortedWith(compareBy<PointF> { it.x }.thenBy { it.y })
+        val left = horizontal.take(2).sortedBy { it.y }
+        val right = horizontal.drop(2).sortedBy { it.y }
+        return listOf(left[0], right[0], right[1], left[1])
+    }
+
+    fun perspectiveCrop(source: Bitmap, corners: List<PointF>): Bitmap {
+        val box = orderCorners(corners)
         require(box.size == 4 && box.all { it.x.isFinite() && it.y.isFinite() }) { "Invalid OCR quadrilateral" }
         val twiceArea = box.indices.sumOf { i ->
             val a = box[i]; val b = box[(i + 1) % 4]
@@ -163,7 +173,8 @@ internal object OcrGeometry {
         try {
             Canvas(out).drawBitmap(source, matrix, Paint(Paint.FILTER_BITMAP_FLAG))
             if (height.toDouble() / width < 1.5) return out
-            val rotated = Bitmap.createBitmap(out, 0, 0, width, height, Matrix().apply { postRotate(90f) }, true)
+            // Paddle's vertical crop normalization is counterclockwise.
+            val rotated = Bitmap.createBitmap(out, 0, 0, width, height, Matrix().apply { postRotate(-90f) }, true)
             out.recycle()
             return rotated
         } catch (failure: Throwable) { out.recycle(); throw failure }

@@ -20,6 +20,23 @@ import androidx.compose.ui.unit.sp
 import com.mightyoung.muyon.product.R
 import org.json.JSONObject
 
+internal fun hasCompleteOutboundPreview(plan: JSONObject): Boolean =
+    plan.optString("outbound_endpoint").startsWith("https://") &&
+        (plan.optJSONObject("outbound_preview") != null || plan.optJSONArray("outbound_preview") != null)
+
+/** Display the exact prepared payload, including history and advertised tools. */
+@Composable
+internal fun ChatOutboundPreview(plan: JSONObject) {
+    if (!hasCompleteOutboundPreview(plan)) {
+        Text("未取得完整出站内容与目的地址，不能确认外发。", Modifier.testTag("chat-outbound-missing"), color = MaterialTheme.colorScheme.error)
+        return
+    }
+    Text("完整出站内容（含自动加入的历史、工具与参数）", style = MaterialTheme.typography.titleSmall)
+    Text(plan.optString("outbound_endpoint"), Modifier.testTag("chat-outbound-endpoint"))
+    val bytes = plan.optJSONObject("outbound_preview")?.toString(2) ?: plan.getJSONArray("outbound_preview").toString(2)
+    ConversationRichText("```json\n$bytes\n```", Modifier.testTag("chat-outbound-payload"))
+}
+
 /** A projection of the actual native observation, never a generated thought transcript. */
 @Composable
 internal fun ChatRequestActivity(observation: JSONObject) {
