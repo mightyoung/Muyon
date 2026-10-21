@@ -1096,7 +1096,7 @@ private fun uniffiCheckApiChecksums(lib: IntegrityCheckingUniffiLib) {
     if ((lib.uniffi_muyon_android_product_checksum_method_productcore_paper() and 0xFFFF) != 28153) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if ((lib.uniffi_muyon_android_product_checksum_method_productcore_prepare() and 0xFFFF) != 19674) {
+    if ((lib.uniffi_muyon_android_product_checksum_method_productcore_prepare() and 0xFFFF) != 10064) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if ((lib.uniffi_muyon_android_product_checksum_method_productcore_read_attachment() and 0xFFFF) != 26786) {
@@ -1635,7 +1635,7 @@ public interface ProductCoreInterface {
     fun `paper`(`projectId`: kotlin.String, `paperId`: kotlin.String): kotlin.String
     
     /**
-     * Pure preparation. No business grant, pending row or effect is created.
+     * Durable review preparation. No business grant, pending row or effect is created.
      * The native plan, exact raw parameters and intent remain stable for review.
      */
     fun `prepare`(`operationJson`: kotlin.String, `projectId`: kotlin.String?, `expectedRevision`: kotlin.String): kotlin.String
@@ -2338,7 +2338,7 @@ open class ProductCore: Disposable, AutoCloseable, ProductCoreInterface
 
     
     /**
-     * Pure preparation. No business grant, pending row or effect is created.
+     * Durable review preparation. No business grant, pending row or effect is created.
      * The native plan, exact raw parameters and intent remain stable for review.
      */
     @Throws(ProductException::class)override fun `prepare`(`operationJson`: kotlin.String, `projectId`: kotlin.String?, `expectedRevision`: kotlin.String): kotlin.String {
