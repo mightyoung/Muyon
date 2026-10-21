@@ -14,7 +14,7 @@ def check(manifest, source):
         text = path.read_text()
         package = re.search(r"^package ([\w.]+)", text, re.M).group(1)
         name = re.search(r"^class (\w+)", text, re.M).group(1)
-        expected.update(f"{package}.{name}#{method}" for method in re.findall(r"@Test\s+fun (\w+)\(", text))
+        expected.update(f"{package}.{name}#{method}" for method in re.findall(r"@Test(?:\([^)]*\))?\s+fun (\w+)\(", text))
     assert expected, "empty required inventory"
     assert manifest["build_id"].startswith(manifest["source_commit"] + ":"), "source identity differs"
     for key in ("apk", "test_apk"):

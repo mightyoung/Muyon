@@ -70,6 +70,9 @@ class ChatConfigurationRestoreTest {
             compose.onNodeWithTag("chat-send").assertIsEnabled()
             // Actual UI → Binder → Rust plan. Fixture configuration cannot send.
             compose.onNodeWithTag("chat-send").performClick()
+            compose.waitUntil(15_000) {
+                compose.onAllNodesWithText("saved-instructions-S17", substring = true).fetchSemanticsNodes().size == 1
+            }
             compose.onNodeWithText("saved-instructions-S17", substring = true)
                 .assertTextContains("saved-role-R16", substring = true)
                 .assertTextContains("用户选择的助手角色说明", substring = true)

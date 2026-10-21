@@ -33,6 +33,15 @@ class SuiteProvenanceTest(unittest.TestCase):
         with self.assertRaisesRegex(AssertionError, "run log changed"):
             check(self.manifest, self.source)
 
+    def test_timeout_annotation_is_required_in_inventory(self):
+        (self.source / "OneTest.kt").write_text(
+            "package fixture\nclass OneTest {\n@Test(timeout = 600_000) fun succeeds() {}\n}\n")
+        self.assertEqual("PASS", check(self.manifest, self.source)["gate"])
+        with (self.source / "OneTest.kt").open("a") as stream:
+            stream.write("@Test(timeout = 100) fun omitted() {}\n")
+        with self.assertRaises(AssertionError):
+            check(self.manifest, self.source)
+
     def test_different_run_or_source_identity_is_refused(self):
         for key in ("build_id", "apk_sha256", "test_apk_sha256"):
             changed = copy.deepcopy(self.manifest)

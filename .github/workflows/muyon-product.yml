@@ -104,10 +104,11 @@ jobs:
           sh apps/muyon_android/build-native.sh 2>&1 | tee "$RUNNER_TEMP/product-evidence/native-build.log"
           cp "$MUYON_NATIVE_OUTPUT/build-id.txt" "$MUYON_NATIVE_OUTPUT/SHA256SUMS" "$RUNNER_TEMP/product-evidence/"
       - name: Generate Android bridge from current Rust source
+        working-directory: crates
         run: |
-          cargo build --offline --locked --manifest-path crates/Cargo.toml -p muyon-android-ffi --features bindings
-          crates/target/debug/uniffi-bindgen generate --library crates/target/debug/libmuyon_android_product.so --language kotlin --config crates/muyon-android-ffi/uniffi.android.toml --out-dir "$RUNNER_TEMP/generated"
-          cmp "$RUNNER_TEMP/generated/com/mightyoung/muyon/productbridge/muyon_android_product.kt" apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/productbridge/muyon_android_product.kt
+          cargo build --offline --locked --manifest-path Cargo.toml -p muyon-android-ffi --features bindings
+          target/debug/uniffi-bindgen generate --library target/debug/libmuyon_android_product.so --language kotlin --config muyon-android-ffi/uniffi.android.toml --out-dir "$RUNNER_TEMP/generated"
+          cmp "$RUNNER_TEMP/generated/com/mightyoung/muyon/productbridge/muyon_android_product.kt" ../apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/productbridge/muyon_android_product.kt
       - name: Provision Maven artifacts by compiling the actual product
         run: |
           "$MUYON_UI_GRADLE" --no-daemon --console=plain -p apps/muyon_android -PmuyonProductNativeInputs="$MUYON_NATIVE_OUTPUT/jni" -PmuyonModelAssets="$RUNNER_TEMP/model-assets" -PmuyonSource="$(cat "$MUYON_NATIVE_OUTPUT/build-id.txt")" :app:assembleDebug :app:assembleDebugAndroidTest :app:lintDebug 2>&1 | tee "$RUNNER_TEMP/product-evidence/gradle-provision.log"
