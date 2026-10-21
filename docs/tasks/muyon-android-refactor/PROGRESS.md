@@ -1,5 +1,16 @@
 # Execution ledger — local implementation delivered; overall acceptance HOLD
 
+## Current handoff — 2026-10-21
+
+Latest installed source is `79dca05ba6ff84dbc8a60d0838951aec6720227a`, including
+offline OCR/embedding and scoped child workflows/skills. The complete latest
+candidate passes54/54 device methods; Rust verification records143 executions
+across16 suites. [Latest candidate and evidence](../../implementation/agent-workflow-proof-20261021/README.md).
+Earlier candidate counts and source IDs below are historical checkpoints.
+Overall36-scenario acceptance remains PARTIAL/HOLD. The user's subsequent push
+request authorizes publishing this feature branch, without merging into develop.
+[Claude whole-branch review checklist](../../reviews/2026-10-21-claude-android-refactor-checklist.md).
+
 Branch: codex/muyon-android-refactor. Latest installed UI/product/test source:
 `07fd4509fb4653a67435957c4ba021a2c142af00`. The earlier business checkpoint below
 is `7b063cb4089fe21fdaf82657bcf00408e3f138b1`.
