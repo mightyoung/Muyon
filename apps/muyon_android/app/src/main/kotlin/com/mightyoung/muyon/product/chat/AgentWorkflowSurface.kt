@@ -7,6 +7,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import com.mightyoung.muyon.product.agentipc.ProductClient
@@ -201,9 +202,22 @@ internal fun workflowStatus(status: String): String = when (status) {
 @Composable
 private fun WorkflowRecords(roots: List<JSONObject>, rootId: String, select: (String) -> Unit, snapshot: JSONObject?, busy: Boolean,
     cancel: (String) -> Unit, execute: (String) -> Unit, preview: (String) -> Unit) {
-    if (roots.size > 1) roots.forEach { root -> TextButton(onClick = { select(root.optString("id")) }) {
-        Text("${if (rootId == root.optString("id")) "✓ " else ""}${root.optString("title")}")
-    } }
+    if (roots.size > 1) {
+        var choosing by remember { mutableStateOf(false) }
+        Box {
+            TextButton(onClick = { choosing = true }) {
+                Text(roots.firstOrNull { it.optString("id") == rootId }?.optString("title").orEmpty(),
+                    modifier = Modifier.weight(1f, fill = false), maxLines = 1, overflow = TextOverflow.Ellipsis)
+                Text(" ▾")
+            }
+            DropdownMenu(expanded = choosing, onDismissRequest = { choosing = false }) {
+                roots.forEach { root -> DropdownMenuItem(text = {
+                    Text("${if (rootId == root.optString("id")) "✓ " else ""}${root.optString("title")}",
+                        maxLines = 2, overflow = TextOverflow.Ellipsis)
+                }, onClick = { select(root.optString("id")); choosing = false }) }
+            }
+        }
+    }
     snapshot?.optJSONArray("runs").objects().forEach { run ->
         var details by remember(run.optString("id")) { mutableStateOf(false) }
         val kind = run.optString("executor", run.optString("kind"))
@@ -216,7 +230,7 @@ private fun WorkflowRecords(roots: List<JSONObject>, rootId: String, select: (St
                 val result = run.opt("result")
                 if (result != null && result != JSONObject.NULL) {
                     TextButton(onClick = { details = !details }, modifier = Modifier.testTag("workflow-result-${run.optString("id")}")) { Text(if (details) "收起结果" else "查看结果") }
-                    if (details) ConversationRichText(if (result is JSONObject) result.optString("summary", result.toString(2)) else result.toString(), Modifier.testTag("workflow-result-body-${run.optString("id")}"))
+                    if (details) WorkflowResult(result, Modifier.testTag("workflow-result-body-${run.optString("id")}"))
                 }
                 if (run.optBoolean("can_control")) Row {
                     if (status in setOf("planned", "created", "pending", "queued")) {
@@ -231,6 +245,29 @@ private fun WorkflowRecords(roots: List<JSONObject>, rootId: String, select: (St
     snapshot?.optJSONArray("events").objects().forEach { event ->
         WorkflowEventSummary(event)
     }
+}
+
+@Composable
+private fun WorkflowResult(result: Any, modifier: Modifier = Modifier) {
+    val value = result as? JSONObject
+    val records = value?.optJSONArray("records")
+    if (value?.optString("source") == "current_local_business" && records != null) {
+        var technical by remember(result.toString()) { mutableStateOf(false) }
+        Column(modifier, verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            Text("已读取 ${records.length()} 条本地记录", style = MaterialTheme.typography.bodyMedium)
+            records.objects().forEach { record ->
+                val payload = record.optJSONObject("payload")
+                val label = payload?.optString("name")?.takeIf { it.isNotBlank() }
+                    ?: payload?.optString("title")?.takeIf { it.isNotBlank() }
+                    ?: "未命名记录"
+                Text("• $label", style = MaterialTheme.typography.bodyMedium)
+            }
+            Text("来源：本地业务数据", style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant)
+            TextButton(onClick = { technical = !technical }) { Text(if (technical) "收起原始记录" else "查看原始记录") }
+            if (technical) ConversationRichText("```json\n${value.toString(2)}\n```")
+        }
+    } else ConversationRichText(if (value != null) value.optString("summary", value.toString(2)) else result.toString(), modifier)
 }
 
 @Composable

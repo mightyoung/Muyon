@@ -229,7 +229,7 @@ class AgentWorkflowProductTest {
         compose.onNodeWithTag("chat-more").performClick()
         compose.onNodeWithText("任务与技能").performClick()
         waitFor("workflow-manager")
-        val title = "本地工作流 UI ${UUID.randomUUID()}"
+        val title = "核对供应商资料"
         compose.onNodeWithTag("workflow-title").performScrollTo().performTextInput(title)
         compose.onNodeWithTag("workflow-task").performScrollTo().performTextInput("读取本地供应商并核对来源，不外发。")
         compose.onNodeWithTag("workflow-create-root").performScrollTo().performClick()
@@ -250,8 +250,11 @@ class AgentWorkflowProductTest {
         compose.onNodeWithText("执行本地工具").performScrollTo().performClick()
         compose.waitUntil(15_000) { compose.onAllNodesWithText("本地读取完成").fetchSemanticsNodes().isNotEmpty() }
         compose.onNodeWithText("查看结果").performScrollTo().performClick()
-        compose.onNode(hasText("current_local_business", substring = true)).assertExists()
+        compose.onNodeWithText("来源：本地业务数据").assertExists()
+        compose.onNode(hasText("current_local_business", substring = true)).assertDoesNotExist()
         capture("01-local-child-result")
+        compose.onNodeWithText("查看原始记录").performScrollTo().performClick()
+        compose.onNode(hasText("current_local_business", substring = true)).assertExists()
         compose.onNodeWithTag("workflow-expand").performScrollTo().performClick()
         compose.onNodeWithText("本地读取完成").assertDoesNotExist()
         compose.onNodeWithText("任务与技能").assertDoesNotExist()
