@@ -514,6 +514,7 @@ impl ProductCore {
                     })
                     .map_err(agent_error)?;
                 let command = envelope.ok_or_else(unavailable)?;
+                store.prepare_review_trusted(&command)?;
                 let reply = json!({"plan_id":suggestion.plan_id,"summary":suggestion.summary,"business_preview":command});
                 prepared.insert(
                     command.plan_id.clone(),
@@ -552,7 +553,7 @@ impl ProductCore {
         }
     }
 
-    /// Pure preparation. No business grant, pending row or effect is created.
+    /// Durable review preparation. No business grant, pending row or effect is created.
     /// The native plan, exact raw parameters and intent remain stable for review.
     pub fn prepare(
         &self,
@@ -574,6 +575,7 @@ impl ProductCore {
             return Err(ContractError::TextLimit.into());
         }
         let reply = encode(&envelope)?;
+        state.store.prepare_review_trusted(&envelope)?;
         state.prepared.insert(
             envelope.plan_id.clone(),
             Prepared {
@@ -795,6 +797,7 @@ fn confirm_prepared(
     if prepared.dispatched {
         return lookup_json(store, &command.intent_id);
     }
+    store.claim_review_trusted(&command)?;
     // Claim before issuing any authority. Unknown results never grant another try.
     prepared.dispatched = true;
     store.issue_grant_trusted(&command, None)?;
@@ -866,6 +869,14 @@ fn paper_projection(row: &muyon_core::research::PaperRecord, detail: bool) -> Va
 
 fn lookup_json(store: &BusinessStore, intent: &str) -> Result<String, ProductError> {
     match store.lookup(intent) {
+        Ok(result)
+            if result.status == ExecutionStatus::Unknown
+                && result.error == Some(ContractError::NotFound)
+                && store.seal_unclaimed_review_trusted(intent)? =>
+        {
+            encode(&json!({"status":"not_submitted","receipt":Value::Null,
+                "error":"confirmation_not_received","recovery_action":"edit_new_draft"}))
+        }
         Ok(result) => encode(&result),
         Err(ContractError::NotFound) => encode(&json!({"status":"unknown","receipt":Value::Null,
             "error":"not_found","recovery_action":"query_original"})),
@@ -1252,6 +1263,81 @@ mod tests {
         serde_json::from_str(&core.prepare(json!({"operation":"supplier_create","supplier_id":"supplier-1",
             "payload":{"name":"supplier","aliases":[],"address":null,"categories":[],"notes":null,"merged_into":null}}).to_string(),None,"0".into()).unwrap()).unwrap()
     }
+    #[test]
+    fn unreceived_confirmation_is_sealed_without_resubmitting_after_restart() {
+        let root = root();
+        let core = ProductCore::open(root.clone(), "workspace".into(), "epoch-1".into(), true).unwrap();
+        let plan = create(&core);
+        // Android has persisted intent_id, but its confirm Binder message never arrived.
+        drop(core);
+        let reopened = ProductCore::open(root.clone(), "workspace".into(), "epoch-2".into(), false).unwrap();
+        let intent = plan["intent_id"].as_str().unwrap();
+        let result: Value = serde_json::from_str(&reopened.lookup_original(intent.into()).unwrap()).unwrap();
+        assert_eq!(result["status"], "not_submitted");
+        assert!(result["receipt"].is_null());
+        assert_eq!(reopened.lookup_original(intent.into()).unwrap(), result.to_string());
+        assert_eq!(reopened.list_suppliers(10, 0).unwrap(), "[]");
+        drop(reopened);
+        std::fs::remove_dir_all(root).unwrap();
+    }
+
+    #[test]
+    fn recovery_seal_refuses_an_already_queued_late_confirmation() {
+        let root = root();
+        let core = ProductCore::open(root.clone(), "workspace".into(), "epoch".into(), true).unwrap();
+        let plan = create(&core);
+        let intent = plan["intent_id"].as_str().unwrap();
+        let sealed = core.lookup_original(intent.into()).unwrap();
+        assert_eq!(serde_json::from_str::<Value>(&sealed).unwrap()["status"], "not_submitted");
+        // Same original in-memory plan still exists: sealing, rather than lost
+        // process memory, must prevent this delayed confirmation from executing.
+        assert!(core.confirm_user_plan(plan["plan_id"].as_str().unwrap().into()).is_err());
+        assert_eq!(core.lookup_original(intent.into()).unwrap(), sealed);
+        assert_eq!(core.list_suppliers(10, 0).unwrap(), "[]");
+        drop(core);
+        std::fs::remove_dir_all(root).unwrap();
+    }
+
+    #[test]
+    fn received_confirmation_and_legacy_unknown_are_never_cleared_or_replayed() {
+        let root = root();
+        let core = ProductCore::open(root.clone(), "workspace".into(), "epoch-1".into(), true).unwrap();
+        let plan = create(&core);
+        {
+            let state = core.state.lock().unwrap();
+            let command = &state.prepared[plan["plan_id"].as_str().unwrap()].command;
+            // Crash immediately after durable host acceptance, before grant or effect.
+            state.store.claim_review_trusted(command).unwrap();
+        }
+        drop(core);
+        let reopened = ProductCore::open(root.clone(), "workspace".into(), "epoch-2".into(), false).unwrap();
+        for intent in [plan["intent_id"].as_str().unwrap(), "legacy-unknown-intent"] {
+            let result: Value = serde_json::from_str(&reopened.lookup_original(intent.into()).unwrap()).unwrap();
+            assert_eq!(result["status"], "unknown");
+            assert!(result["receipt"].is_null());
+        }
+        assert!(reopened.confirm_user_plan(plan["plan_id"].as_str().unwrap().into()).is_err());
+        assert_eq!(reopened.list_suppliers(10, 0).unwrap(), "[]");
+        drop(reopened);
+        std::fs::remove_dir_all(root).unwrap();
+    }
+
+    #[test]
+    fn research_project_confirmation_not_received_recovers_without_a_write() {
+        let root = root();
+        let core = ProductCore::open(root.clone(), "workspace".into(), "epoch-1".into(), true).unwrap();
+        let plan: Value = serde_json::from_str(&core.prepare(
+            json!({"operation":"project_create","project_id":"research-unreceived","name":"Research draft"}).to_string(),
+            None, "0".into()).unwrap()).unwrap();
+        drop(core);
+        let reopened = ProductCore::open(root.clone(), "workspace".into(), "epoch-2".into(), false).unwrap();
+        let result: Value = serde_json::from_str(&reopened.lookup_original(plan["intent_id"].as_str().unwrap().into()).unwrap()).unwrap();
+        assert_eq!(result["status"], "not_submitted");
+        assert_eq!(reopened.list_projects(10, 0).unwrap(), "[]");
+        drop(reopened);
+        std::fs::remove_dir_all(root).unwrap();
+    }
+
     #[test]
     fn review_is_explicit_and_duplicate_confirmation_returns_original_receipt() {
         let root = root();

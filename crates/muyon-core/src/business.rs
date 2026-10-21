@@ -68,6 +68,7 @@ impl Drop for OwnerLock {
 
 pub struct BusinessStore {
     db: Db,
+    reviews: crate::review_lifecycle::ReviewLifecycle,
     workspace: String,
     owner_epoch: String,
     blob_root: PathBuf,
@@ -178,7 +179,9 @@ impl BusinessStore {
         storage(tx.commit())
     }
 
-    /// Opens an already initialized store, with no schema creation or migration.
+    /// Opens an already initialized business store without changing its schema.
+    /// The host review journal has its own namespace and version; its creation
+    /// does not initialize or migrate business rows, grants, uploads or intents.
     pub fn open_existing(
         path: &Path,
         workspace: &str,
@@ -218,6 +221,7 @@ impl BusinessStore {
         blob_root.push(".blobs");
         Ok(Self {
             db,
+            reviews: crate::review_lifecycle::ReviewLifecycle::open(path, workspace)?,
             workspace: workspace.into(),
             owner_epoch: owner_epoch.into(),
             blob_root: PathBuf::from(blob_root),
@@ -248,6 +252,23 @@ impl BusinessStore {
             return Err(ContractError::InvalidAuthority);
         }
         Ok(digest)
+    }
+
+    /// Persist the exact reviewed identity before returning a preview to the UI.
+    /// This creates no write grant or business intent.
+    pub fn prepare_review_trusted(&self, command: &CommandEnvelope) -> Result<(), ContractError> {
+        self.reviews.prepare(command, &self.check_command(command)?)
+    }
+
+    /// Host confirmation acceptance precedes grants and effects. A recovery seal
+    /// wins against a late queued confirmation without replaying the operation.
+    pub fn claim_review_trusted(&self, command: &CommandEnvelope) -> Result<(), ContractError> {
+        self.reviews.claim(command, &self.check_command(command)?)
+    }
+
+    pub fn seal_unclaimed_review_trusted(&self, intent: &str) -> Result<bool, ContractError> {
+        identity(intent)?;
+        self.reviews.seal_unclaimed(intent)
     }
 
     /// HOST ONLY: call after authentic user confirmation/current policy authorization.

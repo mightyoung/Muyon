@@ -16,6 +16,9 @@ mod contract;
 #[path = "../research.rs"]
 #[allow(dead_code)]
 mod research;
+#[path = "../review_lifecycle.rs"]
+#[allow(dead_code)]
+mod review_lifecycle;
 #[path = "../sqlite.rs"]
 #[allow(dead_code)]
 mod sqlite;

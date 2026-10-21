@@ -5,4 +5,5 @@ pub mod blobs;
 pub mod business;
 pub mod contract;
 pub mod research;
+mod review_lifecycle;
 pub mod sqlite;

@@ -114,8 +114,9 @@ fun ResearchScreen(client: ProductClient) {
                 client.call("chat_scope", JSONObject().put("project_id", projectId ?: JSONObject.NULL)) {}
             }
             projectName = null; uploaded = null; snapshot = null; metadata = metadataFields.keys.associateWith { "" }
-        } else message = problem(data)
-        if (committed || data.optString("status") in listOf("rejected", "cancelled")) {
+        } else message = if (data.optString("status") == "not_submitted")
+            "核心未接收此确认，原预览已封存；可重新编辑草稿，不会重发原操作" else problem(data)
+        if (committed || data.optString("status") in listOf("rejected", "cancelled", "not_submitted")) {
             submittedPlan?.let { client.call("discard", JSONObject().put("plan_id", it)) {} }
             submittedPlan = null
             if (preferences.edit().remove("intent_id").commit()) intent = null

@@ -89,10 +89,11 @@ fun SupplierScreen(client: ProductClient) {
             message = "已提交 · 版本 ${nativeReceipt.optString("revision")}"
             draft = null
         } else {
-            message = problem(data)
+            message = if (status == "not_submitted")
+                "核心未接收此确认，原预览已封存；可重新编辑草稿，不会重发原操作" else problem(data)
         }
         pending = status == "pending"
-        if ((status == "committed" && receipt === nativeReceipt) || status == "rejected" || status == "cancelled") {
+        if ((status == "committed" && receipt === nativeReceipt) || status in listOf("rejected", "cancelled", "not_submitted")) {
             submittedPlan?.let { client.call("discard", JSONObject().put("plan_id", it)) {} }
             submittedPlan = null
             if (preferences.edit().remove("intent_id").commit()) originalIntent = null

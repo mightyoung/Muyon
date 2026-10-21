@@ -166,11 +166,13 @@ private fun ChatConversation(client: ProductClient, projectId: String?, conversa
                 val committed = reply.optString("status") == "ok" && result?.optString("status") == "committed" && receipt != null &&
                     receipt.optString("intent_id") == intent && receipt.optString("status") == "committed" &&
                     receipt.optInt("protocol_version") == 1 && scopeMatches
-                val noCommitTerminal = reply.optString("status") == "ok" && result?.optString("status") in setOf("cancelled", "rejected") && receipt == null
+                val noCommitTerminal = reply.optString("status") == "ok" && result?.optString("status") in setOf("cancelled", "rejected", "not_submitted") && receipt == null
                 if (committed) {
                     businessOriginalText = "历史业务回执：原意图 $intent 已提交，目标 ${receipt!!.optString("target_id")}，修订 ${receipt.optString("revision")}，原作用域 $scope。此为历史事实，不代表当前记录状态；未批准模型披露，也未再次执行。"
                 } else if (noCommitTerminal) {
-                    businessOriginalText = "原业务意图 $intent：查询终态 ${result!!.optString("status")}，没有提交回执；未声称业务成功，未再次执行。"
+                    businessOriginalText = if (result!!.optString("status") == "not_submitted")
+                        "原业务意图 $intent：核心尚未接收确认，原预览已封存；没有提交，也不会重发。"
+                    else "原业务意图 $intent：查询终态 ${result.optString("status")}，没有提交回执；未声称业务成功，未再次执行。"
                 } else {
                     businessOriginalText = "原业务意图 $intent：结果未知或回执身份尚未核实，保留原身份继续查询，不会重新执行。"
                 }
