@@ -7,6 +7,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createComposeRule
 import com.mightyoung.muyon.product.design.MuyonTheme
@@ -54,12 +57,26 @@ class ConversationRichTextTest {
 
     @Test fun longBilingualParagraphsAndMarkdownKeepTheirContent() {
         val paragraph = "中文科研阅读与 English research discussion。".repeat(80)
-        val text = "# 研究结果\n\n$paragraph\n\n- 第一个结论\n- Second conclusion\n\n> 引用原文"
+        val inlineSource = "**重点** / *emphasis* / _斜体_ / `**raw** [code](https://example.org)` / <b>原文</b>"
+        val inline = conversationInline(inlineSource, SpanStyle())
+        assertEquals("重点 / emphasis / 斜体 / **raw** [code](https://example.org) / <b>原文</b>", inline.text)
+        assertTrue(inline.spanStyles.any { it.item.fontWeight == FontWeight.Bold && inline.text.substring(it.start, it.end) == "重点" })
+        assertTrue(inline.spanStyles.any { it.item.fontStyle == FontStyle.Italic })
+        assertTrue(inline.spanStyles.any { it.item.fontFamily == FontFamily.Monospace && inline.text.substring(it.start, it.end) == "**raw** [code](https://example.org)" })
+        assertTrue(inline.getStringAnnotations("URL", 0, inline.length).isEmpty())
+        listOf("**尚未结束", "**错误收尾*", "*尚未结束", "`尚未结束", "paper_revision_id").forEach {
+            assertEquals(it, conversationInline(it, SpanStyle()).text)
+        }
+        val styledLink = conversationInline("[**来源**](https://example.org/paper)", SpanStyle())
+        assertEquals("来源", styledLink.text)
+        assertEquals("https://example.org/paper", styledLink.getStringAnnotations("URL", 0, styledLink.length).single().item)
+        val text = "# 研究结果\n\n$paragraph\n\n$inlineSource\n\n- 第一个结论\n- Second conclusion\n\n> 引用原文"
         val blocks = conversationBlocks(text)
         assertEquals(paragraph, (blocks[1] as ConversationBlock.Prose).value)
         assertEquals(1, (blocks[0] as ConversationBlock.Prose).heading)
         compose.setContent { MuyonTheme { Column(Modifier.verticalScroll(rememberScrollState())) { ConversationRichText(text) } } }
         compose.onNodeWithText("研究结果").assertIsDisplayed()
+        compose.onNodeWithText(inline.text).performScrollTo().assertIsDisplayed()
         compose.onNodeWithText("引用原文").performScrollTo().assertIsDisplayed()
         compose.onNodeWithText(paragraph).assertExists()
     }

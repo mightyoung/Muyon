@@ -8,10 +8,12 @@ import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.*
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -73,19 +75,51 @@ internal fun safeConversationUrl(value: String): Boolean = try {
 } catch (_: Exception) { false }
 
 internal fun conversationInline(value: String, linkStyle: SpanStyle): AnnotatedString = buildAnnotatedString {
-    val pattern = Regex("\\[([^]\\n]+)]\\(([^\\s)]+)\\)")
-    var offset = 0
-    for (match in pattern.findAll(value)) {
-        append(value.substring(offset, match.range.first))
-        val label = match.groupValues[1]; val target = match.groupValues[2]
-        if (safeConversationUrl(target)) {
-            pushStringAnnotation("URL", target)
-            pushLink(LinkAnnotation.Url(target, TextLinkStyles(style = linkStyle)))
-            append(label); pop(); pop()
-        } else append(match.value)
-        offset = match.range.last + 1
+    val link = Regex("\\[([^]\\n]+)]\\(([^\\s)]+)\\)")
+    fun appendInline(source: String, depth: Int) {
+        if (depth >= 8) { append(source); return }
+        var at = 0
+        while (at < source.length) {
+            val match = if (source[at] == '[') link.find(source, at)?.takeIf { it.range.first == at } else null
+            if (match != null) {
+                val target = match.groupValues[2]
+                if (safeConversationUrl(target)) {
+                    pushStringAnnotation("URL", target)
+                    pushLink(LinkAnnotation.Url(target, TextLinkStyles(style = linkStyle)))
+                    appendInline(match.groupValues[1], depth + 1); pop(); pop()
+                } else append(match.value)
+                at = match.range.last + 1
+                continue
+            }
+            val delimiter = when {
+                source[at] == '`' -> "`"
+                source.startsWith("**", at) -> "**"
+                source[at] == '*' -> "*"
+                source[at] == '_' && (at == 0 || !source[at - 1].isLetterOrDigit()) -> "_"
+                else -> null
+            }
+            if (delimiter == null) { append(source[at++]); continue }
+            val start = at + delimiter.length
+            var end = source.indexOf(delimiter, start)
+            // Single-star runs are not parsed as part of an incomplete bold marker.
+            while (end >= 0 && delimiter == "*" &&
+                ((end > 0 && source[end - 1] == '*') || source.getOrNull(end + 1) == '*')) end = source.indexOf(delimiter, end + 1)
+            val valid = end > start && !source.substring(start, end).contains('\n') &&
+                source.substring(start, end).isNotBlank() &&
+                (delimiter != "_" || source.getOrNull(end + 1)?.isLetterOrDigit() != true)
+            if (!valid) { append(delimiter); at = start; continue }
+            val style = when (delimiter) {
+                "`" -> SpanStyle(fontFamily = FontFamily.Monospace, background = Color(0x14696969))
+                "**" -> SpanStyle(fontWeight = FontWeight.Bold)
+                else -> SpanStyle(fontStyle = FontStyle.Italic)
+            }
+            pushStyle(style)
+            if (delimiter == "`") append(source.substring(start, end)) else appendInline(source.substring(start, end), depth + 1)
+            pop()
+            at = end + delimiter.length
+        }
     }
-    append(value.substring(offset))
+    appendInline(value, 0)
 }
 
 @Suppress("DEPRECATION")
