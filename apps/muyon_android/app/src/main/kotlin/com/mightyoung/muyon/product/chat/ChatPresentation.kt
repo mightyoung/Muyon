@@ -3,6 +3,7 @@ package com.mightyoung.muyon.product.chat
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -11,6 +12,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
@@ -66,13 +68,18 @@ internal fun ChatInputDock(draft: String, onDraft: (String) -> Unit, enabled: Bo
         shape = RoundedCornerShape(32.dp), color = MaterialTheme.colorScheme.surface,
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.onSurface.copy(alpha = .14f))) {
         Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-            OutlinedTextField(value = draft, onValueChange = onDraft, label = { Text("消息草稿") },
-                modifier = Modifier.fillMaxWidth().heightIn(max = 192.dp), minLines = 1, maxLines = 6,
-                textStyle = MaterialTheme.typography.bodyMedium.copy(fontSize = 15.sp, lineHeight = 24.sp),
-                shape = RoundedCornerShape(12.dp),
-                colors = OutlinedTextFieldDefaults.colors(unfocusedBorderColor = Color.Transparent,
-                    focusedBorderColor = Color.Transparent, unfocusedContainerColor = Color.Transparent,
-                    focusedContainerColor = Color.Transparent))
+            val inputStyle = MaterialTheme.typography.bodyMedium.copy(fontSize = 15.sp, lineHeight = 24.sp,
+                color = MaterialTheme.colorScheme.onSurface)
+            BasicTextField(value = draft, onValueChange = onDraft,
+                modifier = Modifier.fillMaxWidth().heightIn(min = 40.dp, max = 192.dp).testTag("chat-draft"),
+                minLines = 1, maxLines = 6, textStyle = inputStyle,
+                cursorBrush = SolidColor(MaterialTheme.colorScheme.onSurface),
+                decorationBox = { inner ->
+                    Box(Modifier.fillMaxWidth().padding(horizontal = 4.dp, vertical = 4.dp)) {
+                        if (draft.isEmpty()) Text("发送消息…", style = inputStyle, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        inner()
+                    }
+                })
             Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                 Box {
                     IconButton(onClick = onMore, modifier = Modifier.testTag("chat-more")) {

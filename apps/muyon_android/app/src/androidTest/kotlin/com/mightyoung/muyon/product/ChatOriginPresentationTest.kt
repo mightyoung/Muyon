@@ -44,7 +44,7 @@ class ChatOriginPresentationTest {
             }
             compose.onNodeWithText("原请求 · 原始助手A · 会话 agent:original-a").performScrollTo().assertIsDisplayed()
             compose.onNodeWithText("查询原结果").assertExists()
-            compose.onNodeWithTag("chat-original-origin").assertTextContains("原始助手A").assertTextContains("agent:original-a")
+            compose.onNodeWithTag("chat-original-origin").assertTextContains("原始助手A", substring = true).assertTextContains("agent:original-a", substring = true)
             assertNotNull(saved.getString("conversation:group:current-b", null))
             assertNull(context.getSharedPreferences("product-chat-state", 0).getString("conversation:group:current-b", null))
         } finally {

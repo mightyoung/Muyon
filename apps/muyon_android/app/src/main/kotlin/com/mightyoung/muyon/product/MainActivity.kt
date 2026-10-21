@@ -53,6 +53,11 @@ class MainActivity : ComponentActivity() {
                 }
                 WorkbenchShell(tab, title, status, onSelect = { tab = it }) {
                     Column(Modifier.fillMaxSize()) {
+                        if (!connected || !initialized) {
+                            Text(status, Modifier.padding(24.dp), style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        }
+                        if (!connected) TextButton(onClick = { client.bind() }) { Text("重试连接") }
                         if (connected && !initialized) Button(onClick = {
                             client.call(if (existing) "health" else "initialize") { reply ->
                                 initialized = reply.optString("status") == "ok"

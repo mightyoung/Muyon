@@ -28,6 +28,7 @@ class WorkbenchNavigationTest {
 
     private fun capture(name: String) {
         compose.waitForIdle()
+        instrumentation.uiAutomation.waitForIdle(300, 5_000)
         val bitmap = requireNotNull(instrumentation.uiAutomation.takeScreenshot())
         val folder = File(context.getExternalFilesDir(null), "design-evidence").also { check(it.mkdirs() || it.isDirectory) }
         File(folder, "$name.png").outputStream().use { check(bitmap.compress(Bitmap.CompressFormat.PNG, 100, it)) }
@@ -83,7 +84,7 @@ class WorkbenchNavigationTest {
             compose.waitUntil(10_000) { catalog.read().agents.single { it.id == a.id }.role == "梳理论文并追踪来源" }
             compose.onNodeWithTag("agent_card_${a.id}").performScrollTo().performClick()
             compose.onNodeWithText("打开对话").performScrollTo().performClick()
-            compose.onNodeWithText("消息草稿").assertExists()
+            compose.onNodeWithTag("chat-draft").assertExists()
             val agentConversation = saved.getString("conversation:agent:${a.id}", null)
             assertNotNull(agentConversation)
             navigate("agents")
@@ -95,13 +96,13 @@ class WorkbenchNavigationTest {
             val groupConversation = saved.getString("conversation:group:${group.id}", null)
             assertNotEquals(agentConversation, groupConversation)
             capture("04-group-chat")
-            compose.onNodeWithText("消息草稿").performTextInput("整理当前研究资料")
+            compose.onNodeWithTag("chat-draft").performTextInput("整理当前研究资料")
             compose.waitUntil(10_000) {
                 androidx.core.view.ViewCompat.getRootWindowInsets(compose.activity.window.decorView)
                     ?.isVisible(androidx.core.view.WindowInsetsCompat.Type.ime()) == true
             }
             compose.waitForIdle()
-            compose.onNodeWithText("消息草稿").assertIsDisplayed().assertTextContains("整理当前研究资料")
+            compose.onNodeWithTag("chat-draft").assertIsDisplayed().assertTextContains("整理当前研究资料")
             compose.onNodeWithTag("chat-send").assertIsDisplayed().assertIsNotEnabled()
             val visible = android.graphics.Rect()
             compose.activity.window.decorView.getWindowVisibleDisplayFrame(visible)
