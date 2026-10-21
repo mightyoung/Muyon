@@ -101,7 +101,7 @@ class AgentWorkflowProductTest {
     private fun childAction(root: JSONObject, executor: String = "local_read", offset: Int = 0) = action("create_child")
         .put("root_id", root.getString("id")).put("skill_id", "supplier-overview")
         .put("task", "读取本地供应商记录，不联网。拥有明确且足够长的任务要求。")
-        .put("executor", executor).put("arguments", JSONObject().put("limit", 50).put("offset", offset))
+        .put("executor", executor).put("arguments", JSONObject().put("limit", 10).put("offset", offset))
     private fun snapshot(root: JSONObject) = workflow(action("snapshot").put("root_id", root.getString("id")).put("after_seq", 0))
     private fun objects(rows: JSONArray) = (0 until rows.length()).map { rows.getJSONObject(it) }
 
@@ -122,12 +122,12 @@ class AgentWorkflowProductTest {
             .put("address", JSONObject.NULL).put("notes", "Local workflow fixture").put("merged_into", JSONObject.NULL)))
         var offset = 0
         while (true) {
-            val reply = call("suppliers", JSONObject().put("limit", 50).put("offset", offset))
+            val reply = call("suppliers", JSONObject().put("limit", 10).put("offset", offset))
             assertEquals(reply.toString(), "ok", reply.getString("status"))
             val page = reply.getJSONArray("data")
             if (objects(page).any { it.getString("id") == supplierId }) break
-            assertEquals("fixture must exist in real source", 50, page.length())
-            offset += 50
+            assertEquals("fixture must exist in real source", 10, page.length())
+            offset += 10
             assertTrue("bounded source pagination", offset <= 10000)
         }
         val parent = root()
