@@ -8,7 +8,7 @@ Implementation plan, 2026-10-21. Existing Muse UI and business schema 2 remain i
 4. Publish page chunks and normalized vectors atomically into a separate rebuildable SQLite index. Bind results to current project, paper revision, attachment digest and model identity. Revalidate before publication and every search; exclude stale and cross-project results.
 5. Offer local indexing and semantic search in the research page. Run CPU work off the UI thread; cancellation prevents publication. Local results do not authorize disclosure to a remote agent.
 
-Verification requires real API26 loading, Chinese/English/amount/rotated OCR, finite 768-dimensional inference, committed PDF -> index -> reopen -> correct paper/page search, and missing/corrupt model, invalid vector, stale source, cancellation and project isolation checks. Report cold/warm time and memory, APK hashes and ABI/alignment separately from runtime evidence. Until these execute, model integration remains unverified. Full product acceptance and the previously denied I04 experiment are outside this work.
+Verification requires real API26 loading, Chinese/English/amount/rotated OCR, finite 768-dimensional inference, committed PDF -> index -> reopen -> correct paper/page search, and missing/corrupt model, invalid vector, stale source, cancellation and project isolation checks. Report cold/warm time and memory, APK hashes and ABI/alignment separately from runtime evidence. [Completed scoped verification](android-local-models-20261021/README.md) records45/45 device methods and the model-inclusive APK. Full product acceptance and the previously denied I04 experiment are outside this work.
 
 ## Build inputs
 
