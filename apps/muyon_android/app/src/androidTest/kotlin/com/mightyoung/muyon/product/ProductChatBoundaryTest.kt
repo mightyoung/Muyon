@@ -45,7 +45,7 @@ class ProductChatBoundaryTest {
             call("chat_scope")
             for(search in listOf(false,true)) {
                 val plan=call("chat_prepare",JSONObject().put("conversation_id",UUID.randomUUID().toString())
-                    .put("text","你好，请简短介绍一下。").put("search",search).put("count",5))
+                    .put("text","你好，请简短介绍一下。").put("search",search).put("count",5).put("project_id",JSONObject.NULL))
                 assertFalse(plan.getBoolean("send_allowed"))
                 assertEquals("0",plan.getString("reserved_micro_cny"))
                 val blocked=call("chat_confirm",JSONObject().put("request_id",plan.getString("request_id")))

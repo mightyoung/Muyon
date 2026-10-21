@@ -200,7 +200,7 @@ class ProductService : Service() {
                             "chat_configure" -> chat.configure(session, requireNotNull(message.data.getCharArray("credential")),
                                 payload.getString("cap_micro_cny"), payload.getString("max_calls"), payload.getBoolean("chat"), payload.getBoolean("search"), callback)
                             "chat_prepare" -> chat.prepare(session, payload.getString("conversation_id"), payload.getString("text"),
-                                payload.getBoolean("search"), payload.optInt("count", 5).also { check(it in 1..10) }, payload.optString("project_id").takeIf { it.isNotEmpty() }, callback)
+                                payload.getBoolean("search"), payload.optInt("count", 5).also { check(it in 1..10) }, payload.optString("project_id").takeIf { it.isNotEmpty() && it != "null" }, callback)
                             "chat_confirm" -> chat.confirm(session, payload.getString("request_id"), callback)
                             "chat_lookup" -> chat.lookup(session, payload.getString("request_id"), callback)
                             "chat_cancel" -> chat.cancel(session, payload.getString("request_id"), callback)
