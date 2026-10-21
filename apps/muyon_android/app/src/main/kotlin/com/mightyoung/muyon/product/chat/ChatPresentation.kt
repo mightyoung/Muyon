@@ -18,6 +18,37 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.mightyoung.muyon.product.R
+import org.json.JSONObject
+
+/** A projection of the actual native observation, never a generated thought transcript. */
+@Composable
+internal fun ChatRequestActivity(observation: JSONObject) {
+    var expanded by remember(observation.optString("request_id")) { mutableStateOf(false) }
+    val status = observation.optString("status")
+    val label = when (status) {
+        "completed", "tool_consumed" -> "已完成"
+        "tool_pending" -> "等待工具审核"
+        "prepared" -> "等待发送确认"
+        "cancelled" -> "已取消"
+        "reserved" -> "已保留预算"
+        else -> "结果待核实"
+    }
+    Column(Modifier.fillMaxWidth().testTag("chat-request-activity")) {
+        TextButton(onClick = { expanded = !expanded }, modifier = Modifier.testTag("chat-request-activity-toggle")) {
+            Text("调用过程 · $label", style = MaterialTheme.typography.labelMedium)
+        }
+        if (expanded) {
+            Text(if (observation.optBoolean("attempted")) "该原请求已经尝试外发。" else "尚无已尝试外发的记录。", style = MaterialTheme.typography.bodySmall)
+            observation.optString("failure_stage").takeIf { it.isNotBlank() && it != "null" }?.let {
+                Text("中断位置：$it", style = MaterialTheme.typography.bodySmall)
+            }
+            observation.optJSONObject("answer")?.optJSONObject("call")?.let { call ->
+                Text("工具：${call.optString("name")} · ${call.optString("id")}", style = MaterialTheme.typography.bodySmall)
+            }
+            Text("仅展示实际请求与工具状态。", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        }
+    }
+}
 
 @Composable
 internal fun ChatAvatar(name: String, members: List<String> = emptyList()) {

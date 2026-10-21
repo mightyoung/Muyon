@@ -9,6 +9,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 interface ProductChatPort {
     fun configure(settings: JSONObject): JSONObject
     fun prepare(conversation: String, text: String, search: Boolean, count: Int): JSONObject
+    fun prepareScoped(conversation: String, text: String, search: Boolean, count: Int, session: String, project: String?): JSONObject = prepare(conversation, text, search, count)
     fun confirm(request: String, configuration: String): JSONObject
     fun claim(request: String, configuration: String, generation: String): JSONObject
     fun allowed(request: String, configuration: String, generation: String): Boolean
@@ -28,6 +29,8 @@ interface ProductChatPort {
     fun followup(request: String, session: String, generation: String, project: String?): JSONObject
     fun confirmBusinessPlan(request: String, session: String, generation: String, project: String?, planId: String): JSONObject
     fun discardBusinessPlan(session: String, planId: String)
+    fun workflow(action: JSONObject, session: String, conversation: String, project: String?): JSONObject = throw UnsupportedOperationException()
+    fun workflowPrepare(run: String, session: String, conversation: String, project: String?, generation: String): JSONObject = throw UnsupportedOperationException()
 }
 
 /** Extracted from the existing temporary credential port. Memory-only and no
@@ -72,7 +75,7 @@ class ProductChatRuntime(private val port: ProductChatPort) : AutoCloseable {
     private fun unknown(request: String) = JSONObject().put("request_id", request).put("status", "unknown").put("recovery_action", "query_original")
     private fun operationFailure(error: Exception): JSONObject {
         val code = try { port.failureCode(error) } catch (_: Exception) { null }
-        return failure(if (code in setOf("agent_budget_exhausted", "agent_budget_below_consumed", "agent_settings_invalid",
+        return failure(if ((code?.startsWith("workflow_") == true && code.length <= 80) || code in setOf("agent_budget_exhausted", "agent_budget_below_consumed", "agent_settings_invalid",
             "agent_configuration_unavailable", "agent_configuration_changed", "agent_credential_reinstall_required",
             "chat_text_denied", "search_query_denied", "search_request_invalid", "chat_disabled", "search_disabled",
             "hosted_cost_proof_unavailable", "search_price_proof_unavailable", "conversation_original_outcome_required",
@@ -116,13 +119,40 @@ class ProductChatRuntime(private val port: ProductChatPort) : AutoCloseable {
         val scope = checkNotNull(scopes.get(session))
         check(scope.project == project)
         val generation = checkNotNull(credentials.current())
-        val result = port.prepare(conversation, text, search, count)
+        val result = port.prepareScoped(conversation, text, search, count, session, project)
         val request = result.getString("request_id")
         if (!search) {
             port.bindScope(request, session, generation, project)
             toolOrigins[request] = ToolOrigin(session, generation, project, scope.generation)
         }
         plans[request] = Plan(session, JSONObject(result.toString()))
+        result
+    }
+    /** Workflow scope is obtained from this same serialized, selected session. */
+    fun workflow(session: String, conversation: String, action: JSONObject, callback: (JSONObject) -> Unit) = submit(callback) {
+        val scope = checkNotNull(scopes.get(session))
+        val result = port.workflow(action, session, conversation, scope.project)
+        if (action.optString("action") == "cancel") {
+            val requests = result.optJSONArray("remote_request_ids")
+            for (index in 0 until (requests?.length() ?: 0)) {
+                val request = requireNotNull(requests).getString(index)
+                check(productRequestOwnedBy(session, active[request], plans[request]?.session, toolOrigins[request]?.session))
+                sendGate.cancel(request); cancelled.add(request); plans.remove(request)
+                businessPreviews.remove(request)?.optString("plan_id")?.let { port.discardBusinessPlan(session, it) }
+                toolOrigins.remove(request)
+                port.cancel(request) // actual state remains authoritative; no invented refund/terminal status
+            }
+        }
+        result
+    }
+    fun workflowPrepare(session: String, conversation: String, run: String, callback: (JSONObject) -> Unit) = submit(callback) {
+        require(plans.size < 128 && toolOrigins.size < 256)
+        val scope = checkNotNull(scopes.get(session))
+        val generation = checkNotNull(credentials.current())
+        val result = port.workflowPrepare(run, session, conversation, scope.project, generation)
+        val request = result.getString("request_id")
+        plans[request] = Plan(session, JSONObject(result.toString()))
+        toolOrigins[request] = ToolOrigin(session, generation, scope.project, scope.generation)
         result
     }
     /** The request must be this live Binder session's exact reviewed plan. The

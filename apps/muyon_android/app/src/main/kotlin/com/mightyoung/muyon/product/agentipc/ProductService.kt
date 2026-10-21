@@ -49,6 +49,10 @@ class ProductService : Service() {
             override fun failureCode(failure: Exception): String? = (failure as? ProductException.Failure)?.code
             override fun configure(settings: JSONObject) = data(open(false).agentConfigure(settings.toString()))
             override fun prepare(conversation: String, text: String, search: Boolean, count: Int) = data(open(false).agentPrepare(conversation, text, search, count.toUInt()))
+            override fun prepareScoped(conversation: String, text: String, search: Boolean, count: Int, session: String, project: String?): JSONObject {
+                check(!stopped && clients.containsValue(session))
+                return data(open(false).agentPrepareScoped(conversation,text,search,count.toUInt(),session,project))
+            }
             override fun confirm(request: String, configuration: String) = data(open(false).agentConfirm(request, configuration))
             override fun claim(request: String, configuration: String, generation: String) = data(open(false).agentClaim(request, configuration, generation))
             override fun allowed(request: String, configuration: String, generation: String) = !stopped && open(false).agentAllowed(request, configuration, generation)
@@ -57,6 +61,14 @@ class ProductService : Service() {
             override fun lookup(request: String) = data(open(false).agentLookup(request))
             override fun cancel(request: String) = data(open(false).agentCancel(request))
             override fun budget() = data(open(false).agentBudget())
+            override fun workflow(action: JSONObject, session: String, conversation: String, project: String?): JSONObject {
+                check(!stopped && clients.containsValue(session))
+                return data(open(false).agentWorkflow(action.toString(), session, conversation, project))
+            }
+            override fun workflowPrepare(run: String, session: String, conversation: String, project: String?, generation: String): JSONObject {
+                check(!stopped && clients.containsValue(session))
+                return data(open(false).agentWorkflowPrepare(run, session, conversation, project, generation))
+            }
             private fun tool(action: String, request: String, session: String, generation: String, project: String?, value: String = "", digest: String = ""): JSONObject {
                 check(!stopped && clients.containsValue(session))
                 val result = nativeData(open(false).agentToolStep(action, request, session, generation, project, value, digest))
@@ -167,12 +179,14 @@ class ProductService : Service() {
                     error("stale_session", "rejected")
                 } else {
                     val session = clients.getValue(reply.binder)
-                    if (method in setOf("chat_configure", "chat_prepare", "chat_confirm", "chat_lookup", "chat_cancel", "chat_budget", "chat_scope", "chat_tool")) {
+                    if (method in setOf("chat_configure", "chat_prepare", "chat_confirm", "chat_lookup", "chat_cancel", "chat_budget", "chat_scope", "chat_tool", "agent_workflow", "workflow_prepare")) {
                         val callback: (JSONObject) -> Unit = { result -> handler.post {
                             if (!stopped && clients[reply.binder] == session) send(reply, request,
                                 JSONObject().put("status", "ok").put("data", result))
                         } }
                         when (method) {
+                            "agent_workflow" -> chat.workflow(session, payload.getString("conversation_id"), payload.getJSONObject("operation"), callback)
+                            "workflow_prepare" -> chat.workflowPrepare(session, payload.getString("conversation_id"), payload.getString("run_id"), callback)
                             "chat_configure" -> chat.configure(session, requireNotNull(message.data.getCharArray("credential")),
                                 payload.getString("cap_micro_cny"), payload.getString("max_calls"), payload.getBoolean("chat"), payload.getBoolean("search"), callback)
                             "chat_prepare" -> chat.prepare(session, payload.getString("conversation_id"), payload.getString("text"),

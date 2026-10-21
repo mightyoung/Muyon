@@ -701,11 +701,17 @@ internal object IntegrityCheckingUniffiLib {
     ): Int
     external fun uniffi_muyon_android_product_checksum_method_productcore_agent_prepare(
     ): Int
+    external fun uniffi_muyon_android_product_checksum_method_productcore_agent_prepare_scoped(
+    ): Int
     external fun uniffi_muyon_android_product_checksum_method_productcore_agent_read(
     ): Int
     external fun uniffi_muyon_android_product_checksum_method_productcore_agent_settle(
     ): Int
     external fun uniffi_muyon_android_product_checksum_method_productcore_agent_tool_step(
+    ): Int
+    external fun uniffi_muyon_android_product_checksum_method_productcore_agent_workflow(
+    ): Int
+    external fun uniffi_muyon_android_product_checksum_method_productcore_agent_workflow_prepare(
     ): Int
     external fun uniffi_muyon_android_product_checksum_method_productcore_append_upload(
     ): Int
@@ -803,11 +809,17 @@ internal object UniffiLib {
     ): RustBuffer.ByValue
     external fun uniffi_muyon_android_product_fn_method_productcore_agent_prepare(`ptr`: Long,`conversation`: RustBuffer.ByValue,`text`: RustBuffer.ByValue,`search`: Byte,`count`: Int,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
+    external fun uniffi_muyon_android_product_fn_method_productcore_agent_prepare_scoped(`ptr`: Long,`conversation`: RustBuffer.ByValue,`text`: RustBuffer.ByValue,`search`: Byte,`count`: Int,`session`: RustBuffer.ByValue,`project`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
     external fun uniffi_muyon_android_product_fn_method_productcore_agent_read(`ptr`: Long,`request`: RustBuffer.ByValue,`projectId`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
     external fun uniffi_muyon_android_product_fn_method_productcore_agent_settle(`ptr`: Long,`request`: RustBuffer.ByValue,`body`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
     external fun uniffi_muyon_android_product_fn_method_productcore_agent_tool_step(`ptr`: Long,`action`: RustBuffer.ByValue,`request`: RustBuffer.ByValue,`session`: RustBuffer.ByValue,`generation`: RustBuffer.ByValue,`project`: RustBuffer.ByValue,`value`: RustBuffer.ByValue,`digest`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    external fun uniffi_muyon_android_product_fn_method_productcore_agent_workflow(`ptr`: Long,`action`: RustBuffer.ByValue,`session`: RustBuffer.ByValue,`conversation`: RustBuffer.ByValue,`project`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    external fun uniffi_muyon_android_product_fn_method_productcore_agent_workflow_prepare(`ptr`: Long,`runId`: RustBuffer.ByValue,`session`: RustBuffer.ByValue,`conversation`: RustBuffer.ByValue,`project`: RustBuffer.ByValue,`generation`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
     external fun uniffi_muyon_android_product_fn_method_productcore_append_upload(`ptr`: Long,`uploadId`: RustBuffer.ByValue,`bytes`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): Long
@@ -1012,6 +1024,9 @@ private fun uniffiCheckApiChecksums(lib: IntegrityCheckingUniffiLib) {
     if ((lib.uniffi_muyon_android_product_checksum_method_productcore_agent_prepare() and 0xFFFF) != 23553) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
+    if ((lib.uniffi_muyon_android_product_checksum_method_productcore_agent_prepare_scoped() and 0xFFFF) != 26129) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
     if ((lib.uniffi_muyon_android_product_checksum_method_productcore_agent_read() and 0xFFFF) != 31206) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
@@ -1019,6 +1034,12 @@ private fun uniffiCheckApiChecksums(lib: IntegrityCheckingUniffiLib) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if ((lib.uniffi_muyon_android_product_checksum_method_productcore_agent_tool_step() and 0xFFFF) != 31798) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if ((lib.uniffi_muyon_android_product_checksum_method_productcore_agent_workflow() and 0xFFFF) != 24959) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if ((lib.uniffi_muyon_android_product_checksum_method_productcore_agent_workflow_prepare() and 0xFFFF) != 50337) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if ((lib.uniffi_muyon_android_product_checksum_method_productcore_append_upload() and 0xFFFF) != 64298) {
@@ -1548,6 +1569,11 @@ public interface ProductCoreInterface {
     
     fun `agentPrepare`(`conversation`: kotlin.String, `text`: kotlin.String, `search`: kotlin.Boolean, `count`: kotlin.UInt): kotlin.String
     
+    /**
+     * Host UI facade. Project comes from the live selected session, not action JSON.
+     */
+    fun `agentPrepareScoped`(`conversation`: kotlin.String, `text`: kotlin.String, `search`: kotlin.Boolean, `count`: kotlin.UInt, `session`: kotlin.String, `project`: kotlin.String?): kotlin.String
+    
     fun `agentRead`(`request`: kotlin.String, `projectId`: kotlin.String?): kotlin.String
     
     /**
@@ -1560,6 +1586,13 @@ public interface ProductCoreInterface {
      * memory credential owner, never from model arguments.
      */
     fun `agentToolStep`(`action`: kotlin.String, `request`: kotlin.String, `session`: kotlin.String, `generation`: kotlin.String, `project`: kotlin.String?, `value`: kotlin.String, `digest`: kotlin.String): kotlin.String
+    
+    fun `agentWorkflow`(`action`: kotlin.String, `session`: kotlin.String, `conversation`: kotlin.String, `project`: kotlin.String?): kotlin.String
+    
+    /**
+     * Called only on the existing chat control queue. No transport or price bypass.
+     */
+    fun `agentWorkflowPrepare`(`runId`: kotlin.String, `session`: kotlin.String, `conversation`: kotlin.String, `project`: kotlin.String?, `generation`: kotlin.String): kotlin.String
     
     fun `appendUpload`(`uploadId`: kotlin.String, `bytes`: kotlin.ByteArray): kotlin.ULong
     
@@ -1901,6 +1934,29 @@ open class ProductCore: Disposable, AutoCloseable, ProductCoreInterface
     
 
     
+    /**
+     * Host UI facade. Project comes from the live selected session, not action JSON.
+     */
+    @Throws(ProductException::class)override fun `agentPrepareScoped`(`conversation`: kotlin.String, `text`: kotlin.String, `search`: kotlin.Boolean, `count`: kotlin.UInt, `session`: kotlin.String, `project`: kotlin.String?): kotlin.String {
+            return FfiConverterString.lift(
+    callWithHandle {
+    uniffiRustCallWithError(ProductException) { _status ->
+    UniffiLib.uniffi_muyon_android_product_fn_method_productcore_agent_prepare_scoped(
+        it,
+        
+        FfiConverterString.lower(`conversation`),
+        FfiConverterString.lower(`text`),
+        FfiConverterBoolean.lower(`search`),
+        FfiConverterUInt.lower(`count`),
+        FfiConverterString.lower(`session`),
+        FfiConverterOptionalString.lower(`project`),_status)
+}
+    }
+    )
+    }
+    
+
+    
     @Throws(ProductException::class)override fun `agentRead`(`request`: kotlin.String, `projectId`: kotlin.String?): kotlin.String {
             return FfiConverterString.lift(
     callWithHandle {
@@ -1954,6 +2010,46 @@ open class ProductCore: Disposable, AutoCloseable, ProductCoreInterface
         FfiConverterOptionalString.lower(`project`),
         FfiConverterString.lower(`value`),
         FfiConverterString.lower(`digest`),_status)
+}
+    }
+    )
+    }
+    
+
+    
+    @Throws(ProductException::class)override fun `agentWorkflow`(`action`: kotlin.String, `session`: kotlin.String, `conversation`: kotlin.String, `project`: kotlin.String?): kotlin.String {
+            return FfiConverterString.lift(
+    callWithHandle {
+    uniffiRustCallWithError(ProductException) { _status ->
+    UniffiLib.uniffi_muyon_android_product_fn_method_productcore_agent_workflow(
+        it,
+        
+        FfiConverterString.lower(`action`),
+        FfiConverterString.lower(`session`),
+        FfiConverterString.lower(`conversation`),
+        FfiConverterOptionalString.lower(`project`),_status)
+}
+    }
+    )
+    }
+    
+
+    
+    /**
+     * Called only on the existing chat control queue. No transport or price bypass.
+     */
+    @Throws(ProductException::class)override fun `agentWorkflowPrepare`(`runId`: kotlin.String, `session`: kotlin.String, `conversation`: kotlin.String, `project`: kotlin.String?, `generation`: kotlin.String): kotlin.String {
+            return FfiConverterString.lift(
+    callWithHandle {
+    uniffiRustCallWithError(ProductException) { _status ->
+    UniffiLib.uniffi_muyon_android_product_fn_method_productcore_agent_workflow_prepare(
+        it,
+        
+        FfiConverterString.lower(`runId`),
+        FfiConverterString.lower(`session`),
+        FfiConverterString.lower(`conversation`),
+        FfiConverterOptionalString.lower(`project`),
+        FfiConverterString.lower(`generation`),_status)
 }
     }
     )

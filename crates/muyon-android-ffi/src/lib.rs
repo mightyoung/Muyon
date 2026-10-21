@@ -65,6 +65,7 @@ struct State {
     agent: Option<AgentOwner>,
     prepared: BTreeMap<String, Prepared>,
     readers: BTreeMap<String, ControlledReader>,
+    workflow: Option<muyon_core::agent::workflow::RunLedger>,
 }
 
 #[derive(uniffi::Object)]
@@ -72,6 +73,7 @@ pub struct ProductCore {
     workspace: String,
     epoch: String,
     agent_path: std::path::PathBuf,
+    workflow_path: std::path::PathBuf,
     state: Mutex<State>,
 }
 
@@ -112,11 +114,13 @@ impl ProductCore {
             workspace,
             epoch,
             agent_path,
+            workflow_path: root.join("agent-workflows-v1.sqlite"),
             state: Mutex::new(State {
                 store,
                 agent,
                 prepared: BTreeMap::new(),
                 readers: BTreeMap::new(),
+                workflow: None,
             }),
         }))
     }
@@ -179,6 +183,206 @@ impl ProductCore {
                 owner.prepare_chat(&conversation, &text, None)
             }
         })
+    }
+    /// Host UI facade. Project comes from the live selected session, not action JSON.
+    pub fn agent_prepare_scoped(
+        &self,
+        conversation: String,
+        text: String,
+        search: bool,
+        count: u32,
+        session: String,
+        project: Option<String>,
+    ) -> Result<String, ProductError> {
+        use muyon_core::agent::workflow::{RunLedger, RunScope};
+        let mut state = self.state.lock().map_err(|_| unavailable())?;
+        let scope = RunScope::current(&state.store, &session, &conversation, project.as_deref())
+            .map_err(agent_error)?;
+        if state.workflow.is_none() {
+            state.workflow = Some(
+                RunLedger::open(&self.workflow_path, &self.workspace, &self.epoch)
+                    .map_err(agent_error)?,
+            );
+        }
+        let owner = state
+            .agent
+            .as_ref()
+            .ok_or_else(|| agent_error("agent_not_configured"))?;
+        for request in state
+            .workflow
+            .as_ref()
+            .ok_or_else(unavailable)?
+            .remote_requests(&scope)
+            .map_err(agent_error)?
+        {
+            for observation in owner.request_chain(&request).map_err(agent_error)? {
+                if matches!(
+                    observation.status.as_str(),
+                    "reserved" | "unknown" | "tool_pending"
+                ) {
+                    return Err(agent_error("conversation_original_outcome_required"));
+                }
+            }
+        }
+        encode(
+            &if search {
+                owner.prepare_search(&conversation, &text, u64::from(count))
+            } else {
+                owner.prepare_chat(&conversation, &text, None)
+            }
+            .map_err(agent_error)?,
+        )
+    }
+    pub fn agent_workflow(
+        &self,
+        action: String,
+        session: String,
+        conversation: String,
+        project: Option<String>,
+    ) -> Result<String, ProductError> {
+        use muyon_core::agent::workflow::{RunLedger, RunScope};
+        let mut state = self.state.lock().map_err(|_| unavailable())?;
+        let scope = RunScope::current(&state.store, &session, &conversation, project.as_deref())
+            .map_err(agent_error)?;
+        if state.workflow.is_none() {
+            state.workflow = Some(
+                RunLedger::open(&self.workflow_path, &self.workspace, &self.epoch)
+                    .map_err(agent_error)?,
+            );
+        }
+        let State {
+            store,
+            workflow,
+            agent,
+            ..
+        } = &mut *state;
+        let ledger = workflow.as_mut().ok_or_else(unavailable)?;
+        let mut first = ledger
+            .execute(&action, store, &scope)
+            .map_err(agent_error)?;
+        // The observation is authoritative owner data, never a model/UI status update.
+        let snapshot = serde_json::from_str::<Value>(&action)
+            .map_err(|_| agent_error("workflow_action_invalid"))?["action"]
+            == "snapshot";
+        if let (true, Some(owner), Some(runs)) = (
+            snapshot,
+            agent.as_ref(),
+            first.get("runs").and_then(Value::as_array),
+        ) {
+            for run in runs {
+                if !run["can_control"].as_bool().unwrap_or(false) {
+                    continue;
+                }
+                if let (Some(id), Some(request)) =
+                    (run["id"].as_str(), run["remote_request_id"].as_str())
+                {
+                    let observations = owner.request_chain(request).map_err(agent_error)?;
+                    ledger
+                        .observe_remote_chain(&scope, id, &observations)
+                        .map_err(agent_error)?;
+                }
+            }
+            return encode(
+                &ledger
+                    .execute(&action, store, &scope)
+                    .map_err(agent_error)?,
+            );
+        }
+        if let (Some(owner), Some(requests)) =
+            (agent.as_ref(), first["remote_request_ids"].as_array())
+        {
+            let mut actual = std::collections::BTreeSet::new();
+            for request in requests {
+                for observation in owner
+                    .request_chain(request.as_str().ok_or_else(unavailable)?)
+                    .map_err(agent_error)?
+                {
+                    actual.insert(observation.request_id);
+                }
+            }
+            first["remote_request_ids"] = json!(actual);
+        }
+        encode(&first)
+    }
+    /// Called only on the existing chat control queue. No transport or price bypass.
+    pub fn agent_workflow_prepare(
+        &self,
+        run_id: String,
+        session: String,
+        conversation: String,
+        project: Option<String>,
+        generation: String,
+    ) -> Result<String, ProductError> {
+        use muyon_core::agent::workflow::RunScope;
+        let mut state = self.state.lock().map_err(|_| unavailable())?;
+        let scope = RunScope::current(&state.store, &session, &conversation, project.as_deref())
+            .map_err(agent_error)?;
+        let ledger = state
+            .workflow
+            .as_ref()
+            .ok_or_else(|| agent_error("workflow_not_found"))?;
+        let context = ledger
+            .remote_context(&scope, &run_id)
+            .map_err(agent_error)?;
+        let owner = state
+            .agent
+            .as_ref()
+            .ok_or_else(|| agent_error("agent_not_configured"))?;
+        owner
+            .ensure_conversation_resolved(
+                context["root_conversation"]
+                    .as_str()
+                    .ok_or_else(unavailable)?,
+            )
+            .map_err(agent_error)?;
+        for request in ledger.remote_requests(&scope).map_err(agent_error)? {
+            for observation in owner.request_chain(&request).map_err(agent_error)? {
+                if matches!(
+                    observation.status.as_str(),
+                    "reserved" | "unknown" | "tool_pending"
+                ) {
+                    return Err(agent_error("conversation_original_outcome_required"));
+                }
+            }
+        }
+        let child_conversation = context["conversation_id"]
+            .as_str()
+            .ok_or_else(unavailable)?;
+        let input = format!(
+            "任务：{}\n\n已选择的技能说明（不授予额外权限）：\n{}",
+            context["task"].as_str().ok_or_else(unavailable)?,
+            context["skill_body"].as_str().ok_or_else(unavailable)?
+        );
+        let allowed: Vec<&str> = context["tool_names"]
+            .as_array()
+            .ok_or_else(unavailable)?
+            .iter()
+            .map(|name| name.as_str().ok_or_else(unavailable))
+            .collect::<Result<_, _>>()?;
+        let plan = owner
+            .prepare_chat_restricted(child_conversation, &input, None, &allowed)
+            .map_err(agent_error)?;
+        let tool_scope = muyon_core::agent::tools::ToolsContext::current(
+            &state.store,
+            &session,
+            &generation,
+            project.as_deref(),
+        )
+        .map_err(agent_error)?;
+        owner
+            .bind_tool_scope_trusted(&plan.request_id, &tool_scope)
+            .map_err(agent_error)?;
+        state
+            .workflow
+            .as_mut()
+            .ok_or_else(unavailable)?
+            .bind_remote_plan(&scope, &run_id, &plan)
+            .map_err(agent_error)?;
+        let mut result = serde_json::to_value(&plan).map_err(|_| unavailable())?;
+        result["workflow_id"] = json!(run_id);
+        result["input_preview"] = json!(input);
+        result["skill_digest"] = context["skill_digest"].clone();
+        encode(&result)
     }
     pub fn agent_confirm(
         &self,
@@ -677,6 +881,230 @@ pub fn product_protocol_version() -> u32 {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn another_root_and_ordinary_chat_cannot_bypass_an_unknown_child() {
+        use muyon_core::agent::{
+            owner::{HostedCostBound, HostedCostVerifier},
+            workflow::RunScope,
+        };
+        struct FixtureProof;
+        impl HostedCostVerifier for FixtureProof {
+            fn prove(
+                &self,
+                _: &[u8],
+                _: &str,
+            ) -> muyon_core::agent::owner::Result<HostedCostBound> {
+                HostedCostBound::verified(16384, 128)
+            }
+        }
+        let path = root();
+        let core =
+            ProductCore::open(path.clone(), "workspace".into(), "epoch".into(), true).unwrap();
+        core.agent_configure(json!({"credential_generation":"generation","cap_micro_cny":"1000000","max_calls":"10","chat":true,"search":false,"price_revision":muyon_core::agent::owner::PRICE_REVISION}).to_string()).unwrap();
+        let action = |value: Value| -> Value {
+            serde_json::from_str(
+                &core
+                    .agent_workflow(
+                        value.to_string(),
+                        "session".into(),
+                        "parent-chat".into(),
+                        None,
+                    )
+                    .unwrap(),
+            )
+            .unwrap()
+        };
+        let first =
+            action(json!({"action":"create_root","title":"first","task":"inspect suppliers"}));
+        let child = action(
+            json!({"action":"create_child","root_id":first["id"],"skill_id":"supplier-overview","task":"read","executor":"remote_chat","arguments":{"limit":1,"offset":0}}),
+        );
+        let original = {
+            let mut state = core.state.lock().unwrap();
+            let scope = RunScope::current(&state.store, "session", "parent-chat", None).unwrap();
+            let context = state
+                .workflow
+                .as_ref()
+                .unwrap()
+                .remote_context(&scope, child["id"].as_str().unwrap())
+                .unwrap();
+            let plan = state
+                .agent
+                .as_ref()
+                .unwrap()
+                .prepare_chat_restricted(
+                    context["conversation_id"].as_str().unwrap(),
+                    "fixture child",
+                    Some(&FixtureProof),
+                    &["supplier_list"],
+                )
+                .unwrap();
+            state
+                .workflow
+                .as_mut()
+                .unwrap()
+                .bind_remote_plan(&scope, child["id"].as_str().unwrap(), &plan)
+                .unwrap();
+            let owner = state.agent.as_ref().unwrap();
+            owner
+                .confirm_trusted(&plan.request_id, &plan.configuration_id)
+                .unwrap();
+            owner
+                .claim_dispatch(&plan.request_id, &plan.configuration_id, "generation")
+                .unwrap();
+            plan
+        };
+        let second =
+            action(json!({"action":"create_root","title":"second","task":"another request"}));
+        let next = action(
+            json!({"action":"create_child","root_id":second["id"],"skill_id":"supplier-overview","task":"read","executor":"remote_chat","arguments":{"limit":1,"offset":0}}),
+        );
+        assert!(core
+            .agent_workflow_prepare(
+                next["id"].as_str().unwrap().into(),
+                "session".into(),
+                "parent-chat".into(),
+                None,
+                "generation".into()
+            )
+            .unwrap_err()
+            .to_string()
+            .contains("conversation_original_outcome_required"));
+        assert!(core
+            .agent_prepare_scoped(
+                "parent-chat".into(),
+                "ordinary new request".into(),
+                false,
+                1,
+                "session".into(),
+                None
+            )
+            .unwrap_err()
+            .to_string()
+            .contains("conversation_original_outcome_required"));
+        let state = core.state.lock().unwrap();
+        let owner = state.agent.as_ref().unwrap();
+        assert_eq!(
+            owner.lookup(&original.request_id).unwrap().status,
+            "unknown"
+        );
+        assert_eq!(
+            owner.budget().unwrap().held_micro_cny,
+            original.reserved_micro_cny
+        );
+        drop(state);
+        drop(core);
+        std::fs::remove_dir_all(path).unwrap();
+    }
+    #[test]
+    fn child_plan_stays_blocked_and_cannot_bypass_an_unknown_root_request() {
+        use muyon_core::agent::owner::{HostedCostBound, HostedCostVerifier};
+        struct FixtureProof;
+        impl HostedCostVerifier for FixtureProof {
+            fn prove(
+                &self,
+                _: &[u8],
+                _: &str,
+            ) -> muyon_core::agent::owner::Result<HostedCostBound> {
+                HostedCostBound::verified(16384, 128)
+            }
+        }
+        let path = root();
+        let core =
+            ProductCore::open(path.clone(), "workspace".into(), "epoch".into(), true).unwrap();
+        core.agent_configure(json!({"credential_generation":"generation","cap_micro_cny":"1000000","max_calls":"10","chat":true,"search":false,"price_revision":muyon_core::agent::owner::PRICE_REVISION}).to_string()).unwrap();
+        let action = |value: Value| -> Value {
+            serde_json::from_str(
+                &core
+                    .agent_workflow(
+                        value.to_string(),
+                        "session".into(),
+                        "parent-chat".into(),
+                        None,
+                    )
+                    .unwrap(),
+            )
+            .unwrap()
+        };
+        let parent = action(json!({"action":"create_root","title":"分派","task":"检查供应商"}));
+        let child = action(
+            json!({"action":"create_child","root_id":parent["id"],"skill_id":"supplier-overview","task":"只读供应商","executor":"remote_chat","arguments":{"limit":10,"offset":0}}),
+        );
+        let plan: Value = serde_json::from_str(
+            &core
+                .agent_workflow_prepare(
+                    child["id"].as_str().unwrap().into(),
+                    "session".into(),
+                    "parent-chat".into(),
+                    None,
+                    "generation".into(),
+                )
+                .unwrap(),
+        )
+        .unwrap();
+        assert_eq!(plan["send_allowed"], false);
+        assert_eq!(plan["reserved_micro_cny"], "0");
+        assert_ne!(plan["conversation_id"], "parent-chat");
+        for _ in 0..3 {
+            let snapshot =
+                action(json!({"action":"snapshot","root_id":parent["id"],"after_seq":0}));
+            assert_eq!(
+                snapshot["runs"]
+                    .as_array()
+                    .unwrap()
+                    .iter()
+                    .find(|r| r["id"] == child["id"])
+                    .unwrap()["status"],
+                "blocked"
+            );
+        }
+        let pending = {
+            let state = core.state.lock().unwrap();
+            let owner = state.agent.as_ref().unwrap();
+            let pending = owner
+                .prepare_chat(
+                    "parent-chat",
+                    "unresolved root fixture",
+                    Some(&FixtureProof),
+                )
+                .unwrap();
+            owner
+                .confirm_trusted(&pending.request_id, &pending.configuration_id)
+                .unwrap();
+            owner
+                .claim_dispatch(&pending.request_id, &pending.configuration_id, "generation")
+                .unwrap();
+            pending
+        };
+        let other = action(
+            json!({"action":"create_child","root_id":parent["id"],"skill_id":"supplier-overview","task":"另一项任务","executor":"remote_chat","arguments":{"limit":10,"offset":0}}),
+        );
+        let failure = core
+            .agent_workflow_prepare(
+                other["id"].as_str().unwrap().into(),
+                "session".into(),
+                "parent-chat".into(),
+                None,
+                "generation".into(),
+            )
+            .unwrap_err();
+        assert!(failure
+            .to_string()
+            .contains("conversation_original_outcome_required"));
+        let state = core.state.lock().unwrap();
+        let original = state
+            .agent
+            .as_ref()
+            .unwrap()
+            .lookup(&pending.request_id)
+            .unwrap();
+        assert_eq!(original.status, "unknown");
+        assert!(original.attempted);
+        assert!(original.reserved_micro_cny.value() > 0);
+        drop(state);
+        drop(core);
+        std::fs::remove_dir_all(path).unwrap();
+    }
     #[test]
     fn configuring_a_new_budget_never_manufactures_pricing_authority_or_sends() {
         let root = root();

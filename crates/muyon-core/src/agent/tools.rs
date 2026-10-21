@@ -557,7 +557,18 @@ impl AgentOwner {
         // not create authority. Product transport keeps its non-stream envelope.
         let history = wire_json::parse(body["messages"].to_string().as_bytes())
             .map_err(|_| "tool_history_invalid")?;
-        let defs = definitions()?;
+        let advertised = body["tools"].as_array().ok_or("tool_history_invalid")?;
+        let defs: Vec<_> = definitions()?
+            .into_iter()
+            .filter(|definition| {
+                advertised
+                    .iter()
+                    .any(|tool| tool["function"]["name"] == definition.wire_name)
+            })
+            .collect();
+        if defs.is_empty() {
+            return Err("tool_not_allowed");
+        }
         let model_request = ModelRequest {
             task: "product".into(),
             attempt: request.into(),

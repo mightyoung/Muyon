@@ -123,6 +123,7 @@ pub struct Observation {
     pub attempted: bool,
     pub failure_stage: Option<String>,
     pub http_status: Option<u16>,
+    pub blocked_reason: Option<String>,
 }
 #[derive(Clone, Debug, Serialize)]
 pub struct Budget {
@@ -288,6 +289,28 @@ impl AgentOwner {
         text: &str,
         verifier: Option<&dyn HostedCostVerifier>,
     ) -> Result<AgentPlan> {
+        self.prepare_chat_inner(conversation, text, verifier, None)
+    }
+    /// Host-selected child/skill tools are an actual capability subset.
+    pub fn prepare_chat_restricted(
+        &self,
+        conversation: &str,
+        text: &str,
+        verifier: Option<&dyn HostedCostVerifier>,
+        allowed: &[&str],
+    ) -> Result<AgentPlan> {
+        if allowed.is_empty() || allowed.len() > 6 {
+            return Err("tool_not_allowed");
+        }
+        self.prepare_chat_inner(conversation, text, verifier, Some(allowed))
+    }
+    fn prepare_chat_inner(
+        &self,
+        conversation: &str,
+        text: &str,
+        verifier: Option<&dyn HostedCostVerifier>,
+        allowed: Option<&[&str]>,
+    ) -> Result<AgentPlan> {
         check_text(text).map_err(|_| "chat_text_denied")?;
         let configuration = self.configuration()?;
         if !configuration.settings.chat {
@@ -320,7 +343,24 @@ impl AgentOwner {
             messages.push(json!({"role":"assistant","content":answer}));
         }
         messages.push(json!({"role":"user","content":text}));
-        let payload=json!({"model":MODEL,"messages":messages,"tools":super::tools::catalog_json()?,"parallel_tool_calls":false,"n":1,"stream":false,"max_tokens":MAX_OUTPUT,"thinking":{"type":"disabled"}}).to_string();
+        let mut catalog = super::tools::catalog_json()?;
+        if let Some(names) = allowed {
+            let tools = catalog.as_array_mut().ok_or("tool_catalog_invalid")?;
+            for name in names {
+                if !tools
+                    .iter()
+                    .any(|tool| tool["function"]["name"] == format!("product_{name}"))
+                {
+                    return Err("tool_not_allowed");
+                }
+            }
+            tools.retain(|tool| {
+                names
+                    .iter()
+                    .any(|name| tool["function"]["name"] == format!("product_{name}"))
+            });
+        }
+        let payload=json!({"model":MODEL,"messages":messages,"tools":catalog,"parallel_tool_calls":false,"n":1,"stream":false,"max_tokens":MAX_OUTPUT,"thinking":{"type":"disabled"}}).to_string();
         let proof = verifier
             .map(|v| v.prove(payload.as_bytes(), PRICE_REVISION))
             .transpose()?;
@@ -543,6 +583,19 @@ impl AgentOwner {
         if cost > number(cell(&row, 7)?)? {
             return Err("agent_usage_exceeds_reservation");
         }
+        if answer["turn"] == "tool_call" {
+            let name = answer["call"]["name"]
+                .as_str()
+                .ok_or("tool_not_allowed")?
+                .replace('.', "_");
+            let payload = decode_json(cell(&row, 5)?).map_err(|_| "agent_response_invalid")?;
+            if !payload["tools"]
+                .as_array()
+                .is_some_and(|tools| tools.iter().any(|tool| tool["function"]["name"] == name))
+            {
+                return Err("tool_not_allowed");
+            }
+        }
         let cancelled = cell(&row, 10)? == "1"
             || self
                 .configuration()
@@ -583,6 +636,18 @@ impl AgentOwner {
             status = "unknown".into()
         }
         Ok(Observation {
+            blocked_reason: if status == "prepared" && number(cell(&row, 7)?)? == 0 {
+                Some(
+                    if cell(&row, 2)? == "search" {
+                        "search_price_proof_unavailable"
+                    } else {
+                        "hosted_cost_proof_unavailable"
+                    }
+                    .into(),
+                )
+            } else {
+                None
+            },
             attempted: cell(&row, 13)? == "1",
             failure_stage: row[14].clone(),
             http_status: row[15]
@@ -652,6 +717,46 @@ impl AgentOwner {
     pub fn workspace(&self) -> &str {
         &self.workspace
     }
+    /// Child conversations cannot bypass an unresolved root request. Host only.
+    pub fn ensure_conversation_resolved(&self, conversation: &str) -> Result<()> {
+        id(conversation)?;
+        let rows = storage(self.db.query("SELECT id FROM requests WHERE conversation=? AND status IN ('reserved','unknown','tool_pending') LIMIT 1", &[conversation]))?;
+        if !rows.is_empty() {
+            return Err("conversation_original_outcome_required");
+        }
+        Ok(())
+    }
+    /// Follow only durable host-created edges, never caller-provided request lists.
+    pub fn request_chain(&self, first: &str) -> Result<Vec<Observation>> {
+        let mut next = first.to_owned();
+        let first_row = self.request(first)?;
+        let conversation = cell(&first_row, 1)?;
+        let configuration = cell(&first_row, 3)?;
+        let mut observations: Vec<Observation> = Vec::new();
+        loop {
+            if observations.len() >= 32 || observations.iter().any(|o| o.request_id == next) {
+                return Err("tool_chain_limit");
+            }
+            let row = self.request(&next)?;
+            if cell(&row, 1)? != conversation || cell(&row, 3)? != configuration {
+                return Err("tool_history_invalid");
+            }
+            observations.push(self.lookup(&next)?);
+            let rows = storage(self.db.query(
+                "SELECT followup FROM tool_steps WHERE request_id=?",
+                &[&next],
+            ))?;
+            match rows
+                .first()
+                .and_then(|row| row.first())
+                .and_then(Option::as_deref)
+            {
+                Some(value) => next = value.into(),
+                None => break,
+            }
+        }
+        Ok(observations)
+    }
     pub(super) fn tool_db(&self) -> &Db {
         &self.db
     }
@@ -667,6 +772,19 @@ impl AgentOwner {
         payload: String,
         verifier: Option<&dyn HostedCostVerifier>,
     ) -> Result<AgentPlan> {
+        let body = decode_json(&payload).map_err(|_| "tool_history_invalid")?;
+        if body["tools"]
+            .as_array()
+            .is_some_and(|tools| tools.len() < 6)
+        {
+            let rows = storage(self.db.query(
+                "SELECT COUNT(*) FROM requests WHERE conversation=?",
+                &[conversation],
+            ))?;
+            if number(cell(rows.first().ok_or("tool_history_invalid")?, 0)?)? >= 32 {
+                return Err("tool_chain_limit");
+            }
+        }
         let configuration = self.configuration()?;
         let proof = verifier
             .map(|v| v.prove(payload.as_bytes(), PRICE_REVISION))

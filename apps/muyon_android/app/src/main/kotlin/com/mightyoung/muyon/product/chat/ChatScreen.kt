@@ -43,6 +43,7 @@ private fun ChatConversation(client: ProductClient, projectId: String?, conversa
     var originalDisplayName by remember { mutableStateOf(saved.getString("original_request_display_name", null)) }
     var settingsOpen by remember { mutableStateOf(false) }
     var moreOpen by remember { mutableStateOf(false) }
+    var workflowOpen by remember { mutableStateOf(false) }
     var historyOpen by remember { mutableStateOf(false) }
     var requestDetailsOpen by remember { mutableStateOf(false) }
     var key by remember { mutableStateOf("") }
@@ -52,6 +53,9 @@ private fun ChatConversation(client: ProductClient, projectId: String?, conversa
     var reviewConversationKey by remember { mutableStateOf<String?>(null) }
     var reviewDisplayName by remember { mutableStateOf<String?>(null) }
     var resultText by remember { mutableStateOf("") }
+    var usageDetails by remember { mutableStateOf("") }
+    var requestObservation by remember { mutableStateOf<JSONObject?>(null) }
+    var toolDetailsOpen by remember { mutableStateOf(false) }
     var conversationNotice by remember { mutableStateOf("") }
     var searchResults by remember { mutableStateOf<List<JSONObject>>(emptyList()) }
     var accounting by remember { mutableStateOf("") }
@@ -95,6 +99,8 @@ private fun ChatConversation(client: ProductClient, projectId: String?, conversa
             if (reply.optString("status") != "ok" || result == null) {
                 resultText = "原请求结果尚未取得，请继续查询；不会自动重发。"
             } else {
+                usageDetails = ""
+                requestObservation = result
                 val sources = result.optJSONArray("answer")
                 searchResults = if (sources == null) emptyList() else (0 until sources.length()).map { sources.getJSONObject(it) }
                 resultText = when (result.optString("status")) {
@@ -103,7 +109,8 @@ private fun ChatConversation(client: ProductClient, projectId: String?, conversa
                         "模型调用已结算，等待您查看业务动作；不会自动读取后外发、提交修改或继续请求。"
                     }
                     "completed" -> result.optJSONObject("answer")?.let { answer ->
-                        answer.optString("answer") + "\n输入 ${answer.optString("input_tokens")}，输出 ${answer.optString("output_tokens")} token；本次成本上界 ${result.optString("charged_micro_cny")} 微人民币。"
+                        usageDetails = "输入 ${answer.optString("input_tokens")}，输出 ${answer.optString("output_tokens")} token；本次成本上界 ${result.optString("charged_micro_cny")} 微人民币。"
+                        answer.optString("answer")
                     }
                         ?: "搜索完成：${result.optJSONArray("answer")?.length() ?: 0} 条外部结果。"
                     "cancelled" -> "已取消。已开始外发的请求仍可能保留费用上界。"
@@ -228,14 +235,17 @@ private fun ChatConversation(client: ProductClient, projectId: String?, conversa
             if (requestDetailsOpen) {
                 Text("全局原请求恢复 · 结果与动作属于以上原始身份，不代表当前助手或群组的回复。", style = MaterialTheme.typography.bodySmall)
                 Text("原请求：$original")
+                if (usageDetails.isNotBlank()) Text(usageDetails, style = MaterialTheme.typography.bodySmall)
                 TextButton(onClick = { client.call("chat_cancel", JSONObject().put("request_id", original)) { observe() } }) { Text("取消原请求") }
             }
-        if (resultText.isNotEmpty()) Text(resultText, Modifier.testTag("chat-original-result"), style = MaterialTheme.typography.bodyLarge.copy(fontFamily = ClaudeReplyFont))
+        requestObservation?.let { ChatRequestActivity(it) }
+        if (resultText.isNotEmpty()) ConversationRichText(resultText, Modifier.testTag("chat-original-result"))
         pendingTool?.takeIf { scopeReady }?.let { call ->
             ChatPanel {
             Text("原请求待处理动作 · $originalOriginLabel", style = MaterialTheme.typography.labelLarge)
-            Text("待处理动作：${call.optString("name")}")
-            Text(call.optJSONObject("arguments")?.toString(2) ?: "")
+            Text("等待工具审核 · ${call.optString("name")}", style = MaterialTheme.typography.labelLarge)
+            TextButton(onClick = { toolDetailsOpen = !toolDetailsOpen }) { Text(if (toolDetailsOpen) "收起调用详情" else "调用详情") }
+            if (toolDetailsOpen) ConversationRichText("```json\n${call.optJSONObject("arguments")?.toString(2) ?: ""}\n```")
             if (call.optString("name").endsWith("_suggest")) {
                 OutlinedButton(onClick = { toolAction("prepare_suggestion") { suggestion = it } }) { Text("查看业务修改建议") }
                 businessPlan?.let { plan -> OutlinedButton(onClick = {
@@ -265,6 +275,13 @@ private fun ChatConversation(client: ProductClient, projectId: String?, conversa
         }
         if (historyOpen && businessOriginalText.isNotEmpty()) Text(businessOriginalText, Modifier.testTag("chat-business-original-result"))
         if (loading) CircularProgressIndicator()
+        if (scopeReady) AgentWorkflowSurface(client, conversation, projectId, workflowOpen,
+            onDismiss = { workflowOpen = false }, onRemotePlan = { plan ->
+                workflowOpen = false
+                reviewConversationKey = "$conversationKey / ${plan.optString("workflow_id")}"
+                reviewDisplayName = "$displayName · AI子任务"
+                review = plan
+            })
         if (error.isNotEmpty()) Text(error, color = MaterialTheme.colorScheme.error, modifier = Modifier.testTag("chat-error"))
         if (source.isNotEmpty()) {
             Text(source, modifier = Modifier.testTag("chat-local-source"))
@@ -290,13 +307,14 @@ private fun ChatConversation(client: ProductClient, projectId: String?, conversa
         ChatInputDock(draft, { draft = it.take(4096) }, configured && scopeReady && draft.isNotBlank(),
             onChat = { preview(false) }, onMore = { moreOpen = true }, moreMenu = {
                 DropdownMenu(expanded = moreOpen, onDismissRequest = { moreOpen = false }) {
+                    DropdownMenuItem(text = { Text("任务与技能") }, enabled = scopeReady, onClick = { moreOpen = false; workflowOpen = true })
                     DropdownMenuItem(text = { Text("模型与预算设置") }, onClick = { moreOpen = false; settingsOpen = true })
                     DropdownMenuItem(text = { Text("开始新会话") }, onClick = {
                         moreOpen = false
                         val next = java.util.UUID.randomUUID().toString()
                         if (saved.edit().putString(conversationPreference, next).commit()) {
                             conversation = next; pendingTool = null; disclosure = null; suggestion = null; followupReady = false
-                            resultText = ""; searchResults = emptyList(); records = emptyList(); source = ""; historyOpen = false
+                            resultText = ""; requestObservation = null; usageDetails = ""; searchResults = emptyList(); records = emptyList(); source = ""; historyOpen = false
                             conversationNotice = "已开始新会话；原请求仍可独立查询。"
                         }
                     })
@@ -345,6 +363,10 @@ private fun ChatConversation(client: ProductClient, projectId: String?, conversa
             Text(if (reviewConversationKey.isNullOrBlank() || reviewDisplayName.isNullOrBlank()) "历史原请求（身份未记录）" else "请求来源：$reviewDisplayName · 会话 $reviewConversationKey")
             Text("本次保留上界：${plan.optString("reserved_micro_cny")} 微人民币")
             Text("请求身份：${plan.optString("request_id")}")
+            plan.optString("input_preview").takeIf { it.isNotBlank() }?.let {
+                Text("本次子任务的完整输入", style = MaterialTheme.typography.titleSmall)
+                ConversationRichText(it)
+            }
             if (!plan.optBoolean("send_allowed")) Text("尚无可信的托管计费或搜索价格证明；此次请求不会发出。")
             Text("确认仅执行本次请求；超时或重启后查询原身份，不自动重发。")
         } },
@@ -354,7 +376,7 @@ private fun ChatConversation(client: ProductClient, projectId: String?, conversa
                     .putString("original_request_conversation_key", reviewConversationKey)
                     .putString("original_request_display_name", reviewDisplayName).commit()) {
                 original = request; originalConversationKey = reviewConversationKey; originalDisplayName = reviewDisplayName
-                pendingTool = null; searchResults = emptyList(); resultText = ""; review = null
+                pendingTool = null; searchResults = emptyList(); resultText = ""; requestObservation = null; usageDetails = ""; review = null
                 disclosure = null; suggestion = null; followupReady = false
                 client.call("chat_confirm", JSONObject().put("request_id", request)) { observe() }
             } else error = "原请求身份未能保存，未发出请求。"

@@ -5,6 +5,7 @@
 //! bytes against current workspace/project authority before admission.
 pub mod owner;
 pub mod tools;
+pub mod workflow;
 use crate::{
     business::BusinessStore,
     contract::{decode_json, ContractError},
