@@ -14,7 +14,7 @@ Implement the user's ChatGPT/Codex collaboration reference and Claude conversati
 
 The normal conversation stays quiet. A compact expandable execution group shows real child states, skill loading and tool results; configuration and skill controls stay in management. Actual waiting/failed/unknown states remain visible. Public provider reasoning summaries may be rendered only if supplied; the current provider disables thinking, so this implementation displays host execution activity rather than invented reasoning.
 
-Use existing Claude Sans/Serif fonts, readable16/24 body text, bounded line width, selectable paragraphs, headings/lists/quotes/code/tables and safe links. Code copy and table scrolling operate on real rendered content. Preserve exact original-request provenance and business confirmation/disclosure UI.
+Use platform sans/serif fonts with Claude-inspired readable16/24 body text, bounded line width, selectable paragraphs, headings/lists/quotes/code/tables and safe links. Extracted vendor fonts were removed during review remediation because redistribution permission was not established. Code copy and table scrolling operate on real rendered content. Preserve exact original-request provenance and business confirmation/disclosure UI.
 
 ## Acceptance
 

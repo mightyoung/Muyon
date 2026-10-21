@@ -6,6 +6,11 @@ repo=$(CDPATH= cd -- "$(dirname -- "$0")/../.." && pwd)
 : "${MUYON_ML_OUTPUT:?Set an absolute task-owned output directory}"
 case "$MUYON_ML_OUTPUT" in /*) ;; *) exit 2 ;; esac
 ndk="$ANDROID_HOME/ndk/28.2.13676358"
+case "$(uname -s)" in
+    Darwin) ndk_host=darwin-x86_64 ;;
+    Linux) ndk_host=linux-x86_64 ;;
+    *) printf '%s\n' 'Unsupported NDK host' >&2; exit 2 ;;
+esac
 cmake="$ANDROID_HOME/cmake/3.22.1/bin/cmake"
 ninja="$ANDROID_HOME/cmake/3.22.1/bin/ninja"
 test -f "$ndk/build/cmake/android.toolchain.cmake"
@@ -79,7 +84,7 @@ for abi in arm64-v8a x86_64; do
     "$cmake" --build "$MUYON_ML_OUTPUT/build-$abi" --target muyon_local_embedding --parallel 4
     mkdir -p "$MUYON_ML_OUTPUT/jni/$abi"
     cp "$MUYON_ML_OUTPUT/build-$abi/libmuyon_local_embedding.so" "$MUYON_ML_OUTPUT/jni/$abi/"
-    "$ndk/toolchains/llvm/prebuilt/darwin-x86_64/bin/llvm-strip" --strip-unneeded "$MUYON_ML_OUTPUT/jni/$abi/libmuyon_local_embedding.so"
+    "$ndk/toolchains/llvm/prebuilt/$ndk_host/bin/llvm-strip" --strip-unneeded "$MUYON_ML_OUTPUT/jni/$abi/libmuyon_local_embedding.so"
 done
 cp "$MUYON_ML_OUTPUT/llama-source/LICENSE" "$MUYON_ML_OUTPUT/LLAMA-LICENSE.txt"
 (cd "$MUYON_ML_OUTPUT/jni" && shasum -a 256 arm64-v8a/libmuyon_local_embedding.so x86_64/libmuyon_local_embedding.so) > "$MUYON_ML_OUTPUT/SHA256SUMS"

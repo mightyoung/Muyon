@@ -4,6 +4,7 @@ import argparse
 import hashlib
 import json
 import os
+import platform
 from pathlib import Path
 import struct
 import subprocess
@@ -18,7 +19,8 @@ def check(apk, inputs, generated, checked):
     assert generated.read_bytes() == checked.read_bytes(), "generated bridge bytes differ"
     expected = dict(line.split()[::-1] for line in (inputs.parent / "SHA256SUMS").read_text().splitlines())
     expected_abis = {"arm64-v8a": 183, "x86_64": 62}
-    readelf = Path(os.environ["ANDROID_HOME"]) / "ndk/28.2.13676358/toolchains/llvm/prebuilt/darwin-x86_64/bin/llvm-readelf"
+    host = {"Darwin": "darwin-x86_64", "Linux": "linux-x86_64"}[platform.system()]
+    readelf = Path(os.environ["ANDROID_HOME"]) / f"ndk/28.2.13676358/toolchains/llvm/prebuilt/{host}/bin/llvm-readelf"
     libraries = []
     with zipfile.ZipFile(apk) as archive:
         names = archive.namelist()

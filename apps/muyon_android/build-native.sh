@@ -5,7 +5,12 @@ repo=$(CDPATH= cd -- "$(dirname -- "$0")/../.." && pwd)
 : "${ANDROID_HOME:?Set ANDROID_HOME to the installed SDK}"
 : "${MUYON_NATIVE_OUTPUT:?Set an absolute task-owned output directory}"
 case "$MUYON_NATIVE_OUTPUT" in /*) ;; *) exit 2 ;; esac
-ndk="$ANDROID_HOME/ndk/28.2.13676358/toolchains/llvm/prebuilt/darwin-x86_64/bin"
+case "$(uname -s)" in
+    Darwin) ndk_host=darwin-x86_64 ;;
+    Linux) ndk_host=linux-x86_64 ;;
+    *) printf '%s\n' 'Unsupported NDK host' >&2; exit 2 ;;
+esac
+ndk="$ANDROID_HOME/ndk/28.2.13676358/toolchains/llvm/prebuilt/$ndk_host/bin"
 source_id=$(git -C "$repo" rev-parse HEAD)
 # Include all product sources, even a reviewable uncommitted implementation.
 input_hash=$(cd "$repo" && find crates apps/muyon_android/app/src apps/muyon_android/ml-native -type f ! -path '*/target/*' -print | LC_ALL=C sort | while IFS= read -r file; do shasum -a 256 "$file"; done | shasum -a 256 | cut -d ' ' -f1)

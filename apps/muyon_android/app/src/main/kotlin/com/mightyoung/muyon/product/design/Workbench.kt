@@ -19,7 +19,6 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -27,10 +26,12 @@ import androidx.compose.ui.unit.sp
 import com.mightyoung.muyon.product.R
 import kotlinx.coroutines.launch
 
-val ClaudeSansFont = FontFamily(Font(R.font.claude_sans), Font(R.font.claude_sans, FontWeight.Medium), Font(R.font.claude_sans, FontWeight.SemiBold))
-val ClaudeReplyFont = FontFamily(Font(R.font.claude_serif))
+// Legacy source names retained for callers; glyphs come from the OS, not an
+// extracted vendor font. The typography below controls readable size and rhythm.
+val ClaudeSansFont = FontFamily.SansSerif
+val ClaudeReplyFont = FontFamily.Serif
 
-/** Muse token values and Claude UI/response typography from the selected packages. */
+/** Reference-inspired spacing and colors with platform-provided typography. */
 @Composable
 fun MuyonTheme(content: @Composable () -> Unit) {
     val dark = isSystemInDarkTheme()

@@ -1,4 +1,4 @@
-<!-- WorkBuddy 2.6.1 assets/icons/chat-bubble.svg; original path, monochrome tint. -->
-<vector xmlns:android="http://schemas.android.com/apk/res/android" android:width="24dp" android:height="24dp" android:viewportWidth="1212" android:viewportHeight="1024">
-    <path android:fillColor="#FF111112" android:pathData="m165.27,826.33 155.18,180.42c19.83,23.08 52.56,22.86 72.55,0L550.9,826.33h605.81c30.52,0 55.26,-24.73 55.26,-55.47V55.53c0,-30.68 -24.19,-55.53 -55.2,-55.53H55.2C24.73,0 0,24.73 0,55.53v715.33c0,30.63 24.4,55.47 55.03,55.47zM55.09,55.1h1101.78v716.15h-621.9L356.54,967.47 193.69,771.24H55.1z" />
+<!-- Original Muyon geometry: message outline and text rule. No extracted asset. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android" android:width="24dp" android:height="24dp" android:viewportWidth="24" android:viewportHeight="24">
+    <path android:fillColor="@android:color/transparent" android:strokeColor="#FF111112" android:strokeWidth="1.8" android:strokeLineCap="round" android:strokeLineJoin="round" android:pathData="M4,4L20,4L20,17L10,17L4,21ZM8,10L16,10" />
 </vector>

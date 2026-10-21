@@ -1,5 +1,13 @@
 # Android page reference evidence
 
+Review correction (2026-10-21): the extracted Claude font files have been removed
+from current Android sources; platform sans/serif now provide glyphs. The five
+`wb_*` vector resources have been replaced with independently authored basic
+geometry. The extraction descriptions below record the earlier reviewed build,
+not the current distribution contents. No redistribution permission was inferred
+from access to an installed application or the user's reference request. See
+[the current resource inventory](../../reviews/2026-10-21-product-ci-and-resource-remediation.md).
+
 Latest user correction: Muse for the complete UI, Claude typography, quiet chat
 without permanent configuration/button clutter. The initial WorkBuddy/Grok split
 is superseded for visuals; neutral icons and member relationships are retained.
