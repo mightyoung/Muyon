@@ -1,0 +1,124 @@
+{
+  "source_commit": "79dca05ba6ff84dbc8a60d0838951aec6720227a",
+  "build_id": "79dca05ba6ff84dbc8a60d0838951aec6720227a:cbc8b291d425d3a291ddb30bfe8c3baa81d33c6a385b06bdc626216bc00b1f11",
+  "apk": "/private/tmp/muyon-workflows-79dca05b.apk",
+  "test_apk": "/private/tmp/muyon-workflows-79dca05b-androidTest.apk",
+  "apk_sha256": "4007f227f0cb17c3bba0b7ef5c7115ed7901efd24883390354d5c07198a23720",
+  "test_apk_sha256": "8f8179145ea3d98f380116aaff8815e951a50a544db7482eb6b44b90db8279a6",
+  "runs": [
+    {
+      "log": "/private/tmp/muyon-android-refactor-20261020/docs/implementation/agent-workflow-proof-20261021/nonpicker.log",
+      "log_sha256": "f7445363a0ad07339f5718a54f63074fccee6f649e08f31c2b86bea0cb3e82d4",
+      "adb_exit": 0,
+      "required": [
+        "com.mightyoung.muyon.product.ChatOriginPresentationTest#oldRequestRecoveryShowsOriginalIdentityInsideAnotherGroup",
+        "com.mightyoung.muyon.product.ContractCodecProductTest#actualKotlinToRustCodecPreservesPairsAndUsesTheSameNfcRule",
+        "com.mightyoung.muyon.product.ContractCodecProductTest#malformedUtf16AndRawLimitCannotTurnIntoAValidReviewedPlan",
+        "com.mightyoung.muyon.product.ContractVectorsProductTest#sharedVectorsRejectWithoutPlansAndOneEightFieldReceiptSurvivesServiceReopen",
+        "com.mightyoung.muyon.product.ProductChatBoundaryTest#explicitConfigurationCannotTurnMissingPriceProofIntoOutboundAuthority",
+        "com.mightyoung.muyon.product.ProductLifecycleTest#backFromReviewThenRealRotationDiscardsUnconfirmedDraftWithoutWriting",
+        "com.mightyoung.muyon.product.ProductLifecycleTest#closingLeaseBeforePrepareReplyCannotReportStaleSuccessOrPublishSupplier",
+        "com.mightyoung.muyon.product.ProductRecoveryTest#actualServiceDeathChangesEpochAndOnlyOriginalReceiptRecovers",
+        "com.mightyoung.muyon.product.ProductRecoveryTest#closingWithAllRequestSlotsBusyStillRevokesTheLiveBinderLease",
+        "com.mightyoung.muyon.product.ProductRecoveryTest#rapidCloseAndRebindWaitsForPriorOwnersWithoutKillingTheProcess",
+        "com.mightyoung.muyon.product.ProductUnknownRecoveryTest#committedWriteWithLostClientReplyRecoversOnlyOriginalReceiptInUi",
+        "com.mightyoung.muyon.product.WorkbenchNavigationTest#agentAndGroupNavigationPreservesSeparateConversationsAndGlobalReceiptMarkers",
+        "com.mightyoung.muyon.product.agents.AgentCatalogTest#escapedInstructionsCannotCommitAnUnreadableExpandedDirectory",
+        "com.mightyoung.muyon.product.agents.AgentCatalogTest#invalidMembersAndCorruptDataCannotOverwritePersistedDirectory",
+        "com.mightyoung.muyon.product.agents.AgentCatalogTest#reopenedCatalogPreservesEditsAndGroupArchiveNeverDeletesAgents",
+        "com.mightyoung.muyon.product.chat.AgentWorkflowProductTest#activityMenuCreatesAndExecutesLocalChildWithCollapsibleFacts",
+        "com.mightyoung.muyon.product.chat.AgentWorkflowProductTest#conversationProjectAndBinderSessionIsolateAuthority",
+        "com.mightyoung.muyon.product.chat.AgentWorkflowProductTest#metadataLoadsBodyOnDemandAndDisabledSkillCannotCreateOrExecute",
+        "com.mightyoung.muyon.product.chat.AgentWorkflowProductTest#remoteChildCannotPretendToExecuteAndRootCancellationStopsQueuedWork",
+        "com.mightyoung.muyon.product.chat.AgentWorkflowProductTest#selectedSkillReadsCommittedBusinessAndPublishesOrderedToolFacts",
+        "com.mightyoung.muyon.product.chat.ConversationRichTextTest#actualRequestActivityUsesObservedFactsAndResetsForAnotherRequest",
+        "com.mightyoung.muyon.product.chat.ConversationRichTextTest#fencedCodeCopiesExactBodyAndTablesScrollHorizontally",
+        "com.mightyoung.muyon.product.chat.ConversationRichTextTest#longBilingualParagraphsAndMarkdownKeepTheirContent",
+        "com.mightyoung.muyon.product.chat.ConversationRichTextTest#unsafeSchemesHaveNoLinksAndEmptyEventsHaveNoReasoningPlaceholder",
+        "com.mightyoung.muyon.product.ml.LocalEmbeddingTest#realModelNormalizesDeterministicallyAndRanksEnglishAndChineseQueries",
+        "com.mightyoung.muyon.product.ml.LocalEmbeddingTest#realTokenizerRejectsOverflowAndClosedEngineCanBeReopened",
+        "com.mightyoung.muyon.product.ml.LocalModelsTest#cancelledInstallationDoesNotPublishPartialModels",
+        "com.mightyoung.muyon.product.ml.LocalModelsTest#corruptedInstalledDictionaryIsReplacedFromFrozenOfflineAsset",
+        "com.mightyoung.muyon.product.ml.LocalOcrTest#bgrPlaneOrderAndRecognizerPaddingMatchPinnedPreprocessing",
+        "com.mightyoung.muyon.product.ml.LocalOcrTest#ctcKeepsBlankSeparatedRepeatsAndRejectsMalformedProbabilities",
+        "com.mightyoung.muyon.product.ml.LocalOcrTest#readingOrderUsesFixedRowAnchorsAcrossThresholdChainsAndMultipleRows",
+        "com.mightyoung.muyon.product.ml.LocalOcrTest#realModelsRecognizeChineseAmountAndRotatedFixture",
+        "com.mightyoung.muyon.product.ml.LocalOcrTest#realModelsRecognizeScannedPdfRenderedByAndroid",
+        "com.mightyoung.muyon.product.ml.LocalOcrTest#realModelsReturnNoTextForBlankAndCancellationDoesNotPoisonSession",
+        "com.mightyoung.muyon.product.ml.LocalOcrTest#rotatedContourRetainsAngleAndWeakInvalidMapsCannotBecomeTextBoxes",
+        "com.mightyoung.muyon.product.ml.ResearchIndexTest#chunksSurviveReopenAndRankWithPageProvenance",
+        "com.mightyoung.muyon.product.ml.ResearchIndexTest#interruptedPublicationPreservesPreviousSource",
+        "com.mightyoung.muyon.product.ml.ResearchIndexTest#invalidVectorsAndTextPreservePublishedSource",
+        "com.mightyoung.muyon.product.ml.ResearchIndexTest#samePaperAttachmentsSurviveReopenAndReplaceOnlyTheirOwnDigest",
+        "com.mightyoung.muyon.product.ml.ResearchIndexTest#searchRevalidatesSourcesAndIsolatesProjectsAndModels",
+        "com.mightyoung.muyon.product.ml.ResearchIndexTest#sqliteFailureRollsBackReplacementAndPartialChunks",
+        "com.mightyoung.muyon.product.research.LocalResearchIntegrationTest#cancellationDuringPublicationRollsBackAfterAnActualChunkWrite",
+        "com.mightyoung.muyon.product.research.LocalResearchIntegrationTest#committedPrivatePdfRecognizedEmbeddedReopenedAndSemanticallyRetrieved",
+        "com.mightyoung.muyon.product.research.ResearchProductTest#corruptStoredMemberCannotPublishSnapshotOrPaper",
+        "com.mightyoung.muyon.product.research.ResearchProductTest#deflatedZipUsesFrozenArchiveAndSealsActualImport",
+        "com.mightyoung.muyon.product.research.ResearchProductTest#projectVisibleReviewThenActualPdfHostAndDetail",
+        "com.mightyoung.muyon.product.supplier.SupplierProductTest#dismissingReviewKeepsDraftAndDoesNotWrite",
+        "com.mightyoung.muyon.product.supplier.SupplierProductTest#elevenRealSuppliersAreReachableThroughNextPage",
+        "com.mightyoung.muyon.product.supplier.SupplierProductTest#visibleReviewCrudUsesActualReceipts"
+      ],
+      "build_id": "79dca05ba6ff84dbc8a60d0838951aec6720227a:cbc8b291d425d3a291ddb30bfe8c3baa81d33c6a385b06bdc626216bc00b1f11",
+      "apk_sha256": "4007f227f0cb17c3bba0b7ef5c7115ed7901efd24883390354d5c07198a23720",
+      "test_apk_sha256": "8f8179145ea3d98f380116aaff8815e951a50a544db7482eb6b44b90db8279a6"
+    },
+    {
+      "log": "/private/tmp/muyon-android-refactor-20261020/docs/implementation/agent-workflow-proof-20261021/GENERATE.log",
+      "log_sha256": "7ff1823ca6c0a738a3ffcfe46e5cbf98a6c733d50ead198021b12e2a62dc6a1f",
+      "adb_exit": 0,
+      "required": [
+        "com.mightyoung.muyon.product.SystemPickerProductTest#generatePickerInputs"
+      ],
+      "build_id": "79dca05ba6ff84dbc8a60d0838951aec6720227a:cbc8b291d425d3a291ddb30bfe8c3baa81d33c6a385b06bdc626216bc00b1f11",
+      "apk_sha256": "4007f227f0cb17c3bba0b7ef5c7115ed7901efd24883390354d5c07198a23720",
+      "test_apk_sha256": "8f8179145ea3d98f380116aaff8815e951a50a544db7482eb6b44b90db8279a6"
+    },
+    {
+      "log": "/private/tmp/muyon-android-refactor-20261020/docs/implementation/agent-workflow-proof-20261021/PDF.log",
+      "log_sha256": "998d768ab1c8c6b4158426826f868e1869b2696858c58187f611cbc107c09eb6",
+      "adb_exit": 0,
+      "required": [
+        "com.mightyoung.muyon.product.SystemPickerProductTest#pdfSystemPickerManualReviewAndPrivateAttachment"
+      ],
+      "build_id": "79dca05ba6ff84dbc8a60d0838951aec6720227a:cbc8b291d425d3a291ddb30bfe8c3baa81d33c6a385b06bdc626216bc00b1f11",
+      "apk_sha256": "4007f227f0cb17c3bba0b7ef5c7115ed7901efd24883390354d5c07198a23720",
+      "test_apk_sha256": "8f8179145ea3d98f380116aaff8815e951a50a544db7482eb6b44b90db8279a6"
+    },
+    {
+      "log": "/private/tmp/muyon-android-refactor-20261020/docs/implementation/agent-workflow-proof-20261021/ZIP.log",
+      "log_sha256": "8a0e0d242ca9b9e4cc76246f16fd4a8ad5941270586c627da7ebabf5a2d180c7",
+      "adb_exit": 0,
+      "required": [
+        "com.mightyoung.muyon.product.SystemPickerProductTest#zipSystemPickerReviewAndImport"
+      ],
+      "build_id": "79dca05ba6ff84dbc8a60d0838951aec6720227a:cbc8b291d425d3a291ddb30bfe8c3baa81d33c6a385b06bdc626216bc00b1f11",
+      "apk_sha256": "4007f227f0cb17c3bba0b7ef5c7115ed7901efd24883390354d5c07198a23720",
+      "test_apk_sha256": "8f8179145ea3d98f380116aaff8815e951a50a544db7482eb6b44b90db8279a6"
+    },
+    {
+      "log": "/private/tmp/muyon-android-refactor-20261020/docs/implementation/agent-workflow-proof-20261021/DIRECTORY.log",
+      "log_sha256": "255b2d41b95fbc80d1f3bea49847a4c46d86002e9b28367d450970143eaa3c41",
+      "adb_exit": 0,
+      "required": [
+        "com.mightyoung.muyon.product.SystemPickerProductTest#directorySystemPickerReviewAndImport"
+      ],
+      "build_id": "79dca05ba6ff84dbc8a60d0838951aec6720227a:cbc8b291d425d3a291ddb30bfe8c3baa81d33c6a385b06bdc626216bc00b1f11",
+      "apk_sha256": "4007f227f0cb17c3bba0b7ef5c7115ed7901efd24883390354d5c07198a23720",
+      "test_apk_sha256": "8f8179145ea3d98f380116aaff8815e951a50a544db7482eb6b44b90db8279a6"
+    },
+    {
+      "log": "/private/tmp/muyon-android-refactor-20261020/docs/implementation/agent-workflow-proof-20261021/PRIVATE.log",
+      "log_sha256": "6aa1eb40078ce3fa004d1d949cc9523c048c3f4a1b827b5ad7db499842e29a5d",
+      "adb_exit": 0,
+      "required": [
+        "com.mightyoung.muyon.product.SystemPickerProductTest#reopenPrivatePdfAfterOriginalRemoved"
+      ],
+      "build_id": "79dca05ba6ff84dbc8a60d0838951aec6720227a:cbc8b291d425d3a291ddb30bfe8c3baa81d33c6a385b06bdc626216bc00b1f11",
+      "apk_sha256": "4007f227f0cb17c3bba0b7ef5c7115ed7901efd24883390354d5c07198a23720",
+      "test_apk_sha256": "8f8179145ea3d98f380116aaff8815e951a50a544db7482eb6b44b90db8279a6"
+    }
+  ]
+}

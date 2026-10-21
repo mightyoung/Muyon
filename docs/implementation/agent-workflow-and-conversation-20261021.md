@@ -18,6 +18,8 @@ Use existing Claude Sans/Serif fonts, readable16/24 body text, bounded line widt
 
 ## Acceptance
 
+The scoped build/device verification and exact APK identities are recorded in [agent-workflow-proof-20261021](agent-workflow-proof-20261021/README.md). Local record results use a readable summary with a separate raw-record disclosure; task selection remains compact.
+
 Rust tests prove actual local reads, scope isolation, progressive skill loading/toggle, bounds, cancellation, late results, restart and remote blocked-plan identity. Android tests prove real Service→Rust creation/execute/query/reopen, management/timeline interactions and readable rich text. Build, lint, bridge regeneration, two-ABI package checks and existing device regression remain separate gates. Real provider multi-agent inference stays unverified while the existing pricing proof gate is unavailable.
 
 ## Public references and reuse

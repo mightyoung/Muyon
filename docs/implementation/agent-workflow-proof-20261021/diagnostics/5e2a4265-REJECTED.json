@@ -1,0 +1,15 @@
+{
+  "source_commit": "5e2a42650eb3a7f122c5ceb1650f7107c9b545c9",
+  "accepted": false,
+  "reason": "4 rich-text methods passed, 5 workflow methods failed: null error was treated as failure; fixed product code and assertions without skipping cases.",
+  "files": {
+    "muyon-workflows-5e2a4265.apk": {
+      "bytes": 435831129,
+      "sha256": "33d7c194b02ca567d8d1ee6654587b2f57aace21109ec9f71d96d4f235b410e9"
+    },
+    "muyon-workflows-5e2a4265-androidTest.apk": {
+      "bytes": 1321552,
+      "sha256": "6051c1a272ddb8c36f43e877c64b52b15543b133fb69856ff15587897cc81d41"
+    }
+  }
+}

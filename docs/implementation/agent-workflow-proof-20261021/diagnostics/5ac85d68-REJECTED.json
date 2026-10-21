@@ -1,0 +1,15 @@
+{
+  "source_commit": "5ac85d683a0cf2c00fb7b73bb5b849a6e69976eb",
+  "accepted": false,
+  "reason": "8/9 passed; remaining fixture lookup requested host page size50 but Service permits1..10. Corrected fixture pagination to10, product contract unchanged.",
+  "files": {
+    "muyon-workflows-5ac85d68.apk": {
+      "bytes": 435831129,
+      "sha256": "0bcd1ee9ad0977ee85b4bc0ff5693c41016cbde1856ccd1ce3135c00ae3252f1"
+    },
+    "muyon-workflows-5ac85d68-androidTest.apk": {
+      "bytes": 1321558,
+      "sha256": "f6ef7d6bcb336a27acbd0910154c9c443a461bf0d4f37567d00a098fd367cb1e"
+    }
+  }
+}
