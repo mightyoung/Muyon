@@ -14,12 +14,15 @@ import java.util.concurrent.atomic.AtomicBoolean
 @Composable
 internal fun LocalResearchPanel(host: ResearchFileHost, project: String, paper: JSONObject?, enabled: Boolean) {
     val context = LocalContext.current.applicationContext
-    val local = remember(host) { LocalResearch(context, host) }
+    val local = remember(host, project) { LocalResearch(context, host) }
     var query by remember(project) { mutableStateOf("") }
     var status by remember(project) { mutableStateOf("") }
     var hits by remember(project) { mutableStateOf<List<SearchHit>>(emptyList()) }
     var pending by remember(project) { mutableStateOf<AtomicBoolean?>(null) }
-    DisposableEffect(project) { onDispose { pending?.set(true) } }
+    DisposableEffect(local) {
+        host.ownModel(local)
+        onDispose { pending?.set(true); host.releaseModel(local) }
+    }
     fun <T> run(action: (AtomicBoolean) -> T, done: (T) -> Unit) {
         if (pending != null) return
         val token = AtomicBoolean(false)

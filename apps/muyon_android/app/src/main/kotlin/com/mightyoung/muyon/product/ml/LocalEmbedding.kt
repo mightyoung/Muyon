@@ -41,3 +41,41 @@ internal class LocalEmbedding(model: File) : Closeable {
         init { System.loadLibrary("muyon_local_embedding") }
     }
 }
+
+/** Instance-owned single resource. Replacement, use and close share one monitor. */
+internal class ModelResourceCache<T : Closeable> : Closeable {
+    private var key: String? = null
+    private var resource: T? = null
+    private var closed = false
+
+    @Synchronized
+    fun <R> use(identity: String, create: () -> T, action: (T) -> R): R {
+        check(!closed) { "本地模型已关闭" }
+        if (key != identity) {
+            val old = resource
+            resource = null
+            key = null
+            old?.close()
+            // A failed open is never cached. No resource from the old identity remains live.
+            resource = create()
+            key = identity
+        }
+        return try { action(requireNotNull(resource)) } catch (failure: Throwable) {
+            val failed = resource
+            resource = null
+            key = null
+            try { failed?.close() } catch (closing: Throwable) { failure.addSuppressed(closing) }
+            throw failure
+        }
+    }
+
+    @Synchronized
+    override fun close() {
+        if (closed) return
+        closed = true
+        val old = resource
+        resource = null
+        key = null
+        old?.close()
+    }
+}

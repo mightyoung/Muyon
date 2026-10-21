@@ -80,7 +80,9 @@ pub trait HostedCostVerifier {
     fn prove(&self, payload: &[u8], price_revision: &str) -> Result<HostedCostBound>;
 }
 /// Trusted current-price authority, independently reviewed against the chosen
-/// provider's actual per-request billing contract. UI input is not this proof.
+/// provider's exact per-request billing contract, including valid empty results.
+/// Result-dependent billing needs a different reviewed contract; it must not be
+/// inferred from result count. UI input is not this proof.
 pub trait SearchPriceVerifier {
     fn prove(&self, endpoint: &str, payload: &[u8], price_revision: &str) -> Result<u64>;
 }
@@ -559,7 +561,7 @@ impl AgentOwner {
     pub fn cancel_trusted(&self, request: &str) -> Result<Observation> {
         let tx = storage(self.db.transaction())?;
         self.request(request)?;
-        storage(self.db.exec("UPDATE requests SET cancelled=1,status=CASE WHEN status IN ('prepared','reserved','tool_pending') THEN 'cancelled' ELSE status END WHERE id=?",&[request]))?;
+        storage(self.db.exec("UPDATE requests SET cancelled=1,status=CASE WHEN status IN ('prepared','reserved','tool_pending') THEN 'cancelled' ELSE status END WHERE id=? AND status IN ('prepared','reserved','unknown','tool_pending')",&[request]))?;
         storage(tx.commit())?;
         self.lookup(request)
     }
@@ -579,11 +581,7 @@ impl AgentOwner {
             let results = DeepSeek
                 .decode(body.as_bytes(), number(cell(&row, 12)?)?)
                 .map_err(|_| "search_response_invalid")?;
-            let charge = if results.is_empty() {
-                0
-            } else {
-                number(cell(&row, 7)?)?
-            };
+            let charge = number(cell(&row, 7)?)?;
             (
                 serde_json::from_str::<Value>(&muyon_web_search_lab::Json::Array(results).encode())
                     .map_err(|_| "search_response_invalid")?,
@@ -741,7 +739,9 @@ impl AgentOwner {
     /// Revalidated for already-prepared plans and immediately before dispatch.
     fn ensure_conversation_resolved_except(&self, conversation: &str, request: &str) -> Result<()> {
         let rows = storage(self.db.query("SELECT id FROM requests WHERE conversation=? AND id<>? AND status IN ('reserved','unknown','tool_pending') LIMIT 1", &[conversation, request]))?;
-        if !rows.is_empty() { return Err("conversation_original_outcome_required"); }
+        if !rows.is_empty() {
+            return Err("conversation_original_outcome_required");
+        }
         Ok(())
     }
     /// Host-only routing identity, never sourced from action/model JSON.

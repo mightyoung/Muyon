@@ -33,6 +33,38 @@ class ProductRecoveryTest {
         return requireNotNull(response)
     }
     private fun close() = instrumentation.runOnMainSync { client.close() }
+    @Test fun interruptedAttachmentUploadIsRecoveredOnActualServiceRestart() {
+        connect()
+        try {
+            val initialized = call(if (java.io.File(context.filesDir, "muyon-product-v2/business-v2.sqlite").isFile) "health" else "initialize")
+            assertEquals(initialized.toString(), "ok", initialized.getString("status"))
+            val before = call("health").getJSONObject("data")
+            val projectId = "upload-restart-${UUID.randomUUID()}"
+            val plan = call("prepare", JSONObject().put("operation", JSONObject()
+                .put("operation", "project_create").put("project_id", projectId).put("name", projectId))
+                .put("expected_revision", "0")).getJSONObject("data")
+            val committed = call("confirm", JSONObject().put("plan_id", plan.getString("plan_id"))).getJSONObject("data")
+            assertEquals("committed", committed.getString("status"))
+            val upload = call("begin_upload", JSONObject().put("project_id", projectId)).getJSONObject("data").getString("upload_id")
+            val bytes = ByteArray(65_536) { 7 }
+            assertEquals("ok", call("append_upload", JSONObject().put("upload_id", upload)
+                .put("bytes", android.util.Base64.encodeToString(bytes, android.util.Base64.NO_WRAP))).getString("status"))
+            val staging = java.io.File(context.filesDir, "muyon-product-v2/business-v2.sqlite.blobs/staging/$upload")
+            assertEquals(65_536L, staging.length())
+            assertEquals("copying", call("lookup_upload", JSONObject().put("upload_id", upload)).getJSONObject("data").getString("state"))
+            val pid = before.getInt("service_pid")
+            assertNotEquals(Process.myPid(), pid)
+            instrumentation.runOnMainSync { client.close(); Process.killProcess(pid) }
+            connect()
+            val after = call("health").getJSONObject("data")
+            assertNotEquals(before.getString("epoch"), after.getString("epoch"))
+            assertEquals("aborted", call("lookup_upload", JSONObject().put("upload_id", upload)).getJSONObject("data").getString("state"))
+            assertFalse("old owner staging must be reclaimed by production startup", staging.exists())
+            val receipt = call("lookup", JSONObject().put("intent_id", plan.getString("intent_id"))).getJSONObject("data")
+            assertEquals(committed.toString(), receipt.toString())
+            assertEquals(0, call("papers", JSONObject().put("project_id", projectId)).getJSONArray("data").length())
+        } finally { close() }
+    }
     @Test fun rapidCloseAndRebindWaitsForPriorOwnersWithoutKillingTheProcess() {
         val epochs = mutableSetOf<String>()
         val processes = mutableSetOf<Int>()

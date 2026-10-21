@@ -57,7 +57,15 @@ internal class ProductCredentialVault {
  * ledger. No old canary profile, key, grant, batch or reservation is loaded.
  * Configuring does not send. Confirming a blocked plan cannot reserve or send.
  */
-class ProductChatRuntime(private val port: ProductChatPort) : AutoCloseable {
+internal fun interface ProductChatExchange {
+    fun exchange(payload: ByteArray, credential: CharArray, purpose: String,
+        allowed: () -> Boolean, authorizeAndWrite: ((() -> Unit) -> Boolean)): ByteArray
+}
+
+class ProductChatRuntime internal constructor(private val port: ProductChatPort,
+    private val transport: ProductChatExchange = ProductChatExchange { payload, credential, purpose, allowed, write ->
+        ProductHttpsTransport().exchange(payload, credential, purpose, allowed, write)
+    }) : AutoCloseable {
     private val control = Executors.newSingleThreadExecutor()
     private val network = Executors.newSingleThreadExecutor()
     private val closed = AtomicBoolean(false)
@@ -80,7 +88,7 @@ class ProductChatRuntime(private val port: ProductChatPort) : AutoCloseable {
             "agent_configuration_unavailable", "agent_configuration_changed", "agent_credential_reinstall_required",
             "chat_text_denied", "search_query_denied", "search_request_invalid", "chat_disabled", "search_disabled",
             "hosted_cost_proof_unavailable", "search_price_proof_unavailable", "conversation_original_outcome_required",
-            "agent_request_already_confirmed", "agent_request_not_found", "agent_dispatch_denied")) checkNotNull(code) else "chat_operation_unavailable")
+            "agent_request_already_confirmed", "agent_request_not_found", "agent_dispatch_denied", "chat_tool_history_review_required")) checkNotNull(code) else "chat_operation_unavailable")
     }
     private fun submit(callback: (JSONObject) -> Unit, action: () -> JSONObject) {
         if (closed.get()) { callback(failure("chat_closed")); return }
@@ -198,12 +206,15 @@ class ProductChatRuntime(private val port: ProductChatPort) : AutoCloseable {
             check(port.allowed(request, configuration, generation))
             payload = dispatch.getString("payload").toByteArray(Charsets.UTF_8)
             response = credentials.withCopy(generation) { credential ->
-                ProductHttpsTransport().exchange(checkNotNull(payload), credential, dispatch.getString("purpose"), allowed) { write ->
+                transport.exchange(checkNotNull(payload), credential, dispatch.getString("purpose"), allowed) { write ->
                     if (!port.allowed(request, configuration, generation)) false
                     else sendGate.authorizeWrite(ticket, write)
                 }
             }
-            if (allowed()) port.settle(request, Charsets.UTF_8.newDecoder()
+            // A complete validated provider response must reach durable accounting
+            // even when cancellation happened after the sole write. Rust records
+            // the charge while suppressing cancelled answers; no redispatch occurs.
+            port.settle(request, Charsets.UTF_8.newDecoder()
                 .onMalformedInput(java.nio.charset.CodingErrorAction.REPORT)
                 .onUnmappableCharacter(java.nio.charset.CodingErrorAction.REPORT)
                 .decode(java.nio.ByteBuffer.wrap(checkNotNull(response))).toString())

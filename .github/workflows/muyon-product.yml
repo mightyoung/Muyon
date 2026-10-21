@@ -63,7 +63,6 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 60
     env:
-      MUYON_MODEL_INPUT_URL: ${{ vars.MUYON_MODEL_INPUT_URL }}
       MUYON_ML_FETCH: '1'
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
@@ -74,7 +73,7 @@ jobs:
         with:
           distribution: temurin
           java-version: '17'
-      - name: Record exact source and require provisioned model source
+      - name: Record exact source and initialize task-owned build directories
         run: |
           mkdir -p "$RUNNER_TEMP/product-evidence"
           git rev-parse HEAD | tee "$RUNNER_TEMP/product-evidence/source-sha.txt"
@@ -85,10 +84,6 @@ jobs:
             echo "MUYON_ML_OUTPUT=$RUNNER_TEMP/product-ml"
             echo "GRADLE_USER_HOME=$RUNNER_TEMP/product-gradle"
           } >> "$GITHUB_ENV"
-          if [[ -z "$MUYON_MODEL_INPUT_URL" ]]; then
-            echo 'BLOCKED: configure reviewed MUYON_MODEL_INPUT_URL; no substitute model or skipped product gate.' >&2
-            exit 1
-          fi
       - name: Provision fixed toolchains and locked dependencies
         run: |
           rustup toolchain install 1.93.1 --profile minimal --target aarch64-linux-android --target x86_64-linux-android

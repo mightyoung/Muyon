@@ -104,6 +104,12 @@ impl ProductCore {
             BusinessStore::initialize(&path, &workspace)?;
         }
         let store = BusinessStore::open_existing(&path, &workspace, &epoch)?;
+        // The exclusive OS owner lock has been acquired, so no predecessor can
+        // still publish/read with its old epoch. Finish conservative recovery
+        // before exposing any Service capability; existing refs, pins and
+        // pending/unknown intents remain the authority for collection.
+        store.reconcile_blobs_after_restart()?;
+        store.collect_blobs()?;
         let agent_path = root.join("agent-v1.sqlite");
         let agent = if agent_path.is_file() {
             Some(AgentOwner::open(&agent_path, &workspace, &epoch).map_err(agent_error)?)
@@ -264,8 +270,8 @@ impl ProductCore {
         let action_value = serde_json::from_str::<Value>(&action)
             .map_err(|_| agent_error("workflow_action_invalid"))?;
         let snapshot = action_value["action"] == "snapshot";
-        let revoke = action_value["action"] == "cancel" ||
-            (action_value["action"] == "set_skill" && action_value["enabled"] == false);
+        let revoke = action_value["action"] == "cancel"
+            || (action_value["action"] == "set_skill" && action_value["enabled"] == false);
         if let (true, Some(owner), Some(runs)) = (
             snapshot,
             agent.as_ref(),
@@ -299,7 +305,11 @@ impl ProductCore {
                     .request_chain(request.as_str().ok_or_else(unavailable)?)
                     .map_err(agent_error)?
                 {
-                    if revoke { owner.cancel_trusted(&observation.request_id).map_err(agent_error)?; }
+                    if revoke {
+                        owner
+                            .cancel_trusted(&observation.request_id)
+                            .map_err(agent_error)?;
+                    }
                     actual.insert(observation.request_id);
                 }
             }
@@ -395,7 +405,14 @@ impl ProductCore {
     ) -> Result<String, ProductError> {
         let state = self.state.lock().map_err(|_| unavailable())?;
         authorize_agent_request(&state, &request)?;
-        encode(&state.agent.as_ref().ok_or_else(unavailable)?.confirm_trusted(&request, &configuration).map_err(agent_error)?)
+        encode(
+            &state
+                .agent
+                .as_ref()
+                .ok_or_else(unavailable)?
+                .confirm_trusted(&request, &configuration)
+                .map_err(agent_error)?,
+        )
     }
     /// Private transport port. Never registered as a UI/model operation.
     pub fn agent_claim(
@@ -406,7 +423,14 @@ impl ProductCore {
     ) -> Result<String, ProductError> {
         let state = self.state.lock().map_err(|_| unavailable())?;
         authorize_agent_request(&state, &request)?;
-        encode(&state.agent.as_ref().ok_or_else(unavailable)?.claim_dispatch(&request, &configuration, &generation).map_err(agent_error)?)
+        encode(
+            &state
+                .agent
+                .as_ref()
+                .ok_or_else(unavailable)?
+                .claim_dispatch(&request, &configuration, &generation)
+                .map_err(agent_error)?,
+        )
     }
     pub fn agent_allowed(
         &self,
@@ -418,10 +442,10 @@ impl ProductCore {
             .lock()
             .ok()
             .and_then(|state| {
-                state
-                    .agent
-                    .as_ref()
-                    .map(|owner| authorize_agent_request(&state, &request).is_ok() && owner.dispatch_allowed(&request, &configuration, &generation))
+                state.agent.as_ref().map(|owner| {
+                    authorize_agent_request(&state, &request).is_ok()
+                        && owner.dispatch_allowed(&request, &configuration, &generation)
+                })
             })
             .unwrap_or(false)
     }
@@ -799,8 +823,14 @@ fn agent_error(code: &'static str) -> ProductError {
 
 fn authorize_agent_request(state: &State, request: &str) -> Result<(), ProductError> {
     let owner = state.agent.as_ref().ok_or_else(unavailable)?;
-    owner.ensure_request_resolved(request).map_err(agent_error)?;
-    if let Some(ledger) = &state.workflow { ledger.authorize_request(owner, request).map_err(agent_error)?; }
+    owner
+        .ensure_request_resolved(request)
+        .map_err(agent_error)?;
+    if let Some(ledger) = &state.workflow {
+        ledger
+            .authorize_request(owner, request)
+            .map_err(agent_error)?;
+    }
     Ok(())
 }
 fn confirm_prepared(
@@ -1280,18 +1310,198 @@ mod tests {
             "payload":{"name":"supplier","aliases":[],"address":null,"categories":[],"notes":null,"merged_into":null}}).to_string(),None,"0".into()).unwrap()).unwrap()
     }
     #[test]
+    fn production_open_recovers_interrupted_upload_and_collects_only_unreferenced_objects() {
+        let root = root();
+        let core =
+            ProductCore::open(root.clone(), "workspace".into(), "epoch-1".into(), true).unwrap();
+        let project: Value = serde_json::from_str(&core.prepare(json!({"operation":"project_create", "project_id":"attachments", "name":"Attachments"}).to_string(), None, "0".into()).unwrap()).unwrap();
+        core.confirm_user_plan(project["plan_id"].as_str().unwrap().into())
+            .unwrap();
+        let begin = || -> String {
+            serde_json::from_str::<Value>(&core.begin_upload("attachments".into()).unwrap())
+                .unwrap()["upload_id"]
+                .as_str()
+                .unwrap()
+                .into()
+        };
+        let copying = begin();
+        core.append_upload(copying.clone(), b"%PDF-1.4\ninterrupted".to_vec())
+            .unwrap();
+        let orphan = begin();
+        core.append_upload(orphan.clone(), b"%PDF-1.4\nunreferenced\n%%EOF".to_vec())
+            .unwrap();
+        let orphan_blob: Value =
+            serde_json::from_str(&core.finish_upload(orphan.clone(), "pdf".into()).unwrap())
+                .unwrap();
+        let retained = begin();
+        core.append_upload(
+            retained.clone(),
+            b"%PDF-1.4\nretained attachment\n%%EOF".to_vec(),
+        )
+        .unwrap();
+        let retained_blob: Value =
+            serde_json::from_str(&core.finish_upload(retained.clone(), "pdf".into()).unwrap())
+                .unwrap();
+        let paper: Value = serde_json::from_str(&core.prepare(json!({"operation":"paper_create", "paper_id":"retained-paper", "payload":{"title":"Keep this paper", "attachment":retained_blob["blob"], "attachment_upload_id":retained}}).to_string(), Some("attachments".into()), "0".into()).unwrap()).unwrap();
+        let receipt = core
+            .confirm_user_plan(paper["plan_id"].as_str().unwrap().into())
+            .unwrap();
+        let reader: Value = serde_json::from_str(
+            &core
+                .open_attachment(
+                    "attachments".into(),
+                    "retained-paper".into(),
+                    retained_blob["blob"]["digest"].as_str().unwrap().into(),
+                )
+                .unwrap(),
+        )
+        .unwrap();
+        assert!(reader["reader_id"].is_string());
+        // A competing open cannot run maintenance while this owner is live.
+        assert!(
+            ProductCore::open(root.clone(), "workspace".into(), "epoch-2".into(), false).is_err()
+        );
+        drop(core);
+        let reopened =
+            ProductCore::open(root.clone(), "workspace".into(), "epoch-2".into(), false).unwrap();
+        let state: Value =
+            serde_json::from_str(&reopened.lookup_upload(copying.clone()).unwrap()).unwrap();
+        assert_eq!(state["state"], "aborted");
+        let files = Path::new(&root).join("business-v2.sqlite.blobs");
+        assert!(!files.join("staging").join(copying).exists());
+        assert!(!files
+            .join("objects")
+            .join(orphan_blob["blob"]["digest"].as_str().unwrap())
+            .exists());
+        assert!(files
+            .join("objects")
+            .join(retained_blob["blob"]["digest"].as_str().unwrap())
+            .is_file());
+        assert_eq!(
+            reopened
+                .lookup_original(paper["intent_id"].as_str().unwrap().into())
+                .unwrap(),
+            receipt
+        );
+        let db = muyon_core::sqlite::Db::open(
+            Path::new(&root)
+                .join("business-v2.sqlite")
+                .to_str()
+                .unwrap(),
+            true,
+            false,
+        )
+        .unwrap();
+        assert_eq!(
+            db.query("SELECT count(*) FROM blob_pins WHERE kind='reader'", &[])
+                .unwrap()[0][0]
+                .as_deref(),
+            Some("0")
+        );
+        assert_eq!(
+            serde_json::from_str::<Value>(
+                &reopened.list_papers("attachments".into(), 10, 0).unwrap()
+            )
+            .unwrap()
+            .as_array()
+            .unwrap()
+            .len(),
+            1
+        );
+        drop(db);
+        drop(reopened);
+        std::fs::remove_dir_all(root).unwrap();
+    }
+
+    #[test]
+    fn production_startup_never_collects_unknown_uploads_or_intent_retained_pins() {
+        let root = root();
+        let core =
+            ProductCore::open(root.clone(), "workspace".into(), "epoch-1".into(), true).unwrap();
+        let project: Value = serde_json::from_str(&core.prepare(json!({"operation":"project_create", "project_id":"unknown-files", "name":"Unknown files"}).to_string(), None, "0".into()).unwrap()).unwrap();
+        core.confirm_user_plan(project["plan_id"].as_str().unwrap().into())
+            .unwrap();
+        let upload: Value =
+            serde_json::from_str(&core.begin_upload("unknown-files".into()).unwrap()).unwrap();
+        let unknown = upload["upload_id"].as_str().unwrap();
+        core.append_upload(unknown.into(), b"uncertain bytes".to_vec())
+            .unwrap();
+        let pinned: Value =
+            serde_json::from_str(&core.begin_upload("unknown-files".into()).unwrap()).unwrap();
+        let pinned_id = pinned["upload_id"].as_str().unwrap();
+        core.append_upload(
+            pinned_id.into(),
+            b"%PDF-1.4\nkeep uncertain pinned bytes\n%%EOF".to_vec(),
+        )
+        .unwrap();
+        let blob: Value =
+            serde_json::from_str(&core.finish_upload(pinned_id.into(), "pdf".into()).unwrap())
+                .unwrap();
+        let uncertain: Value = serde_json::from_str(&core.prepare(json!({"operation":"project_create", "project_id":"unresolved", "name":"Unresolved"}).to_string(), None, "0".into()).unwrap()).unwrap();
+        // Trusted store fault fixture, not a product API: model no authority to
+        // manufacture lifecycle rows. Represent the exact persisted uncertainty.
+        let command: CommandEnvelope = serde_json::from_value(uncertain.clone()).unwrap();
+        let db = muyon_core::sqlite::Db::open(
+            Path::new(&root)
+                .join("business-v2.sqlite")
+                .to_str()
+                .unwrap(),
+            false,
+            false,
+        )
+        .unwrap();
+        db.exec(
+            "UPDATE blob_uploads SET state='unknown' WHERE upload_id=?",
+            &[unknown],
+        )
+        .unwrap();
+        db.exec("INSERT INTO intents(intent_id,binding_digest,command_json,status,owner_epoch) VALUES(?,?,?,'unknown','epoch-1')", &[&command.intent_id, &command.binding_digest().unwrap(), &uncertain.to_string()]).unwrap();
+        drop(db);
+        drop(core);
+        let reopened =
+            ProductCore::open(root.clone(), "workspace".into(), "epoch-2".into(), false).unwrap();
+        for (id, expected) in [(unknown, "unknown"), (pinned_id, "pinned")] {
+            let status: Value =
+                serde_json::from_str(&reopened.lookup_upload(id.into()).unwrap()).unwrap();
+            assert_eq!(status["state"], expected);
+        }
+        let files = Path::new(&root).join("business-v2.sqlite.blobs");
+        assert_eq!(
+            std::fs::read(files.join("staging").join(unknown)).unwrap(),
+            b"uncertain bytes"
+        );
+        assert!(files
+            .join("objects")
+            .join(blob["blob"]["digest"].as_str().unwrap())
+            .is_file());
+        assert_eq!(
+            serde_json::from_str::<Value>(&reopened.lookup_original(command.intent_id).unwrap())
+                .unwrap()["status"],
+            "unknown"
+        );
+        drop(reopened);
+        std::fs::remove_dir_all(root).unwrap();
+    }
+
+    #[test]
     fn unreceived_confirmation_is_sealed_without_resubmitting_after_restart() {
         let root = root();
-        let core = ProductCore::open(root.clone(), "workspace".into(), "epoch-1".into(), true).unwrap();
+        let core =
+            ProductCore::open(root.clone(), "workspace".into(), "epoch-1".into(), true).unwrap();
         let plan = create(&core);
         // Android has persisted intent_id, but its confirm Binder message never arrived.
         drop(core);
-        let reopened = ProductCore::open(root.clone(), "workspace".into(), "epoch-2".into(), false).unwrap();
+        let reopened =
+            ProductCore::open(root.clone(), "workspace".into(), "epoch-2".into(), false).unwrap();
         let intent = plan["intent_id"].as_str().unwrap();
-        let result: Value = serde_json::from_str(&reopened.lookup_original(intent.into()).unwrap()).unwrap();
+        let result: Value =
+            serde_json::from_str(&reopened.lookup_original(intent.into()).unwrap()).unwrap();
         assert_eq!(result["status"], "not_submitted");
         assert!(result["receipt"].is_null());
-        assert_eq!(reopened.lookup_original(intent.into()).unwrap(), result.to_string());
+        assert_eq!(
+            reopened.lookup_original(intent.into()).unwrap(),
+            result.to_string()
+        );
         assert_eq!(reopened.list_suppliers(10, 0).unwrap(), "[]");
         drop(reopened);
         std::fs::remove_dir_all(root).unwrap();
@@ -1300,14 +1510,20 @@ mod tests {
     #[test]
     fn recovery_seal_refuses_an_already_queued_late_confirmation() {
         let root = root();
-        let core = ProductCore::open(root.clone(), "workspace".into(), "epoch".into(), true).unwrap();
+        let core =
+            ProductCore::open(root.clone(), "workspace".into(), "epoch".into(), true).unwrap();
         let plan = create(&core);
         let intent = plan["intent_id"].as_str().unwrap();
         let sealed = core.lookup_original(intent.into()).unwrap();
-        assert_eq!(serde_json::from_str::<Value>(&sealed).unwrap()["status"], "not_submitted");
+        assert_eq!(
+            serde_json::from_str::<Value>(&sealed).unwrap()["status"],
+            "not_submitted"
+        );
         // Same original in-memory plan still exists: sealing, rather than lost
         // process memory, must prevent this delayed confirmation from executing.
-        assert!(core.confirm_user_plan(plan["plan_id"].as_str().unwrap().into()).is_err());
+        assert!(core
+            .confirm_user_plan(plan["plan_id"].as_str().unwrap().into())
+            .is_err());
         assert_eq!(core.lookup_original(intent.into()).unwrap(), sealed);
         assert_eq!(core.list_suppliers(10, 0).unwrap(), "[]");
         drop(core);
@@ -1317,7 +1533,8 @@ mod tests {
     #[test]
     fn received_confirmation_and_legacy_unknown_are_never_cleared_or_replayed() {
         let root = root();
-        let core = ProductCore::open(root.clone(), "workspace".into(), "epoch-1".into(), true).unwrap();
+        let core =
+            ProductCore::open(root.clone(), "workspace".into(), "epoch-1".into(), true).unwrap();
         let plan = create(&core);
         {
             let state = core.state.lock().unwrap();
@@ -1326,13 +1543,17 @@ mod tests {
             state.store.claim_review_trusted(command).unwrap();
         }
         drop(core);
-        let reopened = ProductCore::open(root.clone(), "workspace".into(), "epoch-2".into(), false).unwrap();
+        let reopened =
+            ProductCore::open(root.clone(), "workspace".into(), "epoch-2".into(), false).unwrap();
         for intent in [plan["intent_id"].as_str().unwrap(), "legacy-unknown-intent"] {
-            let result: Value = serde_json::from_str(&reopened.lookup_original(intent.into()).unwrap()).unwrap();
+            let result: Value =
+                serde_json::from_str(&reopened.lookup_original(intent.into()).unwrap()).unwrap();
             assert_eq!(result["status"], "unknown");
             assert!(result["receipt"].is_null());
         }
-        assert!(reopened.confirm_user_plan(plan["plan_id"].as_str().unwrap().into()).is_err());
+        assert!(reopened
+            .confirm_user_plan(plan["plan_id"].as_str().unwrap().into())
+            .is_err());
         assert_eq!(reopened.list_suppliers(10, 0).unwrap(), "[]");
         drop(reopened);
         std::fs::remove_dir_all(root).unwrap();
@@ -1341,13 +1562,20 @@ mod tests {
     #[test]
     fn research_project_confirmation_not_received_recovers_without_a_write() {
         let root = root();
-        let core = ProductCore::open(root.clone(), "workspace".into(), "epoch-1".into(), true).unwrap();
+        let core =
+            ProductCore::open(root.clone(), "workspace".into(), "epoch-1".into(), true).unwrap();
         let plan: Value = serde_json::from_str(&core.prepare(
             json!({"operation":"project_create","project_id":"research-unreceived","name":"Research draft"}).to_string(),
             None, "0".into()).unwrap()).unwrap();
         drop(core);
-        let reopened = ProductCore::open(root.clone(), "workspace".into(), "epoch-2".into(), false).unwrap();
-        let result: Value = serde_json::from_str(&reopened.lookup_original(plan["intent_id"].as_str().unwrap().into()).unwrap()).unwrap();
+        let reopened =
+            ProductCore::open(root.clone(), "workspace".into(), "epoch-2".into(), false).unwrap();
+        let result: Value = serde_json::from_str(
+            &reopened
+                .lookup_original(plan["intent_id"].as_str().unwrap().into())
+                .unwrap(),
+        )
+        .unwrap();
         assert_eq!(result["status"], "not_submitted");
         assert_eq!(reopened.list_projects(10, 0).unwrap(), "[]");
         drop(reopened);

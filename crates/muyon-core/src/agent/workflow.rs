@@ -278,13 +278,25 @@ impl RunLedger {
                 "running" | "waiting_confirmation" | "queued"
             ) {
                 run.status = "unknown".into();
-                run.blocked_reason = Some("query_original_no_replay".into());
+                let local = run.kind == "local_read";
+                run.blocked_reason = Some(
+                    if local {
+                        "local_interrupted_create_new"
+                    } else {
+                        "query_original_no_replay"
+                    }
+                    .into(),
+                );
                 // Recovery must remain possible even if the event window is full.
                 ledger.event(
                     key,
                     &mut run,
                     "unknown",
-                    "运行中断，请查询原请求",
+                    if local {
+                        "本地任务已中断，可重新创建"
+                    } else {
+                        "运行中断，请查询原请求"
+                    },
                     "host_activity",
                 )?;
                 ledger.save(key, &run)?;
@@ -453,13 +465,30 @@ impl RunLedger {
                 sql(self.db.exec("INSERT INTO skills VALUES(?,?,?) ON CONFLICT(scope,id) DO UPDATE SET enabled=excluded.enabled",&[&key,&skill_id,if enabled {"1"} else {"0"}]))?;
                 let mut requests = Vec::new();
                 if !enabled {
-                    for row in sql(self.db.query("SELECT record FROM runs WHERE scope=?", &[&key]))? {
-                        let mut run: Run = serde_json::from_str(cell(&row, 0)?).map_err(|_| "workflow_storage_invalid")?;
-                        if run.kind == "remote_chat" && run.skill_id.as_deref() == Some(&skill_id)
-                            && run.remote_request_id.is_some() && !run.cancel_requested {
+                    for row in sql(self
+                        .db
+                        .query("SELECT record FROM runs WHERE scope=?", &[&key]))?
+                    {
+                        let mut run: Run = serde_json::from_str(cell(&row, 0)?)
+                            .map_err(|_| "workflow_storage_invalid")?;
+                        if run.kind == "remote_chat"
+                            && run.skill_id.as_deref() == Some(&skill_id)
+                            && run.remote_request_id.is_some()
+                            && !run.cancel_requested
+                        {
                             run.cancel_requested = true;
-                            requests.push(run.remote_request_id.clone().ok_or("workflow_remote_binding_invalid")?);
-                            self.event(&key, &mut run, "skill_revoked", "技能已停用，原外发计划已撤销", "host_activity")?;
+                            requests.push(
+                                run.remote_request_id
+                                    .clone()
+                                    .ok_or("workflow_remote_binding_invalid")?,
+                            );
+                            self.event(
+                                &key,
+                                &mut run,
+                                "skill_revoked",
+                                "技能已停用，原外发计划已撤销",
+                                "host_activity",
+                            )?;
                             self.save(&key, &run)?;
                         }
                     }
@@ -808,7 +837,13 @@ impl RunLedger {
         let previous_cancel = run.cancel_requested;
         let previous_ids = run.remote_request_ids.clone();
         let previous_reason = run.blocked_reason.clone();
-        let (status, kind, label) = if run.cancel_requested && observation.status != "cancelled" {
+        let (status, kind, label) = if observation.status == "completed"
+            && observation.answer.is_some()
+            && observation.attempted
+            && !observation.cancelled
+        {
+            ("completed", "completed", "远程任务已完成，保留原结果")
+        } else if run.cancel_requested && observation.status != "cancelled" {
             ("unknown", "unknown", "已请求取消，请查询原请求状态")
         } else if observation.cancelled && observation.status == "cancelled" {
             ("cancelled", "cancel_requested", "原请求已取消")
@@ -884,14 +919,20 @@ impl RunLedger {
     /// The owner supplies chain identities; action JSON cannot nominate a scope.
     pub fn authorize_request(&self, owner: &AgentOwner, request: &str) -> Result<()> {
         let conversation = owner.request_conversation(request)?;
-        let rows = sql(self.db.query("SELECT scope,record FROM runs WHERE id<>root", &[]))?;
+        let rows = sql(self
+            .db
+            .query("SELECT scope,record FROM runs WHERE id<>root", &[]))?;
         let mut tasks = Vec::new();
         let mut parent_scopes = std::collections::BTreeSet::new();
         for row in rows {
             let key = cell(&row, 0)?.to_owned();
-            let run: Run = serde_json::from_str(cell(&row, 1)?).map_err(|_| "workflow_storage_invalid")?;
-            let Some(original) = run.remote_request_id.as_deref() else { continue };
-            let scope: Value = serde_json::from_str(&key).map_err(|_| "workflow_storage_invalid")?;
+            let run: Run =
+                serde_json::from_str(cell(&row, 1)?).map_err(|_| "workflow_storage_invalid")?;
+            let Some(original) = run.remote_request_id.as_deref() else {
+                continue;
+            };
+            let scope: Value =
+                serde_json::from_str(&key).map_err(|_| "workflow_storage_invalid")?;
             let parent = scope[1].as_str().ok_or("workflow_storage_invalid")?;
             let chain = owner.request_chain(original)?;
             let contains = chain.iter().any(|o| o.request_id == request);
@@ -900,19 +941,31 @@ impl RunLedger {
                     return Err("workflow_remote_stopped");
                 }
                 let skill_id = run.skill_id.as_deref().ok_or("workflow_skill_not_found")?;
-                let enabled = sql(self.db.query("SELECT enabled FROM skills WHERE scope=? AND id=?", &[&key, skill_id]))?;
-                if enabled.first().is_some_and(|r| r.first().and_then(Option::as_deref) == Some("0")) {
+                let enabled = sql(self.db.query(
+                    "SELECT enabled FROM skills WHERE scope=? AND id=?",
+                    &[&key, skill_id],
+                ))?;
+                if enabled
+                    .first()
+                    .is_some_and(|r| r.first().and_then(Option::as_deref) == Some("0"))
+                {
                     return Err("workflow_skill_disabled");
                 }
                 parent_scopes.insert(key.clone());
                 owner.ensure_conversation_resolved(parent)?;
             }
-            if parent == conversation { parent_scopes.insert(key.clone()); }
+            if parent == conversation {
+                parent_scopes.insert(key.clone());
+            }
             tasks.push((key, chain));
         }
         for (scope, chain) in tasks {
-            if parent_scopes.contains(&scope) && chain.iter().any(|o| o.request_id != request &&
-                matches!(o.status.as_str(), "reserved" | "unknown" | "tool_pending")) {
+            if parent_scopes.contains(&scope)
+                && chain.iter().any(|o| {
+                    o.request_id != request
+                        && matches!(o.status.as_str(), "reserved" | "unknown" | "tool_pending")
+                })
+            {
                 return Err("conversation_original_outcome_required");
             }
         }

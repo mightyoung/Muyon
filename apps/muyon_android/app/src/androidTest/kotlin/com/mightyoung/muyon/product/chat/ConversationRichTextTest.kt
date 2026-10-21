@@ -68,7 +68,7 @@ class ConversationRichTextTest {
             assertEquals(it, conversationInline(it, SpanStyle()).text)
         }
         val styledLink = conversationInline("[**来源**](https://example.org/paper)", SpanStyle())
-        assertEquals("来源", styledLink.text)
+        assertEquals("来源 (example.org)", styledLink.text)
         assertEquals("https://example.org/paper", styledLink.getStringAnnotations("URL", 0, styledLink.length).single().item)
         val text = "# 研究结果\n\n$paragraph\n\n$inlineSource\n\n- 第一个结论\n- Second conclusion\n\n> 引用原文"
         val blocks = conversationBlocks(text)
@@ -99,13 +99,16 @@ class ConversationRichTextTest {
     }
 
     @Test fun unsafeSchemesHaveNoLinksAndEmptyEventsHaveNoReasoningPlaceholder() {
-        val dangerous = listOf("javascript:alert", "data:text/plain,hello", "file:///tmp/a", "intent://example", "https://name:secret@example.com", "https:///missing-host")
+        val dangerous = listOf("http://example.org/paper", "javascript:alert", "data:text/plain,hello", "file:///tmp/a", "intent://example", "https://name:secret@example.com", "https:///missing-host")
         dangerous.forEach { target ->
             assertFalse(target, safeConversationUrl(target))
             assertTrue(conversationInline("[危险]($target)", SpanStyle()).getStringAnnotations("URL", 0, 10000).isEmpty())
         }
         val valid = conversationInline("[原始来源](https://example.org/paper)", SpanStyle())
         assertEquals("https://example.org/paper", valid.getStringAnnotations("URL", 0, valid.length).single().item)
+        val disguised = conversationInline("[trusted.example](https://actual.example/paper)", SpanStyle())
+        assertEquals("trusted.example (actual.example)", disguised.text)
+        assertEquals("https://actual.example/paper", disguised.getStringAnnotations("URL", 0, disguised.length).single().item)
         compose.setContent { MuyonTheme { Column {
             ConversationRichText("[危险](javascript:alert)")
             WorkflowEventSummary(JSONObject().put("summary", ""))

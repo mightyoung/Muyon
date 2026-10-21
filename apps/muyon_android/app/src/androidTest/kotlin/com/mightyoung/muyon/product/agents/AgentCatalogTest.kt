@@ -28,6 +28,9 @@ class AgentCatalogTest {
         assertFalse(reopened.agents.single().archived)
         assertTrue(reopened.groups.single().archived)
         assertEquals("新研究组", reopened.groups.single().name)
+        assertEquals("整理证据", second.activeAgent("a").role)
+        second.archiveAgent("a")
+        assertThrows(NoSuchElementException::class.java) { second.activeAgent("a") }
     }
     @Test fun invalidMembersAndCorruptDataCannotOverwritePersistedDirectory() {
         val scope = isolatedContext()
@@ -35,6 +38,7 @@ class AgentCatalogTest {
         catalog.saveAgent(AgentProfile("a", "助手", "研究", ""))
         val preferences = scope.getSharedPreferences(AgentCatalog.PREFERENCES, 0)
         val original = preferences.getString(AgentCatalog.KEY, null)
+        assertThrows(NoSuchElementException::class.java) { catalog.activeAgent("missing") }
         for (members in listOf(emptyList(), listOf("missing"), listOf("a", "a"))) {
             assertThrows(IllegalArgumentException::class.java) { catalog.saveGroup(AgentGroup("g", "群组", members)) }
             assertEquals(original, preferences.getString(AgentCatalog.KEY, null))
@@ -43,6 +47,7 @@ class AgentCatalogTest {
         assertThrows(IllegalArgumentException::class.java) { catalog.archiveAgent("a") }
         assertTrue(preferences.edit().putString(AgentCatalog.KEY, "{broken").commit())
         assertThrows(IllegalStateException::class.java) { AgentCatalog(scope).read() }
+        assertThrows(IllegalStateException::class.java) { catalog.activeAgent("a") }
         assertThrows(IllegalStateException::class.java) { catalog.saveAgent(AgentProfile("b", "其他助手", "研究", "")) }
         assertEquals("{broken", preferences.getString(AgentCatalog.KEY, null))
     }

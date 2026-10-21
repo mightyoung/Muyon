@@ -59,37 +59,125 @@ fn prepared_child_and_normal_chat_are_rechecked_after_another_child_becomes_unkn
     let owner = configured_owner(&f);
     let make = |child: &str| {
         let context = f.ledger.remote_context(&f.scope, child).unwrap();
-        owner.prepare_chat(context["conversation_id"].as_str().unwrap(), "task", Some(&FixtureProof)).unwrap()
+        owner
+            .prepare_chat(
+                context["conversation_id"].as_str().unwrap(),
+                "task",
+                Some(&FixtureProof),
+            )
+            .unwrap()
     };
-    let first = make(&a); let second = make(&b);
+    let first = make(&a);
+    let second = make(&b);
     f.ledger.bind_remote_plan(&f.scope, &a, &first).unwrap();
     f.ledger.bind_remote_plan(&f.scope, &b, &second).unwrap();
-    let normal = owner.prepare_chat("conversation-a", "normal prepared first", Some(&FixtureProof)).unwrap();
-    assert!(f.ledger.authorize_request(&owner, &second.request_id).is_ok());
-    owner.confirm_trusted(&first.request_id, &first.configuration_id).unwrap();
-    owner.claim_dispatch(&first.request_id, &first.configuration_id, "test-only-generation").unwrap();
+    let normal = owner
+        .prepare_chat(
+            "conversation-a",
+            "normal prepared first",
+            Some(&FixtureProof),
+        )
+        .unwrap();
+    assert!(f
+        .ledger
+        .authorize_request(&owner, &second.request_id)
+        .is_ok());
+    owner
+        .confirm_trusted(&first.request_id, &first.configuration_id)
+        .unwrap();
+    owner
+        .claim_dispatch(
+            &first.request_id,
+            &first.configuration_id,
+            "test-only-generation",
+        )
+        .unwrap();
     for id in [&second.request_id, &normal.request_id] {
-        assert_eq!(f.ledger.authorize_request(&owner, id).unwrap_err(), "conversation_original_outcome_required");
+        assert_eq!(
+            f.ledger.authorize_request(&owner, id).unwrap_err(),
+            "conversation_original_outcome_required"
+        );
     }
-    assert!(f.ledger.authorize_request(&owner, &first.request_id).is_ok());
+    assert!(f
+        .ledger
+        .authorize_request(&owner, &first.request_id)
+        .is_ok());
     assert_eq!(owner.lookup(&first.request_id).unwrap().status, "unknown");
 }
 
 #[test]
 fn disabling_a_skill_permanently_revokes_its_prepared_remote_plan() {
     let mut f = Fixture::new();
-    let root = f.root(); let child = f.child(&root, "remote_chat");
+    let root = f.root();
+    let child = f.child(&root, "remote_chat");
     let owner = configured_owner(&f);
     let context = f.ledger.remote_context(&f.scope, &child).unwrap();
-    let plan = owner.prepare_chat(context["conversation_id"].as_str().unwrap(), "task", Some(&FixtureProof)).unwrap();
+    let plan = owner
+        .prepare_chat(
+            context["conversation_id"].as_str().unwrap(),
+            "task",
+            Some(&FixtureProof),
+        )
+        .unwrap();
     f.ledger.bind_remote_plan(&f.scope, &child, &plan).unwrap();
     assert!(f.ledger.authorize_request(&owner, &plan.request_id).is_ok());
-    let revoked = f.act(json!({"action":"set_skill","skill_id":"supplier-overview","enabled":false}));
+    let revoked =
+        f.act(json!({"action":"set_skill","skill_id":"supplier-overview","enabled":false}));
     assert_eq!(revoked["remote_request_ids"][0], plan.request_id);
-    assert!(f.ledger.authorize_request(&owner, &plan.request_id).is_err());
+    assert!(f
+        .ledger
+        .authorize_request(&owner, &plan.request_id)
+        .is_err());
     f.act(json!({"action":"set_skill","skill_id":"supplier-overview","enabled":true}));
-    assert_eq!(f.ledger.authorize_request(&owner, &plan.request_id).unwrap_err(), "workflow_remote_stopped");
+    assert_eq!(
+        f.ledger
+            .authorize_request(&owner, &plan.request_id)
+            .unwrap_err(),
+        "workflow_remote_stopped"
+    );
     assert_eq!(owner.lookup(&plan.request_id).unwrap().status, "prepared");
+}
+
+#[test]
+fn cancellation_after_settlement_preserves_answers_and_releases_active_child_slots() {
+    let mut f = Fixture::new();
+    let root = f.root();
+    let children = [f.child(&root, "remote_chat"), f.child(&root, "remote_chat")];
+    let owner = configured_owner(&f);
+    for child in &children {
+        let context = f.ledger.remote_context(&f.scope, child).unwrap();
+        let plan = owner
+            .prepare_chat(
+                context["conversation_id"].as_str().unwrap(),
+                "task",
+                Some(&FixtureProof),
+            )
+            .unwrap();
+        f.ledger.bind_remote_plan(&f.scope, child, &plan).unwrap();
+        owner
+            .confirm_trusted(&plan.request_id, &plan.configuration_id)
+            .unwrap();
+        owner
+            .claim_dispatch(
+                &plan.request_id,
+                &plan.configuration_id,
+                "test-only-generation",
+            )
+            .unwrap();
+        let reply = json!({"id":"fixture","model":MODEL,"choices":[{"index":0,"finish_reason":"stop","message":{"role":"assistant","content":"completed before stop"}}],"usage":{"prompt_tokens":17,"completion_tokens":4,"total_tokens":21}}).to_string();
+        owner.settle_response(&plan.request_id, &reply).unwrap();
+        let charged = owner.budget().unwrap().charged_micro_cny;
+        f.act(json!({"action":"cancel","run_id":child}));
+        let actual = owner.cancel_trusted(&plan.request_id).unwrap();
+        assert_eq!(actual.status, "completed");
+        assert!(!actual.cancelled);
+        let observed = f.ledger.observe_remote(&f.scope, child, &actual).unwrap();
+        assert_eq!(observed["status"], "completed");
+        assert_eq!(observed["result"]["answer"], "completed before stop");
+        assert_eq!(owner.budget().unwrap().charged_micro_cny, charged);
+        assert_eq!(owner.budget().unwrap().held_micro_cny.value(), 0);
+    }
+    assert!(!f.child(&root, "local_read").is_empty());
 }
 #[test]
 fn attempted_unknown_retains_owner_hold_and_late_cancelled_response_is_not_published() {

@@ -105,14 +105,14 @@ class LocalResearchIntegrationTest {
         val isolatedProject = project()
         val source = committedPaper(project)
         val cancelledSource = committedPaper(project)
-        val local = LocalResearch(context, host)
+        LocalResearch(context, host).use { local ->
         assertFalse(ResearchIndex(context).use { it.contains(source) })
         val chunks = local.index(project, source.paper, source.digest, AtomicBoolean(false))
         assertTrue("Real OCR must yield at least one indexed chunk", chunks > 0)
 
         // A distinct helper/connection proves publication survives closing and reopening the index.
         ResearchIndex(context).use { assertTrue(it.contains(source)) }
-        val hits = LocalResearch(context, host).search(project, "材料的金额是多少", AtomicBoolean(false))
+        val hits = LocalResearch(context, host).use { it.search(project, "材料的金额是多少", AtomicBoolean(false)) }
         assertTrue("Real local semantic search produced no hits", hits.isNotEmpty())
         assertTrue("Every result must retain committed provenance", hits.all { it.source == source && it.page == 0 && it.score.isFinite() })
         val recognized = hits.joinToString("\n") { it.text }
@@ -159,6 +159,7 @@ class LocalResearchIntegrationTest {
             local.index(project, source.paper, "0".repeat(64), AtomicBoolean(false))
         }
         ResearchIndex(context).use { assertTrue("Rejected digest must preserve the valid index", it.contains(source)) }
+        }
     }
 
     @Test fun cancellationDuringPublicationRollsBackAfterAnActualChunkWrite() {

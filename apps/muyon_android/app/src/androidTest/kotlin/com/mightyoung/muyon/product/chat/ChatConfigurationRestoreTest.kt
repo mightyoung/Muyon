@@ -7,6 +7,8 @@ import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.test.platform.app.InstrumentationRegistry
 import com.mightyoung.muyon.product.agentipc.ProductClient
+import com.mightyoung.muyon.product.agents.AgentCatalog
+import com.mightyoung.muyon.product.agents.AgentProfile
 import com.mightyoung.muyon.product.design.MuyonTheme
 import org.json.JSONObject
 import org.junit.Assert.*
@@ -49,9 +51,13 @@ class ChatConfigurationRestoreTest {
             }
             assertTrue(configured.await(35, TimeUnit.SECONDS))
             assertEquals("ok", configReply?.optString("status"))
+            val catalog = AgentCatalog(isolated)
+            catalog.saveAgent(AgentProfile(namespace, "测试助手", "saved-role-R16", "saved-instructions-S17"))
+            val profile = catalog.read().agents.single { it.id == namespace }
             val shown = mutableStateOf(true)
             compose.setContent { CompositionLocalProvider(LocalContext provides isolated) {
-                MuyonTheme { if (shown.value) ChatScreen(client, null, namespace) }
+                MuyonTheme { if (shown.value) ChatScreen(client, null, namespace,
+                    agentRole = profile.role, agentInstructions = profile.instructions) }
             } }
             compose.onNodeWithTag("chat-draft").performTextInput("仅检查恢复状态，不点击发送")
             compose.waitUntil(15_000) { compose.onAllNodesWithTag("chat-send").fetchSemanticsNodes().size == 1 &&
@@ -62,9 +68,17 @@ class ChatConfigurationRestoreTest {
             compose.onNodeWithTag("chat-draft").performTextInput("返回标签后依旧可以预览")
             compose.waitUntil(15_000) { compose.onAllNodes(hasTestTag("chat-send") and isEnabled()).fetchSemanticsNodes().size == 1 }
             compose.onNodeWithTag("chat-send").assertIsEnabled()
+            // Actual UI → Binder → Rust plan. Fixture configuration cannot send.
+            compose.onNodeWithTag("chat-send").performClick()
+            compose.onNodeWithText("saved-instructions-S17", substring = true)
+                .assertTextContains("saved-role-R16", substring = true)
+                .assertTextContains("用户选择的助手角色说明", substring = true)
+                .assertTextContains("\"role\": \"user\"", substring = true)
+            compose.onNodeWithText("确认本次外发").assertIsNotEnabled()
         } finally {
             instrumentation.runOnMainSync { client.close() }
             context.deleteSharedPreferences("$namespace-product-chat-state")
+            context.deleteSharedPreferences("$namespace-${AgentCatalog.PREFERENCES}")
         }
     }
 }

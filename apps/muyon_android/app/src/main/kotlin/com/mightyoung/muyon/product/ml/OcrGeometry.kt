@@ -146,12 +146,19 @@ internal object OcrGeometry {
 
     internal fun orderCorners(points: List<PointF>): List<PointF> {
         require(points.size == 4 && points.all { it.x.isFinite() && it.y.isFinite() }) { "Invalid OCR quadrilateral" }
-        // Split left/right first. Splitting top/bottom instead turns a long
-        // positive-slope line into a tall crop whose later rotation reverses it.
-        val horizontal = points.sortedWith(compareBy<PointF> { it.x }.thenBy { it.y })
-        val left = horizontal.take(2).sortedBy { it.y }
-        val right = horizontal.drop(2).sortedBy { it.y }
-        return listOf(left[0], right[0], right[1], left[1])
+        // Walk the convex boundary, then anchor its most horizontal rightward
+        // edge. A fixed left/right split swaps axes on positively tilted tall
+        // boxes; a fixed top/bottom split does the same on long text lines.
+        // The hull winds clockwise in image coordinates, so its rightward
+        // horizontal edge is the top edge and preserves all four identities.
+        val boundary = hull(points)
+        require(boundary.size == 4) { "Degenerate OCR quadrilateral" }
+        val start = boundary.indices.filter { i -> boundary[(i + 1) % 4].x > boundary[i].x }
+            .minByOrNull { i ->
+                val a = boundary[i]; val b = boundary[(i + 1) % 4]
+                abs((b.y - a.y).toDouble()) / hypot((b.x - a.x).toDouble(), (b.y - a.y).toDouble())
+            } ?: throw IllegalArgumentException("Degenerate OCR quadrilateral")
+        return List(4) { boundary[(start + it) % 4] }
     }
 
     fun perspectiveCrop(source: Bitmap, corners: List<PointF>): Bitmap {

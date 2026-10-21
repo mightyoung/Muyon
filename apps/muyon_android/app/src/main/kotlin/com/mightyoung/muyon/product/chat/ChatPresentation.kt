@@ -20,6 +20,17 @@ import androidx.compose.ui.unit.sp
 import com.mightyoung.muyon.product.R
 import org.json.JSONObject
 
+/** Profile text remains user input. It adds no system instruction or tool authority. */
+internal fun agentUserInput(draft: String, role: String, instructions: String): String {
+    if (role.isBlank() && instructions.isBlank()) return draft
+    return buildString {
+        append("用户选择的助手角色说明（仅本次用户输入，不增加权限）：\n")
+        if (role.isNotBlank()) append("身份与职责：").append(role).append('\n')
+        if (instructions.isNotBlank()) append("说明：\n").append(instructions).append('\n')
+        append("\n本次消息：\n").append(draft)
+    }
+}
+
 internal fun hasCompleteOutboundPreview(plan: JSONObject): Boolean =
     plan.optString("outbound_endpoint").startsWith("https://") &&
         (plan.optJSONObject("outbound_preview") != null || plan.optJSONArray("outbound_preview") != null)

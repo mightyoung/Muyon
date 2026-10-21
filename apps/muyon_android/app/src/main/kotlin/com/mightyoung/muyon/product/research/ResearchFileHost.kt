@@ -29,6 +29,7 @@ internal class ResearchFileHost(private val context: Context, private val client
     private val worker = Executors.newSingleThreadExecutor()
     private val staged = mutableListOf<String>()
     private val viewers = mutableListOf<PrivatePdf>()
+    private val ownedModels = mutableSetOf<java.io.Closeable>()
     @Volatile private var closed = false
     private val singleLimit = 30L * 1024 * 1024
     private val totalLimit = 150L * 1024 * 1024
@@ -38,12 +39,31 @@ internal class ResearchFileHost(private val context: Context, private val client
         worker.execute { val answer = runCatching(task); main.post { if (!closed) result(answer) } }
     }
 
+    @Synchronized
+    fun ownModel(resource: java.io.Closeable) {
+        check(!closed) { "Research host is closed" }
+        ownedModels.add(resource)
+    }
+
+    @Synchronized
+    fun releaseModel(resource: java.io.Closeable) {
+        // close() already queued a drain of all owned models, including this one.
+        if (closed) return
+        if (ownedModels.remove(resource)) worker.execute { resource.close() }
+    }
+
+    @Synchronized
     override fun close() {
         if (closed) return
         closed = true
         // Finish already queued reads, then release private renderers. Uploads
         // remain recoverable: leaving a tab never aborts an uncertain write.
-        worker.execute { viewers.forEach { it.close() }; viewers.clear() }
+        val models = ownedModels.toList()
+        ownedModels.clear()
+        worker.execute {
+            models.forEach { runCatching { it.close() } }
+            viewers.forEach { it.close() }; viewers.clear()
+        }
         worker.shutdown()
     }
 

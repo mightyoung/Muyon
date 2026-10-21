@@ -229,7 +229,7 @@ class AgentWorkflowProductTest {
         compose.onNodeWithTag("chat-more").performClick()
         compose.onNodeWithText("任务与技能").performClick()
         waitFor("workflow-manager")
-        val title = "核对供应商资料"
+        val title = "核对供应商资料与原始来源，逐项比较研究项目和采购记录中的名称、引用及审批状态"
         compose.onNodeWithTag("workflow-title").performScrollTo().performTextInput(title)
         compose.onNodeWithTag("workflow-task").performScrollTo().performTextInput("读取本地供应商并核对来源，不外发。")
         compose.onNodeWithTag("workflow-create-root").performScrollTo().performClick()
@@ -238,6 +238,18 @@ class AgentWorkflowProductTest {
                 ?.config?.get(SemanticsProperties.EditableText)?.text == ""
         }
         waitFor("workflow-child-task")
+        val secondTitle = "第二组独立任务，用于验证多任务选择菜单在大字体和横屏布局下仍然可用"
+        compose.onNodeWithTag("workflow-title").performScrollTo().performTextInput(secondTitle)
+        compose.onNodeWithTag("workflow-task").performScrollTo().performTextInput("读取本地记录，不外发。")
+        compose.onNodeWithTag("workflow-create-root").performScrollTo().performClick()
+        compose.waitUntil(15_000) {
+            compose.onAllNodesWithTag("workflow-title").fetchSemanticsNodes().singleOrNull()
+                ?.config?.get(SemanticsProperties.EditableText)?.text == ""
+        }
+        val skillToggle = compose.onNodeWithTag("workflow-skill-toggle-supplier-overview").performScrollTo()
+        skillToggle.assertIsToggleable()
+        assertTrue(skillToggle.fetchSemanticsNode().config[SemanticsProperties.ContentDescription]
+            .any { it.startsWith("启用技能 ") && it.length > "启用技能 ".length })
         compose.onNodeWithTag("workflow-skill-supplier-overview").performScrollTo().performClick()
         compose.onNodeWithTag("workflow-child-task").performScrollTo().performTextInput("执行供应商概览技能，显示真实读取过程。")
         compose.onNodeWithTag("workflow-create-child").performScrollTo().performClick()
@@ -246,6 +258,8 @@ class AgentWorkflowProductTest {
                 ?.config?.get(SemanticsProperties.EditableText)?.text == ""
         }
         compose.onNodeWithTag("workflow-show-activity").performScrollTo().performClick()
+        compose.onNodeWithTag("workflow-root-selector").performScrollTo().performClick()
+        compose.onNodeWithText("✓ $secondTitle").assertIsDisplayed().performClick()
         compose.waitUntil(15_000) { compose.onAllNodesWithText("执行本地工具").fetchSemanticsNodes().isNotEmpty() }
         compose.onNodeWithText("执行本地工具").performScrollTo().performClick()
         compose.waitUntil(15_000) { compose.onAllNodesWithText("本地读取完成").fetchSemanticsNodes().isNotEmpty() }

@@ -7,10 +7,13 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import com.mightyoung.muyon.product.agentipc.ProductClient
+import com.mightyoung.muyon.product.agents.visibleName
 import kotlinx.coroutines.delay
 import org.json.JSONArray
 import org.json.JSONObject
@@ -27,6 +30,18 @@ private fun workflowFailureCode(reply: JSONObject): String {
     val code = reply.optJSONObject("data")?.optString("error")?.takeIf { it.isNotBlank() }
         ?: reply.optString("error")
     return code.takeIf { it.matches(Regex("[a-z][a-z0-9_]{0,99}")) } ?: "workflow_operation_unavailable"
+}
+
+internal fun workflowChildCount(snapshot: JSONObject?): Int = snapshot?.optJSONArray("runs").objects().count { !it.isNull("parent_id") }
+
+@Composable
+private fun WorkflowFailure(message: String, code: String) {
+    var details by remember(code) { mutableStateOf(false) }
+    Column {
+        Text(message, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
+        TextButton(onClick = { details = !details }) { Text(if (details) "收起错误详情" else "错误详情") }
+        if (details) Text(code, style = MaterialTheme.typography.bodySmall)
+    }
 }
 
 /** Only received execution facts are presented. There is no synthetic reasoning stream. */
@@ -55,6 +70,7 @@ private fun WorkflowContent(client: ProductClient, conversation: String, project
     var snapshot by remember { mutableStateOf<JSONObject?>(null) }
     var expanded by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf("") }
+    var errorCode by remember { mutableStateOf("") }
     var busy by remember { mutableStateOf(false) }
     var title by remember { mutableStateOf("") }
     var task by remember { mutableStateOf("") }
@@ -71,7 +87,7 @@ private fun WorkflowContent(client: ProductClient, conversation: String, project
             if (mutation) busy = false
             val data = workflowReplyData(reply)
             if (data != null) { error = ""; receive(data) }
-            else error = "任务状态暂未取得，请刷新查看原任务。${workflowFailureCode(reply)}"
+            else { error = "任务状态暂未取得，请刷新查看原任务。"; errorCode = workflowFailureCode(reply) }
         }
     }
     fun refresh() {
@@ -92,10 +108,9 @@ private fun WorkflowContent(client: ProductClient, conversation: String, project
     LaunchedEffect(expanded, managerOpen) {
         while (expanded || managerOpen) { delay(1800); if (!busy) refresh() }
     }
-    val runs = snapshot?.optJSONArray("runs").objects()
     if (roots.isNotEmpty()) {
         Column(Modifier.fillMaxWidth().testTag("workflow-surface")) {
-            TextButton(onClick = { expanded = !expanded }, modifier = Modifier.testTag("workflow-expand")) { Text("执行过程 · ${if (runs.isNotEmpty()) runs.size else roots.size}项任务${if (expanded) " ∧" else " ∨"}") }
+            TextButton(onClick = { expanded = !expanded }, modifier = Modifier.testTag("workflow-expand")) { Text("执行过程 · ${workflowChildCount(snapshot)}项子任务${if (expanded) " ∧" else " ∨"}") }
             if (expanded) {
                 Text("以下是任务与工具的执行记录。", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 WorkflowRecords(roots, rootId, { rootId = it }, snapshot, busy,
@@ -108,11 +123,11 @@ private fun WorkflowContent(client: ProductClient, conversation: String, project
                                 busy = false
                                 val plan = workflowReplyData(reply)
                                 if (plan != null && plan.optString("request_id").isNotBlank()) { remotePlan(plan); refresh() }
-                                else error = "尚未取得外发预览；未声称任务已经执行。${workflowFailureCode(reply)}"
+                                else { error = "尚未取得外发预览，请刷新查看原任务。"; errorCode = workflowFailureCode(reply) }
                             }
                         }
                     })
-                if (error.isNotBlank()) Text(error, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
+                if (error.isNotBlank()) WorkflowFailure(error, errorCode)
             }
         }
     }
@@ -125,7 +140,7 @@ private fun WorkflowContent(client: ProductClient, conversation: String, project
                     TextButton(onClick = onDismiss) { Text("关闭") }
                 }
                 Text("本地工具任务只读取本地数据；AI子任务需要单独查看外发内容与费用并确认。", style = MaterialTheme.typography.bodySmall)
-                if (error.isNotBlank()) Text(error, color = MaterialTheme.colorScheme.error)
+                if (error.isNotBlank()) WorkflowFailure(error, errorCode)
                 TextButton(onClick = { refresh() }, enabled = !busy) { Text("刷新原任务") }
                 OutlinedTextField(title, { title = it.take(120) }, label = { Text("任务名称") }, modifier = Modifier.testTag("workflow-title").fillMaxWidth())
                 OutlinedTextField(task, { task = it.take(8000) }, label = { Text("目标与要求") }, minLines = 2, modifier = Modifier.testTag("workflow-task").fillMaxWidth())
@@ -137,7 +152,7 @@ private fun WorkflowContent(client: ProductClient, conversation: String, project
                 if (roots.isNotEmpty()) {
                     Text("任务", style = MaterialTheme.typography.titleMedium)
                     roots.forEach { root -> TextButton(onClick = { rootId = root.optString("id") }) {
-                        Text("${if (rootId == root.optString("id")) "✓ " else ""}${root.optString("title")} · ${workflowStatus(root.optString("status"))}")
+                        Text("${if (rootId == root.optString("id")) "✓ " else ""}${visibleName(root.optString("title"), "未命名任务")} · ${workflowStatus(root.optString("status"))}")
                     } }
                 }
                 HorizontalDivider()
@@ -145,11 +160,12 @@ private fun WorkflowContent(client: ProductClient, conversation: String, project
                 skills.forEach { skill ->
                     Row(Modifier.fillMaxWidth()) {
                         Column(Modifier.weight(1f)) {
-                        TextButton(onClick = { skillId = skill.optString("id") }, modifier = Modifier.testTag("workflow-skill-${skill.optString("id")}")) { Text("${if (skillId == skill.optString("id")) "✓ " else ""}${skill.optString("name", skill.optString("title"))}") }
+                        TextButton(onClick = { skillId = skill.optString("id") }, modifier = Modifier.testTag("workflow-skill-${skill.optString("id")}")) { Text("${if (skillId == skill.optString("id")) "✓ " else ""}${visibleName(skill.optString("name", skill.optString("title")), "未命名技能")}") }
                             Text(skill.optString("description"), style = MaterialTheme.typography.bodySmall)
                             TextButton(onClick = { request(JSONObject().put("action", "load_skill").put("skill_id", skill.optString("id"))) { skillBody = it } }) { Text("查看技能正文") }
                         }
-                        Switch(checked = skill.optBoolean("enabled"), modifier = Modifier.testTag("workflow-skill-toggle-${skill.optString("id")}"), enabled = !busy, onCheckedChange = { enabled ->
+                        Switch(checked = skill.optBoolean("enabled"), modifier = Modifier.testTag("workflow-skill-toggle-${skill.optString("id")}")
+                            .semantics { contentDescription = "启用技能 ${visibleName(skill.optString("name", skill.optString("title")), "未命名技能")}" }, enabled = !busy, onCheckedChange = { enabled ->
                             request(JSONObject().put("action", "set_skill").put("skill_id", skill.optString("id")).put("enabled", enabled), true) {
                                 request(JSONObject().put("action", "skills")) { skills = it.optJSONArray("skills").objects() }
                             }
@@ -196,7 +212,7 @@ internal fun workflowStatus(status: String): String = when (status) {
     "failed" -> "失败"
     "awaiting_confirmation", "waiting_confirmation", "prepared" -> "等待确认"
     "unknown" -> "结果未知"
-    else -> status.ifBlank { "状态未知" }
+    else -> "状态未知"
 }
 
 @Composable
@@ -205,7 +221,7 @@ private fun WorkflowRecords(roots: List<JSONObject>, rootId: String, select: (St
     if (roots.size > 1) {
         var choosing by remember { mutableStateOf(false) }
         Box {
-            TextButton(onClick = { choosing = true }) {
+            TextButton(onClick = { choosing = true }, modifier = Modifier.testTag("workflow-root-selector")) {
                 Text(roots.firstOrNull { it.optString("id") == rootId }?.optString("title").orEmpty(),
                     modifier = Modifier.weight(1f, fill = false), maxLines = 1, overflow = TextOverflow.Ellipsis)
                 Text(" ▾")
@@ -224,9 +240,9 @@ private fun WorkflowRecords(roots: List<JSONObject>, rootId: String, select: (St
         val status = run.optString("status")
         Surface(Modifier.fillMaxWidth().padding(vertical = 4.dp), shape = MaterialTheme.shapes.medium, color = MaterialTheme.colorScheme.surfaceVariant) {
             Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                Text(run.optString("title").ifBlank { run.optString("task") }, style = MaterialTheme.typography.titleSmall)
+                Text(visibleName(run.optString("title").ifBlank { run.optString("task") }, "未命名任务"), style = MaterialTheme.typography.titleSmall)
                 Text("${if (kind == "local_read") "本地工具任务" else if (kind == "remote_chat") "AI子任务" else "任务"} · ${workflowStatus(status)}", style = MaterialTheme.typography.bodySmall)
-                run.optString("blocked_reason").takeIf { it.isNotBlank() && it != "null" }?.let { Text(it, style = MaterialTheme.typography.bodySmall) }
+                run.optString("blocked_reason").takeIf { it.isNotBlank() && it != "null" }?.let { WorkflowFailure("任务暂时受阻，请检查配置、权限或查询原请求。", it) }
                 val result = run.opt("result")
                 if (result != null && result != JSONObject.NULL) {
                     TextButton(onClick = { details = !details }, modifier = Modifier.testTag("workflow-result-${run.optString("id")}")) { Text(if (details) "收起结果" else "查看结果") }
@@ -248,7 +264,7 @@ private fun WorkflowRecords(roots: List<JSONObject>, rootId: String, select: (St
 }
 
 @Composable
-private fun WorkflowResult(result: Any, modifier: Modifier = Modifier) {
+internal fun WorkflowResult(result: Any, modifier: Modifier = Modifier) {
     val value = result as? JSONObject
     val records = value?.optJSONArray("records")
     if (value?.optString("source") == "current_local_business" && records != null) {
@@ -267,7 +283,18 @@ private fun WorkflowResult(result: Any, modifier: Modifier = Modifier) {
             TextButton(onClick = { technical = !technical }) { Text(if (technical) "收起原始记录" else "查看原始记录") }
             if (technical) ConversationRichText("```json\n${value.toString(2)}\n```")
         }
-    } else ConversationRichText(if (value != null) value.optString("summary", value.toString(2)) else result.toString(), modifier)
+    } else if (value != null) {
+        var technical by remember(result.toString()) { mutableStateOf(false) }
+        val answer = (value.opt("answer") as? String)?.takeIf { it.isNotBlank() }
+            ?: (value.opt("summary") as? String)?.takeIf { it.isNotBlank() } ?: "任务结果已返回。"
+        Column(modifier) {
+            ConversationRichText(answer)
+            TextButton(onClick = { technical = !technical }, modifier = Modifier.testTag("workflow-result-metadata")) {
+                Text(if (technical) "收起原始详情" else "查看原始详情")
+            }
+            if (technical) ConversationRichText("```json\n${value.toString(2)}\n```")
+        }
+    } else ConversationRichText(result.toString(), modifier)
 }
 
 @Composable

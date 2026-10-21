@@ -43,7 +43,7 @@ val verifyModelAssets by tasks.registering {
         val directory = File(providers.gradleProperty("muyonModelAssets").orNull
             ?: error("Prepare fixed offline assets and set muyonModelAssets"), "local-models")
         val fixed = mapOf(
-            "embedding.gguf" to "6f1bd4ac6c5df7444f9cca7ca36cafe6cfa34cd6f49fefb1e0b4be8143aed8bc",
+            "embedding.gguf" to "2188ac1deca4b77dffefd603c2776a9d76d9d74ec01841392982ebb840b09135",
             "det.onnx" to "a431985659dc921974177a95adcfbb90fd9e51989a5e04d70d0b75f597b6e61d",
             "rec.onnx" to "da72dc72ca4dc220df0dfde68c1dedc31c58d3e76a25871122e5056227d50092",
             "dictionary.json" to "d858428fbe0ada92b439a5f277b51bc1b318fd985d80946a3ce859d7f2446a92"

@@ -6,11 +6,23 @@ recognizer ed152b8b495f84de93cda5709d768548a9127622.
 https://huggingface.co/PaddlePaddle/PP-OCRv5_mobile_det_onnx
 https://huggingface.co/PaddlePaddle/PP-OCRv5_mobile_rec_onnx
 
-Embedding weight: supplied local embeddinggemma-2-Q8_0.gguf, SHA256
-6f1bd4ac6c5df7444f9cca7ca36cafe6cfa34cd6f49fefb1e0b4be8143aed8bc.
-GGUF metadata declares Embeddinggemma 2 / gemma-embedding2 / Apache-2.0.
-The GGUF does not record its converter or source repository revision.
-Upstream model information: https://huggingface.co/google/embeddinggemma-2
+Embedding weight: ggml-org/embeddinggemma-2-GGUF, fixed revision
+58faf90940886df2d62be555c8765d00dac362c5, embeddinggemma-2-Q8_0.gguf,
+309855456 bytes, SHA256
+2188ac1deca4b77dffefd603c2776a9d76d9d74ec01841392982ebb840b09135.
+https://huggingface.co/ggml-org/embeddinggemma-2-GGUF/tree/58faf90940886df2d62be555c8765d00dac362c5
+The pinned GGUF model card declares google/embeddinggemma-2 as the base,
+Apache-2.0, and automatic ggml-org/convert conversion. The actual converter
+revision and source-model revision used for that conversion are not recorded.
+Google model card separately retained at revision
+914f7f89142e33e77833254d9c9b90c3cef7303b declares Apache-2.0:
+https://huggingface.co/google/embeddinggemma-2/tree/914f7f89142e33e77833254d9c9b90c3cef7303b
+Google license reference: https://ai.google.dev/gemma/apache_2
+Pinned model cards, standard Apache-2.0 text and complete artifact provenance
+are retained separately in APK assets/notices, including REVIEWED_MODEL_PROVENANCE.txt.
+The earlier user-supplied local GGUF, SHA256
+6f1bd4ac6c5df7444f9cca7ca36cafe6cfa34cd6f49fefb1e0b4be8143aed8bc,
+is a different artifact, remains untouched, and is not claimed to share this provenance.
 Only text inference is included; no multimodal encoder is bundled.
 
 Runtime: llama.cpp b11763, MIT, commit

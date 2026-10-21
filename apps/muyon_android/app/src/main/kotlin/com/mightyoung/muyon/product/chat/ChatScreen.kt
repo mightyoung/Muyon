@@ -25,15 +25,17 @@ fun ChatScreen(
     conversationKey: String = "default",
     displayName: String = "Muyon 助手",
     memberNames: List<String> = emptyList(),
+    agentRole: String = "",
+    agentInstructions: String = "",
 ) {
     var configured by remember(client) { mutableStateOf(false) }
     key(conversationKey, projectId) {
-        ChatConversation(client, projectId, conversationKey, displayName, memberNames, configured) { configured = it }
+        ChatConversation(client, projectId, conversationKey, displayName, memberNames, agentRole, agentInstructions, configured) { configured = it }
     }
 }
 
 @Composable
-private fun ChatConversation(client: ProductClient, projectId: String?, conversationKey: String, displayName: String, memberNames: List<String>, configured: Boolean, onConfigured: (Boolean) -> Unit) {
+private fun ChatConversation(client: ProductClient, projectId: String?, conversationKey: String, displayName: String, memberNames: List<String>, agentRole: String, agentInstructions: String, configured: Boolean, onConfigured: (Boolean) -> Unit) {
     val context = LocalContext.current
     val saved = remember { context.getSharedPreferences("product-chat-state", android.content.Context.MODE_PRIVATE) }
     val conversationPreference = remember(conversationKey) { if (conversationKey == "default") "conversation" else "conversation:$conversationKey" }
@@ -150,12 +152,14 @@ private fun ChatConversation(client: ProductClient, projectId: String?, conversa
     }
     fun preview(search: Boolean) {
         scopedCall("chat_prepare", JSONObject().put("conversation_id", conversation)
-            .put("text", draft).put("search", search).put("count", 5).put("project_id", projectId ?: JSONObject.NULL)) { reply ->
+            .put("text", if (search) draft else agentUserInput(draft, agentRole, agentInstructions)).put("search", search).put("count", 5).put("project_id", projectId ?: JSONObject.NULL)) { reply ->
             val data = reply.optJSONObject("data")
             if (reply.optString("status") == "ok" && data?.has("request_id") == true) {
                 reviewConversationKey = conversationKey; reviewDisplayName = displayName; review = data
             }
-            else error = "请求预览未完成，请检查配置、输入或先查询原请求。"
+            else error = if (reply.optString("error") == "chat_tool_history_review_required" || data?.optString("error") == "chat_tool_history_review_required")
+                "此会话包含尚未完成披露审核的工具历史。请查询原请求并完成审核，或从更多菜单开始新会话。"
+            else "请求预览未完成，请检查配置、输入或先查询原请求。"
         }
     }
     fun toolAction(action: String, planId: String? = null, digest: String? = null, callback: (JSONObject) -> Unit) {

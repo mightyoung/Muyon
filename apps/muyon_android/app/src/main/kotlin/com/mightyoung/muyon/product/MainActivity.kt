@@ -20,6 +20,7 @@ import com.mightyoung.muyon.product.research.ResearchScreen
 import com.mightyoung.muyon.product.chat.ChatScreen
 import com.mightyoung.muyon.product.agents.AgentCatalog
 import com.mightyoung.muyon.product.agents.AgentLibraryScreen
+import com.mightyoung.muyon.product.agents.visibleName
 import com.mightyoung.muyon.product.design.MuyonTheme
 import com.mightyoung.muyon.product.design.WorkbenchShell
 
@@ -76,14 +77,14 @@ class MainActivity : ComponentActivity() {
                                         val catalog = AgentCatalog(this@MainActivity).read()
                                         if (groupId != null) {
                                             val group = catalog.groups.single { it.id == groupId && !it.archived }
-                                            val members = group.members.map { id -> catalog.agents.single { it.id == id && !it.archived }.name }
+                                            val members = group.members.map { id -> visibleName(catalog.agents.single { it.id == id && !it.archived }.name, "未命名智能体") }
                                             conversationKey = "group:${group.id}"
-                                            conversationTitle = group.name
+                                            conversationTitle = visibleName(group.name, "未命名群组")
                                             memberNames = ArrayList(members)
                                         } else {
                                             val agent = catalog.agents.single { it.id == agentId && !it.archived }
                                             conversationKey = "agent:${agent.id}"
-                                            conversationTitle = agent.name
+                                            conversationTitle = visibleName(agent.name, "未命名智能体")
                                             memberNames = arrayListOf()
                                         }
                                         navigationError = ""; tab = "chat"
@@ -91,9 +92,20 @@ class MainActivity : ComponentActivity() {
                                         navigationError = "会话身份暂不可用，请返回目录核实智能体与成员。"
                                     }
                                 }
-                                else -> ChatScreen(client,
+                                else -> {
+                                    val selectedAgent = if (conversationKey.startsWith("agent:")) try {
+                                        AgentCatalog(this@MainActivity).activeAgent(conversationKey.removePrefix("agent:"))
+                                    } catch (_: Exception) { null } else null
+                                    if (conversationKey.startsWith("agent:") && selectedAgent == null) {
+                                        Column(Modifier.padding(24.dp)) {
+                                            Text("智能体配置暂不可用，请返回目录核实后重新打开对话。")
+                                            TextButton(onClick = { tab = "agents" }) { Text("返回智能体目录") }
+                                        }
+                                    } else ChatScreen(client,
                                     getSharedPreferences("muyon_product_research_v2", 0).getString("project_id", null),
-                                    conversationKey, conversationTitle, memberNames)
+                                    conversationKey, conversationTitle, memberNames,
+                                    selectedAgent?.role.orEmpty(), selectedAgent?.instructions.orEmpty())
+                                }
                             }
                         }
                     }

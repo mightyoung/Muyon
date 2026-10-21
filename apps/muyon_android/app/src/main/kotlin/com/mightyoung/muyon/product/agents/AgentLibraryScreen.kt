@@ -132,14 +132,14 @@ fun AgentLibraryScreen(onOpenChat: (agentId: String?, groupId: String?) -> Unit)
                                             groupDraft = group.copy(members = if (member.id in group.members) group.members - member.id else group.members + member.id)
                                         }.padding(12.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                                             Avatar(member)
-                                            Column(Modifier.weight(1f)) { Text(member.name, color = Ink); Text(member.role, color = SecondaryInk, style = MaterialTheme.typography.bodySmall, maxLines = 2, overflow = TextOverflow.Ellipsis) }
+                                            Column(Modifier.weight(1f)) { Text(visibleName(member.name, "未命名智能体"), color = Ink); Text(member.role, color = SecondaryInk, style = MaterialTheme.typography.bodySmall, maxLines = 2, overflow = TextOverflow.Ellipsis) }
                                             Checkbox(member.id in group.members, { checked -> groupDraft = group.copy(members = if (checked) (group.members + member.id).distinct() else group.members - member.id) },
-                                                colors = CheckboxDefaults.colors(checkedColor = ActionBlue), modifier = Modifier.semantics { contentDescription = "选择成员 ${member.name}" })
+                                                colors = CheckboxDefaults.colors(checkedColor = ActionBlue), modifier = Modifier.semantics { contentDescription = "选择成员 ${visibleName(member.name, "未命名智能体")}" })
                                         }
                                     }
                                 }
                                 else -> {
-                                    CatalogCard { Text(group.name, style = MaterialTheme.typography.headlineSmall, color = Ink); GroupMembers(group, snapshot) }
+                                    CatalogCard { Text(visibleName(group.name, "未命名群组"), style = MaterialTheme.typography.headlineSmall, color = Ink); GroupMembers(group, snapshot) }
                                     Text("群组仅组织角色与会话，不会自动执行多智能体任务。", color = SecondaryInk, style = MaterialTheme.typography.bodySmall)
                                 }
                             }
@@ -164,7 +164,7 @@ fun AgentLibraryScreen(onOpenChat: (agentId: String?, groupId: String?) -> Unit)
                         TextButton({ close() }) { Text("返回目录", color = SecondaryInk) }
                         snapshot.groups.firstOrNull { it.id == detailGroup }?.let { selected ->
                             FormPanel {
-                                CatalogCard { Text(selected.name, style = MaterialTheme.typography.headlineSmall, color = Ink); GroupMembers(selected, snapshot) }
+                                CatalogCard { Text(visibleName(selected.name, "未命名群组"), style = MaterialTheme.typography.headlineSmall, color = Ink); GroupMembers(selected, snapshot) }
                                 if (!selected.archived) {
                                     PrimaryAction("打开群组会话", { onOpenChat(null, selected.id) })
                                     OutlinedButton({ groupDraft = selected; step = 0 }, shape = CircleShape) { Text("编辑群组与成员", color = Ink) }
@@ -196,7 +196,7 @@ fun AgentLibraryScreen(onOpenChat: (agentId: String?, groupId: String?) -> Unit)
                                 CatalogCard(Modifier.heightIn(min = 256.dp).clickable { detailGroup = item.id }.testTag("group_card_${item.id}")) {
                                     Row(Modifier.heightIn(min = 80.dp), verticalAlignment = Alignment.Top) {
                                         Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                                            Text(item.name, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.SemiBold, color = Ink, maxLines = 2, overflow = TextOverflow.Ellipsis)
+                                            Text(visibleName(item.name, "未命名群组"), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.SemiBold, color = Ink, maxLines = 2, overflow = TextOverflow.Ellipsis)
                                             Text("${item.members.size} 位成员", style = MaterialTheme.typography.bodyMedium, color = SecondaryInk)
                                         }
                                         Chevron()
@@ -212,7 +212,7 @@ fun AgentLibraryScreen(onOpenChat: (agentId: String?, groupId: String?) -> Unit)
                                     Row(Modifier.heightIn(min = 80.dp), horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.Top) {
                                         Avatar(item)
                                         Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                                            Text(item.name, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.SemiBold, color = Ink, maxLines = 2, overflow = TextOverflow.Ellipsis)
+                                            Text(visibleName(item.name, "未命名智能体"), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.SemiBold, color = Ink, maxLines = 2, overflow = TextOverflow.Ellipsis)
                                             Text(item.role, style = MaterialTheme.typography.bodyMedium, color = SecondaryInk, maxLines = 2, overflow = TextOverflow.Ellipsis)
                                         }
                                         Chevron()
@@ -307,7 +307,7 @@ private fun IdentityReview(agent: AgentProfile) {
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
             Avatar(agent, Modifier.size(56.dp))
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                Text(agent.name, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.SemiBold, color = Ink)
+                Text(visibleName(agent.name, "未命名智能体"), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.SemiBold, color = Ink)
                 Text(agent.role, color = SecondaryInk)
             }
         }
@@ -321,7 +321,7 @@ private fun IdentityReview(agent: AgentProfile) {
 @Composable
 private fun Avatar(agent: AgentProfile, modifier: Modifier = Modifier.size(48.dp)) {
     Box(modifier.clip(RoundedCornerShape(12.dp)).background(Color(android.graphics.Color.parseColor(agent.accent)).copy(alpha = .12f))
-        .semantics { contentDescription = "${agent.name.ifBlank { "智能体" }}的头像" }, contentAlignment = Alignment.Center) {
+        .semantics { contentDescription = "${visibleName(agent.name, "未命名智能体")}的头像" }, contentAlignment = Alignment.Center) {
         if (agent.avatar == "✦") Image(painterResource(R.drawable.muyon_avatar), null, Modifier.fillMaxSize().padding(5.dp))
         else Text(agent.avatar, color = Color(android.graphics.Color.parseColor(agent.accent)), style = MaterialTheme.typography.titleLarge)
     }
@@ -336,7 +336,7 @@ private fun GroupMembers(group: AgentGroup, snapshot: CatalogSnapshot) {
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
             row.forEach { id -> snapshot.agents.find { it.id == id }?.let { member ->
                 Surface(Modifier.weight(1f), shape = RoundedCornerShape(8.dp), color = QuietSurface) {
-                    Text(member.name, Modifier.padding(8.dp), color = SecondaryInk, maxLines = 1, overflow = TextOverflow.Ellipsis, style = MaterialTheme.typography.labelMedium)
+                    Text(visibleName(member.name, "未命名智能体"), Modifier.padding(8.dp), color = SecondaryInk, maxLines = 1, overflow = TextOverflow.Ellipsis, style = MaterialTheme.typography.labelMedium)
                 }
             } }
         }

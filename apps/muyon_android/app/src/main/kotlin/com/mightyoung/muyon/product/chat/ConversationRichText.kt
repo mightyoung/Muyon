@@ -71,7 +71,7 @@ internal fun conversationBlocks(text: String): List<ConversationBlock> {
 
 internal fun safeConversationUrl(value: String): Boolean = try {
     val uri = URI(value)
-    uri.scheme?.lowercase() in setOf("http", "https") && !uri.host.isNullOrBlank() && uri.userInfo == null && value.none { it.isISOControl() }
+    uri.scheme?.lowercase() == "https" && !uri.host.isNullOrBlank() && uri.userInfo == null && value.none { it.isISOControl() }
 } catch (_: Exception) { false }
 
 internal fun conversationInline(value: String, linkStyle: SpanStyle): AnnotatedString = buildAnnotatedString {
@@ -86,7 +86,10 @@ internal fun conversationInline(value: String, linkStyle: SpanStyle): AnnotatedS
                 if (safeConversationUrl(target)) {
                     pushStringAnnotation("URL", target)
                     pushLink(LinkAnnotation.Url(target, TextLinkStyles(style = linkStyle)))
-                    appendInline(match.groupValues[1], depth + 1); pop(); pop()
+                    appendInline(match.groupValues[1], depth + 1)
+                    // The label is untrusted model text; always expose the actual host.
+                    append(" ("); append(URI(target).host); append(")")
+                    pop(); pop()
                 } else append(match.value)
                 at = match.range.last + 1
                 continue

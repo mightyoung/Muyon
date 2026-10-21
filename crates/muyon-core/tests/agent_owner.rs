@@ -396,7 +396,7 @@ fn malformed_or_over_bound_usage_keeps_unknown_hold_without_answer() {
 fn validated_search_sources_and_empty_result_follow_existing_settlement_contract() {
     let temp = Temp::new();
     let owner = temp.owner();
-    let config = owner.configure_trusted(settings(5000, 3)).unwrap();
+    let config = owner.configure_trusted(settings(10000, 3)).unwrap();
     let empty = owner
         .prepare_search_with_price(
             "conversation-a",
@@ -419,7 +419,11 @@ fn validated_search_sources_and_empty_result_follow_existing_settlement_contract
         .settle_response(&empty.request_id, r#"{"results":[]}"#)
         .unwrap();
     assert_eq!(result.status, "completed");
-    assert_eq!(result.charged_micro_cny.value(), 0);
+    assert_eq!(
+        result.charged_micro_cny.value(),
+        5000,
+        "empty results do not waive a verified per-request charge"
+    );
     assert_eq!(result.answer, Some(json!([])));
     assert!(owner
         .claim_dispatch(
@@ -450,7 +454,7 @@ fn validated_search_sources_and_empty_result_follow_existing_settlement_contract
         .unwrap()
         .to_string()
         .contains("https://example.com/paper"));
-    assert_eq!(owner.budget().unwrap().charged_micro_cny.value(), 5000);
+    assert_eq!(owner.budget().unwrap().charged_micro_cny.value(), 10000);
 }
 
 #[test]
@@ -474,7 +478,7 @@ fn cancelled_claim_with_empty_response_never_refunds_attempt_count_after_restart
         .settle_response(&plan.request_id, r#"{"results":[]}"#)
         .unwrap();
     assert_eq!(terminal.status, "cancelled");
-    assert_eq!(terminal.charged_micro_cny.value(), 0);
+    assert_eq!(terminal.charged_micro_cny.value(), 5000);
     assert_eq!(
         owner.budget().unwrap().used_calls.value(),
         1,

@@ -78,13 +78,17 @@ class OcrOrientationRegressionTest {
     }
 
     @Test fun tallCropNormalizesCounterclockwiseWithoutSwappingCornerIdentity() {
-        val source = fixture(0f, width = 24f, height = 160f)
-        try {
-            val crop = OcrGeometry.perspectiveCrop(source, corners(0.0, width = 24f, height = 160f))
+        for (degrees in listOf(-44f, -30f, -15f, 0f, 15f, 30f, 44f)) {
+            val source = fixture(degrees, width = 24f, height = 160f)
             try {
-                assertTrue(crop.width > crop.height * 5)
-                checkColors(crop, listOf(Color.GREEN, Color.BLUE, Color.YELLOW, Color.RED))
-            } finally { crop.recycle() }
-        } finally { source.recycle() }
+                for (points in permutations(corners(Math.toRadians(degrees.toDouble()), width = 24f, height = 160f))) {
+                    val crop = OcrGeometry.perspectiveCrop(source, points)
+                    try {
+                        assertTrue("$degrees must normalize the tall crop", crop.width > crop.height * 5)
+                        checkColors(crop, listOf(Color.GREEN, Color.BLUE, Color.YELLOW, Color.RED))
+                    } finally { crop.recycle() }
+                }
+            } finally { source.recycle() }
+        }
     }
 }

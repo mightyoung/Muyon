@@ -13,6 +13,10 @@ data class AgentProfile(
 data class AgentGroup(val id: String, val name: String, val members: List<String>, val archived: Boolean = false)
 data class CatalogSnapshot(val agents: List<AgentProfile>, val groups: List<AgentGroup>)
 
+internal fun visibleName(value: String, fallback: String): String = value.filterNot {
+    it.isISOControl() || Character.getType(it) == Character.FORMAT.toInt()
+}.trim().takeIf { name -> name.any { !it.isWhitespace() && !Character.isSpaceChar(it) } } ?: fallback
+
 /** Local organization only. Never stores credentials, model connections or chat transcripts. */
 class AgentCatalog private constructor(private val preferences: SharedPreferences) {
     constructor(context: Context) : this(context.getSharedPreferences(PREFERENCES, Context.MODE_PRIVATE))
@@ -25,6 +29,7 @@ class AgentCatalog private constructor(private val preferences: SharedPreference
     }
 
     fun read(): CatalogSnapshot = synchronized(lock) { readLocked() }
+    fun activeAgent(id: String): AgentProfile = read().agents.single { it.id == id && !it.archived }
 
     private fun text(value: String, limit: Int, required: Boolean = true) {
         require(value.length <= limit && (!required || value.isNotBlank()) && value.none { it == '\u0000' }) {

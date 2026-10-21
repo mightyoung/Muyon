@@ -7,12 +7,35 @@ from pathlib import Path
 import struct
 import zipfile
 
+REVIEWED_PROVENANCE_NOTICE = "REVIEWED_MODEL_PROVENANCE.txt"
+MODEL_NOTICE_NAMES = (
+    REVIEWED_PROVENANCE_NOTICE, "llama-MIT.txt", "onnxruntime-MIT.txt", "PaddleOCR-Apache2.txt",
+    "Embedding-GGUF-model-card.txt", "Embedding-base-model-card.txt",
+    "PaddleOCR-det-model-card.txt", "PaddleOCR-rec-model-card.txt", "Model-Apache-2.0.txt",
+)
+
+
+def check_notices(archive, assets, source_assets=None):
+    source_assets = source_assets or Path(__file__).parents[1] / "app/src/main/assets"
+    expected = {"LOCAL_MODELS.txt": source_assets / "notices/LOCAL_MODELS.txt"}
+    expected.update({name: assets / "notices" / name for name in MODEL_NOTICE_NAMES})
+    assert not (assets / "notices/LOCAL_MODELS.txt").exists(), "external LOCAL_MODELS notice collides with main assets"
+    verified = []
+    for name, path in expected.items():
+        value = path.read_bytes()
+        assert value.strip() and len(value) <= 131072, f"missing/oversized notice: {name}"
+        packaged = "assets/notices/" + name
+        assert archive.namelist().count(packaged) == 1, f"missing/duplicate packaged notice: {name}"
+        assert archive.read(packaged) == value, f"packaged notice bytes differ: {name}"
+        verified.append({"name": name, "sha256": hashlib.sha256(value).hexdigest()})
+    return verified
+
+
 def check(apk, assets, native):
     manifest = json.loads((assets / "local-models/manifest.json").read_text())
     result = []
     with zipfile.ZipFile(apk) as archive:
-        for notice in ("LOCAL_MODELS.txt", "llama-MIT.txt", "onnxruntime-MIT.txt", "PaddleOCR-Apache2.txt"):
-            assert archive.read("assets/notices/" + notice), notice
+        notices = check_notices(archive, assets)
         for name, identity in manifest.items():
             value = archive.read("assets/local-models/" + name)
             assert len(value) == identity["bytes"]
@@ -45,7 +68,7 @@ def check(apk, assets, native):
         for abi in ("arm64-v8a", "x86_64"):
             for library in ("libmuyon_local_embedding.so", "libonnxruntime.so", "libonnxruntime4j_jni.so"):
                 assert f"lib/{abi}/{library}" in libraries
-    return {"gate":"PASS", "model_files":len(manifest), "libraries":result,
+    return {"gate":"PASS", "model_files":len(manifest), "notices":notices, "libraries":result,
             "boundary":"Static APK bytes/alignment only; API26 inference and 16KiB-kernel execution are separate evidence."}
 
 if __name__ == "__main__":

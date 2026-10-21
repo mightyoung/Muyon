@@ -18,7 +18,7 @@ class LocalEmbeddingTest {
     private fun installedModel(): File {
         val start = SystemClock.elapsedRealtime()
         val model = LocalModels(context).install().getValue("embedding.gguf")
-        assertEquals("fixed production model byte length", 309855520L, model.length())
+        assertEquals("fixed production model byte length", 309855456L, model.length())
         Log.i(TAG, "verified_asset_install_ms=${SystemClock.elapsedRealtime() - start}")
         return model
     }

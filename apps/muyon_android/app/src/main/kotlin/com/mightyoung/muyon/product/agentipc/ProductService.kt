@@ -56,7 +56,13 @@ class ProductService : Service() {
             override fun confirm(request: String, configuration: String) = data(open(false).agentConfirm(request, configuration))
             override fun claim(request: String, configuration: String, generation: String) = data(open(false).agentClaim(request, configuration, generation))
             override fun allowed(request: String, configuration: String, generation: String) = !stopped && open(false).agentAllowed(request, configuration, generation)
-            override fun settle(request: String, body: String) = data(open(false).agentSettle(request, body))
+            override fun settle(request: String, body: String) = synchronized(this@ProductService) {
+                // A complete response belongs to the existing owner even while
+                // destruction drains its worker. Never reopen during shutdown.
+                val owner = requireNotNull(core) { "settlement_owner_unavailable" }
+                if (stopped) owner.agentCancel(request)
+                data(owner.agentSettle(request, body))
+            }
             override fun diagnostic(request: String, stage: String, httpStatus: Int?) { open(false).agentDiagnostic(request, stage, httpStatus?.toUShort()) }
             override fun lookup(request: String) = data(open(false).agentLookup(request))
             override fun cancel(request: String) = data(open(false).agentCancel(request))
@@ -122,6 +128,9 @@ class ProductService : Service() {
         }
         check(!stopped)
         val root = File(filesDir, "muyon-product-v2").absolutePath
+        // Native open first acquires the sole owner and reconciles old-epoch
+        // uploads/readers plus reference-checked GC. Publish only after that
+        // succeeds; no maintenance can overlap a predecessor's drain.
         return ProductCore.open(root, workspace, epoch, initialize).also { core = it }
     }
     private fun error(code: String, status: String = "unknown") = JSONObject()

@@ -147,7 +147,8 @@ internal class ProductHttpsTransport {
                 })
                 check(sent.get() && allowed())
                 result = readResponse(input, allowed, { stage = it }, { httpStatus = it })
-                check(allowed())
+                // Fully framed responses must settle the original attempt even
+                // when cancellation races with the final read.
                 return result
             } catch (failure: ProductHttpsFailure) {
                 result?.fill(0)

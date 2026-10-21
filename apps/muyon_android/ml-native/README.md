@@ -8,8 +8,17 @@ Source archive SHA256: `a3d34dba84adbe488c62fb53e0d7398f469d791e6640e88c463f9a23
 llama.cpp and GGML are MIT licensed. The script copies the upstream MIT license
 to the output directory; include it in application notices. The model has its
 own license and is not covered by the runtime license. No model is committed
-here. The expected existing model is `embeddinggemma-2-Q8_0.gguf`, SHA256
-`6f1bd4ac6c5df7444f9cca7ca36cafe6cfa34cd6f49fefb1e0b4be8143aed8bc`.
+here. The fixed model candidate is `embeddinggemma-2-Q8_0.gguf` published by
+`ggml-org/embeddinggemma-2-GGUF` at revision
+`58faf90940886df2d62be555c8765d00dac362c5`, 309855456 bytes, SHA256
+`2188ac1deca4b77dffefd603c2776a9d76d9d74ec01841392982ebb840b09135`.
+Its pinned model card declares Apache-2.0 and Google embeddinggemma-2 as base;
+the exact converter/base revisions used in conversion remain unspecified.
+The previous user-supplied GGUF with SHA256 `6f1bd4ac6c5df7444f9cca7ca36cafe6cfa34cd6f49fefb1e0b4be8143aed8bc`
+is a distinct artifact whose source was not established; it is not overwritten
+or represented as the new pinned artifact. New inference acceptance must use the
+new candidate's actual bytes. CI provisioning uses fixed official download URLs
+in `prepare-model-assets.py`, with weight/config/card/license hash verification.
 
 ```sh
 ANDROID_HOME=/Users/muyi/Library/Android/sdk \
