@@ -64,10 +64,7 @@ jobs:
     timeout-minutes: 60
     env:
       MUYON_MODEL_INPUT_URL: ${{ vars.MUYON_MODEL_INPUT_URL }}
-      MUYON_NATIVE_OUTPUT: ${{ runner.temp }}/product-native
-      MUYON_ML_OUTPUT: ${{ runner.temp }}/product-ml
       MUYON_ML_FETCH: '1'
-      GRADLE_USER_HOME: ${{ runner.temp }}/product-gradle
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
@@ -81,6 +78,13 @@ jobs:
         run: |
           mkdir -p "$RUNNER_TEMP/product-evidence"
           git rev-parse HEAD | tee "$RUNNER_TEMP/product-evidence/source-sha.txt"
+          # Job-level env cannot access runner context. Resolve these paths only
+          # after allocation, then export them for subsequent build steps.
+          {
+            echo "MUYON_NATIVE_OUTPUT=$RUNNER_TEMP/product-native"
+            echo "MUYON_ML_OUTPUT=$RUNNER_TEMP/product-ml"
+            echo "GRADLE_USER_HOME=$RUNNER_TEMP/product-gradle"
+          } >> "$GITHUB_ENV"
           if [[ -z "$MUYON_MODEL_INPUT_URL" ]]; then
             echo 'BLOCKED: configure reviewed MUYON_MODEL_INPUT_URL; no substitute model or skipped product gate.' >&2
             exit 1
