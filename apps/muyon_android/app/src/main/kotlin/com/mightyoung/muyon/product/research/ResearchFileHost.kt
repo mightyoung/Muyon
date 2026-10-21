@@ -20,6 +20,9 @@ import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 import java.util.zip.ZipInputStream
 
+internal class ResearchReadFailure(val status: String, val code: String) :
+    IllegalStateException("$status: $code")
+
 /** User-selected documents are streams only; no provider path is passed to Rust. */
 internal class ResearchFileHost(private val context: Context, private val client: ProductClient) : AutoCloseable {
     private val main = Handler(Looper.getMainLooper())
@@ -51,7 +54,7 @@ internal class ResearchFileHost(private val context: Context, private val client
         main.post { client.call(method, payload) { response = it; latch.countDown() } }
         check(latch.await(35, TimeUnit.SECONDS)) { "响应未知，请检查原操作" }
         val reply = requireNotNull(response)
-        check(reply.optString("status") == "ok") { "${reply.optString("status")}: ${reply.optString("error")}" }
+        if (reply.optString("status") != "ok") throw ResearchReadFailure(reply.optString("status"), reply.optString("error"))
         return reply.opt("data") ?: JSONObject.NULL
     }
 
@@ -202,6 +205,9 @@ internal class ResearchFileHost(private val context: Context, private val client
             throw error
         } finally { runCatching { rpc("close_attachment", JSONObject().put("reader_id", reader)) } }
     }
+
+    fun currentPaper(project: String, paper: String): JSONObject =
+        rpc("paper", JSONObject().put("project_id", project).put("paper_id", paper)) as JSONObject
 }
 
 internal class PrivatePdf(private val file: File) : AutoCloseable {

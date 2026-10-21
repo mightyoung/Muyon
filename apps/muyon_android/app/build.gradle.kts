@@ -22,6 +22,11 @@ android {
         buildConfigField("String", "MUYON_SOURCE", "\"${providers.gradleProperty("muyonSource").orNull.orEmpty()}\"")
     }
     buildFeatures { compose = true; buildConfig = true; aidl = true }
+    androidResources { noCompress += listOf("gguf", "onnx") }
+    providers.gradleProperty("muyonModelAssets").orNull?.let {
+        require(File(it).isAbsolute) { "Model asset directory must be absolute" }
+        sourceSets.getByName("main").assets.srcDir(it)
+    }
     sourceSets.getByName("androidTest").assets.srcDir(rootProject.file("../../docs/contracts/muyon-android/fixtures"))
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
@@ -33,6 +38,26 @@ android {
     }
 }
 kotlin { compilerOptions { jvmTarget.set(JvmTarget.JVM_17) } }
+val verifyModelAssets by tasks.registering {
+    doLast {
+        val directory = File(providers.gradleProperty("muyonModelAssets").orNull
+            ?: error("Prepare fixed offline assets and set muyonModelAssets"), "local-models")
+        val fixed = mapOf(
+            "embedding.gguf" to "6f1bd4ac6c5df7444f9cca7ca36cafe6cfa34cd6f49fefb1e0b4be8143aed8bc",
+            "det.onnx" to "a431985659dc921974177a95adcfbb90fd9e51989a5e04d70d0b75f597b6e61d",
+            "rec.onnx" to "da72dc72ca4dc220df0dfde68c1dedc31c58d3e76a25871122e5056227d50092",
+            "dictionary.json" to "d858428fbe0ada92b439a5f277b51bc1b318fd985d80946a3ce859d7f2446a92"
+        )
+        fixed.forEach { (name, expected) ->
+            val hash = MessageDigest.getInstance("SHA-256")
+            directory.resolve(name).inputStream().use { input ->
+                val buffer = ByteArray(65536)
+                while (true) { val count = input.read(buffer); if (count < 0) break; hash.update(buffer, 0, count) }
+            }
+            require(hash.digest().joinToString("") { "%02x".format(it) } == expected) { "Fixed model mismatch: $name" }
+        }
+    }
+}
 val verifyProductNativeInputs by tasks.registering {
     doLast {
         val input = providers.gradleProperty("muyonProductNativeInputs").orNull
@@ -46,18 +71,22 @@ val verifyProductNativeInputs by tasks.registering {
             require(fields.size == 2 && fields[0].matches(Regex("[0-9a-f]{64}")))
             fields[1] to fields[0]
         }
-        for (abi in listOf("arm64-v8a", "x86_64")) {
-            val path = "$abi/libmuyon_android_product.so"
+        require(expected.keys == listOf("arm64-v8a", "x86_64").flatMap { abi ->
+            listOf("$abi/libmuyon_android_product.so", "$abi/libmuyon_local_embedding.so")
+        }.toSet()) { "Native manifest set mismatch" }
+        for (path in expected.keys) {
             val library = directory.resolve(path)
             val digest = MessageDigest.getInstance("SHA-256").digest(library.readBytes()).joinToString("") { "%02x".format(it) }
-            require(expected[path] == digest) { "Native input hash mismatch: $abi" }
+            require(expected[path] == digest) { "Native input hash mismatch: $path" }
         }
     }
 }
 tasks.configureEach {
     if (name == "mergeDebugNativeLibs" || name == "mergeReleaseNativeLibs") dependsOn(verifyProductNativeInputs)
+    if (name == "mergeDebugAssets" || name == "mergeReleaseAssets") dependsOn(verifyModelAssets)
 }
 dependencies {
+    implementation("com.microsoft.onnxruntime:onnxruntime-android:1.23.0")
     implementation("net.java.dev.jna:jna:5.19.1@aar")
     implementation(platform("androidx.compose:compose-bom:2025.09.01"))
     implementation("androidx.activity:activity-compose:1.11.0")

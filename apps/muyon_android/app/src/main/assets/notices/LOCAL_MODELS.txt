@@ -1,0 +1,22 @@
+Muyon local research models
+
+PP-OCRv5 mobile detector and recognizer: PaddlePaddle, Apache-2.0.
+Fixed official revisions: detector e6f4fa85f00e168c862bc462aebca69eef9b3d3d;
+recognizer ed152b8b495f84de93cda5709d768548a9127622.
+https://huggingface.co/PaddlePaddle/PP-OCRv5_mobile_det_onnx
+https://huggingface.co/PaddlePaddle/PP-OCRv5_mobile_rec_onnx
+
+Embedding weight: supplied local embeddinggemma-2-Q8_0.gguf, SHA256
+6f1bd4ac6c5df7444f9cca7ca36cafe6cfa34cd6f49fefb1e0b4be8143aed8bc.
+GGUF metadata declares Embeddinggemma 2 / gemma-embedding2 / Apache-2.0.
+The GGUF does not record its converter or source repository revision.
+Upstream model information: https://huggingface.co/google/embeddinggemma-2
+Only text inference is included; no multimodal encoder is bundled.
+
+Runtime: llama.cpp b11763, MIT, commit
+a01ce9ffc64cf370439d6f861a534a65100133ae.
+Runtime: Microsoft ONNX Runtime Android 1.23.0, MIT.
+Full runtime and Apache license texts accompany this file in APK assets/notices.
+Model assets are embedded in this APK and verified before private installation.
+Inference and the derived research index are local. No model download, network
+fallback, telemetry initialization or remote content disclosure is added here.

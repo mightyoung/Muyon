@@ -267,6 +267,7 @@ fun ResearchScreen(client: ProductClient) {
                     }, modifier = Modifier.testTag("research-open-attachment-$index")) { Text("打开受控附件 ${index + 1}") }
                 }
             }
+            if (noDraft) LocalResearchPanel(host, id, paper, unlocked)
         }
         if (!noDraft) TextButton(enabled = unlocked, onClick = { discard = true }) { Text("放弃科研草稿") }
         receipt?.let { Text("历史回执（不代表当前值）：${it.optString("intent_id")} · ${it.optString("target_id")} · 版本 ${it.optString("revision")}", Modifier.testTag("research-receipt")) }
