@@ -2,6 +2,14 @@
 
 核验日期：2026-10-21。验收规格：[36 场景](planning/muyon-android-refactor-tests-20261020.md)；执行范围：[21 张任务卡](planning/muyon-android-refactor-tasks-20261020.md)。本文件记录证据覆盖，不批准整体交付。
 
+**最新 UI 补充：** `07fd4509fb4653a67435957c4ba021a2c142af00` 已按用户最新要求
+全面改用 Muse 组件与配色、Claude 字体，配置操作收入加号菜单。其同候选设备套件
+**26/26 PASS**（原21方法＋5项目录/来源/导航方法），另有200%字体和独立1280dp深色
+实例各1次重复验证通过；构建/lint/包装与4项Python门禁通过。
+[独立封存的最新证据](../../design/android-reference-20261021/muse-final/README.md)。
+这些 UI 与回归证据不关闭下面36个复合场景的残余边界；整体仍 PARTIAL/HOLD。
+下段21/21及其明细保留为此前业务候选的历史证据，不代表最新工作树身份。
+
 **整体结论：PARTIAL；当前候选产品设备套件 21/21 PASS，包装门禁 PASS。** 目标候选为 `7b063cb4089fe21fdaf82657bcf00408e3f138b1`，本轮读取时工作树 HEAD 与此一致。已读取持久化 `product-device/final/{SUITE,SUITE-MANIFEST,PACKAGE}.json`，并独立重跑同候选 suite gate：21 方法全部通过（核心 16＋picker setup 1＋PDF/ZIP/目录/源删除后私有再开 4），4 项门禁单元测试通过。早期候选及测试调试失败记录保留为历史，不混入这轮通过。I04 独立 HOLD，生产价格证明端口仍为 `None`，真实模型、搜索与模型工具后续调用均无本次 live 验收证据。
 
 ## 证据口径

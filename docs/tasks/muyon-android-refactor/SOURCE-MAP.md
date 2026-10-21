@@ -1,5 +1,12 @@
 # Android refactor execution source map
 
+Latest UI supplement: `07fd4509fb4653a67435957c4ba021a2c142af00`.
+`product/design/Workbench.kt` owns Muse tokens, Claude typography and adaptive
+navigation; `product/agents/` owns local agent/group metadata and editing;
+`product/chat/ChatPresentation.kt` owns the plain32dp composer. Existing business,
+IPC and runtime sources remain the delivery boundaries below.
+[Current APK, screenshots and26-method evidence](../../design/android-reference-20261021/muse-final/README.md).
+
 ## Execution identity
 
 - User authorized implementation of the reviewed plan on 2026-10-20.

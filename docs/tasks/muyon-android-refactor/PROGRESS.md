@@ -1,10 +1,22 @@
 # Execution ledger — local implementation delivered; overall acceptance HOLD
 
-Branch: codex/muyon-android-refactor. Fixed installed product/test source: 7b063cb4089fe21fdaf82657bcf00408e3f138b1.
+Branch: codex/muyon-android-refactor. Latest installed UI/product/test source:
+`07fd4509fb4653a67435957c4ba021a2c142af00`. The earlier business checkpoint below
+is `7b063cb4089fe21fdaf82657bcf00408e3f138b1`.
+
+## Latest UI supplement — 2026-10-21
+
+User correction applied: complete Muse component/color/interaction treatment,
+Claude Sans/Serif resources, and quiet chat with settings/actions in the plus menu.
+Durable agent/group management and separate conversation namespaces are included.
+The final same-candidate suite passes26/26 required device methods, plus two
+additional large-font/wide-dark executions, build/lint/package gates and4 Python
+gate tests. [APK,24 actual screenshots and evidence](../../design/android-reference-20261021/muse-final/README.md).
+Overall36-scenario acceptance, I04 and live pricing/provider limitations remain HOLD.
 
 Rust/Compose implements supplier CRUD/delete/restore, research projects, immutable directory/ZIP snapshots, manual PDF metadata/private attachments, and guarded agent/tool coordination. The original develop checkout and existing xcconfig edits were retained. No merge, push, publication or historical Flutter migration occurred; new data and original unknown identities were preserved.
 
-## Verified local result
+## Historical business checkpoint — verified local result
 
 - 21/21 API26 methods PASS: one input-generation setup and 20 behavior methods, same APK/test APK, emulator-5556, SDK26, arm64-v8a, SELinux Enforcing. No required method is omitted or skipped.
 - 127 Rust executions PASS (15 unit cases compiled in two targets; not 127 unique cases). Tested Rust tree c0bcc4306721dc39f75062c078319ec87931f1fa is identical in the test snapshot and installed candidate; crates/ and reused experiments/ did not change. Shared contract tests also traverse 32 vectors.
