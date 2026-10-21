@@ -59,7 +59,11 @@ fun MuyonTheme(content: @Composable () -> Unit) {
         titleLarge = type(20, 28, FontWeight.SemiBold), titleMedium = type(16, 22, FontWeight.Medium), titleSmall = type(14, 20, FontWeight.Medium),
         bodyLarge = type(16, 24), bodyMedium = type(14, 20), bodySmall = type(13, 18),
         labelLarge = type(14, 20, FontWeight.Medium), labelMedium = type(13, 18, FontWeight.Medium), labelSmall = type(12, 16, FontWeight.Medium)
-    ), content = content)
+    ), content = {
+        Surface(Modifier.fillMaxSize(), color = scheme.background, contentColor = scheme.onSurface) {
+            content()
+        }
+    })
 }
 
 private data class Destination(val id: String, val label: String, val icon: Int)
