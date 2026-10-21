@@ -1,6 +1,6 @@
 //! Durable, bounded host activity. These events are not model reasoning.
 use super::{
-    owner::{AgentPlan, Observation},
+    owner::{AgentOwner, AgentPlan, Observation},
     read_business, ReadScope,
 };
 use crate::{business::BusinessStore, contract::decode_json, sqlite::Db};
@@ -449,8 +449,23 @@ impl RunLedger {
             }
             Action::SetSkill { skill_id, enabled } => {
                 skill(&skill_id)?;
+                let tx = sql(self.db.transaction())?;
                 sql(self.db.exec("INSERT INTO skills VALUES(?,?,?) ON CONFLICT(scope,id) DO UPDATE SET enabled=excluded.enabled",&[&key,&skill_id,if enabled {"1"} else {"0"}]))?;
-                Ok(json!({"id":skill_id,"enabled":enabled}))
+                let mut requests = Vec::new();
+                if !enabled {
+                    for row in sql(self.db.query("SELECT record FROM runs WHERE scope=?", &[&key]))? {
+                        let mut run: Run = serde_json::from_str(cell(&row, 0)?).map_err(|_| "workflow_storage_invalid")?;
+                        if run.kind == "remote_chat" && run.skill_id.as_deref() == Some(&skill_id)
+                            && run.remote_request_id.is_some() && !run.cancel_requested {
+                            run.cancel_requested = true;
+                            requests.push(run.remote_request_id.clone().ok_or("workflow_remote_binding_invalid")?);
+                            self.event(&key, &mut run, "skill_revoked", "技能已停用，原外发计划已撤销", "host_activity")?;
+                            self.save(&key, &run)?;
+                        }
+                    }
+                }
+                sql(tx.commit())?;
+                Ok(json!({"id":skill_id,"enabled":enabled,"remote_request_ids":requests}))
             }
             Action::Snapshot { root_id, after_seq } => self.snapshot(scope, &root_id, after_seq),
             Action::List { limit } => {
@@ -690,7 +705,7 @@ impl RunLedger {
         }
         let related = self.children(scope, &run.root_id)?;
         Ok(
-            json!({"root_id":run.root_id,"root_conversation":scope.conversation,"conversation_id":run.conversation_id,"task":run.task,"skill_body":s.body,"skill_digest":sha(s.body),"tool_names":[s.tool],"project_id":run.project_id,"remote_request_ids":related.iter().filter_map(|r|r.remote_request_id.as_ref()).collect::<Vec<_>>()}),
+            json!({"root_id":run.root_id,"root_conversation":scope.conversation,"conversation_id":run.conversation_id,"task":run.task,"skill_id":s.id,"skill_body":s.body,"skill_digest":sha(s.body),"tool_names":[s.tool],"project_id":run.project_id,"remote_request_ids":related.iter().filter_map(|r|r.remote_request_id.as_ref()).collect::<Vec<_>>()}),
         )
     }
     pub fn bind_remote_plan(
@@ -863,6 +878,45 @@ impl RunLedger {
             }
         }
         Ok(ids)
+    }
+
+    /// Host-only check across all task roots for both normal and child plans.
+    /// The owner supplies chain identities; action JSON cannot nominate a scope.
+    pub fn authorize_request(&self, owner: &AgentOwner, request: &str) -> Result<()> {
+        let conversation = owner.request_conversation(request)?;
+        let rows = sql(self.db.query("SELECT scope,record FROM runs WHERE id<>root", &[]))?;
+        let mut tasks = Vec::new();
+        let mut parent_scopes = std::collections::BTreeSet::new();
+        for row in rows {
+            let key = cell(&row, 0)?.to_owned();
+            let run: Run = serde_json::from_str(cell(&row, 1)?).map_err(|_| "workflow_storage_invalid")?;
+            let Some(original) = run.remote_request_id.as_deref() else { continue };
+            let scope: Value = serde_json::from_str(&key).map_err(|_| "workflow_storage_invalid")?;
+            let parent = scope[1].as_str().ok_or("workflow_storage_invalid")?;
+            let chain = owner.request_chain(original)?;
+            let contains = chain.iter().any(|o| o.request_id == request);
+            if contains {
+                if run.epoch != self.epoch || run.cancel_requested || run.status == "cancelled" {
+                    return Err("workflow_remote_stopped");
+                }
+                let skill_id = run.skill_id.as_deref().ok_or("workflow_skill_not_found")?;
+                let enabled = sql(self.db.query("SELECT enabled FROM skills WHERE scope=? AND id=?", &[&key, skill_id]))?;
+                if enabled.first().is_some_and(|r| r.first().and_then(Option::as_deref) == Some("0")) {
+                    return Err("workflow_skill_disabled");
+                }
+                parent_scopes.insert(key.clone());
+                owner.ensure_conversation_resolved(parent)?;
+            }
+            if parent == conversation { parent_scopes.insert(key.clone()); }
+            tasks.push((key, chain));
+        }
+        for (scope, chain) in tasks {
+            if parent_scopes.contains(&scope) && chain.iter().any(|o| o.request_id != request &&
+                matches!(o.status.as_str(), "reserved" | "unknown" | "tool_pending")) {
+                return Err("conversation_original_outcome_required");
+            }
+        }
+        Ok(())
     }
 }
 impl Drop for RunLedger {

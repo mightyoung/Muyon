@@ -64,7 +64,7 @@ class ProductChatRuntime(private val port: ProductChatPort) : AutoCloseable {
     private val credentials = ProductCredentialVault()
     private val sendGate = ProductSendGate()
     private data class Plan(val session: String, val data: JSONObject)
-    private data class ToolOrigin(val session: String, val generation: String, val project: String?, val scopeGeneration: Long)
+    private data class ToolOrigin(val session: String, val generation: String, val project: String?, val scopeGeneration: Long, val skillId: String? = null, val conversation: String? = null)
     private val scopes = ProductScopeRegistry() // control only
     private val toolOrigins = mutableMapOf<String, ToolOrigin>() // control only
     private val businessPreviews = mutableMapOf<String, JSONObject>() // exact host plan per request
@@ -134,12 +134,22 @@ class ProductChatRuntime(private val port: ProductChatPort) : AutoCloseable {
     /** Workflow scope is obtained from this same serialized, selected session. */
     fun workflow(session: String, conversation: String, action: JSONObject, callback: (JSONObject) -> Unit) = submit(callback) {
         val scope = checkNotNull(scopes.get(session))
+        val revoking = action.optString("action") == "set_skill" && !action.optBoolean("enabled", true)
+        if (revoking) {
+            // Linearize local revocation against the final socket-write gate
+            // before durably disabling the skill. Followups inherit this origin.
+            toolOrigins.filterValues { it.conversation == conversation && it.project == scope.project && it.skillId == action.optString("skill_id") }
+                .keys.toList().forEach { request ->
+                    sendGate.cancel(request); cancelled.add(request)
+                    port.cancel(request) // revoke prepared/native authority before skill mutation too
+                }
+        }
         val result = port.workflow(action, session, conversation, scope.project)
-        if (action.optString("action") == "cancel") {
+        if (action.optString("action") == "cancel" || revoking) {
             val requests = result.optJSONArray("remote_request_ids")
             for (index in 0 until (requests?.length() ?: 0)) {
                 val request = requireNotNull(requests).getString(index)
-                check(productRequestOwnedBy(session, active[request], plans[request]?.session, toolOrigins[request]?.session))
+                if (!revoking) check(productRequestOwnedBy(session, active[request], plans[request]?.session, toolOrigins[request]?.session))
                 sendGate.cancel(request); cancelled.add(request); plans.remove(request)
                 businessPreviews.remove(request)?.optString("plan_id")?.let { port.discardBusinessPlan(session, it) }
                 toolOrigins.remove(request)
@@ -155,7 +165,7 @@ class ProductChatRuntime(private val port: ProductChatPort) : AutoCloseable {
         val result = port.workflowPrepare(run, session, conversation, scope.project, generation)
         val request = result.getString("request_id")
         plans[request] = Plan(session, JSONObject(result.toString()))
-        toolOrigins[request] = ToolOrigin(session, generation, scope.project, scope.generation)
+        toolOrigins[request] = ToolOrigin(session, generation, scope.project, scope.generation, result.optString("skill_id").takeIf { it.isNotBlank() }, conversation)
         result
     }
     /** The request must be this live Binder session's exact reviewed plan. The

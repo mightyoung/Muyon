@@ -261,9 +261,11 @@ impl ProductCore {
             .execute(&action, store, &scope)
             .map_err(agent_error)?;
         // The observation is authoritative owner data, never a model/UI status update.
-        let snapshot = serde_json::from_str::<Value>(&action)
-            .map_err(|_| agent_error("workflow_action_invalid"))?["action"]
-            == "snapshot";
+        let action_value = serde_json::from_str::<Value>(&action)
+            .map_err(|_| agent_error("workflow_action_invalid"))?;
+        let snapshot = action_value["action"] == "snapshot";
+        let revoke = action_value["action"] == "cancel" ||
+            (action_value["action"] == "set_skill" && action_value["enabled"] == false);
         if let (true, Some(owner), Some(runs)) = (
             snapshot,
             agent.as_ref(),
@@ -297,6 +299,7 @@ impl ProductCore {
                     .request_chain(request.as_str().ok_or_else(unavailable)?)
                     .map_err(agent_error)?
                 {
+                    if revoke { owner.cancel_trusted(&observation.request_id).map_err(agent_error)?; }
                     actual.insert(observation.request_id);
                 }
             }
@@ -382,6 +385,7 @@ impl ProductCore {
         result["workflow_id"] = json!(run_id);
         result["input_preview"] = json!(input);
         result["skill_digest"] = context["skill_digest"].clone();
+        result["skill_id"] = context["skill_id"].clone();
         encode(&result)
     }
     pub fn agent_confirm(
@@ -389,7 +393,9 @@ impl ProductCore {
         request: String,
         configuration: String,
     ) -> Result<String, ProductError> {
-        self.agent_call(|owner| owner.confirm_trusted(&request, &configuration))
+        let state = self.state.lock().map_err(|_| unavailable())?;
+        authorize_agent_request(&state, &request)?;
+        encode(&state.agent.as_ref().ok_or_else(unavailable)?.confirm_trusted(&request, &configuration).map_err(agent_error)?)
     }
     /// Private transport port. Never registered as a UI/model operation.
     pub fn agent_claim(
@@ -398,7 +404,9 @@ impl ProductCore {
         configuration: String,
         generation: String,
     ) -> Result<String, ProductError> {
-        self.agent_call(|owner| owner.claim_dispatch(&request, &configuration, &generation))
+        let state = self.state.lock().map_err(|_| unavailable())?;
+        authorize_agent_request(&state, &request)?;
+        encode(&state.agent.as_ref().ok_or_else(unavailable)?.claim_dispatch(&request, &configuration, &generation).map_err(agent_error)?)
     }
     pub fn agent_allowed(
         &self,
@@ -413,7 +421,7 @@ impl ProductCore {
                 state
                     .agent
                     .as_ref()
-                    .map(|owner| owner.dispatch_allowed(&request, &configuration, &generation))
+                    .map(|owner| authorize_agent_request(&state, &request).is_ok() && owner.dispatch_allowed(&request, &configuration, &generation))
             })
             .unwrap_or(false)
     }
@@ -453,6 +461,7 @@ impl ProductCore {
         digest: String,
     ) -> Result<String, ProductError> {
         let mut state = self.state.lock().map_err(|_| unavailable())?;
+        authorize_agent_request(&state, &request)?;
         let context =
             ToolsContext::current(&state.store, &session, &generation, project.as_deref())
                 .map_err(agent_error)?;
@@ -786,6 +795,13 @@ impl ProductCore {
 
 fn agent_error(code: &'static str) -> ProductError {
     ProductError::Failure { code: code.into() }
+}
+
+fn authorize_agent_request(state: &State, request: &str) -> Result<(), ProductError> {
+    let owner = state.agent.as_ref().ok_or_else(unavailable)?;
+    owner.ensure_request_resolved(request).map_err(agent_error)?;
+    if let Some(ledger) = &state.workflow { ledger.authorize_request(owner, request).map_err(agent_error)?; }
+    Ok(())
 }
 fn confirm_prepared(
     store: &BusinessStore,

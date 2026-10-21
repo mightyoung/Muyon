@@ -110,6 +110,9 @@ pub struct AgentPlan {
     pub reserved_micro_cny: Revision,
     pub send_allowed: bool,
     pub blocked_reason: Option<String>,
+    /// Exact persisted body and destination reviewed before any reservation.
+    pub outbound_preview: Value,
+    pub outbound_endpoint: String,
 }
 #[derive(Clone, Debug, Serialize)]
 pub struct Observation {
@@ -455,6 +458,12 @@ impl AgentOwner {
             reserved_micro_cny: Revision::new(reserved),
             send_allowed: reason.is_none(),
             blocked_reason: reason,
+            outbound_preview: decode_json(&payload).map_err(|_| "agent_payload_invalid")?,
+            outbound_endpoint: if purpose == "search" {
+                DeepSeek.endpoint().into()
+            } else {
+                "https://api.deepseek.com/chat/completions".into()
+            },
         })
     }
     /// Durable reservation and one-use request identity. Only visible user
@@ -476,6 +485,7 @@ impl AgentOwner {
         if cell(&row, 9)? != "prepared" {
             return Err("agent_request_already_confirmed");
         }
+        self.ensure_conversation_resolved_except(cell(&row, 1)?, request)?;
         let reserved = number(cell(&row, 7)?)?;
         if reserved == 0 {
             return Err("hosted_cost_proof_unavailable");
@@ -517,6 +527,7 @@ impl AgentOwner {
         {
             return Err("agent_dispatch_denied");
         }
+        self.ensure_conversation_resolved_except(cell(&row, 1)?, request)?;
         storage(self.db.exec(
             "UPDATE requests SET status='unknown',attempted=1 WHERE id=? AND status='reserved'",
             &[request],
@@ -535,6 +546,7 @@ impl AgentOwner {
         (|| -> Result<bool> {
             let config = self.configuration()?;
             let row = self.request(request)?;
+            self.ensure_conversation_resolved_except(cell(&row, 1)?, request)?;
             Ok(config.id == configuration
                 && config.settings.credential_generation == generation
                 && cell(&row, 3)? == configuration
@@ -725,6 +737,19 @@ impl AgentOwner {
             return Err("conversation_original_outcome_required");
         }
         Ok(())
+    }
+    /// Revalidated for already-prepared plans and immediately before dispatch.
+    fn ensure_conversation_resolved_except(&self, conversation: &str, request: &str) -> Result<()> {
+        let rows = storage(self.db.query("SELECT id FROM requests WHERE conversation=? AND id<>? AND status IN ('reserved','unknown','tool_pending') LIMIT 1", &[conversation, request]))?;
+        if !rows.is_empty() { return Err("conversation_original_outcome_required"); }
+        Ok(())
+    }
+    /// Host-only routing identity, never sourced from action/model JSON.
+    pub fn request_conversation(&self, request: &str) -> Result<String> {
+        Ok(cell(&self.request(request)?, 1)?.to_owned())
+    }
+    pub fn ensure_request_resolved(&self, request: &str) -> Result<()> {
+        self.ensure_conversation_resolved_except(&self.request_conversation(request)?, request)
     }
     /// Follow only durable host-created edges, never caller-provided request lists.
     pub fn request_chain(&self, first: &str) -> Result<Vec<Observation>> {
