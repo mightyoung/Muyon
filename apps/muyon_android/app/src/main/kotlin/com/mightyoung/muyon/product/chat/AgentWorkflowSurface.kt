@@ -19,7 +19,7 @@ private fun JSONArray?.objects(): List<JSONObject> = if (this == null) emptyList
 
 internal fun workflowReplyData(reply: JSONObject): JSONObject? {
     val data = reply.optJSONObject("data") ?: return null
-    return data.takeIf { reply.optString("status") == "ok" && !it.has("error") && it.optString("status") !in setOf("unavailable", "unknown") }
+    return data.takeIf { reply.optString("status") == "ok" && it.isNull("error") && it.optString("status") !in setOf("unavailable", "unknown") }
 }
 
 private fun workflowFailureCode(reply: JSONObject): String {

@@ -118,6 +118,8 @@ class ConversationRichTextTest {
         assertEquals("结果未知", workflowStatus("unknown"))
         assertNull(workflowReplyData(JSONObject("""{"status":"ok","data":{"status":"unavailable","error":"chat_operation_unavailable"}}""")))
         assertNull(workflowReplyData(JSONObject("""{"status":"ok","data":{"error":"workflow_scope_mismatch"}}""")))
+        assertNotNull(workflowReplyData(JSONObject("""{"status":"ok","data":{"id":"root-real-shaped","status":"queued","error":null}}""")))
+        assertNull(workflowReplyData(JSONObject("""{"status":"ok","data":{"id":"root-real-shaped","status":"queued","error":"actual_code"}}""")))
         assertNull(workflowReplyData(JSONObject("""{"status":"ok","data":{"status":"unknown"}}""")))
         assertNotNull(workflowReplyData(JSONObject("""{"status":"ok","data":{"root":{"status":"unknown"},"runs":[]}}""")))
     }

@@ -63,13 +63,15 @@ class AgentWorkflowProductTest {
     private fun success(reply: JSONObject): JSONObject {
         assertEquals(reply.toString(), "ok", reply.getString("status"))
         val data = reply.getJSONObject("data")
-        assertFalse("nested operation failure: $data", data.has("error"))
+        assertTrue("nested operation failure: $data", data.isNull("error"))
         assertNotEquals(data.toString(), "unavailable", data.optString("status"))
         return data
     }
 
     private fun scope(project: String?, target: ProductClient = client) {
-        success(call("chat_scope", JSONObject().put("project_id", project ?: JSONObject.NULL), target))
+        val selected = success(call("chat_scope", JSONObject().put("project_id", project ?: JSONObject.NULL), target))
+        assertEquals(selected.toString(), "scope_updated", selected.getString("status"))
+        assertEquals(project, selected.optString("project_id").takeUnless { it == "null" || it.isEmpty() })
     }
 
     private fun action(action: String) = JSONObject().put("action", action)
@@ -85,8 +87,17 @@ class AgentWorkflowProductTest {
     }
 
     private fun root(title: String = "真实任务 ${UUID.randomUUID()}") = workflow(action("create_root")
-        .put("title", title).put("task", "读取本地测试记录，保留来源，不外发。"))
-    private fun child(root: JSONObject, executor: String = "local_read", offset: Int = 0) = workflow(childAction(root, executor, offset))
+        .put("title", title).put("task", "读取本地测试记录，保留来源，不外发。")).also {
+        assertEquals(it.toString(), "queued", it.getString("status"))
+        assertEquals(title, it.getString("title"))
+        assertTrue(it.isNull("result"))
+    }
+    private fun child(root: JSONObject, executor: String = "local_read", offset: Int = 0) = workflow(childAction(root, executor, offset)).also {
+        assertEquals(it.toString(), "queued", it.getString("status"))
+        assertEquals(root.getString("id"), it.getString("parent_id"))
+        assertEquals(executor, it.getString("kind"))
+        assertTrue(it.isNull("result"))
+    }
     private fun childAction(root: JSONObject, executor: String = "local_read", offset: Int = 0) = action("create_child")
         .put("root_id", root.getString("id")).put("skill_id", "supplier-overview")
         .put("task", "读取本地供应商记录，不联网。拥有明确且足够长的任务要求。")
