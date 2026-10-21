@@ -8,6 +8,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.Button
+import androidx.compose.material3.TextButton
 import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -57,7 +58,7 @@ class MainActivity : ComponentActivity() {
                             Text(status, Modifier.padding(24.dp), style = MaterialTheme.typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant)
                         }
-                        if (!connected) TextButton(onClick = { client.bind() }) { Text("重试连接") }
+                        if (!connected) TextButton(onClick = { recreate() }) { Text("重试连接") }
                         if (connected && !initialized) Button(onClick = {
                             client.call(if (existing) "health" else "initialize") { reply ->
                                 initialized = reply.optString("status") == "ok"
