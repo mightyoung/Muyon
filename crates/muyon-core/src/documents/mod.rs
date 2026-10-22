@@ -11,9 +11,11 @@ pub mod capability;
 mod history_tests;
 pub mod identity;
 pub mod reader;
-pub mod storage;
+#[cfg(test)]
+mod presentation_tests;
 #[cfg(test)]
 mod reader_tests;
+pub mod storage;
 #[cfg(test)]
 mod storage_tests;
 use crate::contract::{AuthorityBinding, FileSource};

@@ -49,7 +49,7 @@ fn encode<T: Serialize>(value: &T) -> Result<String> {
 fn decode<T: serde::de::DeserializeOwned>(raw: &str) -> Result<T> {
     serde_json::from_str(raw).map_err(|_| ContractError::StorageCorrupt)
 }
-fn now_ms() -> Result<u64> {
+pub(super) fn now_ms() -> Result<u64> {
     SystemTime::now()
         .duration_since(UNIX_EPOCH)
         .map_err(|_| ContractError::InvalidAuthority)?
@@ -340,6 +340,13 @@ impl BusinessStore {
         access: &DocumentAccess,
         required: &[DocumentOperation],
     ) -> Result<()> {
+        self.document_grant_deadline(access, required).map(|_| ())
+    }
+    fn document_grant_deadline(
+        &self,
+        access: &DocumentAccess,
+        required: &[DocumentOperation],
+    ) -> Result<u64> {
         self.document_schema()?;
         binding_shape(&access.authority)?;
         if access.authority.owner_epoch != self.owner_epoch() {
@@ -361,7 +368,18 @@ impl BusinessStore {
         {
             return Err(ContractError::InvalidAuthority);
         }
-        Ok(())
+        Ok(expires)
+    }
+    /// Observability for a live read lease, using the same canonical grant
+    /// checker; never renews a grant or bypasses exact current-head validation.
+    pub(super) fn document_read_deadline_in_transaction(
+        &self,
+        tx: &Transaction<'_>,
+        access: &DocumentAccess,
+        required: &[DocumentOperation],
+    ) -> Result<u64> {
+        self.document_access_in_transaction(tx, access, required)?;
+        self.document_grant_deadline(access, required)
     }
     /// Gateway integration seam: current persisted authority plus exact head
     /// revision under the gateway's existing transaction. Does not commit or
