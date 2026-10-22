@@ -1,0 +1,27 @@
+2026-10-22T09:35:27.878033+00:00
+Actual tools on this execution environment; no denied root locator retried.
+
+argv=["python3", "docs/tasks/document-reader-policy-20261022/evidence/schema-smoke.py"]
+exit=0
+PASS: actual root/attempt DDL +11 trigger SQL statements execute; parent fence cascades child; unfence denied. SQL-only, no Rust or production admission claim.
+
+
+
+argv=["cargo", "test", "--offline", "--locked", "--manifest-path", "crates/Cargo.toml", "-p", "muyon-core", "--lib", "documents::reading_policy_kernel_tests"]
+exit=127
+NOT_RUN: [Errno 2] No such file or directory: 'cargo'
+
+argv=["cargo", "test", "--offline", "--locked", "--manifest-path", "crates/Cargo.toml", "-p", "muyon-core", "--lib"]
+exit=127
+NOT_RUN: [Errno 2] No such file or directory: 'cargo'
+
+argv=["cargo", "test", "--offline", "--locked", "--manifest-path", "crates/Cargo.toml", "--workspace"]
+exit=127
+NOT_RUN: [Errno 2] No such file or directory: 'cargo'
+
+argv=["rustfmt", "--check", "--edition", "2021", "--config", "skip_children=true", "crates/muyon-core/src/documents/reading_policy/mod.rs", "crates/muyon-core/src/documents/reading_policy/types.rs", "crates/muyon-core/src/documents/reading_policy/store.rs", "crates/muyon-core/src/documents/reader.rs", "crates/muyon-core/src/documents/storage.rs", "crates/muyon-core/src/documents/mod.rs", "crates/muyon-core/src/documents/reading_policy_kernel_tests.rs"]
+exit=127
+NOT_RUN: [Errno 2] No such file or directory: 'rustfmt'
+
+argv=["git", "diff", "--check"]
+exit=0

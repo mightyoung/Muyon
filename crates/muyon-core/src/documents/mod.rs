@@ -140,3 +140,7 @@ pub struct RevisionPrecondition {
 #[cfg(test)]
 mod source_notification_tests;
 pub mod source_notifications;
+
+pub mod reading_policy;
+#[cfg(test)]
+mod reading_policy_kernel_tests;

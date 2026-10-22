@@ -30,7 +30,8 @@ pub struct DocumentMetadata {
     pub blob: BlobRef,
 }
 /// A request reference only; all authority is resolved against current SQL rows.
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
 pub struct DocumentAccess {
     pub document: DocumentRef,
     pub authority: AuthorityBinding,
@@ -798,6 +799,31 @@ impl BusinessStore {
             "0",
         )?;
         sql(tx.commit())
+    }
+    /// Core policy-only observation on the caller's existing transaction. This
+    /// deliberately classifies active/expired rows without issuing permission.
+    pub(super) fn reading_policy_grant_record_in_transaction(
+        &self, tx: &Transaction<'_>, grant_id: &str,
+    ) -> Result<Option<super::reading_policy::GrantRecord>> {
+        if !tx.belongs_to(self.database()) || !valid_id(grant_id) { return Err(ContractError::InvalidAuthority); }
+        self.document_schema()?;
+        let rows = sql(self.database().query("SELECT CASE WHEN length(CAST(generation AS BLOB))<=20 THEN generation ELSE NULL END,CASE WHEN length(CAST(owner_epoch AS BLOB))<=128 THEN owner_epoch ELSE NULL END,CASE WHEN length(CAST(document_json AS BLOB))<=8192 THEN document_json ELSE NULL END,CASE WHEN length(CAST(permissions AS BLOB))<=1024 THEN permissions ELSE NULL END,CASE WHEN length(CAST(expires_at_ms AS BLOB))<=20 THEN expires_at_ms ELSE NULL END,active FROM document_grants WHERE grant_id=?", &[grant_id]))?;
+        if rows.is_empty() { return Ok(None); }
+        if rows.len() != 1 { return Err(ContractError::StorageCorrupt); }
+        let row = &rows[0];
+        let authority = AuthorityBinding { grant_id: grant_id.into(), generation: Revision::parse(cell(row, 0)?)?, owner_epoch: cell(row, 1)?.into() };
+        binding_shape(&authority)?;
+        let document = self.document_grant_target(cell(row, 2)?)?;
+        let operations: Vec<DocumentOperation> = decode(cell(row, 3)?)?;
+        if operations.is_empty() || operations.len() > 9 { return Err(ContractError::StorageCorrupt); }
+        let expires_at_ms = Revision::parse(cell(row, 4)?)?.value();
+        let active = match cell(row, 5)? { "0" => false, "1" => true, _ => return Err(ContractError::StorageCorrupt) };
+        Ok(Some(super::reading_policy::GrantRecord { access: DocumentAccess { document, authority }, operations, expires_at_ms, active }))
+    }
+    pub(super) fn reading_policy_metadata_in_transaction(&self, tx: &Transaction<'_>, document: &DocumentRef) -> Result<DocumentMetadata> {
+        if !tx.belongs_to(self.database()) { return Err(ContractError::InvalidAuthority); }
+        self.document_schema()?;
+        self.current_document(document)
     }
     pub fn read_document(&self, access: &DocumentAccess) -> Result<DocumentMetadata> {
         let tx = sql(self.database().transaction())?;

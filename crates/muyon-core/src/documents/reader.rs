@@ -115,6 +115,8 @@ pub struct PresentationInvalidations {
     pub clear_all: bool,
     pub invalidated: Vec<PresentationInvalidation>,
 }
+#[derive(Clone, Copy, PartialEq, Eq)]
+pub(super) enum PolicyClosure { Natural, ValidationDenied, Explicit, Failure, Handoff }
 struct PresentationState {
     generation: Revision,
     active: bool,
@@ -194,6 +196,8 @@ pub struct DocumentReaderHost {
     sessions: BTreeMap<String, Session>,
     poisoned: bool,
     presentation_invalidations: PresentationInvalidations,
+    policy_owner_id: Option<String>,
+    policy_closed: BTreeMap<String, (PresentationTicket, PolicyClosure)>,
 }
 impl DocumentReaderHost {
     pub fn new(store: BusinessStore) -> Self {
@@ -202,6 +206,8 @@ impl DocumentReaderHost {
             sessions: BTreeMap::new(),
             poisoned: false,
             presentation_invalidations: PresentationInvalidations::default(),
+            policy_owner_id: None,
+            policy_closed: BTreeMap::new(),
         }
     }
     /// Trusted Service/evidence adapter borrow; database/transactions remain private.
@@ -211,8 +217,18 @@ impl DocumentReaderHost {
     pub fn inspect(&self, access: &DocumentAccess) -> Result<DocumentMetadata> {
         Ok(self.store.read_document(access)?)
     }
-    fn release<T>(&mut self, mut session: Session, result: CoreResult<T>) -> Result<T> {
-        let cleanup = self.store.release_document_reader(&session.reader);
+    fn release<T>(&mut self, session: Session, result: CoreResult<T>) -> Result<T> {
+        let reason = match &result { Ok(_) => PolicyClosure::Explicit, Err(ContractError::InvalidAuthority) => PolicyClosure::ValidationDenied, Err(_) => PolicyClosure::Failure };
+        self.release_with_reason(session, result, reason)
+    }
+    fn release_with_reason<T>(&mut self, mut session: Session, result: CoreResult<T>, reason: PolicyClosure) -> Result<T> {
+        let fence = if let Some(state) = &session.presentation {
+            let ticket = PresentationTicket { session_id: session.reader.source().lease.lease_id.clone(), document: session.access.document.clone(), authority: session.access.authority.clone(), generation: state.generation.clone() };
+            if self.policy_closed.len() >= MAX_READ_SESSIONS * 2 { if let Some(old) = self.policy_closed.keys().next().cloned() { self.policy_closed.remove(&old); } }
+            self.policy_closed.insert(ticket.session_id.clone(), (ticket.clone(), reason));
+            if matches!(reason, PolicyClosure::Explicit | PolicyClosure::Failure) { super::reading_policy::fence_closed_presentation(&self.store, &ticket) } else { Ok(()) }
+        } else { Ok(()) };
+        let cleanup = fence.and_then(|()| self.store.release_document_reader(&session.reader));
         if cleanup.is_err() {
             self.presentation_invalidations.clear_all = true;
         }
@@ -280,7 +296,7 @@ impl DocumentReaderHost {
             .map(|(key, _)| key.clone())
             .collect();
         for key in expired {
-            self.close_session(&key)?;
+            if let Some(session) = self.sessions.remove(&key) { self.release_with_reason(session, Ok(()), PolicyClosure::Natural)?; }
         }
         Ok(())
     }
@@ -678,6 +694,52 @@ impl DocumentReaderHost {
             Some(error) => Err(error),
             None => Ok(()),
         }
+    }
+    pub(super) fn policy_owner(&self) -> Option<&str> { self.policy_owner_id.as_deref() }
+    pub(super) fn policy_set_owner(&mut self, id: String) -> CoreResult<()> {
+        if self.policy_owner_id.is_some() || self.poisoned { return Err(ContractError::InvalidAuthority); }
+        self.policy_owner_id = Some(id); Ok(())
+    }
+    pub(super) fn policy_validate_begin(&self, tx: &Transaction<'_>, ticket: &PresentationTicket, access: &DocumentAccess, metadata: &DocumentMetadata) -> CoreResult<()> {
+        if self.poisoned { return Err(ContractError::Unknown); }
+        self.require_presentation_ticket(ticket, true)?;
+        let session = self.sessions.get(ticket.session_id()).ok_or(ContractError::NotFound)?;
+        if session.purpose != DocumentReadPurpose::Render || session.access != *access || session.metadata != *metadata { return Err(ContractError::BindingMismatch); }
+        self.presentation_status_in_transaction(tx, session)?; Ok(())
+    }
+    pub(super) fn policy_predecessor(&self, ticket: &PresentationTicket, natural_grant_expiry: bool) -> CoreResult<()> {
+        if self.poisoned { return Err(ContractError::Unknown); }
+        if self.sessions.contains_key(ticket.session_id()) { return self.require_presentation_ticket(ticket, false); }
+        let (closed, reason) = self.policy_closed.get(ticket.session_id()).ok_or(ContractError::Unknown)?;
+        if closed.document != ticket.document || closed.authority != ticket.authority || closed.generation != ticket.generation { return Err(ContractError::InvalidAuthority); }
+        match reason { PolicyClosure::Natural => Ok(()), PolicyClosure::ValidationDenied if natural_grant_expiry => Ok(()), _ => Err(ContractError::Cancelled) }
+    }
+    pub(super) fn policy_suspend(&mut self, ticket: &PresentationTicket) -> CoreResult<()> {
+        if self.sessions.contains_key(ticket.session_id()) {
+            self.require_presentation_ticket(ticket, false)?;
+            let session = self.sessions.get_mut(ticket.session_id()).ok_or(ContractError::NotFound)?;
+            session.presentation.as_mut().ok_or(ContractError::InvalidAuthority)?.active = false;
+            if self.presentation_invalidations.invalidated.len() >= MAX_READ_SESSIONS { self.presentation_invalidations.clear_all = true; self.presentation_invalidations.invalidated.clear(); }
+            self.presentation_invalidations.invalidated.push(PresentationInvalidation { session_id: ticket.session_id.clone(), generation: ticket.generation.clone(), cleanup_pending: false });
+        }
+        Ok(())
+    }
+    /// Called ONLY with a genuine root-owned predecessor and newly issued grant.
+    /// Validate before closing anything. No selection token is replayed.
+    pub(super) fn policy_continue(&mut self, previous: &PresentationTicket, access: &DocumentAccess, metadata: &DocumentMetadata) -> Result<DocumentPresentationInfo> {
+        if self.poisoned { return Err(ContractError::Unknown.into()); }
+        self.policy_predecessor(previous, true)?;
+        for (id, session) in &self.sessions {
+            if session.presentation.is_some() && id != previous.session_id() { return Err(ContractError::Cancelled.into()); }
+        }
+        let tx = sql(self.store.database().transaction())?;
+        let current = self.store.document_access_in_transaction(&tx, access, &[DocumentOperation::Render])?;
+        if current != *metadata { return Err(ContractError::BindingMismatch.into()); }
+        tx.commit().map_err(|_| ContractError::Unknown)?;
+        if let Some(session) = self.sessions.remove(previous.session_id()) { self.release_with_reason(session, Ok(()), PolicyClosure::Handoff)?; }
+        // Own predecessor cleanup finished; no unrelated presentation was open.
+        // Existing open performs real source authentication and the64MiB budget.
+        self.open_presentation(access)
     }
     #[cfg(test)]
     pub(super) fn expire_for_test(&mut self, id: &str, idle: bool) {
