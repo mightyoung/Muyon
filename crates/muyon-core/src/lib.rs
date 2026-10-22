@@ -4,6 +4,7 @@ pub mod archive;
 pub mod blobs;
 pub mod business;
 pub mod contract;
+pub mod group_governance;
 pub mod research;
 mod review_lifecycle;
 pub mod sqlite;
