@@ -1,3 +1,6 @@
+> Latest test-target follow-up: [CLIPPY-DROP-FOLLOWUP.md](CLIPPY-DROP-FOLLOWUP.md).
+> Source2e2cfcdec28c5ecdf4ebc45523fc0885d4b0a9da removes only five drop(g) lines.
+
 # Minimal gateway Clippy fix for the old B combination
 
 Source commit0e325011d6eb66962669aac284cdccf5fa0685e9 on

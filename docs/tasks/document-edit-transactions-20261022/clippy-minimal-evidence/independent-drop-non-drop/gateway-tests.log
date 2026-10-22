@@ -1,0 +1,26 @@
+    Finished `test` profile [unoptimized] target(s) in 0.03s
+     Running tests/document_edit_gateway.rs (/workspace/document-edit-combination/crates/target/debug/deps/document_edit_gateway-8afe59ee0efb04de)
+
+running 19 tests
+test a_different_hash_candidate_cannot_borrow_the_copy_only_publication_route ... ok
+test a_copy_claim_that_cannot_store_its_candidate_is_query_only_after_restart ... ok
+test candidate_and_original_receipt_survive_restart_without_replay ... ok
+test cancellation_is_not_rollback_and_cannot_erase_a_committed_receipt ... ok
+test confirmation_is_exact_and_revocation_stops_publication ... ok
+test candidate_reopens_but_new_effect_requires_an_explicit_fresh_confirmation ... ok
+test corrupt_oversize_persisted_metadata_is_rejected_before_payload_decode ... ok
+test duplicate_intent_binds_original_and_never_creates_second_upload ... ok
+test copy_publication_uses_new_metadata_reference_without_new_upload_or_staging_files ... ok
+test corrupt_candidate_never_validates_or_publishes ... ok
+test frozen_source_title_cannot_change_without_changing_the_reviewed_copy_plan ... ok
+test live_engine_envelope_cannot_be_confused_with_a_validated_copy_intent ... ok
+test persisted_receipt_title_must_match_frozen_reviewed_source ... ok
+test late_copy_duplicate_is_only_an_authorized_original_result_query ... ok
+test prepare_is_durable_without_confirmation_or_engine_success ... ok
+test reading_a_newer_different_blob_does_not_authorize_old_candidate_bytes ... ok
+test receipt_tail_failure_rolls_back_cas_and_restart_unknown_never_replays ... ok
+test grant_revoked_or_expired_by_last_receipt_write_rolls_back_the_entire_publish ... ok
+test two_original_intents_cannot_publish_the_same_source_revision ... ok
+
+test result: ok. 19 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.10s
+

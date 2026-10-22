@@ -1,0 +1,44 @@
+diff --git a/crates/muyon-core/tests/document_edit_gateway.rs b/crates/muyon-core/tests/document_edit_gateway.rs
+index 7340256f..77028b97 100644
+--- a/crates/muyon-core/tests/document_edit_gateway.rs
++++ b/crates/muyon-core/tests/document_edit_gateway.rs
+@@ -159,7 +159,6 @@ fn prepare_is_durable_without_confirmation_or_engine_success() {
+         g.apply_engine_patch(&b, &a).unwrap_err(),
+         ContractError::UnsupportedOperation
+     );
+-    drop(g);
+     drop(s);
+     let s = f.reopen("epoch-2");
+     let a = access(&s, 1, "read-after-restart", 1, "epoch-2");
+@@ -182,7 +181,6 @@ fn candidate_and_original_receipt_survive_restart_without_replay() {
+     let receipt = committed.receipt.unwrap();
+     assert_eq!(receipt.operation, CopyOperation::ByteIdenticalCopy);
+     assert_eq!(receipt.result.document.revision(), &Revision::new(2));
+-    drop(g);
+     drop(s);
+     let s = f.reopen("epoch-2");
+     let a = access(&s, 2, "query", 1, "epoch-2");
+@@ -306,7 +304,6 @@ fn candidate_reopens_but_new_effect_requires_an_explicit_fresh_confirmation() {
+     )
+     .unwrap();
+     g.copy_candidate(&b, &a).unwrap();
+-    drop(g);
+     drop(s);
+     let s = f.reopen("epoch-2");
+     let a = access(&s, 1, "fresh", 1, "epoch-2");
+@@ -372,7 +369,6 @@ fn receipt_tail_failure_rolls_back_cas_and_restart_unknown_never_replays() {
+         before
+     );
+     drop(db);
+-    drop(g);
+     drop(s);
+     let s = f.reopen("epoch-2");
+     let a = access(&s, 1, "query", 1, "epoch-2");
+@@ -482,7 +478,6 @@ fn a_copy_claim_that_cannot_store_its_candidate_is_query_only_after_restart() {
+         DurableState::Unknown
+     );
+     drop(db);
+-    drop(g);
+     drop(s);
+     let s = f.reopen("epoch-2");
+     let a = access(&s, 1, "query", 1, "epoch-2");
