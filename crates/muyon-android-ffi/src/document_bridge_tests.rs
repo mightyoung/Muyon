@@ -5,9 +5,9 @@ use muyon_core::{blobs::BlobKind, documents::*};
 use std::{fs, path::PathBuf, sync::atomic::{AtomicUsize, Ordering}, time::{SystemTime, UNIX_EPOCH}};
 static NEXT: AtomicUsize = AtomicUsize::new(0);
 const TEXT: &[u8] = b"original literal evidence\nanother literal passage\n";
-struct Fixture { core: Arc<ProductCore>, root: PathBuf, request: DocumentAccessRequest, access: DocumentAccess }
+pub(super) struct Fixture { pub(super) core: Arc<ProductCore>, root: PathBuf, pub(super) request: DocumentAccessRequest, access: DocumentAccess }
 impl Fixture {
-    fn new(bytes: &[u8], format: DocumentFormat, operations: &[DocumentOperation]) -> Self {
+    pub(super) fn new(bytes: &[u8], format: DocumentFormat, operations: &[DocumentOperation]) -> Self {
         let root = std::env::temp_dir().join(format!("muyon-doc-ffi-{}-{}",std::process::id(),NEXT.fetch_add(1,Ordering::Relaxed)));
         let core = ProductCore::open(root.to_str().unwrap().into(),"workspace".into(),"epoch".into(),true).unwrap();
         let access = {
@@ -41,7 +41,7 @@ impl Fixture {
         };
         Self {core,root,request,access}
     }
-    fn text() -> Self { Self::new(TEXT,DocumentFormat::Text,&[DocumentOperation::Inspect,DocumentOperation::ReadText]) }
+    pub(super) fn text() -> Self { Self::new(TEXT,DocumentFormat::Text,&[DocumentOperation::Inspect,DocumentOperation::ReadText]) }
     fn open(&self) -> DocumentReadUseRequest {
         let value:Value=serde_json::from_str(&self.core.document_read_open(self.request.clone(),DocumentReadOperation::ReadText).unwrap()).unwrap();
         assert_eq!(value["display_lease"],false);
@@ -230,4 +230,163 @@ fn readonly_annotations_and_explicit_shutdown_do_not_claim_a_display_lease() {
     assert!(f.core.document_metadata(f.request.clone()).is_err());
     assert!(f.core.document_evidence_query(processing,"literal".into(),8).is_err());
     assert!(f.core.document_read_open(f.request.clone(),DocumentReadOperation::ReadText).is_err());
+}
+
+fn presentation_fixture() -> Fixture {
+    Fixture::new(TEXT,DocumentFormat::Text,&[DocumentOperation::ReadText,DocumentOperation::Render])
+}
+fn presentation_open(f:&Fixture) -> (DocumentPresentationUseRequest,Value) {
+    let selection=value(f.core.document_presentation_begin_selection(f.request.scope.clone()).unwrap());
+    let out=value(f.core.document_presentation_open(DocumentPresentationOpenRequest {access:f.request.clone(),
+        selection_id:selection["selection_id"].as_str().unwrap().into()}).unwrap());
+    (DocumentPresentationUseRequest {scope:f.request.scope.clone(),
+        presentation_id:out["presentation_id"].as_str().unwrap().into(),
+        frame_generation:out["frame_generation"].as_str().unwrap().into()},out)
+}
+fn presentation_finish(f:&Fixture,request:&DocumentPresentationUseRequest) {
+    let mut bytes=Vec::new();
+    loop {
+        let chunk=f.core.document_presentation_chunk(request.clone(),7).unwrap();
+        assert_eq!(chunk.frame_generation,request.frame_generation);
+        assert_eq!(chunk.offset.parse::<usize>().unwrap(),bytes.len());
+        bytes.extend_from_slice(&chunk.bytes);
+        assert!(chunk.session_active);
+        if chunk.eof { break; }
+    }
+    assert_eq!(bytes,TEXT);
+}
+
+#[test]
+fn presentation_eof_retains_exact_ticket_while_raw_entries_cannot_bypass_mode() {
+    let f=presentation_fixture();let (request,opened)=presentation_open(&f);
+    assert_eq!(opened["phase"],"loading");
+    presentation_finish(&f,&request);
+    let status=value(f.core.document_presentation_check(request.clone()).unwrap());
+    assert_eq!(status["phase"],"ready");assert_eq!(status["frame_generation"],request.frame_generation);
+    assert!(status["valid_for_ms"].as_u64().unwrap()>0);
+    let raw=DocumentReadUseRequest {scope:request.scope.clone(),read_session_id:request.presentation_id.clone()};
+    assert!(f.core.document_read_chunk(raw.clone(),7).is_err());
+    assert!(f.core.document_read_check(raw.clone()).is_err());
+    assert!(f.core.document_read_close(raw).is_err());
+    assert!(f.core.document_presentation_check(request.clone()).is_ok());
+    f.core.document_presentation_close(request.clone()).unwrap();
+    assert!(f.core.document_presentation_check(request.clone()).is_err());
+    let events=value(f.core.document_presentation_take_invalidations().unwrap());
+    assert_eq!(events["invalidated"][0]["presentation_id"],request.presentation_id);
+    assert_eq!(events["invalidated"][0]["scope"]["service_session"],"service-session");
+}
+
+#[test]
+fn presentation_advance_fences_every_old_async_callback_including_close() {
+    let f=presentation_fixture();let (old,_)=presentation_open(&f);
+    assert!(f.core.document_presentation_advance_frame(old.clone()).is_err());
+    presentation_finish(&f,&old);
+    let next=value(f.core.document_presentation_advance_frame(old.clone()).unwrap());
+    let mut current=old.clone();current.frame_generation=next["frame_generation"].as_str().unwrap().into();
+    assert_ne!(old.frame_generation,current.frame_generation);
+    let stale=f.core.document_presentation_check(old.clone());
+    assert!(matches!(stale,Err(ProductError::Failure {ref code}) if code=="DOCUMENT_PRESENTATION_STALE"));
+    assert!(f.core.document_presentation_chunk(old.clone(),7).is_err());
+    assert!(f.core.document_presentation_advance_frame(old.clone()).is_err());
+    assert!(f.core.document_presentation_close(old).is_err());
+    assert!(f.core.document_presentation_check(current.clone()).is_ok());
+    let events=value(f.core.document_presentation_take_invalidations().unwrap());
+    assert_eq!(events["clear_all"],false);
+    assert!(events["invalidated"].as_array().unwrap().is_empty());
+    f.core.document_presentation_close(current).unwrap();
+}
+
+#[test]
+fn explicit_presentation_reselection_does_not_reuse_old_handle_or_scope() {
+    let f=presentation_fixture();let (old,_)=presentation_open(&f);presentation_finish(&f,&old);
+    let (new,_)=presentation_open(&f);
+    assert_ne!(old.presentation_id,new.presentation_id);
+    assert!(f.core.document_presentation_check(old).is_err());
+    let mut foreign=new.clone();foreign.scope.generation="other-generation".into();
+    assert!(f.core.document_presentation_close(foreign).is_err());
+    let mut foreign=new.clone();foreign.scope.service_session="other-session".into();
+    assert!(f.core.document_presentation_chunk(foreign,7).is_err());
+    assert!(f.core.document_presentation_check(new).is_ok());
+}
+
+#[test]
+fn presentation_revoke_after_eof_delivers_terminal_invalidation_not_cached_true() {
+    let f=presentation_fixture();let (request,_)=presentation_open(&f);presentation_finish(&f,&request);
+    f.core.state.lock().unwrap().store.revoke_document_grant_trusted(&f.access.authority).unwrap();
+    assert!(f.core.document_presentation_check(request.clone()).is_err());
+    let events=value(f.core.document_presentation_take_invalidations().unwrap());
+    assert_eq!(events["invalidated"][0]["presentation_id"],request.presentation_id);
+    assert_eq!(events["invalidated"][0]["frame_generation"],request.frame_generation);
+    assert!(f.core.document_presentation_chunk(request,7).is_err());
+}
+
+#[test]
+fn presentation_requires_real_render_and_owner_release_uses_current_native_ticket() {
+    let denied=Fixture::text();
+    let selection=value(denied.core.document_presentation_begin_selection(denied.request.scope.clone()).unwrap());
+    assert!(denied.core.document_presentation_open(DocumentPresentationOpenRequest {access:denied.request.clone(),
+        selection_id:selection["selection_id"].as_str().unwrap().into()}).is_err());
+    let f=presentation_fixture();let (request,_)=presentation_open(&f);presentation_finish(&f,&request);
+    f.core.document_presentation_advance_frame(request.clone()).unwrap();
+    f.core.document_read_release_owner(f.request.scope.service_session.clone()).unwrap();
+    assert!(f.core.document_presentation_check(request).is_err());
+    let events=value(f.core.document_presentation_take_invalidations().unwrap());
+    assert_eq!(events["invalidated"][0]["frame_generation"],"2");
+}
+
+#[test]
+fn presentation_checks_do_not_renew_actual_short_grant_deadline() {
+    let mut f=presentation_fixture();let mut authority=f.access.authority.clone();authority.generation=Revision::new(2);
+    let expiry=SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_millis() as u64+1_500;
+    f.core.state.lock().unwrap().store.issue_document_grant_trusted(&f.access.document,&authority,
+        &[DocumentOperation::Render],expiry).unwrap();
+    f.request.grant_generation="2".into();let (request,status)=presentation_open(&f);
+    assert!(status["valid_for_ms"].as_u64().unwrap()<=1_500);
+    assert!(status["check_after_ms"].as_u64().unwrap()<=1_000);
+    presentation_finish(&f,&request);
+    for _ in 0..3 { assert!(f.core.document_presentation_check(request.clone()).is_ok()); }
+    std::thread::sleep(std::time::Duration::from_millis(1_600));
+    assert!(f.core.document_presentation_check(request).is_err());
+}
+
+#[test]
+fn bounded_native_terminal_queue_requests_clear_all_on_overflow() {
+    let f=presentation_fixture();
+    for _ in 0..11 { presentation_open(&f); }
+    let events=value(f.core.document_presentation_take_invalidations().unwrap());
+    assert_eq!(events["clear_all"],true);
+    assert!(events["invalidated"].as_array().unwrap().len()<=8);
+    let empty=value(f.core.document_presentation_take_invalidations().unwrap());
+    assert_eq!(empty["clear_all"],false);assert!(empty["invalidated"].as_array().unwrap().is_empty());
+}
+
+#[test]
+fn native_selection_tokens_fence_late_same_scope_open_and_completed_replay() {
+    let f=presentation_fixture();
+    let old=value(f.core.document_presentation_begin_selection(f.request.scope.clone()).unwrap());
+    let (current,_)=presentation_open(&f);presentation_finish(&f,&current);
+    let stale=DocumentPresentationOpenRequest {access:f.request.clone(),selection_id:old["selection_id"].as_str().unwrap().into()};
+    assert!(f.core.document_presentation_open(stale).is_err());
+    assert!(f.core.document_presentation_check(current.clone()).is_ok());
+    let events=value(f.core.document_presentation_take_invalidations().unwrap());
+    assert_eq!(events["clear_all"],false);assert!(events["invalidated"].as_array().unwrap().is_empty());
+    let selection=value(f.core.document_presentation_begin_selection(f.request.scope.clone()).unwrap());
+    let open=DocumentPresentationOpenRequest {access:f.request.clone(),selection_id:selection["selection_id"].as_str().unwrap().into()};
+    let first=value(f.core.document_presentation_open(open.clone()).unwrap());
+    assert!(f.core.document_presentation_open(open).is_err());
+    let request=DocumentPresentationUseRequest {scope:f.request.scope.clone(),presentation_id:first["presentation_id"].as_str().unwrap().into(),frame_generation:first["frame_generation"].as_str().unwrap().into()};
+    assert!(f.core.document_presentation_check(request).is_ok());
+}
+
+#[test]
+fn late_cross_scope_selection_cannot_replace_current_other_scope_display() {
+    let f=presentation_fixture();let mut old_access=f.request.clone();old_access.scope.service_session="previous-session".into();
+    old_access.scope.generation="previous-generation".into();
+    let old=value(f.core.document_presentation_begin_selection(old_access.scope.clone()).unwrap());
+    let (current,_)=presentation_open(&f);presentation_finish(&f,&current);
+    assert!(f.core.document_presentation_open(DocumentPresentationOpenRequest {access:old_access,
+        selection_id:old["selection_id"].as_str().unwrap().into()}).is_err());
+    assert!(f.core.document_presentation_check(current).is_ok());
+    let events=value(f.core.document_presentation_take_invalidations().unwrap());
+    assert_eq!(events["clear_all"],false);assert!(events["invalidated"].as_array().unwrap().is_empty());
 }

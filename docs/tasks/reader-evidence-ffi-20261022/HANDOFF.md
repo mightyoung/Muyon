@@ -1,4 +1,8 @@
-# Reader/evidence native handoff
+# Reader/evidence native handoff — original raw4664 slice
+
+Current additive presentation delivery is PRESENTATION-FFI-HANDOFF.md and
+PRESENTATION-FFI-INTERFACE.md. The original raw status/history below is preserved;
+its requested core display mode has since been delivered as the separate mode.
 
 Branch task/reader-evidence-ffi-20261022. Native interface is INTERFACE.md.
 Source dependencies: provider7bb89a713c0ce5678a8c4cae7fc5e24612d88362,

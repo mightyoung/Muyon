@@ -1,0 +1,4 @@
+$ cargo test --manifest-path crates/Cargo.toml --offline --workspace
+[Errno 2] No such file or directory: 'cargo'
+
+exit=127

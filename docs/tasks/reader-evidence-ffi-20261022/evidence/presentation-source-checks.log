@@ -1,0 +1,7 @@
+PASS: five draft signatures AND bodies identical to7bb89
+PASS: three core formatter paths byte-identical todfa63451
+PASS: imported core evidence SHA256SUMS 103 entries
+PASS: no private database/tx helper adapter calls
+PASS: raw chunk/presentation chunk/check add no full-file is_current
+PASS:21 API test sources +2 explicitly simulated projection sources counted, NOT executed
+PASS: owned current git diff --check (imported historical logs not rewritten)

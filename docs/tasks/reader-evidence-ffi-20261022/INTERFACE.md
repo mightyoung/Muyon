@@ -1,7 +1,7 @@
-# Controlled document/evidence FFI — source-owner interface first
+# Controlled document/evidence FFI — raw/evidence protocol
 
 Fixed deps: provider7bb89a713c0ce5678a8c4cae7fc5e24612d88362;
-reader report8d7323aab51ff76616ee196b90a7d4ee83b45d97/source2e71384e808ecbe5bb010d05e87094e33e9cd3fd;
+reader presentation report3ff95947337c85f15ef1f9edcf5d47ad49e14999/sourceee184fc1dd90faf2c3cdd48d735f47274de6d418, purefmtdfa63451c0d65417b425f5bf1e92a3b43e0b6052;
 evidence78cdff32dee68b664c4fe71b4bbd6b81251af5e7. Ordinary dependency merges on
 isolated task/reader-evidence-ffi-20261022. Owned changes ONLY FFI/lib.rs, new
 FFI document_bridge.rs/tests and task docs. No core/lib.rs, documents, Service,
@@ -111,7 +111,11 @@ body<=65536, no automatic [1] citation or saved/index flag. Canonical Text byte
 anchors/quote digest retained; no inferred PDF page. Pdf/Ocr remain Unsupported.
 JSON output<=262144 bytes; unsupported/error never becomes available or saved.
 
-## Critical current limits and exact core follow-up
+## Raw mode limits
+
+Additive presentation ticket/open-selection fencing and retained EOF are defined
+in PRESENTATION-FFI-INTERFACE.md. They fulfill the original core follow-up below;
+this raw API deliberately retains its original transport EOF-close behavior.
 
 The original ff3 cleanup vulnerabilities and independent RED are preserved in the
 merged core report. This source uses the corrected tail+snapshot dependency above;

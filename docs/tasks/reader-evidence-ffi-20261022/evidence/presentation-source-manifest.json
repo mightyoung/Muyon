@@ -1,0 +1,36 @@
+{
+  "source_dependency": "ee184fc1dd90faf2c3cdd48d735f47274de6d418",
+  "core_purefmt": "dfa63451c0d65417b425f5bf1e92a3b43e0b6052",
+  "core_evidence": "c68f1f1c59e859b6c87996f45cddae5c2baa8379",
+  "files": {
+    "crates/muyon-android-ffi/src/lib.rs": "7a112b31fd21fe3e7f2b218d56977d8ba778d7e882caef4e9d7fa359ae87d1e7",
+    "crates/muyon-android-ffi/src/document_bridge.rs": "a65e5041c8180f320b3c4488dbb43184cbee9e2f9dbf0b90d25c5468e42fe766",
+    "crates/muyon-android-ffi/src/document_bridge_tests.rs": "2b39d05da9ead9f88f65f4cb560375cc3358965fc256affcd6cb7dde77938eda",
+    "crates/muyon-core/src/documents/mod.rs": "f6acf9d73a5a0401321afe4fe5029c552a1ff7671b1b9ed29af6470b6e943154",
+    "crates/muyon-core/src/documents/reader.rs": "d58512973c405b6d5b1951428102888ac7b6f401c1999392fcc93864d950c7f9",
+    "crates/muyon-core/src/documents/presentation_tests.rs": "f844cebd846554283b77124f17fc760f341f22fac37abdcad554e0f1cf9655ac"
+  },
+  "checks": [
+    {
+      "check": "presentation-native-tests",
+      "exit": 127,
+      "status": "NOT_RUN"
+    },
+    {
+      "check": "presentation-workspace-tests",
+      "exit": 127,
+      "status": "NOT_RUN"
+    },
+    {
+      "check": "presentation-fmt",
+      "exit": 127,
+      "status": "NOT_RUN"
+    },
+    {
+      "check": "presentation-strict-clippy",
+      "exit": 127,
+      "status": "NOT_RUN"
+    }
+  ],
+  "runtime_status": "NOT_RUN; missing cargo"
+}

@@ -1,0 +1,4 @@
+$ cargo clippy --manifest-path crates/Cargo.toml --offline --workspace --all-targets -- -D warnings
+[Errno 2] No such file or directory: 'cargo'
+
+exit=127

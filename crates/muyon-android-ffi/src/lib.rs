@@ -21,7 +21,7 @@ mod document_bridge;
 pub use document_bridge::{
     DocumentAccessRequest, DocumentEvidenceAnswerRequest, DocumentEvidenceKind,
     DocumentEvidenceUseRequest, DocumentReadChunkResult, DocumentReadOperation,
-    DocumentReadUseRequest, DocumentReaderScope,
+    DocumentReadUseRequest, DocumentReaderScope, DocumentPresentationUseRequest, DocumentPresentationChunkResult, DocumentPresentationOpenRequest,
 };
 use document_bridge::DocumentBridge;
 #[cfg(test)]
@@ -350,6 +350,30 @@ impl ProductCore {
     }
     pub fn document_evidence_close(&self, context: DocumentEvidenceUseRequest) -> Result<(), ProductError> {
         document_call(self, |bridge| bridge.close_evidence(context))
+    }
+
+    /// Synchronous real Service selection event, before asynchronous lookup.
+    pub fn document_presentation_begin_selection(&self, scope: DocumentReaderScope) -> Result<String, ProductError> {
+        document_call(self, |bridge| bridge.presentation_begin(scope))
+    }
+    pub fn document_presentation_open(&self, request: DocumentPresentationOpenRequest) -> Result<String, ProductError> {
+        document_call(self, |bridge| bridge.presentation_open(request))
+    }
+    pub fn document_presentation_chunk(&self, request: DocumentPresentationUseRequest, max_bytes: u32) -> Result<DocumentPresentationChunkResult, ProductError> {
+        document_call(self, |bridge| bridge.presentation_chunk(request, max_bytes))
+    }
+    pub fn document_presentation_check(&self, request: DocumentPresentationUseRequest) -> Result<String, ProductError> {
+        document_call(self, |bridge| bridge.presentation_check(request))
+    }
+    pub fn document_presentation_advance_frame(&self, request: DocumentPresentationUseRequest) -> Result<String, ProductError> {
+        document_call(self, |bridge| bridge.presentation_advance(request))
+    }
+    pub fn document_presentation_close(&self, request: DocumentPresentationUseRequest) -> Result<(), ProductError> {
+        document_call(self, |bridge| bridge.presentation_close(request))
+    }
+    /// Trusted Service administrative drain; never expose as a client route.
+    pub fn document_presentation_take_invalidations(&self) -> Result<String, ProductError> {
+        document_call(self, DocumentBridge::take_invalidations)
     }
 
     pub fn agent_availability(&self) -> Result<String, ProductError> {
@@ -1040,7 +1064,9 @@ fn document_call<T>(
     let mut state = core.state.lock().map_err(|_| ProductError::Failure {
         code: "DOCUMENT_UNAVAILABLE".into(),
     })?;
-    operation(&mut state.store)
+    let result = operation(&mut state.store);
+    state.store.collect_invalidations();
+    result
 }
 
 fn agent_error(code: &'static str) -> ProductError {
