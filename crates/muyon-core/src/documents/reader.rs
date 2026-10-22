@@ -240,6 +240,12 @@ impl BusinessStore {
         let current = self.document_access_in_transaction(&tx, access, &[purpose.operation()])?;
         if current != metadata { return Err(ContractError::BindingMismatch.into()); }
         tx.commit().map_err(|_| ContractError::Unknown)?;
+        // The write COMMIT itself may wait. Do not let pre-COMMIT authority
+        // authorize output after that wait; this final transaction is read-only.
+        let delivery = sql(self.database().transaction())?;
+        let current = self.document_access_in_transaction(&delivery, access, &[purpose.operation()])?;
+        if current != metadata { return Err(ContractError::BindingMismatch.into()); }
+        delivery.commit().map_err(|_| ContractError::Unknown)?;
         Ok(value)
     }
 }
