@@ -116,7 +116,7 @@ pub struct PresentationInvalidations {
     pub invalidated: Vec<PresentationInvalidation>,
 }
 #[derive(Clone, Copy, PartialEq, Eq)]
-pub(super) enum PolicyClosure { Natural, ValidationDenied, Explicit, Failure, Handoff }
+pub(super) enum PolicyClosure { Natural, NaturalGrantExpiry, Explicit, Failure, Handoff }
 struct PresentationState {
     generation: Revision,
     active: bool,
@@ -132,6 +132,7 @@ struct Session {
     touched: Instant,
     delivered: u64,
     presentation: Option<PresentationState>,
+    policy_selection: Option<(String, String, Revision)>,
 }
 impl Session {
     fn expired(&self) -> bool {
@@ -197,6 +198,7 @@ pub struct DocumentReaderHost {
     poisoned: bool,
     presentation_invalidations: PresentationInvalidations,
     policy_owner_id: Option<String>,
+    policy_selection: Option<(String, String, Revision)>,
     policy_closed: BTreeMap<String, (PresentationTicket, PolicyClosure)>,
 }
 impl DocumentReaderHost {
@@ -207,6 +209,7 @@ impl DocumentReaderHost {
             poisoned: false,
             presentation_invalidations: PresentationInvalidations::default(),
             policy_owner_id: None,
+            policy_selection: None,
             policy_closed: BTreeMap::new(),
         }
     }
@@ -218,7 +221,7 @@ impl DocumentReaderHost {
         Ok(self.store.read_document(access)?)
     }
     fn release<T>(&mut self, session: Session, result: CoreResult<T>) -> Result<T> {
-        let reason = match &result { Ok(_) => PolicyClosure::Explicit, Err(ContractError::InvalidAuthority) => PolicyClosure::ValidationDenied, Err(_) => PolicyClosure::Failure };
+        let reason = match &result { Ok(_) => PolicyClosure::Explicit, Err(ContractError::InvalidAuthority) if self.pure_natural_expiry(&session, true).is_ok() => PolicyClosure::NaturalGrantExpiry, Err(_) => PolicyClosure::Failure };
         self.release_with_reason(session, result, reason)
     }
     fn release_with_reason<T>(&mut self, mut session: Session, result: CoreResult<T>, reason: PolicyClosure) -> Result<T> {
@@ -296,7 +299,7 @@ impl DocumentReaderHost {
             .map(|(key, _)| key.clone())
             .collect();
         for key in expired {
-            if let Some(session) = self.sessions.remove(&key) { self.release_with_reason(session, Ok(()), PolicyClosure::Natural)?; }
+            if let Some(session) = self.sessions.remove(&key) { let reason = if self.pure_natural_expiry(&session, false).is_ok() { PolicyClosure::Natural } else { PolicyClosure::Failure }; self.release_with_reason(session, Ok(()), reason)?; }
         }
         Ok(())
     }
@@ -376,6 +379,7 @@ impl DocumentReaderHost {
             touched: now,
             delivered: 0,
             presentation: None,
+            policy_selection: self.policy_selection.clone(),
         };
         validate_snapshot(&self.store, &tx, &session)?;
         let info = DocumentReadSessionInfo {
@@ -619,6 +623,11 @@ impl DocumentReaderHost {
     }
     pub fn close_presentation(&mut self, ticket: &PresentationTicket) -> Result<()> {
         if !self.sessions.contains_key(&ticket.session_id) {
+            if let Some((closed, _)) = self.policy_closed.get(ticket.session_id()) {
+                if closed.document != ticket.document || closed.authority != ticket.authority || closed.generation != ticket.generation { return Err(ContractError::InvalidAuthority.into()); }
+                super::reading_policy::fence_closed_presentation(&self.store, ticket)?;
+                self.policy_closed.insert(ticket.session_id.clone(), (ticket.clone(), PolicyClosure::Explicit));
+            }
             return Ok(());
         }
         self.require_presentation_ticket(ticket, false)?;
@@ -681,6 +690,10 @@ impl DocumentReaderHost {
         }
     }
     pub fn close_all(&mut self) -> Result<()> {
+        // Natural cleanup may already have removed the owned Session. Explicit
+        // user close still terminates every exact retained presentation root.
+        let closed: Vec<_> = self.policy_closed.values().map(|(ticket, _)| ticket.clone()).collect();
+        for ticket in closed { self.close_presentation(&ticket)?; }
         let sessions = std::mem::take(&mut self.sessions);
         let mut first = None;
         for (_, session) in sessions {
@@ -694,6 +707,32 @@ impl DocumentReaderHost {
             Some(error) => Err(error),
             None => Ok(()),
         }
+    }
+    // Classify at the moment of cleanup. A later expiry cannot wash an
+    // earlier missing pin, changed source or revoked authority into renewal.
+    fn pure_natural_expiry(&self, session: &Session, require_grant_expired: bool) -> CoreResult<()> {
+        let tx = sql(self.store.database().transaction())?;
+        let grant = self.store.reading_policy_grant_record_in_transaction(&tx, &session.access.authority.grant_id)?.ok_or(ContractError::InvalidAuthority)?;
+        if !grant.active || grant.access != session.access || !grant.operations.contains(&session.purpose.operation()) || (require_grant_expired && grant.expires_at_ms > storage::now_ms()?) { return Err(ContractError::InvalidAuthority); }
+        if self.store.reading_policy_metadata_in_transaction(&tx, &session.access.document)? != session.metadata || session.reader.source().blob != session.metadata.blob || self.store.document_reader_stamp_in_transaction(&tx, &session.reader)? != session.stamp { return Err(ContractError::BindingMismatch); }
+        let tail = self.store.reading_policy_grant_record_in_transaction(&tx, &session.access.authority.grant_id)?.ok_or(ContractError::InvalidAuthority)?;
+        if tail != grant { return Err(ContractError::InvalidAuthority); }
+        tx.commit().map_err(|_| ContractError::Unknown)
+    }
+    pub(super) fn policy_select(&mut self, owner: &str, scope_key: &str, epoch: &Revision) -> Result<()> {
+        if self.poisoned || self.policy_owner() != Some(owner) { return Err(ContractError::InvalidAuthority.into()); }
+        // Includes presentations not yet attached to a root. Do not let an
+        // old initial ticket be adopted by the next genuine native selection.
+        let ids: Vec<_> = self.sessions.iter().filter(|(_, session)| session.presentation.is_some()).map(|(id, _)| id.clone()).collect();
+        for id in ids { self.close_session(&id)?; }
+        self.policy_selection = Some((owner.into(), scope_key.into(), epoch.clone()));
+        Ok(())
+    }
+    pub(super) fn policy_validate_selection(&self, ticket: &PresentationTicket, owner: &str, scope_key: &str, epoch: &Revision) -> CoreResult<()> {
+        self.require_presentation_ticket(ticket, true)?;
+        let session = self.sessions.get(ticket.session_id()).ok_or(ContractError::NotFound)?;
+        if session.policy_selection.as_ref() != Some(&(owner.into(), scope_key.into(), epoch.clone())) { return Err(ContractError::Cancelled); }
+        Ok(())
     }
     pub(super) fn policy_owner(&self) -> Option<&str> { self.policy_owner_id.as_deref() }
     pub(super) fn policy_set_owner(&mut self, id: String) -> CoreResult<()> {
@@ -712,7 +751,7 @@ impl DocumentReaderHost {
         if self.sessions.contains_key(ticket.session_id()) { return self.require_presentation_ticket(ticket, false); }
         let (closed, reason) = self.policy_closed.get(ticket.session_id()).ok_or(ContractError::Unknown)?;
         if closed.document != ticket.document || closed.authority != ticket.authority || closed.generation != ticket.generation { return Err(ContractError::InvalidAuthority); }
-        match reason { PolicyClosure::Natural => Ok(()), PolicyClosure::ValidationDenied if natural_grant_expiry => Ok(()), _ => Err(ContractError::Cancelled) }
+        match reason { PolicyClosure::Natural => Ok(()), PolicyClosure::NaturalGrantExpiry if natural_grant_expiry => Ok(()), _ => Err(ContractError::Cancelled) }
     }
     pub(super) fn policy_suspend(&mut self, ticket: &PresentationTicket) -> CoreResult<()> {
         if self.sessions.contains_key(ticket.session_id()) {

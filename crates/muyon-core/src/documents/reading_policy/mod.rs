@@ -68,8 +68,9 @@ impl ReadingPolicyHost {
         let record=reader.store().reading_policy_grant_record_in_transaction(&tx,&request.access.authority.grant_id)?;
         let mut result=PolicyObservation{schema:1,document:request.access.document.clone(),source_digest:None,grant_id:request.access.authority.grant_id.clone(),grant_generation:request.access.authority.generation.clone(),active:None,expires_at_ms:None,now_ms:now,readonly_operations:Vec::new(),availability:PolicyAvailability::Unavailable};
         if let Some(record)=record{
-            if record.access.authority.generation!=request.access.authority.generation {result.availability=PolicyAvailability::Replaced;}
-            else if record.access==request.access && record.access.authority.owner_epoch==self.epoch {
+            if record.access.document!=request.access.document || record.access.authority.owner_epoch!=self.epoch || request.access.authority.owner_epoch!=self.epoch { /* No classification of an unrelated target. */ }
+            else if record.access.authority.generation!=request.access.authority.generation {result.availability=PolicyAvailability::Replaced;}
+            else if record.access==request.access {
                 result.active=Some(record.active);result.expires_at_ms=Some(record.expires_at_ms);
                 result.readonly_operations=record.operations.iter().copied().filter(|op|op.is_read()).collect();
                 result.availability=if !record.active{PolicyAvailability::Revoked}else if !record.operations.contains(&DocumentOperation::Render){PolicyAvailability::Unavailable}else if record.expires_at_ms<=now{PolicyAvailability::NaturallyExpired}else{PolicyAvailability::Valid};
@@ -89,6 +90,7 @@ impl ReadingPolicyHost {
             if request.access.document.scope().project_id.as_deref()!=Some(request.scope.project.as_str()) || initial.generation()!=&request.frame_generation{return Err(ContractError::BindingMismatch);}
             let metadata=reader.store().reading_policy_metadata_in_transaction(&tx,&request.access.document)?;
             if metadata.blob.digest!=request.source_digest{return Err(ContractError::BindingMismatch);}
+            reader.policy_validate_selection(initial,&self.instance,&store::scope_key(&request.scope)?,native_selection_epoch)?;
             reader.policy_validate_begin(&tx,initial,&request.access,&metadata)?;
             let parent=reader.store().reading_policy_grant_record_in_transaction(&tx,&request.access.authority.grant_id)?.ok_or(ContractError::InvalidAuthority)?;
             if parent.access!=request.access || !parent.active || parent.expires_at_ms<=self.now()? || !parent.operations.contains(&DocumentOperation::Render){return Err(ContractError::InvalidAuthority);}
@@ -99,6 +101,7 @@ impl ReadingPolicyHost {
             let attempt=AttemptRecord{kind:PolicyKind::Begin,scope:request.scope.clone(),id:request.original_attempt_id.clone(),fingerprint:fp.clone(),prepared:None,root_id:Some(root.id.clone()),renew_fingerprint:None,observation_id:None,outcome:result.clone(),handoff_fingerprint:None,handoff_outcome:None};
             store::insert_root(reader.store(),&root)?;store::insert_attempt(reader.store(),&attempt,"begun")?;
             validate_root(reader.store(),&tx,&root,true)?;reader.policy_validate_begin(&tx,initial,&request.access,&root.metadata)?;
+            reader.policy_validate_selection(initial,&self.instance,&store::scope_key(&request.scope)?,native_selection_epoch)?;
             store::assert_root(reader.store(),&root,false)?;store::assert_attempt(reader.store(),&attempt)?;
             self.tickets.insert(root.id.clone(),initial.clone());
             tx.commit().map_err(|_|ContractError::Unknown)?;Ok(result)
@@ -131,6 +134,7 @@ impl ReadingPolicyHost {
         for (root,terminal) in roots {if !terminal && root.instance==self.instance{store::fence_root(reader.store(),&root.id)?;closing.push(root.id);}}
         for id in &closing {if !store::root(reader.store(),id)?.1{return Err(ContractError::StorageCorrupt);}}
         tx.commit().map_err(|_|ContractError::Unknown)?;
+        reader.policy_select(&self.instance,&store::scope_key(scope)?,native_epoch).map_err(read_error)?;
         self.selection=Some((scope.clone(),native_epoch.clone()));self.freshness.clear();
         for id in closing {if let Some(ticket)=self.tickets.get(&id).cloned(){reader.close_presentation(&ticket).map_err(read_error)?;self.tickets.remove(&id);}}
         Ok(())
