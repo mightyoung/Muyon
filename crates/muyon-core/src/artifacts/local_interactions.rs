@@ -1,7 +1,7 @@
 //! Bounded local component state, not business execution or canonical source data.
 //! Actual Evidence source authority is revalidated in each local transaction.
 use super::*;
-use super::save_journal::{requires_original_lookup, ArtifactSaveFailure, JournalDomain};
+use super::save_journal::{requires_original_lookup, ArtifactSaveFailure, JournalDomain, PendingJournal, PendingJournalTarget};
 use crate::contract::{RecoveryAction,AuthorityBinding};
 use sha2::{Digest, Sha256};
 use std::time::{SystemTime, UNIX_EPOCH};
@@ -267,7 +267,7 @@ impl BusinessStore {
             {let tx=sql(self.database().transaction())?; self.local_schema()?; self.artifact_project_authorize(&tx,&a.project,permission)?; self.local_project(&request,a)?;
                 let rows=self.journal_rows(JournalDomain::Local,intent)?; if let Some(row)=rows.first(){if cell(row,0)?!=digest || cell(row,1)?!=json {return Err(ContractError::IntentConflict);} let result=self.local_projection(intent,row,&a.project)?; self.artifact_project_authorize(&tx,&a.project,permission)?; sql(tx.commit())?; return Ok(result);}
                 self.local_binding(&tx,a,permission)?; if self.local_pending(a)?.is_some(){return Err(ContractError::IntentConflict);}
-                self.journal_pending(JournalDomain::Local,intent,a.project.project_id()?,&a.project.actor_id,&digest,&json,&a.object.object_id)?;
+                self.journal_pending(PendingJournal { target: PendingJournalTarget::Local { object_id: &a.object.object_id }, intent_id: intent, project_id: a.project.project_id()?, actor_id: &a.project.actor_id, binding_digest: &digest, request_json: &json })?;
                 self.local_binding(&tx,a,permission)?; sql(tx.commit())?;
             }
             let outcome=(||->std::result::Result<LocalOutcome,ArtifactSaveFailure>{

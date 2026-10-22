@@ -95,6 +95,20 @@ pub(super) fn requires_original_lookup(error: &ContractError) -> bool {
 
 #[derive(Clone, Copy)]
 pub(super) enum JournalDomain { Artifact, Local }
+/// Internal pending-row inputs borrowed from the already frozen original request.
+/// No FFI/serialization contract: both callers remain inside this artifact module.
+pub(super) struct PendingJournal<'a> {
+    pub(super) target: PendingJournalTarget<'a>,
+    pub(super) intent_id: &'a str,
+    pub(super) project_id: &'a str,
+    pub(super) actor_id: &'a str,
+    pub(super) binding_digest: &'a str,
+    pub(super) request_json: &'a str,
+}
+pub(super) enum PendingJournalTarget<'a> {
+    Artifact,
+    Local { object_id: &'a str },
+}
 /// Internal effect phase: a receipt-tail invalidation cannot become a durable
 /// rejection. Its effect transaction must roll back, leaving the original pending.
 pub(super) enum ArtifactSaveFailure {
@@ -113,11 +127,11 @@ impl BusinessStore {
         };
         sql(self.database().query(query, &[intent]))
     }
-    #[allow(clippy::too_many_arguments)]
-    pub(super) fn journal_pending(&self, domain: JournalDomain, intent: &str, project: &str, actor: &str, digest: &str, json: &str, object_id: &str) -> Result<()> {
-        match domain {
-            JournalDomain::Artifact => sql(self.database().exec("INSERT INTO artifact_save_intents_v1 VALUES(?,?,?,?,?,'pending',NULL,NULL)", &[intent, project, actor, digest, json]))?,
-            JournalDomain::Local => sql(self.database().exec("INSERT INTO artifact_local_intents_v1 VALUES(?,?,?,?,?,'pending',NULL,NULL,?)", &[intent, project, actor, digest, json, object_id]))?,
+    pub(super) fn journal_pending(&self, pending: PendingJournal<'_>) -> Result<()> {
+        let PendingJournal { target, intent_id, project_id, actor_id, binding_digest, request_json } = pending;
+        match target {
+            PendingJournalTarget::Artifact => sql(self.database().exec("INSERT INTO artifact_save_intents_v1 VALUES(?,?,?,?,?,'pending',NULL,NULL)", &[intent_id, project_id, actor_id, binding_digest, request_json]))?,
+            PendingJournalTarget::Local { object_id } => sql(self.database().exec("INSERT INTO artifact_local_intents_v1 VALUES(?,?,?,?,?,'pending',NULL,NULL,?)", &[intent_id, project_id, actor_id, binding_digest, request_json, object_id]))?,
         };
         Ok(())
     }
@@ -179,7 +193,7 @@ impl BusinessStore {
             }
             self.artifact_access(&tx, output, true)?;
             self.artifact_sources(&tx, output, sources)?;
-            self.journal_pending(JournalDomain::Artifact, intent, access.project_id()?, &access.actor_id, digest, json, "")?;
+            self.journal_pending(PendingJournal { target: PendingJournalTarget::Artifact, intent_id: intent, project_id: access.project_id()?, actor_id: &access.actor_id, binding_digest: digest, request_json: json })?;
             self.artifact_project_authorize(&tx, access, ArtifactProjectOperation::Save)?;
             sql(tx.commit())?; // PENDING_DURABLE: no artifact/document effect yet.
         }
