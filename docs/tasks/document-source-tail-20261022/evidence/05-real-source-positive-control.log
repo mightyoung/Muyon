@@ -1,0 +1,12 @@
+Source: /workspace/document-source-tail-20261022 
+Evidence: /tmp/muyon-source-tail-direct.hs8mhgft
+['/workspace/document-edit-tools/toolchain/bin/cargo', 'build', '--offline', '--locked', '--manifest-path', '/workspace/document-source-tail-20261022/crates/Cargo.toml', '-p', 'muyon-core', '--lib', '--message-format=json']
+    Finished `dev` profile [unoptimized] target(s) in 0.03s
+['/workspace/document-edit-tools/toolchain/bin/rustc', '--edition=2021', '--test', '/workspace/document-source-tail-20261022/crates/muyon-core/tests/document_edit_gateway.rs', '-L', 'dependency=/workspace/document-edit-combination/crates/target/debug/deps', '-L', 'native=/workspace/document-edit-tools/native', '--extern', 'muyon_core=/workspace/document-edit-combination/crates/target/debug/libmuyon_core.rlib', '--extern', 'serde_json=/workspace/document-edit-combination/crates/target/debug/deps/libserde_json-ae0abdd76423c00d.rlib', '--extern', 'sha2=/workspace/document-edit-combination/crates/target/debug/deps/libsha2-ee5641143bb9770c.rlib', '-o', '/tmp/muyon-source-tail-direct.hs8mhgft/gateway-tests']
+['/tmp/muyon-source-tail-direct.hs8mhgft/gateway-tests', 'real_source_copy_keeps_manual_draft_and_queues_one_notification', '--nocapture']
+
+running 1 test
+test real_source_copy_keeps_manual_draft_and_queues_one_notification ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 22 filtered out; finished in 0.03s
+

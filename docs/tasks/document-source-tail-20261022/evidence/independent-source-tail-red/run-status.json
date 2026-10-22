@@ -1,0 +1,7 @@
+{
+  "red_tests_returncode": 101,
+  "red_observed": "2 behavior failures: commit OkCommitted/head2 after event DELETE or pending0",
+  "positive_control_returncode": 0,
+  "direct_binary": "/tmp/muyon-source-tail-direct.tj23q9lw/gateway-tests",
+  "note": "Direct real-library tests, not cargo integration gate pass. RED status is test binary failure, wrapper shell tool status not used."
+}

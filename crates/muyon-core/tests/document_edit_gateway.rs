@@ -804,3 +804,309 @@ fn persisted_receipt_title_must_match_frozen_reviewed_source() {
     );
     assert_eq!(s.read_document(&current).unwrap().title, "Synthetic");
 }
+
+#[test]
+fn existing_text_source_identity_roundtrips_copy_preparation() {
+    let f = Fixture::new();
+    let s = f.store_with_format(DocumentFormat::Text);
+    let a = DocumentAccess {
+        document: DocumentRef::new(
+            reference(1).scope().clone(),
+            "document",
+            Revision::new(1),
+            DocumentFormat::Text,
+        )
+        .unwrap(),
+        authority: AuthorityBinding {
+            grant_id: "text-source".into(),
+            generation: Revision::new(1),
+            owner_epoch: "epoch-1".into(),
+        },
+    };
+    let expires = SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .unwrap()
+        .as_millis() as u64
+        + 25_000;
+    s.issue_document_grant_trusted(
+        &a.document,
+        &a.authority,
+        &[
+            DocumentOperation::Inspect,
+            DocumentOperation::ReadText,
+            DocumentOperation::StructuredEdit,
+            DocumentOperation::Validate,
+        ],
+        expires,
+    )
+    .unwrap();
+    let g = DocumentEditGateway::initialize_trusted(&s).unwrap();
+    let prepared = g.prepare_copy(&a, "text-source-copy").unwrap();
+    assert_eq!(prepared.binding.document, a.document);
+    assert_eq!(prepared.state, DurableState::Prepared);
+}
+
+fn real_evidence_text_source() -> (Fixture, BusinessStore, DocumentAccess) {
+    use muyon_core::{
+        artifacts::{local_interactions::*, *},
+        documents::AnnotationAuthor,
+        evidence::{store::StoreEvidence, InputKind},
+    };
+    let f = Fixture::new();
+    let s = f.store_with_format(DocumentFormat::Text);
+    s.initialize_artifacts_trusted().unwrap();
+    s.initialize_artifact_workflows_trusted().unwrap();
+    s.initialize_local_interactions_trusted().unwrap();
+    let a = DocumentAccess {
+        document: DocumentRef::new(
+            reference(1).scope().clone(),
+            "document",
+            Revision::new(1),
+            DocumentFormat::Text,
+        )
+        .unwrap(),
+        authority: AuthorityBinding {
+            grant_id: "evidence-source".into(),
+            generation: Revision::new(1),
+            owner_epoch: "epoch-1".into(),
+        },
+    };
+    let expires = SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .unwrap()
+        .as_millis() as u64
+        + 25_000;
+    s.issue_document_grant_trusted(
+        &a.document,
+        &a.authority,
+        &[
+            DocumentOperation::Inspect,
+            DocumentOperation::ReadText,
+            DocumentOperation::StructuredEdit,
+            DocumentOperation::Validate,
+        ],
+        expires,
+    )
+    .unwrap();
+    let project = ArtifactProjectAccess {
+        scope: a.document.scope().clone(),
+        actor_id: "actor".into(),
+        project_revision: Revision::new(1),
+        authority: AuthorityBinding {
+            grant_id: "evidence-project".into(),
+            generation: Revision::new(1),
+            owner_epoch: "epoch-1".into(),
+        },
+    };
+    s.issue_artifact_project_grant_trusted(
+        &project,
+        &[
+            ArtifactProjectOperation::LocalDraft,
+            ArtifactProjectOperation::ReadOwnLocal,
+        ],
+        expires,
+    )
+    .unwrap();
+    let kind = LocalKind::Form(FormSpec {
+        fields: vec![LocalField::Text],
+        single_options: vec![],
+        multiple_options: vec![],
+    });
+    let local = {
+        let evidence = StoreEvidence::new(&s);
+        let processing = evidence.process(&a, InputKind::Utf8Text).unwrap();
+        let hits = evidence
+            .find_literal(&a, &processing, "synthetic", 1)
+            .unwrap();
+        let proof = s
+            .resolve_local_evidence_trusted(
+                &project,
+                ArtifactProjectOperation::LocalDraft,
+                &a,
+                &processing,
+                &hits[0],
+            )
+            .unwrap();
+        let local = LocalAccess {
+            project,
+            object: LocalObjectRef {
+                object_id: "source-object".into(),
+                target: proof.target(),
+                component_id: "component".into(),
+                component_revision: Revision::new(1),
+                attempt_id: "attempt".into(),
+            },
+            binding_generation: Revision::new(1),
+        };
+        s.issue_local_evidence_binding_trusted(&local, &kind, expires, &proof)
+            .unwrap();
+        local
+    };
+    let manual = LocalMutation::Patch {
+        expected: Revision::new(0),
+        changes: vec![FieldChange::Text {
+            value: "original manual draft".into(),
+        }],
+        author: AnnotationAuthor::Human {
+            actor_id: "actor".into(),
+        },
+    };
+    assert_eq!(
+        s.mutate_local_trusted("manual-source-form", &local, &manual)
+            .unwrap()
+            .status,
+        ArtifactSaveStatus::Committed
+    );
+    (f, s, a)
+}
+fn receipt_tail_notification_mutation_is_atomic(mutation: &str) {
+    use muyon_core::sqlite::Db;
+    let (f, s, a) = real_evidence_text_source();
+    let g = DocumentEditGateway::initialize_trusted(&s).unwrap();
+    let b = ready(&g, &a, "source-notification-tail");
+    let db = Db::open(f.path().to_str().unwrap(), false, false).unwrap();
+    let forms = db
+        .query(
+            "SELECT * FROM artifact_local_forms_v1 ORDER BY object_id",
+            &[],
+        )
+        .unwrap();
+    let references = db
+        .query("SELECT * FROM blob_references ORDER BY reference_id", &[])
+        .unwrap();
+    assert_eq!(
+        db.query("SELECT active FROM artifact_local_evidence_sources_v1", &[])
+            .unwrap()[0][0]
+            .as_deref(),
+        Some("1")
+    );
+    assert!(s
+        .pending_document_source_notifications_trusted(None, 256)
+        .unwrap()
+        .is_empty());
+    db.exec(&format!("CREATE TRIGGER corrupt_notification_after_receipt AFTER UPDATE OF receipt_json ON edit_journal_intents WHEN NEW.state='committed' AND NEW.receipt_json IS NOT NULL BEGIN {mutation}; END"),&[]).unwrap();
+    let outcome = g.commit_copy(&b, &a);
+    eprintln!(
+        "receipt-tail outcome={outcome:?}; head={:?}; notifications={:?}",
+        db.query(
+            "SELECT revision FROM document_heads WHERE document_id='document'",
+            &[]
+        )
+        .unwrap(),
+        db.query(
+            "SELECT generation,pending FROM document_source_notifications_v1",
+            &[]
+        )
+        .unwrap()
+    );
+    assert!(
+        outcome.is_err(),
+        "last receipt write corrupted the real notification but publication succeeded"
+    );
+    assert_eq!(
+        s.read_document(&a).unwrap().document.revision(),
+        &Revision::new(1)
+    );
+    assert_eq!(
+        db.query("SELECT COUNT(*) FROM document_revisions", &[])
+            .unwrap()[0][0]
+            .as_deref(),
+        Some("1")
+    );
+    assert_eq!(
+        db.query("SELECT active FROM artifact_local_evidence_sources_v1", &[])
+            .unwrap()[0][0]
+            .as_deref(),
+        Some("1")
+    );
+    assert_eq!(
+        db.query("SELECT active FROM artifact_local_bindings_v1", &[])
+            .unwrap()[0][0]
+            .as_deref(),
+        Some("1")
+    );
+    assert_eq!(
+        db.query("SELECT * FROM blob_references ORDER BY reference_id", &[])
+            .unwrap(),
+        references
+    );
+    assert_eq!(
+        db.query(
+            "SELECT * FROM artifact_local_forms_v1 ORDER BY object_id",
+            &[]
+        )
+        .unwrap(),
+        forms
+    );
+    assert!(s
+        .pending_document_source_notifications_trusted(None, 256)
+        .unwrap()
+        .is_empty());
+    let original = g.lookup_original(&b, &a).unwrap();
+    assert_ne!(original.state, DurableState::Committed);
+    assert!(original.receipt.is_none());
+}
+#[test]
+fn receipt_tail_cannot_delete_actual_source_notification() {
+    receipt_tail_notification_mutation_is_atomic("DELETE FROM document_source_notifications_v1 WHERE project_id='project' AND actor_id='actor' AND object_id='source-object'");
+}
+#[test]
+fn receipt_tail_cannot_ack_actual_source_notification_before_commit() {
+    receipt_tail_notification_mutation_is_atomic("UPDATE document_source_notifications_v1 SET pending=0 WHERE project_id='project' AND actor_id='actor' AND object_id='source-object'");
+}
+
+#[test]
+fn real_source_copy_keeps_manual_draft_and_queues_one_notification() {
+    use muyon_core::sqlite::Db;
+    let (f, s, a) = real_evidence_text_source();
+    let g = DocumentEditGateway::initialize_trusted(&s).unwrap();
+    let b = ready(&g, &a, "source-control");
+    let db = Db::open(f.path().to_str().unwrap(), false, false).unwrap();
+    let forms = db
+        .query(
+            "SELECT * FROM artifact_local_forms_v1 ORDER BY object_id",
+            &[],
+        )
+        .unwrap();
+    assert!(s
+        .pending_document_source_notifications_trusted(None, 256)
+        .unwrap()
+        .is_empty());
+    assert_eq!(
+        g.commit_copy(&b, &a).unwrap().state,
+        DurableState::Committed
+    );
+    let events = s
+        .pending_document_source_notifications_trusted(None, 256)
+        .unwrap();
+    assert_eq!(events.len(), 1);
+    assert_eq!(
+        (
+            events[0].project_id.as_str(),
+            events[0].actor_id.as_str(),
+            events[0].object_id.as_str()
+        ),
+        ("project", "actor", "source-object")
+    );
+    assert_eq!(events[0].generation, Revision::new(1));
+    assert_eq!(
+        db.query("SELECT active FROM artifact_local_evidence_sources_v1", &[])
+            .unwrap()[0][0]
+            .as_deref(),
+        Some("0")
+    );
+    assert_eq!(
+        db.query("SELECT active FROM artifact_local_bindings_v1", &[])
+            .unwrap()[0][0]
+            .as_deref(),
+        Some("0")
+    );
+    assert_eq!(
+        db.query(
+            "SELECT * FROM artifact_local_forms_v1 ORDER BY object_id",
+            &[]
+        )
+        .unwrap(),
+        forms
+    );
+}

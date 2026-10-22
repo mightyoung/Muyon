@@ -118,6 +118,7 @@ pub(super) fn document_decode(s: &str) -> Result<DocumentMetadata> {
     let m: StoredDocument = decode(s)?;
     m.blob.validate()?;
     let f = match m.format.as_str() {
+        "Text" => DocumentFormat::Text,
         "Docx" => DocumentFormat::Docx,
         "Pptx" => DocumentFormat::Pptx,
         "Xlsx" => DocumentFormat::Xlsx,

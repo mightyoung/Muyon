@@ -1,0 +1,2 @@
+2326473e54053d82b8fcba5087310c40199e19b38fb523810b1936c1731f5048  crates/muyon-core/src/document_edit/gateway.rs
+f4832e6eb40c59af41dd99a912929d9bb229e7fb4f8c273947d33e43ea1ee5bf  crates/muyon-core/tests/document_edit_gateway.rs
