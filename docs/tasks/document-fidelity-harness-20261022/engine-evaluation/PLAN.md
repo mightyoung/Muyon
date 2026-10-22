@@ -1,0 +1,10 @@
+# Existing-engine evaluation continuation
+
+Parent explicitly authorizes installed-engine evaluation but requires licensing and isolation before any document processing. Same task branch, base bfdd7ecd7e8ec6a7825d959b6f8a5e8e7cf20ef8; same ownership (tools/document_fidelity and independent task docs), no production edits.
+
+One harmless sandbox probe failed setting up UID map with read-only filesystem. Stop that action; do not retry/relocate or use a weaker route. Do not import/launch engines for document processing. Existing host process has network and filesystem reach; resource limits alone cannot replace an enforced boundary. Continue authorized independent work with standard library only.
+
+- [ ] Test-first metadata-only inventory (no import of engine modules): installed distribution/version/dependencies/declared project URLs, RECORD/INSTALLER/WHEEL/license file hashes and missing license/origin evidence; static soffice version/build/license component headings and executable hashes; scoped POI discovery. No claimed supply-chain authenticity or integration license approval.
+- [ ] Build two new original complex DOCX/XLSX specimens, deterministic ZIP bytes using standard library. Include split styled runs/comment/bookmark/header, and merged cells/date system/date styles/hidden sheet/defined name/formula text+authored stale cache/comment/opaque part. No macros/externals/embedded payload. Preserve previous four originals unchanged.
+- [ ] Before candidate execution, define exactly one run/cell change, original hash, expected text/value, allowed changed member and semantic node, all other nodes/parts invariant, no unknown-part loss/rewrite, formula cache not recalculated, source read-only, engine result unknown until independent reopen. On current environment mark all engine actions NOT_RUN.
+- [ ] Verify inventory/fixture behavior and raw logs; independent read-only review; push task branch only, return complete SHA and explicit isolation/licensing blockers. No main/develop merge, deployment, paid calls, installation, credential setup or unknown-operation retry.

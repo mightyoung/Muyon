@@ -1,0 +1,8 @@
+Original execution transcript, 2026-10-22 UTC (copied from tool output; not re-executed):
+$ /usr/bin/bwrap --version
+bubblewrap 0.12.0
+$ /usr/bin/bwrap --unshare-user --unshare-net --unshare-pid --unshare-ipc --unshare-uts --die-with-parent --new-session --clearenv --ro-bind /usr /usr --ro-bind /lib /lib --ro-bind /lib64 /lib64 --proc /proc --dev /dev --tmpfs /tmp -- /usr/bin/true
+bwrap: setting up uid map: Read-only file system
+exit=1
+
+No document engine was started. No retry, unshare alternative, namespace relocation, escalation, policy change, permission expansion, EULA acceptance or installation attempted. Failure is an execution-environment filesystem denial, not an auto-review approval rejection. Outcome known: harmless sandbox probe failed; no round-trip performed.
