@@ -45,3 +45,7 @@ cargo test --offline --locked --manifest-path crates/Cargo.toml -p muyon-core
 [验证材料目录](independent-verification/) 保存所有原始 stdout/stderr。`targeted.junit.xml` 与 `core-full.junit.xml` 是从原始 libtest stdout **派生**的 JUnit，非原生 runner XML；转换脚本保留，按原输出统计18/165，不虚构时长。`test-summary.json` 给出计数。
 
 `SHA256SUMS` 覆盖同目录所有其他证据文件（自身除外），可从该目录运行 `sha256sum -c SHA256SUMS`。原始工具输出的空白保留；全量 diff-check 与排除原始 `.log` 后的检查分别记录，不能用格式化原始输出来制造干净结果。本次新增路径只在作者报告目录内，原生产和测试树对固定源 diff 为空。
+
+## 后续格式修复的新固定源复验
+
+原ab9c源失败和旧workspace阻断保留。作者新源 `d2ac6a87a8bf13d8a22ebd41676683be8d849a22` 已在独立隔离worktree实际复验：五文件与rustfmt(旧源)逐字节相等，scoped fmt exit0，targeted18/18、完整muyon-core165/165均exit0。仅关闭这五文件的格式门槛，原TDD历史、workspace缓存/其余格式和生产接线门槛不变。见 [FORMAT-RECHECK.md](FORMAT-RECHECK.md) 及新分目录原始输出/独立SHA256SUMS；旧evidence hash清单仍只封存其原固定批次，新批次不冒充旧结果。

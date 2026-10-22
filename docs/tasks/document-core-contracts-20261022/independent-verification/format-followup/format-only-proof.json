@@ -1,0 +1,61 @@
+{
+  "old_source": "ab9c381cc935be0cd52db5a8a455ce985bdba1db",
+  "new_source": "d2ac6a87a8bf13d8a22ebd41676683be8d849a22",
+  "all_changed_paths": [
+    "crates/muyon-core/src/documents/anchor.rs",
+    "crates/muyon-core/src/documents/capability.rs",
+    "crates/muyon-core/src/documents/identity.rs",
+    "crates/muyon-core/src/documents/mod.rs",
+    "crates/muyon-core/tests/documents.rs",
+    "docs/tasks/document-core-contracts-20261022/FORMAT-FOLLOWUP.md",
+    "docs/tasks/document-core-contracts-20261022/format-followup/application.json",
+    "docs/tasks/document-core-contracts-20261022/format-followup/checks.log"
+  ],
+  "argv": [
+    "/tmp/muyon-rust/bin/rustfmt",
+    "--edition",
+    "2021",
+    "/tmp/muyon-document-format-expected/crates/muyon-core/src/documents/anchor.rs",
+    "/tmp/muyon-document-format-expected/crates/muyon-core/src/documents/capability.rs",
+    "/tmp/muyon-document-format-expected/crates/muyon-core/src/documents/identity.rs",
+    "/tmp/muyon-document-format-expected/crates/muyon-core/src/documents/mod.rs",
+    "/tmp/muyon-document-format-expected/crates/muyon-core/tests/documents.rs"
+  ],
+  "cwd": "/workspace/Muyon-document-verification",
+  "start_utc": "2026-10-22T04:33:59.199284+00:00",
+  "end_utc": "2026-10-22T04:33:59.217106+00:00",
+  "exit_status": 0,
+  "description": "Format the five old source files in a temporary copy using the same existing rustfmt; compare exact resulting bytes with new source. No formatting writes to author/source worktree.",
+  "files": [
+    {
+      "path": "crates/muyon-core/src/documents/anchor.rs",
+      "expected_rustfmt_sha256": "96fbfc461f6c376024428cddf0d4ca3422c28f743de8ae4da6ef1fb835a9e470",
+      "new_source_sha256": "96fbfc461f6c376024428cddf0d4ca3422c28f743de8ae4da6ef1fb835a9e470",
+      "byte_identical": true
+    },
+    {
+      "path": "crates/muyon-core/src/documents/capability.rs",
+      "expected_rustfmt_sha256": "acc72370f24258f5cc3aee87f3a88ec3e99ce67df7142dceca01c5baf6a61cb6",
+      "new_source_sha256": "acc72370f24258f5cc3aee87f3a88ec3e99ce67df7142dceca01c5baf6a61cb6",
+      "byte_identical": true
+    },
+    {
+      "path": "crates/muyon-core/src/documents/identity.rs",
+      "expected_rustfmt_sha256": "8d1939488620cd2b7a1c6453e2b8116e8cf60d98dd2fcc4546408f956ad436b4",
+      "new_source_sha256": "8d1939488620cd2b7a1c6453e2b8116e8cf60d98dd2fcc4546408f956ad436b4",
+      "byte_identical": true
+    },
+    {
+      "path": "crates/muyon-core/src/documents/mod.rs",
+      "expected_rustfmt_sha256": "d72c71cc523af61fd93fe3dc2b336e0f5b0fed25b53c5dc64a14ef9db86a24ea",
+      "new_source_sha256": "d72c71cc523af61fd93fe3dc2b336e0f5b0fed25b53c5dc64a14ef9db86a24ea",
+      "byte_identical": true
+    },
+    {
+      "path": "crates/muyon-core/tests/documents.rs",
+      "expected_rustfmt_sha256": "a1e4c3d1dc0cfc37d5020e909977ccca311c39602265f19d75073dae1795440a",
+      "new_source_sha256": "a1e4c3d1dc0cfc37d5020e909977ccca311c39602265f19d75073dae1795440a",
+      "byte_identical": true
+    }
+  ]
+}

@@ -1,0 +1,250 @@
+
+running 18 tests
+test blobs::tests::file_and_upload_logical_length_quotas_precede_hashing_and_writing ... ok
+test blobs::tests::failed_ledger_after_solidification_keeps_staging_and_object_independent ... ok
+test blobs::tests::deleting_rejects_new_read_or_same_digest_upload ... ok
+test blobs::tests::kill_fixture ... ok
+test blobs::tests::gc_and_publish_barrier_preserves_either_upload_pin_or_reference ... ok
+test blobs::tests::corrupt_existing_object_and_dangling_symlink_are_never_replaced ... ok
+test blobs::tests::gc_and_reader_barrier_covers_reader_after_upload_pin_release ... ok
+test blobs::tests::pinned_state_alone_does_not_replace_a_durable_upload_pin ... ok
+test blobs::tests::publication_binds_expected_bytes_project_revision_and_real_transaction ... ok
+test blobs::tests::partial_publication_copy_is_not_reused_and_unknown_uploads_are_not_cleaned ... ok
+test blobs::tests::rename_then_failed_pin_commit_can_retry_existing_target_without_overwrite ... ok
+test blobs::tests::pending_unknown_never_expire_and_lookup_does_not_recover ... ok
+test review_lifecycle::tests::committed_claims_are_preserved_and_partial_committed_schema_is_refused ... ok
+test review_lifecycle::tests::empty_file_from_interrupted_creation_initializes_without_replacement ... ok
+test review_lifecycle::tests::uncommitted_ddl_reopens_and_initializes_the_original_database ... ok
+test blobs::tests::real_paper_effect_receipt_and_blob_reference_survive_or_roll_back_together ... ok
+test blobs::tests::real_sigkill_and_reopen_at_twelve_cross_media_windows ... ok
+test research::resource_tests::real_opaque_uploads_are_not_aggregated_when_sealing_or_importing ... ok
+
+test result: ok. 18 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.90s
+
+
+running 18 tests
+test blobs::tests::file_and_upload_logical_length_quotas_precede_hashing_and_writing ... ok
+test blobs::tests::deleting_rejects_new_read_or_same_digest_upload ... ok
+test blobs::tests::failed_ledger_after_solidification_keeps_staging_and_object_independent ... ok
+test blobs::tests::kill_fixture ... ok
+test blobs::tests::corrupt_existing_object_and_dangling_symlink_are_never_replaced ... ok
+test blobs::tests::gc_and_publish_barrier_preserves_either_upload_pin_or_reference ... ok
+test blobs::tests::gc_and_reader_barrier_covers_reader_after_upload_pin_release ... ok
+test blobs::tests::pinned_state_alone_does_not_replace_a_durable_upload_pin ... ok
+test blobs::tests::publication_binds_expected_bytes_project_revision_and_real_transaction ... ok
+test blobs::tests::partial_publication_copy_is_not_reused_and_unknown_uploads_are_not_cleaned ... ok
+test blobs::tests::rename_then_failed_pin_commit_can_retry_existing_target_without_overwrite ... ok
+test blobs::tests::pending_unknown_never_expire_and_lookup_does_not_recover ... ok
+test review_lifecycle::tests::committed_claims_are_preserved_and_partial_committed_schema_is_refused ... ok
+test review_lifecycle::tests::empty_file_from_interrupted_creation_initializes_without_replacement ... ok
+test review_lifecycle::tests::uncommitted_ddl_reopens_and_initializes_the_original_database ... ok
+test blobs::tests::real_paper_effect_receipt_and_blob_reference_survive_or_roll_back_together ... ok
+test blobs::tests::real_sigkill_and_reopen_at_twelve_cross_media_windows ... ok
+test research::resource_tests::real_opaque_uploads_are_not_aggregated_when_sealing_or_importing ... ok
+
+test result: ok. 18 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.95s
+
+
+running 3 tests
+test child_tool_subset_is_priced_and_enforced_on_the_actual_model_response ... ok
+test preprepared_plan_cannot_bypass_a_later_unknown_request ... ok
+test confirmation_preview_contains_the_exact_prior_history_and_wire_fields ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+
+running 11 tests
+test cancel_before_attempt_releases_only_held_identity_and_is_not_replayable ... ok
+test config_or_credential_changes_deny_dispatch_and_suppress_revoked_disclosure ... ok
+test cancelled_claim_with_empty_response_never_refunds_attempt_count_after_restart ... ok
+test complete_chat_usage_settles_once_and_restores_bounded_conversation_history ... ok
+test cumulative_budget_survives_reconfiguration_and_unknown_is_not_refunded ... ok
+test fixed_transport_diagnostic_survives_reopen_without_settlement_or_raw_text ... ok
+test fresh_product_settings_and_blocked_chat_plan_do_not_inherit_canary_authority ... ok
+test reserve_claim_exactly_once_and_unknown_never_resends_after_reopen ... ok
+test malformed_or_over_bound_usage_keeps_unknown_hold_without_answer ... ok
+test validated_search_sources_and_empty_result_follow_existing_settlement_contract ... ok
+test process_death_after_reservation_or_claim_keeps_original_hold_without_replay ... ok
+
+test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+
+running 6 tests
+test missing_live_owners_are_explicitly_unavailable_without_synthetic_fallback ... ok
+test response_requires_full_terminal_answer_and_usage_not_http_success ... ok
+test tools_reject_writes_scope_injection_duplicate_keys_and_unbounded_pages ... ok
+test old_epoch_read_scope_cannot_be_reused_after_service_restart ... ok
+test suppliers_are_current_database_reads_and_deleted_records_are_not_context ... ok
+test newly_added_paper_is_read_from_selected_project_without_raw_json_or_blob_path ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+
+running 7 tests
+test cancellation_restart_and_unknown_never_resume_or_approve_tool_disclosure ... ok
+test disclosure_is_not_inferred_from_budget_or_copied_to_new_scope_or_generation ... ok
+test production_unbound_proof_never_auto_sends_approved_tool_followup ... ok
+test cancelled_or_changed_suggestion_is_revalidated_before_any_business_commit ... ok
+test malformed_function_calls_remain_unknown_and_have_no_business_effect ... ok
+test read_call_requires_exact_visible_disclosure_then_new_followup_identity_and_budget ... ok
+test suggestion_only_prepares_then_requires_original_committed_receipt_and_disclosure ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
+
+
+running 16 tests
+test disabled_skill_blocks_existing_queued_work_and_invalid_arguments_do_not_create_children ... ok
+test actual_owner_settlement_completes_remote_child_without_accepted_answer_shortcut ... ok
+test cancellation_after_settlement_preserves_answers_and_releases_active_child_slots ... ok
+test disabling_a_skill_permanently_revokes_its_prepared_remote_plan ... ok
+test local_child_reads_actual_supplier_and_emits_only_host_activity ... ok
+test paper_skill_reads_selected_project_and_skill_settings_do_not_leak_between_projects ... ok
+test attempted_unknown_retains_owner_hold_and_late_cancelled_response_is_not_published ... ok
+test prepared_child_and_normal_chat_are_rechecked_after_another_child_becomes_unknown ... ok
+test recovery_is_read_only_and_never_replays_and_owner_is_exclusive ... ok
+test remote_tool_allowlist_is_compiled_skill_metadata_and_not_instructions_in_task ... ok
+test scope_forgery_unknown_actions_and_fields_are_rejected ... ok
+test real_owner_followup_chain_tracks_leaf_unknown_and_cancels_every_known_request ... ok
+test skill_toggle_digest_and_child_budgets_are_real ... ok
+test real_owner_blocked_plan_binds_unique_child_and_cancellation_is_not_fake_completion ... ok
+test unproven_tool_followup_is_blocked_not_confirmable_and_polling_keeps_original_budget ... ok
+test large_real_local_results_keep_complete_storage_but_project_bounded_honest_previews ... ok
+
+test result: ok. 16 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.11s
+
+
+running 13 tests
+test actual_archive409_encoder_round_trip_fixture ... ok
+test contract_entries_bind_exact_snapshot_digest_and_length ... ok
+test accepts_unsigned_descriptor ... ok
+test descriptor_and_decoded_content_are_independent_checks ... ok
+test directories_validated_but_not_exposed ... ok
+test overlap_guard ... ok
+test refuses_overlapping_ranges_and_unknown_extra_fields ... ok
+test rejects_offsets_local_conflicts_flags_zip64_and_quotas ... ok
+test symlink_guard ... ok
+test rejects_path_aliases_links_and_special_files ... ok
+test stored_deflated_and_signed_descriptor_metadata ... ok
+test traversal_guard ... ok
+test all_truncations_fail_without_panicking ... ok
+
+test result: ok. 13 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 8 tests
+test archive_upload_uses_actual_archive409_metadata_reader ... ok
+test durable_upload_and_repeatable_lease_reads ... ok
+test equal_content_reuses_verified_object_but_retains_independent_upload_pins ... ok
+test input_is_opaque_and_chunks_and_kinds_are_bounded ... ok
+test controlled_paths_refuse_symlinks_and_preserve_outside_files ... ok
+test lookup_is_read_only_and_restart_reconciliation_is_explicit ... ok
+test private_snapshot_survives_source_removal_and_does_not_overwrite_corruption ... ok
+test persistent_reader_pin_outlives_upload_pin_until_explicit_close ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+
+running 14 tests
+test cross_process_owner_lock_is_released_only_after_process_exit ... ok
+test corrupt_receipt_tail_rolls_back_all_effects_and_never_reexecutes_pending ... ok
+test grant_expiring_during_actual_sql_rejects_and_rolls_back_the_effect ... ok
+test initialize_is_explicit_and_never_truncates_or_migrates ... ok
+test duplicate_binding_conflict_cas_and_same_name_new_intent ... ok
+test current_schema_label_does_not_authorize_a_missing_required_table_or_column ... ok
+test old_schema_v1_missing_tail_table_is_refused_without_changing_pending_identity ... ok
+test project_create_and_reads_are_persistent_workspace_bound_operations ... ok
+test real_grants_expiry_revoke_generation_scope_and_epoch_are_required ... ok
+test sqlite_constraints_and_corrupt_files_have_fixed_typed_errors ... ok
+test sigkill_after_actual_sql_rolls_back_and_original_pending_cannot_redispatch ... ok
+test sigkill_after_commit_before_reply_recovers_exact_original_receipt ... ok
+test supplier_full_payload_update_soft_delete_restore_and_original_receipt ... ok
+test sqlite_revocation_transaction_barrier_precedes_business_admission ... ok
+
+test result: ok. 14 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.14s
+
+
+running 10 tests
+test ct02_file_metadata_bounds_and_binding_are_checked ... ok
+test ct01_revisions_are_lossless_canonical_text ... ok
+test ct01_reuses_supplier_name_boundary_vectors ... ok
+test ct01_eight_fields_normalize_with_dart_rules ... ok
+test ct03_receipt_and_unknown_states_have_distinct_invariants ... ok
+test ct02_manual_paper_requires_project_title_and_blob ... ok
+test ct03_every_security_fact_changes_retry_binding ... ok
+test ct02_import_is_opaque_metadata_not_manual_paper ... ok
+test ct04_strict_decode_rejects_duplicates_unknown_and_versions ... ok
+test ct04_digest_order_and_fixture_round_trip ... ok
+
+test result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 1 test
+test ct01_ct04_shared_codec_vectors_use_real_contract_and_lossless_wire_text ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+
+running 18 tests
+test anchors_are_bound_to_identity_revision_and_format ... ok
+test current_host_and_operation_capability_must_both_allow_read ... ok
+test capability_for_other_operation_or_format_grants_nothing ... ok
+test cached_metadata_never_bypasses_revocation_or_unknown_authority ... ok
+test declared_format_never_enables_a_reader ... ok
+test each_missing_pdf_geometry_field_remains_unresolved ... ok
+test host_errors_and_invalid_or_stale_lease_fail_closed ... ok
+test invalid_document_metadata_is_rejected_and_revision_is_preserved ... ok
+test nonfinite_empty_overflowing_and_invalid_normalized_rectangles_fail ... ok
+test normalized_regions_preserve_explicit_rotation_and_reject_invalid_crop ... ok
+test old_revision_or_other_document_is_rejected ... ok
+test pdf_geometry_keeps_unknowns_without_guessing ... ok
+test read_contract_cannot_admit_edit_even_when_both_lists_allow_it ... ok
+test stale_grant_epoch_generation_and_id_are_rejected ... ok
+test structured_anchors_validate_ids_ranges_and_package_parts ... ok
+test visible_pdf_selection_must_fit_the_declared_crop ... ok
+test unsupported_and_gated_capabilities_deny ... ok
+test workspace_and_project_are_exact_not_wildcards ... ok
+
+test result: ok. 18 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 16 tests
+test committed_paper_after_process_kill_recovers_original_receipt_and_private_pdf ... ok
+test directory_and_real_stored_zip_produce_equivalent_records_and_bad_decoded_crc_fails ... ok
+test api26_eleven_record_deflated_import_with_three_identical_empty_logs_commits ... ok
+test cited_same_revision_changes_reject_atomically_and_next_revision_is_retained ... ok
+test forged_wire_records_and_snapshot_project_changes_do_not_become_imports ... ok
+test explicit_ambiguous_binding_choice_survives_refresh ... ok
+test import_domain_tail_tampering_rolls_back_records_source_and_publication ... ok
+test loose_imported_metadata_uses_fallback_title_and_does_not_apply_manual_constraints ... ok
+test malformed_jsonl_paths_and_no_recognized_material_are_rejected_before_publication ... ok
+test imported_raw_json_duplicate_revisions_and_material_binding_are_preserved ... ok
+test manual_kind_project_and_exact_upload_binding_cannot_be_forged ... ok
+test receipt_fault_rolls_back_paper_publication_and_cancel_blocks_original_retry ... ok
+test prefixed_skill_root_arxiv_manifest_binds_verified_pdf_hash ... ok
+test manual_pdf_is_real_private_persistent_and_shares_catalog_with_import ... ok
+test refresh_only_removes_missing_uncited_entries_and_keeps_cited_document_bytes ... ok
+test jsonl_larger_than_wire_limit_uses_small_verified_source_ref_command ... ok
+
+test result: ok. 16 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.37s
+
+
+running 3 tests
+test zip_metadata_exact_expansion_and_member_count_and_one_over ... ok
+test actual_pdf_and_document_exact_thirty_mib_and_one_extra_byte ... ok
+test seal_actual_total_exact_one_fifty_mib_then_one_byte_and_member_count_refuse_without_effects ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 31.71s
+
+
+running 3 tests
+test real_os_file_size_write_failure_has_no_business_or_receipt_effect ... ok
+test sqlite_rejects_pending_domain_history_business_history_and_receipt_writes_atomically ... ok
+test os_process_races_preserve_original_intent_and_reject_stale_cas_after_owner_exit ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

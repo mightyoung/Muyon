@@ -1,0 +1,43 @@
+warning: suspicious definition of the runtime `read` symbol used by the standard library
+   --> /workspace/Muyon-document-formatted/experiments/redesign/core-agent-lab/core/src/host_session.rs:132:124
+    |
+132 | ...ount: usize, timeout: i32) -> i32; fn read(fd: i32, buffer: *mut u8, count: usize) -> isize; fn write(fd: i32, buffer: *const u8...
+    |                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = note: expected `unsafe extern "C" fn(i32, *mut c_void, usize) -> isize` (for the current target)
+            found    `unsafe extern "C" fn(i32, *mut u8, usize) -> isize`
+    = help: either fix the signature or remove any attributes like `#[unsafe(no_mangle)]`, `#[unsafe(export_name = "read")]`, or `#[link_name = "read"]`
+    = help: allow this lint if the signature is compatible
+    = note: `#[warn(suspicious_runtime_symbol_definitions)]` on by default
+
+warning: suspicious definition of the runtime `write` symbol used by the standard library
+   --> /workspace/Muyon-document-formatted/experiments/redesign/core-agent-lab/core/src/host_session.rs:132:182
+    |
+132 | ... *mut u8, count: usize) -> isize; fn write(fd: i32, buffer: *const u8, count: usize) -> isize; }
+    |                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = note: expected `unsafe extern "C" fn(i32, *const c_void, usize) -> isize` (for the current target)
+            found    `unsafe extern "C" fn(i32, *const u8, usize) -> isize`
+    = help: either fix the signature or remove any attributes like `#[unsafe(no_mangle)]`, `#[unsafe(export_name = "write")]`, or `#[link_name = "write"]`
+    = help: allow this lint if the signature is compatible
+
+warning: `muyon-core-agent-lab` (lib) generated 2 warnings
+   Compiling muyon-core v0.1.0 (/workspace/Muyon-document-formatted/crates/muyon-core)
+    Finished `test` profile [unoptimized] target(s) in 2.88s
+     Running unittests src/lib.rs (/tmp/muyon-document-cargo-target/debug/deps/muyon_core-4009f9eac85773f1)
+     Running unittests src/bin/business_worker.rs (/tmp/muyon-document-cargo-target/debug/deps/business_worker-4c84de808b8ed374)
+     Running tests/agent_child_tools.rs (/tmp/muyon-document-cargo-target/debug/deps/agent_child_tools-58968ef6dd27f86a)
+     Running tests/agent_owner.rs (/tmp/muyon-document-cargo-target/debug/deps/agent_owner-414f1f17e449e995)
+     Running tests/agent_product.rs (/tmp/muyon-document-cargo-target/debug/deps/agent_product-688027c1c28b4aa3)
+     Running tests/agent_tools.rs (/tmp/muyon-document-cargo-target/debug/deps/agent_tools-52966412b70591f3)
+     Running tests/agent_workflow.rs (/tmp/muyon-document-cargo-target/debug/deps/agent_workflow-3d9b6e54ad8c10e3)
+     Running tests/archive.rs (/tmp/muyon-document-cargo-target/debug/deps/archive-b57eed1fa379cf6c)
+     Running tests/blobs.rs (/tmp/muyon-document-cargo-target/debug/deps/blobs-dc9bf0e8a3b71688)
+     Running tests/business.rs (/tmp/muyon-document-cargo-target/debug/deps/business-fd1a0d2b31215342)
+     Running tests/contract.rs (/tmp/muyon-document-cargo-target/debug/deps/contract-90ca5ba794f811a4)
+     Running tests/contract_vectors_additional.rs (/tmp/muyon-document-cargo-target/debug/deps/contract_vectors_additional-0509a43933bd0b0f)
+     Running tests/documents.rs (/tmp/muyon-document-cargo-target/debug/deps/documents-3441de4959c45ed7)
+     Running tests/research.rs (/tmp/muyon-document-cargo-target/debug/deps/research-247e0d2df80eadd7)
+     Running tests/resource_boundaries_additional.rs (/tmp/muyon-document-cargo-target/debug/deps/resource_boundaries_additional-bfcfb23cf76fb8e7)
+     Running tests/store_admission_additional.rs (/tmp/muyon-document-cargo-target/debug/deps/store_admission_additional-236f83b5bed02dc4)
+   Doc-tests muyon_core

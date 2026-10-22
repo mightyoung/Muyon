@@ -1,0 +1,94 @@
+{
+  "source_commit": "d2ac6a87a8bf13d8a22ebd41676683be8d849a22",
+  "prior_source_commit": "ab9c381cc935be0cd52db5a8a455ce985bdba1db",
+  "created_utc": "2026-10-22T04:33:59.217761+00:00",
+  "cwd": "/workspace/Muyon-document-formatted",
+  "environment": {
+    "PATH": "/tmp/muyon-rust/bin:/home/agent/.local/bin:/opt/codex/runtimes/codex-primary-runtime/dependencies/bin/override:/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin:/opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin:/opt/codex/runtimes/codex-primary-runtime/dependencies/bin:/opt/codex/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/home/agent/.local/bin:/opt/codex/runtimes/codex-primary-runtime/dependencies/bin/fallback",
+    "CARGO_HOME": "/tmp/muyon-cargo",
+    "CARGO_TARGET_DIR": "/tmp/muyon-document-cargo-target",
+    "RUSTFLAGS": "-L native=/tmp/muyon-native-libs"
+  },
+  "tools": {
+    "rustc": {
+      "version": "rustc 1.99.1 (58cf8f9c3 2026-10-13)",
+      "sha256": "b53b780f77f952062f8ca8a3b70aef2390b1e45ad91939be94afdc9543026853"
+    },
+    "cargo": {
+      "version": "cargo 1.99.1 (5f94df478 2026-08-27)",
+      "sha256": "a670e02cfa39ac2e53f77a2d911ca1fc9e2c479b0603ec956625be1daf24e3af"
+    },
+    "rustfmt": {
+      "version": "rustfmt 1.10.0-stable (58cf8f9c35 2026-10-13)",
+      "sha256": "68cb47a2a38daa8ff2ec6d623a2374b0a165d77ec74f1f654216665018c04598"
+    }
+  },
+  "source_sha256": {
+    "crates/muyon-core/src/documents/anchor.rs": "96fbfc461f6c376024428cddf0d4ca3422c28f743de8ae4da6ef1fb835a9e470",
+    "crates/muyon-core/src/documents/capability.rs": "acc72370f24258f5cc3aee87f3a88ec3e99ce67df7142dceca01c5baf6a61cb6",
+    "crates/muyon-core/src/documents/identity.rs": "8d1939488620cd2b7a1c6453e2b8116e8cf60d98dd2fcc4546408f956ad436b4",
+    "crates/muyon-core/src/documents/mod.rs": "d72c71cc523af61fd93fe3dc2b336e0f5b0fed25b53c5dc64a14ef9db86a24ea",
+    "crates/muyon-core/tests/documents.rs": "a1e4c3d1dc0cfc37d5020e909977ccca311c39602265f19d75073dae1795440a",
+    "crates/muyon-core/src/lib.rs": "3f0cce296a46a285bd6816dc046c9d5778f3ab92150d9f4b3abaf7bd66dc170f",
+    "crates/Cargo.toml": "f26104ba02b1428992464a393d902dad2b9d328a9ffd364a9ddd7d7f1cc091e3",
+    "crates/Cargo.lock": "3a87fdce6228dff89d292547057627f999e7286ccf0a774c1683c4ba5f95f367"
+  },
+  "commands": [
+    {
+      "label": "documents-fmt",
+      "argv": [
+        "/tmp/muyon-rust/bin/rustfmt",
+        "--edition",
+        "2021",
+        "--check",
+        "crates/muyon-core/src/documents/anchor.rs",
+        "crates/muyon-core/src/documents/capability.rs",
+        "crates/muyon-core/src/documents/identity.rs",
+        "crates/muyon-core/src/documents/mod.rs",
+        "crates/muyon-core/tests/documents.rs"
+      ],
+      "cwd": "/workspace/Muyon-document-formatted",
+      "start_utc": "2026-10-22T04:33:59.284543+00:00",
+      "end_utc": "2026-10-22T04:33:59.300800+00:00",
+      "exit_status": 0
+    },
+    {
+      "label": "targeted",
+      "argv": [
+        "cargo",
+        "test",
+        "--offline",
+        "--locked",
+        "--manifest-path",
+        "crates/Cargo.toml",
+        "-p",
+        "muyon-core",
+        "--test",
+        "documents"
+      ],
+      "cwd": "/workspace/Muyon-document-formatted",
+      "start_utc": "2026-10-22T04:33:59.301129+00:00",
+      "end_utc": "2026-10-22T04:34:05.082322+00:00",
+      "exit_status": 0
+    },
+    {
+      "label": "core-full",
+      "argv": [
+        "cargo",
+        "test",
+        "--offline",
+        "--locked",
+        "--manifest-path",
+        "crates/Cargo.toml",
+        "-p",
+        "muyon-core"
+      ],
+      "cwd": "/workspace/Muyon-document-formatted",
+      "start_utc": "2026-10-22T04:34:05.082656+00:00",
+      "end_utc": "2026-10-22T04:34:43.589989+00:00",
+      "exit_status": 0
+    }
+  ],
+  "source_hashes_unchanged_after_checks": true,
+  "source_worktree_status_after_checks": ""
+}
