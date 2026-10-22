@@ -1,3 +1,5 @@
+> Latest a21fdbd3: fresh workspace435 executions PASS/0FAIL. Original50 lint diagnostics cleared; strict Clippy still FAIL101 on5 newly reached gateway-test drop_non_drop diagnostics. See GATEWAY-CLIPPY-FOLLOWUP.md for exact owner locations. Earlier fixed-version records below retain historical status.
+
 > Latest lint delta at bc6ccea1: artifact47 and provider1 diagnostics cleared; core391 fresh PASS. Strict Clippy still FAIL101 with gateway.rs:91:12 and :357:27 only. Later-target lint validation remains pending. See CLIPPY-ARTIFACT-RECHECK.md. Earlier records below retain their fixed-version status.
 
 # Strict Clippy source-owner handoff

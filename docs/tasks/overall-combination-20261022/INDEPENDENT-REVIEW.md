@@ -20,3 +20,5 @@ These findings cover composition and stated source boundaries, not Android, live
 Reviewer did not write files, run tests or access network. Actual runs are separate in CLIPPY-ARTIFACT-RECHECK.md. Both reviews concluded no new delta finding; existing HOLD and quality-gate failures not waived.
 
 - 4d55b4f6..9b1c6a77: independent reviewer verified group source/tests/docs match68f0fb69, no lib/FFI/UI change, exact grant expiry/generation/epoch/binding/local admission tail consumption and last-write read audit, uncertain rejection/identity reads retain pending, no second authority/dispatch. Parent later separately closed both Important findings after source+RED/GREEN evidence validation. Broader canonical gateway not part of this SHA.
+
+- e4f497c9..a21fdbd3: reviewer verified unique gateway file matches0e325011, exactly equivalent parity predicate and redundant[u8;32] conversion removal. No schema2/candidate/authority change, no reviewer writes/tests/network. Test-target lint findings are integrator execution evidence separately recorded.

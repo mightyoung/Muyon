@@ -1,14 +1,14 @@
 # Leader B current combination handoff — incomplete product, no develop merge
 
 Remote branch: lab/overall-combination-20261022.
-Latest fully tested code:9b1c6a774bbe9258216a61a2c82ce3c0e8bddc74.
+Latest fully tested code:a21fdbd3c70ea40048fe67e22d446de33ff79fb7.
 Full product Rust workspace:435 executions PASS/0FAIL/0ignored,26 groups:
 FFI14/core421. Group65 includes30new+17old+18duplicate module cases. Do not
 sum targeted runs/earlier405 or claim435 independent acceptance scenarios.
 
 Latest accepted owners: coreaec085fa; provider8b2d7783 (NULL fix31602082 retained);
 artifactde3ec5b5 (receipt-tail fdc8f28e retained); group68f0fb69 (runtime12a001
-and storeecef00d8 retained); evidence78cdff32; COPY gateway90b7a35a.
+and storeecef00d8 retained); evidence78cdff32; COPY gateway0e325011 (minimal two-expression fix over90b7).
 Other UI/host/codec/reader/adapter pins unchanged; complete SHAs in MATRIX.md.
 Only owned deltas imported, sole module exports and generated bridge retained.
 
@@ -18,11 +18,11 @@ parent review closed + actual group65PASS. Parent verified originalRED42/16,
 independent65GREEN and actual deferred-FK COMMIT failure rollback evidence.
 None implies external execution/whole-product acceptance.
 
-Strict Clippy remains FAIL101 with gateway.rs:91:12 manual_is_multiple_of
-and :357:27 useless_conversion only emitted. Provider1/artifact47 cleared.
-Original gateway owner fixed minimal delta pending; do not import unreviewed
-schema2/candidate work to solve two lint lines. Rerun whole strict gate after fix;
-downstream lint targets are not yet green.
+Strict Clippy remains FAIL101 after all50 original diagnostics cleared. Newly
+reached test document_edit_gateway.rs emits5 drop_non_drop at162/185/309/375/485.
+Original gateway owner minimal test fix pending; do not import unreviewed
+schema2/candidate work. See GATEWAY-CLIPPY-FOLLOWUP.md. Rerun whole strict gate
+after owner fix; downstream lint targets are not yet green.
 
 Host owner can consume generated four-method Kotlin bridge single-file commit
 8255d08eaed90e002b68a31f4158e8c518a7d488; BINDING-HOST-HANDOFF.md contains

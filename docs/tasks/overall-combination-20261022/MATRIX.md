@@ -59,3 +59,5 @@ Restrictions: no main/develop mutation/merge, deploy, force push/delete, real mo
 - Group grant-tail candidate68f0fb697699d3a8589fc2cc4f274edaf2b2a67d replaces ecef source via9b1c6a77. Actual65 harnessPASS=30new17old18repeat; parent targeted review pending, broader admission HOLD retained. See GROUP-TAIL-RECHECK.md.
 
 - Parent targeted review/evidence closed both local group Important at68f0fb69; exact9b1c6a77 full product Rust workspace435 executions PASS/0FAIL (FFI14/core421), includes30new group regressions and18duplicate modules. Canonical gateway/real dispatch excluded.
+
+- COPY gateway lint-only0e325011d6eb66962669aac284cdccf5fa0685e9 replaces90b7 two expressions viaa21fdbd3. No schema2/candidate mixed in. Strict Clippy production diagnostics cleared; newly reached test target has5 drop_non_drop at162/185/309/375/485; original owner followup pending. See GATEWAY-CLIPPY-FOLLOWUP.md.
