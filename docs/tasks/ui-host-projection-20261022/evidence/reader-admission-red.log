@@ -1,0 +1,44 @@
+error: source file or directory not found: /workspace/Muyon/apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/documents/host/LocalWorkspaceReaderPrincipal.kt
+error: source file or directory not found: /workspace/Muyon/apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/documents/host/ReaderAdmissionRegistry.kt
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/documents/host/ReaderAdmissionChecks.kt:5:21: error: unresolved reference 'LocalWorkspaceReaderPrincipal'.
+    val principal = LocalWorkspaceReaderPrincipal("workspace", "service-epoch", "session", "project", 1, binder)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/documents/host/ReaderAdmissionChecks.kt:6:17: error: unresolved reference 'LocalWorkspaceReaderPrincipal'.
+    val fresh = LocalWorkspaceReaderPrincipal("workspace", "service-epoch", "session", "project", 1, binder)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/documents/host/ReaderAdmissionChecks.kt:7:20: error: unresolved reference 'ReaderAdmissionRegistry'.
+    val registry = ReaderAdmissionRegistry(principal)
+                   ^^^^^^^^^^^^^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/documents/host/ReaderAdmissionChecks.kt:8:13: error: unresolved reference 'ExactReaderSource'.
+    val a = ExactReaderSource("workspace", "project", "doc-A", "1", "pdf", "a".repeat(64))
+            ^^^^^^^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/documents/host/ReaderAdmissionChecks.kt:13:11: error: cannot infer type for type parameter 'R'. Specify it explicitly.
+    check(runCatching { registry.withCurrentSelection(fresh, selectionA) { calls++; "wrong" } }.isFailure)
+          ^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/documents/host/ReaderAdmissionChecks.kt:16:11: error: cannot infer type for type parameter 'R'. Specify it explicitly.
+    check(runCatching { registry.acceptSelection(fresh, 1, a) }.isFailure)
+          ^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/documents/host/ReaderAdmissionChecks.kt:18:11: error: cannot infer type for type parameter 'R'. Specify it explicitly.
+    check(runCatching { registry.withCurrentSelection(fresh, selectionA) { calls++ } }.isFailure)
+          ^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/documents/host/ReaderAdmissionChecks.kt:20:19: error: unresolved reference 'LocalWorkspaceReaderPrincipal'.
+    val foreign = LocalWorkspaceReaderPrincipal("workspace", "service-epoch", "session", "project", 1, Any())
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/documents/host/ReaderAdmissionChecks.kt:21:11: error: cannot infer type for type parameter 'R'. Specify it explicitly.
+    check(runCatching { registry.withCurrentSelection(foreign, selectionA3) { calls++ } }.isFailure)
+          ^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/documents/host/ReaderAdmissionChecks.kt:22:24: error: unresolved reference 'LocalWorkspaceReaderPrincipal'.
+    val scopeChanged = LocalWorkspaceReaderPrincipal("workspace", "service-epoch", "session", "project", 2, binder)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/documents/host/ReaderAdmissionChecks.kt:23:11: error: cannot infer type for type parameter 'R'. Specify it explicitly.
+    check(runCatching { registry.withCurrentSelection(scopeChanged, selectionA3) { calls++ } }.isFailure)
+          ^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/documents/host/ReaderAdmissionChecks.kt:24:11: error: cannot infer type for type parameter 'R'. Specify it explicitly.
+    check(runCatching { registry.acceptSelection(fresh, 3, b) }.isFailure)
+          ^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/documents/host/ReaderAdmissionChecks.kt:26:11: error: cannot infer type for type parameter 'R'. Specify it explicitly.
+    check(runCatching { registry.withCurrentSelection(fresh, selectionA3) { calls++ } }.isFailure)
+          ^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/documents/host/ReaderAdmissionChecks.kt:27:11: error: cannot infer type for type parameter 'R'. Specify it explicitly.
+    check(runCatching { registry.acceptSelection(fresh, 4, a) }.isFailure)
+          ^^^^^^^^^^^

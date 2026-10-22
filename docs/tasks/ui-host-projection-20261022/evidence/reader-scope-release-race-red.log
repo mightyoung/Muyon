@@ -1,0 +1,5 @@
+PASS host projection: scope/absent/unknown/pending/history/detachment/malformed/search/workflow/followup/release/cache capacity/actual charge proof checks
+Exception in thread "main" java.lang.IllegalStateException: Check failed.
+	at com.mightyoung.muyon.product.chat.HostContinuationChecksKt.hostContinuationChecks(HostContinuationChecks.kt:128)
+	at com.mightyoung.muyon.product.chat.HostProjectionChecksKt.main(HostProjectionChecks.kt:174)
+	at com.mightyoung.muyon.product.chat.HostProjectionChecksKt.main(HostProjectionChecks.kt)

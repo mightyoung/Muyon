@@ -1,0 +1,33 @@
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/chat/projection/HostContinuationChecks.kt:108:92: error: unresolved reference 'ReaderScopeSnapshot'.
+        fun readerScope(expected: Long, selected: String? = "project"): ProductChatRuntime.ReaderScopeSnapshot? {
+                                                                                           ^^^^^^^^^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/chat/projection/HostContinuationChecks.kt:109:74: error: unresolved reference 'ReaderScopeSnapshot'.
+            val done = CountDownLatch(1); var result: ProductChatRuntime.ReaderScopeSnapshot? = null
+                                                                         ^^^^^^^^^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/chat/projection/HostContinuationChecks.kt:110:21: error: unresolved reference 'withReaderScope'.
+            runtime.withReaderScope("owner", selected, expected) { result = it; done.countDown() }
+                    ^^^^^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/chat/projection/HostContinuationChecks.kt:110:77: error: unresolved reference 'it'.
+            runtime.withReaderScope("owner", selected, expected) { result = it; done.countDown() }
+                                                                            ^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/chat/projection/HostContinuationChecks.kt:113:22: error: cannot infer type for type parameter 'T'. Specify it explicitly.
+        val reader = checkNotNull(readerScope(releasedGeneration))
+                     ^^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/chat/projection/HostContinuationChecks.kt:114:22: error: unresolved reference 'isCurrent'.
+        check(reader.isCurrent() && reader.session == "owner" && reader.project == "project")
+                     ^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/chat/projection/HostContinuationChecks.kt:114:44: error: unresolved reference 'session'.
+        check(reader.isCurrent() && reader.session == "owner" && reader.project == "project")
+                                           ^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/chat/projection/HostContinuationChecks.kt:114:73: error: unresolved reference 'project'.
+        check(reader.isCurrent() && reader.session == "owner" && reader.project == "project")
+                                                                        ^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/chat/projection/HostContinuationChecks.kt:117:23: error: unresolved reference 'isCurrent'.
+        check(!reader.isCurrent())
+                      ^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/chat/projection/HostContinuationChecks.kt:119:28: error: cannot infer type for type parameter 'T'. Specify it explicitly.
+        val latestReader = checkNotNull(readerScope(newest))
+                           ^^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/chat/projection/HostContinuationChecks.kt:121:29: error: unresolved reference 'isCurrent'.
+        check(!latestReader.isCurrent()) // immediate fence before queued cleanup
+                            ^^^^^^^^^

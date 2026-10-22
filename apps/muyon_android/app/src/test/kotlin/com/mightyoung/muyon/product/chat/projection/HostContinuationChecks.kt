@@ -105,6 +105,30 @@ fun hostContinuationChecks() {
         }
         denied(setup(JSONObject().put("action", "open"), conversation = "over-capacity", gen = releasedGeneration))
         check(setup(JSONObject().put("action", "read").put("local_draft_id", fresh.getString("local_draft_id")), gen = releasedGeneration).getString("name").isEmpty())
+        fun readerScope(expected: Long, selected: String? = "project"): ProductChatRuntime.ReaderScopeSnapshot? {
+            val done = CountDownLatch(1); var result: ProductChatRuntime.ReaderScopeSnapshot? = null
+            runtime.withReaderScope("reader-owner", selected, expected) { result = it; done.countDown() }
+            check(done.await(5, TimeUnit.SECONDS)); return result
+        }
+        val readerGeneration = scope("reader-owner", "project")
+        val reader = checkNotNull(readerScope(readerGeneration))
+        check(reader.isCurrent() && reader.session == "reader-owner" && reader.project == "project")
+        check(readerScope(readerGeneration + 1) == null)
+        scope("reader-owner", "other")
+        check(!reader.isCurrent())
+        val newest = scope("reader-owner", "project")
+        val latestReader = checkNotNull(readerScope(newest))
+        val entered = CountDownLatch(1); val unblock = CountDownLatch(1); val pendingDone = CountDownLatch(1)
+        var queuedReader: ProductChatRuntime.ReaderScopeSnapshot? = latestReader
+        runtime.withReaderScope("reader-owner", "project", newest) { entered.countDown(); check(unblock.await(5, TimeUnit.SECONDS)) }
+        check(entered.await(5, TimeUnit.SECONDS))
+        runtime.withReaderScope("reader-owner", "project", newest) { queuedReader = it; pendingDone.countDown() }
+        runtime.releaseSession("reader-owner")
+        unblock.countDown(); check(pendingDone.await(5, TimeUnit.SECONDS))
+        check(queuedReader == null) // getter queued before cleanup must not mint after release
+        check(!latestReader.isCurrent()) // immediate fence before queued cleanup
+        scope("reader-owner", null)
+        check(readerScope(1, null) == null)
         check(portCalls == 0)
         println("PASS host local setup: genuine ephemeral identity/CAS/repeat/scope/token/revoke/unknown/disabled backend; zero native calls")
     } finally { runtime.close(); check(runtime.awaitDrain(5000)) }

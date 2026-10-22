@@ -1,0 +1,4 @@
+Exception in thread "main" java.lang.IllegalStateException: Check failed.
+	at com.mightyoung.muyon.product.documents.host.ReaderBatchChecksKt.readerBatchChecks(ReaderBatchChecks.kt:73)
+	at com.mightyoung.muyon.product.documents.host.ReaderAdmissionChecksKt.main(ReaderAdmissionChecks.kt:41)
+	at com.mightyoung.muyon.product.documents.host.ReaderAdmissionChecksKt.main(ReaderAdmissionChecks.kt)

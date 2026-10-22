@@ -6,6 +6,9 @@ import android.os.*
 import com.mightyoung.muyon.productbridge.ProductCore
 import com.mightyoung.muyon.productbridge.ProductException
 import android.util.Base64
+import com.mightyoung.muyon.product.documents.host.LocalWorkspaceReaderPrincipal
+import com.mightyoung.muyon.product.documents.host.ReaderDocumentBatchDomain
+import com.mightyoung.muyon.product.documents.host.ReaderAdmissionRegistry
 import com.mightyoung.muyon.product.chat.ProductChatPort
 import com.mightyoung.muyon.product.chat.ProductChatRuntime
 import com.mightyoung.muyon.product.chat.persistence.ProductLocalDraftPort
@@ -36,6 +39,7 @@ class ProductService : Service() {
     private val planOwners = java.util.concurrent.ConcurrentHashMap<String, String>()
     private val toolPlans = java.util.concurrent.ConcurrentHashMap.newKeySet<String>()
     private val readerOwners = mutableMapOf<String, String>()
+    private val readerDocumentBatches = ReaderDocumentBatchDomain() // same real native owner, never per client
     @Volatile private var stopped = false
 
     override fun onCreate() {
@@ -162,6 +166,27 @@ class ProductService : Service() {
         // uploads/readers plus reference-checked GC. Publish only after that
         // succeeds; no maintenance can overlap a predecessor's drain.
         return ProductCore.open(root, workspace, epoch, initialize).also { core = it }
+    }
+    /** Private typed reader adapter only. No JSON principal/allow parameter or model route.
+     * Identity facts do not authorize documents; current native policy remains mandatory. */
+    private fun newReaderAdmission(principal: LocalWorkspaceReaderPrincipal) = ReaderAdmissionRegistry(principal, readerDocumentBatches)
+    private fun withReaderPrincipal(owner: IBinder, project: String?, generation: Long,
+        callback: (LocalWorkspaceReaderPrincipal?) -> Unit) {
+        val session = clients[owner]
+        if (stopped || session == null) { callback(null); return }
+        chat.withReaderScope(session, project, generation) { scope ->
+            val principal = try {
+                if (scope == null || !scope.isCurrent() || stopped || clients[owner] != session) null
+                else {
+                    val facts = nativeData(open(false).health()) as JSONObject
+                    check(facts.opt("workspace") == workspace && facts.opt("epoch") == epoch && facts.opt("synthetic") == false)
+                    LocalWorkspaceReaderPrincipal(workspace, epoch, session, scope.project, scope.generation, owner) {
+                        !stopped && clients[owner] == session && scope.isCurrent()
+                    }
+                }
+            } catch (_: Exception) { null }
+            callback(principal) // Runtime control queue; not a persistent/cached permission
+        }
     }
     private fun error(code: String, status: String = "unknown") = JSONObject()
         .put("status", status).put("error", code).put("recovery_action", "query_original")

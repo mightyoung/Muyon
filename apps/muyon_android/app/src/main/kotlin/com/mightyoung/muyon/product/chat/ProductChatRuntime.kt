@@ -83,6 +83,35 @@ class ProductChatRuntime internal constructor(private val port: ProductChatPort,
     private data class Plan(val session: String, val data: JSONObject)
     private data class ToolOrigin(val session: String, val generation: String, val project: String?, val scopeGeneration: Long, val skillId: String? = null, val conversation: String? = null)
     private val scopes = ProductScopeRegistry() // control only
+    /** Revocable projection of the sole Runtime scope, never document permission. */
+    internal class ReaderScopeSnapshot internal constructor(val session: String, val project: String, val generation: Long,
+        private val runtimeAlive: () -> Boolean) {
+        private val current = AtomicBoolean(true)
+        fun isCurrent() = current.get() && runtimeAlive()
+        internal fun revoke() { current.set(false) }
+    }
+    private val readerScopes = java.util.concurrent.ConcurrentHashMap<String, ReaderScopeSnapshot>()
+    // Session UUIDs are never revived. Saturation fails reader admission closed,
+    // rather than forgetting a release tombstone and reviving a queued getter.
+    private val readerReleased = mutableSetOf<String>()
+    private var readerReleaseCapacityReached = false
+    private fun readerSessionLive(session: String): Boolean = synchronized(readerReleased) {
+        !closed.get() && !readerReleaseCapacityReached && session !in readerReleased
+    }
+    internal fun withReaderScope(session: String, project: String?, generation: Long, callback: (ReaderScopeSnapshot?) -> Unit) {
+        if (closed.get()) { callback(null); return }
+        try { control.execute {
+            if (!readerSessionLive(session) || project == null || !scopes.matches(session, project, generation)) callback(null)
+            else {
+                val existing = readerScopes[session]
+                val snapshot = if (existing != null && existing.isCurrent() && existing.project == project && existing.generation == generation) existing
+                    else ReaderScopeSnapshot(session, project, generation) { readerSessionLive(session) }.also {
+                        readerScopes.put(session, it)?.revoke()
+                    }
+                callback(snapshot.takeIf { it.isCurrent() }) // same serialized control domain, not a cached allow
+            }
+        } } catch (_: java.util.concurrent.RejectedExecutionException) { callback(null) }
+    }
     private val toolOrigins = mutableMapOf<String, ToolOrigin>() // control only
     private val businessPreviews = mutableMapOf<String, JSONObject>() // exact host plan per request
     private val plans = mutableMapOf<String, Plan>() // control thread only
@@ -481,6 +510,7 @@ class ProductChatRuntime internal constructor(private val port: ProductChatPort,
     fun updateScope(session: String, project: String?, callback: (JSONObject) -> Unit) = submit(callback) {
         require(session.isNotEmpty())
         if (scopes.get(session)?.project != project || scopes.get(session) == null) {
+            readerScopes.remove(session)?.revoke()
             sendGate.invalidateSessionScope(session)
             readOrigins.entries.removeAll { it.value.session == session }
             setupDrafts.entries.removeAll { it.key.session == session }
@@ -563,6 +593,11 @@ class ProductChatRuntime internal constructor(private val port: ProductChatPort,
         }
     }
     fun releaseSession(session: String) {
+        synchronized(readerReleased) {
+            if (readerReleased.size >= 4096 && session !in readerReleased) readerReleaseCapacityReached = true
+            else readerReleased.add(session)
+        }
+        readerScopes.remove(session)?.revoke() // immediate reader fence, before cleanup queue
         sendGate.releaseSession(session)
         val requests = active.filterValues { it == session }.keys.toList()
         requests.forEach { cancelled.add(it) }
@@ -577,6 +612,7 @@ class ProductChatRuntime internal constructor(private val port: ProductChatPort,
             }
             readOrigins.entries.removeAll { it.value.session == session }
             setupDrafts.entries.removeAll { it.key.session == session }
+            readerScopes.remove(session)?.revoke() // cover a callback already queued at release
             scopes.release(session)
             JSONObject().put("status", "released")
         }
@@ -584,6 +620,7 @@ class ProductChatRuntime internal constructor(private val port: ProductChatPort,
     override fun close() {
         sendGate.close()
         if (!closed.compareAndSet(false, true)) return
+        readerScopes.values.forEach { it.revoke() }; readerScopes.clear()
         active.keys.forEach { cancelled.add(it) }
         credentials.close()
         control.shutdown(); network.shutdown()
