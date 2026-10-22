@@ -46,11 +46,11 @@ git diff --check
 bash apps/muyon_android/gradlew --offline :app:testDebugUnitTest
 ```
 
-- Standalone contract suite: PASS 15 named groups, including 16 simultaneous clicks with one original identity and one state transition. No sleeps, provider/IPC or socket fixtures. Compiler warnings are errors.
+- Standalone contract suite: PASS 16 named groups, including 16 simultaneous clicks with one original identity and one state transition. No sleeps, provider/IPC or socket fixtures. Compiler warnings are errors.
 - `git diff --check`: PASS.
 - Gradle: exit 2, `NOT_RUN: set MUYON_UI_GRADLE to the existing Gradle 8.13 executable.` Full app compilation/unit suite, Android lint, APK, native/model inputs, emulator/device/TalkBack and production persistence tests remain NOT_RUN; the standalone test main is not automatically registered in Gradle. No build files changed to pretend otherwise.
 - Test-first initial absence RED: source/contracts missing. First stub RED: unimplemented decoder. Strict compilation exposed a data-class copy visibility warning; replaced it with an ordinary class. Actual schema assertion RED then reproduced unsupported versions being accepted before the schema-version guard was completed.
-- Independent review reproduced ambiguous duplicate submit decisions, cross-conversation nested restored identities, and changed restored values retaining the old digest. The new restore regression first failed `Expected rejection`. Fixed with typed decisions and full nested restore checks; all 15 groups now PASS. Raw logs stay in `/tmp`, not committed, per repository review rules. Final independent fixed-source result is recorded separately.
+- Independent review reproduced ambiguous duplicate submit decisions, cross-conversation nested restored identities, and changed restored values retaining the old digest. The new restore regression first failed `Expected rejection`. Fixed with typed decisions and full nested restore checks; all 16 groups now PASS. Raw logs stay in `/tmp`, not committed, per repository review rules. Further review caught UTF-8 replacement aliasing for lone UTF-16 surrogates and forged committed/reused-intent restore paths; each received a failing regression and is now rejected, while valid emoji remains accepted. Final independent fixed-source result is recorded separately.
 
 ## Holds and remaining blockers
 

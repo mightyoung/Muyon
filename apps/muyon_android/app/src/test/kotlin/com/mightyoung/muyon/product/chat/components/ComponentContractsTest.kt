@@ -174,6 +174,13 @@ fun main() {
         rejected { ComponentLedger.restore(component(), s.copy(pending = p.copy(values = mapOf("answer" to "B")))) }
         rejected { ComponentLedger.restore(component(), s.copy(lastSubmission = null)) }
         rejected { ComponentLedger.restore(component(), s.copy(attempts = listOf("attempt-1", "attempt-1"))) }
+        rejected { ComponentLedger.restore(component(), s.copy(committed = mapOf("answer" to "B"))) }
+        l.observe(scope, receipt(p))
+        rejected { ComponentLedger.restore(component(), l.snapshot().copy(committed = mapOf("answer" to "B"))) }
+        l.redo(scope, "attempt-2")
+        val next = begin(l, "intent-2"); val current = l.snapshot()
+        val reused = next.copy(identity = next.identity.copy(intentId = "intent-1"))
+        rejected { ComponentLedger.restore(component(), current.copy(pending = reused, lastSubmission = reused)) }
     }
     test("simultaneous double click records one identity and one state transition") {
         val l = edited()
@@ -189,6 +196,15 @@ fun main() {
         check(failures.isEmpty() && results.size == 16)
         check(results.map { it.identity }.distinct().size == 1)
         check(l.snapshot().stateRevision == 2L && l.snapshot().history.isEmpty())
+    }
+    test("malformed Unicode cannot alias a different value digest") {
+        val l = ledger()
+        for (value in listOf("\uD800", "\uD801", "\uDC00", "x\uD800z")) {
+            rejected { l.edit(scope, 3, 0, "choose", value) }
+            rejected { component(wire() + ("text" to value)) }
+        }
+        l.edit(scope, 3, 0, "choose", "Valid \uD83D\uDE00")
+        check(l.snapshot().draft["answer"] == "Valid \uD83D\uDE00")
     }
     println("PASS $passed offline contract groups; no network/provider/IPC code invoked")
 }

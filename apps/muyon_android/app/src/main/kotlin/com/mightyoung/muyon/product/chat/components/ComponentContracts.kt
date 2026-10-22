@@ -79,7 +79,7 @@ object ComponentDecoder {
     private fun exactKeys(fields: Map<*, *>, expected: Set<String>) { require(fields.keys == expected) { "unexpected or missing fields" } }
     private fun string(fields: Map<*, *>, key: String, limit: Int): String {
         val value = fields[key] as? String ?: throw IllegalArgumentException("invalid $key")
-        require(value.isNotBlank() && value.length <= limit); return value
+        require(value.isNotBlank() && value.length <= limit && wellFormedUnicode(value)); return value
     }
     private fun integer(value: Any?): Long {
         val number = when (value) { is Int -> value.toLong(); is Long -> value; else -> throw IllegalArgumentException("integer required") }
@@ -142,7 +142,7 @@ class ComponentLedger private constructor(private val component: ChatComponent, 
         checkContext(scope, componentRevision)
         require(expectedRevision == state.stateRevision && state.pending == null && state.lastSubmission == null) { "stale or locked draft" }
         val action = component.actions[actionId]?.action as? ComponentAction.LocalEdit ?: throw IllegalArgumentException("not a local edit")
-        require(value.length <= 4096)
+        require(value.length <= 4096 && wellFormedUnicode(value))
         state = freeze(state.copy(stateRevision = nextRevision(), draft = state.draft + (action.field to value)))
     }
 
@@ -244,7 +244,7 @@ class ComponentLedger private constructor(private val component: ChatComponent, 
             snapshot.attempts.forEach(::checkedId)
             val editableFields = component.actions.values.mapNotNull { (it.action as? ComponentAction.LocalEdit)?.field }.toSet()
             fun checkValues(values: Map<String, String>) {
-                require(values.size <= 32 && values.keys.all { it in editableFields } && values.values.all { it.length <= 4096 })
+                require(values.size <= 32 && values.keys.all { it in editableFields } && values.values.all { it.length <= 4096 && wellFormedUnicode(it) })
             }
             checkValues(snapshot.draft); checkValues(snapshot.committed)
             require(snapshot.heldMicroCny == null || snapshot.heldMicroCny >= 0)
@@ -266,10 +266,13 @@ class ComponentLedger private constructor(private val component: ChatComponent, 
                 require(if (receipt.status == ReceiptStatus.COMMITTED) receipt.committed && !receipt.receiptRef.isNullOrBlank() && receipt.receiptRef.length <= 1024
                     else !receipt.committed && receipt.receiptRef == null)
             }
+            val lastCommit = snapshot.history.lastOrNull { it.committed }
+            require(if (lastCommit == null) snapshot.committed.isEmpty() else digest(snapshot.committed) == lastCommit.identity.paramsDigest)
             val last = snapshot.lastSubmission
             if (last == null) require(snapshot.pending == null) else {
                 checkIdentity(last.identity); checkValues(last.values)
                 require(last.identity.attemptId == snapshot.attemptId && last.identity.paramsDigest == digest(last.values) && last.values == snapshot.draft)
+                require(snapshot.history.none { it.identity.intentId == last.identity.intentId && it.identity != last.identity })
                 val receipt = snapshot.history.singleOrNull { it.identity == last.identity }
                 if (snapshot.pending == null) require(receipt != null) else {
                     require(snapshot.pending.identity == last.identity && snapshot.pending.values == last.values && receipt == null)
@@ -292,4 +295,16 @@ private fun <K, V> frozenMap(map: Map<K, V>): Map<K, V> = Collections.unmodifiab
 private fun digest(values: Map<String, String>): String {
     val canonical = values.toSortedMap().entries.joinToString("") { "${it.key.length}:${it.key}${it.value.length}:${it.value}" }
     return MessageDigest.getInstance("SHA-256").digest(canonical.toByteArray(Charsets.UTF_8)).joinToString("") { "%02x".format(it) }
+}
+
+/** Reject lone UTF-16 surrogates before UTF-8 hashing can replace them with the same byte. */
+private fun wellFormedUnicode(value: String): Boolean {
+    var index = 0
+    while (index < value.length) {
+        val char = value[index++]
+        if (Character.isHighSurrogate(char)) {
+            if (index == value.length || !Character.isLowSurrogate(value[index++])) return false
+        } else if (Character.isLowSurrogate(char)) return false
+    }
+    return true
 }
