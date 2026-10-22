@@ -1,0 +1,19 @@
+settingsEvaluated { settings ->
+ settings.pluginManagement.repositories.clear()
+ settings.pluginManagement.repositories.maven { url = uri('/workspace/ui-shell-tools/maven-offline-restore/repository') }
+ settings.dependencyResolutionManagement.repositories.clear()
+ settings.dependencyResolutionManagement.repositories.maven { url = uri('/workspace/ui-shell-tools/maven-offline-restore/repository') }
+}
+
+gradle.projectsEvaluated {
+ def app = gradle.rootProject.project(':app')
+ app.tasks.register('restoreDependencyInputs') {
+  doLast {
+   ['debugCompileClasspath','debugAndroidTestCompileClasspath'].each { name ->
+    def configuration = app.configurations.getByName(name)
+    println('RESTORE_CONFIGURATION ' + name)
+    configuration.files.each { println('RESOLVED_OFFICIAL_INPUT ' + it.name) }
+   }
+  }
+ }
+}

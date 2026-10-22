@@ -1,0 +1,170 @@
+[
+  {
+    "operation": "create_library_file",
+    "status": "succeeded",
+    "path": "/043bed97e218bc25202a803aff3c0de1a5da031f-component-preview-chat-light-api26-font1-synthetic.png",
+    "file_id": "file_000000003fec81f7abbadce1a36ed2f2",
+    "library_file_id": "libfile_5811482871888191891cff3d41c8374a",
+    "file_name": "043bed97e218bc25202a803aff3c0de1a5da031f-component-preview-chat-light-api26-font1-synthetic.png",
+    "current_version_number": 0,
+    "restored_from_version_number": null,
+    "xattrs": [
+      {
+        "name": "user.library-file-version",
+        "value": "0"
+      }
+    ],
+    "directory_id": "libdir_00811fafe7748191b94e5f776febb3d7",
+    "mime_type": "image/png",
+    "library_artifact_type": "image",
+    "file_size_bytes": 123992,
+    "external_connectors_accessed": false
+  },
+  {
+    "operation": "create_library_file",
+    "status": "succeeded",
+    "path": "/043bed97e218bc25202a803aff3c0de1a5da031f-component-preview-menu-light-api26-font1-synthetic.png",
+    "file_id": "file_00000000de688243bedb08059578a95a",
+    "library_file_id": "libfile_233e54fda540819189a2ce911b5153af",
+    "file_name": "043bed97e218bc25202a803aff3c0de1a5da031f-component-preview-menu-light-api26-font1-synthetic.png",
+    "current_version_number": 0,
+    "restored_from_version_number": null,
+    "xattrs": [
+      {
+        "name": "user.library-file-version",
+        "value": "0"
+      }
+    ],
+    "directory_id": "libdir_00811fafe7748191b94e5f776febb3d7",
+    "mime_type": "image/png",
+    "library_artifact_type": "image",
+    "file_size_bytes": 118200,
+    "external_connectors_accessed": false
+  },
+  {
+    "operation": "create_library_file",
+    "status": "succeeded",
+    "path": "/043bed97e218bc25202a803aff3c0de1a5da031f-component-preview-cards-light-api26-font1-synthetic.png",
+    "file_id": "file_00000000d04481f5b14e645a34e7428f",
+    "library_file_id": "libfile_40b7d20048b08191bfc15dcb0d0dc88b",
+    "file_name": "043bed97e218bc25202a803aff3c0de1a5da031f-component-preview-cards-light-api26-font1-synthetic.png",
+    "current_version_number": 0,
+    "restored_from_version_number": null,
+    "xattrs": [
+      {
+        "name": "user.library-file-version",
+        "value": "0"
+      }
+    ],
+    "directory_id": "libdir_00811fafe7748191b94e5f776febb3d7",
+    "mime_type": "image/png",
+    "library_artifact_type": "image",
+    "file_size_bytes": 214259,
+    "external_connectors_accessed": false
+  },
+  {
+    "operation": "create_library_file",
+    "status": "succeeded",
+    "path": "/043bed97e218bc25202a803aff3c0de1a5da031f-component-preview-bot-light-api26-font1-synthetic.png",
+    "file_id": "file_00000000d76081fd97b6a4c94af2afb7",
+    "library_file_id": "libfile_7358aad27b948191b67897610a50279b",
+    "file_name": "043bed97e218bc25202a803aff3c0de1a5da031f-component-preview-bot-light-api26-font1-synthetic.png",
+    "current_version_number": 0,
+    "restored_from_version_number": null,
+    "xattrs": [
+      {
+        "name": "user.library-file-version",
+        "value": "0"
+      }
+    ],
+    "directory_id": "libdir_00811fafe7748191b94e5f776febb3d7",
+    "mime_type": "image/png",
+    "library_artifact_type": "image",
+    "file_size_bytes": 168119,
+    "external_connectors_accessed": false
+  },
+  {
+    "operation": "create_library_file",
+    "status": "succeeded",
+    "path": "/043bed97e218bc25202a803aff3c0de1a5da031f-component-preview-group-light-api26-font1-synthetic.png",
+    "file_id": "file_000000006b4c81f782a4c99f01b202a4",
+    "library_file_id": "libfile_5ad1d6ab152c8191be42b6a5552dabc3",
+    "file_name": "043bed97e218bc25202a803aff3c0de1a5da031f-component-preview-group-light-api26-font1-synthetic.png",
+    "current_version_number": 0,
+    "restored_from_version_number": null,
+    "xattrs": [
+      {
+        "name": "user.library-file-version",
+        "value": "0"
+      }
+    ],
+    "directory_id": "libdir_00811fafe7748191b94e5f776febb3d7",
+    "mime_type": "image/png",
+    "library_artifact_type": "image",
+    "file_size_bytes": 222378,
+    "external_connectors_accessed": false
+  },
+  {
+    "operation": "create_library_file",
+    "status": "succeeded",
+    "path": "/043bed97e218bc25202a803aff3c0de1a5da031f-component-preview-chat-dark-api26-font1-synthetic.png",
+    "file_id": "file_00000000fe988230844d59f5e67d4f88",
+    "library_file_id": "libfile_bae7e9794f588191922208a8fb2f95d7",
+    "file_name": "043bed97e218bc25202a803aff3c0de1a5da031f-component-preview-chat-dark-api26-font1-synthetic.png",
+    "current_version_number": 0,
+    "restored_from_version_number": null,
+    "xattrs": [
+      {
+        "name": "user.library-file-version",
+        "value": "0"
+      }
+    ],
+    "directory_id": "libdir_00811fafe7748191b94e5f776febb3d7",
+    "mime_type": "image/png",
+    "library_artifact_type": "image",
+    "file_size_bytes": 104100,
+    "external_connectors_accessed": false
+  },
+  {
+    "operation": "create_library_file",
+    "status": "succeeded",
+    "path": "/043bed97e218bc25202a803aff3c0de1a5da031f-component-preview-menu-dark-api26-font1-synthetic.png",
+    "file_id": "file_00000000950081f784eb71633c36019b",
+    "library_file_id": "libfile_5800711e517481918eb0a58d1ad1cd29",
+    "file_name": "043bed97e218bc25202a803aff3c0de1a5da031f-component-preview-menu-dark-api26-font1-synthetic.png",
+    "current_version_number": 0,
+    "restored_from_version_number": null,
+    "xattrs": [
+      {
+        "name": "user.library-file-version",
+        "value": "0"
+      }
+    ],
+    "directory_id": "libdir_00811fafe7748191b94e5f776febb3d7",
+    "mime_type": "image/png",
+    "library_artifact_type": "image",
+    "file_size_bytes": 120154,
+    "external_connectors_accessed": false
+  },
+  {
+    "operation": "create_library_file",
+    "status": "succeeded",
+    "path": "/043bed97e218bc25202a803aff3c0de1a5da031f-component-preview-bot-dark-api26-font1-synthetic.png",
+    "file_id": "file_000000009cb881f79e808b13c94dd52f",
+    "library_file_id": "libfile_862efadee7f88191885f2d38da65133f",
+    "file_name": "043bed97e218bc25202a803aff3c0de1a5da031f-component-preview-bot-dark-api26-font1-synthetic.png",
+    "current_version_number": 0,
+    "restored_from_version_number": null,
+    "xattrs": [
+      {
+        "name": "user.library-file-version",
+        "value": "0"
+      }
+    ],
+    "directory_id": "libdir_00811fafe7748191b94e5f776febb3d7",
+    "mime_type": "image/png",
+    "library_artifact_type": "image",
+    "file_size_bytes": 146833,
+    "external_connectors_accessed": false
+  }
+]

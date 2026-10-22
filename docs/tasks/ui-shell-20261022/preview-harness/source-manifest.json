@@ -1,0 +1,55 @@
+{
+  "product_source": "043bed97e218bc25202a803aff3c0de1a5da031f",
+  "working_head": "1f2f1d615af010e8f7f234cd63e52a286c01c382",
+  "scope": "Actual Android Compose COMPONENT PREVIEW, synthetic fixtures; NOT product MainActivity/Service/native APK",
+  "files": [
+    {
+      "source": "apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/ui/shell/ConversationShell.kt",
+      "sha256": "d46ca6efcf97a3d1f34d233a7cf83742ab52cb9d14c427627ca4a01bbddcc00a"
+    },
+    {
+      "source": "apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/ui/shell/ShellInputDock.kt",
+      "sha256": "a19e2dfd8d490ab2f2168de1535f3da4c84fe3f6a732e73ce57e2b1630258a3f"
+    },
+    {
+      "source": "apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/ui/shell/ReadOnlySnapshot.kt",
+      "sha256": "d0f70f2ec2f48931783a17ffc662dd8feeefd001a4967cf7e11b468bc2ef234c"
+    },
+    {
+      "source": "apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/ui/shell/ReadOnlySnapshotPanel.kt",
+      "sha256": "07345c42041bf4b4e418396cd0f531e9a5289e0d5d879876b69ecc37f5a8770d"
+    },
+    {
+      "source": "apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/ui/system/FoundationTokens.kt",
+      "sha256": "b3c3e14ad8bb8dae25b2de62980429d1d482d85b48a76e4fbcc46a9912744bac"
+    },
+    {
+      "source": "apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/ui/system/FoundationComponents.kt",
+      "sha256": "f560b4a356e94ae38b92c7829b46511b9b7a682e12fe6797425ea68b2ebb8b4d"
+    },
+    {
+      "source": "apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/ui/configuration/BotConfigurationEditor.kt",
+      "sha256": "fe00fd8d43e255ea36a66009a149834a4ba463f2cfc8b83df80e0df6a867a2eb"
+    },
+    {
+      "source": "apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/ui/configuration/BotConfigurationScreen.kt",
+      "sha256": "e27e7aeb2b6b3cb4a099a8e0183d2eb0d64e73d4dbd85c9134ec2795c8ff5197"
+    },
+    {
+      "source": "apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/ui/configuration/GroupConfigurationScreen.kt",
+      "sha256": "37894f219f931887f6b13a89ecee920a1bd45ffe6b62f90533c99424974afc8c"
+    },
+    {
+      "source": "apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupDraft.kt",
+      "sha256": "2becb6c2a44ba2fe862e3cfe3df31528c91bb37e04bc6835a749c54f4e5eb2f5"
+    },
+    {
+      "source": "apps/muyon_android/app/src/androidTest/kotlin/com/mightyoung/muyon/product/ui/shell/ConversationShellTest.kt",
+      "sha256": "f6df3af2ca2de6322eff475c633c7d46232d8d78068cbe6fe4d4dbb5cf5f5489"
+    },
+    {
+      "source": "apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/agents/setup/SetupDraftArchive.kt",
+      "sha256": "5ff652109765a429fd427379a4eabaf0d82e6159ae57bceafbd4955c2f03dbc1"
+    }
+  ]
+}

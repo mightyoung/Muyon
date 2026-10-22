@@ -1,0 +1,2 @@
+After all captures/tests completed, SIGTERM sent only to validated task-owned qemu PID6966, AVD muyon_api26_software port5558. No other process selected.
+Execution session subsequently terminated with exit138 (shell reported SIGUSR1), not exit0. Captures and instrumentation had completed before cleanup; no automatic restart/retry.

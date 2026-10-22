@@ -1,0 +1,32 @@
+{"command": "cmd uimode night no", "output": "Night mode: no\n"}
+{"command": "am force-stop com.mightyoung.muyon.uicomponentpreview", "output": ""}
+{"command": "am start -W -n com.mightyoung.muyon.uicomponentpreview/com.mightyoung.muyon.preview.PreviewActivity --es page chat", "output": "Starting: Intent { cmp=com.mightyoung.muyon.uicomponentpreview/com.mightyoung.muyon.preview.PreviewActivity (has extras) }\nStatus: ok\nActivity: com.mightyoung.muyon.uicomponentpreview/com.mightyoung.muyon.preview.PreviewActivity\nThisTime: 6589\nTotalTime: 6589\nWaitTime: 6712\nComplete\n"}
+{"command": "uiautomator dump /data/local/tmp/muyon-preview.xml", "output": "UI hierchary dumped to: /data/local/tmp/muyon-preview.xml\n"}
+{"command": "input tap 84 347", "output": ""}
+{"command": "uiautomator dump /data/local/tmp/muyon-preview.xml", "output": "UI hierchary dumped to: /data/local/tmp/muyon-preview.xml\n"}
+{"command": "cmd uimode night no", "output": "Night mode: no\n"}
+{"command": "am force-stop com.mightyoung.muyon.uicomponentpreview", "output": ""}
+{"command": "am start -W -n com.mightyoung.muyon.uicomponentpreview/com.mightyoung.muyon.preview.PreviewActivity --es page cards", "output": "Starting: Intent { cmp=com.mightyoung.muyon.uicomponentpreview/com.mightyoung.muyon.preview.PreviewActivity (has extras) }\nStatus: ok\nActivity: com.mightyoung.muyon.uicomponentpreview/com.mightyoung.muyon.preview.PreviewActivity\nThisTime: 7191\nTotalTime: 7191\nWaitTime: 7595\nComplete\n"}
+{"command": "uiautomator dump /data/local/tmp/muyon-preview.xml", "output": "UI hierchary dumped to: /data/local/tmp/muyon-preview.xml\n"}
+{"command": "cmd uimode night no", "output": "Night mode: no\n"}
+{"command": "am force-stop com.mightyoung.muyon.uicomponentpreview", "output": ""}
+{"command": "am start -W -n com.mightyoung.muyon.uicomponentpreview/com.mightyoung.muyon.preview.PreviewActivity --es page bot", "output": "Starting: Intent { cmp=com.mightyoung.muyon.uicomponentpreview/com.mightyoung.muyon.preview.PreviewActivity (has extras) }\nStatus: ok\nActivity: com.mightyoung.muyon.uicomponentpreview/com.mightyoung.muyon.preview.PreviewActivity\nThisTime: 5614\nTotalTime: 5614\nWaitTime: 5815\nComplete\n"}
+{"command": "uiautomator dump /data/local/tmp/muyon-preview.xml", "output": "UI hierchary dumped to: /data/local/tmp/muyon-preview.xml\n"}
+{"command": "cmd uimode night no", "output": "Night mode: no\n"}
+{"command": "am force-stop com.mightyoung.muyon.uicomponentpreview", "output": ""}
+{"command": "am start -W -n com.mightyoung.muyon.uicomponentpreview/com.mightyoung.muyon.preview.PreviewActivity --es page group", "output": "Starting: Intent { cmp=com.mightyoung.muyon.uicomponentpreview/com.mightyoung.muyon.preview.PreviewActivity (has extras) }\nStatus: ok\nActivity: com.mightyoung.muyon.uicomponentpreview/com.mightyoung.muyon.preview.PreviewActivity\nThisTime: 5633\nTotalTime: 5633\nWaitTime: 5720\nComplete\n"}
+{"command": "uiautomator dump /data/local/tmp/muyon-preview.xml", "output": "UI hierchary dumped to: /data/local/tmp/muyon-preview.xml\n"}
+{"command": "cmd uimode night yes", "output": "Night mode: yes\n"}
+{"command": "am force-stop com.mightyoung.muyon.uicomponentpreview", "output": ""}
+{"command": "am start -W -n com.mightyoung.muyon.uicomponentpreview/com.mightyoung.muyon.preview.PreviewActivity --es page chat", "output": "Starting: Intent { cmp=com.mightyoung.muyon.uicomponentpreview/com.mightyoung.muyon.preview.PreviewActivity (has extras) }\nStatus: ok\nActivity: com.mightyoung.muyon.uicomponentpreview/com.mightyoung.muyon.preview.PreviewActivity\nThisTime: 6481\nTotalTime: 6481\nWaitTime: 7117\nComplete\n"}
+{"command": "uiautomator dump /data/local/tmp/muyon-preview.xml", "output": "UI hierchary dumped to: /data/local/tmp/muyon-preview.xml\n"}
+{"command": "cmd uimode night yes", "output": "Night mode: yes\n"}
+{"command": "am force-stop com.mightyoung.muyon.uicomponentpreview", "output": ""}
+{"command": "am start -W -n com.mightyoung.muyon.uicomponentpreview/com.mightyoung.muyon.preview.PreviewActivity --es page chat", "output": "Starting: Intent { cmp=com.mightyoung.muyon.uicomponentpreview/com.mightyoung.muyon.preview.PreviewActivity (has extras) }\nStatus: ok\nActivity: com.mightyoung.muyon.uicomponentpreview/com.mightyoung.muyon.preview.PreviewActivity\nThisTime: 6078\nTotalTime: 6078\nWaitTime: 6164\nComplete\n"}
+{"command": "uiautomator dump /data/local/tmp/muyon-preview.xml", "output": "UI hierchary dumped to: /data/local/tmp/muyon-preview.xml\n"}
+{"command": "input tap 84 347", "output": ""}
+{"command": "uiautomator dump /data/local/tmp/muyon-preview.xml", "output": "UI hierchary dumped to: /data/local/tmp/muyon-preview.xml\n"}
+{"command": "cmd uimode night yes", "output": "Night mode: yes\n"}
+{"command": "am force-stop com.mightyoung.muyon.uicomponentpreview", "output": ""}
+{"command": "am start -W -n com.mightyoung.muyon.uicomponentpreview/com.mightyoung.muyon.preview.PreviewActivity --es page bot", "output": "Starting: Intent { cmp=com.mightyoung.muyon.uicomponentpreview/com.mightyoung.muyon.preview.PreviewActivity (has extras) }\nStatus: ok\nActivity: com.mightyoung.muyon.uicomponentpreview/com.mightyoung.muyon.preview.PreviewActivity\nThisTime: 6041\nTotalTime: 6041\nWaitTime: 6244\nComplete\n"}
+{"command": "uiautomator dump /data/local/tmp/muyon-preview.xml", "output": "UI hierchary dumped to: /data/local/tmp/muyon-preview.xml\n"}

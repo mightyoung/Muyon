@@ -91,3 +91,12 @@ Ordinary software TCG route assessed only; no KVM/security/network enablement.
 Obtain the specific applicable SDK agreement acceptance before installing, then
 validate the unchanged043bed UI source first. Do not infer acceptance from the
 separate general toolchain-install approval or falsely inherit214/07fd rendering.
+
+Actual recovery now supersedes earlier infrastructure-only HOLD for main Kotlin:
+ANDROID-RECOVERY-PREVIEW.md records SDK/JDK restoration and real main compilePASS;
+full test compileFAIL is now reader-owned PdfDocument.use at33/86/158. Exact af57
+minimal Android JSON dependency is listed for Reader consumers. Eight current43
+source COMPONENT preview PNGs are actually in Library (CAPTURES.json confirmed IDs),
+not the full product APK or production business screenshots. Six original shell
+source tests passed in that isolated Android harness. Keep all scope captions,
+rejected ANR evidence and actual remaining full-product gates; sole merge owner B.
