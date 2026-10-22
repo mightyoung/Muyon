@@ -172,7 +172,6 @@ fn prepared_candidate_restart_never_implies_confirmation_validation_or_document_
         g.stage_candidate_trusted(&b, &a, DIFFERENT).unwrap_err(),
         ContractError::InvalidAuthority
     );
-    drop(g);
     drop(s);
     let s = f.reopen("epoch-2");
     let a = access(&s, 1, "after", 1, "epoch-2");
@@ -197,7 +196,6 @@ fn prepared_candidate_restart_never_implies_confirmation_validation_or_document_
         s.read_document(&a).unwrap().document.revision(),
         &Revision::new(1)
     );
-    drop(g);
     drop(s);
     let s = f.reopen("epoch-3");
     let a = access(&s, 1, "inspect", 1, "epoch-3");
@@ -237,7 +235,6 @@ fn unknown_ingestion_queries_original_intent_and_never_replays_after_restart() {
         ContractError::Unknown
     );
     db.exec("DROP TRIGGER fail_candidate", &[]).unwrap();
-    drop(g);
     drop(s);
     let s = f.reopen("epoch-2");
     let a = access(&s, 1, "after", 1, "epoch-2");
