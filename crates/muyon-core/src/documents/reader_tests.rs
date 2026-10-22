@@ -37,6 +37,33 @@ fn exact_metadata_and_sequential_bytes_close_at_eof() {
 }
 
 #[test]
+fn open_failure_after_pin_creation_rolls_back_without_exposing_a_session() {
+    let (_f, mut host, access) = setup();
+    host.store().database().exec("CREATE TRIGGER expire_on_reader_pin AFTER INSERT ON blob_pins WHEN NEW.kind='reader' BEGIN UPDATE document_grants SET expires_at_ms='0'; END", &[]).unwrap();
+    assert!(host.open(&access, DocumentReadPurpose::ReadText).is_err());
+    assert_eq!(pins(host.store()), 0);
+    host.store().database().exec("DROP TRIGGER expire_on_reader_pin", &[]).unwrap();
+    // The initial pin and fault mutation shared the rolled-back transaction.
+    let opened = host.open(&access, DocumentReadPurpose::ReadText).unwrap();
+    host.close(&opened.session_id).unwrap();
+    assert_eq!(pins(host.store()), 0);
+}
+
+#[test]
+fn open_commit_rejection_maps_to_unknown_and_cleans_original_pin() {
+    let (_f, mut host, access) = setup();
+    // Genuine SQLite deferred constraint failure at COMMIT, not a claim to
+    // reproduce a crash where COMMIT may already have reached durable storage.
+    host.store().database().exec("CREATE TABLE reader_commit_fault(project_id TEXT REFERENCES projects(id) DEFERRABLE INITIALLY DEFERRED)", &[]).unwrap();
+    host.store().database().exec("CREATE TRIGGER reject_reader_commit AFTER INSERT ON blob_pins WHEN NEW.kind='reader' BEGIN INSERT INTO reader_commit_fault VALUES('nonexistent-project'); END", &[]).unwrap();
+    assert!(matches!(host.open(&access, DocumentReadPurpose::ReadText), Err(DocumentReadError::Core(ContractError::Unknown))));
+    assert_eq!(pins(host.store()), 0);
+    assert!(host.store().database().query("SELECT * FROM reader_commit_fault", &[]).unwrap().is_empty());
+    host.store().database().exec("DROP TRIGGER reject_reader_commit", &[]).unwrap();
+    host.close_all().unwrap();
+}
+
+#[test]
 fn inspect_grant_cannot_open_bytes_and_forged_scope_never_substitutes_source() {
     let f = Fixture::new(); let (store, access) = f.setup();
     let mut host = DocumentReaderHost::new(store);
