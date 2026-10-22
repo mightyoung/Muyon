@@ -187,6 +187,7 @@ const SCHEMA:&[(&str,&str)] = &[
  ("group_runtime_local_intents","CREATE TABLE group_runtime_local_intents(intent_id TEXT PRIMARY KEY,workspace TEXT NOT NULL,project_id TEXT NOT NULL,group_id TEXT NOT NULL,binding_digest TEXT NOT NULL,status TEXT NOT NULL CHECK(status IN('pending','committed','rejected')),receipt TEXT)"),
  ("group_runtime_events","CREATE TABLE group_runtime_events(intent_id TEXT PRIMARY KEY,group_id TEXT NOT NULL,run_id TEXT,record TEXT NOT NULL)"),
 ];
+const INTENT_BINDINGS_DDL: &str = "CREATE TABLE group_runtime_intent_bindings(intent_id TEXT PRIMARY KEY REFERENCES group_runtime_local_intents(intent_id),command TEXT NOT NULL)";
 fn io<T>(v: crate::sqlite::Result<T>) -> Result<T> {
     v.map_err(|_| ContractError::Storage)
 }
@@ -286,8 +287,29 @@ impl BusinessStore {
             return Err(ContractError::InvalidVersion);
         }
         let rows = io(db.query("SELECT workspace,version FROM group_runtime_schema", &[]))?;
-        if rows != vec![vec![Some(self.workspace_id().into()), Some("1".into())]] {
+        if rows.len() != 1 || cell(&rows[0], 0)? != self.workspace_id() {
             return Err(ContractError::ScopeMismatch);
+        }
+        let bindings = io(db.query("SELECT sql FROM sqlite_master WHERE type='table' AND name='group_runtime_intent_bindings'", &[]))?;
+        match cell(&rows[0], 1)? {
+            "1" if bindings.is_empty() => {
+                // Explicit, atomic extension migration; never invent principals
+                // or reconstruct missing historical commands from group defaults.
+                io(db.exec(INTENT_BINDINGS_DDL, &[]))?;
+                if io(db.exec(
+                    "UPDATE group_runtime_schema SET version='2' WHERE workspace=? AND version='1'",
+                    &[self.workspace_id()],
+                ))? != 1
+                {
+                    return Err(ContractError::Storage);
+                }
+            }
+            "2" if bindings == vec![vec![Some(INTENT_BINDINGS_DDL.into())]] => {}
+            _ => return Err(ContractError::InvalidVersion),
+        }
+        if io(db.query("SELECT workspace,version FROM group_runtime_schema", &[]))? != vec![vec![Some(self.workspace_id().into()), Some("2".into())]]
+            || io(db.query("SELECT sql FROM sqlite_master WHERE type='table' AND name='group_runtime_intent_bindings'", &[]))? != vec![vec![Some(INTENT_BINDINGS_DDL.into())]] {
+            return Err(ContractError::Storage);
         }
         io(tx.commit())
     }
@@ -359,7 +381,67 @@ impl BusinessStore {
         if rows != vec![expected] {
             return Err(ContractError::Storage);
         }
+        self.group_verify_original_command(c)?;
         Ok(())
+    }
+    fn group_verify_pending_tail(&self, c: &GroupCommand, binding: &str) -> Result<()> {
+        let expected = vec![
+            Some(c.workspace_id.clone()),
+            Some(c.project_id.clone()),
+            Some(c.group_id.clone()),
+            Some(binding.into()),
+            Some("pending".into()),
+            None,
+        ];
+        let rows=io(self.database().query("SELECT workspace,project_id,group_id,binding_digest,status,receipt FROM group_runtime_local_intents WHERE intent_id=?", &[&c.intent_id]))?;
+        if rows != vec![expected] {
+            return Err(ContractError::Storage);
+        }
+        self.group_verify_original_command(c)
+    }
+    fn group_verify_original_command(&self, c: &GroupCommand) -> Result<()> {
+        let rows = io(self.database().query(
+            "SELECT command FROM group_runtime_intent_bindings WHERE intent_id=?",
+            &[&c.intent_id],
+        ))?;
+        if rows != vec![vec![Some(encode(c)?)]] {
+            return Err(ContractError::Storage);
+        }
+        Ok(())
+    }
+    /// Historical identity lookup only: verifies the actual journal digest, not
+    /// current grant expiry/epoch or a successfully created group. Never writes.
+    pub(crate) fn group_original_command(
+        &self,
+        intent: &str,
+        project: &str,
+        group: &str,
+    ) -> Result<GroupCommand> {
+        let rows = io(self.database().query("SELECT j.binding_digest,b.command FROM group_runtime_local_intents j LEFT JOIN group_runtime_intent_bindings b ON b.intent_id=j.intent_id WHERE j.intent_id=? AND j.workspace=? AND j.project_id=? AND j.group_id=?", &[intent,self.workspace_id(),project,group]))?;
+        let row = rows.first().ok_or(ContractError::NotFound)?;
+        let raw = row
+            .get(1)
+            .and_then(Option::as_deref)
+            .ok_or(ContractError::Unknown)?;
+        let c: GroupCommand = decode(raw)?;
+        if c.intent_id != intent
+            || c.workspace_id != self.workspace_id()
+            || c.project_id != project
+            || c.group_id != group
+            || digest(&c)? != cell(row, 0)?
+        {
+            return Err(ContractError::BindingMismatch);
+        }
+        let GroupActor::Human(actor) = &c.actor else {
+            return Err(ContractError::InvalidAuthority);
+        };
+        id(actor)?;
+        if let GroupOperation::Register { owner, .. } = &c.operation {
+            if actor != owner {
+                return Err(ContractError::InvalidAuthority);
+            }
+        }
+        Ok(c)
     }
     fn group_consume_and_verify_tail(
         &self,
@@ -368,7 +450,7 @@ impl BusinessStore {
         binding: &str,
         grant: &GroupGrantWitness,
         receipt: &LocalReceipt,
-        group_after_effect: &[Vec<Option<String>>],
+        expected_group: &[Vec<Option<String>>],
         configured_runs: &Option<Vec<Vec<Option<String>>>>,
     ) -> Result<()> {
         let db = self.database();
@@ -391,8 +473,8 @@ impl BusinessStore {
             return Err(ContractError::RevisionConflict);
         }
         let actual_group=io(db.query("SELECT workspace,project_id,revision,record FROM group_runtime_groups WHERE group_id=?",&[&c.group_id]))?;
-        if actual_group != group_after_effect {
-            return Err(ContractError::ScopeMismatch);
+        if actual_group != expected_group {
+            return Err(ContractError::Storage);
         }
         // Configure must preserve every existing run's captured coordination
         // facts, including legacy rows frozen before changing future defaults.
@@ -500,6 +582,14 @@ impl BusinessStore {
                     &binding,
                 ],
             ))?;
+            if io(db.exec(
+                "INSERT INTO group_runtime_intent_bindings VALUES(?,?)",
+                &[&c.intent_id, &encode(c)?],
+            ))? != 1
+            {
+                return Err(ContractError::Storage);
+            }
+            self.group_verify_pending_tail(c, &binding)?;
             io(tx.commit())?;
         }
         let result = (|| {
@@ -507,11 +597,11 @@ impl BusinessStore {
             self.group_check(c)?;
             let original_grant = self.group_authority(c, &binding)?;
             let mut configured_runs = None;
-            let result = self.group_effect(c, owner, &mut configured_runs)?;
+            let mut expected_group = Vec::new();
+            let result = self.group_effect(c, owner, &mut configured_runs, &mut expected_group)?;
             if self.group_authority(c, &binding)? != original_grant {
                 return Err(ContractError::InvalidAuthority);
             }
-            let group_after_effect=io(db.query("SELECT workspace,project_id,revision,record FROM group_runtime_groups WHERE group_id=?",&[&c.group_id]))?;
             let receipt = LocalReceipt {
                 intent_id: c.intent_id.clone(),
                 status: LocalStatus::Committed,
@@ -534,7 +624,7 @@ impl BusinessStore {
                 &binding,
                 &original_grant,
                 &receipt,
-                &group_after_effect,
+                &expected_group,
                 &configured_runs,
             )?;
             io(tx.commit())?;
@@ -717,6 +807,7 @@ impl BusinessStore {
         c: &GroupCommand,
         owner: Option<&AgentOwner>,
         configured_runs: &mut Option<Vec<Vec<Option<String>>>>,
+        expected_group: &mut Vec<Vec<Option<String>>>,
     ) -> Result<serde_json::Value> {
         let db = self.database();
         let new_revision = c.expected_revision.next()?;
@@ -777,6 +868,13 @@ impl BusinessStore {
                 fixed_leader: fixed_leader.clone(),
                 members: members.clone(),
             };
+            let record = encode(&r)?;
+            *expected_group = vec![vec![
+                Some(self.workspace_id().into()),
+                Some(c.project_id.clone()),
+                Some(new_revision.as_str().into()),
+                Some(record.clone()),
+            ]];
             io(db.exec(
                 "INSERT INTO group_runtime_groups VALUES(?,?,?,?,?)",
                 &[
@@ -784,7 +882,7 @@ impl BusinessStore {
                     self.workspace_id(),
                     &c.project_id,
                     new_revision.as_str(),
-                    &encode(&r)?,
+                    &record,
                 ],
             ))?;
             return Ok(
@@ -1118,7 +1216,16 @@ impl BusinessStore {
             ))?;
         }
         group.revision = new_revision.clone();
-        if io(db.exec("UPDATE group_runtime_groups SET revision=?,record=? WHERE group_id=? AND workspace=? AND project_id=? AND revision=?",&[new_revision.as_str(),&encode(&group)?,&c.group_id,self.workspace_id(),&c.project_id,c.expected_revision.as_str()]))?!=1{return Err(ContractError::RevisionConflict)}
+        // Capture intended bytes before any trigger-capable group write. A
+        // post-write database snapshot could already contain a reverted config.
+        let record = encode(&group)?;
+        *expected_group = vec![vec![
+            Some(self.workspace_id().into()),
+            Some(c.project_id.clone()),
+            Some(new_revision.as_str().into()),
+            Some(record.clone()),
+        ]];
+        if io(db.exec("UPDATE group_runtime_groups SET revision=?,record=? WHERE group_id=? AND workspace=? AND project_id=? AND revision=?",&[new_revision.as_str(),&record,&c.group_id,self.workspace_id(),&c.project_id,c.expected_revision.as_str()]))?!=1{return Err(ContractError::RevisionConflict)}
         Ok(
             serde_json::json!({"group_id":c.group_id,"run_id":run_id(&c.operation),"execution_authority":false}),
         )

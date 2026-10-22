@@ -1,0 +1,47 @@
+COMMAND: cargo test --offline --manifest-path /tmp/mig20-recovery-review/Cargo.toml independent_pending_binding_insert -- --nocapture
+EXIT: 101
+    Blocking waiting for file lock on build directory
+warning: suspicious definition of the runtime `read` symbol used by the standard library
+   --> /workspace/mig20/experiments/redesign/core-agent-lab/core/src/host_session.rs:132:124
+    |
+132 | ...ount: usize, timeout: i32) -> i32; fn read(fd: i32, buffer: *mut u8, count: usize) -> isize; fn write(fd: i32, buffer: *const u8...
+    |                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = note: expected `unsafe extern "C" fn(i32, *mut c_void, usize) -> isize` (for the current target)
+            found    `unsafe extern "C" fn(i32, *mut u8, usize) -> isize`
+    = help: either fix the signature or remove any attributes like `#[unsafe(no_mangle)]`, `#[unsafe(export_name = "read")]`, or `#[link_name = "read"]`
+    = help: allow this lint if the signature is compatible
+    = note: `#[warn(suspicious_runtime_symbol_definitions)]` on by default
+
+warning: suspicious definition of the runtime `write` symbol used by the standard library
+   --> /workspace/mig20/experiments/redesign/core-agent-lab/core/src/host_session.rs:132:182
+    |
+132 | ... *mut u8, count: usize) -> isize; fn write(fd: i32, buffer: *const u8, count: usize) -> isize; }
+    |                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = note: expected `unsafe extern "C" fn(i32, *const c_void, usize) -> isize` (for the current target)
+            found    `unsafe extern "C" fn(i32, *const u8, usize) -> isize`
+    = help: either fix the signature or remove any attributes like `#[unsafe(no_mangle)]`, `#[unsafe(export_name = "write")]`, or `#[link_name = "write"]`
+    = help: allow this lint if the signature is compatible
+
+warning: `muyon-core-agent-lab` (lib) generated 2 warnings
+    Finished `test` profile [unoptimized] target(s) in 3.24s
+     Running review.rs (/tmp/mig20-target/debug/deps/review-e706c2c5c1dc969f)
+
+running 1 test
+INITIAL_RESULT=Ok(LocalReceipt { intent_id: "pending-tail-corruption", status: PendingOriginal, revision: Revision("0"), result: Object {"execution_authority": Bool(false), "recovery_action": String("query_original_local_intent")} })
+RECOVERY_RESULT=Err(BindingMismatch)
+
+thread 'independent_pending_binding_insert_tail_cannot_corrupt_recovery_journal' (22014) panicked at review.rs:1039:2:
+must atomically roll back corrupt pending journal, or retain a verifiable original identity
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test independent_pending_binding_insert_tail_cannot_corrupt_recovery_journal ... FAILED
+
+failures:
+
+failures:
+    independent_pending_binding_insert_tail_cannot_corrupt_recovery_journal
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 42 filtered out; finished in 0.01s
+
+error: test failed, to rerun pass `--test review`

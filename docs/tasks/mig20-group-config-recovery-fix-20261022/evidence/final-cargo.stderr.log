@@ -1,0 +1,45 @@
+warning: suspicious definition of the runtime `read` symbol used by the standard library
+   --> /workspace/mig20/experiments/redesign/core-agent-lab/core/src/host_session.rs:132:124
+    |
+132 | ...ount: usize, timeout: i32) -> i32; fn read(fd: i32, buffer: *mut u8, count: usize) -> isize; fn write(fd: i32, buffer: *const u8...
+    |                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = note: expected `unsafe extern "C" fn(i32, *mut c_void, usize) -> isize` (for the current target)
+            found    `unsafe extern "C" fn(i32, *mut u8, usize) -> isize`
+    = help: either fix the signature or remove any attributes like `#[unsafe(no_mangle)]`, `#[unsafe(export_name = "read")]`, or `#[link_name = "read"]`
+    = help: allow this lint if the signature is compatible
+    = note: `#[warn(suspicious_runtime_symbol_definitions)]` on by default
+
+warning: suspicious definition of the runtime `write` symbol used by the standard library
+   --> /workspace/mig20/experiments/redesign/core-agent-lab/core/src/host_session.rs:132:182
+    |
+132 | ... *mut u8, count: usize) -> isize; fn write(fd: i32, buffer: *const u8, count: usize) -> isize; }
+    |                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = note: expected `unsafe extern "C" fn(i32, *const c_void, usize) -> isize` (for the current target)
+            found    `unsafe extern "C" fn(i32, *const u8, usize) -> isize`
+    = help: either fix the signature or remove any attributes like `#[unsafe(no_mangle)]`, `#[unsafe(export_name = "write")]`, or `#[link_name = "write"]`
+    = help: allow this lint if the signature is compatible
+
+warning: `muyon-core-agent-lab` (lib) generated 2 warnings
+    Finished `test` profile [unoptimized] target(s) in 0.02s
+     Running unittests src/lib.rs (/tmp/mig20-target/debug/deps/muyon_core-73407baf0f542dfb)
+     Running unittests src/bin/business_worker.rs (/tmp/mig20-target/debug/deps/business_worker-1daf1882c4f0df30)
+     Running tests/agent_child_tools.rs (/tmp/mig20-target/debug/deps/agent_child_tools-e7cb58149b8bf0e8)
+     Running tests/agent_owner.rs (/tmp/mig20-target/debug/deps/agent_owner-8a9985358780bc09)
+     Running tests/agent_product.rs (/tmp/mig20-target/debug/deps/agent_product-964612e2f8bcc83b)
+     Running tests/agent_tools.rs (/tmp/mig20-target/debug/deps/agent_tools-75660f8227bd576c)
+     Running tests/agent_workflow.rs (/tmp/mig20-target/debug/deps/agent_workflow-32d837d83e56ba9e)
+     Running tests/archive.rs (/tmp/mig20-target/debug/deps/archive-26516cc8890c3ee6)
+     Running tests/blobs.rs (/tmp/mig20-target/debug/deps/blobs-4e596fc7e3ab6574)
+     Running tests/business.rs (/tmp/mig20-target/debug/deps/business-41364b9d5681cb45)
+     Running tests/contract.rs (/tmp/mig20-target/debug/deps/contract-b242eff1e3b8e079)
+     Running tests/contract_vectors_additional.rs (/tmp/mig20-target/debug/deps/contract_vectors_additional-52fffd8c5306a2b9)
+     Running tests/group_governance.rs (/tmp/mig20-target/debug/deps/group_governance-e29812bb22b88ab1)
+     Running tests/group_runtime.rs (/tmp/mig20-target/debug/deps/group_runtime-7856621e7af18f44)
+     Running tests/group_runtime_bridge.rs (/tmp/mig20-target/debug/deps/group_runtime_bridge-38cb17ce8beddf05)
+     Running tests/group_runtime_store.rs (/tmp/mig20-target/debug/deps/group_runtime_store-7a92c651c84a9a04)
+     Running tests/research.rs (/tmp/mig20-target/debug/deps/research-fac58dbe56f0a185)
+     Running tests/resource_boundaries_additional.rs (/tmp/mig20-target/debug/deps/resource_boundaries_additional-b256a6e1537d945c)
+     Running tests/store_admission_additional.rs (/tmp/mig20-target/debug/deps/store_admission_additional-43d691c4e624c4a3)
+   Doc-tests muyon_core

@@ -1,0 +1,14 @@
+docs/tasks/mig20-group-config-recovery-fix-20261022/evidence/03-intended-group-green.log:37: new blank line at EOF.
+docs/tasks/mig20-group-config-recovery-fix-20261022/evidence/06-recovery-bridge-green.log:74: new blank line at EOF.
+docs/tasks/mig20-group-config-recovery-fix-20261022/evidence/07-existing-store-regression.log:97: new blank line at EOF.
+docs/tasks/mig20-group-config-recovery-fix-20261022/evidence/08-recovery-boundaries.log:79: new blank line at EOF.
+docs/tasks/mig20-group-config-recovery-fix-20261022/evidence/10-recovery-green.log:151: new blank line at EOF.
+docs/tasks/mig20-group-config-recovery-fix-20261022/evidence/final-bridge.stdout.log:53: new blank line at EOF.
+docs/tasks/mig20-group-config-recovery-fix-20261022/evidence/final-cargo.stdout.log:401: new blank line at EOF.
+docs/tasks/mig20-group-config-recovery-fix-20261022/evidence/final-governance.stdout.log:26: new blank line at EOF.
+docs/tasks/mig20-group-config-recovery-fix-20261022/evidence/final-runtime.stdout.log:25: new blank line at EOF.
+docs/tasks/mig20-group-config-recovery-fix-20261022/evidence/final-store.stdout.log:70: new blank line at EOF.
+docs/tasks/mig20-group-config-recovery-fix-20261022/evidence/independent-final-native-regression.log:152: new blank line at EOF.
+docs/tasks/mig20-group-config-recovery-fix-20261022/evidence/independent-final-parent-counterexamples.log:41: new blank line at EOF.
+docs/tasks/mig20-group-config-recovery-fix-20261022/evidence/independent-final-recovery-controls.log:39: new blank line at EOF.
+docs/tasks/mig20-group-config-recovery-fix-20261022/evidence/independent-parent-counterexamples-green.log:42: new blank line at EOF.

@@ -1,0 +1,162 @@
+{
+  "cwd": "/workspace/mig20",
+  "environment": {
+    "CARGO_HOME": "/tmp/mig20-cargo",
+    "CARGO_TARGET_DIR": "/tmp/mig20-target",
+    "RUSTFLAGS": "-L native=/tmp/mig20-native-libs"
+  },
+  "runs": [
+    {
+      "name": "final-rustc",
+      "command": [
+        "/tmp/mig20-rust/bin/rustc",
+        "--version",
+        "--verbose"
+      ],
+      "start_utc": "2026-10-22T06:54:28.142745+00:00",
+      "end_utc": "2026-10-22T06:54:28.149622+00:00",
+      "exit_code": 0
+    },
+    {
+      "name": "final-runtime-compile",
+      "command": [
+        "/tmp/mig20-rust/bin/rustc",
+        "--edition=2021",
+        "-D",
+        "warnings",
+        "--test",
+        "crates/muyon-core/tests/group_runtime.rs",
+        "-o",
+        "/tmp/mig20-final-runtime"
+      ],
+      "start_utc": "2026-10-22T06:54:28.149823+00:00",
+      "end_utc": "2026-10-22T06:54:28.598469+00:00",
+      "exit_code": 0
+    },
+    {
+      "name": "final-runtime",
+      "command": [
+        "/tmp/mig20-final-runtime"
+      ],
+      "start_utc": "2026-10-22T06:54:28.598784+00:00",
+      "end_utc": "2026-10-22T06:54:28.601706+00:00",
+      "exit_code": 0
+    },
+    {
+      "name": "final-governance-compile",
+      "command": [
+        "/tmp/mig20-rust/bin/rustc",
+        "--edition=2021",
+        "-D",
+        "warnings",
+        "--test",
+        "crates/muyon-core/tests/group_governance.rs",
+        "-o",
+        "/tmp/mig20-final-governance"
+      ],
+      "start_utc": "2026-10-22T06:54:28.601892+00:00",
+      "end_utc": "2026-10-22T06:54:28.901889+00:00",
+      "exit_code": 0
+    },
+    {
+      "name": "final-governance",
+      "command": [
+        "/tmp/mig20-final-governance"
+      ],
+      "start_utc": "2026-10-22T06:54:28.902281+00:00",
+      "end_utc": "2026-10-22T06:54:28.905430+00:00",
+      "exit_code": 0
+    },
+    {
+      "name": "final-format",
+      "command": [
+        "/tmp/mig20-rust/bin/rustfmt",
+        "--edition",
+        "2021",
+        "--check",
+        "crates/muyon-core/src/group_runtime/mod.rs",
+        "crates/muyon-core/tests/group_runtime.rs",
+        "crates/muyon-core/src/group_runtime/store.rs",
+        "crates/muyon-core/tests/group_runtime_store.rs",
+        "crates/muyon-core/src/group_runtime/bridge.rs",
+        "crates/muyon-core/tests/group_runtime_bridge.rs"
+      ],
+      "start_utc": "2026-10-22T06:54:28.905668+00:00",
+      "end_utc": "2026-10-22T06:54:29.199328+00:00",
+      "exit_code": 0
+    },
+    {
+      "name": "final-store",
+      "command": [
+        "/tmp/mig20-rust/bin/cargo",
+        "test",
+        "--manifest-path",
+        "crates/Cargo.toml",
+        "-p",
+        "muyon-core",
+        "--locked",
+        "--offline",
+        "--test",
+        "group_runtime_store"
+      ],
+      "start_utc": "2026-10-22T06:54:29.202148+00:00",
+      "end_utc": "2026-10-22T06:54:30.442627+00:00",
+      "exit_code": 0
+    },
+    {
+      "name": "final-bridge",
+      "command": [
+        "/tmp/mig20-rust/bin/cargo",
+        "test",
+        "--manifest-path",
+        "crates/Cargo.toml",
+        "-p",
+        "muyon-core",
+        "--locked",
+        "--offline",
+        "--test",
+        "group_runtime_bridge"
+      ],
+      "start_utc": "2026-10-22T06:54:30.442961+00:00",
+      "end_utc": "2026-10-22T06:54:47.732515+00:00",
+      "exit_code": 0
+    },
+    {
+      "name": "final-cargo",
+      "command": [
+        "/tmp/mig20-rust/bin/cargo",
+        "test",
+        "--manifest-path",
+        "crates/Cargo.toml",
+        "-p",
+        "muyon-core",
+        "--locked",
+        "--offline"
+      ],
+      "start_utc": "2026-10-22T06:54:47.732876+00:00",
+      "end_utc": "2026-10-22T06:55:26.306263+00:00",
+      "exit_code": 0
+    },
+    {
+      "name": "final-diff",
+      "command": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "start_utc": "2026-10-22T06:55:26.306744+00:00",
+      "end_utc": "2026-10-22T06:55:26.314757+00:00",
+      "exit_code": 0
+    }
+  ],
+  "sha256": {
+    "crates/muyon-core/src/group_runtime/mod.rs": "db2aa97ea80560fb218e07381b36357c9e3862079e75ad25ea949691128cf1c0",
+    "crates/muyon-core/tests/group_runtime.rs": "513770b074fb6e5d6ad836d38b16ba57025d974e0aaf0c41ac36e6f65973267c",
+    "crates/muyon-core/src/group_governance/mod.rs": "0cea48fe4e01a95c0980e0d77d4ece899f6aa86adc58c4c43a8d2b068a2b0099",
+    "crates/Cargo.lock": "3a87fdce6228dff89d292547057627f999e7286ccf0a774c1683c4ba5f95f367",
+    "crates/muyon-core/src/group_runtime/store.rs": "91ac111c514385b04d2e4fe75c5bdbb74dd2a06dae0a2a499b963854d9fed9ad",
+    "crates/muyon-core/tests/group_runtime_store.rs": "748b6ec38c605c112731198625c64b362632eeb441d6c59b085102d54848e7c6",
+    "crates/muyon-core/src/group_runtime/bridge.rs": "ccbc5c5166aa2abdd580ca3be7473715f6b194a764f1b7c52a8ce70b5d71b403",
+    "crates/muyon-core/tests/group_runtime_bridge.rs": "3f3b41ac36e48db351871954fa3cfbfb1e95cef7c6482808360bb44c1a2d9720"
+  }
+}

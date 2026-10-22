@@ -840,3 +840,417 @@ fn configuration_run_witness_checks_receipt_and_consumption_tail_mutations() {
         assert_eq!(s.database().query("SELECT active FROM business_grants WHERE grant_id='grant-tail-config'",&[]).unwrap()[0][0].as_deref(),Some("1"));
     }
 }
+
+#[test]
+fn parent_configure_group_trigger_cannot_replace_intended_mode_and_leader() {
+    for target in ["host_only", "fixed"] {
+        let f = Fixture::new();
+        let s = f.init();
+        start(&s);
+        let before=s.database().query("SELECT workspace,project_id,revision,record FROM group_runtime_groups WHERE group_id='group'",&[]).unwrap();
+        let runs = s
+            .database()
+            .query("SELECT run_id,group_id,record FROM group_runtime_runs", &[])
+            .unwrap();
+        s.database().exec("CREATE TRIGGER restore_old_defaults AFTER UPDATE OF record ON group_runtime_groups BEGIN UPDATE group_runtime_groups SET record=json_set(NEW.record,'$.mode',json_extract(OLD.record,'$.mode'),'$.fixed_leader',json_extract(OLD.record,'$.fixed_leader')) WHERE group_id=NEW.group_id; END",&[]).unwrap();
+        let c = command("parent-mode", 2, config(target));
+        let receipt = apply(&s, &c);
+        let after=s.database().query("SELECT workspace,project_id,revision,record FROM group_runtime_groups WHERE group_id='group'",&[]).unwrap();
+        println!(
+            "TARGET={target} RECEIPT={:?} GROUP={after:?}",
+            receipt.status
+        );
+        assert_eq!(receipt.status, LocalStatus::PendingOriginal);
+        assert_eq!(after, before);
+        assert_eq!(
+            s.database()
+                .query("SELECT run_id,group_id,record FROM group_runtime_runs", &[])
+                .unwrap(),
+            runs
+        );
+        assert!(s
+            .database()
+            .query(
+                "SELECT * FROM group_runtime_events WHERE intent_id='parent-mode'",
+                &[]
+            )
+            .unwrap()
+            .is_empty());
+        assert_eq!(s.database().query("SELECT status,receipt FROM group_runtime_local_intents WHERE intent_id='parent-mode'",&[]).unwrap(),vec![vec![Some("pending".into()),None]]);
+        assert_eq!(
+            s.database()
+                .query(
+                    "SELECT active FROM business_grants WHERE grant_id='grant-parent-mode'",
+                    &[]
+                )
+                .unwrap()[0][0]
+                .as_deref(),
+            Some("1")
+        );
+    }
+}
+
+#[test]
+fn parent_exact_revision_trigger_preserves_new_revision_but_undoes_configuration() {
+    let f = Fixture::new();
+    let s = f.init();
+    start(&s);
+    let before=s.database().query("SELECT workspace,project_id,revision,record FROM group_runtime_groups WHERE group_id='group'",&[]).unwrap();
+    s.database().exec(r#"CREATE TRIGGER undo_group_config AFTER UPDATE OF revision ON group_runtime_groups WHEN OLD.group_id='group' AND OLD.revision='2' AND NEW.revision='3' BEGIN UPDATE group_runtime_groups SET record=replace(OLD.record,'"revision":"2"','"revision":"3"') WHERE group_id=NEW.group_id; END"#,&[]).unwrap();
+    let receipt = apply(&s, &command("parent-exact", 2, config("fixed")));
+    let after=s.database().query("SELECT workspace,project_id,revision,record FROM group_runtime_groups WHERE group_id='group'",&[]).unwrap();
+    println!(
+        "EXACT_PARENT_TRIGGER RECEIPT={:?} GROUP={after:?}",
+        receipt.status
+    );
+    assert_eq!(receipt.status, LocalStatus::PendingOriginal);
+    assert_eq!(after, before);
+}
+
+#[test]
+fn parent_pending_register_recovery_reads_original_after_failure_and_restart_without_group() {
+    let f = Fixture::new();
+    {
+        let s = f.init();
+        s.database().exec("CREATE TRIGGER fail_register BEFORE INSERT ON group_runtime_groups BEGIN SELECT RAISE(ABORT,'synthetic register effect failure'); END",&[]).unwrap();
+        let receipt = apply(&s, &command("pending-registration", 0, registration()));
+        assert_eq!(receipt.status, LocalStatus::PendingOriginal);
+        assert!(s
+            .database()
+            .query("SELECT * FROM group_runtime_groups", &[])
+            .unwrap()
+            .is_empty());
+        let query=json!({"schema_version":1,"request":{"operation":"local_intent","group_id":"group","intent_id":"pending-registration"}}).to_string();
+        let result = s.group_ui_read(&ui_scope(&s), &query, None, None);
+        println!("BEFORE_RESTART_ORIGINAL_LOOKUP={result:?}");
+        assert!(
+            result.is_ok(),
+            "pending Register must be queryable without a group"
+        );
+    }
+    let s = BusinessStore::open_existing(&f.path(), "ws", "restart-epoch").unwrap();
+    let scope = GroupUiScope::current(&s, "project", "owner").unwrap();
+    let raw=json!({"schema_version":1,"request":{"operation":"local_intent","group_id":"group","intent_id":"pending-registration"}}).to_string();
+    let journal = s
+        .database()
+        .query("SELECT * FROM group_runtime_local_intents", &[])
+        .unwrap();
+    let grants = s
+        .database()
+        .query("SELECT * FROM business_grants ORDER BY grant_id", &[])
+        .unwrap();
+    for _ in 0..2 {
+        let value = s.group_ui_read(&scope, &raw, None, None).unwrap();
+        assert_eq!(value["local_intent"]["status"], "pending_original");
+        assert!(value["local_intent"]["receipt"].is_null());
+        assert_eq!(
+            value["local_intent"]["recovery_action"],
+            "query_original_local_intent"
+        );
+    }
+    assert_eq!(
+        s.database()
+            .query("SELECT * FROM group_runtime_local_intents", &[])
+            .unwrap(),
+        journal
+    );
+    assert_eq!(
+        s.database()
+            .query("SELECT * FROM business_grants ORDER BY grant_id", &[])
+            .unwrap(),
+        grants
+    );
+    assert!(s
+        .database()
+        .query("SELECT * FROM group_runtime_groups", &[])
+        .unwrap()
+        .is_empty());
+    assert!(s
+        .database()
+        .query("SELECT * FROM group_runtime_events", &[])
+        .unwrap()
+        .is_empty());
+    let unauthorized = GroupUiScope::current(&s, "project", "different-human").unwrap();
+    assert_eq!(
+        s.group_ui_read(&unauthorized, &raw, None, None)
+            .unwrap_err(),
+        ContractError::InvalidAuthority
+    );
+    let wrong_group = raw.replace("\"group\"", "\"other-group\"");
+    assert!(s.group_ui_read(&scope, &wrong_group, None, None).is_err());
+}
+
+#[test]
+fn parent_v1_migration_preserves_journal_without_fabricating_missing_original_identity() {
+    let f = Fixture::new();
+    let s = f.init();
+    s.database().exec("CREATE TRIGGER fail_old_registration BEFORE INSERT ON group_runtime_groups BEGIN SELECT RAISE(ABORT,'synthetic old failure'); END",&[]).unwrap();
+    assert_eq!(
+        apply(&s, &command("legacy-pending", 0, registration())).status,
+        LocalStatus::PendingOriginal
+    );
+    let rows = s
+        .database()
+        .query("SELECT * FROM group_runtime_local_intents", &[])
+        .unwrap();
+    s.database()
+        .exec("DROP TABLE IF EXISTS group_runtime_intent_bindings", &[])
+        .unwrap();
+    s.database()
+        .exec("UPDATE group_runtime_schema SET version='1'", &[])
+        .unwrap();
+    s.initialize_group_runtime().unwrap();
+    assert_eq!(
+        s.database()
+            .query("SELECT version FROM group_runtime_schema", &[])
+            .unwrap()[0][0]
+            .as_deref(),
+        Some("2")
+    );
+    assert_eq!(
+        s.database()
+            .query("SELECT * FROM group_runtime_local_intents", &[])
+            .unwrap(),
+        rows
+    );
+    assert!(s
+        .database()
+        .query("SELECT * FROM group_runtime_intent_bindings", &[])
+        .unwrap()
+        .is_empty());
+    let raw=json!({"schema_version":1,"request":{"operation":"local_intent","group_id":"group","intent_id":"legacy-pending"}}).to_string();
+    assert_eq!(
+        s.group_ui_read(&ui_scope(&s), &raw, None, None)
+            .unwrap_err(),
+        ContractError::Unknown
+    );
+}
+
+#[test]
+fn parent_normal_explicit_modes_and_fixed_leader_persist_and_start_real_local_runs() {
+    for mode in ["host_only", "fixed", "per_task"] {
+        let f = Fixture::new();
+        {
+            let s = f.init();
+            start(&s);
+            assert_eq!(
+                apply(&s, &command("normal-config", 2, config(mode))).status,
+                LocalStatus::Committed
+            );
+            let scope = GroupScope::current(&s, "project", "group").unwrap();
+            let group = s.group_registration(&scope).unwrap();
+            assert_eq!(group.mode, mode);
+            assert_eq!(group.owner, "owner");
+            assert!(group.admins.contains("admin"));
+            assert_eq!(
+                group.fixed_leader.as_deref(),
+                if mode == "fixed" { Some("b") } else { None }
+            );
+            let c = command(
+                "new-mode-run",
+                3,
+                GroupOperation::Start {
+                    run_id: "new-mode-run".into(),
+                    root_task_id: "new-root".into(),
+                    leader: if mode == "per_task" {
+                        Some("a".into())
+                    } else {
+                        None
+                    },
+                    max_rounds: 3,
+                    max_handoffs: 2,
+                    deadline_ms: u64::MAX,
+                },
+            );
+            assert_eq!(apply(&s, &c).status, LocalStatus::Committed);
+        }
+        let s = f.store();
+        let scope = GroupScope::current(&s, "project", "group").unwrap();
+        assert_eq!(s.group_registration(&scope).unwrap().mode, mode);
+        let run = s.group_run(&scope, "new-mode-run").unwrap();
+        assert_eq!(run.coordination_mode.as_deref(), Some(mode));
+        assert_eq!(
+            run.leader.as_deref(),
+            match mode {
+                "fixed" => Some("b"),
+                "per_task" => Some("a"),
+                _ => None,
+            }
+        );
+        assert_eq!(
+            s.group_run(&scope, "run")
+                .unwrap()
+                .coordination_mode
+                .as_deref(),
+            Some("per_task")
+        );
+    }
+}
+
+#[test]
+fn parent_pending_register_binding_tamper_and_missing_metadata_do_not_claim_identity() {
+    let f = Fixture::new();
+    let s = f.init();
+    s.database().exec("CREATE TRIGGER fail_registration BEFORE INSERT ON group_runtime_groups BEGIN SELECT RAISE(ABORT,'synthetic'); END",&[]).unwrap();
+    let c = command("pending-identity", 0, registration());
+    assert_eq!(apply(&s, &c).status, LocalStatus::PendingOriginal);
+    let raw=json!({"schema_version":1,"request":{"operation":"local_intent","group_id":"group","intent_id":"pending-identity"}}).to_string();
+    let mut forged = serde_json::to_value(&c).unwrap();
+    forged["actor"] = json!({"Human":"different-human"});
+    forged["operation"]["Register"]["owner"] = json!("different-human");
+    s.database()
+        .exec(
+            "UPDATE group_runtime_intent_bindings SET command=? WHERE intent_id='pending-identity'",
+            &[&forged.to_string()],
+        )
+        .unwrap();
+    assert_eq!(
+        s.group_ui_read(&ui_scope(&s), &raw, None, None)
+            .unwrap_err(),
+        ContractError::BindingMismatch
+    );
+    let different = GroupUiScope::current(&s, "project", "different-human").unwrap();
+    assert_eq!(
+        s.group_ui_read(&different, &raw, None, None).unwrap_err(),
+        ContractError::BindingMismatch
+    );
+    s.database()
+        .exec(
+            "DELETE FROM group_runtime_intent_bindings WHERE intent_id='pending-identity'",
+            &[],
+        )
+        .unwrap();
+    assert_eq!(
+        s.group_ui_read(&ui_scope(&s), &raw, None, None)
+            .unwrap_err(),
+        ContractError::Unknown
+    );
+    assert!(s
+        .database()
+        .query("SELECT * FROM group_runtime_groups", &[])
+        .unwrap()
+        .is_empty());
+    assert!(s
+        .database()
+        .query("SELECT * FROM group_runtime_events", &[])
+        .unwrap()
+        .is_empty());
+}
+
+#[test]
+fn parent_original_binding_suppression_and_tampering_roll_back_pending_transaction() {
+    for action in ["BEFORE INSERT ON group_runtime_intent_bindings BEGIN SELECT RAISE(IGNORE); END","AFTER INSERT ON group_runtime_intent_bindings BEGIN UPDATE group_runtime_intent_bindings SET command='{}' WHERE intent_id=NEW.intent_id; END"] {
+        let f=Fixture::new();let s=f.init();
+        let c=command("pending-atomic",0,registration());s.issue_group_local_grant_trusted(&c).unwrap();
+        s.database().exec(&format!("CREATE TRIGGER damage_original {action}"),&[]).unwrap();
+        assert_eq!(s.execute_group_local(&c,None).unwrap_err(),ContractError::Storage);
+        assert!(s.database().query("SELECT * FROM group_runtime_local_intents",&[]).unwrap().is_empty());
+        assert!(s.database().query("SELECT * FROM group_runtime_intent_bindings",&[]).unwrap().is_empty());
+        assert!(s.database().query("SELECT * FROM group_runtime_groups",&[]).unwrap().is_empty());
+    }
+}
+
+#[test]
+fn parent_original_binding_receipt_and_consume_tail_damage_returns_pending_and_rolls_back() {
+    for trigger in ["AFTER UPDATE ON group_runtime_local_intents WHEN NEW.intent_id='binding-tail' AND NEW.status='committed'","AFTER UPDATE ON business_grants WHEN NEW.grant_id='grant-binding-tail' AND NEW.active=0"] {
+        let f=Fixture::new();let s=f.init();start(&s);
+        let before=s.database().query("SELECT * FROM group_runtime_groups",&[]).unwrap();
+        let c=command("binding-tail",2,config("fixed"));s.issue_group_local_grant_trusted(&c).unwrap();
+        s.database().exec(&format!("CREATE TRIGGER damage_binding {trigger} BEGIN DELETE FROM group_runtime_intent_bindings WHERE intent_id='binding-tail'; END"),&[]).unwrap();
+        assert_eq!(s.execute_group_local(&c,None).unwrap().status,LocalStatus::PendingOriginal);
+        assert_eq!(s.database().query("SELECT * FROM group_runtime_groups",&[]).unwrap(),before);
+        assert_eq!(s.database().query("SELECT command FROM group_runtime_intent_bindings WHERE intent_id='binding-tail'",&[]).unwrap(),vec![vec![Some(serde_json::to_string(&c).unwrap())]]);
+        assert_eq!(s.database().query("SELECT status,receipt FROM group_runtime_local_intents WHERE intent_id='binding-tail'",&[]).unwrap(),vec![vec![Some("pending".into()),None]]);
+        assert!(s.database().query("SELECT * FROM group_runtime_events WHERE intent_id='binding-tail'",&[]).unwrap().is_empty());
+    }
+}
+
+#[test]
+fn parent_v1_identity_migration_storage_failure_rolls_back_schema_without_identity_backfill() {
+    let f = Fixture::new();
+    let s = f.init();
+    start(&s);
+    let journal = s
+        .database()
+        .query(
+            "SELECT * FROM group_runtime_local_intents ORDER BY intent_id",
+            &[],
+        )
+        .unwrap();
+    s.database()
+        .exec("DROP TABLE group_runtime_intent_bindings", &[])
+        .unwrap();
+    s.database()
+        .exec("UPDATE group_runtime_schema SET version='1'", &[])
+        .unwrap();
+    s.database().exec("CREATE TRIGGER fail_identity_migration BEFORE UPDATE ON group_runtime_schema BEGIN SELECT RAISE(ABORT,'synthetic migration failure'); END",&[]).unwrap();
+    assert_eq!(
+        s.initialize_group_runtime().unwrap_err(),
+        ContractError::Storage
+    );
+    assert!(s.database().query("SELECT name FROM sqlite_master WHERE type='table' AND name='group_runtime_intent_bindings'",&[]).unwrap().is_empty());
+    assert_eq!(
+        s.database()
+            .query("SELECT version FROM group_runtime_schema", &[])
+            .unwrap()[0][0]
+            .as_deref(),
+        Some("1")
+    );
+    assert_eq!(
+        s.database()
+            .query(
+                "SELECT * FROM group_runtime_local_intents ORDER BY intent_id",
+                &[]
+            )
+            .unwrap(),
+        journal
+    );
+    s.database()
+        .exec("DROP TRIGGER fail_identity_migration", &[])
+        .unwrap();
+    s.initialize_group_runtime().unwrap();
+    assert!(s
+        .database()
+        .query("SELECT * FROM group_runtime_intent_bindings", &[])
+        .unwrap()
+        .is_empty());
+    let raw=json!({"schema_version":1,"request":{"operation":"local_intent","group_id":"group","intent_id":"start"}}).to_string();
+    assert_eq!(
+        s.group_ui_read(&ui_scope(&s), &raw, None, None).unwrap()["local_intent"]
+            ["identity_source"],
+        "current_group_management"
+    );
+    let member = GroupUiScope::current(&s, "project", "a").unwrap();
+    assert_eq!(
+        s.group_ui_read(&member, &raw, None, None).unwrap_err(),
+        ContractError::InvalidAuthority
+    );
+}
+
+#[test]
+fn parent_original_binding_insert_cannot_commit_a_corrupted_pending_journal() {
+    let f = Fixture::new();
+    let s = f.init();
+    let c = command("corrupt-pending", 0, registration());
+    s.issue_group_local_grant_trusted(&c).unwrap();
+    s.database().exec("CREATE TRIGGER damage_pending AFTER INSERT ON group_runtime_intent_bindings BEGIN UPDATE group_runtime_local_intents SET binding_digest='wrong' WHERE intent_id=NEW.intent_id; END",&[]).unwrap();
+    s.database().exec("CREATE TRIGGER fail_new_group BEFORE INSERT ON group_runtime_groups BEGIN SELECT RAISE(ABORT,'synthetic effect failure'); END",&[]).unwrap();
+    let outcome = s.execute_group_local(&c, None);
+    println!("PENDING_INSERT_TAIL_OUTCOME={outcome:?}");
+    assert_eq!(outcome.unwrap_err(), ContractError::Storage);
+    assert!(s
+        .database()
+        .query("SELECT * FROM group_runtime_local_intents", &[])
+        .unwrap()
+        .is_empty());
+    assert!(s
+        .database()
+        .query("SELECT * FROM group_runtime_intent_bindings", &[])
+        .unwrap()
+        .is_empty());
+    assert!(s
+        .database()
+        .query("SELECT * FROM group_runtime_groups", &[])
+        .unwrap()
+        .is_empty());
+}

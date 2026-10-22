@@ -1,0 +1,42 @@
+COMMAND: cargo test --offline --manifest-path /tmp/mig20-recovery-review/Cargo.toml parent_ -- --nocapture
+EXIT: 0
+warning: suspicious definition of the runtime `read` symbol used by the standard library
+   --> /workspace/mig20/experiments/redesign/core-agent-lab/core/src/host_session.rs:132:124
+    |
+132 | ...ount: usize, timeout: i32) -> i32; fn read(fd: i32, buffer: *mut u8, count: usize) -> isize; fn write(fd: i32, buffer: *const u8...
+    |                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = note: expected `unsafe extern "C" fn(i32, *mut c_void, usize) -> isize` (for the current target)
+            found    `unsafe extern "C" fn(i32, *mut u8, usize) -> isize`
+    = help: either fix the signature or remove any attributes like `#[unsafe(no_mangle)]`, `#[unsafe(export_name = "read")]`, or `#[link_name = "read"]`
+    = help: allow this lint if the signature is compatible
+    = note: `#[warn(suspicious_runtime_symbol_definitions)]` on by default
+
+warning: suspicious definition of the runtime `write` symbol used by the standard library
+   --> /workspace/mig20/experiments/redesign/core-agent-lab/core/src/host_session.rs:132:182
+    |
+132 | ... *mut u8, count: usize) -> isize; fn write(fd: i32, buffer: *const u8, count: usize) -> isize; }
+    |                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = note: expected `unsafe extern "C" fn(i32, *const c_void, usize) -> isize` (for the current target)
+            found    `unsafe extern "C" fn(i32, *const u8, usize) -> isize`
+    = help: either fix the signature or remove any attributes like `#[unsafe(no_mangle)]`, `#[unsafe(export_name = "write")]`, or `#[link_name = "write"]`
+    = help: allow this lint if the signature is compatible
+
+warning: `muyon-core-agent-lab` (lib) generated 2 warnings
+   Compiling mig20-recovery-review v0.1.0 (/tmp/mig20-recovery-review)
+    Finished `test` profile [unoptimized] target(s) in 3.91s
+     Running review.rs (/tmp/mig20-target/debug/deps/review-e706c2c5c1dc969f)
+
+running 4 tests
+test parent_v1_migration_preserves_journal_without_fabricating_missing_original_identity ... ok
+BEFORE_RESTART_ORIGINAL_LOOKUP=Ok(Object {"execution_authority": Bool(false), "local_intent": Object {"identity_source": String("exact_original_command"), "intent_id": String("pending-registration"), "receipt": Null, "recovery_action": String("query_original_local_intent"), "status": String("pending_original")}, "operation": String("local_intent"), "schema_version": Number(1)})
+EXACT_PARENT_TRIGGER RECEIPT=PendingOriginal GROUP=[[Some("ws"), Some("project"), Some("2"), Some("{\"revision\":\"2\",\"owner\":\"owner\",\"admins\":[\"admin\"],\"conversation_id\":\"conversation\",\"mode\":\"per_task\",\"fixed_leader\":null,\"members\":{\"a\":{\"scopes\":[\"project\"],\"permissions\":[\"read\"]},\"b\":{\"scopes\":[\"project\"],\"permissions\":[\"read\"]}}}")]]
+test parent_exact_revision_trigger_preserves_new_revision_but_undoes_configuration ... ok
+test parent_pending_register_recovery_reads_original_after_failure_and_restart_without_group ... ok
+TARGET=host_only RECEIPT=PendingOriginal GROUP=[[Some("ws"), Some("project"), Some("2"), Some("{\"revision\":\"2\",\"owner\":\"owner\",\"admins\":[\"admin\"],\"conversation_id\":\"conversation\",\"mode\":\"per_task\",\"fixed_leader\":null,\"members\":{\"a\":{\"scopes\":[\"project\"],\"permissions\":[\"read\"]},\"b\":{\"scopes\":[\"project\"],\"permissions\":[\"read\"]}}}")]]
+TARGET=fixed RECEIPT=PendingOriginal GROUP=[[Some("ws"), Some("project"), Some("2"), Some("{\"revision\":\"2\",\"owner\":\"owner\",\"admins\":[\"admin\"],\"conversation_id\":\"conversation\",\"mode\":\"per_task\",\"fixed_leader\":null,\"members\":{\"a\":{\"scopes\":[\"project\"],\"permissions\":[\"read\"]},\"b\":{\"scopes\":[\"project\"],\"permissions\":[\"read\"]}}}")]]
+test parent_configure_group_trigger_cannot_replace_intended_mode_and_leader ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 41 filtered out; finished in 0.02s
+

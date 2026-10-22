@@ -1,0 +1,25 @@
+
+running 20 tests
+test exact_budget_allows_zero_reservation_without_hiding_unknown_usage ... ok
+test explicit_modes_choose_task_leader_without_changing_default ... ok
+test coordinator_cannot_manage_and_wrong_leader_cannot_propose ... ok
+test all_modes_use_same_deterministic_host_gates ... ok
+test handoff_epoch_is_bounded_atomic_and_permissions_only_narrow ... ok
+test handoff_does_not_restore_permissions_when_returning_to_previous_leader ... ok
+test handoff_rejects_active_fixed_stopped_and_cross_scope_materials ... ok
+test parallel_results_keep_dissent_and_deduplicate_primary_sources ... ok
+test projection_and_advice_share_round_budget_and_capacity_boundaries ... ok
+test restored_limits_and_snapshot_fences_fail_closed ... ok
+test result_requires_original_host_receipt_artifact_and_matching_member ... ok
+test scheduling_projection_preserves_unknown_hold_and_stop_is_monotonic ... ok
+test scopes_budget_rounds_capacity_and_dag_are_not_bypassed ... ok
+test stale_epoch_results_are_archived_and_original_lookup_survives_handoff ... ok
+test second_parallel_advice_requires_updated_authoritative_ledger ... ok
+test stopped_and_deadline_preserve_lookup_without_dispatch ... ok
+test summaries_keep_artifact_and_speaker_attribution_and_failures ... ok
+test unknown_can_resolve_only_with_new_original_receipt_event ... ok
+test unknown_resolution_keeps_earlier_dissent_and_source_versions ... ok
+test unknown_submitted_prepared_and_child_unknown_gate_handoff_and_new_work ... ok
+
+test result: ok. 20 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

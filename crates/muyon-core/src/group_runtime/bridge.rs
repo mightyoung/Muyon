@@ -260,10 +260,37 @@ impl BusinessStore {
                 group_id,
                 intent_id,
             } => {
-                GroupScope::current(self, &s.project, &group_id)?;
+                id(&group_id)?;
                 id(&intent_id)?;
                 let rows=io(self.database().query("SELECT status,receipt FROM group_runtime_local_intents WHERE intent_id=? AND workspace=? AND project_id=? AND group_id=?",&[&intent_id,self.workspace_id(),&s.project,&group_id]))?;
                 let row = rows.first().ok_or(ContractError::NotFound)?;
+                let original = match self.group_original_command(&intent_id, &s.project, &group_id)
+                {
+                    Ok(command) => Some(command),
+                    Err(ContractError::Unknown) => None,
+                    Err(error) => return Err(error),
+                };
+                let submitter = original
+                    .as_ref()
+                    .is_some_and(|c| c.actor == GroupActor::Human(s.actor.clone()));
+                if !submitter {
+                    match GroupScope::current(self, &s.project, &group_id) {
+                        Ok(scope) => {
+                            let group = self.group_registration(&scope)?;
+                            if s.actor != group.owner && !group.admins.contains(&s.actor) {
+                                return Err(ContractError::InvalidAuthority);
+                            }
+                        }
+                        Err(ContractError::NotFound) => {
+                            return Err(if original.is_none() {
+                                ContractError::Unknown
+                            } else {
+                                ContractError::InvalidAuthority
+                            })
+                        }
+                        Err(error) => return Err(error),
+                    }
+                }
                 let status = cell(row, 0)?;
                 let receipt: Option<LocalReceipt> = row[1]
                     .as_deref()
@@ -284,7 +311,7 @@ impl BusinessStore {
                 } else {
                     status
                 };
-                json!({"local_intent":{"intent_id":intent_id,"status":status,"receipt":receipt,"recovery_action":if status=="pending_original"{"query_original_local_intent"}else{"none"}}})
+                json!({"local_intent":{"intent_id":intent_id,"status":status,"receipt":receipt,"identity_source":if submitter{"exact_original_command"}else{"current_group_management"},"recovery_action":if status=="pending_original"{"query_original_local_intent"}else{"none"}}})
             }
             ReadRequest::Workflow { group_id, run_id } => {
                 let scope = GroupScope::current(self, &s.project, &group_id)?;
