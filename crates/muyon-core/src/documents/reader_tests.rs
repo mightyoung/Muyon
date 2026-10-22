@@ -6,7 +6,7 @@ use std::{
     time::{SystemTime, UNIX_EPOCH},
 };
 
-fn setup() -> (Fixture, DocumentReaderHost, DocumentAccess) {
+pub(super) fn setup() -> (Fixture, DocumentReaderHost, DocumentAccess) {
     let fixture = Fixture::new();
     let (store, mut access) = fixture.setup();
     access.authority.generation = access.authority.generation.next().unwrap();
@@ -30,7 +30,7 @@ fn setup() -> (Fixture, DocumentReaderHost, DocumentAccess) {
         .unwrap();
     (fixture, DocumentReaderHost::new(store), access)
 }
-fn pins(store: &BusinessStore) -> usize {
+pub(super) fn pins(store: &BusinessStore) -> usize {
     store
         .database()
         .query("SELECT pin_id FROM blob_pins WHERE kind='reader'", &[])

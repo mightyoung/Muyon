@@ -12,6 +12,8 @@ mod history_tests;
 pub mod identity;
 pub mod reader;
 #[cfg(test)]
+mod presentation_tests;
+#[cfg(test)]
 mod reader_tests;
 pub mod storage;
 #[cfg(test)]
