@@ -127,6 +127,14 @@ fn deleted_pin_or_same_length_corruption_invalidates_session() {
 }
 
 #[test]
+fn corrupt_oversize_blob_length_is_rejected_without_creating_reader_pin() {
+    let (_f, mut host, access) = setup();
+    host.store().database().exec("UPDATE blobs SET byte_length=hex(zeroblob(100000))", &[]).unwrap();
+    assert!(host.open(&access, DocumentReadPurpose::ReadText).is_err());
+    assert_eq!(pins(host.store()), 0);
+}
+
+#[test]
 fn one_shot_view_is_live_bounded_and_tail_rechecks_expiry_before_delivery() {
     let (_f, host, access) = setup();
     let output = host.store().with_document_source(&access, DocumentReadPurpose::ReadText, 1024, |view| {

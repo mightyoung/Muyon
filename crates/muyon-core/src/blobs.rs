@@ -758,7 +758,7 @@ impl BusinessStore {
     ) -> Result<ControlledReader> {
         blob.validate()?;
         let rows = sql(self.database().query(
-            "SELECT byte_length FROM blobs WHERE digest=? AND state='ready'",
+            "SELECT CASE WHEN length(CAST(byte_length AS BLOB))<=20 THEN byte_length ELSE NULL END FROM blobs WHERE digest=? AND state='ready'",
             &[&blob.digest],
         ))?;
         if rows.is_empty() || cell(&rows[0], 0)? != blob.byte_length.as_str() {
