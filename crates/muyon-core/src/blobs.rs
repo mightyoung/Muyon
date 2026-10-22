@@ -875,7 +875,9 @@ impl BusinessStore {
             "SELECT 1 FROM blob_references WHERE project_id=? AND digest=? LIMIT 1",
             &[project, &blob.digest],
         ))?;
-        if refs.is_empty() { return Err(ContractError::NotFound); }
+        if refs.is_empty() {
+            return Err(ContractError::NotFound);
+        }
         self.open_reader_for(project, &random_id("snap_")?, blob)
     }
     pub(crate) fn verify_document_reader_in_transaction(
@@ -883,18 +885,24 @@ impl BusinessStore {
         tx: &Transaction<'_>,
         reader: &mut ControlledReader,
     ) -> Result<()> {
-        if !tx.belongs_to(self.database()) { return Err(ContractError::InvalidAuthority); }
+        if !tx.belongs_to(self.database()) {
+            return Err(ContractError::InvalidAuthority);
+        }
         self.check_reader(reader)?;
         let digest = hash_file(&mut reader.file, reader.source.blob.byte_length.value())?;
         io(reader.file.seek(SeekFrom::Start(reader.position)))?;
-        if digest != reader.source.blob.digest { return Err(ContractError::BindingMismatch); }
+        if digest != reader.source.blob.digest {
+            return Err(ContractError::BindingMismatch);
+        }
         Ok(())
     }
     /// Cleanup requires an actual nonconstructible reader, not document rights.
     /// It still works after revocation, deleted pins or corrupt/missing objects.
     pub(crate) fn release_document_reader(&self, reader: &ControlledReader) -> Result<()> {
         let source = reader.source();
-        if source.lease.owner_epoch != self.owner_epoch() { return Err(ContractError::InvalidAuthority); }
+        if source.lease.owner_epoch != self.owner_epoch() {
+            return Err(ContractError::InvalidAuthority);
+        }
         sql(self.database().exec(
             "DELETE FROM blob_pins WHERE pin_id=? AND owner_epoch=? AND snapshot_id=? AND digest=? AND kind='reader'",
             &[&source.lease.lease_id, self.owner_epoch(), &source.snapshot_id, &source.blob.digest],
