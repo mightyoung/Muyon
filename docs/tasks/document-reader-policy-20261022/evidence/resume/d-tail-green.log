@@ -1,0 +1,70 @@
+warning: suspicious definition of the runtime `read` symbol used by the standard library
+   --> /workspace/Muyon-reader-policy-d-verification/experiments/redesign/core-agent-lab/core/src/host_session.rs:132:124
+    |
+132 | ...ount: usize, timeout: i32) -> i32; fn read(fd: i32, buffer: *mut u8, count: usize) -> isize; fn write(fd: i32, buffer: *const u8...
+    |                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = note: expected `unsafe extern "C" fn(i32, *mut c_void, usize) -> isize` (for the current target)
+            found    `unsafe extern "C" fn(i32, *mut u8, usize) -> isize`
+    = help: either fix the signature or remove any attributes like `#[unsafe(no_mangle)]`, `#[unsafe(export_name = "read")]`, or `#[link_name = "read"]`
+    = help: allow this lint if the signature is compatible
+    = note: `#[warn(suspicious_runtime_symbol_definitions)]` on by default
+
+warning: suspicious definition of the runtime `write` symbol used by the standard library
+   --> /workspace/Muyon-reader-policy-d-verification/experiments/redesign/core-agent-lab/core/src/host_session.rs:132:182
+    |
+132 | ... *mut u8, count: usize) -> isize; fn write(fd: i32, buffer: *const u8, count: usize) -> isize; }
+    |                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = note: expected `unsafe extern "C" fn(i32, *const c_void, usize) -> isize` (for the current target)
+            found    `unsafe extern "C" fn(i32, *const u8, usize) -> isize`
+    = help: either fix the signature or remove any attributes like `#[unsafe(no_mangle)]`, `#[unsafe(export_name = "write")]`, or `#[link_name = "write"]`
+    = help: allow this lint if the signature is compatible
+
+warning: `muyon-core-agent-lab` (lib) generated 2 warnings
+   Compiling muyon-core v0.1.0 (/workspace/Muyon-reader-policy-d-verification/crates/muyon-core)
+warning: variant `Handoff` is never constructed
+   --> muyon-core/src/documents/reader.rs:119:81
+    |
+119 | pub(super) enum PolicyClosure { Natural, NaturalGrantExpiry, Explicit, Failure, Handoff }
+    |                 ------------- variant in this enum                              ^^^^^^^
+    |
+    = note: `PolicyClosure` has a derived impl for the trait `Clone`, but this is intentionally ignored during dead code analysis
+    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: method `policy_continue` is never used
+   --> muyon-core/src/documents/reader.rs:772:19
+    |
+204 | impl DocumentReaderHost {
+    | ----------------------- method in this implementation
+...
+772 |     pub(super) fn policy_continue(&mut self, previous: &PresentationTicket, access: &DocumentAccess, metadata: &DocumentMetadata) -...
+    |                   ^^^^^^^^^^^^^^^
+
+warning: function `save_terminal_root` is never used
+  --> muyon-core/src/documents/reading_policy/store.rs:73:15
+   |
+73 | pub(super) fn save_terminal_root(store:&BusinessStore,value:&RootRecord)->PolicyResult<()> {let changed=sql(store.database().exec("U...
+   |               ^^^^^^^^^^^^^^^^^^
+
+warning: `muyon-core` (lib test) generated 3 warnings
+    Finished `test` profile [unoptimized] target(s) in 7.37s
+     Running unittests src/lib.rs (crates/target/debug/deps/muyon_core-3347918e7222804d)
+
+running 13 tests
+test documents::reading_policy_kernel_tests::close_all_after_natural_session_cleanup_terminates_root ... ok
+test documents::reading_policy_kernel_tests::explicit_close_after_natural_session_cleanup_terminates_root ... ok
+test documents::reading_policy_kernel_tests::explicit_revoke_and_reactivation_cannot_unfence_an_established_root ... ok
+test documents::reading_policy_kernel_tests::child_issue_trigger_cannot_extend_shared_parent_expiry ... ok
+test documents::reading_policy_kernel_tests::late_old_selection_begin_cannot_adopt_or_close_new_selection ... ok
+test documents::reading_policy_kernel_tests::observe_does_not_disclose_other_document_generation ... ok
+test documents::reading_policy_kernel_tests::observe_reads_real_rows_without_opening_bytes_or_issuing_grants ... ok
+test documents::reading_policy_kernel_tests::lost_pin_failure_cannot_be_reclassified_by_later_grant_expiry ... ok
+test documents::reading_policy_kernel_tests::presentation_created_before_native_selection_cannot_be_adopted ... ok
+test documents::reading_policy_kernel_tests::pure_grant_expiry_at_cleanup_still_allows_same_root_prepare ... ok
+test documents::reading_policy_kernel_tests::issued_attempt_trigger_cannot_erase_canonical_observation ... ok
+test documents::reading_policy_kernel_tests::real_initial_render_begins_once_and_prepares_original_challenge_without_issuance ... ok
+test documents::reading_policy_kernel_tests::renewal_issues_owned_child_once_without_mutating_parent ... ok
+
+test result: ok. 13 passed; 0 failed; 0 ignored; 0 measured; 186 filtered out; finished in 0.08s
+

@@ -47,3 +47,43 @@ warning: function `save_terminal_root` is never used
 73 | pub(super) fn save_terminal_root(store:&BusinessStore,value:&RootRecord)->PolicyResult<()> {let changed=sql(store.database().exec("U...
    |               ^^^^^^^^^^^^^^^^^^
 
+warning: `muyon-core` (lib test) generated 3 warnings
+    Finished `test` profile [unoptimized] target(s) in 7.59s
+     Running unittests src/lib.rs (crates/target/debug/deps/muyon_core-3347918e7222804d)
+
+running 13 tests
+test documents::reading_policy_kernel_tests::explicit_close_after_natural_session_cleanup_terminates_root ... ok
+test documents::reading_policy_kernel_tests::close_all_after_natural_session_cleanup_terminates_root ... ok
+test documents::reading_policy_kernel_tests::explicit_revoke_and_reactivation_cannot_unfence_an_established_root ... ok
+test documents::reading_policy_kernel_tests::child_issue_trigger_cannot_extend_shared_parent_expiry ... FAILED
+test documents::reading_policy_kernel_tests::observe_does_not_disclose_other_document_generation ... ok
+test documents::reading_policy_kernel_tests::issued_attempt_trigger_cannot_erase_canonical_observation ... FAILED
+test documents::reading_policy_kernel_tests::lost_pin_failure_cannot_be_reclassified_by_later_grant_expiry ... ok
+test documents::reading_policy_kernel_tests::late_old_selection_begin_cannot_adopt_or_close_new_selection ... ok
+test documents::reading_policy_kernel_tests::observe_reads_real_rows_without_opening_bytes_or_issuing_grants ... ok
+test documents::reading_policy_kernel_tests::presentation_created_before_native_selection_cannot_be_adopted ... ok
+test documents::reading_policy_kernel_tests::pure_grant_expiry_at_cleanup_still_allows_same_root_prepare ... ok
+test documents::reading_policy_kernel_tests::real_initial_render_begins_once_and_prepares_original_challenge_without_issuance ... ok
+test documents::reading_policy_kernel_tests::renewal_issues_owned_child_once_without_mutating_parent ... ok
+
+failures:
+
+---- documents::reading_policy_kernel_tests::child_issue_trigger_cannot_extend_shared_parent_expiry stdout ----
+
+thread 'documents::reading_policy_kernel_tests::child_issue_trigger_cannot_extend_shared_parent_expiry' (1415) panicked at muyon-core/src/documents/reading_policy_kernel_tests.rs:134:2:
+assertion failed: host.renew(&mut reader, &request).is_err()
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+---- documents::reading_policy_kernel_tests::issued_attempt_trigger_cannot_erase_canonical_observation stdout ----
+
+thread 'documents::reading_policy_kernel_tests::issued_attempt_trigger_cannot_erase_canonical_observation' (1419) panicked at muyon-core/src/documents/reading_policy_kernel_tests.rs:122:2:
+accepted observation_id=NULL
+
+
+failures:
+    documents::reading_policy_kernel_tests::child_issue_trigger_cannot_extend_shared_parent_expiry
+    documents::reading_policy_kernel_tests::issued_attempt_trigger_cannot_erase_canonical_observation
+
+test result: FAILED. 11 passed; 2 failed; 0 ignored; 0 measured; 186 filtered out; finished in 0.08s
+
+error: test failed, to rerun pass `-p muyon-core --lib`

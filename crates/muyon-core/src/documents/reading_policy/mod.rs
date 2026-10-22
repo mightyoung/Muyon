@@ -151,6 +151,7 @@ impl ReadingPolicyHost {
             let previous=self.ticket(&root)?;
             let actual=reader.store().reading_policy_grant_record_in_transaction(&tx,&root.current.access.authority.grant_id)?.ok_or(ContractError::InvalidAuthority)?;
             reader.policy_predecessor(&tx,&previous,actual.expires_at_ms<=self.now()?)?;
+            let frozen_parent=reader.store().reading_policy_grant_record_in_transaction(&tx,&root.parent.access.authority.grant_id)?.ok_or(ContractError::InvalidAuthority)?;
             let plan=reader.store().prepare_document_source_mutation_in_transaction(&tx,&[&root.metadata.document])?;
             store::begin_renew_guard(reader.store(),&root)?;
             let now=self.now()?;
@@ -168,6 +169,7 @@ impl ReadingPolicyHost {
             validate_root(reader.store(),&tx,&root,true)?;
             store::assert_root(reader.store(),&root,false)?;store::assert_attempt(reader.store(),&attempt)?;
             reader.store().verify_document_source_mutation_in_transaction(&tx,&source_tail)?;
+            if reader.store().reading_policy_grant_record_in_transaction(&tx,&root.parent.access.authority.grant_id)?.as_ref()!=Some(&frozen_parent){return Err(ContractError::InvalidAuthority);}
             if started.elapsed()>FRESH{return Err(ContractError::Cancelled);}
             let handoff_started=Instant::now();
             tx.commit().map_err(|_|ContractError::Unknown)?;
