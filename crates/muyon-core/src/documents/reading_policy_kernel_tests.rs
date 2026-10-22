@@ -91,3 +91,23 @@ fn observe_does_not_disclose_other_document_generation(){
  let mut wanted=access;wanted.authority.generation=wanted.authority.generation.next().unwrap();
  assert_eq!(host.observe(&mut reader,&PolicyObserveRequest{scope:scope(),access:wanted}).unwrap().availability,PolicyAvailability::Unavailable);
 }
+#[test]
+fn pure_grant_expiry_at_cleanup_still_allows_same_root_prepare(){
+ let(_f,mut reader,access)=setup();let mut host=ReadingPolicyHost::open(&mut reader).unwrap();host.selection_changed(&mut reader,&scope(),&Revision::new(1)).unwrap();
+ let info=reader.open_presentation(&access).unwrap();let begun=host.begin(&mut reader,&request(&access,&info,"begin"),&info.status.ticket,&Revision::new(1)).unwrap();
+ reader.store().database().exec("UPDATE document_grants SET expires_at_ms='0'",&[]).unwrap();assert!(reader.check_presentation(&info.status.ticket).is_err());
+ assert_eq!(host.prepare(&mut reader,&prepare_request(&access,&begun,"natural")).unwrap().status,PolicyOutcomeStatus::Prepared);
+}
+#[test]
+fn renewal_issues_owned_child_once_without_mutating_parent(){
+ let(_f,mut reader,access)=setup();let mut host=ReadingPolicyHost::open(&mut reader).unwrap();host.selection_changed(&mut reader,&scope(),&Revision::new(1)).unwrap();
+ let info=reader.open_presentation(&access).unwrap();let begun=host.begin(&mut reader,&request(&access,&info,"begin"),&info.status.ticket,&Revision::new(1)).unwrap();
+ let parent=reader.store().database().query("SELECT * FROM document_grants WHERE grant_id=?",&[&access.authority.grant_id]).unwrap();
+ let prepared=host.prepare(&mut reader,&prepare_request(&access,&begun,"renew")).unwrap();
+ let request=PolicyRenewRequest{scope:scope(),root_id:begun.root_id.unwrap(),expected_root_revision:Revision::new(1),original_attempt_id:"renew".into(),challenge_id:prepared.challenge_id.unwrap(),surface_binding:surface(),observation_id:"observed-now".into()};
+ let issued=host.renew(&mut reader,&request).unwrap();assert_eq!(issued.status,PolicyOutcomeStatus::Issued);assert_ne!(issued.access.as_ref().unwrap().authority.grant_id,access.authority.grant_id);
+ assert_eq!(reader.store().database().query("SELECT * FROM document_grants WHERE grant_id=?",&[&access.authority.grant_id]).unwrap(),parent);
+ assert!(reader.check_presentation(&info.status.ticket).is_err());
+ let historical=host.renew(&mut reader,&request).unwrap();assert!(historical.historical);assert_eq!(issued.outcome_id,historical.outcome_id);assert_eq!(issued.expires_at_ms,historical.expires_at_ms);
+ let mut altered=request;altered.observation_id="different".into();assert!(host.renew(&mut reader,&altered).is_err());
+}
