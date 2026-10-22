@@ -10,6 +10,9 @@ import com.mightyoung.muyon.product.ui.shell.ConversationHeader
 import com.mightyoung.muyon.product.ui.shell.ShellInputDock
 import com.mightyoung.muyon.product.ui.shell.LocalShellDrafts
 import com.mightyoung.muyon.product.ui.shell.ReadOnlySnapshot
+import com.mightyoung.muyon.product.ui.shell.RequestCandidate
+import com.mightyoung.muyon.product.ui.shell.RequestCandidatePanel
+import com.mightyoung.muyon.product.ui.shell.decodeRequestCandidate
 import com.mightyoung.muyon.product.ui.shell.ReadOnlySnapshotPanel
 import com.mightyoung.muyon.product.ui.shell.decodeReadOnlySnapshot
 import androidx.compose.ui.Modifier
@@ -169,8 +172,11 @@ private fun ChatConversation(client: ProductClient, projectId: String?, conversa
             }
         }
     }
-    fun readOriginalSnapshot() {
-        val request = original ?: return
+    var requestCandidate by remember { mutableStateOf<RequestCandidate?>(null) }
+    fun readOriginalSnapshot(candidate: RequestCandidate? = null) {
+        val request = candidate?.snapshot?.requestId ?: original ?: return
+        if (request != original) return
+        if (snapshotReading) return
         val generation = snapshotGeneration ?: return
         val selectedConversation = conversation
         val selectedProject = projectId
@@ -186,13 +192,16 @@ private fun ChatConversation(client: ProductClient, projectId: String?, conversa
                 snapshotReading = false; snapshotNotice = "当前工作台身份未取得，只读快照暂不可用。"
                 return@healthReply
             }
-            scopedCall("chat_snapshot", JSONObject().put("request_id", request)
+            scopedCall(if (candidate == null) "chat_card_candidates" else "chat_snapshot", JSONObject().put("request_id", request)
                 .put("conversation_id", selectedConversation).put("project_id", selectedProject ?: JSONObject.NULL)
                 .put("scope_generation", generation)) snapshotReply@{ reply ->
                 if (!stillSelected()) return@snapshotReply
                 val data = reply.optJSONObject("data")
-                val decoded = if (reply.optString("status") == "ok" && data != null)
+                val decodedCandidate = if (candidate == null && reply.optString("status") == "ok" && data != null)
+                    decodeRequestCandidate(data, workspace, selectedConversation, selectedProject, generation, request) else null
+                val decoded = if (candidate == null) decodedCandidate?.snapshot else if (reply.optString("status") == "ok" && data != null)
                     decodeReadOnlySnapshot(data, workspace, selectedConversation, selectedProject, generation, request) else null
+                if (decodedCandidate != null) requestCandidate = decodedCandidate
                 snapshotReading = false
                 if (decoded != null) readOnlySnapshot = decoded
                 else snapshotNotice = "当前会话缺少有效只读来源或作用域已变化；原请求身份保留，可使用原结果查询。"
@@ -284,13 +293,12 @@ private fun ChatConversation(client: ProductClient, projectId: String?, conversa
                     tool = selectedTool; offset = selectedOffset; error = ""
                 }
             } else {
-                error = "本地读取未完成，请检查项目或重新连接。"
-                records = emptyList()
+                error = "本地读取未完成，以下保留上次读取内容；请检查项目或重新连接。"
             }
         }
     }
     LaunchedEffect(original, conversation) {
-        readOnlySnapshot = null; snapshotNotice = ""; snapshotReading = false
+        readOnlySnapshot = null; requestCandidate = null; snapshotNotice = ""; snapshotReading = false
     }
     LaunchedEffect(client, conversation) { refreshStatus() }
     LaunchedEffect(client, projectId) {
@@ -340,6 +348,9 @@ private fun ChatConversation(client: ProductClient, projectId: String?, conversa
                 if (usageDetails.isNotBlank()) Text(usageDetails, style = MaterialTheme.typography.bodySmall)
                 ReadOnlySnapshotPanel(readOnlySnapshot?.takeIf { it.requestId == original }, snapshotNotice, snapshotReading,
                     if (scopeReady && snapshotGeneration != null) ({ readOriginalSnapshot() }) else null)
+                requestCandidate?.takeIf { it.snapshot.requestId == original }?.let { candidate ->
+                    RequestCandidatePanel(candidate, !snapshotReading && scopeReady) { readOriginalSnapshot(candidate) }
+                }
                 TextButton(onClick = { scopedCall("chat_cancel", JSONObject().put("request_id", original)) { observe() } }) { Text("取消原请求") }
             }
         requestObservation?.let { ChatRequestActivity(it) }

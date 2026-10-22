@@ -1,0 +1,3 @@
+Exception in thread "main" java.lang.IllegalStateException: real host candidate must decode
+	at com.mightyoung.muyon.product.ui.shell.RequestCandidateChecksKt.main(RequestCandidateChecks.kt:31)
+	at com.mightyoung.muyon.product.ui.shell.RequestCandidateChecksKt.main(RequestCandidateChecks.kt)

@@ -1,0 +1,3 @@
+Exception in thread "main" java.lang.IllegalStateException: actual local save must return a persisted draft receipt
+	at com.mightyoung.muyon.product.ui.shell.ConfigurationDraftStoreChecksKt.main(ConfigurationDraftStoreChecks.kt:15)
+	at com.mightyoung.muyon.product.ui.shell.ConfigurationDraftStoreChecksKt.main(ConfigurationDraftStoreChecks.kt)

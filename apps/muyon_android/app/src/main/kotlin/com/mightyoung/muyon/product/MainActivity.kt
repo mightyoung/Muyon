@@ -3,6 +3,7 @@ package com.mightyoung.muyon.product
 import android.os.Bundle
 import androidx.lifecycle.ViewModelProvider
 import com.mightyoung.muyon.product.ui.shell.ShellConfigurationState
+import com.mightyoung.muyon.product.ui.shell.configurationBufferScope
 import com.mightyoung.muyon.product.ui.shell.ConfigurationPreviewHost
 import com.mightyoung.muyon.product.ui.shell.DocumentCapabilitiesScreen
 import androidx.activity.ComponentActivity
@@ -36,6 +37,7 @@ class MainActivity : ComponentActivity() {
     private val configurationDrafts by lazy { ViewModelProvider(this)[ShellConfigurationState::class.java] }
     private var connected by mutableStateOf(false)
     private var initialized by mutableStateOf(false)
+    private var workspaceId by mutableStateOf<String?>(null)
     private var existing by mutableStateOf(false)
     private var status by mutableStateOf("正在连接本地内核")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -45,8 +47,9 @@ class MainActivity : ComponentActivity() {
             connected = ready
             if (ready) { existing = client.workspaceExists; client.call("health") { reply ->
                 initialized = reply.optString("status") == "ok"
+                workspaceId = if (initialized) (reply.optJSONObject("data")?.opt("workspace") as? String)?.takeIf { it.isNotBlank() } else null
                 status = if (initialized) "本地工作台已连接" else if (existing) "工作台暂不可用，请重试连接" else "请创建新工作台"
-            } } else { initialized = false; status = "连接已断开；未确认的操作请查询原结果" }
+            } } else { initialized = false; workspaceId = null; status = "连接已断开；未确认的操作请查询原结果" }
         }
         setContent {
             FoundationTheme {
@@ -124,6 +127,7 @@ class MainActivity : ComponentActivity() {
                         if (connected && !initialized) Button(onClick = {
                             client.call(if (existing) "health" else "initialize") { reply ->
                                 initialized = reply.optString("status") == "ok"
+                                workspaceId = if (initialized) (reply.optJSONObject("data")?.opt("workspace") as? String)?.takeIf { it.isNotBlank() } else null
                                 if (initialized) existing = true
                                 status = if (initialized) "本地工作台已连接" else reply.optString("error")
                             }
@@ -137,8 +141,16 @@ class MainActivity : ComponentActivity() {
                                 "documents" -> DocumentCapabilitiesScreen { tab = "research" }
                                 "configuration" -> {
                                     val project = getSharedPreferences("muyon_product_research_v2", 0).getString("project_id", null)
-                                    val scope = "local-preview:${packageName}:${project?.length ?: -1}:${project.orEmpty()}"
-                                    ConfigurationPreviewHost(configurationDrafts.forScope(scope)) { tab = "agents" }
+                                    val preference = if (conversationKey == "default") "conversation" else "conversation:$conversationKey"
+                                    val conversation = getSharedPreferences("product-chat-state", 0).getString(preference, null)?.takeIf { it.isNotBlank() }
+                                    val workspace = workspaceId
+                                    if (workspace == null || conversation == null) {
+                                        Text("配置草稿缺少已核实的工作台或会话身份，请先打开对应对话。", Modifier.padding(20.dp))
+                                        TextButton(onClick = { tab = "chat" }) { Text("返回对话") }
+                                    } else {
+                                        val scope = configurationBufferScope(workspace, conversation, project)
+                                        ConfigurationPreviewHost(configurationDrafts.forScope(scope), client, workspace, conversation, project) { tab = "agents" }
+                                    }
                                 }
                                 "agents" -> AgentLibraryScreen { agentId, groupId ->
                                     try {

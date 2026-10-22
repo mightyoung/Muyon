@@ -14,14 +14,14 @@ class ConfigurationPreviewHostTest {
         compose.onNodeWithText("打开现有项目资料").performScrollTo().assertIsEnabled()
     }
 
-    @Test fun previewEntryRetainsLocalEditorAndDoesNotOfferCreation() {
+    @Test fun previewEntryRetainsUnsentTextAndDoesNotOfferCreation() {
         val state = ShellConfigurationState().forScope("test-local-preview")
         compose.setContent { ConfigurationPreviewHost(state) {} }
         compose.onNodeWithText("Bot 配置预览").performClick()
-        compose.onNodeWithText("名称（最多60字符）").performTextInput("用户草稿")
+        compose.onNodeWithText("名称").performTextInput("用户草稿")
         compose.onNodeWithText("稍后配置 · 保留内存草稿").performScrollTo().performClick()
         compose.onNodeWithText("Bot 配置预览").performClick()
-        compose.onNodeWithText("名称（最多60字符）").assertTextContains("用户草稿")
+        compose.onNodeWithText("名称").assertTextContains("用户草稿")
         compose.onNodeWithText("稍后配置 · 保留内存草稿").performScrollTo().performClick()
         compose.onNodeWithText("群组配置预览").performClick()
         compose.onNodeWithText("请选择协作方式；没有默认选择。").assertExists()

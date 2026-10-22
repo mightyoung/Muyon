@@ -89,3 +89,15 @@ not magically implement missing typed producers, document gateway/engine, durabl
 annotation/create semantics or full-card integration. Both categories remain separately
 tracked until closed. Historical2 unknown / ¥0.002620 remains unchanged; Leader B
 alone merges develop, no main/develop edits or live/paid/external model requests.
+
+## Memory/candidate slice update
+
+Host a175 is now composed. Shell's production memory configuration flow and explicit
+original-request candidates are implemented, with actual real-host JVM checks and
+independent review; HOST-SHELL-BATCH.md records exact limits. Passive recovery ID
+survives navigation without retaining session handles. Formal persisted draft APIs
+remain another host-owner slice; no competing local store is integrated. The reader
+worker exclusively owns product/ui/documents and will deliver the actual PDF/anchor/
+zoom/annotation interface. Public document preview is pending that concrete interface,
+not a reason to withhold this independent memory/candidate commit. Overall U01–U17
+completion and Android runtime acceptance remain open.

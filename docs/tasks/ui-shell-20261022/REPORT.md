@@ -174,3 +174,11 @@ Final full project command after authored adapters and combined dependencies:
 with the same explicit temporary Gradle/cache settings — FAILED exit1 before
 product compilation, same AGP8.11.1 resolution prerequisite. Retained as
 `evidence/android-final-suite.log`. No individual Android test executed.
+
+## Host-backed continuation slice
+
+See [HOST-SHELL-BATCH.md](HOST-SHELL-BATCH.md) for actual memory configuration,
+original-request candidates, exact tests, retained failures and remaining ownership
+boundaries. It supersedes the earlier UI-only Bot editor path; formal persistence/
+creation/run remain unavailable. This is another reviewable slice, not overall UI
+completion. Document preview integration follows the separate reader owner's API.

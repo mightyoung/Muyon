@@ -45,3 +45,9 @@ permission expansion, deployment, paid CI dispatch, force push, branch deletion 
 main/develop modification. Historical2 unknown / ¥0.002620 hold unchanged.
 Leader B remains sole develop merger. This checkpoint is for review, not merge or
 all-UI completion.
+
+Next fixed slice: HOST-SHELL-BATCH.md and HOST-SHELL-INDEPENDENT-REVIEW.md. The Bot
+production host now consumes a175's single memory reducer with passive original-ID
+recovery. Do not reintroduce a UI-owned reducer or standalone file-store truth.
+Candidate reads are explicit and cannot enable typed-card actions. Document owner
+exclusively owns product/ui/documents; shell owns final MainActivity/ChatScreen wire.
