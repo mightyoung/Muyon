@@ -17,6 +17,16 @@ use std::{
     sync::{Arc, Mutex},
 };
 
+mod document_bridge;
+pub use document_bridge::{
+    DocumentAccessRequest, DocumentEvidenceAnswerRequest, DocumentEvidenceKind,
+    DocumentEvidenceUseRequest, DocumentReadChunkResult, DocumentReadOperation,
+    DocumentReadUseRequest, DocumentReaderScope,
+};
+use document_bridge::DocumentBridge;
+#[cfg(test)]
+mod document_bridge_tests;
+
 uniffi::setup_scaffolding!();
 
 /// Private host snapshot for a new, not-yet-released prepare API. Fields are
@@ -77,7 +87,7 @@ struct Prepared {
     dispatched: bool,
 }
 struct State {
-    store: BusinessStore,
+    store: DocumentBridge,
     agent: Option<AgentOwner>,
     prepared: BTreeMap<String, Prepared>,
     readers: BTreeMap<String, ControlledReader>,
@@ -132,13 +142,14 @@ impl ProductCore {
         } else {
             None
         };
+        let document_store = DocumentBridge::new(store, workspace.clone(), epoch.clone());
         Ok(Arc::new(Self {
             workspace,
             epoch,
             agent_path,
             workflow_path: root.join("agent-workflows-v1.sqlite"),
             state: Mutex::new(State {
-                store,
+                store: document_store,
                 agent,
                 prepared: BTreeMap::new(),
                 readers: BTreeMap::new(),
@@ -297,6 +308,48 @@ impl ProductCore {
         )
         .map_err(|code| ProductError::Failure { code: code.into() })?;
         encode(&value)
+    }
+
+    /// Private trusted Service only: exact existing grant references, no issuer.
+    pub fn document_metadata(&self, request: DocumentAccessRequest) -> Result<String, ProductError> {
+        document_call(self, |bridge| bridge.metadata(request))
+    }
+    pub fn document_annotations(&self, request: DocumentAccessRequest) -> Result<String, ProductError> {
+        document_call(self, |bridge| bridge.annotations(request))
+    }
+    pub fn document_read_open(&self, request: DocumentAccessRequest, purpose: DocumentReadOperation) -> Result<String, ProductError> {
+        document_call(self, |bridge| bridge.open(request, purpose))
+    }
+    pub fn document_read_check(&self, request: DocumentReadUseRequest) -> Result<String, ProductError> {
+        document_call(self, |bridge| bridge.check(request))
+    }
+    pub fn document_read_chunk(&self, request: DocumentReadUseRequest, max_bytes: u32) -> Result<DocumentReadChunkResult, ProductError> {
+        document_call(self, |bridge| bridge.chunk(request, max_bytes))
+    }
+    pub fn document_read_close(&self, request: DocumentReadUseRequest) -> Result<(), ProductError> {
+        document_call(self, |bridge| bridge.close(request))
+    }
+    pub fn document_read_release_owner(&self, service_session: String) -> Result<(), ProductError> {
+        document_call(self, |bridge| bridge.release_owner(&service_session))
+    }
+    /// Service lifecycle only: invalidate all document outputs and retry cleanup.
+    pub fn document_read_shutdown(&self) -> Result<(), ProductError> {
+        document_call(self, DocumentBridge::shutdown)
+    }
+    pub fn document_evidence_process(&self, request: DocumentAccessRequest, kind: DocumentEvidenceKind) -> Result<String, ProductError> {
+        document_call(self, |bridge| bridge.process(request, kind))
+    }
+    pub fn document_evidence_query(&self, context: DocumentEvidenceUseRequest, query: String, limit: u32) -> Result<String, ProductError> {
+        document_call(self, |bridge| bridge.query(context, query, limit))
+    }
+    pub fn document_evidence_quote(&self, context: DocumentEvidenceUseRequest, query_id: String, evidence_id: String) -> Result<String, ProductError> {
+        document_call(self, |bridge| bridge.quote(context, query_id, evidence_id))
+    }
+    pub fn document_evidence_answer(&self, request: DocumentEvidenceAnswerRequest) -> Result<String, ProductError> {
+        document_call(self, |bridge| bridge.answer(request))
+    }
+    pub fn document_evidence_close(&self, context: DocumentEvidenceUseRequest) -> Result<(), ProductError> {
+        document_call(self, |bridge| bridge.close_evidence(context))
     }
 
     pub fn agent_availability(&self) -> Result<String, ProductError> {
@@ -978,6 +1031,16 @@ impl ProductCore {
             .ok_or(ContractError::NotFound)?;
         Ok(state.store.close_blob_reader(reader)?)
     }
+}
+
+fn document_call<T>(
+    core: &ProductCore,
+    operation: impl FnOnce(&mut DocumentBridge) -> Result<T, ProductError>,
+) -> Result<T, ProductError> {
+    let mut state = core.state.lock().map_err(|_| ProductError::Failure {
+        code: "DOCUMENT_UNAVAILABLE".into(),
+    })?;
+    operation(&mut state.store)
 }
 
 fn agent_error(code: &'static str) -> ProductError {
