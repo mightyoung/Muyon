@@ -1,0 +1,5 @@
+2026-10-22 07:28:53.638077+00:00
+Static review identified legacy close/is_current bypass of page generation; tests added before fix.
+$ cargo test --offline --locked --manifest-path crates/Cargo.toml -p muyon-core --lib stale_page_callback
+[Errno 2] No such file or directory: 'cargo'
+exit=127 NOT_RUN, no actual RED.

@@ -267,7 +267,7 @@ impl DocumentReaderHost {
             .map(|(key, _)| key.clone())
             .collect();
         for key in expired {
-            self.close(&key)?;
+            self.close_session(&key)?;
         }
         Ok(())
     }
@@ -445,7 +445,7 @@ impl DocumentReaderHost {
     pub fn open_presentation(&mut self, access: &DocumentAccess) -> Result<DocumentPresentationInfo> {
         if self.poisoned { return Err(ContractError::Unknown.into()); }
         let previous: Vec<_> = self.sessions.iter().filter(|(_, session)| session.presentation.is_some()).map(|(id, _)| id.clone()).collect();
-        for id in previous { self.close(&id)?; }
+        for id in previous { self.close_session(&id)?; }
         let session = self.open(access, DocumentReadPurpose::Render)?;
         self.sessions.get_mut(&session.session_id).ok_or(ContractError::NotFound)?.presentation = Some(PresentationState { generation: Revision::new(1), active: true });
         let ticket = PresentationTicket { session_id: session.session_id.clone(), document: access.document.clone(), authority: access.authority.clone(), generation: Revision::new(1) };
@@ -488,12 +488,15 @@ impl DocumentReaderHost {
     pub fn close_presentation(&mut self, ticket: &PresentationTicket) -> Result<()> {
         if !self.sessions.contains_key(&ticket.session_id) { return Ok(()); }
         self.require_presentation_ticket(ticket, false)?;
-        self.close(&ticket.session_id)
+        self.close_session(&ticket.session_id)
     }
     pub fn take_presentation_invalidations(&mut self) -> PresentationInvalidations {
         std::mem::take(&mut self.presentation_invalidations)
     }
     pub fn is_current(&mut self, id: &str) -> Result<bool> {
+        if self.sessions.get(id).is_some_and(|session| session.presentation.is_some()) {
+            return Err(ContractError::UnsupportedOperation.into());
+        }
         self.sweep()?;
         let Some(mut session) = self.sessions.remove(id) else {
             return Ok(false);
@@ -524,6 +527,12 @@ impl DocumentReaderHost {
         }
     }
     pub fn close(&mut self, id: &str) -> Result<()> {
+        if self.sessions.get(id).is_some_and(|session| session.presentation.is_some()) {
+            return Err(ContractError::UnsupportedOperation.into());
+        }
+        self.close_session(id)
+    }
+    fn close_session(&mut self, id: &str) -> Result<()> {
         match self.sessions.remove(id) {
             Some(session) => self.release(session, Ok(())),
             None => Ok(()),

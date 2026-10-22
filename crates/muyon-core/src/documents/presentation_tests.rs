@@ -48,6 +48,8 @@ fn stale_page_callback_cannot_show_or_close_new_frame() {
     let next = host.advance_presentation_frame(&opened.status.ticket).unwrap();
     assert!(host.check_presentation(&opened.status.ticket).is_err());
     assert!(host.close_presentation(&opened.status.ticket).is_err());
+    assert!(host.close(opened.status.ticket.session_id()).is_err(), "legacy callback must not bypass presentation generation");
+    assert!(host.is_current(opened.status.ticket.session_id()).is_err());
     assert_eq!(host.check_presentation(&next.ticket).unwrap().phase, PresentationPhase::Ready);
     assert_eq!(pins(host.store()), 1);
 }
