@@ -392,10 +392,19 @@ impl BusinessStore {
         if changed != 1 {
             return Err(ContractError::RevisionConflict);
         }
-        let metadata = DocumentMetadata { document, title, blob };
+        let metadata = DocumentMetadata {
+            document,
+            title,
+            blob,
+        };
         sql(self.database().exec(
             "INSERT INTO document_revisions VALUES(?,?,?,?)",
-            &[project, base.document_id(), revision.as_str(), &encode(&metadata)?],
+            &[
+                project,
+                base.document_id(),
+                revision.as_str(),
+                &encode(&metadata)?,
+            ],
         ))?;
         Ok(metadata)
     }
