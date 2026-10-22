@@ -1,7 +1,5 @@
 //! Same-crate source harness exercises actual pub(crate) BusinessStore seams.
 #![allow(dead_code)]
-#[path = "../src/documents/mod.rs"]
-mod documents;
 #[path = "../src/agent/mod.rs"]
 mod agent;
 #[path = "../src/archive.rs"]
@@ -12,6 +10,8 @@ mod blobs;
 mod business;
 #[path = "../src/contract.rs"]
 mod contract;
+#[path = "../src/documents/mod.rs"]
+mod documents;
 #[path = "../src/group_runtime/store.rs"]
 mod group_runtime_store;
 #[path = "../src/research.rs"]
