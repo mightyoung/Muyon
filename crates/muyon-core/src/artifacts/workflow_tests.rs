@@ -193,3 +193,19 @@ fn receipt_tail_invalidation_rolls_back_all_effects_and_preserves_original_pendi
         assert_eq!(s.read_document(&out).unwrap(), before_document);
     }
 }
+#[test]
+fn effect_unknown_uses_original_lookup_without_writing_a_rejection() {
+    use super::save_journal::ArtifactSaveFailure;
+    let f = Fixture::new(); let (s, out, source) = f.setup(); s.initialize_artifact_workflows_trusted().unwrap(); let p = all_access(&s);
+    s.database().exec("CREATE TRIGGER fail_artifact BEFORE INSERT ON artifact_revisions BEGIN SELECT RAISE(ABORT,'synthetic'); END", &[]).unwrap();
+    s.submit_artifact_save_trusted("unknown-hook", &p, &archive("artifact"), &out, &[source]).unwrap();
+    let rows = s.database().query("SELECT binding_digest FROM artifact_save_intents_v1 WHERE intent_id='unknown-hook'", &[]).unwrap();
+    let digest = rows[0][0].as_deref().unwrap();
+    let before = s.database().query("SELECT * FROM artifact_save_intents_v1", &[]).unwrap();
+    // Inject a future hook's Unknown into the real production failure dispatcher.
+    let result = s.artifact_save_failure_outcome("unknown-hook", digest, ArtifactSaveFailure::from(ContractError::Unknown)).unwrap();
+    assert_eq!(result.status, ArtifactSaveStatus::Unknown); assert_eq!(result.error, Some(ContractError::Unknown));
+    assert_eq!(result.recovery_action, RecoveryAction::QueryOriginal); assert!(result.receipt.is_none());
+    assert_eq!(s.database().query("SELECT * FROM artifact_save_intents_v1", &[]).unwrap(), before);
+    assert_eq!(s.lookup_artifact_save("unknown-hook", &p).unwrap().status, ArtifactSaveStatus::Unknown);
+}
