@@ -1,0 +1,14 @@
+import datetime,hashlib,json,pathlib,subprocess,sys
+phase=sys.argv[1];root=pathlib.Path(sys.argv[2]);branch=sys.argv[3];base=pathlib.Path('/workspace/Muyon-document-verification/docs/tasks/document-core-contracts-20261022/independent-verification/reader-presentation-20261022');out=base/phase/'format';out.mkdir(exist_ok=True);m=json.loads((base/phase/'manifest.json').read_text());assert all(c['exit_status']==0 for c in m['commands'] if c['label']!='scoped-fmt');assert next(c['exit_status'] for c in m['commands'] if c['label']=='scoped-fmt')==1
+old=subprocess.check_output(['git','rev-parse','HEAD'],cwd=root,text=True).strip();assert old==m['source_commit'];files=[p for p in m['source_sha256'] if p.endswith('.rs') and p!='crates/muyon-core/src/lib.rs'];scratch=pathlib.Path('/tmp/muyon-reader-'+phase+'-format-expected');changes=['crates/muyon-core/src/documents/mod.rs','crates/muyon-core/src/documents/reader.rs','crates/muyon-core/src/documents/presentation_tests.rs']
+for p in files:
+ d=scratch/p;d.parent.mkdir(parents=True,exist_ok=True);raw=(root/p).read_bytes();assert hashlib.sha256(raw).hexdigest()==m['source_sha256'][p];d.write_bytes(raw)
+argv=['/tmp/muyon-rust/bin/rustfmt','--edition','2021',*[str(scratch/p) for p in changes]];start=datetime.datetime.now(datetime.timezone.utc).isoformat();r=subprocess.run(argv,capture_output=True);(out/'formatter.stdout.log').write_bytes(r.stdout);(out/'formatter.stderr.log').write_bytes(r.stderr);assert r.returncode==0,r.stderr
+expected_changed=[p for p in files if (root/p).read_bytes()!=(scratch/p).read_bytes()];assert sorted(expected_changed)==sorted(changes)
+subprocess.run(['git','switch','-c',branch],cwd=root,check=True)
+for p in changes:(root/p).write_bytes((scratch/p).read_bytes())
+rows=[]
+for p in files:
+ a=(root/p).read_bytes();b=(scratch/p).read_bytes();assert a==b;rows.append({'path':p,'before_sha256':m['source_sha256'][p],'formatted_sha256':hashlib.sha256(a).hexdigest(),'equal_to_actual_rustfmt_output':True,'changed':p in changes})
+subprocess.run(['git','diff','--check'],cwd=root,check=True);subprocess.run(['git','add',*changes],cwd=root,check=True);subprocess.run(['git','commit','-m','style(reader): format '+phase+' source without behavior changes'],cwd=root,check=True);head=subprocess.check_output(['git','rev-parse','HEAD'],cwd=root,text=True).strip()
+(out/'format-proof.json').write_text(json.dumps({'source_parent':old,'format_commit':head,'branch':branch,'argv':argv,'start_utc':start,'end_utc':datetime.datetime.now(datetime.timezone.utc).isoformat(),'exit_status':r.returncode,'files':rows,'changed_paths':changes,'scope':'Only exact rustfmt old-source output applied to three paths; no logic/test expectation changes.'},indent=2)+'\n');(out/'format-commit.patch').write_bytes(subprocess.check_output(['git','format-patch','-1','--stdout',head],cwd=root));print(head)

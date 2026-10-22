@@ -1,0 +1,52 @@
+{
+  "commands": [
+    {
+      "argv": [
+        "git",
+        "rev-parse",
+        "HEAD"
+      ],
+      "cwd": "/workspace/Muyon-reader-presentation-verification",
+      "exit_status": 0,
+      "utc": "2026-10-22T07:41:27.311643+00:00"
+    },
+    {
+      "argv": [
+        "git",
+        "status",
+        "--short"
+      ],
+      "cwd": "/workspace/Muyon-reader-presentation-verification",
+      "exit_status": 0,
+      "utc": "2026-10-22T07:41:27.328377+00:00"
+    },
+    {
+      "argv": [
+        "git",
+        "diff",
+        "ee184fc1dd90faf2c3cdd48d735f47274de6d418",
+        "3ff95947337c85f15ef1f9edcf5d47ad49e14999",
+        "--",
+        "crates"
+      ],
+      "cwd": "/workspace/Muyon-reader-presentation-verification",
+      "exit_status": 0,
+      "utc": "2026-10-22T07:41:27.332240+00:00"
+    },
+    {
+      "argv": [
+        "git",
+        "ls-remote",
+        "origin",
+        "refs/heads/main",
+        "refs/heads/develop",
+        "refs/heads/task/document-core-contracts-20261022"
+      ],
+      "cwd": "/workspace/Muyon-reader-presentation-verification",
+      "exit_status": 0,
+      "utc": "2026-10-22T07:41:27.737154+00:00"
+    }
+  ],
+  "AGENTS": "find .. -name AGENTS.md -print returned no paths before build",
+  "network": "Only git read/fetch and authorized evidence branch push; cargo offline; no provider/model/search/engine requests"
+}

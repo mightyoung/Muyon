@@ -1,0 +1,15 @@
+
+running 10 tests
+test documents::presentation_tests::changed_head_after_eof_invalidates_without_reopening_latest_revision ... ok
+test documents::presentation_tests::check_never_renews_absolute_or_idle_deadline_and_expiry_frees_resources ... ok
+test documents::presentation_tests::legacy_eof_still_closes_and_transport_cannot_bypass_presentation_ticket ... ok
+test documents::presentation_tests::presentation_cleanup_failure_poison_withholds_lifecycle_and_retains_budget_until_retry ... ok
+test documents::presentation_tests::presentation_eof_retains_same_lease_and_snapshot_until_explicit_close ... ok
+test documents::presentation_tests::selection_change_fences_old_scope_and_reopen_of_same_reference_fences_old_id ... ok
+test documents::presentation_tests::short_original_grant_bounds_status_and_frame_change_never_renews_it ... ok
+test documents::presentation_tests::display_after_eof_denies_revoked_generation_epoch_expiry_or_deleted_project ... ok
+test documents::presentation_tests::invalidation_queue_is_bounded_and_overflow_requests_host_clear_all ... ok
+test documents::presentation_tests::stale_page_callback_cannot_show_or_close_new_frame ... ok
+
+test result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 65 filtered out; finished in 0.06s
+

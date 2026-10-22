@@ -1,0 +1,7 @@
+
+running 1 test
+source_bytes=31457280 open_hash_bytes=94371840 backup_open_hash_bytes=94371840 stream_hash_bytes=0
+test documents::reader_tests::thirty_mib_stream_hash_cost_is_linear_and_chunk_bytes_are_exact ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 74 filtered out; finished in 12.56s
+

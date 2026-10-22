@@ -1,0 +1,193 @@
+{
+  "note": "JUnit is derived from actual raw stdout, per binary class; repeated executions not unique scenarios. Shared-path collision runs excluded; no invented timings.",
+  "phases": {
+    "original": {
+      "snapshot-cost": {
+        "counts_per_binary": [
+          1
+        ],
+        "total_executions": 1,
+        "exit_status": 0
+      },
+      "presentation-targeted": {
+        "counts_per_binary": [
+          10
+        ],
+        "total_executions": 10,
+        "exit_status": 0
+      },
+      "reader-targeted": {
+        "counts_per_binary": [
+          17
+        ],
+        "total_executions": 17,
+        "exit_status": 0
+      },
+      "core-full": {
+        "counts_per_binary": [
+          75,
+          75,
+          3,
+          11,
+          6,
+          7,
+          16,
+          13,
+          8,
+          14,
+          10,
+          1,
+          15,
+          18,
+          16,
+          3,
+          3,
+          0
+        ],
+        "total_executions": 294,
+        "exit_status": 0,
+        "library_worker_exact_same_test_names": true
+      },
+      "probes/probe-tests": {
+        "counts_per_binary": [
+          6
+        ],
+        "total_executions": 6,
+        "exit_status": 0
+      },
+      "presentation-probes/probe-tests": {
+        "counts_per_binary": [
+          4
+        ],
+        "total_executions": 4,
+        "exit_status": 0
+      },
+      "scoped-fmt": {
+        "label": "scoped-fmt",
+        "argv": [
+          "/tmp/muyon-rust/bin/rustfmt",
+          "--edition",
+          "2021",
+          "--check",
+          "crates/muyon-core/src/bin/business_worker.rs",
+          "crates/muyon-core/src/blobs.rs",
+          "crates/muyon-core/src/documents/anchor.rs",
+          "crates/muyon-core/src/documents/annotation.rs",
+          "crates/muyon-core/src/documents/candidate.rs",
+          "crates/muyon-core/src/documents/candidate_tests.rs",
+          "crates/muyon-core/src/documents/capability.rs",
+          "crates/muyon-core/src/documents/history_tests.rs",
+          "crates/muyon-core/src/documents/identity.rs",
+          "crates/muyon-core/src/documents/mod.rs",
+          "crates/muyon-core/src/documents/presentation_tests.rs",
+          "crates/muyon-core/src/documents/reader.rs",
+          "crates/muyon-core/src/documents/reader_tests.rs",
+          "crates/muyon-core/src/documents/storage.rs",
+          "crates/muyon-core/src/documents/storage_tests.rs",
+          "crates/muyon-core/tests/document_storage.rs",
+          "crates/muyon-core/tests/documents.rs"
+        ],
+        "cwd": "/workspace/Muyon-reader-presentation-verification",
+        "start_utc": "2026-10-22T07:38:44.122701+00:00",
+        "end_utc": "2026-10-22T07:38:44.373322+00:00",
+        "exit_status": 1
+      },
+      "source_commit": "ee184fc1dd90faf2c3cdd48d735f47274de6d418",
+      "explicit_format_paths": 17
+    },
+    "formatted": {
+      "snapshot-cost": {
+        "counts_per_binary": [
+          1
+        ],
+        "total_executions": 1,
+        "exit_status": 0
+      },
+      "presentation-targeted": {
+        "counts_per_binary": [
+          10
+        ],
+        "total_executions": 10,
+        "exit_status": 0
+      },
+      "reader-targeted": {
+        "counts_per_binary": [
+          17
+        ],
+        "total_executions": 17,
+        "exit_status": 0
+      },
+      "core-full": {
+        "counts_per_binary": [
+          75,
+          75,
+          3,
+          11,
+          6,
+          7,
+          16,
+          13,
+          8,
+          14,
+          10,
+          1,
+          15,
+          18,
+          16,
+          3,
+          3,
+          0
+        ],
+        "total_executions": 294,
+        "exit_status": 0,
+        "library_worker_exact_same_test_names": true
+      },
+      "probes/probe-tests": {
+        "counts_per_binary": [
+          6
+        ],
+        "total_executions": 6,
+        "exit_status": 0
+      },
+      "presentation-probes/probe-tests": {
+        "counts_per_binary": [
+          4
+        ],
+        "total_executions": 4,
+        "exit_status": 0
+      },
+      "scoped-fmt": {
+        "label": "scoped-fmt",
+        "argv": [
+          "/tmp/muyon-rust/bin/rustfmt",
+          "--edition",
+          "2021",
+          "--check",
+          "crates/muyon-core/src/bin/business_worker.rs",
+          "crates/muyon-core/src/blobs.rs",
+          "crates/muyon-core/src/documents/anchor.rs",
+          "crates/muyon-core/src/documents/annotation.rs",
+          "crates/muyon-core/src/documents/candidate.rs",
+          "crates/muyon-core/src/documents/candidate_tests.rs",
+          "crates/muyon-core/src/documents/capability.rs",
+          "crates/muyon-core/src/documents/history_tests.rs",
+          "crates/muyon-core/src/documents/identity.rs",
+          "crates/muyon-core/src/documents/mod.rs",
+          "crates/muyon-core/src/documents/presentation_tests.rs",
+          "crates/muyon-core/src/documents/reader.rs",
+          "crates/muyon-core/src/documents/reader_tests.rs",
+          "crates/muyon-core/src/documents/storage.rs",
+          "crates/muyon-core/src/documents/storage_tests.rs",
+          "crates/muyon-core/tests/document_storage.rs",
+          "crates/muyon-core/tests/documents.rs"
+        ],
+        "cwd": "/workspace/Muyon-reader-presentation-verification",
+        "start_utc": "2026-10-22T07:40:40.660487+00:00",
+        "end_utc": "2026-10-22T07:40:40.932868+00:00",
+        "exit_status": 0
+      },
+      "source_commit": "dfa63451c0d65417b425f5bf1e92a3b43e0b6052",
+      "explicit_format_paths": 17
+    }
+  }
+}

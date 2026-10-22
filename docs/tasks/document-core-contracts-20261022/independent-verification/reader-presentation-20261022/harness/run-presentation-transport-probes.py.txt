@@ -1,0 +1,16 @@
+import datetime,hashlib,json,os,pathlib,subprocess,sys
+root=pathlib.Path(sys.argv[2]);phase=sys.argv[1];base=pathlib.Path('/workspace/Muyon-document-verification/docs/tasks/document-core-contracts-20261022/independent-verification/reader-presentation-20261022');out=base/phase/'probes';out.mkdir(parents=True,exist_ok=True);env=os.environ.copy();env.update(PATH='/tmp/muyon-rust/bin:'+env['PATH'],CARGO_HOME='/tmp/muyon-cargo',CARGO_TARGET_DIR='/tmp/muyon-document-cargo-target',RUSTFLAGS='-L native=/tmp/muyon-native-libs');now=lambda:datetime.datetime.now(datetime.timezone.utc).isoformat();records=[]
+def run(name,args):
+ start=now();r=subprocess.run(args,cwd=root,env=env,capture_output=True);(out/(name+'.stdout.log')).write_bytes(r.stdout);(out/(name+'.stderr.log')).write_bytes(r.stderr);records.append({'label':name,'argv':args,'cwd':str(root),'start_utc':start,'end_utc':now(),'exit_status':r.returncode});return r
+r=run('artifact-build',['cargo','build','--offline','--locked','--manifest-path','crates/Cargo.toml','-p','muyon-core','--lib','--message-format=json']);assert r.returncode==0,r.stderr
+artifacts={}
+for line in r.stdout.splitlines():
+ row=json.loads(line)
+ if row.get('reason')=='compiler-artifact' and row['target']['name'] in ['muyon_core','sha2','serde_json']:
+  artifacts[row['target']['name']]=next(f for f in row['filenames'] if f.endswith('.rlib'))
+seed=(root/'crates/muyon-core/tests/document_storage.rs').read_bytes();extra=pathlib.Path('/tmp/reader-independent-probes.rs').read_bytes();probe=pathlib.Path('/tmp/muyon-reader-probes-'+phase+'.rs');probe.write_bytes(seed+extra);(out/'probe-source.rs.txt').write_bytes(probe.read_bytes())
+args=['/tmp/muyon-rust/bin/rustc','--edition=2021','--test',str(probe),'-L','dependency=/tmp/muyon-document-cargo-target/debug/deps','-L','native=/tmp/muyon-native-libs']
+for name,path in artifacts.items():args+=['--extern',name+'='+path]
+binary='/tmp/muyon-reader-probes-'+phase;args+=['-o',binary];r=run('probe-compile',args);assert r.returncode==0,r.stderr
+r=run('probe-tests',[binary,'independent_','--nocapture']);
+manifest={'source_commit':subprocess.check_output(['git','rev-parse','HEAD'],cwd=root,text=True).strip(),'seed_test_source_sha256':hashlib.sha256(seed).hexdigest(),'added_probe_source_sha256':hashlib.sha256(extra).hexdigest(),'probe_source_sha256':hashlib.sha256(probe.read_bytes()).hexdigest(),'linked_artifacts':{k:{'path':v,'sha256':hashlib.sha256(pathlib.Path(v).read_bytes()).hexdigest()} for k,v in artifacts.items()},'commands':records,'boundary':'Original immutable six Reader probes, including the two prior real cleanup-tail RED. Copied synthetic fixture only; no product edits.'};(out/'manifest.json').write_text(json.dumps(manifest,indent=2)+'\n');print('independent probes exit',r.returncode);print(r.stdout.decode());assert r.returncode==0

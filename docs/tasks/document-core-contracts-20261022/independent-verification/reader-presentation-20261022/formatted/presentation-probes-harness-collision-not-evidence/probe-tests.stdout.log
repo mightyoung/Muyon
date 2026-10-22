@@ -1,0 +1,9 @@
+
+running 4 tests
+test independent_legacy_entrypoints_cannot_read_validate_or_close_presentation ... ok
+test independent_old_ticket_cannot_read_check_advance_or_close_current_frame ... ok
+test independent_notification_overflow_requires_clear_all_and_drain_resets ... ok
+test independent_short_grant_deadline_survives_eof_frame_and_status_refresh ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 15 filtered out; finished in 1.24s
+
