@@ -43,3 +43,16 @@ restart staging retention, unchanged journal/upload snapshots and second GC=0
 assertions are reasonable. The missing >128-row test-source recommendation is
 closed. Actual compilation/tests remain NOT_RUN and runtime acceptance HOLD.
 Reviewer performed no source edits or execution.
+
+## Worker and exact-format repair
+
+Separate read-only review of `cab23b69b2aa56f55f3b44e0fe248f026da9c08d`
+against 8802 found no new static blocker. business_worker.rs:19–23 includes the
+full real documents module; its blobs/business/contract/sqlite dependencies are
+already compiled into the worker. No stub or replacement retention policy exists.
+Document tests remain cfg(test); candidate publication remains UnsupportedOperation.
+Reviewer independently hashed all 13 fixed files: 13/13 match the independent
+263dfe4 expected_sha256 values and owner evidence JSON. Worker is outside that
+old file list and requires actual compilation/format verification. Static review
+passed; no cargo/rustfmt was run and the original full-core compile blocker is
+not declared closed until the Rust environment reruns the fixed source.
