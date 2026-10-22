@@ -62,6 +62,15 @@ class DaDetails(unittest.TestCase):
         self.assertIn('inquiry', result['missing_suite_reports'])
         self.assertNotIn('module_api', result['missing_suite_reports'])
 
+    def test_regressed_metadata_files_have_bounded_explicit_diagnostics(self):
+        result = self.measure('DA:17,1\n')
+        coverage = 'packages/muyon_module_api/lib/src/coverage.dart'
+        ontology = 'packages/muyon_module_api/lib/src/ontology.dart'
+        self.assertIn(coverage, result['files'])
+        self.assertEqual(result['files'][coverage]['uncovered_da_line_ids'], [8])
+        self.assertEqual(result['files'][ontology]['status'], 'no_DA_records')
+        self.assertEqual(result['files'][ontology]['uncovered_da_line_ids'], 'unknown')
+
     def test_invalid_da_fails(self):
         for record in ('DA:0,1\n', 'DA:17,-1\n', 'DA:bad,1\n', 'DA:17\n'):
             with self.subTest(record=record):

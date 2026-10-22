@@ -1,0 +1,19 @@
+test_all_loaded_sources_have_identity_and_da_sets (__main__.DaDetails.test_all_loaded_sources_have_identity_and_da_sets) ... ok
+test_exact_zero_da_and_union_hit (__main__.DaDetails.test_exact_zero_da_and_union_hit) ... ok
+test_invalid_da_fails (__main__.DaDetails.test_invalid_da_fails) ... ok
+test_missing_suite_evidence_is_explicit (__main__.DaDetails.test_missing_suite_evidence_is_explicit) ... ok
+test_regressed_metadata_files_have_bounded_explicit_diagnostics (__main__.DaDetails.test_regressed_metadata_files_have_bounded_explicit_diagnostics) ... FAIL
+test_unreported_source_is_unknown_not_zero (__main__.DaDetails.test_unreported_source_is_unknown_not_zero) ... ok
+
+======================================================================
+FAIL: test_regressed_metadata_files_have_bounded_explicit_diagnostics (__main__.DaDetails.test_regressed_metadata_files_have_bounded_explicit_diagnostics)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/Muyon-pr101-coverage-contract-fix-20261022/scripts/coverage/test_da_details.py", line 69, in test_regressed_metadata_files_have_bounded_explicit_diagnostics
+    self.assertIn(coverage, result['files'])
+AssertionError: 'packages/muyon_module_api/lib/src/coverage.dart' not found in {'packages/muyon_module_api/lib/src/ui/snapshot.dart': {'source_sha256': 'ec7adfacce058c6f0f41fa6b284f20236ea40af3090337c947917457b668c859', 'status': 'loaded_DA_records', 'loaded_executable_lines': 1, 'hit_lines': 1, 'da_line_ids': [17], 'uncovered_da_line_ids': []}, 'packages/muyon_module_api/lib/src/ui/state.dart': {'source_sha256': None, 'status': 'no_DA_records', 'loaded_executable_lines': 'unknown', 'hit_lines': 'unknown', 'da_line_ids': 'unknown', 'uncovered_da_line_ids': 'unknown'}, 'packages/muyon_module_api/lib/src/ui/stream_compiler.dart': {'source_sha256': None, 'status': 'no_DA_records', 'loaded_executable_lines': 'unknown', 'hit_lines': 'unknown', 'da_line_ids': 'unknown', 'uncovered_da_line_ids': 'unknown'}, 'packages/muyon_module_api/lib/src/ui/stream_protocol.dart': {'source_sha256': None, 'status': 'no_DA_records', 'loaded_executable_lines': 'unknown', 'hit_lines': 'unknown', 'da_line_ids': 'unknown', 'uncovered_da_line_ids': 'unknown'}, 'packages/muyon_module_api/lib/src/ui/validation.dart': {'source_sha256': None, 'status': 'no_DA_records', 'loaded_executable_lines': 'unknown', 'hit_lines': 'unknown', 'da_line_ids': 'unknown', 'uncovered_da_line_ids': 'unknown'}, 'packages/muyon_module_api/lib/src/ui/workspace.dart': {'source_sha256': None, 'status': 'no_DA_records', 'loaded_executable_lines': 'unknown', 'hit_lines': 'unknown', 'da_line_ids': 'unknown', 'uncovered_da_line_ids': 'unknown'}}
+
+----------------------------------------------------------------------
+Ran 6 tests in 0.031s
+
+FAILED (failures=1)
