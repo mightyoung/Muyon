@@ -1,3 +1,37 @@
+# Current combination result — HOLD
+
+Validated code commit cf26a7bf. Current immutable source replacements are in MATRIX.md; independent fixed-range composition reviews are in INDEPENDENT-REVIEW.md. Prior failures and NOT_RUN remain below as historical evidence, not current-version results.
+
+| Actual run | Outcome / exact boundary |
+|---|---|
+| Rust1.93.1 locked/offline product workspace all targets | PASS405 test executions/0 failed/0 ignored,26 target groups. FFI14 + core391. Includes group same-crate harness35 =17 dedicated+18 repeated module cases. Not405 independent acceptance cases. No old lab/I04 suites executed. |
+| Provider31602082 |19 PASS, included in workspace405. Original7ca15 run1PASS/14FAIL and FFI13PASS/1FAIL preserved. New FFI bridge test now PASS, workspace FFI14 includes it. |
+| Artifactfdc8f28e |17 PASS, included in core lib65. New receipt-tail case iterates10 authority mutations. c5ee test-first artifact source overlaid in isolated worktree compiled and failed actual1test: revoked output grant incorrectly Committed, expected Unknown. Fixed candidate GREEN. Patch/manifest and both logs retained. |
+| Evidence78cdff32 | Real exported store12 + pure16 PASS. Both included in workspace405, not extra totals. No Service/FFI/UI caller yet. |
+| Groupecef00d8 | Actual same-crate source harness35 PASS; permanent lib export compiled. Does not prove Service/FFI/public-dispatch execution or canonical node payload/RunLedger admission. Known post-event/receipt grant-expiry Important remains unresolved. |
+| Kotlin bridge | Actual cdylib build + UniFFI generation PASS, checked-in bytes updated for4 methods; repeat and final fixed-source generation cmp PASS. ktlint absent: initial auto-format warning retained; no-format repeat produces identical bytes. No Android compile claim. |
+| Pure JVM | Bot/codec17 PASS; chat projection/local setup PASS; persistence restart/process CAS/fault checks PASS; reader PASS; real shell controller/candidate PASS after integration runner includes archive codec. No Android PFD/intent/device behavior verified. |
+| Python fake adapter |60 PASS, no real engine. |
+| Android product static checker |17 PASS after final binding regeneration. |
+| Strict Clippy workspace/all-target -D warnings |FAIL101: provider bot_drafts.rs:113 manual_is_multiple_of; gateway.rs:91 manual_is_multiple_of + :357 useless_conversion; artifact tests22+workflow_tests25 cloned_ref_to_slice_refs. Three lib errors and50 lib-test diagnostics overlap, not53 unique errors. Source owners must fix; no suppression. |
+| Android tests/build/lint/device |NOT_RUN exit2 before Gradle. No existing Gradle/SDK; no install/retry/relocation of stopped SDK action. |
+| Remote CI | No workflow run triggered on this new branch at query. Not PASS. Existing product workflow provisions Android SDK and full old workflows are not substituted or dispatched around restrictions. |
+
+Code integration adds module exports, one source-list correction in the JVM shell runner, and generated bridge methods; no second authority, driver, fabricated grant/identity or production save enablement. Runtime can_save=false remains. Parent/source authors retain their branches; main/develop, real engines/models/search, credentials/payment and old unknown/reserved funds are untouched.
+
+## Pending acceptance and exact next dependencies
+
+1. Original group owner fixed SHA for post-write expiry recheck and its actual regression RED/GREEN; ecef current tests do not cover that Important finding.
+2. Source-owner Clippy fixes at the exact locations above; strict quality gate remains red despite passing behavior tests.
+3. Real host stable conversation identity/registry and provider adapter under existing owner; can_save stays false until that fixed source is accepted and compiled. Reader PFD/annotation-intent bridge is still owner work.
+4. Evidence Service/FFI invocation and actual receipt/UI binding; export/real store behavior is delivered, product callsite is absent.
+5. Canonical group request context and complete RunLedger projection plus sole original gateway live authorization/cost/epoch/lease/budget/reserve/claim rechecks; local persisted coordination does not grant external execution.
+6. Existing authorized Android toolchain/build/device acceptance; current machine lacks tools. Real third-party engine remains HOLD. Real model ID, currency/fee ceiling and charged acceptance remain unconfigured/unexecuted, outside current offline scope.
+
+No Draft PR or develop merge is created while these gates are unresolved. Current work is a reviewable remote combination branch and actual compilation/behavior evidence, not whole-product completion.
+
+## Historical intermediate result (superseded where stated)
+
 # Combination validation — intermediate, HOLD
 
 Branch lab/overall-combination-20261022. Locked sources and path-scoped deltas are in MATRIX.md. No main/develop merge, deployment, credential/payment action, real model/search or Office engine has been executed. Validation runs only disposable synthetic product stores; no original unknown/reservation was modified.

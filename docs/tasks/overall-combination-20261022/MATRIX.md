@@ -43,3 +43,11 @@ Restrictions: no main/develop mutation/merge, deploy, force push/delete, real mo
 - Reader8d2b parent static findings closed; parent pure-JVM evidence08e77d05647afc47b99ec839f846eba5163bf6c7 offered. Local reader runner also PASS. PFD/annotation host owner pending.
 - Artifact workflow53badad9f6bab5321af3c1409a564184446cc4b8 replaces older artifact4eec source via owned delta in043051b7, for diagnosis only: Important HOLD on post-receipt authorization recheck, original owner fixing. Actual15 Rust PASS does not close that finding.
 - Integration runner fix420baee1 adds SetupDraftArchive.kt to shell pure-JVM compilation; initial failure and subsequent PASS retained.
+
+## Latest source replacements (supersede the initial rows)
+
+- Evidence78cdff32dee68b664c4fe71b4bbd6b81251af5e7/source3296cb8402afd5003279ad443d701dda1fee9f56 replaces741 viaa60068fa. Concrete real-store adapter exported and tested12 + pure16. Service/FFI callsite remains absent; old consumer-pending statement is historical.
+- Generated four-method native Kotlin bridge8255d08e is a necessary integration correction; current library regeneration matches checked-in bytes. Not Android compile or host wiring.
+- Group persistenceecef00d8b296930bd40ad8f1ed06890fd7b8a7fc extends runtime12a001 via8032140f. Integration exports group_runtime_store exactly once. Actual same-crate harness35 includes17 dedicated cases and18 repeated module cases. Public export compiles; host/gateway remains unwired. Parent Important post-receipt grant-expiry HOLD is unresolved.
+- Provider3160208247c5257b6382106d69f2028f5ad8ccab replaces7ca2 via11fc5868. Actual19 provider PASS; original14 failures retained. No API or host policy change.
+- Artifactfdc8f28e2cbfaf8fd22c3370b156fb7d0a5bf734 replaces53bad via cf26a7bf. Actual17 PASS including10 receipt-tail mutation cases; test-firstc5ee source reproduces real failure in independent worktree. Parent static Important closure and independent integration review do not enable production.

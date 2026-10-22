@@ -1,0 +1,411 @@
+    Blocking waiting for file lock on build directory
+    Checking muyon-core v0.1.0 (/workspace/Muyon-combination-20261022/crates/muyon-core)
+error: manual implementation of `.is_multiple_of()`
+   --> muyon-core/src/bot_drafts.rs:113:12
+    |
+113 |         || s.len() % 2 != 0
+    |            ^^^^^^^^^^^^^^^^ help: replace with: `!s.len().is_multiple_of(2)`
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.93.0/index.html#manual_is_multiple_of
+    = note: `-D clippy::manual-is-multiple-of` implied by `-D warnings`
+    = help: to override `-D warnings` add `#[allow(clippy::manual_is_multiple_of)]`
+
+error: manual implementation of `.is_multiple_of()`
+  --> muyon-core/src/document_edit/gateway.rs:91:12
+   |
+91 |         || s.len() % 2 != 0
+   |            ^^^^^^^^^^^^^^^^ help: replace with: `!s.len().is_multiple_of(2)`
+   |
+   = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.93.0/index.html#manual_is_multiple_of
+
+error: useless conversion to the same type: `[u8; 32]`
+   --> muyon-core/src/document_edit/gateway.rs:357:27
+    |
+357 |             patch_digest: digest.into(),
+    |                           ^^^^^^^^^^^^^ help: consider removing `.into()`: `digest`
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.93.0/index.html#useless_conversion
+    = note: `-D clippy::useless-conversion` implied by `-D warnings`
+    = help: to override `-D warnings` add `#[allow(clippy::useless_conversion)]`
+
+error: this call to `clone` can be replaced with `std::slice::from_ref`
+  --> muyon-core/src/artifacts/tests.rs:41:62
+   |
+41 |     let saved = s.archive_artifact_trusted("artifact", &out, &[source.clone()], &generated()).unwrap();
+   |                                                              ^^^^^^^^^^^^^^^^^ help: try: `std::slice::from_ref(&source)`
+   |
+   = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.93.0/index.html#cloned_ref_to_slice_refs
+   = note: `-D clippy::cloned-ref-to-slice-refs` implied by `-D warnings`
+   = help: to override `-D warnings` add `#[allow(clippy::cloned_ref_to_slice_refs)]`
+
+error: this call to `clone` can be replaced with `std::slice::from_ref`
+  --> muyon-core/src/artifacts/tests.rs:43:61
+   |
+43 |     assert_eq!(s.archive_artifact_trusted("artifact", &out, &[source.clone()], &generated()), Err(ContractError::RevisionConflict));
+   |                                                             ^^^^^^^^^^^^^^^^^ help: try: `std::slice::from_ref(&source)`
+   |
+   = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.93.0/index.html#cloned_ref_to_slice_refs
+
+error: this call to `clone` can be replaced with `std::slice::from_ref`
+  --> muyon-core/src/artifacts/tests.rs:46:82
+   |
+46 |     let restored = s.read_artifact_revision("artifact", &Revision::new(1), &out, &[source.clone()]).unwrap();
+   |                                                                                  ^^^^^^^^^^^^^^^^^ help: try: `std::slice::from_ref(&source)`
+   |
+   = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.93.0/index.html#cloned_ref_to_slice_refs
+
+error: this call to `clone` can be replaced with `std::slice::from_ref`
+  --> muyon-core/src/artifacts/tests.rs:53:78
+   |
+53 |     assert_eq!(s.read_artifact_revision("artifact", &Revision::new(1), &out, &[source.clone()]), Err(ContractError::RevisionConflict));
+   |                                                                              ^^^^^^^^^^^^^^^^^ help: try: `std::slice::from_ref(&source)`
+   |
+   = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.93.0/index.html#cloned_ref_to_slice_refs
+
+error: this call to `clone` can be replaced with `std::slice::from_ref`
+  --> muyon-core/src/artifacts/tests.rs:64:60
+   |
+64 |     let old = s.archive_artifact_trusted("artifact", &out, &[source.clone()], &generated()).unwrap();
+   |                                                            ^^^^^^^^^^^^^^^^^ help: try: `std::slice::from_ref(&source)`
+   |
+   = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.93.0/index.html#cloned_ref_to_slice_refs
+
+error: this call to `clone` can be replaced with `std::slice::from_ref`
+  --> muyon-core/src/artifacts/tests.rs:65:133
+   |
+65 | ...1.4\nhuman edit\n%%EOF\n"), "Human", &[source.clone()], &human()).unwrap();
+   |                                         ^^^^^^^^^^^^^^^^^ help: try: `std::slice::from_ref(&source)`
+   |
+   = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.93.0/index.html#cloned_ref_to_slice_refs
+
+error: this call to `clone` can be replaced with `std::slice::from_ref`
+  --> muyon-core/src/artifacts/tests.rs:70:105
+   |
+70 | ...on, &current, &pending, "Generated", &[source.clone()], &generated()), Err(ContractError::IntentConflict));
+   |                                         ^^^^^^^^^^^^^^^^^ help: try: `std::slice::from_ref(&source)`
+   |
+   = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.93.0/index.html#cloned_ref_to_slice_refs
+
+error: this call to `clone` can be replaced with `std::slice::from_ref`
+  --> muyon-core/src/artifacts/tests.rs:71:98
+   |
+71 | ...vision, &current, &pending, "Stale", &[source.clone()], &human()), Err(ContractError::RevisionConflict));
+   |                                         ^^^^^^^^^^^^^^^^^ help: try: `std::slice::from_ref(&source)`
+   |
+   = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.93.0/index.html#cloned_ref_to_slice_refs
+
+error: this call to `clone` can be replaced with `std::slice::from_ref`
+  --> muyon-core/src/artifacts/tests.rs:73:69
+   |
+73 |     let history = s.artifact_history("artifact", None, 1, &current, &[source.clone()]).unwrap();
+   |                                                                     ^^^^^^^^^^^^^^^^^ help: try: `std::slice::from_ref(&source)`
+   |
+   = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.93.0/index.html#cloned_ref_to_slice_refs
+
+error: this call to `clone` can be replaced with `std::slice::from_ref`
+  --> muyon-core/src/artifacts/tests.rs:75:67
+   |
+75 |     assert_eq!(s.artifact_history("artifact", None, 10, &current, &[source.clone()]), Err(ContractError::InvalidAuthority));
+   |                                                                   ^^^^^^^^^^^^^^^^^ help: try: `std::slice::from_ref(&source)`
+   |
+   = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.93.0/index.html#cloned_ref_to_slice_refs
+
+error: this call to `clone` can be replaced with `std::slice::from_ref`
+  --> muyon-core/src/artifacts/tests.rs:76:84
+   |
+76 | ...Some(&edited.revision), 1, &current, &[source.clone()]), Err(ContractError::InvalidAuthority));
+   |                                         ^^^^^^^^^^^^^^^^^ help: try: `std::slice::from_ref(&source)`
+   |
+   = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.93.0/index.html#cloned_ref_to_slice_refs
+
+error: this call to `clone` can be replaced with `std::slice::from_ref`
+  --> muyon-core/src/artifacts/tests.rs:82:50
+   |
+82 |     s.archive_artifact_trusted("artifact", &out, &[source.clone()], &generated()).unwrap();
+   |                                                  ^^^^^^^^^^^^^^^^^ help: try: `std::slice::from_ref(&source)`
+   |
+   = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.93.0/index.html#cloned_ref_to_slice_refs
+
+error: this call to `clone` can be replaced with `std::slice::from_ref`
+  --> muyon-core/src/artifacts/tests.rs:85:78
+   |
+85 |     assert_eq!(s.read_artifact_revision("artifact", &Revision::new(1), &out, &[source.clone()]), Err(ContractError::InvalidAuthority));
+   |                                                                              ^^^^^^^^^^^^^^^^^ help: try: `std::slice::from_ref(&source)`
+   |
+   = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.93.0/index.html#cloned_ref_to_slice_refs
+
+error: this call to `clone` can be replaced with `std::slice::from_ref`
+  --> muyon-core/src/artifacts/tests.rs:88:65
+   |
+88 |     assert_eq!(s.artifact_history("artifact", None, 10, &other, &[source.clone()]), Err(ContractError::BindingMismatch));
+   |                                                                 ^^^^^^^^^^^^^^^^^ help: try: `std::slice::from_ref(&source)`
+   |
+   = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.93.0/index.html#cloned_ref_to_slice_refs
+
+error: this call to `clone` can be replaced with `std::slice::from_ref`
+  --> muyon-core/src/artifacts/tests.rs:90:63
+   |
+90 |     assert_eq!(s.artifact_history("artifact", None, 10, &out, &[source.clone()]), Err(ContractError::InvalidAuthority));
+   |                                                               ^^^^^^^^^^^^^^^^^ help: try: `std::slice::from_ref(&source)`
+   |
+   = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.93.0/index.html#cloned_ref_to_slice_refs
+
+error: this call to `clone` can be replaced with `std::slice::from_ref`
+   --> muyon-core/src/artifacts/tests.rs:100:50
+    |
+100 |     s.archive_artifact_trusted("artifact", &out, &[source.clone()], &human()).unwrap();
+    |                                                  ^^^^^^^^^^^^^^^^^ help: try: `std::slice::from_ref(&source)`
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.93.0/index.html#cloned_ref_to_slice_refs
+
+error: this call to `clone` can be replaced with `std::slice::from_ref`
+   --> muyon-core/src/artifacts/tests.rs:109:62
+    |
+109 |     let saved = s.archive_artifact_trusted("artifact", &out, &[source.clone()], &generated()).unwrap();
+    |                                                              ^^^^^^^^^^^^^^^^^ help: try: `std::slice::from_ref(&source)`
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.93.0/index.html#cloned_ref_to_slice_refs
+
+error: this call to `clone` can be replaced with `std::slice::from_ref`
+   --> muyon-core/src/artifacts/tests.rs:113:91
+    |
+113 |     assert!(s.revise_artifact_trusted("artifact", &saved.revision, &out, &blob, "Failed", &[source.clone()], &human()).is_err());
+    |                                                                                           ^^^^^^^^^^^^^^^^^ help: try: `std::slice::from_ref(&source)`
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.93.0/index.html#cloned_ref_to_slice_refs
+
+error: this call to `clone` can be replaced with `std::slice::from_ref`
+   --> muyon-core/src/artifacts/tests.rs:129:61
+    |
+129 |     assert_eq!(s.archive_artifact_trusted("artifact", &out, &[source.clone()], &human()), Err(ContractError::InvalidAuthority));
+    |                                                             ^^^^^^^^^^^^^^^^^ help: try: `std::slice::from_ref(&source)`
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.93.0/index.html#cloned_ref_to_slice_refs
+
+error: this call to `clone` can be replaced with `std::slice::from_ref`
+   --> muyon-core/src/artifacts/tests.rs:131:50
+    |
+131 |     s.archive_artifact_trusted("artifact", &out, &[source.clone()], &generated()).unwrap();
+    |                                                  ^^^^^^^^^^^^^^^^^ help: try: `std::slice::from_ref(&source)`
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.93.0/index.html#cloned_ref_to_slice_refs
+
+error: this call to `clone` can be replaced with `std::slice::from_ref`
+   --> muyon-core/src/artifacts/tests.rs:133:86
+    |
+133 | ...t", &Revision::new(1), &wrong_epoch, &[source.clone()]), Err(ContractError::InvalidAuthority));
+    |                                         ^^^^^^^^^^^^^^^^^ help: try: `std::slice::from_ref(&source)`
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.93.0/index.html#cloned_ref_to_slice_refs
+
+error: this call to `clone` can be replaced with `std::slice::from_ref`
+   --> muyon-core/src/artifacts/tests.rs:135:89
+    |
+135 | ... &Revision::new(1), &old_generation, &[source.clone()]), Err(ContractError::InvalidAuthority));
+    |                                         ^^^^^^^^^^^^^^^^^ help: try: `std::slice::from_ref(&source)`
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.93.0/index.html#cloned_ref_to_slice_refs
+
+error: this call to `clone` can be replaced with `std::slice::from_ref`
+  --> muyon-core/src/artifacts/workflow_tests.rs:15:95
+   |
+15 |     let first = s.submit_artifact_save_trusted("save-intent", &p, &archive("artifact"), &out, &[source.clone()]).unwrap();
+   |                                                                                               ^^^^^^^^^^^^^^^^^ help: try: `std::slice::from_ref(&source)`
+   |
+   = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.93.0/index.html#cloned_ref_to_slice_refs
+
+error: this call to `clone` can be replaced with `std::slice::from_ref`
+  --> muyon-core/src/artifacts/workflow_tests.rs:18:99
+   |
+18 |     let duplicate = s.submit_artifact_save_trusted("save-intent", &p, &archive("artifact"), &out, &[source.clone()]).unwrap();
+   |                                                                                                   ^^^^^^^^^^^^^^^^^ help: try: `std::slice::from_ref(&source)`
+   |
+   = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.93.0/index.html#cloned_ref_to_slice_refs
+
+error: this call to `clone` can be replaced with `std::slice::from_ref`
+  --> muyon-core/src/artifacts/workflow_tests.rs:20:95
+   |
+20 | ...t", &p, &archive("different"), &out, &[source.clone()]), Err(ContractError::IntentConflict));
+   |                                         ^^^^^^^^^^^^^^^^^ help: try: `std::slice::from_ref(&source)`
+   |
+   = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.93.0/index.html#cloned_ref_to_slice_refs
+
+error: this call to `clone` can be replaced with `std::slice::from_ref`
+  --> muyon-core/src/artifacts/workflow_tests.rs:29:95
+   |
+29 |     let first = s.submit_artifact_save_trusted("save-intent", &p, &archive("artifact"), &out, &[source.clone()]).unwrap();
+   |                                                                                               ^^^^^^^^^^^^^^^^^ help: try: `std::slice::from_ref(&source)`
+   |
+   = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.93.0/index.html#cloned_ref_to_slice_refs
+
+error: this call to `clone` can be replaced with `std::slice::from_ref`
+  --> muyon-core/src/artifacts/workflow_tests.rs:37:94
+   |
+37 | ...nt", &p, &archive("artifact"), &out, &[source.clone()]).unwrap().status, ArtifactSaveStatus::Unknown);
+   |                                         ^^^^^^^^^^^^^^^^^ help: try: `std::slice::from_ref(&source)`
+   |
+   = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.93.0/index.html#cloned_ref_to_slice_refs
+
+error: this call to `clone` can be replaced with `std::slice::from_ref`
+  --> muyon-core/src/artifacts/workflow_tests.rs:43:79
+   |
+43 |     s.submit_artifact_save_trusted("archive", &p, &archive("artifact"), &out, &[source.clone()]).unwrap();
+   |                                                                               ^^^^^^^^^^^^^^^^^ help: try: `std::slice::from_ref(&source)`
+   |
+   = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.93.0/index.html#cloned_ref_to_slice_refs
+
+error: this call to `clone` can be replaced with `std::slice::from_ref`
+  --> muyon-core/src/artifacts/workflow_tests.rs:45:84
+   |
+45 |     let saved = s.submit_artifact_save_trusted("human-save", &p, &operation, &out, &[source.clone()]).unwrap();
+   |                                                                                    ^^^^^^^^^^^^^^^^^ help: try: `std::slice::from_ref(&source)`
+   |
+   = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.93.0/index.html#cloned_ref_to_slice_refs
+
+error: this call to `clone` can be replaced with `std::slice::from_ref`
+  --> muyon-core/src/artifacts/workflow_tests.rs:48:83
+   |
+48 |     assert_eq!(s.submit_artifact_save_trusted("human-save", &p, &operation, &out, &[source.clone()]).unwrap(), saved);
+   |                                                                                   ^^^^^^^^^^^^^^^^^ help: try: `std::slice::from_ref(&source)`
+   |
+   = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.93.0/index.html#cloned_ref_to_slice_refs
+
+error: this call to `clone` can be replaced with `std::slice::from_ref`
+  --> muyon-core/src/artifacts/workflow_tests.rs:50:91
+   |
+50 |     let denied = s.submit_artifact_save_trusted("generated", &p, &generated_op, &current, &[source.clone()]).unwrap();
+   |                                                                                           ^^^^^^^^^^^^^^^^^ help: try: `std::slice::from_ref(&source)`
+   |
+   = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.93.0/index.html#cloned_ref_to_slice_refs
+
+error: this call to `clone` can be replaced with `std::slice::from_ref`
+  --> muyon-core/src/artifacts/workflow_tests.rs:86:65
+   |
+86 |     let original = s.archive_artifact_trusted("artifact", &out, &[source.clone()], &generated()).unwrap();
+   |                                                                 ^^^^^^^^^^^^^^^^^ help: try: `std::slice::from_ref(&source)`
+   |
+   = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.93.0/index.html#cloned_ref_to_slice_refs
+
+error: this call to `clone` can be replaced with `std::slice::from_ref`
+  --> muyon-core/src/artifacts/workflow_tests.rs:87:140
+   |
+87 | ...\nhuman history\n%%EOF\n"), "Human", &[source.clone()], &human()).unwrap();
+   |                                         ^^^^^^^^^^^^^^^^^ help: try: `std::slice::from_ref(&source)`
+   |
+   = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.93.0/index.html#cloned_ref_to_slice_refs
+
+error: this call to `clone` can be replaced with `std::slice::from_ref`
+  --> muyon-core/src/artifacts/workflow_tests.rs:91:86
+   |
+91 |     assert!(s.read_artifact_revision("artifact", &Revision::new(1), &current_output, &[current_source.clone()]).is_err());
+   |                                                                                      ^^^^^^^^^^^^^^^^^^^^^^^^^ help: try: `std::slice::from_ref(&current_source)`
+   |
+   = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.93.0/index.html#cloned_ref_to_slice_refs
+
+error: this call to `clone` can be replaced with `std::slice::from_ref`
+  --> muyon-core/src/artifacts/workflow_tests.rs:95:86
+   |
+95 |     assert!(s.read_artifact_revision("artifact", &Revision::new(1), &current_output, &[current_source.clone()]).is_err());
+   |                                                                                      ^^^^^^^^^^^^^^^^^^^^^^^^^ help: try: `std::slice::from_ref(&current_source)`
+   |
+   = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.93.0/index.html#cloned_ref_to_slice_refs
+
+error: this call to `clone` can be replaced with `std::slice::from_ref`
+  --> muyon-core/src/artifacts/workflow_tests.rs:97:89
+   |
+97 |     assert_eq!(s.read_artifact_revision("artifact", &Revision::new(1), &current_output, &[current_source.clone()]).unwrap(), original);
+   |                                                                                         ^^^^^^^^^^^^^^^^^^^^^^^^^ help: try: `std::slice::from_ref(&current_source)`
+   |
+   = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.93.0/index.html#cloned_ref_to_slice_refs
+
+error: this call to `clone` can be replaced with `std::slice::from_ref`
+  --> muyon-core/src/artifacts/workflow_tests.rs:98:74
+   |
+98 |     let page = s.artifact_history("artifact", None, 10, &current_output, &[current_source.clone()]).unwrap();
+   |                                                                          ^^^^^^^^^^^^^^^^^^^^^^^^^ help: try: `std::slice::from_ref(&current_source)`
+   |
+   = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.93.0/index.html#cloned_ref_to_slice_refs
+
+error: this call to `clone` can be replaced with `std::slice::from_ref`
+   --> muyon-core/src/artifacts/workflow_tests.rs:110:79
+    |
+110 |     s.submit_artifact_save_trusted("archive", &p, &archive("artifact"), &out, &[source.clone()]).unwrap();
+    |                                                                               ^^^^^^^^^^^^^^^^^ help: try: `std::slice::from_ref(&source)`
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.93.0/index.html#cloned_ref_to_slice_refs
+
+error: this call to `clone` can be replaced with `std::slice::from_ref`
+   --> muyon-core/src/artifacts/workflow_tests.rs:113:89
+    |
+113 |     let result = s.submit_artifact_save_trusted("failed-receipt", &p, &operation, &out, &[source.clone()]).unwrap();
+    |                                                                                         ^^^^^^^^^^^^^^^^^ help: try: `std::slice::from_ref(&source)`
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.93.0/index.html#cloned_ref_to_slice_refs
+
+error: this call to `clone` can be replaced with `std::slice::from_ref`
+   --> muyon-core/src/artifacts/workflow_tests.rs:116:63
+    |
+116 |     assert_eq!(s.artifact_history("artifact", None, 10, &out, &[source.clone()]).unwrap().len(), 1);
+    |                                                               ^^^^^^^^^^^^^^^^^ help: try: `std::slice::from_ref(&source)`
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.93.0/index.html#cloned_ref_to_slice_refs
+
+error: this call to `clone` can be replaced with `std::slice::from_ref`
+   --> muyon-core/src/artifacts/workflow_tests.rs:119:87
+    |
+119 | ...iled-receipt", &p, &operation, &out, &[source.clone()]).unwrap().status, ArtifactSaveStatus::Unknown);
+    |                                         ^^^^^^^^^^^^^^^^^ help: try: `std::slice::from_ref(&source)`
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.93.0/index.html#cloned_ref_to_slice_refs
+
+error: this call to `clone` can be replaced with `std::slice::from_ref`
+   --> muyon-core/src/artifacts/workflow_tests.rs:125:79
+    |
+125 |     s.submit_artifact_save_trusted("archive", &p, &archive("artifact"), &out, &[source.clone()]).unwrap();
+    |                                                                               ^^^^^^^^^^^^^^^^^ help: try: `std::slice::from_ref(&source)`
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.93.0/index.html#cloned_ref_to_slice_refs
+
+error: this call to `clone` can be replaced with `std::slice::from_ref`
+   --> muyon-core/src/artifacts/workflow_tests.rs:164:83
+    |
+164 |         s.submit_artifact_save_trusted("archive", &p, &archive("artifact"), &out, &[source.clone()]).unwrap();
+    |                                                                                   ^^^^^^^^^^^^^^^^^ help: try: `std::slice::from_ref(&source)`
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.93.0/index.html#cloned_ref_to_slice_refs
+
+error: this call to `clone` can be replaced with `std::slice::from_ref`
+   --> muyon-core/src/artifacts/workflow_tests.rs:173:78
+    |
+173 |         let before_artifact = s.artifact_history("artifact", None, 10, &out, &[current_source.clone()]).unwrap();
+    |                                                                              ^^^^^^^^^^^^^^^^^^^^^^^^^ help: try: `std::slice::from_ref(&current_source)`
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.93.0/index.html#cloned_ref_to_slice_refs
+
+error: this call to `clone` can be replaced with `std::slice::from_ref`
+   --> muyon-core/src/artifacts/workflow_tests.rs:179:88
+    |
+179 |         let result = s.submit_artifact_save_trusted("tail-save", &p, &operation, &out, &[current_source.clone()]).unwrap();
+    |                                                                                        ^^^^^^^^^^^^^^^^^^^^^^^^^ help: try: `std::slice::from_ref(&current_source)`
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.93.0/index.html#cloned_ref_to_slice_refs
+
+error: this call to `clone` can be replaced with `std::slice::from_ref`
+   --> muyon-core/src/artifacts/workflow_tests.rs:183:67
+    |
+183 |         assert_eq!(s.artifact_history("artifact", None, 10, &out, &[current_source.clone()]).unwrap(), before_artifact);
+    |                                                                   ^^^^^^^^^^^^^^^^^^^^^^^^^ help: try: `std::slice::from_ref(&current_source)`
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.93.0/index.html#cloned_ref_to_slice_refs
+
+error: this call to `clone` can be replaced with `std::slice::from_ref`
+   --> muyon-core/src/artifacts/workflow_tests.rs:192:86
+    |
+192 | ...save", &p, &operation, &out, &[current_source.clone()]).unwrap().status, ArtifactSaveStatus::Unknown);
+    |                                 ^^^^^^^^^^^^^^^^^^^^^^^^^ help: try: `std::slice::from_ref(&current_source)`
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.93.0/index.html#cloned_ref_to_slice_refs
+
+error: could not compile `muyon-core` (lib) due to 3 previous errors
+warning: build failed, waiting for other jobs to finish...
+error: could not compile `muyon-core` (lib test) due to 50 previous errors
