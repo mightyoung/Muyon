@@ -1,0 +1,56 @@
+test_docx_split_runs_comment_bookmark_header (tools.document_fidelity.tests.test_engine_evaluation.ComplexFixtureTests.test_docx_split_runs_comment_bookmark_header) ... ERROR
+test_two_deterministic_packages_and_operation_contracts (tools.document_fidelity.tests.test_engine_evaluation.ComplexFixtureTests.test_two_deterministic_packages_and_operation_contracts) ... FAIL
+test_xlsx_stale_formula_cache_and_hidden_date_merge_comment (tools.document_fidelity.tests.test_engine_evaluation.ComplexFixtureTests.test_xlsx_stale_formula_cache_and_hidden_date_merge_comment) ... ERROR
+test_installed_metadata_or_explicit_absence (tools.document_fidelity.tests.test_engine_evaluation.InventoryTests.test_installed_metadata_or_explicit_absence) ... ERROR
+test_local_license_hash_and_missing_origin (tools.document_fidelity.tests.test_engine_evaluation.InventoryTests.test_local_license_hash_and_missing_origin) ... ERROR
+
+======================================================================
+ERROR: test_docx_split_runs_comment_bookmark_header (tools.document_fidelity.tests.test_engine_evaluation.ComplexFixtureTests.test_docx_split_runs_comment_bookmark_header)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/document-fidelity/tools/document_fidelity/tests/test_engine_evaluation.py", line 65, in test_docx_split_runs_comment_bookmark_header
+    data=complex_fixtures.build_complex_samples()['complex.docx']
+         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^
+KeyError: 'complex.docx'
+
+======================================================================
+ERROR: test_xlsx_stale_formula_cache_and_hidden_date_merge_comment (tools.document_fidelity.tests.test_engine_evaluation.ComplexFixtureTests.test_xlsx_stale_formula_cache_and_hidden_date_merge_comment)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/document-fidelity/tools/document_fidelity/tests/test_engine_evaluation.py", line 76, in test_xlsx_stale_formula_cache_and_hidden_date_merge_comment
+    data=complex_fixtures.build_complex_samples()['complex.xlsx']
+         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^
+KeyError: 'complex.xlsx'
+
+======================================================================
+ERROR: test_installed_metadata_or_explicit_absence (tools.document_fidelity.tests.test_engine_evaluation.InventoryTests.test_installed_metadata_or_explicit_absence)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/document-fidelity/tools/document_fidelity/tests/test_engine_evaluation.py", line 17, in test_installed_metadata_or_explicit_absence
+    self.assertEqual('not_run', r['engine_execution'])
+                                ~^^^^^^^^^^^^^^^^^^^^
+KeyError: 'engine_execution'
+
+======================================================================
+ERROR: test_local_license_hash_and_missing_origin (tools.document_fidelity.tests.test_engine_evaluation.InventoryTests.test_local_license_hash_and_missing_origin)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/document-fidelity/tools/document_fidelity/tests/test_engine_evaluation.py", line 37, in test_local_license_hash_and_missing_origin
+    licenses=[x for x in value['evidence'] if 'license' in x['relative_path'].lower()]
+                         ~~~~~^^^^^^^^^^^^
+KeyError: 'evidence'
+
+======================================================================
+FAIL: test_two_deterministic_packages_and_operation_contracts (tools.document_fidelity.tests.test_engine_evaluation.ComplexFixtureTests.test_two_deterministic_packages_and_operation_contracts)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/document-fidelity/tools/document_fidelity/tests/test_engine_evaluation.py", line 47, in test_two_deterministic_packages_and_operation_contracts
+    self.assertEqual({'complex.docx','complex.xlsx'}, set(samples))
+AssertionError: Items in the first set but not the second:
+'complex.xlsx'
+'complex.docx'
+
+----------------------------------------------------------------------
+Ran 5 tests in 0.014s
+
+FAILED (failures=1, errors=4)

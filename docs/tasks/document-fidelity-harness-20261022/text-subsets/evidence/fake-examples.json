@@ -1,0 +1,577 @@
+{
+  "docx": {
+    "fake": {
+      "candidate_sha256": "308d59bdaa6a1a8bcb66f1ab96778a10eaac871352c713b13fef03e41a7bf724",
+      "dimensions": {
+        "annotation": "not_run",
+        "recalc": "not_run",
+        "render": "not_run",
+        "visual": "not_run"
+      },
+      "engine_execution": "not_run",
+      "fake_executor_used": true,
+      "fidelity": "unknown",
+      "hard_timeout_enforced": false,
+      "identity": {
+        "base_revision": "rev1",
+        "file_id": "file1",
+        "idempotency_key": "key1",
+        "operation_id": "op1",
+        "scope_id": "scope1"
+      },
+      "preview": {
+        "format": "docx",
+        "layout": "narrow_synthetic_subset",
+        "local_sha256": "b7164fe75612c4d7ce56eadcca953d82ea193c4f955948bf3fbf014aeb95dae2",
+        "new_value": "edited",
+        "old_value": "target",
+        "part": "word/document.xml",
+        "render": "not_run",
+        "status": "supported",
+        "structure_path": "document/body/p[0]/r[1]/t"
+      },
+      "real_roundtrip": "not_run",
+      "reasons": [],
+      "safety": "unknown",
+      "schema_version": 2,
+      "source_manifest": [
+        {
+          "name": "[Content_Types].xml",
+          "sha256": "84fda44d58fcbe79a47ea25bd64cefe8e8d3038bb79fc558beca96e97486f67c",
+          "size": 439
+        },
+        {
+          "name": "_rels/.rels",
+          "sha256": "22c01d12e912dc45bdf191c382dd5b80cdeca1a9e95af86a477798a9f7e541e9",
+          "size": 242
+        },
+        {
+          "name": "custom/original.bin",
+          "sha256": "d6fdff43e49c2841433bca98eadba1beeb7cb768144cec4446eb30cf6659fbac",
+          "size": 33
+        },
+        {
+          "name": "word/document.xml",
+          "sha256": "50045b15e02e99a0274c5cab58c5d93238b1fceb585977eb86ff03938e20a474",
+          "size": 321
+        }
+      ],
+      "source_sha256": "7843ec72722b4866ebc36f1e30a96378449efad7b9febb632bc03b15b6ebc43b",
+      "status": "simulated_validated",
+      "temporary_candidate_cleaned": true,
+      "validation": {
+        "candidate_manifest": [
+          {
+            "name": "[Content_Types].xml",
+            "sha256": "84fda44d58fcbe79a47ea25bd64cefe8e8d3038bb79fc558beca96e97486f67c",
+            "size": 439
+          },
+          {
+            "name": "_rels/.rels",
+            "sha256": "22c01d12e912dc45bdf191c382dd5b80cdeca1a9e95af86a477798a9f7e541e9",
+            "size": 242
+          },
+          {
+            "name": "custom/original.bin",
+            "sha256": "d6fdff43e49c2841433bca98eadba1beeb7cb768144cec4446eb30cf6659fbac",
+            "size": 33
+          },
+          {
+            "name": "word/document.xml",
+            "sha256": "db7740b3445077a02adb6053de0c18403acf8c31a112d087bfa6f572923c41b5",
+            "size": 337
+          }
+        ],
+        "candidate_sha256": "308d59bdaa6a1a8bcb66f1ab96778a10eaac871352c713b13fef03e41a7bf724",
+        "reasons": [],
+        "source_manifest": [
+          {
+            "name": "[Content_Types].xml",
+            "sha256": "84fda44d58fcbe79a47ea25bd64cefe8e8d3038bb79fc558beca96e97486f67c",
+            "size": 439
+          },
+          {
+            "name": "_rels/.rels",
+            "sha256": "22c01d12e912dc45bdf191c382dd5b80cdeca1a9e95af86a477798a9f7e541e9",
+            "size": 242
+          },
+          {
+            "name": "custom/original.bin",
+            "sha256": "d6fdff43e49c2841433bca98eadba1beeb7cb768144cec4446eb30cf6659fbac",
+            "size": 33
+          },
+          {
+            "name": "word/document.xml",
+            "sha256": "50045b15e02e99a0274c5cab58c5d93238b1fceb585977eb86ff03938e20a474",
+            "size": 321
+          }
+        ],
+        "status": "pass"
+      }
+    },
+    "fake_unknown_loss": {
+      "candidate_sha256": "15e80597b3afad83a594ecf9d9b5970c72de4220789fa0afbf1bd76a253afd69",
+      "dimensions": {
+        "annotation": "not_run",
+        "recalc": "not_run",
+        "render": "not_run",
+        "visual": "not_run"
+      },
+      "engine_execution": "not_run",
+      "fake_executor_used": true,
+      "fidelity": "unknown",
+      "hard_timeout_enforced": false,
+      "identity": {
+        "base_revision": "rev1",
+        "file_id": "file1",
+        "idempotency_key": "key1",
+        "operation_id": "op1",
+        "scope_id": "scope1"
+      },
+      "preview": {
+        "format": "docx",
+        "layout": "narrow_synthetic_subset",
+        "local_sha256": "b7164fe75612c4d7ce56eadcca953d82ea193c4f955948bf3fbf014aeb95dae2",
+        "new_value": "edited",
+        "old_value": "target",
+        "part": "word/document.xml",
+        "render": "not_run",
+        "status": "supported",
+        "structure_path": "document/body/p[0]/r[1]/t"
+      },
+      "real_roundtrip": "not_run",
+      "reasons": [
+        "output_validation_failed"
+      ],
+      "safety": "unknown",
+      "schema_version": 2,
+      "source_manifest": [
+        {
+          "name": "[Content_Types].xml",
+          "sha256": "84fda44d58fcbe79a47ea25bd64cefe8e8d3038bb79fc558beca96e97486f67c",
+          "size": 439
+        },
+        {
+          "name": "_rels/.rels",
+          "sha256": "22c01d12e912dc45bdf191c382dd5b80cdeca1a9e95af86a477798a9f7e541e9",
+          "size": 242
+        },
+        {
+          "name": "custom/original.bin",
+          "sha256": "d6fdff43e49c2841433bca98eadba1beeb7cb768144cec4446eb30cf6659fbac",
+          "size": 33
+        },
+        {
+          "name": "word/document.xml",
+          "sha256": "50045b15e02e99a0274c5cab58c5d93238b1fceb585977eb86ff03938e20a474",
+          "size": 321
+        }
+      ],
+      "source_sha256": "7843ec72722b4866ebc36f1e30a96378449efad7b9febb632bc03b15b6ebc43b",
+      "status": "simulation_failed",
+      "temporary_candidate_cleaned": true,
+      "validation": {
+        "candidate_manifest": [
+          {
+            "name": "[Content_Types].xml",
+            "sha256": "84fda44d58fcbe79a47ea25bd64cefe8e8d3038bb79fc558beca96e97486f67c",
+            "size": 439
+          },
+          {
+            "name": "_rels/.rels",
+            "sha256": "22c01d12e912dc45bdf191c382dd5b80cdeca1a9e95af86a477798a9f7e541e9",
+            "size": 242
+          },
+          {
+            "name": "word/document.xml",
+            "sha256": "db7740b3445077a02adb6053de0c18403acf8c31a112d087bfa6f572923c41b5",
+            "size": 337
+          }
+        ],
+        "candidate_sha256": "15e80597b3afad83a594ecf9d9b5970c72de4220789fa0afbf1bd76a253afd69",
+        "reasons": [
+          "part_set_changed"
+        ],
+        "source_manifest": [
+          {
+            "name": "[Content_Types].xml",
+            "sha256": "84fda44d58fcbe79a47ea25bd64cefe8e8d3038bb79fc558beca96e97486f67c",
+            "size": 439
+          },
+          {
+            "name": "_rels/.rels",
+            "sha256": "22c01d12e912dc45bdf191c382dd5b80cdeca1a9e95af86a477798a9f7e541e9",
+            "size": 242
+          },
+          {
+            "name": "custom/original.bin",
+            "sha256": "d6fdff43e49c2841433bca98eadba1beeb7cb768144cec4446eb30cf6659fbac",
+            "size": 33
+          },
+          {
+            "name": "word/document.xml",
+            "sha256": "50045b15e02e99a0274c5cab58c5d93238b1fceb585977eb86ff03938e20a474",
+            "size": 321
+          }
+        ],
+        "status": "fail"
+      }
+    },
+    "preview": {
+      "format": "docx",
+      "layout": "narrow_synthetic_subset",
+      "local_sha256": "b7164fe75612c4d7ce56eadcca953d82ea193c4f955948bf3fbf014aeb95dae2",
+      "new_value": "edited",
+      "old_value": "target",
+      "part": "word/document.xml",
+      "render": "not_run",
+      "status": "supported",
+      "structure_path": "document/body/p[0]/r[1]/t"
+    },
+    "real_gate": {
+      "dimensions": {
+        "annotation": "not_run",
+        "recalc": "not_run",
+        "render": "not_run",
+        "visual": "not_run"
+      },
+      "engine_execution": "not_run",
+      "fake_executor_used": false,
+      "fidelity": "unknown",
+      "identity": {
+        "base_revision": "rev1",
+        "file_id": "file1",
+        "idempotency_key": "key1",
+        "operation_id": "op1",
+        "scope_id": "scope1"
+      },
+      "real_roundtrip": "not_run",
+      "reasons": [
+        "environment_hold",
+        "real_executor_not_implemented",
+        "admission_missing"
+      ],
+      "safety": "unknown",
+      "schema_version": 2,
+      "status": "held"
+    }
+  },
+  "notice": "FAKE EXECUTOR ONLY; no third-party imports/engine runs",
+  "pptx": {
+    "fake": {
+      "candidate_sha256": "3bb6940df268c36935041b1303d4bbb7e922c59c5a76d8510f0350f7f51a3461",
+      "dimensions": {
+        "annotation": "not_run",
+        "recalc": "not_run",
+        "render": "not_run",
+        "visual": "not_run"
+      },
+      "engine_execution": "not_run",
+      "fake_executor_used": true,
+      "fidelity": "unknown",
+      "hard_timeout_enforced": false,
+      "identity": {
+        "base_revision": "rev1",
+        "file_id": "file1",
+        "idempotency_key": "key1",
+        "operation_id": "op1",
+        "scope_id": "scope1"
+      },
+      "preview": {
+        "format": "pptx",
+        "layout": "narrow_synthetic_subset",
+        "local_sha256": "245e81b60868c922eacaf8154039de3b02b1d8df56d1c6fe5451d3a36be1ffa9",
+        "new_value": "edited",
+        "old_value": "target",
+        "part": "ppt/slides/slide1.xml",
+        "render": "not_run",
+        "status": "supported",
+        "structure_path": "slideId=256/shapeId=2/p[0]/r[0]/t"
+      },
+      "real_roundtrip": "not_run",
+      "reasons": [],
+      "safety": "unknown",
+      "schema_version": 2,
+      "source_manifest": [
+        {
+          "name": "[Content_Types].xml",
+          "sha256": "4a17ab67ec8909f0ca735a37c62ef93a2778429b407683e761146f24e1981842",
+          "size": 574
+        },
+        {
+          "name": "_rels/.rels",
+          "sha256": "2754d98129bad6b2330140680e9d0a064180a224d2df6252e4ef8df3800ee50a",
+          "size": 245
+        },
+        {
+          "name": "custom/original.bin",
+          "sha256": "d6fdff43e49c2841433bca98eadba1beeb7cb768144cec4446eb30cf6659fbac",
+          "size": 33
+        },
+        {
+          "name": "ppt/_rels/presentation.xml.rels",
+          "sha256": "3369239f8dbd38f94ab13a476f46e249ea454d853d9ef1e9aa10da4e52a25eee",
+          "size": 233
+        },
+        {
+          "name": "ppt/presentation.xml",
+          "sha256": "12bfa50096c154011bd00256686ff66e9c66da2d7b409ba595b132b08e368e3e",
+          "size": 294
+        },
+        {
+          "name": "ppt/slides/slide1.xml",
+          "sha256": "d29faee7f3a0b854bfd72fc32ede759d0341fd366bbb5709c5c72158b578ee6f",
+          "size": 665
+        }
+      ],
+      "source_sha256": "e0f217f2ddcc8f0c429b07caacdf9ad365b96ea090e1a887055154a44275732e",
+      "status": "simulated_validated",
+      "temporary_candidate_cleaned": true,
+      "validation": {
+        "candidate_manifest": [
+          {
+            "name": "[Content_Types].xml",
+            "sha256": "4a17ab67ec8909f0ca735a37c62ef93a2778429b407683e761146f24e1981842",
+            "size": 574
+          },
+          {
+            "name": "_rels/.rels",
+            "sha256": "2754d98129bad6b2330140680e9d0a064180a224d2df6252e4ef8df3800ee50a",
+            "size": 245
+          },
+          {
+            "name": "custom/original.bin",
+            "sha256": "d6fdff43e49c2841433bca98eadba1beeb7cb768144cec4446eb30cf6659fbac",
+            "size": 33
+          },
+          {
+            "name": "ppt/_rels/presentation.xml.rels",
+            "sha256": "3369239f8dbd38f94ab13a476f46e249ea454d853d9ef1e9aa10da4e52a25eee",
+            "size": 233
+          },
+          {
+            "name": "ppt/presentation.xml",
+            "sha256": "12bfa50096c154011bd00256686ff66e9c66da2d7b409ba595b132b08e368e3e",
+            "size": 294
+          },
+          {
+            "name": "ppt/slides/slide1.xml",
+            "sha256": "00a2263901dfdca49fed729dbd2b0a176f99b28ad6d80cbde1afe3545d16a9b9",
+            "size": 767
+          }
+        ],
+        "candidate_sha256": "3bb6940df268c36935041b1303d4bbb7e922c59c5a76d8510f0350f7f51a3461",
+        "reasons": [],
+        "source_manifest": [
+          {
+            "name": "[Content_Types].xml",
+            "sha256": "4a17ab67ec8909f0ca735a37c62ef93a2778429b407683e761146f24e1981842",
+            "size": 574
+          },
+          {
+            "name": "_rels/.rels",
+            "sha256": "2754d98129bad6b2330140680e9d0a064180a224d2df6252e4ef8df3800ee50a",
+            "size": 245
+          },
+          {
+            "name": "custom/original.bin",
+            "sha256": "d6fdff43e49c2841433bca98eadba1beeb7cb768144cec4446eb30cf6659fbac",
+            "size": 33
+          },
+          {
+            "name": "ppt/_rels/presentation.xml.rels",
+            "sha256": "3369239f8dbd38f94ab13a476f46e249ea454d853d9ef1e9aa10da4e52a25eee",
+            "size": 233
+          },
+          {
+            "name": "ppt/presentation.xml",
+            "sha256": "12bfa50096c154011bd00256686ff66e9c66da2d7b409ba595b132b08e368e3e",
+            "size": 294
+          },
+          {
+            "name": "ppt/slides/slide1.xml",
+            "sha256": "d29faee7f3a0b854bfd72fc32ede759d0341fd366bbb5709c5c72158b578ee6f",
+            "size": 665
+          }
+        ],
+        "status": "pass"
+      }
+    },
+    "fake_unknown_loss": {
+      "candidate_sha256": "77fd02c28a5b29594c1c7f097e0242f176e441603c1ac49ed6c25cb9ee9d207a",
+      "dimensions": {
+        "annotation": "not_run",
+        "recalc": "not_run",
+        "render": "not_run",
+        "visual": "not_run"
+      },
+      "engine_execution": "not_run",
+      "fake_executor_used": true,
+      "fidelity": "unknown",
+      "hard_timeout_enforced": false,
+      "identity": {
+        "base_revision": "rev1",
+        "file_id": "file1",
+        "idempotency_key": "key1",
+        "operation_id": "op1",
+        "scope_id": "scope1"
+      },
+      "preview": {
+        "format": "pptx",
+        "layout": "narrow_synthetic_subset",
+        "local_sha256": "245e81b60868c922eacaf8154039de3b02b1d8df56d1c6fe5451d3a36be1ffa9",
+        "new_value": "edited",
+        "old_value": "target",
+        "part": "ppt/slides/slide1.xml",
+        "render": "not_run",
+        "status": "supported",
+        "structure_path": "slideId=256/shapeId=2/p[0]/r[0]/t"
+      },
+      "real_roundtrip": "not_run",
+      "reasons": [
+        "output_validation_failed"
+      ],
+      "safety": "unknown",
+      "schema_version": 2,
+      "source_manifest": [
+        {
+          "name": "[Content_Types].xml",
+          "sha256": "4a17ab67ec8909f0ca735a37c62ef93a2778429b407683e761146f24e1981842",
+          "size": 574
+        },
+        {
+          "name": "_rels/.rels",
+          "sha256": "2754d98129bad6b2330140680e9d0a064180a224d2df6252e4ef8df3800ee50a",
+          "size": 245
+        },
+        {
+          "name": "custom/original.bin",
+          "sha256": "d6fdff43e49c2841433bca98eadba1beeb7cb768144cec4446eb30cf6659fbac",
+          "size": 33
+        },
+        {
+          "name": "ppt/_rels/presentation.xml.rels",
+          "sha256": "3369239f8dbd38f94ab13a476f46e249ea454d853d9ef1e9aa10da4e52a25eee",
+          "size": 233
+        },
+        {
+          "name": "ppt/presentation.xml",
+          "sha256": "12bfa50096c154011bd00256686ff66e9c66da2d7b409ba595b132b08e368e3e",
+          "size": 294
+        },
+        {
+          "name": "ppt/slides/slide1.xml",
+          "sha256": "d29faee7f3a0b854bfd72fc32ede759d0341fd366bbb5709c5c72158b578ee6f",
+          "size": 665
+        }
+      ],
+      "source_sha256": "e0f217f2ddcc8f0c429b07caacdf9ad365b96ea090e1a887055154a44275732e",
+      "status": "simulation_failed",
+      "temporary_candidate_cleaned": true,
+      "validation": {
+        "candidate_manifest": [
+          {
+            "name": "[Content_Types].xml",
+            "sha256": "4a17ab67ec8909f0ca735a37c62ef93a2778429b407683e761146f24e1981842",
+            "size": 574
+          },
+          {
+            "name": "_rels/.rels",
+            "sha256": "2754d98129bad6b2330140680e9d0a064180a224d2df6252e4ef8df3800ee50a",
+            "size": 245
+          },
+          {
+            "name": "ppt/_rels/presentation.xml.rels",
+            "sha256": "3369239f8dbd38f94ab13a476f46e249ea454d853d9ef1e9aa10da4e52a25eee",
+            "size": 233
+          },
+          {
+            "name": "ppt/presentation.xml",
+            "sha256": "12bfa50096c154011bd00256686ff66e9c66da2d7b409ba595b132b08e368e3e",
+            "size": 294
+          },
+          {
+            "name": "ppt/slides/slide1.xml",
+            "sha256": "00a2263901dfdca49fed729dbd2b0a176f99b28ad6d80cbde1afe3545d16a9b9",
+            "size": 767
+          }
+        ],
+        "candidate_sha256": "77fd02c28a5b29594c1c7f097e0242f176e441603c1ac49ed6c25cb9ee9d207a",
+        "reasons": [
+          "part_set_changed"
+        ],
+        "source_manifest": [
+          {
+            "name": "[Content_Types].xml",
+            "sha256": "4a17ab67ec8909f0ca735a37c62ef93a2778429b407683e761146f24e1981842",
+            "size": 574
+          },
+          {
+            "name": "_rels/.rels",
+            "sha256": "2754d98129bad6b2330140680e9d0a064180a224d2df6252e4ef8df3800ee50a",
+            "size": 245
+          },
+          {
+            "name": "custom/original.bin",
+            "sha256": "d6fdff43e49c2841433bca98eadba1beeb7cb768144cec4446eb30cf6659fbac",
+            "size": 33
+          },
+          {
+            "name": "ppt/_rels/presentation.xml.rels",
+            "sha256": "3369239f8dbd38f94ab13a476f46e249ea454d853d9ef1e9aa10da4e52a25eee",
+            "size": 233
+          },
+          {
+            "name": "ppt/presentation.xml",
+            "sha256": "12bfa50096c154011bd00256686ff66e9c66da2d7b409ba595b132b08e368e3e",
+            "size": 294
+          },
+          {
+            "name": "ppt/slides/slide1.xml",
+            "sha256": "d29faee7f3a0b854bfd72fc32ede759d0341fd366bbb5709c5c72158b578ee6f",
+            "size": 665
+          }
+        ],
+        "status": "fail"
+      }
+    },
+    "preview": {
+      "format": "pptx",
+      "layout": "narrow_synthetic_subset",
+      "local_sha256": "245e81b60868c922eacaf8154039de3b02b1d8df56d1c6fe5451d3a36be1ffa9",
+      "new_value": "edited",
+      "old_value": "target",
+      "part": "ppt/slides/slide1.xml",
+      "render": "not_run",
+      "status": "supported",
+      "structure_path": "slideId=256/shapeId=2/p[0]/r[0]/t"
+    },
+    "real_gate": {
+      "dimensions": {
+        "annotation": "not_run",
+        "recalc": "not_run",
+        "render": "not_run",
+        "visual": "not_run"
+      },
+      "engine_execution": "not_run",
+      "fake_executor_used": false,
+      "fidelity": "unknown",
+      "identity": {
+        "base_revision": "rev1",
+        "file_id": "file1",
+        "idempotency_key": "key1",
+        "operation_id": "op1",
+        "scope_id": "scope1"
+      },
+      "real_roundtrip": "not_run",
+      "reasons": [
+        "environment_hold",
+        "real_executor_not_implemented",
+        "admission_missing"
+      ],
+      "safety": "unknown",
+      "schema_version": 2,
+      "status": "held"
+    }
+  }
+}

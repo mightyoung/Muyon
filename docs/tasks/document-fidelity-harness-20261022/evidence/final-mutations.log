@@ -1,0 +1,216 @@
+unsafe_path_disabled exit= 1 KILLED
+test_active_formulas_and_cfb (test_harness.AdditionalBoundaryTests.test_active_formulas_and_cfb) ... ok
+test_corrupt_deflate_is_structured_rejection (test_harness.AdditionalBoundaryTests.test_corrupt_deflate_is_structured_rejection) ... ok
+test_duplicate_and_crc_corruption (test_harness.AdditionalBoundaryTests.test_duplicate_and_crc_corruption) ... ok
+test_fifo_input_rejects_without_waiting_for_writer (test_harness.AdditionalBoundaryTests.test_fifo_input_rejects_without_waiting_for_writer) ... ok
+test_fixture_generation_reproducible_and_usable (test_harness.AdditionalBoundaryTests.test_fixture_generation_reproducible_and_usable) ... ok
+test_forged_eocd_count_rejected_before_zipfile_allocation (test_harness.AdditionalBoundaryTests.test_forged_eocd_count_rejected_before_zipfile_allocation) ... ok
+test_limits_and_deep_xml (test_harness.AdditionalBoundaryTests.test_limits_and_deep_xml) ... ok
+test_local_header_encryption_and_flags_disagreement (test_harness.AdditionalBoundaryTests.test_local_header_encryption_and_flags_disagreement) ... ok
+test_pdf_obfuscated_names (test_harness.AdditionalBoundaryTests.test_pdf_obfuscated_names) ... ok
+test_relationship_declared_mime_required (test_harness.AdditionalBoundaryTests.test_relationship_declared_mime_required) ... ok
+test_relationship_escape_and_missing_target (test_harness.AdditionalBoundaryTests.test_relationship_escape_and_missing_target) ... ok
+test_relationship_type_and_declared_mime_required (test_harness.AdditionalBoundaryTests.test_relationship_type_and_declared_mime_required) ... ok
+test_second_unsupported_office_main_is_ambiguous (test_harness.AdditionalBoundaryTests.test_second_unsupported_office_main_is_ambiguous) ... ok
+test_unused_content_type_cannot_be_empty (test_harness.AdditionalBoundaryTests.test_unused_content_type_cannot_be_empty) ... ok
+test_cli_stdout_and_original_untouched (test_harness.HarnessTests.test_cli_stdout_and_original_untouched) ... ok
+test_compare_unknown_loss_and_changes_fail (test_harness.HarnessTests.test_compare_unknown_loss_and_changes_fail) ... ok
+test_duplicate_symlink_and_encryption (test_harness.HarnessTests.test_duplicate_symlink_and_encryption) ... ok
+test_invalid_archive_and_plaintext_not_ooxml (test_harness.HarnessTests.test_invalid_archive_and_plaintext_not_ooxml) ... ok
+test_macro_external_and_embedded_recorded (test_harness.HarnessTests.test_macro_external_and_embedded_recorded) ... ok
+test_masquerade (test_harness.HarnessTests.test_masquerade) ... ok
+test_missing_main_and_root_relationship (test_harness.HarnessTests.test_missing_main_and_root_relationship) ... ok
+test_pdf_preflight_never_certifies_safety (test_harness.HarnessTests.test_pdf_preflight_never_certifies_safety) ... ok
+test_three_formats_and_honest_dimensions (test_harness.HarnessTests.test_three_formats_and_honest_dimensions) ... ok
+test_unsafe_archive_paths (test_harness.HarnessTests.test_unsafe_archive_paths) ... 
+  test_unsafe_archive_paths (test_harness.HarnessTests.test_unsafe_archive_paths) (name='../escape') ... FAIL
+  test_unsafe_archive_paths (test_harness.HarnessTests.test_unsafe_archive_paths) (name='/absolute') ... FAIL
+  test_unsafe_archive_paths (test_harness.HarnessTests.test_unsafe_archive_paths) (name='C:/drive') ... FAIL
+  test_unsafe_archive_paths (test_harness.HarnessTests.test_unsafe_archive_paths) (name='a\\b') ... FAIL
+  test_unsafe_archive_paths (test_harness.HarnessTests.test_unsafe_archive_paths) (name='a/../b') ... FAIL
+  test_unsafe_archive_paths (test_harness.HarnessTests.test_unsafe_archive_paths) (name='a/%2e%2e/b') ... FAIL
+test_wrong_content_type_and_root (test_harness.HarnessTests.test_wrong_content_type_and_root) ... ok
+test_xml_entities_utf16_and_malformed (test_harness.HarnessTests.test_xml_entities_utf16_and_malformed) ... ok
+test_zip_bomb_ratio_and_member_limit (test_harness.HarnessTests.test_zip_bomb_ratio_and_member_limit) ... ok
+
+======================================================================
+FAIL: test_unsafe_archive_paths (test_harness.HarnessTests.test_unsafe_archive_paths) (name='../escape')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/tmph0rxg8xe/tools/document_fidelity/tests/test_harness.py", line 87, in test_unsafe_archive_paths
+    self.reject(self.sample(members=p), 'unsafe_path')
+  File "/tmp/tmph0rxg8xe/tools/document_fidelity/tests/test_harness.py", line 49, in reject
+    self.assertIn(code, [x['code'] for x in r['findings']], r)
+AssertionError: 'unsafe_path' not found in ['missing_content_type'] : {'schema_version': 1, 'format': 'docx', 'sha256': '31094cafa03f666adf216ebb22233da5a21592112d6964e22c715c48f25f4689', 'size': 1015, 'decision': 'reject', 'safety': 'unknown', 'fidelity': 'unknown', 'parts': [{'name': '[Content_Types].xml', 'size': 439, 'sha256': '84fda44d58fcbe79a47ea25bd64cefe8e8d3038bb79fc558beca96e97486f67c'}, {'name': '_rels/.rels', 'size': 242, 'sha256': '22c01d12e912dc45bdf191c382dd5b80cdeca1a9e95af86a477798a9f7e541e9'}, {'name': 'word/document.xml', 'size': 80, 'sha256': '8d955cb02b64b6d4602c8d12b39b2b248a36828d51a411433b91029a160792ab'}, {'name': 'custom/original.bin', 'size': 32, 'sha256': '67f8770ac3dd1bef1d1335f3d65c6c0e62cbd153ea026beb36db97174d66ae43'}, {'name': '../escape', 'size': 1, 'sha256': '2d711642b726b04401627ca9fbac32f5c8530fb1903cc4db02258717921a4881'}], 'findings': [{'code': 'missing_content_type', 'part': '../escape', 'detail': ''}], 'limits': {'max_file': 16777216, 'max_members': 2048, 'max_member': 8388608, 'max_total': 33554432, 'max_ratio': 100, 'max_xml_depth': 128}, 'dimensions': {'structure': {'status': 'fail', 'reason': 'Package preflight rejected'}, 'visual': {'status': 'not_run', 'reason': 'No engine installed or invoked'}, 'formula': {'status': 'not_run', 'reason': 'No engine installed or invoked'}, 'annotation': {'status': 'not_run', 'reason': 'No engine installed or invoked'}, 'render': {'status': 'not_run', 'reason': 'No engine installed or invoked'}, 'recalc': {'status': 'not_run', 'reason': 'No engine installed or invoked'}}, 'limitations': ['No complete OOXML schema validation or malware detection', 'Unknown parts inventoried; no editing/rendering/semantic preservation proven']}
+
+======================================================================
+FAIL: test_unsafe_archive_paths (test_harness.HarnessTests.test_unsafe_archive_paths) (name='/absolute')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/tmph0rxg8xe/tools/document_fidelity/tests/test_harness.py", line 87, in test_unsafe_archive_paths
+    self.reject(self.sample(members=p), 'unsafe_path')
+  File "/tmp/tmph0rxg8xe/tools/document_fidelity/tests/test_harness.py", line 49, in reject
+    self.assertIn(code, [x['code'] for x in r['findings']], r)
+AssertionError: 'unsafe_path' not found in ['missing_content_type'] : {'schema_version': 1, 'format': 'docx', 'sha256': '7424a47292d349c258e1ce6b11e367a8236c48fe79294b597eda3aac33931b39', 'size': 1015, 'decision': 'reject', 'safety': 'unknown', 'fidelity': 'unknown', 'parts': [{'name': '[Content_Types].xml', 'size': 439, 'sha256': '84fda44d58fcbe79a47ea25bd64cefe8e8d3038bb79fc558beca96e97486f67c'}, {'name': '_rels/.rels', 'size': 242, 'sha256': '22c01d12e912dc45bdf191c382dd5b80cdeca1a9e95af86a477798a9f7e541e9'}, {'name': 'word/document.xml', 'size': 80, 'sha256': '8d955cb02b64b6d4602c8d12b39b2b248a36828d51a411433b91029a160792ab'}, {'name': 'custom/original.bin', 'size': 32, 'sha256': '67f8770ac3dd1bef1d1335f3d65c6c0e62cbd153ea026beb36db97174d66ae43'}, {'name': '/absolute', 'size': 1, 'sha256': '2d711642b726b04401627ca9fbac32f5c8530fb1903cc4db02258717921a4881'}], 'findings': [{'code': 'missing_content_type', 'part': '/absolute', 'detail': ''}], 'limits': {'max_file': 16777216, 'max_members': 2048, 'max_member': 8388608, 'max_total': 33554432, 'max_ratio': 100, 'max_xml_depth': 128}, 'dimensions': {'structure': {'status': 'fail', 'reason': 'Package preflight rejected'}, 'visual': {'status': 'not_run', 'reason': 'No engine installed or invoked'}, 'formula': {'status': 'not_run', 'reason': 'No engine installed or invoked'}, 'annotation': {'status': 'not_run', 'reason': 'No engine installed or invoked'}, 'render': {'status': 'not_run', 'reason': 'No engine installed or invoked'}, 'recalc': {'status': 'not_run', 'reason': 'No engine installed or invoked'}}, 'limitations': ['No complete OOXML schema validation or malware detection', 'Unknown parts inventoried; no editing/rendering/semantic preservation proven']}
+
+======================================================================
+FAIL: test_unsafe_archive_paths (test_harness.HarnessTests.test_unsafe_archive_paths) (name='C:/drive')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/tmph0rxg8xe/tools/document_fidelity/tests/test_harness.py", line 87, in test_unsafe_archive_paths
+    self.reject(self.sample(members=p), 'unsafe_path')
+  File "/tmp/tmph0rxg8xe/tools/document_fidelity/tests/test_harness.py", line 49, in reject
+    self.assertIn(code, [x['code'] for x in r['findings']], r)
+AssertionError: 'unsafe_path' not found in ['missing_content_type'] : {'schema_version': 1, 'format': 'docx', 'sha256': '4d14563fa33408e0bd425dc2682ea5b6a10d5384e8a517a4668eba210b5385fa', 'size': 1013, 'decision': 'reject', 'safety': 'unknown', 'fidelity': 'unknown', 'parts': [{'name': '[Content_Types].xml', 'size': 439, 'sha256': '84fda44d58fcbe79a47ea25bd64cefe8e8d3038bb79fc558beca96e97486f67c'}, {'name': '_rels/.rels', 'size': 242, 'sha256': '22c01d12e912dc45bdf191c382dd5b80cdeca1a9e95af86a477798a9f7e541e9'}, {'name': 'word/document.xml', 'size': 80, 'sha256': '8d955cb02b64b6d4602c8d12b39b2b248a36828d51a411433b91029a160792ab'}, {'name': 'custom/original.bin', 'size': 32, 'sha256': '67f8770ac3dd1bef1d1335f3d65c6c0e62cbd153ea026beb36db97174d66ae43'}, {'name': 'C:/drive', 'size': 1, 'sha256': '2d711642b726b04401627ca9fbac32f5c8530fb1903cc4db02258717921a4881'}], 'findings': [{'code': 'missing_content_type', 'part': 'C:/drive', 'detail': ''}], 'limits': {'max_file': 16777216, 'max_members': 2048, 'max_member': 8388608, 'max_total': 33554432, 'max_ratio': 100, 'max_xml_depth': 128}, 'dimensions': {'structure': {'status': 'fail', 'reason': 'Package preflight rejected'}, 'visual': {'status': 'not_run', 'reason': 'No engine installed or invoked'}, 'formula': {'status': 'not_run', 'reason': 'No engine installed or invoked'}, 'annotation': {'status': 'not_run', 'reason': 'No engine installed or invoked'}, 'render': {'status': 'not_run', 'reason': 'No engine installed or invoked'}, 'recalc': {'status': 'not_run', 'reason': 'No engine installed or invoked'}}, 'limitations': ['No complete OOXML schema validation or malware detection', 'Unknown parts inventoried; no editing/rendering/semantic preservation proven']}
+
+======================================================================
+FAIL: test_unsafe_archive_paths (test_harness.HarnessTests.test_unsafe_archive_paths) (name='a\\b')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/tmph0rxg8xe/tools/document_fidelity/tests/test_harness.py", line 87, in test_unsafe_archive_paths
+    self.reject(self.sample(members=p), 'unsafe_path')
+  File "/tmp/tmph0rxg8xe/tools/document_fidelity/tests/test_harness.py", line 49, in reject
+    self.assertIn(code, [x['code'] for x in r['findings']], r)
+AssertionError: 'unsafe_path' not found in ['missing_content_type'] : {'schema_version': 1, 'format': 'docx', 'sha256': '09926c3d7ce507a57dd88de74d80dfb4cbabe0a81892d72a056e9b5d3af109d4', 'size': 1003, 'decision': 'reject', 'safety': 'unknown', 'fidelity': 'unknown', 'parts': [{'name': '[Content_Types].xml', 'size': 439, 'sha256': '84fda44d58fcbe79a47ea25bd64cefe8e8d3038bb79fc558beca96e97486f67c'}, {'name': '_rels/.rels', 'size': 242, 'sha256': '22c01d12e912dc45bdf191c382dd5b80cdeca1a9e95af86a477798a9f7e541e9'}, {'name': 'word/document.xml', 'size': 80, 'sha256': '8d955cb02b64b6d4602c8d12b39b2b248a36828d51a411433b91029a160792ab'}, {'name': 'custom/original.bin', 'size': 32, 'sha256': '67f8770ac3dd1bef1d1335f3d65c6c0e62cbd153ea026beb36db97174d66ae43'}, {'name': 'a\\b', 'size': 1, 'sha256': '2d711642b726b04401627ca9fbac32f5c8530fb1903cc4db02258717921a4881'}], 'findings': [{'code': 'missing_content_type', 'part': 'a\\b', 'detail': ''}], 'limits': {'max_file': 16777216, 'max_members': 2048, 'max_member': 8388608, 'max_total': 33554432, 'max_ratio': 100, 'max_xml_depth': 128}, 'dimensions': {'structure': {'status': 'fail', 'reason': 'Package preflight rejected'}, 'visual': {'status': 'not_run', 'reason': 'No engine installed or invoked'}, 'formula': {'status': 'not_run', 'reason': 'No engine installed or invoked'}, 'annotation': {'status': 'not_run', 'reason': 'No engine installed or invoked'}, 'render': {'status': 'not_run', 'reason': 'No engine installed or invoked'}, 'recalc': {'status': 'not_run', 'reason': 'No engine installed or invoked'}}, 'limitations': ['No complete OOXML schema validation or malware detection', 'Unknown parts inventoried; no editing/rendering/semantic preservation proven']}
+
+======================================================================
+FAIL: test_unsafe_archive_paths (test_harness.HarnessTests.test_unsafe_archive_paths) (name='a/../b')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/tmph0rxg8xe/tools/document_fidelity/tests/test_harness.py", line 87, in test_unsafe_archive_paths
+    self.reject(self.sample(members=p), 'unsafe_path')
+  File "/tmp/tmph0rxg8xe/tools/document_fidelity/tests/test_harness.py", line 49, in reject
+    self.assertIn(code, [x['code'] for x in r['findings']], r)
+AssertionError: 'unsafe_path' not found in ['missing_content_type'] : {'schema_version': 1, 'format': 'docx', 'sha256': '83302b153f63967f27519a4dd816937a1ef4ada83898c9ef51138700f8021361', 'size': 1009, 'decision': 'reject', 'safety': 'unknown', 'fidelity': 'unknown', 'parts': [{'name': '[Content_Types].xml', 'size': 439, 'sha256': '84fda44d58fcbe79a47ea25bd64cefe8e8d3038bb79fc558beca96e97486f67c'}, {'name': '_rels/.rels', 'size': 242, 'sha256': '22c01d12e912dc45bdf191c382dd5b80cdeca1a9e95af86a477798a9f7e541e9'}, {'name': 'word/document.xml', 'size': 80, 'sha256': '8d955cb02b64b6d4602c8d12b39b2b248a36828d51a411433b91029a160792ab'}, {'name': 'custom/original.bin', 'size': 32, 'sha256': '67f8770ac3dd1bef1d1335f3d65c6c0e62cbd153ea026beb36db97174d66ae43'}, {'name': 'a/../b', 'size': 1, 'sha256': '2d711642b726b04401627ca9fbac32f5c8530fb1903cc4db02258717921a4881'}], 'findings': [{'code': 'missing_content_type', 'part': 'a/../b', 'detail': ''}], 'limits': {'max_file': 16777216, 'max_members': 2048, 'max_member': 8388608, 'max_total': 33554432, 'max_ratio': 100, 'max_xml_depth': 128}, 'dimensions': {'structure': {'status': 'fail', 'reason': 'Package preflight rejected'}, 'visual': {'status': 'not_run', 'reason': 'No engine installed or invoked'}, 'formula': {'status': 'not_run', 'reason': 'No engine installed or invoked'}, 'annotation': {'status': 'not_run', 'reason': 'No engine installed or invoked'}, 'render': {'status': 'not_run', 'reason': 'No engine installed or invoked'}, 'recalc': {'status': 'not_run', 'reason': 'No engine installed or invoked'}}, 'limitations': ['No complete OOXML schema validation or malware detection', 'Unknown parts inventoried; no editing/rendering/semantic preservation proven']}
+
+======================================================================
+FAIL: test_unsafe_archive_paths (test_harness.HarnessTests.test_unsafe_archive_paths) (name='a/%2e%2e/b')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/tmph0rxg8xe/tools/document_fidelity/tests/test_harness.py", line 87, in test_unsafe_archive_paths
+    self.reject(self.sample(members=p), 'unsafe_path')
+  File "/tmp/tmph0rxg8xe/tools/document_fidelity/tests/test_harness.py", line 49, in reject
+    self.assertIn(code, [x['code'] for x in r['findings']], r)
+AssertionError: 'unsafe_path' not found in ['missing_content_type'] : {'schema_version': 1, 'format': 'docx', 'sha256': 'a3bd3672de77062a2d23f848147172de43c643ac19542553fc805c468471652b', 'size': 1017, 'decision': 'reject', 'safety': 'unknown', 'fidelity': 'unknown', 'parts': [{'name': '[Content_Types].xml', 'size': 439, 'sha256': '84fda44d58fcbe79a47ea25bd64cefe8e8d3038bb79fc558beca96e97486f67c'}, {'name': '_rels/.rels', 'size': 242, 'sha256': '22c01d12e912dc45bdf191c382dd5b80cdeca1a9e95af86a477798a9f7e541e9'}, {'name': 'word/document.xml', 'size': 80, 'sha256': '8d955cb02b64b6d4602c8d12b39b2b248a36828d51a411433b91029a160792ab'}, {'name': 'custom/original.bin', 'size': 32, 'sha256': '67f8770ac3dd1bef1d1335f3d65c6c0e62cbd153ea026beb36db97174d66ae43'}, {'name': 'a/%2e%2e/b', 'size': 1, 'sha256': '2d711642b726b04401627ca9fbac32f5c8530fb1903cc4db02258717921a4881'}], 'findings': [{'code': 'missing_content_type', 'part': 'a/%2e%2e/b', 'detail': ''}], 'limits': {'max_file': 16777216, 'max_members': 2048, 'max_member': 8388608, 'max_total': 33554432, 'max_ratio': 100, 'max_xml_depth': 128}, 'dimensions': {'structure': {'status': 'fail', 'reason': 'Package preflight rejected'}, 'visual': {'status': 'not_run', 'reason': 'No engine installed or invoked'}, 'formula': {'status': 'not_run', 'reason': 'No engine installed or invoked'}, 'annotation': {'status': 'not_run', 'reason': 'No engine installed or invoked'}, 'render': {'status': 'not_run', 'reason': 'No engine installed or invoked'}, 'recalc': {'status': 'not_run', 'reason': 'No engine installed or invoked'}}, 'limitations': ['No complete OOXML schema validation or malware detection', 'Unknown parts inventoried; no editing/rendering/semantic preservation proven']}
+
+----------------------------------------------------------------------
+Ran 27 tests in 0.133s
+
+FAILED (failures=6)
+
+unknown_part_loss_ignored exit= 1 KILLED
+test_active_formulas_and_cfb (test_harness.AdditionalBoundaryTests.test_active_formulas_and_cfb) ... ok
+test_corrupt_deflate_is_structured_rejection (test_harness.AdditionalBoundaryTests.test_corrupt_deflate_is_structured_rejection) ... ok
+test_duplicate_and_crc_corruption (test_harness.AdditionalBoundaryTests.test_duplicate_and_crc_corruption) ... ok
+test_fifo_input_rejects_without_waiting_for_writer (test_harness.AdditionalBoundaryTests.test_fifo_input_rejects_without_waiting_for_writer) ... ok
+test_fixture_generation_reproducible_and_usable (test_harness.AdditionalBoundaryTests.test_fixture_generation_reproducible_and_usable) ... ok
+test_forged_eocd_count_rejected_before_zipfile_allocation (test_harness.AdditionalBoundaryTests.test_forged_eocd_count_rejected_before_zipfile_allocation) ... ok
+test_limits_and_deep_xml (test_harness.AdditionalBoundaryTests.test_limits_and_deep_xml) ... ok
+test_local_header_encryption_and_flags_disagreement (test_harness.AdditionalBoundaryTests.test_local_header_encryption_and_flags_disagreement) ... ok
+test_pdf_obfuscated_names (test_harness.AdditionalBoundaryTests.test_pdf_obfuscated_names) ... ok
+test_relationship_declared_mime_required (test_harness.AdditionalBoundaryTests.test_relationship_declared_mime_required) ... ok
+test_relationship_escape_and_missing_target (test_harness.AdditionalBoundaryTests.test_relationship_escape_and_missing_target) ... ok
+test_relationship_type_and_declared_mime_required (test_harness.AdditionalBoundaryTests.test_relationship_type_and_declared_mime_required) ... ok
+test_second_unsupported_office_main_is_ambiguous (test_harness.AdditionalBoundaryTests.test_second_unsupported_office_main_is_ambiguous) ... ok
+test_unused_content_type_cannot_be_empty (test_harness.AdditionalBoundaryTests.test_unused_content_type_cannot_be_empty) ... ok
+test_cli_stdout_and_original_untouched (test_harness.HarnessTests.test_cli_stdout_and_original_untouched) ... ok
+test_compare_unknown_loss_and_changes_fail (test_harness.HarnessTests.test_compare_unknown_loss_and_changes_fail) ... FAIL
+test_duplicate_symlink_and_encryption (test_harness.HarnessTests.test_duplicate_symlink_and_encryption) ... ok
+test_invalid_archive_and_plaintext_not_ooxml (test_harness.HarnessTests.test_invalid_archive_and_plaintext_not_ooxml) ... ok
+test_macro_external_and_embedded_recorded (test_harness.HarnessTests.test_macro_external_and_embedded_recorded) ... ok
+test_masquerade (test_harness.HarnessTests.test_masquerade) ... ok
+test_missing_main_and_root_relationship (test_harness.HarnessTests.test_missing_main_and_root_relationship) ... ok
+test_pdf_preflight_never_certifies_safety (test_harness.HarnessTests.test_pdf_preflight_never_certifies_safety) ... ok
+test_three_formats_and_honest_dimensions (test_harness.HarnessTests.test_three_formats_and_honest_dimensions) ... ok
+test_unsafe_archive_paths (test_harness.HarnessTests.test_unsafe_archive_paths) ... ok
+test_wrong_content_type_and_root (test_harness.HarnessTests.test_wrong_content_type_and_root) ... ok
+test_xml_entities_utf16_and_malformed (test_harness.HarnessTests.test_xml_entities_utf16_and_malformed) ... ok
+test_zip_bomb_ratio_and_member_limit (test_harness.HarnessTests.test_zip_bomb_ratio_and_member_limit) ... ok
+
+======================================================================
+FAIL: test_compare_unknown_loss_and_changes_fail (test_harness.HarnessTests.test_compare_unknown_loss_and_changes_fail)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/tmpuy_p3soc/tools/document_fidelity/tests/test_harness.py", line 129, in test_compare_unknown_loss_and_changes_fail
+    self.assertEqual('fail', r['preservation']['status'])
+AssertionError: 'fail' != 'pass'
+- fail
++ pass
+
+
+----------------------------------------------------------------------
+Ran 27 tests in 0.131s
+
+FAILED (failures=1)
+
+false_render_success exit= 1 KILLED
+test_active_formulas_and_cfb (test_harness.AdditionalBoundaryTests.test_active_formulas_and_cfb) ... ok
+test_corrupt_deflate_is_structured_rejection (test_harness.AdditionalBoundaryTests.test_corrupt_deflate_is_structured_rejection) ... ok
+test_duplicate_and_crc_corruption (test_harness.AdditionalBoundaryTests.test_duplicate_and_crc_corruption) ... ok
+test_fifo_input_rejects_without_waiting_for_writer (test_harness.AdditionalBoundaryTests.test_fifo_input_rejects_without_waiting_for_writer) ... ok
+test_fixture_generation_reproducible_and_usable (test_harness.AdditionalBoundaryTests.test_fixture_generation_reproducible_and_usable) ... ok
+test_forged_eocd_count_rejected_before_zipfile_allocation (test_harness.AdditionalBoundaryTests.test_forged_eocd_count_rejected_before_zipfile_allocation) ... ok
+test_limits_and_deep_xml (test_harness.AdditionalBoundaryTests.test_limits_and_deep_xml) ... ok
+test_local_header_encryption_and_flags_disagreement (test_harness.AdditionalBoundaryTests.test_local_header_encryption_and_flags_disagreement) ... ok
+test_pdf_obfuscated_names (test_harness.AdditionalBoundaryTests.test_pdf_obfuscated_names) ... ok
+test_relationship_declared_mime_required (test_harness.AdditionalBoundaryTests.test_relationship_declared_mime_required) ... ok
+test_relationship_escape_and_missing_target (test_harness.AdditionalBoundaryTests.test_relationship_escape_and_missing_target) ... ok
+test_relationship_type_and_declared_mime_required (test_harness.AdditionalBoundaryTests.test_relationship_type_and_declared_mime_required) ... ok
+test_second_unsupported_office_main_is_ambiguous (test_harness.AdditionalBoundaryTests.test_second_unsupported_office_main_is_ambiguous) ... ok
+test_unused_content_type_cannot_be_empty (test_harness.AdditionalBoundaryTests.test_unused_content_type_cannot_be_empty) ... ok
+test_cli_stdout_and_original_untouched (test_harness.HarnessTests.test_cli_stdout_and_original_untouched) ... ok
+test_compare_unknown_loss_and_changes_fail (test_harness.HarnessTests.test_compare_unknown_loss_and_changes_fail) ... ok
+test_duplicate_symlink_and_encryption (test_harness.HarnessTests.test_duplicate_symlink_and_encryption) ... ok
+test_invalid_archive_and_plaintext_not_ooxml (test_harness.HarnessTests.test_invalid_archive_and_plaintext_not_ooxml) ... ok
+test_macro_external_and_embedded_recorded (test_harness.HarnessTests.test_macro_external_and_embedded_recorded) ... ok
+test_masquerade (test_harness.HarnessTests.test_masquerade) ... ok
+test_missing_main_and_root_relationship (test_harness.HarnessTests.test_missing_main_and_root_relationship) ... ok
+test_pdf_preflight_never_certifies_safety (test_harness.HarnessTests.test_pdf_preflight_never_certifies_safety) ... ok
+test_three_formats_and_honest_dimensions (test_harness.HarnessTests.test_three_formats_and_honest_dimensions) ... 
+  test_three_formats_and_honest_dimensions (test_harness.HarnessTests.test_three_formats_and_honest_dimensions) (kind='docx') ... FAIL
+  test_three_formats_and_honest_dimensions (test_harness.HarnessTests.test_three_formats_and_honest_dimensions) (kind='xlsx') ... FAIL
+  test_three_formats_and_honest_dimensions (test_harness.HarnessTests.test_three_formats_and_honest_dimensions) (kind='pptx') ... FAIL
+test_unsafe_archive_paths (test_harness.HarnessTests.test_unsafe_archive_paths) ... ok
+test_wrong_content_type_and_root (test_harness.HarnessTests.test_wrong_content_type_and_root) ... ok
+test_xml_entities_utf16_and_malformed (test_harness.HarnessTests.test_xml_entities_utf16_and_malformed) ... ok
+test_zip_bomb_ratio_and_member_limit (test_harness.HarnessTests.test_zip_bomb_ratio_and_member_limit) ... ok
+
+======================================================================
+FAIL: test_three_formats_and_honest_dimensions (test_harness.HarnessTests.test_three_formats_and_honest_dimensions) (kind='docx')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/tmp479rmhfy/tools/document_fidelity/tests/test_harness.py", line 62, in test_three_formats_and_honest_dimensions
+    self.assertEqual('not_run', r['dimensions'][d]['status'])
+AssertionError: 'not_run' != 'pass'
+- not_run
++ pass
+
+
+======================================================================
+FAIL: test_three_formats_and_honest_dimensions (test_harness.HarnessTests.test_three_formats_and_honest_dimensions) (kind='xlsx')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/tmp479rmhfy/tools/document_fidelity/tests/test_harness.py", line 62, in test_three_formats_and_honest_dimensions
+    self.assertEqual('not_run', r['dimensions'][d]['status'])
+AssertionError: 'not_run' != 'pass'
+- not_run
++ pass
+
+
+======================================================================
+FAIL: test_three_formats_and_honest_dimensions (test_harness.HarnessTests.test_three_formats_and_honest_dimensions) (kind='pptx')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/tmp479rmhfy/tools/document_fidelity/tests/test_harness.py", line 62, in test_three_formats_and_honest_dimensions
+    self.assertEqual('not_run', r['dimensions'][d]['status'])
+AssertionError: 'not_run' != 'pass'
+- not_run
++ pass
+
+
+----------------------------------------------------------------------
+Ran 27 tests in 0.151s
+
+FAILED (failures=3)
+
+3/3 mutations killed. Only ephemeral copies changed; original fixtures/source untouched.
