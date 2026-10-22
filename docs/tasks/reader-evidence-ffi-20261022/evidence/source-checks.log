@@ -1,0 +1,5 @@
+PASS: original five draft method signatures AND bodies byte-identical to7bb89
+PASS: no private database/transaction helper in adapter
+PASS: no redundant is_current in chunk
+PASS:12 authored synthetic Rust tests found (not executed)
+PASS: git diff --check

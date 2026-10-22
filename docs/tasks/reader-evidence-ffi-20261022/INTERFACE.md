@@ -1,7 +1,7 @@
 # Controlled document/evidence FFI — source-owner interface first
 
 Fixed deps: provider7bb89a713c0ce5678a8c4cae7fc5e24612d88362;
-readerff3cc928311afc12bee3205f28b662c6b7499b34/sourceb3592e9bc1b0d9c3c52800e5ec1f566e36b8a297;
+reader report8d7323aab51ff76616ee196b90a7d4ee83b45d97/source2e71384e808ecbe5bb010d05e87094e33e9cd3fd;
 evidence78cdff32dee68b664c4fe71b4bbd6b81251af5e7. Ordinary dependency merges on
 isolated task/reader-evidence-ffi-20261022. Owned changes ONLY FFI/lib.rs, new
 FFI document_bridge.rs/tests and task docs. No core/lib.rs, documents, Service,
@@ -52,6 +52,7 @@ document_read_check(request: DocumentReadUseRequest) -> String
 document_read_chunk(request: DocumentReadUseRequest, max_bytes: u32) -> DocumentReadChunkResult
 document_read_close(request: DocumentReadUseRequest) -> ()
 document_read_release_owner(service_session: String) -> ()
+document_read_shutdown() -> ()
 document_evidence_process(request: DocumentAccessRequest, kind: DocumentEvidenceKind) -> String
 document_evidence_query(context: DocumentEvidenceUseRequest, query: String, limit: u32) -> String
 document_evidence_quote(context: DocumentEvidenceUseRequest, query_id: String, evidence_id: String) -> String
@@ -62,6 +63,8 @@ document_evidence_close(context: DocumentEvidenceUseRequest) -> ()
 No project-wide list endpoint is fabricated: core explicitly has no authorized
 project document enumeration API. metadata is exact known-reference Inspect;
 annotations is actual core ReadText listing, canonical JSON unchanged, read-only.
+Its final delivery gate requires a source<=2,000,000 bytes; larger sources fail
+DOCUMENT_LIMIT rather than returning empty annotations.
 
 metadata JSON schema1/status=inspected/document=actual DocumentMetadata,
 annotation_editing=false, safety_status=not_assessed. Annotation JSON schema1/
@@ -82,6 +85,11 @@ check, or schema1/status=invalidated (closed/expired/not-current). Cleanup error
 return failure, preserve cleanup retry and block success; no cached true. Scope or
 owner mismatch fails without closing another live owner's session. release_owner
 closes matching service owner only and also clears its evidence entries.
+shutdown is trusted Service lifecycle only, never an ordinary client route: it
+permanently stops all document/evidence outputs and explicitly closes core leases.
+Cleanup failures withhold success and require owner restart/real reconciliation.
+At full admission capacity only, at most8 real core checks remove stale bridge IDs.
+Explicit check hashes the whole source; chunk never calls it redundantly.
 
 ## Evidence is real local processing, not saved/indexed/claimed support
 
@@ -89,7 +97,13 @@ process calls the existing concrete StoreEvidence adapter on the same BusinessSt
 Returns schema1/status=processed/processing_id/actual stored-processing projection.
 Maximum4 ephemeral processing entries,15s idle/30s absolute; no authority cache.
 Each query/quote/answer calls StoreEvidence again, revalidating actual bytes/grant/
-exact source. Query returns a fresh explicit query_id + canonical hits (limit1..32,
+exact source. Before publishing an encoded owned projection, a separate public
+with_document_source gate compares the exact processing metadata and rechecks
+committed cleanup authority. Its callback has no nested transaction or delivery.
+The <=2M gate rereads/hashes a bounded source; it is not used on raw chunks. The
+15s idle/30s absolute processing lifetime is checked again after that work, before
+touch/reinsertion, so slow work cannot renew an already expired entry.
+Query returns a fresh explicit query_id + canonical hits (limit1..32,
 query<=4096); quote/answer require that exact query_id, not latest substitution.
 Only cached native EvidenceRefs are accepted; no caller-authored reference JSON.
 Answer takes explicit indices into that query, returns core's AnswerEvidence,
@@ -99,10 +113,13 @@ JSON output<=262144 bytes; unsupported/error never becomes available or saved.
 
 ## Critical current limits and exact core follow-up
 
-Parent reports core cleanup->delivery tail recheck Important and whole-file hashing
-cost under review. ff3 is NOT accepted; bridge source may be built in isolation,
-not enabled as a validated production reader until core fixed SHA + actual tests.
-Do not widen15/30s timeouts, delete hashing, or promise16/30MiB always completes.
+The original ff3 cleanup vulnerabilities and independent RED are preserved in the
+merged core report. This source uses the corrected tail+snapshot dependency above;
+parent independent execution/acceptance remains separate. Snapshot64MiB is the
+aggregate payload budget, not total RSS. Raw chunks rely on core's fresh grant,
+revision, pin and source-stamp checks plus authenticated private immutable snapshot.
+They never repeat is_current's whole-file hash. Do not widen15/30s timeouts,
+delete integrity checks, or promise16/30MiB always completes.
 
 Core read_chunk closes/releases its real pin at successful EOF. Native therefore
 removes the mapping and emits eof=true/session_active=false. Later check is
