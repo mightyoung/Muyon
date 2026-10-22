@@ -5,6 +5,8 @@ use std::collections::BTreeMap;
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum DocumentFormat {
+    /// Plain-text format label only; encoding and actual bytes need validation.
+    Text,
     Docx,
     Pptx,
     Xlsx,

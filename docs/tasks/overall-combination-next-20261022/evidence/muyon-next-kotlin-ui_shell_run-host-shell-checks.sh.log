@@ -1,0 +1,8 @@
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/ui/shell/HostPersistenceProjectionChecks.kt:13:9: error: class 'ColdProjectionPort' is not abstract and does not implement abstract member:
+fun prepare(original: PreparedLocalSave): JSONObject
+private class ColdProjectionPort : ProductLocalDraftPort {
+        ^^^^^^^^^^^^^^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/ui/shell/HostPersistenceProjectionChecks.kt:32:5: error: 'prepare' overrides nothing. Potential signatures for overriding:
+fun prepare(original: PreparedLocalSave): JSONObject
+    override fun prepare(conversation: String, project: String?, namespace: String, draft: String, generation: String, revision: String,
+    ^^^^^^^^

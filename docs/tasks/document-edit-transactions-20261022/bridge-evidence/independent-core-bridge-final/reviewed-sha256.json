@@ -1,0 +1,5 @@
+{
+  "crates/muyon-core/src/document_edit/edited_candidates/core_bridge.rs": "99d23874159e2a05aecbf41d8c76190c81b8be59277a64629efdd603e0d5fbb0",
+  "crates/muyon-core/src/document_edit/edited_candidates.rs": "2c70960141da4ecd4b757dd8410aa7197172a8256e0ba04b2b8251028e65a9e0",
+  "crates/muyon-core/tests/document_edit_core_bridge.rs": "00575798cd6ad89b75a40434c0d4322d238d073880991c78a73453fa414dc408"
+}

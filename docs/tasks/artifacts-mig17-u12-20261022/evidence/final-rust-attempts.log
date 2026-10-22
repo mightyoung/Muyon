@@ -1,0 +1,4 @@
+/bin/bash: line 141: cargo: command not found
+FULL_WORKSPACE_EXIT=127 (NOT_RUN when cargo unavailable)
+/bin/bash: line 141: cargo: command not found
+FORMAT_EXIT=127 (NOT_RUN when cargo unavailable)

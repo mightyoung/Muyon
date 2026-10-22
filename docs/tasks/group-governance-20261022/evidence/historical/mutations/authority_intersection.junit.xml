@@ -1,0 +1,33 @@
+<?xml version='1.0' encoding='utf-8'?>
+<testsuite name="historical/mutations/authority_intersection.log" tests="20" failures="1" errors="0" skipped="0">
+  <properties>
+    <property name="origin" value="derived from retained raw libtest output; not native JUnit" />
+    <property name="raw_sha256" value="ce328748e0a08ccd3ee7295e0d253d5ed6d44ac49134985c1b09309aa69780a3" />
+  </properties>
+  <testcase classname="authority_intersection" name="budget_overflow_and_exhaustion_never_become_zero_cost" />
+  <testcase classname="authority_intersection" name="cycles_missing_dependencies_and_duplicate_nodes_are_rejected" />
+  <testcase classname="authority_intersection" name="depth_two_and_foreign_parent_are_rejected" />
+  <testcase classname="authority_intersection" name="all_duplicate_states_only_lookup_and_submitted_blocks_new_dispatch" />
+  <testcase classname="authority_intersection" name="collaborator_cannot_self_authorize_even_as_coordinator" />
+  <testcase classname="authority_intersection" name="duplicate_request_identity_and_stale_config_are_not_valid_host_views" />
+  <testcase classname="authority_intersection" name="duplicate_command_returns_only_original_receipt_even_when_unknown" />
+  <testcase classname="authority_intersection" name="deterministic_ready_order_uses_node_identity_and_dependencies" />
+  <testcase classname="authority_intersection" name="eight_lifetime_children_and_two_active_slots_are_hard_caps" />
+  <testcase classname="authority_intersection" name="failed_dependencies_do_not_run_and_cancelled_children_keep_lifetime_slots" />
+  <testcase classname="authority_intersection" name="human_admin_can_only_narrow_existing_grant" />
+  <testcase classname="authority_intersection" name="every_authority_layer_and_member_scope_must_allow_the_request">
+    <failure message="libtest reported FAILED; see sibling raw log">thread 'every_authority_layer_and_member_scope_must_allow_the_request' (4284) panicked at /tmp/muyon-group-mutations/authority_intersection/tests/group_governance.rs:252:9:
+assertion `left == right` failed
+  left: Ok(Eligible { child_id: "a" })
+ right: Err(ScopeDenied)
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace</failure>
+  </testcase>
+  <testcase classname="authority_intersection" name="ledger_corruption_and_unsupported_status_fail_closed" />
+  <testcase classname="authority_intersection" name="modes_roundtrip_by_explicit_name_and_unknown_fails_closed" />
+  <testcase classname="authority_intersection" name="non_member_is_rejected" />
+  <testcase classname="authority_intersection" name="stale_host_epoch_leader_epoch_or_configuration_never_executes" />
+  <testcase classname="authority_intersection" name="rounds_count_original_dispatch_history_across_restarts_and_stops" />
+  <testcase classname="authority_intersection" name="represented_coordinator_modes_never_execute" />
+  <testcase classname="authority_intersection" name="unknown_budget_keeps_reserve_and_blocks_new_command" />
+  <testcase classname="authority_intersection" name="unsupported_versions_and_ownerless_groups_are_rejected" />
+</testsuite>

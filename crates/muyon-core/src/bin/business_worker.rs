@@ -13,6 +13,11 @@ mod business;
 #[path = "../contract.rs"]
 #[allow(dead_code)]
 mod contract;
+// blobs' restart/GC paths must use the same real candidate journal policy as
+// the library. Keep the full document owner module in this standalone harness.
+#[path = "../documents/mod.rs"]
+#[allow(dead_code)]
+mod documents;
 #[path = "../research.rs"]
 #[allow(dead_code)]
 mod research;

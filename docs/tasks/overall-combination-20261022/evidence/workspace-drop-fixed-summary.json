@@ -1,0 +1,10 @@
+{
+  "source": "67fd14c4259acf9275d7a20c5643bcb2f2671d16",
+  "command": "cargo test --offline --locked --manifest-path crates/Cargo.toml --workspace --all-targets -- --test-threads=1",
+  "exit_code": 0,
+  "groups": 26,
+  "passed_executions": 435,
+  "failed": 0,
+  "ignored": 0,
+  "note": "FFI14/core421; repeat source-harness cases included. Not435 independent cases and not additive to prior435."
+}

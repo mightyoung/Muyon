@@ -1,0 +1,69 @@
+   Compiling proc-macro2 v1.0.107
+   Compiling typenum v1.20.1
+   Compiling unicode-ident v1.0.27
+   Compiling quote v1.0.47
+   Compiling serde_core v1.0.229
+   Compiling zmij v1.0.23
+   Compiling muyon-core-agent-lab v0.1.0 (/tmp/document-edit-tail-mutation/experiments/redesign/core-agent-lab/core)
+   Compiling hybrid-array v0.4.15
+   Compiling syn v3.0.9
+   Compiling block-buffer v0.12.1
+   Compiling muyon-plugin-contract-lab v0.1.0 (/tmp/document-edit-tail-mutation/experiments/redesign/plugin-contract-lab/core)
+   Compiling crypto-common v0.2.2
+   Compiling serde_json v1.0.154
+   Compiling serde v1.0.229
+   Compiling const-oid v0.10.2
+   Compiling muyon-rust-agent-host-lab v0.1.0 (/tmp/document-edit-tail-mutation/experiments/redesign/rust-agent-host-lab/core)
+   Compiling tinyvec v1.13.3
+   Compiling digest v0.11.3
+   Compiling itoa v1.0.18
+   Compiling cpufeatures v0.3.1
+   Compiling cfg-if v1.0.5
+   Compiling memchr v2.8.3
+   Compiling unicode-normalization v0.1.25
+   Compiling sha2 v0.11.1
+   Compiling serde_derive v1.0.229
+   Compiling muyon-web-search-lab v0.1.0 (/tmp/document-edit-tail-mutation/experiments/redesign/web-search-lab/core)
+   Compiling muyon-core v0.1.0 (/tmp/document-edit-tail-mutation/crates/muyon-core)
+    Finished `test` profile [unoptimized] target(s) in 14.06s
+     Running tests/document_edit_candidates.rs (/tmp/document-edit-tail-mutation-target/debug/deps/document_edit_candidates-b17febaad9596ddc)
+
+running 4 tests
+test last_candidate_write_expiry_rolls_back_to_query_only_unknown ... FAILED
+test last_candidate_write_generation_rolls_back_to_query_only_unknown ... FAILED
+test last_candidate_write_epoch_rolls_back_to_query_only_unknown ... FAILED
+test last_candidate_write_revocation_rolls_back_to_query_only_unknown ... FAILED
+
+failures:
+
+---- last_candidate_write_expiry_rolls_back_to_query_only_unknown stdout ----
+
+thread 'last_candidate_write_expiry_rolls_back_to_query_only_unknown' panicked at muyon-core/tests/document_edit_candidates.rs:279:54:
+called `Result::unwrap_err()` on an `Ok` value: EditedCandidatePreparation { binding: Binding { document: DocumentRef { scope: Scope { workspace_id: "workspace", project_id: Some("project") }, document_id: "document", revision: Revision("1"), format: Xlsx }, patch_digest: [151, 192, 174, 132, 55, 61, 84, 56, 77, 205, 34, 107, 81, 139, 207, 96, 212, 100, 20, 251, 87, 147, 159, 41, 153, 199, 86, 248, 191, 234, 149, 42], intent_id: "tail", rollback_target: None }, state: CandidateUnvalidated, candidate: Some(BlobRef { digest: "8f2edb4f2a0dba40bab850e73789ad5c0a8abf9b03b6d791fb5f8d99a6f6a8b6", byte_length: Revision("61") }) }
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+---- last_candidate_write_generation_rolls_back_to_query_only_unknown stdout ----
+
+thread 'last_candidate_write_generation_rolls_back_to_query_only_unknown' panicked at muyon-core/tests/document_edit_candidates.rs:279:54:
+called `Result::unwrap_err()` on an `Ok` value: EditedCandidatePreparation { binding: Binding { document: DocumentRef { scope: Scope { workspace_id: "workspace", project_id: Some("project") }, document_id: "document", revision: Revision("1"), format: Xlsx }, patch_digest: [151, 192, 174, 132, 55, 61, 84, 56, 77, 205, 34, 107, 81, 139, 207, 96, 212, 100, 20, 251, 87, 147, 159, 41, 153, 199, 86, 248, 191, 234, 149, 42], intent_id: "tail", rollback_target: None }, state: CandidateUnvalidated, candidate: Some(BlobRef { digest: "8f2edb4f2a0dba40bab850e73789ad5c0a8abf9b03b6d791fb5f8d99a6f6a8b6", byte_length: Revision("61") }) }
+
+---- last_candidate_write_epoch_rolls_back_to_query_only_unknown stdout ----
+
+thread 'last_candidate_write_epoch_rolls_back_to_query_only_unknown' panicked at muyon-core/tests/document_edit_candidates.rs:279:54:
+called `Result::unwrap_err()` on an `Ok` value: EditedCandidatePreparation { binding: Binding { document: DocumentRef { scope: Scope { workspace_id: "workspace", project_id: Some("project") }, document_id: "document", revision: Revision("1"), format: Xlsx }, patch_digest: [151, 192, 174, 132, 55, 61, 84, 56, 77, 205, 34, 107, 81, 139, 207, 96, 212, 100, 20, 251, 87, 147, 159, 41, 153, 199, 86, 248, 191, 234, 149, 42], intent_id: "tail", rollback_target: None }, state: CandidateUnvalidated, candidate: Some(BlobRef { digest: "8f2edb4f2a0dba40bab850e73789ad5c0a8abf9b03b6d791fb5f8d99a6f6a8b6", byte_length: Revision("61") }) }
+
+---- last_candidate_write_revocation_rolls_back_to_query_only_unknown stdout ----
+
+thread 'last_candidate_write_revocation_rolls_back_to_query_only_unknown' panicked at muyon-core/tests/document_edit_candidates.rs:279:54:
+called `Result::unwrap_err()` on an `Ok` value: EditedCandidatePreparation { binding: Binding { document: DocumentRef { scope: Scope { workspace_id: "workspace", project_id: Some("project") }, document_id: "document", revision: Revision("1"), format: Xlsx }, patch_digest: [151, 192, 174, 132, 55, 61, 84, 56, 77, 205, 34, 107, 81, 139, 207, 96, 212, 100, 20, 251, 87, 147, 159, 41, 153, 199, 86, 248, 191, 234, 149, 42], intent_id: "tail", rollback_target: None }, state: CandidateUnvalidated, candidate: Some(BlobRef { digest: "8f2edb4f2a0dba40bab850e73789ad5c0a8abf9b03b6d791fb5f8d99a6f6a8b6", byte_length: Revision("61") }) }
+
+
+failures:
+    last_candidate_write_epoch_rolls_back_to_query_only_unknown
+    last_candidate_write_expiry_rolls_back_to_query_only_unknown
+    last_candidate_write_generation_rolls_back_to_query_only_unknown
+    last_candidate_write_revocation_rolls_back_to_query_only_unknown
+
+test result: FAILED. 0 passed; 4 failed; 0 ignored; 0 measured; 8 filtered out; finished in 0.03s
+
+error: test failed, to rerun pass `-p muyon-core --test document_edit_candidates`

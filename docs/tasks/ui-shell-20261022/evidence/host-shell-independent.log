@@ -1,0 +1,39 @@
+Independent reviewer: /root/review_shell
+UTC sealed: 2026-10-22T05:24:42.628606+00:00
+Working directory: /workspace/muyon-ui-shell
+HEAD before feature commit: 097b86d7e2bdaadf01736289cd54380ea82b9b27
+Source status: working-tree/untracked feature source identified by SHA256; HEAD alone is not the tested feature artifact.
+Command: KOTLINC=/workspace/ui-shell-tools/kotlin-2.2.20/kotlinc/bin/kotlinc JSON_JAR=/workspace/ui-shell-tools/json-20250517.jar bash apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/ui/shell/run-host-shell-checks.sh
+Compiler: Kotlin2.2.20; runner -Werror -jvm-target17; actual org.json; no Android stubs
+Input SHA256 before/after run: identical
+Runner exit_code=0
+STDOUT (captured directly):
+PASS real host/controller: one reducer, exact CAS, stale/double action rejection, template token/manual buffer, lost outcome original read, cancel/resume, same-CAS immutability, closed-view callback isolation, re-entry original-ID read and expired-session retention; no native/transport
+PASS real host candidate: original request/config identity, exact scope, finite read-only kind, binding/actions absent, unknown charge remains unknown, mismatched duplicate observation rejects; no transport
+
+STDERR (captured directly):
+
+Static git diff --check exit_code=0
+
+SHA256 inputs and reviewed UI source:
+9ad3ad817f8e524844a0f2f4379ac405290ef1f3c1ae3f1995daa3eddff6d9fe  apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/chat/ProductChatRuntime.kt
+4a75ee5bd4f8c88b4b049eabcd7ee09fc04e68b7d228d1566062e6a29e56d8e4  apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/chat/ProductSendGate.kt
+2d7da1fc9a1f5bb86eb00d63279efcddef2f5b0c3bcc789a75074df585cd9e31  apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/chat/ProductHttpsTransport.kt
+4715e21b685599f4b6fb993a89d241b97304de3def997e87c84f654a98773550  apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupDraft.kt
+3e4a57789cfb7160ae20fe3b7c0fccddf61f052d454f85ed482869caf475d96a  apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/ui/shell/HostSetupController.kt
+d0f70f2ec2f48931783a17ffc662dd8feeefd001a4967cf7e11b468bc2ef234c  apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/ui/shell/ReadOnlySnapshot.kt
+323e4312d99576050e6d5d49e85f5e48f3ef4bcb7bdb04ea9d332bdeaffa99f7  apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/ui/shell/RequestCandidates.kt
+27886cb746e6b27c2207cfd980433153ab0f6ccf20e5b8684c41e0207cc93112  apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/ui/shell/HostSetupScreen.kt
+133f2887d2c933a2adcb2ad2c30c4a47913da587fac41e531af179bbf1bf4f0c  apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/ui/shell/ConfigurationPreviewHost.kt
+451899cd9d1d7646f79a6a410f9337cbe8d52339641efc9e8c5494c9be0aae85  apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/ui/shell/ConfigurationLocalState.kt
+296fe4663b23c49401e9f64f719e38eb41cf6f486ec8410e34899bf17270e324  apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/ui/shell/RequestCandidatePanel.kt
+07345c42041bf4b4e418396cd0f531e9a5289e0d5d879876b69ecc37f5a8770d  apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/ui/shell/ReadOnlySnapshotPanel.kt
+d7c05aec6041d4182f2414e9fec217bc246c4533483074564be9558cd758b648  apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/MainActivity.kt
+510f689276511f3d4aafdf1824fa141afccd83eaefb92162e8f8a441927ccceb  apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/chat/ChatScreen.kt
+e10298405402a72ab45d28b848ed29a3cc93451a3b68efa87ca0bbb2469993ec  apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/ui/shell/HostSetupControllerChecks.kt
+65b85747e130073cb62e05912bb42628f84eb008867c1f0bc38e147fb3cf7b71  apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/ui/shell/RequestCandidateChecks.kt
+306e5b3723499a021b86765d2e9bb654088f83e1e6aec715bbce5ce1ff53cc59  apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/ui/shell/run-host-shell-checks.sh
+3ea61b2a06e31edf1c91134fe9106b0ebb16628be169f3db75bc7a2b06b45796  /workspace/ui-shell-tools/json-20250517.jar
+
+Retained parent failure: host-shell-completion-publication-red.log records the completion publication race before busy=false was moved after final snapshot/recovery assignment. Earlier GREEN is not substituted for this post-fix run.
+Android limitation: actual parent Gradle failure at com.android.application plugin8.11.1 resolution; this JVM runner does not validate Android compilation/device behavior.

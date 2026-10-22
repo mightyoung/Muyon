@@ -1,0 +1,56 @@
+    Checking typenum v1.20.1
+    Checking muyon-core-agent-lab v0.1.0 (/tmp/muyon-document-durable-check.jjxOkG2K/experiments/redesign/core-agent-lab/core)
+    Checking serde_core v1.0.229
+    Checking const-oid v0.10.2
+    Checking zmij v1.0.23
+    Checking memchr v2.8.3
+    Checking tinyvec v1.13.3
+    Checking hybrid-array v0.4.15
+    Checking itoa v1.0.18
+    Checking muyon-plugin-contract-lab v0.1.0 (/tmp/muyon-document-durable-check.jjxOkG2K/experiments/redesign/plugin-contract-lab/core)
+    Checking cfg-if v1.0.5
+    Checking cpufeatures v0.3.1
+    Checking unicode-normalization v0.1.25
+    Checking muyon-rust-agent-host-lab v0.1.0 (/tmp/muyon-document-durable-check.jjxOkG2K/experiments/redesign/rust-agent-host-lab/core)
+    Checking crypto-common v0.2.2
+    Checking block-buffer v0.12.1
+    Checking serde_json v1.0.154
+    Checking serde v1.0.229
+    Checking digest v0.11.3
+    Checking sha2 v0.11.1
+    Checking muyon-web-search-lab v0.1.0 (/tmp/muyon-document-durable-check.jjxOkG2K/experiments/redesign/web-search-lab/core)
+    Checking muyon-core v0.1.0 (/tmp/muyon-document-durable-check.jjxOkG2K/crates/muyon-core)
+warning: method `document_publish_candidate_in_transaction` is never used
+   --> muyon-core/src/documents/candidate.rs:297:19
+    |
+ 62 | impl BusinessStore {
+    | ------------------ method in this implementation
+...
+297 |     pub(crate) fn document_publish_candidate_in_transaction(
+    |                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = note: `#[warn(dead_code)]` on by default
+
+warning: methods `historical_grant` and `document_history_access_in_transaction` are never used
+   --> muyon-core/src/documents/storage.rs:138:8
+    |
+ 94 | impl BusinessStore {
+    | ------------------ methods in this implementation
+...
+138 |     fn historical_grant(
+    |        ^^^^^^^^^^^^^^^^
+...
+212 |     pub(crate) fn document_history_access_in_transaction(
+    |                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: `muyon-core` (lib) generated 2 warnings
+warning: unused imports: `CandidateState` and `CandidateStatus`
+  --> muyon-core/src/bin/../documents/mod.rs:19:21
+   |
+19 | pub use candidate::{CandidateState, CandidateStatus};
+   |                     ^^^^^^^^^^^^^^  ^^^^^^^^^^^^^^^
+   |
+   = note: `#[warn(unused_imports)]` on by default
+
+warning: `muyon-core` (bin "business_worker") generated 1 warning (run `cargo fix --bin "business_worker"` to apply 1 suggestion)
+    Finished `dev` profile [unoptimized] target(s) in 6.62s

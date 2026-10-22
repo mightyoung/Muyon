@@ -1,0 +1,12 @@
+{
+  "source_commit": "3296cb8402afd5003279ad443d701dda1fee9f56",
+  "core_dependency": "aec085fafef8aa02f86f2fc60626f168b10f4caa",
+  "files": {
+    "crates/muyon-core/src/evidence/local.rs": "7e48171496deb3c5ba8bde155186e89f785fb43482424b7b2726ada2f6297e47",
+    "crates/muyon-core/src/evidence/mod.rs": "35b2f22f9b386c8a4aeb81c6ea33d386a40a04db509a48cbf3e813136480281c",
+    "crates/muyon-core/src/evidence/run-store-tests.py": "0ca6f7223a30d44adffb1a6d781b66064fbed7881f2af3cb75aa7ba0be5c6b19",
+    "crates/muyon-core/src/evidence/store.rs": "c9cb7dd270dfd958eccbd27827067258e55b9c2b10fdb959a921c290a3c9a262",
+    "crates/muyon-core/src/evidence/store_tests.rs": "1077e2550b8f7fe94aae782b9a1d1da03c749c1e27d3549922f94f7c4e3c4d56",
+    "crates/muyon-core/tests/evidence_local.rs": "f4d4954c0473ec75e11e75a348ac61044f4d62be19f1ad2bc1d58baf523cc5a0"
+  }
+}

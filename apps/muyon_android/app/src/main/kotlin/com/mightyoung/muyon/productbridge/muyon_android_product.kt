@@ -741,6 +741,8 @@ internal object IntegrityCheckingUniffiLib {
     ): Int
     external fun uniffi_muyon_android_product_checksum_method_productcore_local_draft_lookup_save(
     ): Int
+    external fun uniffi_muyon_android_product_checksum_method_productcore_local_draft_prepare_save(
+    ): Int
     external fun uniffi_muyon_android_product_checksum_method_productcore_local_draft_read(
     ): Int
     external fun uniffi_muyon_android_product_checksum_method_productcore_local_draft_resolve(
@@ -856,6 +858,8 @@ internal object UniffiLib {
     external fun uniffi_muyon_android_product_fn_method_productcore_list_suppliers(`ptr`: Long,`limit`: Int,`offset`: Int,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
     external fun uniffi_muyon_android_product_fn_method_productcore_local_draft_lookup_save(`ptr`: Long,`conversation`: RustBuffer.ByValue,`project`: RustBuffer.ByValue,`namespaceId`: RustBuffer.ByValue,`draftId`: RustBuffer.ByValue,`attemptId`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    external fun uniffi_muyon_android_product_fn_method_productcore_local_draft_prepare_save(`ptr`: Long,`request`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
     external fun uniffi_muyon_android_product_fn_method_productcore_local_draft_read(`ptr`: Long,`conversation`: RustBuffer.ByValue,`project`: RustBuffer.ByValue,`namespaceId`: RustBuffer.ByValue,`draftId`: RustBuffer.ByValue,`expectedGeneration`: RustBuffer.ByValue,`expectedStoredRevision`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
@@ -1097,7 +1101,10 @@ private fun uniffiCheckApiChecksums(lib: IntegrityCheckingUniffiLib) {
     if ((lib.uniffi_muyon_android_product_checksum_method_productcore_list_suppliers() and 0xFFFF) != 12062) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if ((lib.uniffi_muyon_android_product_checksum_method_productcore_local_draft_lookup_save() and 0xFFFF) != 434) {
+    if ((lib.uniffi_muyon_android_product_checksum_method_productcore_local_draft_lookup_save() and 0xFFFF) != 33659) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if ((lib.uniffi_muyon_android_product_checksum_method_productcore_local_draft_prepare_save() and 0xFFFF) != 63893) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if ((lib.uniffi_muyon_android_product_checksum_method_productcore_local_draft_read() and 0xFFFF) != 65349) {
@@ -1653,9 +1660,16 @@ public interface ProductCoreInterface {
     fun `listSuppliers`(`limit`: kotlin.UInt, `offset`: kotlin.UInt): kotlin.String
     
     /**
-     * Queries exactly one original local save. Never retries or queries execution ledgers.
+     * Queries the original only. An uncommitted preparation is atomically fenced;
+     * a queued save then refuses. Never retries or queries execution ledgers.
      */
     fun `localDraftLookupSave`(`conversation`: kotlin.String, `project`: kotlin.String?, `namespaceId`: kotlin.String, `draftId`: kotlin.String, `attemptId`: kotlin.String): kotlin.String
+    
+    /**
+     * HOST ONLY: durably register the exact original snapshot BEFORE dispatch.
+     * This neither stores the archive nor executes/replays a save after restart.
+     */
+    fun `localDraftPrepareSave`(`request`: LocalDraftPrepareRequest): kotlin.String
     
     fun `localDraftRead`(`conversation`: kotlin.String, `project`: kotlin.String?, `namespaceId`: kotlin.String, `draftId`: kotlin.String, `expectedGeneration`: kotlin.String, `expectedStoredRevision`: kotlin.String): kotlin.String
     
@@ -2307,7 +2321,8 @@ open class ProductCore: Disposable, AutoCloseable, ProductCoreInterface
 
     
     /**
-     * Queries exactly one original local save. Never retries or queries execution ledgers.
+     * Queries the original only. An uncommitted preparation is atomically fenced;
+     * a queued save then refuses. Never retries or queries execution ledgers.
      */
     @Throws(ProductException::class)override fun `localDraftLookupSave`(`conversation`: kotlin.String, `project`: kotlin.String?, `namespaceId`: kotlin.String, `draftId`: kotlin.String, `attemptId`: kotlin.String): kotlin.String {
             return FfiConverterString.lift(
@@ -2321,6 +2336,25 @@ open class ProductCore: Disposable, AutoCloseable, ProductCoreInterface
         FfiConverterString.lower(`namespaceId`),
         FfiConverterString.lower(`draftId`),
         FfiConverterString.lower(`attemptId`),_status)
+}
+    }
+    )
+    }
+    
+
+    
+    /**
+     * HOST ONLY: durably register the exact original snapshot BEFORE dispatch.
+     * This neither stores the archive nor executes/replays a save after restart.
+     */
+    @Throws(ProductException::class)override fun `localDraftPrepareSave`(`request`: LocalDraftPrepareRequest): kotlin.String {
+            return FfiConverterString.lift(
+    callWithHandle {
+    uniffiRustCallWithError(ProductException) { _status ->
+    UniffiLib.uniffi_muyon_android_product_fn_method_productcore_local_draft_prepare_save(
+        it,
+        
+        FfiConverterTypeLocalDraftPrepareRequest.lower(`request`),_status)
 }
     }
     )
@@ -2613,6 +2647,88 @@ public object FfiConverterTypeProductCore: FfiConverter<ProductCore, Long> {
 
     override fun write(value: ProductCore, buf: ByteBuffer) {
         buf.putLong(lower(value))
+    }
+}
+
+
+
+/**
+ * Private host snapshot for a new, not-yet-released prepare API. Fields are
+ * references/preconditions, never caller-issued authority or a saved assertion.
+ */
+data class LocalDraftPrepareRequest (
+    var `conversation`: kotlin.String
+    , 
+    var `project`: kotlin.String?
+    , 
+    var `namespaceId`: kotlin.String
+    , 
+    var `draftId`: kotlin.String
+    , 
+    var `expectedGeneration`: kotlin.String
+    , 
+    var `expectedStoredRevision`: kotlin.String
+    , 
+    var `attemptId`: kotlin.String
+    , 
+    var `exportedMemoryRevision`: kotlin.String
+    , 
+    var `hostEditorRevision`: kotlin.String
+    , 
+    var `archive`: kotlin.ByteArray
+    
+){
+    
+
+    
+
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeLocalDraftPrepareRequest: FfiConverterRustBuffer<LocalDraftPrepareRequest> {
+    override fun read(buf: ByteBuffer): LocalDraftPrepareRequest {
+        return LocalDraftPrepareRequest(
+            FfiConverterString.read(buf),
+            FfiConverterOptionalString.read(buf),
+            FfiConverterString.read(buf),
+            FfiConverterString.read(buf),
+            FfiConverterString.read(buf),
+            FfiConverterString.read(buf),
+            FfiConverterString.read(buf),
+            FfiConverterString.read(buf),
+            FfiConverterString.read(buf),
+            FfiConverterByteArray.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: LocalDraftPrepareRequest) = (
+            FfiConverterString.allocationSize(value.`conversation`) +
+            FfiConverterOptionalString.allocationSize(value.`project`) +
+            FfiConverterString.allocationSize(value.`namespaceId`) +
+            FfiConverterString.allocationSize(value.`draftId`) +
+            FfiConverterString.allocationSize(value.`expectedGeneration`) +
+            FfiConverterString.allocationSize(value.`expectedStoredRevision`) +
+            FfiConverterString.allocationSize(value.`attemptId`) +
+            FfiConverterString.allocationSize(value.`exportedMemoryRevision`) +
+            FfiConverterString.allocationSize(value.`hostEditorRevision`) +
+            FfiConverterByteArray.allocationSize(value.`archive`)
+    )
+
+    override fun write(value: LocalDraftPrepareRequest, buf: ByteBuffer) {
+            FfiConverterString.write(value.`conversation`, buf)
+            FfiConverterOptionalString.write(value.`project`, buf)
+            FfiConverterString.write(value.`namespaceId`, buf)
+            FfiConverterString.write(value.`draftId`, buf)
+            FfiConverterString.write(value.`expectedGeneration`, buf)
+            FfiConverterString.write(value.`expectedStoredRevision`, buf)
+            FfiConverterString.write(value.`attemptId`, buf)
+            FfiConverterString.write(value.`exportedMemoryRevision`, buf)
+            FfiConverterString.write(value.`hostEditorRevision`, buf)
+            FfiConverterByteArray.write(value.`archive`, buf)
     }
 }
 

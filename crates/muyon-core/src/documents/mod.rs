@@ -1,10 +1,14 @@
-//! Offline public document contracts only. No engine, file IO, DB or model calls.
+//! Public document contracts, authorized metadata/annotation persistence and
+//! private candidate preparation. No document engine or model calls.
 //!
 //! A valid reference/anchor/capability declaration never proves actual file
 //! reading, rendering, target resolution, editing or native format fidelity.
 pub mod anchor;
 pub mod annotation;
+pub mod candidate;
 pub mod capability;
+#[cfg(test)]
+mod history_tests;
 pub mod identity;
 pub mod storage;
 #[cfg(test)]
@@ -12,7 +16,10 @@ mod storage_tests;
 use crate::contract::{AuthorityBinding, FileSource};
 pub use anchor::*;
 pub use annotation::*;
+pub use candidate::{CandidateState, CandidateStatus};
 pub use capability::*;
+#[cfg(test)]
+mod candidate_tests;
 pub use identity::DocumentRef;
 pub use storage::{DocumentAccess, DocumentMetadata};
 

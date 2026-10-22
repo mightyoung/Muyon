@@ -1,0 +1,1 @@
+Independent Rust/Python comparison: 2308 Unicode samples; exact ensure_ascii compact JSON bytes and SHA256 all match. Includes control ASCII, DEL/C1, BMP, non-BMP surrogate escapes, Unicode attribute names, null tail. No engine or XML parser invoked.

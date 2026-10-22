@@ -1,0 +1,11 @@
+{
+  "tools": {
+    "java": "/usr/bin/java",
+    "javac": null,
+    "kotlinc": null,
+    "gradle": null,
+    "adb": null
+  },
+  "android_sdk_present": false,
+  "installations_attempted": false
+}

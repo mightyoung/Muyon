@@ -1,0 +1,18 @@
+test_cli_stdout_and_original_untouched (test_harness.HarnessTests.test_cli_stdout_and_original_untouched) ... ok
+test_compare_unknown_loss_and_changes_fail (test_harness.HarnessTests.test_compare_unknown_loss_and_changes_fail) ... ok
+test_duplicate_symlink_and_encryption (test_harness.HarnessTests.test_duplicate_symlink_and_encryption) ... ok
+test_invalid_archive_and_plaintext_not_ooxml (test_harness.HarnessTests.test_invalid_archive_and_plaintext_not_ooxml) ... ok
+test_macro_external_and_embedded_recorded (test_harness.HarnessTests.test_macro_external_and_embedded_recorded) ... ok
+test_masquerade (test_harness.HarnessTests.test_masquerade) ... ok
+test_missing_main_and_root_relationship (test_harness.HarnessTests.test_missing_main_and_root_relationship) ... ok
+test_pdf_preflight_never_certifies_safety (test_harness.HarnessTests.test_pdf_preflight_never_certifies_safety) ... ok
+test_three_formats_and_honest_dimensions (test_harness.HarnessTests.test_three_formats_and_honest_dimensions) ... ok
+test_unsafe_archive_paths (test_harness.HarnessTests.test_unsafe_archive_paths) ... ok
+test_wrong_content_type_and_root (test_harness.HarnessTests.test_wrong_content_type_and_root) ... ok
+test_xml_entities_utf16_and_malformed (test_harness.HarnessTests.test_xml_entities_utf16_and_malformed) ... ok
+test_zip_bomb_ratio_and_member_limit (test_harness.HarnessTests.test_zip_bomb_ratio_and_member_limit) ... ok
+
+----------------------------------------------------------------------
+Ran 13 tests in 0.053s
+
+OK

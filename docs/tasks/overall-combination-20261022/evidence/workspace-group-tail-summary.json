@@ -1,0 +1,10 @@
+{
+  "source": "9b1c6a774bbe9258216a61a2c82ce3c0e8bddc74",
+  "command": "cargo test --offline --locked --manifest-path crates/Cargo.toml --workspace --all-targets -- --test-threads=1",
+  "exit_code": 0,
+  "groups": 26,
+  "passed_executions": 435,
+  "failed": 0,
+  "ignored": 0,
+  "note": "FFI14/core421; group harness65 includes30new17old18duplicate.435 execution count is not435 independent acceptance cases and is not additive to previous405 or targeted65."
+}

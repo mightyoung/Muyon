@@ -1,0 +1,22 @@
+   Compiling muyon-core v0.1.0 (/tmp/muyon-document-durable-check.HuqkpAc8/crates/muyon-core)
+    Finished `test` profile [unoptimized] target(s) in 0.20s
+     Running tests/document_edit_candidates.rs (/workspace/document-edit-combination/crates/target/debug/deps/document_edit_candidates-ef54b164ac608172)
+
+running 1 test
+test copy_and_edited_candidates_share_the_same_total_byte_budget ... FAILED
+
+failures:
+
+---- copy_and_edited_candidates_share_the_same_total_byte_budget stdout ----
+
+thread 'copy_and_edited_candidates_share_the_same_total_byte_budget' panicked at muyon-core/tests/document_edit_candidates.rs:425:40:
+called `Result::unwrap_err()` on an `Ok` value: DurableIntent { binding: Binding { document: DocumentRef { scope: Scope { workspace_id: "workspace", project_id: Some("project") }, document_id: "document", revision: Revision("1"), format: Xlsx }, patch_digest: [234, 53, 214, 228, 20, 249, 195, 233, 220, 244, 82, 209, 144, 53, 180, 6, 95, 79, 112, 133, 18, 125, 232, 95, 13, 151, 248, 111, 36, 243, 251, 106], intent_id: "copy-over-budget", rollback_target: None }, state: Candidate, cancel_requested: false, candidate: Some(BlobRef { digest: "0fa7c5f34eddec1d4c9bc45edf02b85baeb9a2bc18ceab5d131d52de97d7c1b1", byte_length: Revision("58") }), receipt: None }
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    copy_and_edited_candidates_share_the_same_total_byte_budget
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 6 filtered out; finished in 0.81s
+
+error: test failed, to rerun pass `-p muyon-core --test document_edit_candidates`

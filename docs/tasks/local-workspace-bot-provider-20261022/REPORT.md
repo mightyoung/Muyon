@@ -1,5 +1,9 @@
 # Local-workspace Bot provider delivery
 
+Current continuation: durable pre-dispatch original journal and fifth native method
+are delivered in [SAVE-PREPARATION-REPORT.md](SAVE-PREPARATION-REPORT.md). That new
+source awaits fresh Rust/host verification; earlier results below are historical.
+
 **Updated status: HOLD.** Independent Rust verification of the original source
 returned1 PASS/14 FAIL. A NULL/type/byte-bound repair is now implemented but has
 not been re-run in Rust here. See [NULL-PROJECTION-FIX.md](NULL-PROJECTION-FIX.md)

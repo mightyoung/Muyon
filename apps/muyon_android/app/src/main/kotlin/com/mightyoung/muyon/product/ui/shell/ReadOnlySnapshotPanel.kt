@@ -27,6 +27,6 @@ fun ReadOnlySnapshotPanel(snapshot: ReadOnlySnapshot?, notice: String, reading: 
         if (reading) Text("正在读取本机状态…", style = MaterialTheme.typography.bodySmall)
         if (notice.isNotBlank()) Text(notice, color = MaterialTheme.colorScheme.onSurfaceVariant)
         OutlinedButton(onClick = { onRead?.invoke() }, enabled = onRead != null && !reading,
-            modifier = Modifier.heightIn(min = 48.dp)) { Text("查询只读状态") }
+            modifier = Modifier.heightIn(min = 48.dp)) { Text("查询只读候选与状态") }
     }
 }

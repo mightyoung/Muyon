@@ -1,0 +1,19 @@
+test_zero_default_row_height_is_hidden_and_rejected (tools.document_fidelity.tests.test_text_subsets.ExtraBoundaryTests.test_zero_default_row_height_is_hidden_and_rejected) ... FAIL
+
+======================================================================
+FAIL: test_zero_default_row_height_is_hidden_and_rejected (tools.document_fidelity.tests.test_text_subsets.ExtraBoundaryTests.test_zero_default_row_height_is_hidden_and_rejected)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/document-fidelity/tools/document_fidelity/tests/test_text_subsets.py", line 158, in test_zero_default_row_height_is_hidden_and_rejected
+    p=xlsx.preview(source,request(source));self.assertEqual('unsupported',p['status']);self.assertTrue(p['hidden']['row'])
+                                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 'unsupported' != 'supported'
+- unsupported
+? --
++ supported
+
+
+----------------------------------------------------------------------
+Ran 1 test in 0.005s
+
+FAILED (failures=1)

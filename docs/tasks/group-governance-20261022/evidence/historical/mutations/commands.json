@@ -1,0 +1,140 @@
+[
+  {
+    "name": "lifetime_cap",
+    "old": ".is_none_or(|n| n > 8)",
+    "new": ".is_none_or(|n| n > 9)",
+    "module_sha256": "0f232704d9b2a3b0939e8413f0e524096c2100ff3beedf30a55a0c4cd875f975",
+    "tests_sha256": "70223840eeb146522e5ab9a196505a729c08f353f0eca6e6a34a0a6978a30f2d",
+    "rustc_argv": [
+      "/tmp/muyon-rust/bin/rustc",
+      "--edition=2021",
+      "--test",
+      "/tmp/muyon-group-mutations/lifetime_cap/tests/group_governance.rs",
+      "-o",
+      "/tmp/muyon-group-mutations/lifetime_cap/test"
+    ],
+    "test_argv": [
+      "/tmp/muyon-group-mutations/lifetime_cap/test"
+    ],
+    "compile_exit_status_from_prior_tool_result": 0,
+    "test_exit_status_from_prior_tool_result": null,
+    "compile_stdout_stderr_retained": false,
+    "command_provenance": "Reconstructed from recorded original orchestration; not an original process manifest.",
+    "test_exit_nonzero_asserted_by_original_orchestration": true
+  },
+  {
+    "name": "active_cap",
+    "old": "if active >= 2 {",
+    "new": "if active >= 3 {",
+    "module_sha256": "adbf601b785aed556670b5bf5559d513302d1cb15acfe42910e61c6ba4aa98cc",
+    "tests_sha256": "70223840eeb146522e5ab9a196505a729c08f353f0eca6e6a34a0a6978a30f2d",
+    "rustc_argv": [
+      "/tmp/muyon-rust/bin/rustc",
+      "--edition=2021",
+      "--test",
+      "/tmp/muyon-group-mutations/active_cap/tests/group_governance.rs",
+      "-o",
+      "/tmp/muyon-group-mutations/active_cap/test"
+    ],
+    "test_argv": [
+      "/tmp/muyon-group-mutations/active_cap/test"
+    ],
+    "compile_exit_status_from_prior_tool_result": 0,
+    "test_exit_status_from_prior_tool_result": null,
+    "compile_stdout_stderr_retained": false,
+    "command_provenance": "Reconstructed from recorded original orchestration; not an original process manifest.",
+    "test_exit_nonzero_asserted_by_original_orchestration": true
+  },
+  {
+    "name": "epoch_fence",
+    "old": "|| command.identity != host.identity",
+    "new": "|| false",
+    "module_sha256": "b1c7c0283759f7ab86591bffc002a58379e1dde18f35a3b5bf3352840b30236b",
+    "tests_sha256": "70223840eeb146522e5ab9a196505a729c08f353f0eca6e6a34a0a6978a30f2d",
+    "rustc_argv": [
+      "/tmp/muyon-rust/bin/rustc",
+      "--edition=2021",
+      "--test",
+      "/tmp/muyon-group-mutations/epoch_fence/tests/group_governance.rs",
+      "-o",
+      "/tmp/muyon-group-mutations/epoch_fence/test"
+    ],
+    "test_argv": [
+      "/tmp/muyon-group-mutations/epoch_fence/test"
+    ],
+    "compile_exit_status_from_prior_tool_result": 0,
+    "test_exit_status_from_prior_tool_result": null,
+    "compile_stdout_stderr_retained": false,
+    "command_provenance": "Reconstructed from recorded original orchestration; not an original process manifest.",
+    "test_exit_nonzero_asserted_by_original_orchestration": true
+  },
+  {
+    "name": "unknown_budget",
+    "old": "if !host.budget.unknown_request_ids.is_empty()",
+    "new": "if false",
+    "module_sha256": "b3c33f108c80b1ef3eda372325879fa1a574c3731e6d3b9b4b504c6c75119bcb",
+    "tests_sha256": "70223840eeb146522e5ab9a196505a729c08f353f0eca6e6a34a0a6978a30f2d",
+    "rustc_argv": [
+      "/tmp/muyon-rust/bin/rustc",
+      "--edition=2021",
+      "--test",
+      "/tmp/muyon-group-mutations/unknown_budget/tests/group_governance.rs",
+      "-o",
+      "/tmp/muyon-group-mutations/unknown_budget/test"
+    ],
+    "test_argv": [
+      "/tmp/muyon-group-mutations/unknown_budget/test"
+    ],
+    "compile_exit_status_from_prior_tool_result": 0,
+    "test_exit_status_from_prior_tool_result": null,
+    "compile_stdout_stderr_retained": false,
+    "command_provenance": "Reconstructed from recorded original orchestration; not an original process manifest.",
+    "test_exit_nonzero_asserted_by_original_orchestration": true
+  },
+  {
+    "name": "authority_intersection",
+    "old": "|| authority_layers.iter().any(|g| !subset(&node.grant, g))",
+    "new": "|| false",
+    "module_sha256": "ab5ca663d437313ceda9a6e4941a7df8a718ceb33fe19fc1d8cdbd3addfdd130",
+    "tests_sha256": "70223840eeb146522e5ab9a196505a729c08f353f0eca6e6a34a0a6978a30f2d",
+    "rustc_argv": [
+      "/tmp/muyon-rust/bin/rustc",
+      "--edition=2021",
+      "--test",
+      "/tmp/muyon-group-mutations/authority_intersection/tests/group_governance.rs",
+      "-o",
+      "/tmp/muyon-group-mutations/authority_intersection/test"
+    ],
+    "test_argv": [
+      "/tmp/muyon-group-mutations/authority_intersection/test"
+    ],
+    "compile_exit_status_from_prior_tool_result": 0,
+    "test_exit_status_from_prior_tool_result": null,
+    "compile_stdout_stderr_retained": false,
+    "command_provenance": "Reconstructed from recorded original orchestration; not an original process manifest.",
+    "test_exit_nonzero_asserted_by_original_orchestration": true
+  },
+  {
+    "name": "dag_cycle",
+    "old": "if visited.len() != pending.len() {",
+    "new": "if false {",
+    "module_sha256": "3337f353a27ac51a0d38a6bde70020a154323f7c34912f29e070479616e72525",
+    "tests_sha256": "70223840eeb146522e5ab9a196505a729c08f353f0eca6e6a34a0a6978a30f2d",
+    "rustc_argv": [
+      "/tmp/muyon-rust/bin/rustc",
+      "--edition=2021",
+      "--test",
+      "/tmp/muyon-group-mutations/dag_cycle/tests/group_governance.rs",
+      "-o",
+      "/tmp/muyon-group-mutations/dag_cycle/test"
+    ],
+    "test_argv": [
+      "/tmp/muyon-group-mutations/dag_cycle/test"
+    ],
+    "compile_exit_status_from_prior_tool_result": 0,
+    "test_exit_status_from_prior_tool_result": null,
+    "compile_stdout_stderr_retained": false,
+    "command_provenance": "Reconstructed from recorded original orchestration; not an original process manifest.",
+    "test_exit_nonzero_asserted_by_original_orchestration": true
+  }
+]

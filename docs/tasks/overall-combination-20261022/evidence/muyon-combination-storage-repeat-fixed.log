@@ -1,0 +1,24 @@
+    Blocking waiting for file lock on artifact directory
+   Compiling muyon-core v0.1.0 (/workspace/Muyon-combination-20261022/crates/muyon-core)
+    Finished `test` profile [unoptimized] target(s) in 10.19s
+     Running tests/document_storage.rs (/tmp/muyon-combination-target/debug/deps/document_storage-92678b974cb30792)
+
+running 15 tests
+test annotation_cas_tombstones_and_ai_provenance_are_durable ... ok
+test corrupted_revision_keys_or_missing_snapshot_fail_closed ... ok
+test delete_expiry_at_publication_tail_preserves_previous_annotation ... ok
+test expires_deleted_project_and_missing_permissions_fail_closed ... ok
+test export_is_deterministic_sidecar_data_with_origin_and_tombstones ... ok
+test foreign_upload_and_bad_schema_are_rejected_without_partial_metadata ... ok
+test grant_scope_revision_epoch_generation_and_revoke_are_current ... ok
+test immutable_document_revisions_invalidate_access_and_preserve_old_anchors ... ok
+test invalid_or_cross_revision_anchors_do_not_leave_rows ... ok
+test late_annotation_failure_rolls_back_history ... ok
+test late_metadata_failure_rolls_back_blob_publication_and_head ... ok
+test oversized_persistent_payloads_are_rejected_before_decode ... ok
+test save_expiry_at_publication_tail_rolls_back_sidecar_and_history ... ok
+test synthetic_metadata_blob_and_annotation_survive_reopen ... ok
+test writes_cannot_strand_existing_annotations_above_read_budget ... ok
+
+test result: ok. 15 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.78s
+

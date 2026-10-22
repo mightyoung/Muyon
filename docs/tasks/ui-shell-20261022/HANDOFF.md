@@ -45,3 +45,21 @@ permission expansion, deployment, paid CI dispatch, force push, branch deletion 
 main/develop modification. Historical2 unknown / ¥0.002620 hold unchanged.
 Leader B remains sole develop merger. This checkpoint is for review, not merge or
 all-UI completion.
+
+Next fixed slice: HOST-SHELL-BATCH.md and HOST-SHELL-INDEPENDENT-REVIEW.md. The Bot
+production host now consumes a175's single memory reducer with passive original-ID
+recovery. Do not reintroduce a UI-owned reducer or standalone file-store truth.
+Candidate reads are explicit and cannot enable typed-card actions. Document owner
+exclusively owns product/ui/documents; shell owns final MainActivity/ChatScreen wire.
+
+Parent-released reader8d2b7931 is now ordinarily composed (merge935d48b2), with its
+owner's directories unchanged. READER-COMPOSITION.md records combined-tree JVM PASS,
+actual blocked Android build and the closed public entry. Consume this branch's next
+fixed composition SHA rather than separately reapplying that reader history. Actual
+DocumentReaderHost authority/FD/durable receipt adapter remains the original owner's work.
+
+Cold-consumer source1b097e3b is ordinarily composed; COLD-SHELL-INTEGRATION.md gives
+strict decoder/passive state delivery and exact logs. Service verified=false/prepare
+unavailable and all shell persistence actions/buttons remain closed. Ordinary read
+never invokes outcome lookup/fence; cold history cannot acknowledge a new editor.
+Do not enable save/restore/query solely from decoded host-advertised operation flags.

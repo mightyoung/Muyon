@@ -1,0 +1,67 @@
+   Compiling proc-macro2 v1.0.107
+   Compiling quote v1.0.47
+   Compiling unicode-ident v1.0.27
+   Compiling typenum v1.20.1
+   Compiling serde_core v1.0.229
+   Compiling muyon-core-agent-lab v0.1.0 (/workspace/Muyon-combination-20261022/experiments/redesign/core-agent-lab/core)
+   Compiling zmij v1.0.23
+   Compiling hybrid-array v0.4.15
+   Compiling syn v3.0.9
+   Compiling block-buffer v0.12.1
+   Compiling crypto-common v0.2.2
+   Compiling muyon-plugin-contract-lab v0.1.0 (/workspace/Muyon-combination-20261022/experiments/redesign/plugin-contract-lab/core)
+   Compiling serde v1.0.229
+   Compiling const-oid v0.10.2
+   Compiling serde_json v1.0.154
+   Compiling digest v0.11.3
+   Compiling muyon-rust-agent-host-lab v0.1.0 (/workspace/Muyon-combination-20261022/experiments/redesign/rust-agent-host-lab/core)
+   Compiling tinyvec v1.13.3
+   Compiling itoa v1.0.18
+   Compiling cfg-if v1.0.5
+   Compiling cpufeatures v0.3.1
+   Compiling memchr v2.8.3
+   Compiling sha2 v0.11.1
+   Compiling serde_derive v1.0.229
+   Compiling unicode-normalization v0.1.25
+   Compiling muyon-web-search-lab v0.1.0 (/workspace/Muyon-combination-20261022/experiments/redesign/web-search-lab/core)
+   Compiling muyon-core v0.1.0 (/workspace/Muyon-combination-20261022/crates/muyon-core)
+warning: methods `historical_grant` and `document_history_access_in_transaction` are never used
+   --> muyon-core/src/documents/storage.rs:117:8
+    |
+ 88 | impl BusinessStore {
+    | ------------------ methods in this implementation
+...
+117 |     fn historical_grant(&self, current: &DocumentAccess, historical: &DocumentRef, required: &[DocumentOperation]) -> Result<()> {
+    |        ^^^^^^^^^^^^^^^^
+...
+162 |     pub(crate) fn document_history_access_in_transaction(&self, tx: &Transaction<'_>, current: &DocumentAccess, historical: &DocumentRef,...
+    |                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: `muyon-core` (lib) generated 1 warning
+    Finished `test` profile [unoptimized] target(s) in 11.80s
+  Executable unittests src/lib.rs (/tmp/muyon-combination-target/debug/deps/muyon_core-570c1dcad7530a3a)
+  Executable unittests src/bin/business_worker.rs (/tmp/muyon-combination-target/debug/deps/business_worker-6dad93ec6717d982)
+  Executable tests/agent_child_tools.rs (/tmp/muyon-combination-target/debug/deps/agent_child_tools-39a559c546ad44c0)
+  Executable tests/agent_owner.rs (/tmp/muyon-combination-target/debug/deps/agent_owner-4af23bbaba27c52b)
+  Executable tests/agent_product.rs (/tmp/muyon-combination-target/debug/deps/agent_product-2de5c16094e624b7)
+  Executable tests/agent_tools.rs (/tmp/muyon-combination-target/debug/deps/agent_tools-711a0996d9dc9aba)
+  Executable tests/agent_workflow.rs (/tmp/muyon-combination-target/debug/deps/agent_workflow-c926099f5fa732bc)
+  Executable tests/archive.rs (/tmp/muyon-combination-target/debug/deps/archive-168f3768c277fe33)
+  Executable tests/blobs.rs (/tmp/muyon-combination-target/debug/deps/blobs-f8d0be43409909b3)
+  Executable tests/bot_drafts.rs (/tmp/muyon-combination-target/debug/deps/bot_drafts-7daf0d49bf8ef876)
+  Executable tests/business.rs (/tmp/muyon-combination-target/debug/deps/business-13c2c79ff5c73476)
+  Executable tests/contract.rs (/tmp/muyon-combination-target/debug/deps/contract-7f21d370cb7c6049)
+  Executable tests/contract_vectors_additional.rs (/tmp/muyon-combination-target/debug/deps/contract_vectors_additional-8b45434957f3d4c6)
+  Executable tests/document_edit_engine_protocol.rs (/tmp/muyon-combination-target/debug/deps/document_edit_engine_protocol-f5a55ea011c575dd)
+  Executable tests/document_edit_gateway.rs (/tmp/muyon-combination-target/debug/deps/document_edit_gateway-926e9f6880a7b995)
+  Executable tests/document_edit_transactions.rs (/tmp/muyon-combination-target/debug/deps/document_edit_transactions-579a1112ea7ead0b)
+  Executable tests/document_storage.rs (/tmp/muyon-combination-target/debug/deps/document_storage-92678b974cb30792)
+  Executable tests/documents.rs (/tmp/muyon-combination-target/debug/deps/documents-65fa7ebb5f19b4fc)
+  Executable tests/evidence_local.rs (/tmp/muyon-combination-target/debug/deps/evidence_local-73945266da081d61)
+  Executable tests/group_governance.rs (/tmp/muyon-combination-target/debug/deps/group_governance-a1e9297cb11108e1)
+  Executable tests/group_runtime.rs (/tmp/muyon-combination-target/debug/deps/group_runtime-5d64ed25c78922d8)
+  Executable tests/research.rs (/tmp/muyon-combination-target/debug/deps/research-23e10940c6bfdea9)
+  Executable tests/resource_boundaries_additional.rs (/tmp/muyon-combination-target/debug/deps/resource_boundaries_additional-00fd51ea47d8da8b)
+  Executable tests/store_admission_additional.rs (/tmp/muyon-combination-target/debug/deps/store_admission_additional-f70b7a4b5e0231bb)

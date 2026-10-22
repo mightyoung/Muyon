@@ -1,0 +1,16 @@
+{
+  "base_revision": "rev1",
+  "file_id": "file1",
+  "idempotency_key": "key1",
+  "operation": {
+    "cell": "A1",
+    "expected": "2",
+    "kind": "set_numeric_cell",
+    "replacement": "5",
+    "sheet": "Original"
+  },
+  "operation_id": "op1",
+  "schema_version": 1,
+  "scope_id": "scope1",
+  "source_sha256": "e1bbea112782f0350fbe348a2a021d8d0926ed8c2c768be528ef2fc9317ba78d"
+}

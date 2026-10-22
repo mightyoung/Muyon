@@ -1,0 +1,27 @@
+Exact core dependency: 8802bf555bfce1265296318d83a2f8a1fb2b787e
+Combination directory: /tmp/muyon-document-durable-check.rBBjDb69
+   Compiling muyon-core-agent-lab v0.1.0 (/tmp/muyon-document-durable-check.rBBjDb69/experiments/redesign/core-agent-lab/core)
+   Compiling muyon-plugin-contract-lab v0.1.0 (/tmp/muyon-document-durable-check.rBBjDb69/experiments/redesign/plugin-contract-lab/core)
+   Compiling muyon-rust-agent-host-lab v0.1.0 (/tmp/muyon-document-durable-check.rBBjDb69/experiments/redesign/rust-agent-host-lab/core)
+   Compiling muyon-web-search-lab v0.1.0 (/tmp/muyon-document-durable-check.rBBjDb69/experiments/redesign/web-search-lab/core)
+   Compiling muyon-core v0.1.0 (/tmp/muyon-document-durable-check.rBBjDb69/crates/muyon-core)
+    Finished `test` profile [unoptimized] target(s) in 6.01s
+     Running unittests src/lib.rs (/workspace/document-edit-combination/crates/target/debug/deps/muyon_core-3e7707e0af3a5a35)
+
+running 13 tests
+test documents::candidate_tests::expiry_after_durable_pin_is_unknown_and_never_source_success ... ok
+test documents::candidate_tests::duplicate_preparation_is_query_only_and_conflicting_binding_is_rejected ... ok
+test documents::candidate_tests::late_seal_failure_leaves_unpublished_object_and_query_only_unknown ... ok
+test documents::candidate_tests::missing_pin_or_corrupt_object_is_query_only_unknown ... ok
+test documents::candidate_tests::new_bytes_are_private_sealed_unvalidated_and_never_publish ... ok
+test documents::candidate_tests::partial_staging_restart_preserves_candidate_without_blocking_unrelated_gc ... ok
+test documents::candidate_tests::oversize_nonpayload_fields_fail_before_status_decode ... ok
+test documents::candidate_tests::reservation_failure_has_no_upload_or_output_effect ... ok
+test documents::candidate_tests::restart_retains_prepared_pin_but_never_adopts_original_execution_authority ... ok
+test documents::candidate_tests::revocation_conflict_invalid_input_and_foreign_publication_fail_closed ... ok
+test documents::candidate_tests::source_head_advance_rejects_old_candidate_without_latest_substitution ... ok
+test documents::candidate_tests::candidate_gc_crosses_page_boundary_preserving_exact_objects_and_project_quotas ... ok
+test documents::candidate_tests::candidate_count_and_expected_byte_admission_limits_precede_file_writes ... ok
+
+test result: ok. 13 passed; 0 failed; 0 ignored; 0 measured; 36 filtered out; finished in 1.30s
+

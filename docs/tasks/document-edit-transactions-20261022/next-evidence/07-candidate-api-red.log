@@ -1,0 +1,24 @@
+warning: struct `StoredRequest` is never constructed
+   --> muyon-core/src/document_edit/engine_protocol.rs:153:8
+    |
+153 | struct StoredRequest {
+    |        ^^^^^^^^^^^^^
+    |
+    = note: `#[warn(dead_code)]` on by default
+
+warning: function `verify_stored_request` is never used
+   --> muyon-core/src/document_edit/engine_protocol.rs:216:15
+    |
+216 | pub(super) fn verify_stored_request(
+    |               ^^^^^^^^^^^^^^^^^^^^^
+
+warning: `muyon-core` (lib) generated 2 warnings
+   Compiling muyon-core v0.1.0 (/tmp/muyon-document-durable-check.HuqkpAc8/crates/muyon-core)
+error[E0432]: unresolved import `muyon_core::document_edit::edited_candidates`
+ --> muyon-core/tests/document_edit_candidates.rs:6:21
+  |
+6 |     document_edit::{edited_candidates::*, engine_protocol::{prepare_request_trusted,NumericCellEdit,PreparedEngineRequest}, gateway::Docu...
+  |                     ^^^^^^^^^^^^^^^^^ could not find `edited_candidates` in `document_edit`
+
+For more information about this error, try `rustc --explain E0432`.
+error: could not compile `muyon-core` (test "document_edit_candidates") due to 1 previous error

@@ -1,0 +1,22 @@
+   Compiling muyon-core v0.1.0 (/tmp/muyon-document-durable-check.HuqkpAc8/crates/muyon-core)
+    Finished `test` profile [unoptimized] target(s) in 0.23s
+     Running tests/document_edit_candidates.rs (/workspace/document-edit-combination/crates/target/debug/deps/document_edit_candidates-ef54b164ac608172)
+
+running 1 test
+test unpublished_candidate_bytes_require_fresh_explicit_edit_confirmation_not_source_read ... FAILED
+
+failures:
+
+---- unpublished_candidate_bytes_require_fresh_explicit_edit_confirmation_not_source_read stdout ----
+
+thread 'unpublished_candidate_bytes_require_fresh_explicit_edit_confirmation_not_source_read' panicked at muyon-core/tests/document_edit_candidates.rs:455:41:
+called `Result::unwrap_err()` on an `Ok` value: [111, 114, 105, 103, 105, 110, 97, 108, 32, 115, 121, 110, 116, 104, 101, 116, 105, 99, 32, 99, 104, 97, 110, 103, 101, 100, 32, 98, 121, 116, 101, 115, 44, 32, 110, 111, 116, 32, 97, 110, 32, 79, 102, 102, 105, 99, 101, 32, 101, 110, 103, 105, 110, 101, 32, 111, 117, 116, 112, 117, 116]
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    unpublished_candidate_bytes_require_fresh_explicit_edit_confirmation_not_source_read
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 7 filtered out; finished in 0.01s
+
+error: test failed, to rerun pass `-p muyon-core --test document_edit_candidates`

@@ -1,0 +1,22 @@
+   Compiling muyon-core v0.1.0 (/workspace/document-edit-durable-combination/crates/muyon-core)
+    Finished `test` profile [unoptimized] target(s) in 0.26s
+     Running tests/document_edit_gateway.rs (/workspace/document-edit-combination/crates/target/debug/deps/document_edit_gateway-9524898dbf45656f)
+
+running 1 test
+test frozen_source_title_cannot_change_without_changing_the_reviewed_copy_plan ... FAILED
+
+failures:
+
+---- frozen_source_title_cannot_change_without_changing_the_reviewed_copy_plan stdout ----
+
+thread 'frozen_source_title_cannot_change_without_changing_the_reviewed_copy_plan' panicked at muyon-core/tests/document_edit_gateway.rs:653:10:
+called `Result::unwrap_err()` on an `Ok` value: DurableIntent { binding: Binding { document: DocumentRef { scope: Scope { workspace_id: "workspace", project_id: Some("project") }, document_id: "document", revision: Revision("1"), format: Unknown }, patch_digest: [26, 231, 137, 116, 254, 214, 103, 32, 27, 110, 135, 152, 198, 208, 151, 42, 223, 240, 199, 131, 175, 153, 145, 41, 117, 56, 175, 110, 190, 212, 78, 112], intent_id: "frozen-plan", rollback_target: None }, state: Confirmed, cancel_requested: false, candidate: None, receipt: None, upload: None }
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    frozen_source_title_cannot_change_without_changing_the_reviewed_copy_plan
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 14 filtered out; finished in 0.01s
+
+error: test failed, to rerun pass `-p muyon-core --test document_edit_gateway`

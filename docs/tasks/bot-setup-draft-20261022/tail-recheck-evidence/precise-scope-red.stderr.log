@@ -1,0 +1,85 @@
+   Compiling muyon-core-agent-lab v0.1.0 (/tmp/muyon-bot-create-4bgh7tz4/repo/experiments/redesign/core-agent-lab/core)
+warning: suspicious definition of the runtime `read` symbol used by the standard library
+   --> /tmp/muyon-bot-create-4bgh7tz4/repo/experiments/redesign/core-agent-lab/core/src/host_session.rs:132:124
+    |
+132 | ...ount: usize, timeout: i32) -> i32; fn read(fd: i32, buffer: *mut u8, count: usize) -> isize; fn write(fd: i32, buffer: *const u8...
+    |                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = note: expected `unsafe extern "C" fn(i32, *mut c_void, usize) -> isize` (for the current target)
+            found    `unsafe extern "C" fn(i32, *mut u8, usize) -> isize`
+    = help: either fix the signature or remove any attributes like `#[unsafe(no_mangle)]`, `#[unsafe(export_name = "read")]`, or `#[link_name = "read"]`
+    = help: allow this lint if the signature is compatible
+    = note: `#[warn(suspicious_runtime_symbol_definitions)]` on by default
+
+warning: suspicious definition of the runtime `write` symbol used by the standard library
+   --> /tmp/muyon-bot-create-4bgh7tz4/repo/experiments/redesign/core-agent-lab/core/src/host_session.rs:132:182
+    |
+132 | ... *mut u8, count: usize) -> isize; fn write(fd: i32, buffer: *const u8, count: usize) -> isize; }
+    |                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = note: expected `unsafe extern "C" fn(i32, *const c_void, usize) -> isize` (for the current target)
+            found    `unsafe extern "C" fn(i32, *const u8, usize) -> isize`
+    = help: either fix the signature or remove any attributes like `#[unsafe(no_mangle)]`, `#[unsafe(export_name = "write")]`, or `#[link_name = "write"]`
+    = help: allow this lint if the signature is compatible
+
+   Compiling muyon-plugin-contract-lab v0.1.0 (/tmp/muyon-bot-create-4bgh7tz4/repo/experiments/redesign/plugin-contract-lab/core)
+   Compiling muyon-rust-agent-host-lab v0.1.0 (/tmp/muyon-bot-create-4bgh7tz4/repo/experiments/redesign/rust-agent-host-lab/core)
+warning: `muyon-core-agent-lab` (lib) generated 2 warnings
+   Compiling muyon-web-search-lab v0.1.0 (/tmp/muyon-bot-create-4bgh7tz4/repo/experiments/redesign/web-search-lab/core)
+   Compiling muyon-core v0.1.0 (/tmp/muyon-bot-create-4bgh7tz4/repo/crates/muyon-core)
+    Finished `test` profile [unoptimized] target(s) in 5.52s
+     Running unittests src/lib.rs (/tmp/bot-definitions-target/debug/deps/muyon_core-6b23850f8d8cd0a2)
+
+thread 'bot_definitions::tests::insert_draft_lifecycle_rolls_back' (7824) panicked at muyon-core/src/bot_definitions/tests.rs:437:5:
+tail mutation must not be reported committed: UPDATE local_bot_drafts SET lifecycle='invalid'
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+thread 'bot_definitions::tests::insert_draft_revision_rolls_back' (7825) panicked at muyon-core/src/bot_definitions/tests.rs:437:5:
+tail mutation must not be reported committed: UPDATE local_bot_drafts SET stored_revision='2'
+
+thread 'bot_definitions::tests::insert_draft_scope_rolls_back' (7826) panicked at muyon-core/src/bot_definitions/tests.rs:437:5:
+tail mutation must not be reported committed: UPDATE local_bot_drafts SET scope_key='changed' WHERE project_id='p1'
+
+thread 'bot_definitions::tests::pending_update_project_deletion_cannot_commit_effect' (7829) panicked at muyon-core/src/bot_definitions/tests.rs:570:5:
+assertion failed: confirm_create_trusted(f.store(), CONVERSATION, Some("p1"), INTENT,
+        &r.review_digest).is_err()
+
+thread 'bot_definitions::tests::project_deleted_exactly_between_pending_and_effect_must_not_commit' (7830) panicked at muyon-core/src/bot_definitions/tests.rs:405:5:
+revoked project must not create a Bot
+
+thread 'bot_definitions::tests::tail_definition_identity_tampering_rolls_back' (7835) panicked at muyon-core/src/bot_definitions/tests.rs:437:5:
+tail mutation must not be reported committed: UPDATE local_bot_definitions SET draft_key='forged'
+
+thread 'bot_definitions::tests::tail_definition_tampering_rolls_back' (7836) panicked at muyon-core/src/bot_definitions/tests.rs:437:5:
+tail mutation must not be reported committed: UPDATE local_bot_definitions SET definition_json=replace(definition_json,'研究员','篡改')
+
+thread 'bot_definitions::tests::tail_draft_lifecycle_rolls_back' (7837) panicked at muyon-core/src/bot_definitions/tests.rs:437:5:
+tail mutation must not be reported committed: UPDATE local_bot_drafts SET lifecycle='invalid'
+
+thread 'bot_definitions::tests::tail_draft_revision_rolls_back' (7838) panicked at muyon-core/src/bot_definitions/tests.rs:437:5:
+tail mutation must not be reported committed: UPDATE local_bot_drafts SET stored_revision='2'
+
+thread 'bot_definitions::tests::tail_draft_scope_rolls_back' (7839) panicked at muyon-core/src/bot_definitions/tests.rs:437:5:
+tail mutation must not be reported committed: UPDATE local_bot_drafts SET scope_key='changed' WHERE project_id='p1'
+
+thread 'bot_definitions::tests::tail_intent_identity_tampering_rolls_back' (7840) panicked at muyon-core/src/bot_definitions/tests.rs:437:5:
+tail mutation must not be reported committed: UPDATE local_bot_definition_intents SET draft_key='forged'
+
+thread 'bot_definitions::tests::tail_owner_epoch_rolls_back' (7841) panicked at muyon-core/src/bot_definitions/tests.rs:437:5:
+tail mutation must not be reported committed: UPDATE local_bot_definition_intents SET owner_epoch='changed-epoch'
+
+thread 'bot_definitions::tests::tail_project_deletion_rolls_back' (7842) panicked at muyon-core/src/bot_definitions/tests.rs:437:5:
+tail mutation must not be reported committed: UPDATE projects SET deleted=1 WHERE id='p1'
+
+thread 'bot_definitions::tests::tail_receipt_tampering_rolls_back' (7843) panicked at muyon-core/src/bot_definitions/tests.rs:437:5:
+tail mutation must not be reported committed: UPDATE local_bot_definition_intents SET receipt_json=replace(receipt_json,'committed','unknown')
+
+thread 'bot_definitions::tests::tail_workspace_change_rolls_back' (7844) panicked at muyon-core/src/bot_definitions/tests.rs:437:5:
+tail mutation must not be reported committed: UPDATE meta SET value='changed-workspace' WHERE key='workspace'
+error: test failed, to rerun pass `-p muyon-core --lib`
+Traceback (most recent call last):
+  File "/workspace/bot-setup-draft/docs/tasks/bot-setup-draft-20261022/run-creation-checks.py", line 17, in <module>
+    subprocess.run(['/tmp/bot-cargo/bin/cargo','test','--manifest-path',str(target/'crates/Cargo.toml'),'-p','muyon-core','--lib','bot_definitions','--','--test-threads=1','--nocapture'],env=env,check=True)
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/subprocess.py", line 571, in run
+    raise CalledProcessError(retcode, process.args,
+subprocess.CalledProcessError: Command '['/tmp/bot-cargo/bin/cargo', 'test', '--manifest-path', '/tmp/muyon-bot-create-4bgh7tz4/repo/crates/Cargo.toml', '-p', 'muyon-core', '--lib', 'bot_definitions', '--', '--test-threads=1', '--nocapture']' returned non-zero exit status 101.

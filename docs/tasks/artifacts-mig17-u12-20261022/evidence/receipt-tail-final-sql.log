@@ -1,0 +1,1 @@
+{"document_blob_upload_pin_artifact_receipt_and_grant_rollback": "PASS", "real_sqlite_after_receipt_mutations": 10, "reopen_preserves_original_pending_without_receipt": "PASS", "rust_compilation_and_tests": "NOT_RUN: cargo/rustc absent", "rust_tail_order_failure_dispatch_unknown_and_no_retry": "STATIC_REVIEW_ONLY", "source_sql_guards_detect_each_mutation": "PASS"}
