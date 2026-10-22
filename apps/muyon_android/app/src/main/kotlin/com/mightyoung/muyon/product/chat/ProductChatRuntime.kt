@@ -1,5 +1,6 @@
 package com.mightyoung.muyon.product.chat
 
+import org.json.JSONArray
 import org.json.JSONObject
 import java.util.UUID
 import java.util.concurrent.Executors
@@ -77,6 +78,19 @@ class ProductChatRuntime internal constructor(private val port: ProductChatPort,
     private val toolOrigins = mutableMapOf<String, ToolOrigin>() // control only
     private val businessPreviews = mutableMapOf<String, JSONObject>() // exact host plan per request
     private val plans = mutableMapOf<String, Plan>() // control thread only
+    private data class ReadOrigin(val session: String, val conversation: String,
+        val requestConversation: String, val project: String?, val generation: Long)
+    // Display provenance only. Never used to authorize a write or infer a card binding.
+    private val readOrigins = linkedMapOf<String, ReadOrigin>() // control only; bounded
+    private fun rememberReadOrigin(session: String, conversation: String, plan: JSONObject) {
+        val scope = scopes.get(session) ?: return
+        val request = (plan.opt("request_id") as? String)?.takeIf { it.isNotBlank() } ?: return
+        val requestConversation = (plan.opt("conversation_id") as? String)?.takeIf { it.isNotBlank() } ?: return
+        if (request in readOrigins) { readOrigins.remove(request); return } // ambiguous display provenance
+        // Eviction removes display availability only; never block business prepare.
+        if (readOrigins.size >= 256) readOrigins.remove(readOrigins.keys.first())
+        readOrigins[request] = ReadOrigin(session, conversation, requestConversation, scope.project, scope.generation)
+    }
     private val active = java.util.concurrent.ConcurrentHashMap<String, String>()
     private val cancelled = java.util.concurrent.ConcurrentHashMap.newKeySet<String>()
     private var configurationReady = false // control queue only
@@ -137,6 +151,7 @@ class ProductChatRuntime internal constructor(private val port: ProductChatPort,
             toolOrigins[request] = ToolOrigin(session, generation, project, scope.generation)
         }
         plans[request] = Plan(session, JSONObject(result.toString()))
+        rememberReadOrigin(session, conversation, result)
         result
     }
     /** Workflow scope is obtained from this same serialized, selected session. */
@@ -174,6 +189,7 @@ class ProductChatRuntime internal constructor(private val port: ProductChatPort,
         val request = result.getString("request_id")
         plans[request] = Plan(session, JSONObject(result.toString()))
         toolOrigins[request] = ToolOrigin(session, generation, scope.project, scope.generation, result.optString("skill_id").takeIf { it.isNotBlank() }, conversation)
+        rememberReadOrigin(session, conversation, result)
         result
     }
     /** The request must be this live Binder session's exact reviewed plan. The
@@ -227,6 +243,47 @@ class ProductChatRuntime internal constructor(private val port: ProductChatPort,
         } finally { response?.fill(0); payload?.fill(0); active.remove(request); cancelled.remove(request); sendGate.finish(ticket) }
     }
     fun lookup(session: String, request: String, callback: (JSONObject) -> Unit) = submit(callback) { require(session.isNotEmpty()); port.lookup(request) }
+    /** Bounded read-only observation. Workspace is supplied by the Service, while
+     * caller-supplied conversation/project/generation must match the captured origin.
+     * This is not ComponentSnapshot/CardBinding: missing core identity remains null.
+     * The shell must also compare returned scope with its still-mounted view.
+     * No automatic recovery of old unknown requests or mutation takes place here. */
+    fun readSnapshot(session: String, workspace: String, conversation: String, request: String,
+        project: String?, generation: Long, callback: (JSONObject) -> Unit) = submit(callback) {
+        val origin = readOrigins[request]
+        if (workspace.isBlank() || origin == null || origin.session != session ||
+            origin.conversation != conversation || origin.project != project || origin.generation != generation ||
+            !scopes.matches(session, project, generation)) return@submit failure("snapshot_scope_unavailable")
+        val observation = port.lookup(request) // original local lookup only, never dispatch
+        if (observation.opt("request_id") != request) return@submit failure("snapshot_identity_mismatch")
+        val rawStatus = (observation.opt("status") as? String)?.takeIf { it in setOf(
+            "prepared", "reserved", "unknown", "tool_pending", "tool_consumed", "completed", "failed", "cancelled", "pending") }
+        fun micro(key: String): Any = (observation.opt(key) as? String)
+            ?.takeIf { it.length <= 20 && it.matches(Regex("0|[1-9][0-9]*")) && it.toULongOrNull() != null } ?: JSONObject.NULL
+        val cancelledFact = observation.opt("cancelled") as? Boolean
+        val execution = when (rawStatus) {
+            "completed", "failed", "cancelled" -> rawStatus
+            "unknown" -> "unknown"
+            else -> "unavailable" // local prepared/reserved/tool-pending is not running proof
+        }
+        JSONObject().put("schema_version", 1).put("status", "read_only")
+            .put("scope", JSONObject().put("workspace_id", workspace).put("conversation_id", origin.conversation)
+                .put("project_id", origin.project ?: JSONObject.NULL).put("generation", origin.generation)
+                .put("agent_id", JSONObject.NULL))
+            .put("original_request", JSONObject().put("request_id", request)
+                .put("request_conversation_id", origin.requestConversation).put("intent_id", JSONObject.NULL))
+            .put("observation", JSONObject().put("status", rawStatus ?: JSONObject.NULL)
+                .put("execution_status", execution).put("reserved_micro_cny", micro("reserved_micro_cny"))
+                .put("charged_micro_cny", micro("charged_micro_cny"))
+                .put("cancelled", cancelledFact ?: JSONObject.NULL)
+                .put("attempted", observation.opt("attempted") as? Boolean ?: JSONObject.NULL)
+                .put("cancellation_status", if (rawStatus == "cancelled") "confirmed_cancelled"
+                    else if (cancelledFact == true) "intent_recorded_outcome_unknown" else "unavailable")
+                .put("current_business_state", JSONObject.NULL))
+            .put("binding", JSONObject.NULL).put("capabilities", JSONArray())
+            .put("unavailable", JSONArray(listOf("agent_id", "message_id", "component_id", "component_revision",
+                "state_revision", "attempt_id", "host_digest", "intent_id", "task_snapshot", "source_snapshot")))
+    }
     fun budget(callback: (JSONObject) -> Unit) = submit(callback) { port.budget() }
     fun availability(base: JSONObject, callback: (JSONObject) -> Unit) = submit(callback) {
         JSONObject(base.toString()).put("configured", configurationReady && credentials.current() != null)
@@ -240,6 +297,7 @@ class ProductChatRuntime internal constructor(private val port: ProductChatPort,
         require(session.isNotEmpty())
         if (scopes.get(session)?.project != project || scopes.get(session) == null) {
             sendGate.invalidateSessionScope(session)
+            readOrigins.entries.removeAll { it.value.session == session }
             val requests = (toolOrigins.filterValues { it.session == session }.keys + plans.filterValues { it.session == session }.keys + active.filterValues { it == session }.keys).toSet()
             requests.forEach { request ->
                 cancelled.add(request)
@@ -297,6 +355,7 @@ class ProductChatRuntime internal constructor(private val port: ProductChatPort,
         val next = plan.getString("request_id")
         toolOrigins[next] = scope
         plans[next] = Plan(session, JSONObject(plan.toString()))
+        readOrigins[request]?.let { rememberReadOrigin(session, it.conversation, plan) }
         plan
     }
     fun cancel(session: String, request: String, callback: (JSONObject) -> Unit) {
@@ -330,6 +389,7 @@ class ProductChatRuntime internal constructor(private val port: ProductChatPort,
                 businessPreviews.remove(request)?.optString("plan_id")?.let { planId -> try { port.discardBusinessPlan(session, planId) } catch (_: Exception) { } }
                 toolOrigins.remove(request)
             }
+            readOrigins.entries.removeAll { it.value.session == session }
             scopes.release(session)
             JSONObject().put("status", "released")
         }
