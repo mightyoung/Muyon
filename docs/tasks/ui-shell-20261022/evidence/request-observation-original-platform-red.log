@@ -1,0 +1,3 @@
+/tmp/muyon-json-platform.txG0LJ/RequestCandidates.kt:24:49: error: unresolved reference 'similar'.
+        candidate.optJSONObject("observation")?.similar(source.optJSONObject("observation")) != true) return null
+                                                ^^^^^^^

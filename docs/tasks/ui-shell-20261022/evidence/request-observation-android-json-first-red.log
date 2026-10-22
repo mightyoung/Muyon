@@ -1,0 +1,15 @@
+apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/ui/shell/RequestCandidates.kt:40:24: error: argument type mismatch: actual type is 'Any?', but 'String!' was expected.
+        if (!right.has(key)) return false
+                       ^^^
+apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/ui/shell/RequestCandidates.kt:41:26: error: argument type mismatch: actual type is 'Any?', but 'String!' was expected.
+        val a = left.opt(key)
+                         ^^^
+apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/ui/shell/RequestCandidates.kt:42:27: error: argument type mismatch: actual type is 'Any?', but 'String!' was expected.
+        val b = right.opt(key)
+                          ^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/ui/shell/RequestCandidateChecks.kt:53:40: error: 'val' cannot be reassigned.
+            while (iterator.hasNext()) keys += iterator.next()
+                                       ^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/ui/shell/RequestCandidateChecks.kt:53:40: error: assignment type mismatch: actual type is 'List<Any?>', but 'MutableList<String>' was expected.
+            while (iterator.hasNext()) keys += iterator.next()
+                                       ^^^^^^^^^^^^^^^^^^^^^^^

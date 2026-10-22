@@ -1,0 +1,53 @@
+Independent request observation review 2026-10-22T09:41:11.983250+00:00
+HEAD c0c2dc994df099c36c83813adf8410dac999d943
+BEFORE INPUT SHA256
+8a1e27f3b7ede95d4ee7c0c09702b114ae70ffb5d73c7e66ae6e1991df89fe6f  apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/ui/shell/run-host-shell-checks.sh
+bc801627ebae2730e4ec5eb044d0fbc15fa58663b555ab73b5b28ac37b492b56  apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/chat/ProductChatRuntime.kt
+4a75ee5bd4f8c88b4b049eabcd7ee09fc04e68b7d228d1566062e6a29e56d8e4  apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/chat/ProductSendGate.kt
+2d7da1fc9a1f5bb86eb00d63279efcddef2f5b0c3bcc789a75074df585cd9e31  apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/chat/ProductHttpsTransport.kt
+2becb6c2a44ba2fe862e3cfe3df31528c91bb37e04bc6835a749c54f4e5eb2f5  apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupDraft.kt
+5ff652109765a429fd427379a4eabaf0d82e6159ae57bceafbd4955c2f03dbc1  apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/agents/setup/SetupDraftArchive.kt
+8fb5429995d41b7f9cae5dfb6d69ca2f7627a3305ed9d2f0198ac1e9713a0a4e  apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/chat/persistence/HostDraftSaveState.kt
+9bf83f8b91e64c12891c536e13747ae280be658a51a61c5843b298da8d55e20c  apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/chat/persistence/NativeLocalDraftCodec.kt
+35f5e82fb135f74cac06f139ca4e3f0a4cdeca05561df6b4e50efe680d51edd6  apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/chat/persistence/HostLocalDraftSession.kt
+13d009f695dbec2cac2ede383a5775439ef8eeac9f8fb3ef6167692bfe0cfc44  apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/ui/shell/HostSetupController.kt
+b1d017774fd45bcad6fb0e3877ed13318df84db1550620b45de22c5a629f2937  apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/ui/shell/HostDraftPersistence.kt
+d0f70f2ec2f48931783a17ffc662dd8feeefd001a4967cf7e11b468bc2ef234c  apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/ui/shell/ReadOnlySnapshot.kt
+c30ca08815352a901bb45ddbc428241ebea89279b8f68bf221bf98e8afe4d7c2  apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/ui/shell/RequestCandidates.kt
+1db7eab0c2596dadc2dad6613fe4a9bd291e8b8c3e3709f09cd068895caa5e44  apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/ui/shell/HostPersistenceProjectionChecks.kt
+e10298405402a72ab45d28b848ed29a3cc93451a3b68efa87ca0bbb2469993ec  apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/ui/shell/HostSetupControllerChecks.kt
+a11eeccfb504ad5e673eefe6d5ae82c74d544e86a974f4608ce3a2cd6c303e25  apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/ui/shell/RequestCandidateChecks.kt
+
+COMMAND KOTLINC=/workspace/ui-shell-tools/kotlin-2.2.20/kotlinc/bin/kotlinc JSON_JAR=/workspace/ui-shell-tools/android-json-0.0.20131108.vaadin1.jar bash apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/ui/shell/run-host-shell-checks.sh
+JAR SHA256 dfb7bae2f404cfe0b72b4d23944698cb716b7665171812a0a4d0f5926c0fac79
+PASS real host/controller: one reducer, exact CAS, stale/double action rejection, template token/manual buffer, lost outcome original read, cancel/resume, same-CAS immutability, closed-view callback isolation, re-entry original-ID read and expired-session retention; no native/transport
+PASS real host candidate: original request/config identity, exact scope, finite read-only kind, binding/actions absent, unknown charge remains unknown, mismatched duplicate observation rejects; no transport
+PASS cold shell: actual host unknown/history decode; plain open/read zero lookup; closed persistence actions; same-CAS storage observation; cold0/0 never saved; malformed facts rejected
+
+EXIT 0
+
+COMMAND KOTLINC=/workspace/ui-shell-tools/kotlin-2.2.20/kotlinc/bin/kotlinc JSON_JAR=/workspace/ui-shell-tools/json-20250517.jar bash apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/ui/shell/run-host-shell-checks.sh
+JAR SHA256 3ea61b2a06e31edf1c91134fe9106b0ebb16628be169f3db75bc7a2b06b45796
+PASS real host/controller: one reducer, exact CAS, stale/double action rejection, template token/manual buffer, lost outcome original read, cancel/resume, same-CAS immutability, closed-view callback isolation, re-entry original-ID read and expired-session retention; no native/transport
+PASS real host candidate: original request/config identity, exact scope, finite read-only kind, binding/actions absent, unknown charge remains unknown, mismatched duplicate observation rejects; no transport
+PASS cold shell: actual host unknown/history decode; plain open/read zero lookup; closed persistence actions; same-CAS storage observation; cold0/0 never saved; malformed facts rejected
+
+EXIT 0
+AFTER INPUT SHA256
+8a1e27f3b7ede95d4ee7c0c09702b114ae70ffb5d73c7e66ae6e1991df89fe6f  apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/ui/shell/run-host-shell-checks.sh
+bc801627ebae2730e4ec5eb044d0fbc15fa58663b555ab73b5b28ac37b492b56  apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/chat/ProductChatRuntime.kt
+4a75ee5bd4f8c88b4b049eabcd7ee09fc04e68b7d228d1566062e6a29e56d8e4  apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/chat/ProductSendGate.kt
+2d7da1fc9a1f5bb86eb00d63279efcddef2f5b0c3bcc789a75074df585cd9e31  apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/chat/ProductHttpsTransport.kt
+2becb6c2a44ba2fe862e3cfe3df31528c91bb37e04bc6835a749c54f4e5eb2f5  apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupDraft.kt
+5ff652109765a429fd427379a4eabaf0d82e6159ae57bceafbd4955c2f03dbc1  apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/agents/setup/SetupDraftArchive.kt
+8fb5429995d41b7f9cae5dfb6d69ca2f7627a3305ed9d2f0198ac1e9713a0a4e  apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/chat/persistence/HostDraftSaveState.kt
+9bf83f8b91e64c12891c536e13747ae280be658a51a61c5843b298da8d55e20c  apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/chat/persistence/NativeLocalDraftCodec.kt
+35f5e82fb135f74cac06f139ca4e3f0a4cdeca05561df6b4e50efe680d51edd6  apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/chat/persistence/HostLocalDraftSession.kt
+13d009f695dbec2cac2ede383a5775439ef8eeac9f8fb3ef6167692bfe0cfc44  apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/ui/shell/HostSetupController.kt
+b1d017774fd45bcad6fb0e3877ed13318df84db1550620b45de22c5a629f2937  apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/ui/shell/HostDraftPersistence.kt
+d0f70f2ec2f48931783a17ffc662dd8feeefd001a4967cf7e11b468bc2ef234c  apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/ui/shell/ReadOnlySnapshot.kt
+c30ca08815352a901bb45ddbc428241ebea89279b8f68bf221bf98e8afe4d7c2  apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/ui/shell/RequestCandidates.kt
+1db7eab0c2596dadc2dad6613fe4a9bd291e8b8c3e3709f09cd068895caa5e44  apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/ui/shell/HostPersistenceProjectionChecks.kt
+e10298405402a72ab45d28b848ed29a3cc93451a3b68efa87ca0bbb2469993ec  apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/ui/shell/HostSetupControllerChecks.kt
+a11eeccfb504ad5e673eefe6d5ae82c74d544e86a974f4608ce3a2cd6c303e25  apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/ui/shell/RequestCandidateChecks.kt
+INPUTS_UNCHANGED True

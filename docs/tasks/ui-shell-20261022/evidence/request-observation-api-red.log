@@ -1,0 +1,21 @@
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/ui/shell/RequestCandidateChecks.kt:57:15: error: unresolved reference 'sameRequestObservation'.
+        check(sameRequestObservation(JSONObject().put("n", 1), JSONObject().put("n", 1)))
+              ^^^^^^^^^^^^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/ui/shell/RequestCandidateChecks.kt:58:16: error: unresolved reference 'sameRequestObservation'.
+        check(!sameRequestObservation(JSONObject().put("n", 1), JSONObject().put("n", 1.0)))
+               ^^^^^^^^^^^^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/ui/shell/RequestCandidateChecks.kt:59:16: error: unresolved reference 'sameRequestObservation'.
+        check(!sameRequestObservation(JSONObject().put("n", false), JSONObject().put("n", "false")))
+               ^^^^^^^^^^^^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/ui/shell/RequestCandidateChecks.kt:60:16: error: unresolved reference 'sameRequestObservation'.
+        check(!sameRequestObservation(JSONObject().put("n", JSONObject.NULL), JSONObject()))
+               ^^^^^^^^^^^^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/ui/shell/RequestCandidateChecks.kt:61:16: error: unresolved reference 'sameRequestObservation'.
+        check(!sameRequestObservation(JSONObject(), JSONObject().put("n", JSONObject.NULL)))
+               ^^^^^^^^^^^^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/ui/shell/RequestCandidateChecks.kt:62:16: error: unresolved reference 'sameRequestObservation'.
+        check(!sameRequestObservation(JSONObject().put("n", JSONObject()), JSONObject().put("n", JSONObject())))
+               ^^^^^^^^^^^^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/ui/shell/RequestCandidateChecks.kt:63:16: error: unresolved reference 'sameRequestObservation'.
+        check(!sameRequestObservation(null, null))
+               ^^^^^^^^^^^^^^^^^^^^^^
