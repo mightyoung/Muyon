@@ -5,11 +5,17 @@
 use crate::{
     blobs::FinishedBlob,
     business::BusinessStore,
-    contract::{ContractError, Revision},
+    contract::{ContractError, Revision, Scope},
     documents::{AnnotationAuthor, DocumentAccess, DocumentMetadata, DocumentOperation},
     sqlite::Transaction,
 };
 use serde::{Deserialize, Serialize};
+mod project_access;
+mod save_journal;
+mod catalog;
+pub use project_access::{ArtifactProjectAccess, ArtifactProjectOperation};
+pub use save_journal::{ArtifactSaveOperation, ArtifactSaveOutcome, ArtifactSaveReceipt, ArtifactSaveStatus};
+pub use catalog::ArtifactCatalogEntry;
 
 type Result<T> = std::result::Result<T, ContractError>;
 const MAX_SOURCES: usize = 16;
@@ -129,11 +135,15 @@ impl BusinessStore {
         Ok(Some(revision))
     }
     fn artifact_record(&self, id: &str, revision: &Revision, access: &DocumentAccess) -> Result<ArtifactRevision> {
-        let rows = sql(self.database().query("SELECT CASE WHEN length(CAST(payload AS BLOB))<=163840 THEN payload ELSE NULL END FROM artifact_revisions WHERE project_id=? AND artifact_id=? AND revision=?", &[project(access)?, id, revision.as_str()]))?;
+        self.artifact_record_for_scope(id, revision, access.document.scope(), access.document.document_id())
+    }
+    fn artifact_record_for_scope(&self, id: &str, revision: &Revision, scope: &Scope, document_id: &str) -> Result<ArtifactRevision> {
+        let project_id = scope.project_id.as_deref().ok_or(ContractError::ScopeMismatch)?;
+        let rows = sql(self.database().query("SELECT CASE WHEN length(CAST(payload AS BLOB))<=163840 THEN payload ELSE NULL END FROM artifact_revisions WHERE project_id=? AND artifact_id=? AND revision=?", &[project_id, id, revision.as_str()]))?;
         if rows.is_empty() { return Err(ContractError::NotFound); }
         let record: ArtifactRevision = decode(cell(&rows[0], 0)?)?;
         if record.artifact_id != id || &record.revision != revision || revision.value() == 0
-            || !same_document(&record.document, access) || record.sources.len() > MAX_SOURCES
+            || record.document.document.scope() != scope || record.document.document.document_id() != document_id || record.sources.len() > MAX_SOURCES
             || (record.modified_by.is_human() && !record.human_edited)
             || (record.created_by.is_human() && !record.human_edited) {
             return Err(ContractError::StorageCorrupt);
@@ -142,8 +152,8 @@ impl BusinessStore {
         record.modified_by.validate()?;
         // Catalog snapshots must equal existing immutable canonical SQL metadata.
         for metadata in std::iter::once(&record.document).chain(record.sources.iter()) {
-            if metadata.document.scope() != access.document.scope() { return Err(ContractError::StorageCorrupt); }
-            let canonical = sql(self.database().query("SELECT CASE WHEN length(CAST(payload AS BLOB))<=8192 THEN payload ELSE NULL END FROM document_revisions WHERE project_id=? AND document_id=? AND revision=?", &[project(access)?, metadata.document.document_id(), metadata.document.revision().as_str()]))?;
+            if metadata.document.scope() != scope { return Err(ContractError::StorageCorrupt); }
+            let canonical = sql(self.database().query("SELECT CASE WHEN length(CAST(payload AS BLOB))<=8192 THEN payload ELSE NULL END FROM document_revisions WHERE project_id=? AND document_id=? AND revision=?", &[project_id, metadata.document.document_id(), metadata.document.revision().as_str()]))?;
             if canonical.len() != 1 || decode::<DocumentMetadata>(cell(&canonical[0], 0)?)? != *metadata {
                 return Err(ContractError::StorageCorrupt);
             }
@@ -176,26 +186,39 @@ impl BusinessStore {
     }
     /// Explicit save of an already-published canonical document. A duplicate ID
     /// conflicts: this API never implies retry/idempotent business execution.
-    pub fn archive_artifact_trusted(&self, id: &str, output: &DocumentAccess, sources: &[DocumentAccess], origin: &ArtifactOrigin) -> Result<ArtifactRevision> {
-        identifier(id)?; origin.validate()?;
+    #[cfg(test)]
+    pub(crate) fn archive_artifact_trusted(&self, id: &str, output: &DocumentAccess, sources: &[DocumentAccess], origin: &ArtifactOrigin) -> Result<ArtifactRevision> {
         let tx = sql(self.database().transaction())?;
+        let record = self.archive_artifact_in_transaction(&tx, id, output, sources, origin)?;
+        sql(tx.commit())?;
+        Ok(record)
+    }
+    fn archive_artifact_in_transaction(&self, tx: &Transaction<'_>, id: &str, output: &DocumentAccess, sources: &[DocumentAccess], origin: &ArtifactOrigin) -> Result<ArtifactRevision> {
+        identifier(id)?; origin.validate()?;
         self.artifact_schema()?;
         let document = self.artifact_access(&tx, output, true)?;
         if self.artifact_head(id, output)?.is_some() { return Err(ContractError::RevisionConflict); }
         let record = ArtifactRevision { artifact_id: id.into(), revision: Revision::new(1), document, sources: self.artifact_sources(&tx, output, sources)?, created_by: origin.clone(), modified_by: origin.clone(), human_edited: origin.is_human() };
         self.artifact_put(&record, output, &Revision::new(0))?;
         self.artifact_access(&tx, output, true)?;
-        self.artifact_sources(&tx, output, sources)?;
-        sql(tx.commit())?; Ok(record)
+        self.artifact_sources(tx, output, sources)?;
+        Ok(record)
     }
     /// Publishes immutable canonical document + artifact revision atomically.
     /// Sources stay at their captured revisions; current grants are still needed.
     /// No automatic recommendation may replace a human-edited artifact, even
     /// with a fresh expected revision. Save generated results under a new ID/doc.
     #[allow(clippy::too_many_arguments)]
-    pub fn revise_artifact_trusted(&self, id: &str, expected: &Revision, output: &DocumentAccess, finished: &FinishedBlob, title: &str, current_sources: &[DocumentAccess], origin: &ArtifactOrigin) -> Result<ArtifactRevision> {
-        identifier(id)?; origin.validate()?;
+    #[cfg(test)]
+    pub(crate) fn revise_artifact_trusted(&self, id: &str, expected: &Revision, output: &DocumentAccess, finished: &FinishedBlob, title: &str, current_sources: &[DocumentAccess], origin: &ArtifactOrigin) -> Result<ArtifactRevision> {
         let tx = sql(self.database().transaction())?;
+        let record = self.revise_artifact_in_transaction(&tx, id, expected, output, finished, title, current_sources, origin)?;
+        sql(tx.commit())?;
+        Ok(record)
+    }
+    #[allow(clippy::too_many_arguments)]
+    fn revise_artifact_in_transaction(&self, tx: &Transaction<'_>, id: &str, expected: &Revision, output: &DocumentAccess, finished: &FinishedBlob, title: &str, current_sources: &[DocumentAccess], origin: &ArtifactOrigin) -> Result<ArtifactRevision> {
+        identifier(id)?; origin.validate()?;
         self.artifact_schema()?;
         self.artifact_access(&tx, output, true)?;
         if self.artifact_head(id, output)?.as_ref() != Some(expected) { return Err(ContractError::RevisionConflict); }
@@ -208,8 +231,8 @@ impl BusinessStore {
         let record = ArtifactRevision { artifact_id: id.into(), revision: expected.next()?, document, sources: old.sources, created_by: old.created_by, modified_by: origin.clone(), human_edited: old.human_edited || origin.is_human() };
         self.artifact_put(&record, output, expected)?;
         self.document_grant_in_transaction(&tx, output, &[DocumentOperation::ReadText, DocumentOperation::StructuredEdit])?;
-        self.artifact_sources(&tx, output, current_sources)?;
-        sql(tx.commit())?; Ok(record)
+        self.artifact_sources(tx, output, current_sources)?;
+        Ok(record)
     }
     /// Recovery lookup only: returns the exact archived refs with fresh exact
     /// grants, including all sources. Older revisions fail closed until the core
@@ -252,3 +275,6 @@ impl BusinessStore {
 }
 #[cfg(test)]
 mod tests;
+
+#[cfg(test)]
+mod workflow_tests;

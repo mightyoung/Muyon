@@ -1,0 +1,2 @@
+/bin/bash: line 237: cargo: command not found
+WORKFLOW_IMPLEMENTATION_EXIT=127; NOT_RUN when cargo missing

@@ -1,0 +1,2 @@
+/bin/bash: line 126: cargo: command not found
+CONTINUATION_TEST_FIRST_EXIT=127; NOT_RUN when cargo missing

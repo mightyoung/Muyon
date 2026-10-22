@@ -2,15 +2,15 @@ use super::*;
 use crate::{blobs::BlobKind, contract::*, documents::*};
 use std::{fs, path::PathBuf, sync::atomic::{AtomicU64, Ordering}, time::{SystemTime, UNIX_EPOCH}};
 static NEXT: AtomicU64 = AtomicU64::new(0);
-struct Fixture(PathBuf);
+pub(super) struct Fixture(PathBuf);
 impl Fixture {
-    fn new() -> Self {
+    pub(super) fn new() -> Self {
         let p = std::env::temp_dir().join(format!("muyon-artifacts-{}-{}", std::process::id(), NEXT.fetch_add(1, Ordering::Relaxed)));
         fs::create_dir(&p).unwrap(); Self(p)
     }
     fn path(&self) -> PathBuf { self.0.join("business.sqlite") }
-    fn open(&self) -> BusinessStore { BusinessStore::open_existing(&self.path(), "workspace", "epoch").unwrap() }
-    fn setup(&self) -> (BusinessStore, DocumentAccess, DocumentAccess) {
+    pub(super) fn open(&self) -> BusinessStore { BusinessStore::open_existing(&self.path(), "workspace", "epoch").unwrap() }
+    pub(super) fn setup(&self) -> (BusinessStore, DocumentAccess, DocumentAccess) {
         BusinessStore::initialize(&self.path(), "workspace").unwrap();
         let s = self.open();
         s.database().exec("INSERT INTO projects VALUES('project','workspace','Synthetic','1',0)", &[]).unwrap();
@@ -21,10 +21,10 @@ impl Fixture {
     }
 }
 impl Drop for Fixture { fn drop(&mut self) { let _ = fs::remove_dir_all(&self.0); } }
-fn upload(s: &BusinessStore, bytes: &[u8]) -> FinishedBlob {
+pub(super) fn upload(s: &BusinessStore, bytes: &[u8]) -> FinishedBlob {
     let u = s.begin_upload("project").unwrap(); s.append_chunk(&u.upload_id, bytes).unwrap(); s.finish_blob(&u.upload_id, BlobKind::Pdf).unwrap()
 }
-fn grant(s: &BusinessStore, document: DocumentRef, generation: u64) -> DocumentAccess {
+pub(super) fn grant(s: &BusinessStore, document: DocumentRef, generation: u64) -> DocumentAccess {
     let authority = AuthorityBinding { grant_id: format!("grant-{}", document.document_id()), generation: Revision::new(generation), owner_epoch: "epoch".into() };
     let expires = SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_millis() as u64 + 29_000;
     s.issue_document_grant_trusted(&document, &authority, &[DocumentOperation::Inspect, DocumentOperation::ReadText, DocumentOperation::StructuredEdit], expires).unwrap();
@@ -33,8 +33,8 @@ fn grant(s: &BusinessStore, document: DocumentRef, generation: u64) -> DocumentA
 fn document(s: &BusinessStore, id: &str, bytes: &[u8]) -> DocumentAccess {
     let d = s.register_document_trusted("project", id, "Synthetic", DocumentFormat::Pdf, &upload(s, bytes)).unwrap(); grant(s, d.document, 1)
 }
-fn generated() -> ArtifactOrigin { ArtifactOrigin { author: AnnotationAuthor::Ai { agent_id: "agent".into(), run_id: "run".into() }, context: Some(ArtifactContext { message_id: "message".into(), attempt_id: "attempt".into() }) } }
-fn human() -> ArtifactOrigin { ArtifactOrigin { author: AnnotationAuthor::Human { actor_id: "actor".into() }, context: None } }
+pub(super) fn generated() -> ArtifactOrigin { ArtifactOrigin { author: AnnotationAuthor::Ai { agent_id: "agent".into(), run_id: "run".into() }, context: Some(ArtifactContext { message_id: "message".into(), attempt_id: "attempt".into() }) } }
+pub(super) fn human() -> ArtifactOrigin { ArtifactOrigin { author: AnnotationAuthor::Human { actor_id: "actor".into() }, context: None } }
 #[test]
 fn restart_restores_exact_snapshot_and_source_advance_fails_closed() {
     let f = Fixture::new(); let (s, out, source) = f.setup();
