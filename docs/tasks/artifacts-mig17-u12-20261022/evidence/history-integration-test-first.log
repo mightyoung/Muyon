@@ -1,0 +1,2 @@
+/bin/bash: line 27: cargo: command not found
+HISTORY_INTEGRATION_TEST_FIRST_EXIT=127; NOT_RUN when cargo missing
