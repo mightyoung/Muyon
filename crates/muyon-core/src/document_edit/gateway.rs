@@ -711,7 +711,7 @@ impl<'a> DocumentEditGateway<'a> {
         // COPY-only uses the already-published immutable source object. The
         // candidate bytes were independently persisted and checked identical.
         // No upload, staging, file write, or independent transaction remains.
-        let result = self.store.document_clone_in_transaction(
+        let (result, postcondition) = self.store.document_clone_with_postcondition_in_transaction(
             &tx,
             &b.document,
             &r.source.title,
@@ -729,6 +729,13 @@ impl<'a> DocumentEditGateway<'a> {
         // Final expiry/revocation check must retain the originally granted base
         // identity while allowing the head to be the just-published next version.
         let v = self.view(b, &self.load(b)?)?;
+        self.store
+            .document_grant_in_transaction(&tx, a, &[DocumentOperation::StructuredEdit])?;
+        // Receipt triggers can mutate the source notification or publication facts.
+        // Verify the exact batch frozen by COPY after every journal/receipt write.
+        self.store
+            .document_publication_postcondition_in_transaction(&tx, postcondition)?;
+        // Postcondition verification is read-only; recheck expiry after its reads.
         self.store
             .document_grant_in_transaction(&tx, a, &[DocumentOperation::StructuredEdit])?;
         // No work or write follows this final authority check except COMMIT.
