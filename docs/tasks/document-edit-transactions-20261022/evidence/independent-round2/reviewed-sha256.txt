@@ -1,0 +1,3 @@
+0f777c71743f38a9d874b3c75ff918b73d08efcec577b3ee73bba4b3b35e68d0  crates/muyon-core/src/document_edit/mod.rs
+eaaab01ee941fbefd559bae5a316d25b1e8cdd8a54aac96308cc2d7731d1e8de  crates/muyon-core/tests/document_edit_transactions.rs
+e6e904182a3dbd941e152e84d2c937e5207e24ed48433eb79c20ee3310582189  docs/tasks/document-edit-transactions-20261022/PLAN.md

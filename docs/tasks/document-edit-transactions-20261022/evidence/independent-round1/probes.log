@@ -1,0 +1,11 @@
+
+running 3 tests
+cancel before late durable receipt: Err(State); mark unknown: Err(State); state Cancelled
+old output/report accepted for new intent and patch: Validated
+test cancel_before_late_commit_loses_outcome ... ok
+test old_candidate_and_validation_accept_new_patch_and_intent ... ok
+renewed live grant: recover Err(Authority); cancel Err(Authority); state Unknown; cancel_requested false
+test renewed_authority_blocks_original_intent_recovery_and_cancel ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

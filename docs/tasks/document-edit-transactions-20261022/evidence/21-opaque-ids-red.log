@@ -1,0 +1,24 @@
+   Compiling muyon-core v0.1.0 (/workspace/document-edit-combination/crates/muyon-core)
+    Finished `test` profile [unoptimized] target(s) in 0.32s
+     Running tests/document_edit_transactions.rs (/workspace/document-edit-combination/crates/target/debug/deps/document_edit_transactions-9871e8bb1a298551)
+
+running 1 test
+test host_observations_reject_paths_in_opaque_candidate_and_authority_ids ... FAILED
+
+failures:
+
+---- host_observations_reject_paths_in_opaque_candidate_and_authority_ids stdout ----
+
+thread 'host_observations_reject_paths_in_opaque_candidate_and_authority_ids' panicked at muyon-core/tests/document_edit_transactions.rs:667:5:
+assertion `left == right` failed
+  left: Ok(())
+ right: Err(MissingFact)
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    host_observations_reject_paths_in_opaque_candidate_and_authority_ids
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 26 filtered out; finished in 0.00s
+
+error: test failed, to rerun pass `-p muyon-core --test document_edit_transactions`
