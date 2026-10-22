@@ -1,5 +1,9 @@
 # Host read projection — bounded request observation slice
 
+Latest follow-up: see UI-HOST-CONTINUATION-REPORT.md and UI-HOST-PROTOCOL.md for
+new card-candidate/local-setup APIs. The initial slice evidence below is retained
+with its original scope and validation dates.
+
 Branch: `task/ui-host-projection-20261022`.
 Pinned parent: `8937b3d62943351f918b4ae980f987e804427911`.
 Verified candidate: `codex/muyon-android-refactor` =

@@ -28,3 +28,16 @@ runtime settlement/revocation JVM3tests; independent static+actual offline rerun
 Android command NOT_RUN exit2: Gradle8.13 absent. No SDK retry/bypass; Service build,
 lint, instrumentation, device captures and full UI adoption remain open.
 Historical2 unknown / ¥0.002620 unchanged. No main/develop edit or automatic merge.
+
+## Continuation endpoints — latest source delivery
+
+Read UI-HOST-PROTOCOL.md (schema1, protocol-first473c13f1) and
+UI-HOST-CONTINUATION-REPORT.md for the subsequent implementation commit.
+New fixed methods chat_card_candidates and chat_setup_draft; chat_snapshot schema1
+is unchanged. Candidates only support explicit original local query, no execute/
+cancel binding. Local setup reuses canonical BotSetupDraft, genuine ephemeral local
+ID and local CAS, finite local edits/template suggestions/cancel/resume; never backend
+save/create/start. Empty skill/material offers explicitly mean metadata unavailable;
+no replacement document truth. Shell chooses one draft source of truth and retains
+mounted scope guards. Backend identities/CAS/documents and Android acceptance remain
+open. Producer endpoint implementation is source-delivered, not shell wiring.

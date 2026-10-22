@@ -13,14 +13,16 @@ fun main() {
     var observation = JSONObject()
     var mismatch = false
     var omitConversation = false
+    var fixtureConfiguration: String? = null
+    var lastLookup: String? = null
     val port = Proxy.newProxyInstance(ProductChatPort::class.java.classLoader, arrayOf(ProductChatPort::class.java)) { _, method, args ->
         when (method.name) {
             "configure" -> JSONObject().put("id", "config")
-            "prepareScoped" -> JSONObject().put("request_id", "request-${++next}").put("conversation_id", if (omitConversation) JSONObject.NULL else args!![0])
+            "prepareScoped" -> JSONObject().put("request_id", "request-${++next}").put("conversation_id", if (omitConversation) JSONObject.NULL else args!![0]).put("configuration_id", fixtureConfiguration ?: JSONObject.NULL)
             "workflowPrepare" -> JSONObject().put("request_id", "request-${++next}").put("conversation_id", "native-child")
             "followup" -> JSONObject().put("request_id", "request-${++next}").put("conversation_id", "native-followup")
             "bindScope" -> null
-            "lookup" -> { lookups++; JSONObject(observation.toString()).put("request_id", if (mismatch) "wrong-original" else args!![0]) }
+            "lookup" -> { lookups++; lastLookup = args!![0] as String; JSONObject(observation.toString()).put("request_id", if (mismatch) "wrong-original" else args[0]) }
             "cancel", "discardBusinessPlan" -> { writes++; JSONObject() }
             "failureCode" -> null
             else -> error("unexpected port: ${method.name}")
@@ -80,6 +82,16 @@ fun main() {
         }
         observation = JSONObject().put("status", "completed").put("attempted", true).put("charged_micro_cny", "0")
         check(snapshot("session", "conversation", request, "project", generation).getJSONObject("observation").getString("charged_micro_cny") == "0")
+        observation = JSONObject().put("status", "unknown").put("attempted", true).put("charged_micro_cny", "0")
+        val candidate = call { runtime.cardCandidates("session", "workspace", "conversation", request, "project", generation, it) }
+        check(candidate.getString("projection_type") == "card_candidates")
+        val card = candidate.getJSONArray("candidates").getJSONObject(0)
+        check(card.getString("kind") == "request_observation" && card.getString("request_id") == request)
+        check(card.isNull("binding") && card.isNull("configuration_id"))
+        check(card.getJSONArray("supported_local_reads").getString(0) == "query_original")
+        check(card.getJSONObject("observation").isNull("charged_micro_cny"))
+        check(!card.getBoolean("can_execute") && !card.getBoolean("can_cancel"))
+        denied(call { runtime.cardCandidates("session", "workspace", "other", request, "project", generation, it) })
         val before = lookups
         val other = scope("other", "project")
         denied(snapshot("other", "conversation", request, "project", other))
@@ -127,6 +139,17 @@ fun main() {
         val followup = snapshot("session", "conversation", followupRequest, "project", generation)
         check(followup.getJSONObject("scope").getString("conversation_id") == "conversation")
         check(followup.getJSONObject("original_request").getString("request_conversation_id") == "native-followup")
+        // A newer prepare/configuration must never substitute for the displayed original.
+        call { runtime.configure("session", CharArray(20) { 'x' }, "0", "0", true, true, it) }
+        fixtureConfiguration = "actual-native-config-two"
+        val newerRequest = call { runtime.prepare("session", "conversation", "fixture", true, 1, "project", it) }.getString("request_id")
+        val newer = call { runtime.cardCandidates("session", "workspace", "conversation", newerRequest, "project", generation, it) }
+            .getJSONArray("candidates").getJSONObject(0)
+        check(newer.getString("configuration_id") == "actual-native-config-two")
+        val stillOriginal = call { runtime.cardCandidates("session", "workspace", "conversation", request, "project", generation, it) }
+            .getJSONArray("candidates").getJSONObject(0)
+        check(stillOriginal.getString("request_id") == request && stillOriginal.isNull("configuration_id"))
+        check(lastLookup == request && request != newerRequest)
         check(writes == 0) // projection never calls a write port
         scope("session", "other-project"); scope("session", "project")
         val staleBefore = lookups
@@ -148,4 +171,5 @@ fun main() {
         denied(snapshot("session", "conversation", request, "project", generation))
         println("PASS host projection: scope/absent/unknown/pending/history/detachment/malformed/search/workflow/followup/release/cache capacity/actual charge proof checks")
     } finally { runtime.close(); check(runtime.awaitDrain(5000)) }
+    hostContinuationChecks()
 }

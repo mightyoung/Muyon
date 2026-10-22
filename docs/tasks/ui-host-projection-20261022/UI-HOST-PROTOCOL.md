@@ -65,7 +65,9 @@ revision. Scope change/release destroys local drafts; no persistence claim.
 
 Response: local_only, schema_version=1, projection_type=setup_draft; actual scope;
 local_draft_id/local_revision/reducer_revision; step, name/purpose/role, cancelled,
-local suggestion token/source; empty allowed skills/materials; saved=false,
+local suggestion token/source; capability_metadata_status/material_metadata_status
+are unavailable with empty allowed_capabilities/allowed_materials (no trusted offers
+projected, not a claim that the underlying registries/documents are empty); saved=false,
 creation_status=not_requested, agent_id=null, intent_id=null, held/actual=null,
 can_create=false, can_start=false, can_save=false. Finite local operation enablement
 reflects reducer state. Unsupported backend operations reject before any state change.
@@ -86,3 +88,9 @@ unknown actual0, finite disabled operations; local open/read, CAS/repeated mutat
 invalid text/token, manual role locking, cancel/resume, release/scope remount and
 no port/transport calls. Independent non-author review plus actual Kotlin JVM runs.
 Android build/toolchain limits remain unchanged and cannot be replaced by JVM tests.
+
+Implementation status: protocol-first publication was473c13f13403f309b269caf258b1b7410af09b06.
+The subsequent implementation commit on this branch supplies these methods; consume
+that full reviewed SHA from the delivery report, not the protocol-only checkpoint.
+No document/material truth store or replacement source/version/anchor is introduced;
+future material offers must consume the shared authorized Rust documents producer.

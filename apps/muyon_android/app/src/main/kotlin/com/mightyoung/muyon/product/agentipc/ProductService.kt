@@ -188,7 +188,7 @@ class ProductService : Service() {
                     error("stale_session", "rejected")
                 } else {
                     val session = clients.getValue(reply.binder)
-                    if (method in setOf("agent_availability", "chat_configure", "chat_prepare", "chat_confirm", "chat_lookup", "chat_cancel", "chat_budget", "chat_scope", "chat_snapshot", "chat_tool", "agent_workflow", "workflow_prepare")) {
+                    if (method in setOf("agent_availability", "chat_configure", "chat_prepare", "chat_confirm", "chat_lookup", "chat_cancel", "chat_budget", "chat_scope", "chat_snapshot", "chat_card_candidates", "chat_setup_draft", "chat_tool", "agent_workflow", "workflow_prepare")) {
                         val callback: (JSONObject) -> Unit = { result -> handler.post {
                             if (!stopped && clients[reply.binder] == session) send(reply, request,
                                 JSONObject().put("status", "ok").put("data", result))
@@ -206,6 +206,13 @@ class ProductService : Service() {
                             "chat_snapshot" -> chat.readSnapshot(session, workspace, payload.getString("conversation_id"),
                                 payload.getString("request_id"), payload.optString("project_id").takeIf { it.isNotEmpty() && it != "null" },
                                 payload.getLong("scope_generation").also { check(it >= 0 && (payload.opt("scope_generation") is Int || payload.opt("scope_generation") is Long)) }, callback)
+                            "chat_card_candidates" -> chat.cardCandidates(session, workspace, payload.getString("conversation_id"),
+                                payload.getString("request_id"), payload.optString("project_id").takeIf { it.isNotEmpty() && it != "null" },
+                                payload.getLong("scope_generation").also { check(it >= 0 && (payload.opt("scope_generation") is Int || payload.opt("scope_generation") is Long)) }, callback)
+                            "chat_setup_draft" -> chat.setupDraft(session, workspace, payload.getString("conversation_id"),
+                                payload.optString("project_id").takeIf { it.isNotEmpty() && it != "null" },
+                                payload.getLong("scope_generation").also { check(it >= 0 && (payload.opt("scope_generation") is Int || payload.opt("scope_generation") is Long)) },
+                                payload.getJSONObject("operation"), callback)
                             "chat_cancel" -> chat.cancel(session, payload.getString("request_id"), callback)
                             "chat_budget" -> chat.budget(callback)
                             "chat_scope" -> chat.updateScope(session, payload.optString("project_id").takeIf { it.isNotEmpty() && it != "null" }, callback)

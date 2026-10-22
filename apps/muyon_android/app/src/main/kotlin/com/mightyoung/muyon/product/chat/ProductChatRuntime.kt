@@ -1,5 +1,9 @@
 package com.mightyoung.muyon.product.chat
 
+import com.mightyoung.muyon.product.agents.setup.BotSetupDraft
+import com.mightyoung.muyon.product.agents.setup.LocalSetupTemplates
+import com.mightyoung.muyon.product.agents.setup.SuggestionRequest
+import com.mightyoung.muyon.product.agents.setup.SetupStep
 import org.json.JSONArray
 import org.json.JSONObject
 import java.util.UUID
@@ -79,7 +83,7 @@ class ProductChatRuntime internal constructor(private val port: ProductChatPort,
     private val businessPreviews = mutableMapOf<String, JSONObject>() // exact host plan per request
     private val plans = mutableMapOf<String, Plan>() // control thread only
     private data class ReadOrigin(val session: String, val conversation: String,
-        val requestConversation: String, val project: String?, val generation: Long)
+        val requestConversation: String, val project: String?, val generation: Long, val configurationId: String?)
     // Display provenance only. Never used to authorize a write or infer a card binding.
     private val readOrigins = linkedMapOf<String, ReadOrigin>() // control only; bounded
     private fun rememberReadOrigin(session: String, conversation: String, plan: JSONObject) {
@@ -89,7 +93,8 @@ class ProductChatRuntime internal constructor(private val port: ProductChatPort,
         if (request in readOrigins) { readOrigins.remove(request); return } // ambiguous display provenance
         // Eviction removes display availability only; never block business prepare.
         if (readOrigins.size >= 256) readOrigins.remove(readOrigins.keys.first())
-        readOrigins[request] = ReadOrigin(session, conversation, requestConversation, scope.project, scope.generation)
+        readOrigins[request] = ReadOrigin(session, conversation, requestConversation, scope.project, scope.generation,
+            (plan.opt("configuration_id") as? String)?.takeIf { it.isNotBlank() })
     }
     private val active = java.util.concurrent.ConcurrentHashMap<String, String>()
     private val cancelled = java.util.concurrent.ConcurrentHashMap.newKeySet<String>()
@@ -250,12 +255,16 @@ class ProductChatRuntime internal constructor(private val port: ProductChatPort,
      * No automatic recovery of old unknown requests or mutation takes place here. */
     fun readSnapshot(session: String, workspace: String, conversation: String, request: String,
         project: String?, generation: Long, callback: (JSONObject) -> Unit) = submit(callback) {
+        readSnapshotValue(session, workspace, conversation, request, project, generation)
+    }
+    private fun readSnapshotValue(session: String, workspace: String, conversation: String, request: String,
+        project: String?, generation: Long): JSONObject {
         val origin = readOrigins[request]
         if (workspace.isBlank() || origin == null || origin.session != session ||
             origin.conversation != conversation || origin.project != project || origin.generation != generation ||
-            !scopes.matches(session, project, generation)) return@submit failure("snapshot_scope_unavailable")
+            !scopes.matches(session, project, generation)) return failure("snapshot_scope_unavailable")
         val observation = port.lookup(request) // original local lookup only, never dispatch
-        if (observation.opt("request_id") != request) return@submit failure("snapshot_identity_mismatch")
+        if (observation.opt("request_id") != request) return failure("snapshot_identity_mismatch")
         val rawStatus = (observation.opt("status") as? String)?.takeIf { it in setOf(
             "prepared", "reserved", "unknown", "tool_pending", "tool_consumed", "completed", "failed", "cancelled", "pending") }
         fun micro(key: String): Any = (observation.opt(key) as? String)
@@ -273,7 +282,7 @@ class ProductChatRuntime internal constructor(private val port: ProductChatPort,
             "unknown" -> "unknown"
             else -> "unavailable" // local prepared/reserved/tool-pending is not running proof
         }
-        JSONObject().put("schema_version", 1).put("status", "read_only")
+        return JSONObject().put("schema_version", 1).put("status", "read_only")
             .put("scope", JSONObject().put("workspace_id", workspace).put("conversation_id", origin.conversation)
                 .put("project_id", origin.project ?: JSONObject.NULL).put("generation", origin.generation)
                 .put("agent_id", JSONObject.NULL))
@@ -291,6 +300,130 @@ class ProductChatRuntime internal constructor(private val port: ProductChatPort,
             .put("unavailable", JSONArray(listOf("agent_id", "message_id", "component_id", "component_revision",
                 "state_revision", "attempt_id", "host_digest", "intent_id", "task_snapshot", "source_snapshot")))
     }
+    /** Finite read-only candidate, not an actionable CardBinding or model callback. */
+    fun cardCandidates(session: String, workspace: String, conversation: String, request: String,
+        project: String?, generation: Long, callback: (JSONObject) -> Unit) = submit(callback) {
+        val value = readSnapshotValue(session, workspace, conversation, request, project, generation)
+        if (value.optString("status") != "read_only") return@submit value
+        val original = value.getJSONObject("original_request")
+        JSONObject().put("schema_version", 1).put("projection_type", "card_candidates").put("status", "read_only")
+            .put("request_snapshot", value)
+            .put("candidates", JSONArray().put(JSONObject().put("kind", "request_observation")
+                .put("request_id", original.getString("request_id"))
+                .put("request_conversation_id", original.getString("request_conversation_id"))
+                .put("configuration_id", readOrigins[request]?.configurationId ?: JSONObject.NULL)
+                .put("observation", JSONObject(value.getJSONObject("observation").toString()))
+                .put("binding", JSONObject.NULL).put("supported_local_reads", JSONArray(listOf("query_original")))
+                .put("can_execute", false).put("can_cancel", false)
+                .put("disabled_reason", "trusted_card_binding_unavailable")))
+    }
+
+    private data class LocalDraftScope(val workspace: String, val session: String, val conversation: String,
+        val project: String?, val generation: Long)
+    private class LocalSetup(val scope: LocalDraftScope, val draft: BotSetupDraft) {
+        var revision = 0L // genuine local host CAS, never a business/component revision
+        var suggestionRequest: SuggestionRequest? = null
+    }
+    private val setupDrafts = linkedMapOf<LocalDraftScope, LocalSetup>() // control only; no persistence
+
+    /** Local-only setup operations reuse the sole Bot reducer. No port is called. */
+    fun setupDraft(session: String, workspace: String, conversation: String, project: String?, generation: Long,
+        operation: JSONObject, callback: (JSONObject) -> Unit) {
+        val input = JSONObject(operation.toString()) // caller cannot mutate an enqueued CAS operation
+        submit(callback) {
+            if (workspace.isBlank() || conversation.isBlank() || conversation.length > 1024 ||
+                !scopes.matches(session, project, generation)) return@submit failure("setup_scope_unavailable")
+            val action = input.opt("action") as? String ?: return@submit failure("setup_operation_unavailable")
+            val mutations = setOf("edit_name", "edit_purpose", "edit_role", "next", "back", "cancel", "resume", "suggest_role", "accept_role")
+            if (action !in mutations && action !in setOf("open", "read")) return@submit failure("setup_operation_unavailable")
+            val required = when (action) {
+                "open" -> setOf("action")
+                "read" -> setOf("action", "local_draft_id")
+                "edit_name", "edit_purpose", "edit_role" -> setOf("action", "local_draft_id", "expected_local_revision", "value")
+                "accept_role" -> setOf("action", "local_draft_id", "expected_local_revision", "suggestion_request_id")
+                else -> setOf("action", "local_draft_id", "expected_local_revision")
+            }
+            if (input.keys().asSequence().toSet() != required) return@submit failure("setup_operation_unavailable")
+            val key = LocalDraftScope(workspace, session, conversation, project, generation)
+            val state = if (action == "open") setupDrafts[key] ?: run {
+                if (setupDrafts.size >= 32) return@submit failure("setup_draft_capacity")
+                val opaqueScope = JSONArray(listOf(workspace, session, conversation, project, generation)).toString()
+                LocalSetup(key, BotSetupDraft(opaqueScope)).also { setupDrafts[key] = it }
+            } else setupDrafts[key] ?: return@submit failure("setup_draft_unavailable")
+            if (action != "open" && input.opt("local_draft_id") != state.draft.snapshot().draftId)
+                return@submit failure("setup_draft_unavailable")
+            if (action in mutations) {
+                val expected = input.opt("expected_local_revision")
+                if ((expected !is Int && expected !is Long) || (expected as Number).toLong() != state.revision || state.revision == Long.MAX_VALUE)
+                    return@submit failure("setup_revision_mismatch")
+                if (action !in localSetupActions(state)) return@submit failure("setup_operation_unavailable")
+                if (action in setOf("edit_name", "edit_purpose", "edit_role") && input.opt("value") !is String)
+                    return@submit failure("setup_draft_rejected")
+                try {
+                    when (action) {
+                        "edit_name" -> state.draft.editName(input.get("value") as String)
+                        "edit_purpose" -> state.draft.editPurpose(input.get("value") as String)
+                        "edit_role" -> state.draft.editRole(input.get("value") as String)
+                        "next" -> state.draft.next()
+                        "back" -> state.draft.back()
+                        "cancel" -> state.draft.cancel()
+                        "resume" -> state.draft.resume()
+                        "suggest_role" -> {
+                            val token = state.draft.requestSuggestions()
+                            check(state.draft.receiveSuggestions(token, LocalSetupTemplates.suggest(token)))
+                            state.suggestionRequest = token
+                        }
+                        "accept_role" -> {
+                            val token = state.suggestionRequest ?: return@submit failure("setup_suggestion_unavailable")
+                            if (input.opt("suggestion_request_id") != token.requestId || !state.draft.acceptRoleSuggestion(token))
+                                return@submit failure("setup_suggestion_unavailable")
+                        }
+                    }
+                } catch (_: IllegalArgumentException) { return@submit failure("setup_draft_rejected")
+                } catch (_: IllegalStateException) { return@submit failure("setup_draft_rejected") }
+                if (action != "suggest_role") state.suggestionRequest = null
+                state.revision++
+            }
+            setupProjection(state)
+        }
+    }
+    private fun localSetupActions(state: LocalSetup): List<String> {
+        val draft = state.draft.snapshot()
+        if (draft.cancelled) return listOf("resume")
+        val actions = mutableListOf("edit_name", "edit_purpose", "edit_role", "cancel")
+        if (draft.step != SetupStep.NAME) actions.add("back")
+        val canAdvance = when (draft.step) {
+            SetupStep.NAME -> draft.name.value.isNotBlank()
+            SetupStep.PURPOSE -> draft.purpose.value.isNotBlank()
+            SetupStep.CONFIGURATION -> draft.role.value.isNotBlank()
+            SetupStep.REVIEW -> false
+        }
+        if (canAdvance) actions.add("next")
+        if (draft.name.value.isNotBlank() && draft.purpose.value.isNotBlank()) actions.add("suggest_role")
+        if (draft.suggestion != null && state.suggestionRequest != null && !draft.role.userLocked) actions.add("accept_role")
+        return actions
+    }
+    private fun setupProjection(state: LocalSetup): JSONObject {
+        val draft = state.draft.snapshot()
+        val suggestion = draft.suggestion
+        val token = state.suggestionRequest
+        val localActions = localSetupActions(state)
+        return JSONObject().put("schema_version", 1).put("projection_type", "setup_draft").put("status", "local_only")
+            .put("scope", JSONObject().put("workspace_id", state.scope.workspace).put("conversation_id", state.scope.conversation)
+                .put("project_id", state.scope.project ?: JSONObject.NULL).put("generation", state.scope.generation))
+            .put("local_draft_id", draft.draftId).put("local_revision", state.revision).put("reducer_revision", draft.revision)
+            .put("step", draft.step.name).put("name", draft.name.value).put("purpose", draft.purpose.value).put("role", draft.role.value)
+            .put("cancelled", draft.cancelled).put("saved", false).put("can_save", false).put("can_create", false).put("can_start", false)
+            .put("creation_status", "not_requested").put("agent_id", JSONObject.NULL).put("intent_id", JSONObject.NULL)
+            .put("actual_micro_cny", JSONObject.NULL).put("reserved_micro_cny", JSONObject.NULL)
+            .put("capability_metadata_status", "unavailable").put("material_metadata_status", "unavailable")
+            .put("allowed_capabilities", JSONArray()).put("allowed_materials", JSONArray())
+            .put("supported_local_operations", JSONArray(listOf("open", "read") + localActions))
+            .put("suggestion", if (suggestion != null && token != null) JSONObject().put("request_id", token.requestId)
+                .put("role", suggestion.role).put("source_id", suggestion.source.id).put("source_version", suggestion.source.version)
+                .put("source_label", suggestion.source.label) else JSONObject.NULL)
+            .put("binding", JSONObject.NULL).put("disabled_reason", "backend_creation_save_and_execution_unavailable")
+    }
     fun budget(callback: (JSONObject) -> Unit) = submit(callback) { port.budget() }
     fun availability(base: JSONObject, callback: (JSONObject) -> Unit) = submit(callback) {
         JSONObject(base.toString()).put("configured", configurationReady && credentials.current() != null)
@@ -305,6 +438,7 @@ class ProductChatRuntime internal constructor(private val port: ProductChatPort,
         if (scopes.get(session)?.project != project || scopes.get(session) == null) {
             sendGate.invalidateSessionScope(session)
             readOrigins.entries.removeAll { it.value.session == session }
+            setupDrafts.entries.removeAll { it.key.session == session }
             val requests = (toolOrigins.filterValues { it.session == session }.keys + plans.filterValues { it.session == session }.keys + active.filterValues { it == session }.keys).toSet()
             requests.forEach { request ->
                 cancelled.add(request)
@@ -397,6 +531,7 @@ class ProductChatRuntime internal constructor(private val port: ProductChatPort,
                 toolOrigins.remove(request)
             }
             readOrigins.entries.removeAll { it.value.session == session }
+            setupDrafts.entries.removeAll { it.key.session == session }
             scopes.release(session)
             JSONObject().put("status", "released")
         }

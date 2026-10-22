@@ -51,3 +51,21 @@ of other statuses; source comment corrected without changing behavior.
 Only projection, corresponding tests and documentation/evidence change. No old
 unknown query/retry, billing state change, Service authority change, or live request.
 Android/toolchain and full-card limitations from initial review still apply.
+
+## UI host continuation independent review
+
+Reviewed delta from98e5b652 by the non-author host_projection_review agent. Final
+actual new runner rerun exit0, two PASS lines in continuation-independent.log;
+authored source diff check passed. Reviewer confirmed original-request/configuration
+separation, unknown cost proof retention, null binding/disabled execute/cancel,
+strict local CAS/id/scope/token/repeat handling, cancelled-draft isolation and
+capacity32 with no business request gate. Setup tests report zero private-port calls.
+
+Initial state-independent next/back/suggest enablement was flagged and fixed:
+localSetupActions is shared by output and operation handler, with step/required-field
+regressions. Strict edit value String validation avoids generic failure/port path;
+numeric/null tests confirm no overwrite. Final metadata unavailable flags and
+no alternative Rust documents source were verified. No new blocker identified in
+this host-only API slice. Actual Android Service/build/device, full card binding,
+backend persistence/create and shell adoption remain open. No review merges or
+changes were made by the reviewer.
