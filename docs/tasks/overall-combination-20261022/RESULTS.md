@@ -1,3 +1,5 @@
+> Latest67fd14c4: workspace435 PASS and final fixed-source independent composition review complete. Strict Clippy FAIL101: FFIlib.rs181 too_many_arguments + document_storage.rs685 manual_repeat_n. Prior55 diagnostics cleared. See STRICT-GATE-REMAINING.md; next candidate/provider batch not started. Earlier records below are historical.
+
 > Latest a21fdbd3: fresh workspace435 executions PASS/0FAIL. Original50 lint diagnostics cleared; strict Clippy still FAIL101 on5 newly reached gateway-test drop_non_drop diagnostics. See GATEWAY-CLIPPY-FOLLOWUP.md for exact owner locations. Earlier fixed-version records below retain historical status.
 
 > Latest accepted composition: group68f0fb69 via9b1c6a77; parent closed both local group Important. Full product Rust workspace435 executions PASS/0FAIL, including FFI14/core421 and repeated module cases. Strict Clippy still gateway2 FAIL; host/canonical gateway/Android remain pending. See GROUP-TAIL-RECHECK.md. Earlier fixed-version records below are retained history, not current gate status.

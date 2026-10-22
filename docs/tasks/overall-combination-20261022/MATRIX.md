@@ -61,3 +61,5 @@ Restrictions: no main/develop mutation/merge, deploy, force push/delete, real mo
 - Parent targeted review/evidence closed both local group Important at68f0fb69; exact9b1c6a77 full product Rust workspace435 executions PASS/0FAIL (FFI14/core421), includes30new group regressions and18duplicate modules. Canonical gateway/real dispatch excluded.
 
 - COPY gateway lint-only0e325011d6eb66962669aac284cdccf5fa0685e9 replaces90b7 two expressions viaa21fdbd3. No schema2/candidate mixed in. Strict Clippy production diagnostics cleared; newly reached test target has5 drop_non_drop at162/185/309/375/485; original owner followup pending. See GATEWAY-CLIPPY-FOLLOWUP.md.
+
+- Gateway test-only2e2cfcdec28c5ecdf4ebc45523fc0885d4b0a9da via67fd14c4 deletes5drop(g); current full fixed-source independent review verified all pins. Fresh workspace435PASS; new strict Clippy targets FFIlib181 too_many_arguments and document_storage685 manual_repeat_n fail. See STRICT-GATE-REMAINING.md. New candidate/provider batch not started until this gate closes.
