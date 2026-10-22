@@ -384,7 +384,6 @@ fn rollback_is_a_new_bound_transaction_not_a_cancel_side_effect() {
         intent_id: "rollback-2".into(),
         patch_digest: [10; 32],
         rollback_target: Some(Revision::new(1)),
-        ..binding()
     };
     let next = t.rollback(b.clone()).unwrap();
     assert_eq!(next.state(), State::New);
