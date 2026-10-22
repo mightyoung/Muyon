@@ -53,7 +53,7 @@ bash apps/muyon_android/gradlew --offline :app:testDebugUnitTest
 - Unknown: stale pre-observation CAS rejected; exact unknown identity/current CAS allowed only as local cancel intent; original lookup, held cost, nullable actual cost, history and committed values preserved; resubmission remains lookup-only.
 - Diff whitespace check PASS. Gradle exit 2, missing Gradle 8.13, NOT_RUN; no Android compile, persistence or UI integration acceptance follows.
 
-Independent final-source review and exact implementation SHA are recorded in CANCEL-INDEPENDENT-REVIEW.md after the reviewer returns. The reviewed source and final pushed head are reported separately, since evidence-only commits do not change implementation.
+Independent final-source review passed at `4d3b80115dc79ab5829d7e3d82afc1086a302fdb`: see [CANCEL-INDEPENDENT-REVIEW.md](CANCEL-INDEPENDENT-REVIEW.md), including the independent old-source RED probe and raw 20-group GREEN output. The reviewed source and final pushed head are reported separately, since evidence-only commits do not change implementation.
 
 ## Scope and holds
 
