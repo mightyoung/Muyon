@@ -1,0 +1,8 @@
+docs/tasks/mig20-group-store-20261022/evidence/04-first-implementation.log:59: new blank line at EOF.
+docs/tasks/mig20-group-store-20261022/evidence/08-review-fixes-green.log:66: new blank line at EOF.
+docs/tasks/mig20-group-store-20261022/evidence/09-chain-fix-green.log:66: new blank line at EOF.
+docs/tasks/mig20-group-store-20261022/evidence/11-store-final-green.log:67: new blank line at EOF.
+docs/tasks/mig20-group-store-20261022/evidence/final-cargo.stdout.log:318: new blank line at EOF.
+docs/tasks/mig20-group-store-20261022/evidence/final-governance.stdout.log:26: new blank line at EOF.
+docs/tasks/mig20-group-store-20261022/evidence/final-runtime.stdout.log:25: new blank line at EOF.
+docs/tasks/mig20-group-store-20261022/evidence/final-store.stdout.log:40: new blank line at EOF.
