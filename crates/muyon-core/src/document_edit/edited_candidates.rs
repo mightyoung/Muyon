@@ -1,4 +1,5 @@
-//! Durable unvalidated edited-candidate journal. No engine, blob pin or publication.
+//! Durable unvalidated edited-candidate journal and held core preparation bridge.
+//! Core owns private object/pin preparation; no engine or publication is enabled.
 //! Bytes here are local preparation data, never a document result or validation.
 use super::{
     engine_protocol::{now, verify_stored_request, PreparedEngineRequest},
@@ -16,6 +17,9 @@ use crate::{
 use sha2::{Digest, Sha256};
 type Result<T> = std::result::Result<T, ContractError>;
 const TABLE:&str="CREATE TABLE edit_candidate_intents(intent_id TEXT PRIMARY KEY,binding_json TEXT NOT NULL,source_json TEXT NOT NULL,request_json TEXT NOT NULL,state TEXT NOT NULL CHECK(state IN('planned','confirmed','ingesting','candidate_unvalidated','cancelled')),authority_json TEXT,expires_ms TEXT NOT NULL,cancel_requested INTEGER NOT NULL CHECK(cancel_requested IN(0,1)),candidate_hex TEXT CHECK(length(candidate_hex)<=16777216),candidate_digest TEXT,candidate_length TEXT)";
+mod core_bridge;
+pub use core_bridge::CoreCandidatePreparation;
+
 const MAX_CANDIDATE: usize = 8 * 1024 * 1024;
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum EditedCandidateState {
@@ -105,6 +109,7 @@ impl<'a> EditedCandidateJournal<'a> {
             return Err(ContractError::InvalidVersion);
         }
         sql(tx.commit())?;
+        core_bridge::initialize_core_bridge(store)?;
         Ok(Self { store })
     }
     fn load(&self, b: &Binding) -> Result<Record> {
