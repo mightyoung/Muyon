@@ -3,6 +3,7 @@
 use super::{identity::valid_id, DocumentRef};
 use crate::{business::BusinessStore, contract::{ContractError, Revision}, sqlite::Transaction};
 use serde::Serialize;
+use std::collections::{BTreeMap, BTreeSet};
 
 type Result<T> = std::result::Result<T, ContractError>;
 const SOURCE: &str = "artifact_local_evidence_sources_v1";
@@ -18,6 +19,23 @@ pub struct DocumentSourceNotification {
     pub object_id: String,
     pub generation: Revision,
 }
+struct DocumentSourceRoute {
+    document: DocumentRef,
+    event: DocumentSourceNotification,
+    expected: Option<(Revision, bool)>,
+}
+pub(super) struct DocumentSourceMutationPlan<'tx, 'db> {
+    transaction: &'tx Transaction<'db>,
+    documents: Vec<DocumentRef>,
+    routes: Vec<DocumentSourceRoute>,
+    notifications: bool,
+    installed: bool,
+}
+pub(super) struct DocumentSourceMutationPostcondition {
+    routes: Vec<DocumentSourceRoute>,
+    batches: Vec<(DocumentRef, Vec<DocumentSourceNotification>)>,
+    installed: bool,
+}
 fn sql<T>(value: crate::sqlite::Result<T>) -> Result<T> { value.map_err(|_| ContractError::Storage) }
 fn cell(row: &[Option<String>], index: usize) -> Result<&str> { row.get(index).and_then(Option::as_deref).ok_or(ContractError::StorageCorrupt) }
 fn ids(project: &str, actor: &str, object: &str) -> Result<()> {
@@ -30,43 +48,100 @@ impl BusinessStore {
         if rows.len() != 1 || cell(&rows[0], 0)? != "table" || cell(&rows[0], 1)? != DDL { return Err(ContractError::InvalidVersion); }
         Ok(true)
     }
-    /// All callers propagate failure; no commit/event publication occurs here.
-    pub(crate) fn invalidate_document_dependents_in_transaction(&self, tx: &Transaction<'_>, changed: &DocumentRef) -> Result<Vec<DocumentSourceNotification>> {
-        if !tx.belongs_to(self.database()) || changed.scope().workspace_id != self.workspace_id() { return Err(ContractError::ScopeMismatch); }
-        let source = sql(self.database().query("SELECT type FROM sqlite_master WHERE name=?", &[SOURCE]))?;
+    /// Routing projections only, not an authority decision. Freeze BEFORE the
+    /// document/grant/blob writes and before the real owner's source UPDATEs.
+    pub(super) fn prepare_document_source_mutation_in_transaction<'tx, 'db>(&self, tx: &'tx Transaction<'db>, changed: &[&DocumentRef]) -> Result<DocumentSourceMutationPlan<'tx, 'db>> {
+        if !tx.belongs_to(self.database()) { return Err(ContractError::ScopeMismatch); }
         let notifications = self.document_notification_schema()?;
-        if source.is_empty() {
-            // Legacy/uninitialized resolver, not a swallowed resolver failure.
-            return if notifications { Err(ContractError::InvalidVersion) } else { Ok(Vec::new()) };
+        let source = sql(self.database().query("SELECT type FROM sqlite_master WHERE name=?", &[SOURCE]))?;
+        let installed = !source.is_empty();
+        if installed && (source.len() != 1 || cell(&source[0], 0)? != "table") { return Err(ContractError::InvalidVersion); }
+        if !installed && notifications { return Err(ContractError::InvalidVersion); }
+        let mut documents: Vec<DocumentRef> = Vec::new();
+        let mut routes = Vec::new();
+        for document in changed {
+            if document.scope().workspace_id != self.workspace_id() { return Err(ContractError::ScopeMismatch); }
+            let project = document.scope().project_id.as_deref().ok_or(ContractError::ScopeMismatch)?;
+            if documents.iter().any(|old| old.scope() == document.scope() && old.document_id() == document.document_id()) { continue; }
+            documents.push((**document).clone());
+            if !installed { continue; }
+            let mut actor = String::new(); let mut object = String::new();
+            loop {
+                // Include inactive sources: their existing tombstones must not
+                // be erased as a side effect of another source's invalidation.
+                let rows = sql(self.database().query("SELECT CASE WHEN length(CAST(actor_id AS BLOB))<=128 THEN actor_id ELSE NULL END,CASE WHEN length(CAST(object_id AS BLOB))<=128 THEN object_id ELSE NULL END FROM artifact_local_evidence_sources_v1 WHERE project_id=? AND document_id=? AND (actor_id>? OR (actor_id=? AND object_id>?)) ORDER BY actor_id,object_id LIMIT 256", &[project, document.document_id(), &actor, &actor, &object]))?;
+                if rows.is_empty() { break; }
+                for row in rows {
+                    actor = cell(&row, 0)?.into(); object = cell(&row, 1)?.into();
+                    ids(project, &actor, &object)?;
+                    let event = DocumentSourceNotification { project_id: project.into(), actor_id: actor.clone(), object_id: object.clone(), generation: Revision::new(1) };
+                    let expected = if notifications { self.document_notification_state(&event)? } else { None };
+                    routes.push(DocumentSourceRoute { document: (**document).clone(), event, expected });
+                }
+            }
         }
-        if source.len() != 1 || cell(&source[0], 0)? != "table" { return Err(ContractError::InvalidVersion); }
-        // The real source owner validates its exact schema and rechecks every
-        // source. Never duplicate that truth, substitute TTL or accept all errors.
-        let affected = self.invalidate_local_evidence_sources_in_transaction(tx, changed)?;
-        // Freeze the COMPLETE batch before any outbox row write. A successful
-        // trigger from an earlier object must not turn a later tombstone into a
-        // seemingly new object whose generation would restart at one.
-        let mut frozen = Vec::with_capacity(affected.len());
-        for event in affected {
-            ids(&event.project_id, &event.actor_id, &event.object_id)?;
-            let mut queued = DocumentSourceNotification { project_id: event.project_id, actor_id: event.actor_id, object_id: event.object_id, generation: Revision::new(1) };
-            let old = if notifications { self.document_notification_state(&queued)? } else { None };
-            if let Some((current, _)) = &old { queued.generation = current.next()?; }
-            frozen.push((queued, old));
-        }
-        if !notifications { sql(self.database().exec(DDL, &[]))?; }
-        for (event, old) in &frozen {
-            if self.document_notification_state(event)? != *old { return Err(ContractError::StorageCorrupt); }
-            sql(self.database().exec("INSERT INTO document_source_notifications_v1 VALUES(?,?,?,?,1) ON CONFLICT(project_id,actor_id,object_id) DO UPDATE SET generation=excluded.generation,pending=1", &[&event.project_id, &event.actor_id, &event.object_id, event.generation.as_str()]))?;
-        }
-        let queued: Vec<_> = frozen.into_iter().map(|(event, _)| event).collect();
-        // Check the entire batch after ALL writes, not only each just-written row:
-        // a later successful trigger can corrupt an earlier event/source.
-        self.verify_document_source_notifications_in_transaction(tx, changed, &queued)?;
-        Ok(queued)
+        Ok(DocumentSourceMutationPlan { transaction: tx, documents, routes, notifications, installed })
     }
-    pub(super) fn verify_document_source_notification_namespace(&self, installed: bool) -> Result<()> {
-        if self.document_notification_schema()? != installed { return Err(ContractError::InvalidVersion); }
+    fn verify_document_source_routes(&self, routes: &[DocumentSourceRoute], notifications: bool) -> Result<()> {
+        for route in routes {
+            let source = sql(self.database().query("SELECT 1 FROM artifact_local_evidence_sources_v1 s JOIN artifact_local_bindings_v1 b ON b.project_id=s.project_id AND b.actor_id=s.actor_id AND b.object_id=s.object_id WHERE s.project_id=? AND s.actor_id=? AND s.object_id=? AND s.document_id=?", &[&route.event.project_id, &route.event.actor_id, &route.event.object_id, route.document.document_id()]))?;
+            if source.len() != 1 { return Err(ContractError::StorageCorrupt); }
+            let actual = if notifications { self.document_notification_state(&route.event)? } else { None };
+            if actual != route.expected { return Err(ContractError::StorageCorrupt); }
+        }
+        Ok(())
+    }
+    /// Called after the original mutation, still in its exact transaction. The
+    /// REAL owner decides invalidity; core only preserves the frozen queue facts.
+    pub(super) fn finish_document_source_mutation_in_transaction(&self, tx: &Transaction<'_>, plan: DocumentSourceMutationPlan<'_, '_>) -> Result<DocumentSourceMutationPostcondition> {
+        if !tx.belongs_to(self.database()) || !std::ptr::eq(tx, plan.transaction) { return Err(ContractError::ScopeMismatch); }
+        self.verify_document_source_notification_namespace(plan.notifications, plan.installed)?;
+        self.verify_document_source_routes(&plan.routes, plan.notifications)?;
+        let mut routes = plan.routes;
+        let route_indices: BTreeMap<_, _> = routes.iter().enumerate().map(|(index, route)| ((route.event.project_id.clone(), route.event.actor_id.clone(), route.event.object_id.clone()), index)).collect();
+        let mut queued_indices = BTreeSet::new();
+        let mut batches = Vec::new();
+        let mut frozen = Vec::new();
+        if plan.installed {
+            for document in plan.documents {
+                let affected = self.invalidate_local_evidence_sources_in_transaction(tx, &document)?;
+                let mut events = Vec::with_capacity(affected.len());
+                for affected in affected {
+                    ids(&affected.project_id, &affected.actor_id, &affected.object_id)?;
+                    let index = *route_indices.get(&(affected.project_id.clone(), affected.actor_id.clone(), affected.object_id.clone())).ok_or(ContractError::StorageCorrupt)?;
+                    if routes[index].document.scope() != document.scope() || routes[index].document.document_id() != document.document_id() || !queued_indices.insert(index) { return Err(ContractError::StorageCorrupt); }
+                    let old = routes[index].expected.clone();
+                    let generation = match &old { Some((generation, _)) => generation.next()?, None => Revision::new(1) };
+                    let event = DocumentSourceNotification { project_id: affected.project_id, actor_id: affected.actor_id, object_id: affected.object_id, generation };
+                    events.push(event.clone()); frozen.push((index, event, old));
+                }
+                batches.push((document, events));
+            }
+            // Owner source/binding triggers also precede all queue writes.
+            self.verify_document_source_notification_namespace(plan.notifications, true)?;
+            self.verify_document_source_routes(&routes, plan.notifications)?;
+            if !plan.notifications { sql(self.database().exec(DDL, &[]))?; }
+            for (index, event, old) in frozen {
+                if self.document_notification_state(&event)? != old { return Err(ContractError::StorageCorrupt); }
+                sql(self.database().exec("INSERT INTO document_source_notifications_v1 VALUES(?,?,?,?,1) ON CONFLICT(project_id,actor_id,object_id) DO UPDATE SET generation=excluded.generation,pending=1", &[&event.project_id, &event.actor_id, &event.object_id, event.generation.as_str()]))?;
+                routes[index].expected = Some((event.generation, true));
+            }
+        }
+        let postcondition = DocumentSourceMutationPostcondition { routes, batches, installed: plan.installed };
+        self.verify_document_source_mutation_in_transaction(tx, &postcondition)?;
+        Ok(postcondition)
+    }
+    pub(super) fn verify_document_source_mutation_in_transaction(&self, tx: &Transaction<'_>, postcondition: &DocumentSourceMutationPostcondition) -> Result<()> {
+        if !tx.belongs_to(self.database()) { return Err(ContractError::ScopeMismatch); }
+        self.verify_document_source_notification_namespace(postcondition.installed, postcondition.installed)?;
+        self.verify_document_source_routes(&postcondition.routes, postcondition.installed)?;
+        for (document, events) in &postcondition.batches {
+            self.verify_document_source_notifications_in_transaction(tx, document, events)?;
+        }
+        Ok(())
+    }
+    pub(super) fn verify_document_source_notification_namespace(&self, notifications: bool, installed: bool) -> Result<()> {
+        if self.document_notification_schema()? != notifications { return Err(ContractError::InvalidVersion); }
         let source = sql(self.database().query("SELECT type FROM sqlite_master WHERE name=?", &[SOURCE]))?;
         if installed {
             if source.len() != 1 || cell(&source[0], 0)? != "table" { return Err(ContractError::InvalidVersion); }

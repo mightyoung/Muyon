@@ -222,7 +222,7 @@ fn foreign_transaction_and_oversized_pages_are_rejected() {
     let (_f, store, source, _, _) = fixture();
     let other = Db::open(":memory:", false, true).unwrap();
     let tx = other.transaction().unwrap();
-    assert!(store.invalidate_document_dependents_in_transaction(&tx, &source.document).is_err());
+    assert!(store.prepare_document_source_mutation_in_transaction(&tx, &[&source.document]).is_err());
     assert!(store.pending_document_source_notifications_trusted(None, 0).is_err());
     assert!(store.pending_document_source_notifications_trusted(None, 257).is_err());
 }
