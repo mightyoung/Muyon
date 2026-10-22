@@ -1,0 +1,6 @@
+error running cargo metadata
+
+Caused by:
+    0: failed to start `cargo metadata`: No such file or directory (os error 2)
+    1: No such file or directory (os error 2)
+cmp: /workspace/ui-shell-tools/candidate-generated/com/mightyoung/muyon/productbridge/muyon_android_product.kt: No such file or directory
