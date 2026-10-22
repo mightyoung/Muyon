@@ -35,3 +35,8 @@ not product/Androidrelease. Sourceauthorqualityfixes and nextArtifact0e85/Group8
 inputs remain inNEXT-INPUTS.md, not imported. No PR/main/develop/deploy/fee/credential/
 realmodel/search/engine/old403/I04/historicalunknown action. Writers stop after
 seal/push; parent coordinates nextfixedsources. Logs/sourcehashes under evidence/.
+
+Latest minimal quality follow-up supersedes old fmt/drop blockers: see
+MINIMAL-QUALITY-RECHECK.md. Three specified drops removed and FFI purefmt adopted;
+new639 full regression PASS, all-target strict still FAIL on worker imports and
+core_bridge.rs238 drop(g). Two independent minimal commits available for owners.
