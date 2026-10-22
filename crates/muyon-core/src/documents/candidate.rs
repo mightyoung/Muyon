@@ -294,6 +294,13 @@ impl BusinessStore {
         tx.commit().map_err(|_| ContractError::Unknown)?;
         Ok(status)
     }
+    #[cfg_attr(
+        not(test),
+        expect(
+            dead_code,
+            reason = "Reserved fail-closed publication seam; remove this expectation when a reviewed production caller is integrated"
+        )
+    )]
     pub(crate) fn document_publish_candidate_in_transaction(
         &self,
         tx: &Transaction<'_>,
