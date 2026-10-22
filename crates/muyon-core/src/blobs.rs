@@ -887,16 +887,22 @@ impl BusinessStore {
     fn can_delete_blob(&self, digest: &str) -> Result<bool> {
         let blocked=sql(self.database().query("SELECT 1 WHERE EXISTS(SELECT 1 FROM blob_references WHERE digest=?) OR EXISTS(SELECT 1 FROM blob_pins WHERE digest=?) OR EXISTS(SELECT 1 FROM blob_uploads WHERE state NOT IN('committed','aborted') AND digest=?) OR EXISTS(SELECT 1 FROM intents WHERE status IN('pending','unknown'))",&[digest,digest,digest]))?;
         if !blocked.is_empty() { return Ok(false); }
-        let unresolved = sql(self.database().query("SELECT upload_id FROM blob_uploads WHERE state NOT IN('committed','aborted') AND digest IS NULL", &[]))?;
-        for row in unresolved {
-            match self.document_candidate_reserves_digest(cell(&row, 0)?, digest)? {
-                Some(false) => {},
-                // Legacy unresolved uploads retain their original conservative
-                // behavior; only exact journal-backed candidate digests narrow it.
-                Some(true) | None => return Ok(false),
+        let mut cursor = String::new();
+        loop {
+            let unresolved = sql(self.database().query("SELECT CASE WHEN length(CAST(upload_id AS BLOB))<=128 THEN upload_id ELSE NULL END FROM blob_uploads WHERE state NOT IN('committed','aborted') AND digest IS NULL AND (?='' OR upload_id>?) ORDER BY upload_id LIMIT 128", &[&cursor, &cursor]))?;
+            if unresolved.is_empty() { return Ok(true); }
+            for row in &unresolved {
+                let upload = cell(row, 0)?;
+                match self.document_candidate_reserves_digest(upload, digest)? {
+                    Some(false) => {},
+                    // Legacy unresolved uploads keep their original conservative
+                    // behavior; journal-backed candidates reserve exact digests.
+                    Some(true) | None => return Ok(false),
+                }
+                cursor = upload.into();
             }
+            if unresolved.len() < 128 { return Ok(true); }
         }
-        Ok(true)
     }
     /// Explicit, serialized maintenance. Marking deleting commits before unlink;
     /// publication/read acquisition both require ready in the same database.

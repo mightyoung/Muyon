@@ -121,12 +121,16 @@ fn partial_staging_restart_preserves_candidate_without_blocking_unrelated_gc() {
     store.append_chunk(&orphan.upload_id, b"unrelated original synthetic orphan").unwrap();
     let orphan = store.finish_blob(&orphan.upload_id, crate::blobs::BlobKind::Document).unwrap();
     store.abort_upload(&orphan.upload_id).unwrap();
+    // Simulate the durable expected object existing before its ledger commit.
+    let expected_object = store.root_dir().join("objects").join(&candidate.digest);
+    fs::write(&expected_object, NEW_BYTES).unwrap();
     drop(store);
     let store = BusinessStore::open_existing(&f.path(), "workspace", "new-epoch").unwrap();
     assert_eq!(store.reconcile_blobs_after_restart().unwrap().aborted_uploads, 0);
     assert_eq!(fs::read(&staging).unwrap(), before);
     assert_eq!(store.collect_blobs().unwrap(), 1);
     assert!(!store.root_dir().join("objects").join(&orphan.blob.digest).exists());
+    assert_eq!(fs::read(&expected_object).unwrap(), NEW_BYTES);
     assert_eq!(fs::read(&staging).unwrap(), before);
     assert_eq!(store.lookup_upload(&upload.upload_id).unwrap().state, "copying");
 }
@@ -168,10 +172,15 @@ fn expiry_after_durable_pin_is_unknown_and_never_source_success() {
 fn missing_pin_or_corrupt_object_is_query_only_unknown() {
     let (_f, store, access) = setup();
     let status = store.prepare_document_candidate_trusted(&access, "candidate", "operation", NEW_BYTES).unwrap();
-    store.database().exec("DELETE FROM blob_pins WHERE kind='upload'", &[]).unwrap();
-    assert_eq!(store.lookup_document_candidate(&access, "candidate").unwrap().state, CandidateState::PreparationUnknown);
     let object = store.root_dir().join("objects").join(&status.expected_blob.digest);
     fs::write(&object, b"corrupt synthetic output").unwrap();
+    assert_eq!(store.lookup_document_candidate(&access, "candidate").unwrap().state, CandidateState::PreparationUnknown);
+    fs::write(&object, NEW_BYTES).unwrap();
+    assert_eq!(store.lookup_document_candidate(&access, "candidate").unwrap().state, CandidateState::SealedUnvalidated);
+    fs::remove_file(&object).unwrap();
+    assert_eq!(store.lookup_document_candidate(&access, "candidate").unwrap().state, CandidateState::PreparationUnknown);
+    fs::write(&object, NEW_BYTES).unwrap();
+    store.database().exec("DELETE FROM blob_pins WHERE kind='upload'", &[]).unwrap();
     assert_eq!(store.lookup_document_candidate(&access, "candidate").unwrap().state, CandidateState::PreparationUnknown);
     assert_eq!(store.database().query("SELECT * FROM document_revisions", &[]).unwrap().len(), 1);
 }
