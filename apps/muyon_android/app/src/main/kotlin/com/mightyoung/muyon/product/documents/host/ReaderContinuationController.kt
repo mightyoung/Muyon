@@ -132,32 +132,48 @@ internal class ReaderContinuationController(
         }
         // Expiry timer remains armed during native/sample work. Late replies can
         // never extend a displayed expired frame or erase a newer replacement.
-        val receive: (ReaderContinuationResult) -> Unit = { result -> scheduler.post { receive(frame, stamp, result) } }
+        val renewal = frame.deadline.renewalDue(scheduler.nowMillis())
+        val sampled = java.util.concurrent.atomic.AtomicBoolean(false)
+        var challengeRequested = false
+        val receive: (ReaderContinuationResult) -> Unit = { result ->
+            // Capture provenance on arrival; later queued sampling cannot authorize an earlier result.
+            val sampledAtCallback = sampled.get()
+            scheduler.post { receive(frame, stamp, renewal, sampledAtCallback, result) }
+        }
         try {
-            if (frame.deadline.renewalDue(scheduler.nowMillis())) {
+            if (renewal) {
                 checkNotNull(backend).renew(frame, { challenge, callback ->
                     scheduler.post {
-                        if (current !== frame || generation != stamp || !isOriginalCurrent(frame.request) ||
+                        // Consume the first callback even when malformed. It may
+                        // not be swapped for a fresh prepare inside this attempt.
+                        val firstChallenge = !challengeRequested
+                        challengeRequested = true
+                        if (!firstChallenge || current !== frame || generation != stamp || !isOriginalCurrent(frame.request) ||
                             frame.deadline.isExpired(scheduler.nowMillis()) || challenge.isBlank() || challenge.length > 128 || seenChallenges.size >= 256 || !seenChallenges.add(challenge) || !outstanding.add(challenge)) callback(null)
-                        else try {
-                            val sampleStartedMillis = scheduler.nowMillis()
-                            checkNotNull(activity).sample(frame.request, challenge) { observation -> scheduler.post {
-                                val valid = outstanding.remove(challenge) && current === frame && generation == stamp &&
-                                    isOriginalCurrent(frame.request) && !frame.deadline.isExpired(scheduler.nowMillis()) &&
-                                    observation?.request === frame.request && observation.sampledAtNanos >= 0 &&
-                                    observation.sampledAtNanos / 1_000_000 >= sampleStartedMillis &&
-                                    scheduler.nowMillis() - observation.sampledAtNanos / 1_000_000 in 0..2_000 &&
-                                    observation.observationId.isNotBlank() && observation.observationId.length <= 128 &&
-                                    seenObservations.size < 256 && seenObservations.add(observation.observationId)
-                                callback(if (valid) observation else null)
-                            } }
-                        } catch (_: Exception) { outstanding.remove(challenge); callback(null); fail(frame) }
+                        else {
+                            // One native prepare/challenge per original operation;
+                            // a replacement challenge is not an automatic retry.
+                            try {
+                                val sampleStartedMillis = scheduler.nowMillis()
+                                checkNotNull(activity).sample(frame.request, challenge) { observation -> scheduler.post {
+                                    val valid = outstanding.remove(challenge) && current === frame && generation == stamp &&
+                                        isOriginalCurrent(frame.request) && !frame.deadline.isExpired(scheduler.nowMillis()) &&
+                                        observation?.request === frame.request && observation.sampledAtNanos >= 0 &&
+                                        observation.sampledAtNanos / 1_000_000 >= sampleStartedMillis &&
+                                        scheduler.nowMillis() - observation.sampledAtNanos / 1_000_000 in 0..2_000 &&
+                                        observation.observationId.isNotBlank() && observation.observationId.length <= 128 &&
+                                        seenObservations.size < 256 && seenObservations.add(observation.observationId)
+                                    if (valid) sampled.set(true)
+                                    callback(if (valid) observation else null)
+                                } }
+                            } catch (_: Exception) { outstanding.remove(challenge); callback(null); fail(frame) }
+                        }
                     }
                 }, receive)
             } else checkNotNull(backend).check(frame, receive)
         } catch (_: Exception) { fail(frame) }
     }
-    private fun receive(previous: ReaderContinuationFrame, stamp: Long, result: ReaderContinuationResult) {
+    private fun receive(previous: ReaderContinuationFrame, stamp: Long, renewal: Boolean, sampled: Boolean, result: ReaderContinuationResult) {
         scheduler.requireOwnerThread()
         // Original outcome retention is independent of display liveness. A late
         // unknown must remain queryable without touching a newer frame.
@@ -173,6 +189,15 @@ internal class ReaderContinuationController(
             return
         }
         busy = false
+        // A check never hands off/renews. A renewal must have completed its OWN
+        // fresh original challenge sample and return an actual replacement result.
+        // Backend mistakes cannot become a new ticket or a repeated renewal loop.
+        if ((result is ReaderContinuationResult.Checked && renewal) ||
+            (result is ReaderContinuationResult.Replaced && (!renewal || !sampled))) {
+            supplied?.let { discard(it) }
+            fail(previous)
+            return
+        }
         when (result) {
             is ReaderContinuationResult.Unknown -> fail(previous, result.originalAttemptId)
             ReaderContinuationResult.Unavailable -> fail(previous)
