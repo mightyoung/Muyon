@@ -1,0 +1,8 @@
+{
+  "code": "62661af4d6afac947730ab76c15e12bbe498ecee",
+  "files": {
+    "crates/muyon-core/src/bin/business_worker.rs": "6a5e3cc6160a460b16ccfcc2cc16b928a163dca9c2c6f621762c09403cff2f9a",
+    "crates/muyon-core/tests/group_runtime_bridge.rs": "a28c6f38d8f6b5447bb1be4ccbf039bb38b14d1ac4938ecab91e662dc7618bd5",
+    "crates/muyon-core/tests/group_runtime_store.rs": "42995b715b1d0dbe59f4833196e6394f92c6e0194835f855d4acbe31abb1c1bc"
+  }
+}

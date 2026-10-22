@@ -39,3 +39,9 @@ CoreArtifactnotificationhook/Hostconsumption stillunwired in thissource. Message
 formsFFI/UI and Groupcanonicaladmission/gateway/Host remainincomplete.
 No main/develop/deploy/realmodel/search/engine/credential/fee/old403/I04/historical
 Unknown or heldbudget action. No CI dispatched. Writers stop afterseal/push.
+
+Later parent-authorized wrapper-only commit62661af4d6afac947730ab76c15e12bbe498ecee
+adds3 reasoned module expect(unused_imports), no publicmodule/test changes. Related
+307 repeated executions PASS; alltargetClippy still FAIL at Grouplib, so expectation
+item not closed until Group typedfix and actualfullstrict. WRAPPER-EXPECT-RECHECK.md
+records target symbols/module-level caveat and preserveddiagnostics.
