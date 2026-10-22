@@ -204,7 +204,7 @@ fn decode_archive(h: &str, expected_revision: &str) -> Result<(String, String, S
     for (i, max) in [60, 8000, 160].iter().enumerate() {
         let flags = p.get(pos..pos + 2).ok_or("bot_archive")?;
         pos += 2;
-        if !matches!(flags, [0, 1]) && !(i == 2 && matches!(flags, [1, 0])) {
+        if !(matches!(flags, [0, 1]) || i == 2 && matches!(flags, [1, 0])) {
             return Err("bot_archive");
         }
         if i == 2 {
