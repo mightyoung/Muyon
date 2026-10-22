@@ -67,3 +67,5 @@ Restrictions: no main/develop mutation/merge, deploy, force push/delete, real mo
 - Core test lint-only8f24e8f5384489e2ee7d86b8494ee1ca47c0cd8b via4b98072e changes only repeat_n at document_storage685; fresh15PASS. All24core strict target commands scanned:23PASS, onlytransactions387 needless_update failed. FFIABI method exception authorized by parent but pending ownerfixed. See CLIPPY-TARGET-AUDIT.md.
 
 - Method-local fixed-ABI owner patch9ff15871556a4afc8f283a2fbc5d695d7531cd27 via c628e23e: explicitly parent-authorized save-only too_many_arguments allowance+reason; body/signature unchanged. ActualFFI14/FFIstrictalltarget0/bindgenCMPpass; workspace strict onlytransactions387 stillred. Disclose ABIexception, no argument refactor. See ABI-EXCEPTION-RECHECK.md.
+
+- Final old-batch source7b7d806283f36cc36463f379090b0eb05ae5dc75 integrates test5959173995b92f55587cf9e201d51a7b2a04cf0e. Strict workspaceClippy0 (explicit authorized save ABIallowance), fullworkspace435PASS and fixed final independent review complete. See OLD-BATCH-CLOSED.md. Next inputs excluded.
