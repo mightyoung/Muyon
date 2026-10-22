@@ -1,0 +1,21 @@
+# Offline document fidelity foundation (DOC-02 / DOC-05 / DOC-07)
+
+Python 3.12 standard library only. Run from repository root:
+
+```sh
+python3 -m unittest discover -s tools/document_fidelity/tests -v
+python3 -m tools.document_fidelity.harness tools/document_fidelity/fixtures/minimal.docx
+python3 -m tools.document_fidelity.harness tools/document_fidelity/fixtures/minimal.xlsx --candidate tools/document_fidelity/fixtures/minimal.xlsx
+```
+
+JSON goes to stdout. Exit 2 means rejection or failed preservation; exit 0 means report produced, **not safety/edit/fidelity approval**. IO errors are structured rejections. No file extraction, editing, macro execution, link resolution, model calls, engine subprocesses or network operations. Inspect reads a capped regular-file snapshot, hashes that snapshot and inventories ZIP member names/sizes/hashes when readable. Original input is never written. Run hostile input only in a separate resource-limited process: bounded preflight is not a security sandbox.
+
+Default hard caps: input 16 MiB, 2048 members, 8 MiB/member, 32 MiB total expanded, 100:1 compression ratio, XML depth 128. `inspect(path, limits={...})` can only tighten defaults. ZIP64, multidisk, exotic compression, encrypted/CFB and unsafe packages reject. Rejected pre-read members have null hashes; an oversized file has no full hash (reported size is capped bytes observed). No extraction is ever performed. Unknown parts are retained in inventory, never interpreted as trusted instructions.
+
+`structure: pass` means only this bounded ZIP/CRC/XML/main-part/content-type/relationship subset. No complete OPC/OOXML schema, renderability, malware clearance or semantic validation is claimed. Strict OOXML, legacy binary formats and macro main types are unsupported. Risks found by name/type/relation/field heuristics reject; absence is not absence of hazards. `safety` and overall `fidelity` remain `unknown`. Visual, formula, annotation, render and recalc remain `not_run` even for byte-identical input. Formula cache 3 in synthetic XLSX is authored sample data, never evidence of recalculation.
+
+PDF supports only bounded header/version/EOF checks and conservative byte markers (including hex-escaped names). PDF grammar, object resolution, decompression, encryption/signature verification, parse and render are NOT_RUN. Marker-free files remain quarantined. The byte scan is incomplete and cannot establish safety. PDF self-comparison also remains unknown.
+
+Comparison conservatively fails missing **any** source member (including opaque/unknown extension parts) or any changed member bytes. Identical part payloads pass *byte preservation only*; additions yield unknown. ZIP metadata changes are outside that dimension; input/output container hashes remain available. Future authorized semantic edit validators must explicitly account for allowed changes rather than weakening this baseline. No editor/renderer/recalculator adapter exists in this batch.
+
+Fixtures are original synthetic samples, not user documents, APK code, vendor assets or production engine output. `generate_fixtures.build_samples()` yields deterministic bytes. `python3 -m tools.document_fidelity.generate_fixtures` creates the corpus once using exclusive creation and refuses an existing directory. `fixtures/manifest.json` records full hashes and members. Samples contain a text/comment DOCX, a one-sheet formula XLSX, a one-slide PPTX and a one-page PDF with explicit xref. Their desktop/application opening and schema conformance are NOT_RUN; the minimal PPTX has no layout/master/theme and does not demonstrate production presentation compatibility.

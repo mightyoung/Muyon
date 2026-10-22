@@ -1,0 +1,2 @@
+scripts/verify.sh: line 19: flutter: command not found
+pub get failed
