@@ -1,0 +1,37 @@
+warning: methods `document_access_in_transaction` and `document_grant_in_transaction` are never used
+   --> muyon-core/src/documents/storage.rs:211:19
+    |
+ 75 | impl BusinessStore {
+    | ------------------ methods in this implementation
+...
+211 |     pub(crate) fn document_access_in_transaction(
+    |                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+...
+227 |     pub(crate) fn document_grant_in_transaction(
+    |                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: `muyon-core` (lib) generated 1 warning
+   Compiling muyon-core v0.1.0 (/workspace/Muyon/crates/muyon-core)
+    Finished `test` profile [unoptimized] target(s) in 0.29s
+     Running tests/evidence_local.rs (crates/target/debug/deps/evidence_local-1be9f1693f6a1f58)
+
+running 1 test
+test unknown_format_never_becomes_utf8_by_caller_assertion ... FAILED
+
+failures:
+
+---- unknown_format_never_becomes_utf8_by_caller_assertion stdout ----
+
+thread 'unknown_format_never_becomes_utf8_by_caller_assertion' (6887) panicked at muyon-core/tests/evidence_local.rs:379:79:
+called `Result::unwrap_err()` on an `Ok` value: LocalEvidence { receipt: ProcessingReceipt { receipt_id: "processing-a612d19a657512407c33ee4684c51dddc6b2dba0e35e1620b364929e36f61a5d", schema: "muyon.processing-receipt.v1", processor: "muyon.local-utf8-literal.v1", source_id: "source-4d67e5796c830befeff8e58a400b02b3906209dcfdc98fd6a2b7600d7e728ee8", source: SourceVersion { document: DocumentRef { scope: Scope { workspace_id: "w", project_id: Some("p") }, document_id: "doc", revision: Revision("1"), format: Unknown }, blob: BlobRef { digest: "b3cc0475bb78a5026098858e9889acf666d31062d513d303314eca31d36e72f2", byte_length: Revision("9") } }, input_kind: Utf8Text, extraction: Available, index: NotRun, failure: None, events: [ExtractionStarted, Extracted] }, .. }
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    unknown_format_never_becomes_utf8_by_caller_assertion
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 15 filtered out; finished in 0.00s
+
+error: test failed, to rerun pass `-p muyon-core --test evidence_local`

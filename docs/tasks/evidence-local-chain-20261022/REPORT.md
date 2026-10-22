@@ -1,70 +1,73 @@
-# MIG16 / U01–04 U07–08 — offline processing delivery
+# MIG16 / U01–04 U07–08 — concrete BusinessStore follow-up
 
-Status: implementable offline evidence module delivered; production owner wiring
-is pending, not claimed complete. Dedicated branch task/evidence-local-chain-20261022
-starts at document-core f4a8e8d3971208f16d4a3b1ddff5d4e8fb2a63ac.
+Verified source: `3296cb8402afd5003279ad443d701dda1fee9f56`.
+Core dependency: `aec085fafef8aa02f86f2fc60626f168b10f4caa`.
+Dedicated branch: `task/evidence-local-chain-20261022`.
 
-## Implemented
+## Delivered behavior
 
-- Concrete bounded local UTF-8 extraction and literal excerpt matching, SHA-256
-  and byte-length verification against current authorized core source; no
-  filesystem imports, alternate document database or vector index.
-- Stable source/version/receipt/evidence JSON structures using core DocumentRef,
-  BlobRef and AuthorityBinding. Exact workspace/project/document/revision/blob
-  binding prevents stale reference rebinding to a newer document.
-- Exact UTF-8 byte anchors, quote digest and source identity revalidation;
-  no invented PDF page or geometry. All derived text deliveries recheck permission
-  and source before and after computation. Unknown/revoked access fails closed.
-- Immutable body/citation/candidate projection with explicit selection and stable
-  numbers within a projection; claim support remains unassessed and independent
-  corroboration count unknown. Duplicate passages never inflate source count.
-- Processing events reflect actual extraction outcomes. Malformed/empty/NUL text
-  fails; PDF/OCR unsupported; semantic index not_run. A processing receipt is
-  historical ephemeral metadata, never an import/save/commit/index completion.
-- Redacted Debug prevents cached text disclosure after revocation.
+The first delivery's pure processor is now in evidence/local.rs. evidence/store.rs
+adds the real BusinessStore DocumentHost and processing receipt path. It reuses
+persisted ReadText grants, current registered document revision/scope/project,
+generation/epoch/expiry, and actual controlled blob reader leases. It never treats
+Inspect or a client permission list as ReadText authority.
 
-## Requirement boundaries
+Within final BEGIN IMMEDIATE and the existing owner call: reauthorize exact
+metadata; read real controlled bytes; verify SHA-256/length; parse/project; validate
+current authority and reader lease again; commit. Cleanup is explicit; failure
+cannot return a successful payload. A preliminary transaction permits acquisition
+of the existing reader API; it is not used as delivery authority. Tests demonstrate
+SQLite 5 writer exclusion during delivery and successful writer access afterward.
 
-U01: extraction/failed/unsupported real states implemented; selected/saved and
-persistent index availability require existing owner records, not recreated here.
-U02: scope isolation checked per use; no cross-project defaults or disclosure grant.
-U03: revision-bound text excerpt resolution implemented; PDF page resolution remains
-unsupported by this processor (existing core anchors are reusable by engine owner).
-U04: concrete body/citation/candidate projection, separate unassessed support and
-unknown independent corroboration. No automatic correctness/credibility badge.
-U07: synchronous actual extraction events only, no invented queued/cancelled state
-or new task runner. U08: deterministic processing identity, no business intent
-retries, reservation mutations or unknown-operation resolution attempted.
+All StoreEvidence open/find/answer operations reopen actual controlled bytes and
+recheck current authority. Cached text is private, not wire-deserializable and
+redacted in Debug. StoredProcessing has no caller-supplied DocumentHost escape.
+The adapter creates no store/schema/index, no import/save business intent and no
+new grant; it does not touch original unknown operations or reservations.
 
-## Verification
+Text is now exact core Text + explicit Utf8Text + validated actual UTF-8, not
+Unknown. Contradictory formats and canonical PDF bytes relabelled Text fail.
+Registered PDF/OCR produces Unsupported without fake content. Index remains
+NotRun. Real core metadata and actual parser receipt are separate fields in
+`muyon.stored-processing.v1`; there is no invented saved/index success flag.
 
-- Final dedicated suite: 15 passed, 0 failed (also contained in workspace-final.log).
-- Independent reviewer: final dedicated suite 15 passed, 0 failed; no unresolved
-  Critical/Important findings. Prior Debug leak reproduced then fixed; see REVIEW.md.
-- Final locked/offline Rust workspace: 211 passed, 0 failed, 0 ignored, 21 result
-  groups; exit 0. Existing documents/storage.rs dead-code warning retained.
-- rustfmt limited to owned module/test; source/prose staged diff whitespace checked; raw logs retain tool whitespace.
-- Initial NOT_RUN, compile failure, actual regression RED, unavailable offline
-  dependency failure and successful reruns preserved in evidence/.
-- Test-first limitation: tests existed before implementation but initial cargo
-  execution was NOT_RUN. Do not claim a fully observed initial TDD RED cycle.
-  The Debug regression did have an observed behavioral RED/GREEN cycle.
+Source, receipt and evidence identity bind exact scope/document/revision/blob.
+Quote opening validates byte range and digest. Body, explicitly selected citations
+and uncited candidates remain separate; claim support is unassessed, independent
+corroboration count unknown. Old revision access is rejected, never redirected to
+latest or granted by a publication-tail check. Text never gets a fabricated page.
 
-Tooling: repository CI specifies Rust 1.93.1. Official rustc/cargo/std/rustfmt
-checksums verified before isolated /tmp installation. Fetches only used fixed
-repository commits and pinned repository build dependencies; no model/search
-request or user real-file processing. Existing system SQLite runtime reused
-via temporary linker alias. No dependency versions or owner files changed.
+## Actual Rust verification of the frozen source
 
-## Remaining integration blockers
+- Standard pure processing suite: 16 passed, 0 failed.
+- Standard workspace on fixed core: 226 passed, 0 failed, 0 ignored, 21 groups.
+  This does not include the unexported store adapter.
+- Full-core source harness: 225 passed, 0 failed, 0 ignored, 19 groups, including
+  all original core integration targets, actual core unit tests and 12 real store
+  tests. Android FFI workspace targets are outside this isolated core harness.
+- Independent reviewer on exact 3296cb84: store 12 passed, 0 failed, exit 0;
+  no unresolved Critical/Important source findings. Final evidence hashes in
+  REVIEW.md. Counts overlap and must not be added together.
+- Scoped rustfmt, Python syntax, source/prose whitespace and owner-file identity
+  checked. Raw tool logs retain their whitespace and all failures.
 
-Pending (not denied): core owner must export evidence in lib.rs and settle Text
-format; host owner must implement authoritative DocumentHost adapter and connect
-controlled bytes plus existing persistent import/task/intent receipts. ReadText
-cannot be inferred from read_document's Inspect-only check. See HANDOFF.md.
+Source was frozen before final verification. Later delivery commits change only
+reports/logs; SOURCE-MANIFEST.json binds the exact source files to the frozen SHA.
+Shared history/Text Rust tests run as actual Rust in the full-source harness and
+standard workspace. No SQL smoke result is substituted for Rust execution.
 
-NOT_RUN: Android build/device, PDF extraction/OCR/engine geometry, real UI/host
-integration and persistence recovery for the new processing projection. No engine
-HOLD, original unknown/reservation, main/develop, deploy, payment configuration,
-credential or security permission changes. Full native app completion is not
-asserted by this bounded module delivery.
+## Ownership, limitations and remaining actions
+
+No author changes to lib.rs, documents/, blobs.rs or Android shell/host/FFI source.
+Those source paths match fixed core aec085fa exactly; incoming owner commits were
+consumed by ordinary merges. No main/develop writes, force push/delete, deployment,
+payment/credential/security permission changes, real model/search requests,
+user real-file imports or engine-isolation HOLD bypass.
+
+Pending, not denied: parent B applies the existing core export patch on the actual
+combination branch; Service/FFI owner calls the new concrete StoreEvidence adapter
+under the existing trusted store guard. Native UI, durable import/saved receipt
+binding and ResearchIndex wiring remain that integration work. Adapter source
+and real database execution are delivered, but product entrypoint completion is
+not asserted. Android build/device, PDF extraction/OCR/geometry runtime and real
+external model/search calls are NOT_RUN. See HANDOFF.md for exact APIs and steps.
