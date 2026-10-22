@@ -1,5 +1,11 @@
 # Durable original save preparation / native owner handoff
 
+Update: independent actual Rust results and purefmt adoption are preserved in
+[SAVE-PREPARATION-RUST-VERIFICATION.md](SAVE-PREPARATION-RUST-VERIFICATION.md) and
+[FORMATTED-FIVE-METHOD-INTAKE.md](FORMATTED-FIVE-METHOD-INTAKE.md). Exact core/test
+bytes now match verified111e (26/core209/probe3 PASS); current typed-record FFI
+and generation/Host/Android remain unverified. Earlier local NOT_RUN is historical.
+
 Priority source: Host9d2c4119d0c66d1748955cee1d86e63deb7ce16f
 SERVICE-BINDING-REPORT.md and parent's confirmation. Interface-first commit
 15c65c7c9c1f0af1e73c8092b2de2ac78939eea7 was pushed before implementation.
