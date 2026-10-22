@@ -1,0 +1,7 @@
+{
+  "path": "apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/ui/configuration/ConfigurationChecks.kt",
+  "base": "022389b4d1d6fbf1f1bd7eead59259774886170d",
+  "sha256": "f80122817f8a32a3a28e3eb4e96c342c641bb27d306950f55aa95b50f060792d",
+  "byte_identical": true,
+  "assertion_groups": 5
+}
