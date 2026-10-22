@@ -55,3 +55,7 @@ Restrictions: no main/develop mutation/merge, deploy, force push/delete, real mo
 - Artifact test-only strict-lint source de3ec5b56de80f30c5a98c0b22bae64ece6167ae replaces fdc test expressions via0cdd05ef. Production unchanged, affected17PASS; artifact47 strict diagnostics cleared, provider/gateway3 remain. See CLIPPY-ARTIFACT-RECHECK.md.
 
 - Provider lint-only8b2d7783a0bfe5c5207edb7cf37a83631f1cfb0f replaces31602082 expression viabc6ccea1; strict Clippy now blocked only on gateway2 diagnostics. No provider semantics/FFI API change.
+
+- Group grant-tail candidate68f0fb697699d3a8589fc2cc4f274edaf2b2a67d replaces ecef source via9b1c6a77. Actual65 harnessPASS=30new17old18repeat; parent targeted review pending, broader admission HOLD retained. See GROUP-TAIL-RECHECK.md.
+
+- Parent targeted review/evidence closed both local group Important at68f0fb69; exact9b1c6a77 full product Rust workspace435 executions PASS/0FAIL (FFI14/core421), includes30new group regressions and18duplicate modules. Canonical gateway/real dispatch excluded.
