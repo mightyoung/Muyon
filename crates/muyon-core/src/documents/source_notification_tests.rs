@@ -408,3 +408,44 @@ fn first_outbox_update_cannot_reset_a_later_tombstone_generation() {
     assert_eq!(store.pending_document_source_notifications_trusted(None, 256).unwrap(), renewed);
 }
 
+
+#[test]
+fn publication_token_rejects_later_write_tampering_and_rolls_back() {
+    // Core seam test only: this does NOT claim the real gateway receipt path ran.
+    for action in [
+        "DELETE FROM document_source_notifications_v1",
+        "UPDATE document_source_notifications_v1 SET pending=0",
+        "UPDATE artifact_local_evidence_sources_v1 SET active=1",
+        "DELETE FROM blob_references WHERE target_id='text-source'",
+        "UPDATE document_heads SET revision='1' WHERE document_id='text-source'",
+    ] {
+        let (_f, store, source, _, _) = fixture();
+        let metadata = store.read_document(&source).unwrap();
+        let tx = store.database().transaction().unwrap();
+        let (_, token) = store.document_clone_with_postcondition_in_transaction(&tx, &source.document, "Copy", &metadata.blob).unwrap();
+        store.database().exec(action, &[]).unwrap();
+        assert!(store.document_publication_postcondition_in_transaction(&tx, token).is_err(), "{action}");
+        drop(tx);
+        assert_eq!(head(&store), "1"); assert_eq!(active(&store), "1");
+        assert!(store.pending_document_source_notifications_trusted(None, 256).unwrap().is_empty());
+    }
+}
+
+#[test]
+fn publication_token_rejects_another_transaction_and_accepts_exact_original() {
+    let (_f, store, source, _, _) = fixture();
+    let metadata = store.read_document(&source).unwrap();
+    let tx = store.database().transaction().unwrap();
+    let (_, token) = store.document_clone_with_postcondition_in_transaction(&tx, &source.document, "Copy", &metadata.blob).unwrap();
+    let other = Db::open(":memory:", false, true).unwrap(); let foreign = other.transaction().unwrap();
+    assert!(store.document_publication_postcondition_in_transaction(&foreign, token).is_err());
+    drop(tx); drop(foreign);
+    assert_eq!(head(&store), "1");
+    let tx = store.database().transaction().unwrap();
+    let (result, token) = store.document_clone_with_postcondition_in_transaction(&tx, &source.document, "Copy", &metadata.blob).unwrap();
+    store.document_grant_in_transaction(&tx, &source, &[DocumentOperation::StructuredEdit]).unwrap();
+    store.document_publication_postcondition_in_transaction(&tx, token).unwrap();
+    tx.commit().unwrap();
+    assert_eq!(result.document.revision(), &Revision::new(2));
+    assert_eq!(store.pending_document_source_notifications_trusted(None, 256).unwrap().len(), 1);
+}

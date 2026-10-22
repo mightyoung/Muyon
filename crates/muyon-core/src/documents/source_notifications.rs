@@ -24,7 +24,7 @@ fn ids(project: &str, actor: &str, object: &str) -> Result<()> {
     if [project, actor, object].iter().all(|id| valid_id(id)) { Ok(()) } else { Err(ContractError::StorageCorrupt) }
 }
 impl BusinessStore {
-    fn document_notification_schema(&self) -> Result<bool> {
+    pub(super) fn document_notification_schema(&self) -> Result<bool> {
         let rows = sql(self.database().query("SELECT type,CASE WHEN length(CAST(sql AS BLOB))<=1024 THEN sql ELSE NULL END FROM sqlite_master WHERE name=?", &[NAME]))?;
         if rows.is_empty() { return Ok(false); }
         if rows.len() != 1 || cell(&rows[0], 0)? != "table" || cell(&rows[0], 1)? != DDL { return Err(ContractError::InvalidVersion); }
@@ -43,26 +43,35 @@ impl BusinessStore {
         // The real source owner validates its exact schema and rechecks every
         // source. Never duplicate that truth, substitute TTL or accept all errors.
         let affected = self.invalidate_local_evidence_sources_in_transaction(tx, changed)?;
-        if !notifications { sql(self.database().exec(DDL, &[]))?; }
-        let mut queued = Vec::with_capacity(affected.len());
+        // Freeze the COMPLETE batch before any outbox row write. A successful
+        // trigger from an earlier object must not turn a later tombstone into a
+        // seemingly new object whose generation would restart at one.
+        let mut frozen = Vec::with_capacity(affected.len());
         for event in affected {
             ids(&event.project_id, &event.actor_id, &event.object_id)?;
-            let old = sql(self.database().query("SELECT CASE WHEN length(CAST(generation AS BLOB))<=20 THEN generation ELSE NULL END FROM document_source_notifications_v1 WHERE project_id=? AND actor_id=? AND object_id=?", &[&event.project_id, &event.actor_id, &event.object_id]))?;
-            let generation = match old.first() {
-                Some(row) => {
-                    let current = Revision::parse(cell(row, 0)?)?;
-                    if current.value() == 0 { return Err(ContractError::StorageCorrupt); }
-                    current.next()?
-                }
-                None => Revision::new(1),
-            };
-            sql(self.database().exec("INSERT INTO document_source_notifications_v1 VALUES(?,?,?,?,1) ON CONFLICT(project_id,actor_id,object_id) DO UPDATE SET generation=excluded.generation,pending=1", &[&event.project_id, &event.actor_id, &event.object_id, generation.as_str()]))?;
-            queued.push(DocumentSourceNotification { project_id: event.project_id, actor_id: event.actor_id, object_id: event.object_id, generation });
+            let mut queued = DocumentSourceNotification { project_id: event.project_id, actor_id: event.actor_id, object_id: event.object_id, generation: Revision::new(1) };
+            let old = if notifications { self.document_notification_state(&queued)? } else { None };
+            if let Some((current, _)) = &old { queued.generation = current.next()?; }
+            frozen.push((queued, old));
         }
+        if !notifications { sql(self.database().exec(DDL, &[]))?; }
+        for (event, old) in &frozen {
+            if self.document_notification_state(event)? != *old { return Err(ContractError::StorageCorrupt); }
+            sql(self.database().exec("INSERT INTO document_source_notifications_v1 VALUES(?,?,?,?,1) ON CONFLICT(project_id,actor_id,object_id) DO UPDATE SET generation=excluded.generation,pending=1", &[&event.project_id, &event.actor_id, &event.object_id, event.generation.as_str()]))?;
+        }
+        let queued: Vec<_> = frozen.into_iter().map(|(event, _)| event).collect();
         // Check the entire batch after ALL writes, not only each just-written row:
         // a later successful trigger can corrupt an earlier event/source.
         self.verify_document_source_notifications_in_transaction(tx, changed, &queued)?;
         Ok(queued)
+    }
+    pub(super) fn verify_document_source_notification_namespace(&self, installed: bool) -> Result<()> {
+        if self.document_notification_schema()? != installed { return Err(ContractError::InvalidVersion); }
+        let source = sql(self.database().query("SELECT type FROM sqlite_master WHERE name=?", &[SOURCE]))?;
+        if installed {
+            if source.len() != 1 || cell(&source[0], 0)? != "table" { return Err(ContractError::InvalidVersion); }
+        } else if !source.is_empty() { return Err(ContractError::InvalidVersion); }
+        Ok(())
     }
     fn verify_document_notification_rows(&self, events: &[DocumentSourceNotification], pending: &str) -> Result<()> {
         if !events.is_empty() && !self.document_notification_schema()? { return Err(ContractError::StorageCorrupt); }

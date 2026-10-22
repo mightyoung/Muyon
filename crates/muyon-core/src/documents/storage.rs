@@ -35,6 +35,17 @@ pub struct DocumentAccess {
     pub document: DocumentRef,
     pub authority: AuthorityBinding,
 }
+/// Opaque effect receipt for a later gateway write tail on the EXACT same tx.
+/// Not a grant, validator fact or serializable caller-supplied assertion.
+#[must_use = "retain until after the final journal write, then verify before COMMIT"]
+pub(crate) struct DocumentPublicationPostcondition<'tx, 'db> {
+    transaction: &'tx Transaction<'db>,
+    metadata: DocumentMetadata,
+    reference_id: String,
+    upload_id: Option<String>,
+    source_events: Vec<super::source_notifications::DocumentSourceNotification>,
+    notification_schema: bool,
+}
 fn sql<T>(value: crate::sqlite::Result<T>) -> Result<T> {
     value.map_err(|_| ContractError::Storage)
 }
@@ -455,6 +466,20 @@ impl BusinessStore {
         format: DocumentFormat,
         finished: &FinishedBlob,
     ) -> Result<DocumentMetadata> {
+        let (metadata, postcondition) = self.document_publish_with_postcondition_in_transaction(tx, base, title, format, finished)?;
+        self.document_publication_postcondition_in_transaction(tx, postcondition)?;
+        Ok(metadata)
+    }
+    /// Retain the opaque receipt through later journal writes. Gateway must call
+    /// document_publication_postcondition_in_transaction after its LAST write.
+    pub(crate) fn document_publish_with_postcondition_in_transaction<'tx, 'db>(
+        &self,
+        tx: &'tx Transaction<'db>,
+        base: &DocumentRef,
+        title: &str,
+        format: DocumentFormat,
+        finished: &FinishedBlob,
+    ) -> Result<(DocumentMetadata, DocumentPublicationPostcondition<'tx, 'db>)> {
         if !tx.belongs_to(self.database()) {
             return Err(ContractError::InvalidAuthority);
         }
@@ -516,12 +541,14 @@ impl BusinessStore {
                 &encode(&metadata)?,
             ],
         ))?;
-        self.invalidate_document_dependents_in_transaction(tx, &metadata.document)?;
-        self.verify_blob_publication_in_transaction(tx, &reference, project, base.document_id(), &metadata.blob, Some(&finished.upload_id))?;
-        if self.current_document(&metadata.document)? != metadata {
-            return Err(ContractError::StorageCorrupt);
-        }
-        Ok(metadata)
+        let source_events = self.invalidate_document_dependents_in_transaction(tx, &metadata.document)?;
+        let postcondition = DocumentPublicationPostcondition {
+            transaction: tx, metadata: metadata.clone(), reference_id: reference,
+            upload_id: Some(finished.upload_id.clone()), source_events,
+            notification_schema: self.document_notification_schema()?,
+        };
+        self.verify_document_publication_postcondition(tx, &postcondition)?;
+        Ok((metadata, postcondition))
     }
     /// COPY-only: append metadata for the exact existing source bytes. There is
     /// no edited-candidate or format-change argument. Gateway must check current
@@ -534,6 +561,19 @@ impl BusinessStore {
         title: &str,
         expected_blob: &BlobRef,
     ) -> Result<DocumentMetadata> {
+        let (metadata, postcondition) = self.document_clone_with_postcondition_in_transaction(tx, base, title, expected_blob)?;
+        self.document_publication_postcondition_in_transaction(tx, postcondition)?;
+        Ok(metadata)
+    }
+    /// Additive COPY hook for gateways that write a receipt after publication.
+    /// The legacy metadata-only hook cannot prove later business writes safe.
+    pub(crate) fn document_clone_with_postcondition_in_transaction<'tx, 'db>(
+        &self,
+        tx: &'tx Transaction<'db>,
+        base: &DocumentRef,
+        title: &str,
+        expected_blob: &BlobRef,
+    ) -> Result<(DocumentMetadata, DocumentPublicationPostcondition<'tx, 'db>)> {
         if !tx.belongs_to(self.database()) {
             return Err(ContractError::InvalidAuthority);
         }
@@ -587,12 +627,36 @@ impl BusinessStore {
                 &encode(&metadata)?,
             ],
         ))?;
-        self.invalidate_document_dependents_in_transaction(tx, &metadata.document)?;
-        self.verify_blob_publication_in_transaction(tx, &reference, project, base.document_id(), &metadata.blob, None)?;
-        if self.current_document(&metadata.document)? != metadata {
-            return Err(ContractError::StorageCorrupt);
+        let source_events = self.invalidate_document_dependents_in_transaction(tx, &metadata.document)?;
+        let postcondition = DocumentPublicationPostcondition {
+            transaction: tx, metadata: metadata.clone(), reference_id: reference,
+            upload_id: None, source_events,
+            notification_schema: self.document_notification_schema()?,
+        };
+        self.verify_document_publication_postcondition(tx, &postcondition)?;
+        Ok((metadata, postcondition))
+    }
+    fn verify_document_publication_postcondition(
+        &self, tx: &Transaction<'_>, postcondition: &DocumentPublicationPostcondition<'_, '_>,
+    ) -> Result<()> {
+        if !tx.belongs_to(self.database()) || !std::ptr::eq(tx, postcondition.transaction) {
+            return Err(ContractError::InvalidAuthority);
         }
-        Ok(metadata)
+        self.document_schema()?;
+        self.verify_document_source_notification_namespace(postcondition.notification_schema)?;
+        let metadata = &postcondition.metadata;
+        self.verify_document_source_notifications_in_transaction(tx, &metadata.document, &postcondition.source_events)?;
+        self.verify_blob_publication_in_transaction(tx, &postcondition.reference_id, self.document_project(&metadata.document)?, metadata.document.document_id(), &metadata.blob, postcondition.upload_id.as_deref())?;
+        if self.current_document(&metadata.document)? != *metadata { return Err(ContractError::StorageCorrupt); }
+        Ok(())
+    }
+    /// AFTER the gateway's final receipt/journal write and original grant check,
+    /// immediately before COMMIT. Consumes the unforgeable exact-tx effect token.
+    /// Propagate failure; no business write may follow this read-only tail.
+    pub(crate) fn document_publication_postcondition_in_transaction(
+        &self, tx: &Transaction<'_>, postcondition: DocumentPublicationPostcondition<'_, '_>,
+    ) -> Result<()> {
+        self.verify_document_publication_postcondition(tx, &postcondition)
     }
     /// HOST ONLY, after authentic current policy/user authorization. No model or
     /// deserialized permission list may call this. Reissue must use next generation.
