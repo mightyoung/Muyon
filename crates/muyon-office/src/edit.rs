@@ -2,7 +2,7 @@
 //! Both require the caller's `expected` value to match exactly once; no guessing.
 
 use crate::error::{OfficeError, Result};
-use crate::package::{splice, EditReceipt, Package};
+use crate::package::{splice, splice_size, EditReceipt, Package};
 use crate::xml::{escape_text, simple_text, Kind, Tok, NS_PKG_REL, NS_R, NS_S, NS_W};
 
 const WORD_MAIN: &str = "word/document.xml";
@@ -18,6 +18,7 @@ impl Package {
         if self.format() != Some(crate::package::Format::Docx) {
             return Err(OfficeError::UnsupportedFormat);
         }
+        self.check_edit_inputs(&[expected, replacement])?;
         if expected.is_empty() {
             return Err(OfficeError::InvalidReplacement("expected text is empty"));
         }
@@ -49,7 +50,12 @@ impl Package {
                 "leading/trailing whitespace needs xml:space=preserve on the run",
             ));
         }
-        let patched = splice(&bytes, range, escape_text(replacement).as_bytes());
+        let escaped_size = replacement.bytes().try_fold(0usize, |n, b| {
+            n.checked_add(match b { b'&' => 5, b'<' | b'>' => 4, _ => 1 })
+                .ok_or(OfficeError::LimitExceeded("part size"))
+        })?;
+        self.check_rewrite_size(WORD_MAIN, splice_size(bytes.len(), range, escaped_size)?)?;
+        let patched = splice(&bytes, range, escape_text(replacement).as_bytes())?;
         self.rewrite_part(WORD_MAIN, &patched, range)
     }
 
@@ -65,6 +71,7 @@ impl Package {
         if self.format() != Some(crate::package::Format::Xlsx) {
             return Err(OfficeError::UnsupportedFormat);
         }
+        self.check_edit_inputs(&[sheet, cell, expected, replacement])?;
         if !is_cell_ref(cell) {
             return Err(OfficeError::InvalidReplacement("cell reference"));
         }
@@ -122,8 +129,16 @@ impl Package {
             [one] => *one,
             _ => return Err(OfficeError::Ambiguous),
         };
-        let patched = splice(&bytes, range, replacement.as_bytes());
+        self.check_rewrite_size(&part, splice_size(bytes.len(), range, replacement.len())?)?;
+        let patched = splice(&bytes, range, replacement.as_bytes())?;
         self.rewrite_part(&part, &patched, range)
+    }
+
+    fn check_edit_inputs(&self, inputs: &[&str]) -> Result<()> {
+        if inputs.iter().any(|s| s.len() > self.limits.max_text || s.len() > self.limits.max_part) {
+            return Err(OfficeError::LimitExceeded("edit input size"));
+        }
+        Ok(())
     }
 
     fn resolve_sheet(&self, name: &str) -> Result<String> {

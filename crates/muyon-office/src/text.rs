@@ -19,6 +19,10 @@ fn trailing_number(name: &str) -> u64 {
 
 impl Package {
     pub fn extract_text(&self) -> Result<Vec<Section>> {
+        self.extract_text_replacing(None)
+    }
+
+    pub(crate) fn extract_text_replacing(&self, replacement: Option<(&str, &[u8])>) -> Result<Vec<Section>> {
         let format = self.format().ok_or(OfficeError::UnsupportedFormat)?;
         let mut parts: Vec<&String> = self
             .part_names()
@@ -34,33 +38,44 @@ impl Package {
             return Err(OfficeError::Unsupported("missing or too many content parts"));
         }
         let shared = if format == Format::Xlsx && self.has_part("xl/sharedStrings.xml") {
-            self.shared_strings()?
+            self.shared_strings(replacement)?
         } else {
             Vec::new()
         };
         let mut total = 0usize;
         let mut out = Vec::new();
         for name in parts {
-            let (_, toks) = self.tokens(name)?;
+            let toks = self.text_tokens(name, replacement)?;
+            let remaining = self.limits.max_text.saturating_sub(total);
             let text = match format {
-                Format::Docx => paragraphs(&toks, NS_W, "t", "p", "br"),
-                Format::Pptx => paragraphs(&toks, NS_A, "t", "p", "br"),
-                Format::Xlsx => sheet_text(&toks, &shared)?,
+                Format::Docx => paragraphs(&toks, NS_W, "t", "p", "br", remaining)?,
+                Format::Pptx => paragraphs(&toks, NS_A, "t", "p", "br", remaining)?,
+                Format::Xlsx => sheet_text(&toks, &shared, remaining)?,
             };
-            total += text.len();
-            if total > self.limits.max_text {
-                return Err(OfficeError::LimitExceeded("text size"));
-            }
-            out.push(Section {
-                name: name.clone(),
-                text: if text.trim().is_empty() { "此部分没有可预览文本".to_owned() } else { text },
-            });
+            let text = if text.trim().is_empty() {
+                let placeholder = "此部分没有可预览文本";
+                if placeholder.len() > remaining { return Err(OfficeError::LimitExceeded("text size")); }
+                placeholder.to_owned()
+            } else { text };
+            total += text.len(); // text was bounded by remaining before appending
+            out.push(Section { name: name.clone(), text });
         }
         Ok(out)
     }
 
-    fn shared_strings(&self) -> Result<Vec<String>> {
-        let (_, toks) = self.tokens("xl/sharedStrings.xml")?;
+    fn text_tokens(&self, name: &str, replacement: Option<(&str, &[u8])>) -> Result<Vec<Tok>> {
+        if let Some((target, bytes)) = replacement {
+            if target == name {
+                return crate::xml::tokenize(bytes, &crate::xml::XmlLimits {
+                    max_depth: self.limits.max_xml_depth, max_tokens: self.limits.max_xml_tokens,
+                });
+            }
+        }
+        self.tokens(name).map(|(_, tokens)| tokens)
+    }
+
+    fn shared_strings(&self, replacement: Option<(&str, &[u8])>) -> Result<Vec<String>> {
+        let toks = self.text_tokens("xl/sharedStrings.xml", replacement)?;
         let mut out = Vec::new();
         let mut cur = String::new();
         let mut in_si = false;
@@ -83,7 +98,7 @@ impl Package {
                 phonetic = phonetic.saturating_sub(1);
             } else if in_si && phonetic == 0 && t.is(Kind::Start, NS_S, "t") {
                 if let Some((text, _, _)) = crate::xml::simple_text(&toks, k) {
-                    cur.push_str(&text);
+                    append_text(&mut cur, &text, self.limits.max_text.saturating_sub(chars))?;
                 }
             }
         }
@@ -98,21 +113,28 @@ fn is_numbered(name: &str, prefix: &str) -> bool {
         .unwrap_or(false)
 }
 
-fn paragraphs(toks: &[Tok], ns: &str, t: &str, p: &str, br: &str) -> String {
+fn append_text(out: &mut String, text: &str, limit: usize) -> Result<()> {
+    if text.len() > limit.saturating_sub(out.len()) { return Err(OfficeError::LimitExceeded("text size")); }
+    out.try_reserve_exact(text.len()).map_err(|_| OfficeError::LimitExceeded("text size"))?;
+    out.push_str(text);
+    Ok(())
+}
+
+fn paragraphs(toks: &[Tok], ns: &str, t: &str, p: &str, br: &str, limit: usize) -> Result<String> {
     let mut out = String::new();
     for (k, tok) in toks.iter().enumerate() {
         if tok.is(Kind::Start, ns, t) {
             if let Some((text, _, _)) = crate::xml::simple_text(toks, k) {
-                out.push_str(&text);
+                append_text(&mut out, &text, limit)?;
             }
         } else if tok.is(Kind::End, ns, p) || tok.is(Kind::Empty, ns, br) || tok.is(Kind::End, ns, br) {
-            out.push('\n');
+            append_text(&mut out, "\n", limit)?;
         }
     }
-    out
+    Ok(out)
 }
 
-fn sheet_text(toks: &[Tok], shared: &[String]) -> Result<String> {
+fn sheet_text(toks: &[Tok], shared: &[String], limit: usize) -> Result<String> {
     let mut out = String::new();
     let mut k = 0;
     while k < toks.len() {
@@ -121,15 +143,20 @@ fn sheet_text(toks: &[Tok], shared: &[String]) -> Result<String> {
             let cell = t.attr("r").unwrap_or("").to_owned();
             let ty = t.attr("t").unwrap_or("").to_owned();
             let mut formula = false;
+            let mut phonetic = 0usize;
             let mut value = String::new();
             let mut j = k + 1;
             while j < toks.len() && !(toks[j].kind == Kind::End && toks[j].depth == t.depth) {
                 let c = &toks[j];
-                if c.is(Kind::Start, NS_S, "f") || c.is(Kind::Empty, NS_S, "f") {
+                if c.is(Kind::Start, NS_S, "rPh") {
+                    phonetic += 1;
+                } else if c.is(Kind::End, NS_S, "rPh") {
+                    phonetic = phonetic.saturating_sub(1);
+                } else if c.is(Kind::Start, NS_S, "f") || c.is(Kind::Empty, NS_S, "f") {
                     formula = true;
-                } else if c.is(Kind::Start, NS_S, "v") || c.is(Kind::Start, NS_S, "t") {
+                } else if phonetic == 0 && (c.is(Kind::Start, NS_S, "v") || c.is(Kind::Start, NS_S, "t")) {
                     if let Some((text, _, _)) = crate::xml::simple_text(toks, j) {
-                        value.push_str(&text);
+                        append_text(&mut value, &text, limit)?;
                     }
                 }
                 j += 1;
@@ -142,13 +169,13 @@ fn sheet_text(toks: &[Tok], shared: &[String]) -> Result<String> {
             } else {
                 value
             };
-            out.push_str(&cell);
-            out.push_str(": ");
-            out.push_str(&display);
+            append_text(&mut out, &cell, limit)?;
+            append_text(&mut out, ": ", limit)?;
+            append_text(&mut out, &display, limit)?;
             if formula {
-                out.push_str(" [公式缓存值]");
+                append_text(&mut out, " [公式缓存值]", limit)?;
             }
-            out.push('\n');
+            append_text(&mut out, "\n", limit)?;
             k = j;
         }
         k += 1;

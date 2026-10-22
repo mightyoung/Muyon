@@ -1,0 +1,14 @@
+Working directory: /workspace/office-rust-boundary-review
+Baseline: 796cdfe7cb3d79d630056239724af78128094fee
+Snapshot identity: source.sha256 (matched author's review-source.sha256)
+
+source /workspace/office-rust-boundary-fix-tools/env.sh
+export CARGO_TARGET_DIR=/workspace/office-rust-boundary-fix-tools/target-review
+cargo test --manifest-path crates/Cargo.toml --offline --locked -p muyon-office --test boundaries --test fidelity > /tmp/office-rust-final-review-independent/office-tests.log 2>&1
+cargo clippy --manifest-path crates/Cargo.toml --offline --locked --workspace --all-targets -- -D warnings > /tmp/office-rust-final-review-independent/clippy.log 2>&1
+cargo test --manifest-path crates/Cargo.toml --offline --locked --workspace > /tmp/office-rust-final-review-independent/workspace-tests.log 2>&1
+sha256sum -c /tmp/office-rust-final-review-independent/source.sha256 > /tmp/office-rust-final-review-independent/source-after.log
+
+Initial invocation without --manifest-path ran from repository root and failed
+before compilation: Cargo.toml not found. Its original output is retained in
+office-tests-wrong-root.log. This invocation error is not a behavioral RED.
