@@ -95,7 +95,7 @@ private fun ReaderContent(snapshot: DocumentReaderSnapshot, host: DocumentReader
                     Preview.Pdf(requestedPage, page)
                 } else {
                     val sections = ParcelFileDescriptor.AutoCloseInputStream(descriptor).use {
-                        OfficeTextPreview.read(it, document.format)
+                        RustOfficePreview.read(it, document.format)
                     }
                     Preview.Office(sections)
                 }

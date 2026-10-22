@@ -1,0 +1,4 @@
+crates/muyon-office/src/package.rs: OK
+crates/muyon-office/src/text.rs: OK
+crates/muyon-office/src/edit.rs: OK
+crates/muyon-office/tests/boundaries.rs: OK

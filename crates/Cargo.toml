@@ -1,6 +1,6 @@
 [workspace]
 resolver = "2"
-members = ["muyon-core", "muyon-android-ffi"]
+members = ["muyon-core", "muyon-android-ffi", "muyon-office"]
 
 [workspace.dependencies]
 serde = { version = "=1.0.229", features = ["derive"] }
