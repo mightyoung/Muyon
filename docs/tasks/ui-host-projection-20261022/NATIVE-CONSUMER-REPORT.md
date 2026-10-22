@@ -111,3 +111,16 @@ not native-provider/Android acceptance. Current actual Android compile command
 `bash apps/muyon_android/gradlew --offline :app:compileDebugKotlin` exits2 with
 NOT_RUN: set MUYON_UI_GRADLE to existing Gradle8.13 executable. Raw output retained
 in native-android-not-run.log. No restriction was bypassed.
+
+## Latest fixed-provider Rust verification (supersedes pending Rust status above)
+
+Fetched/read evidence dc7f1c0c5331c5ecb53e4dfa33c0c0cb3d6b7bfa,
+NULL-FIX-RUST-RECHECK.md. Exact tested combo f0ef760ba7253f38be8e26989ca99b82a76acf8b
+is owner3160208247c5257b6382106d69f2028f5ad8ccab plus sole core module export,
+no provider behavioral edits: actual provider19/19, core202 (includes those19),
+scoped rustfmt exit0. The original NULL failure is CLOSED for that Rust combination;
+old RED is historical evidence, not a current blocker. FFI was not newly executed
+because of known offline anyhow cache gap; generated Android bindings/Service compile,
+durable cold-process original-attempt binding and Android acceptance remain pending.
+Production verified=false remains accurate for these remaining gates. Service comment
+updated accordingly; no new failed-Rust claim or retry of the resolved issue.

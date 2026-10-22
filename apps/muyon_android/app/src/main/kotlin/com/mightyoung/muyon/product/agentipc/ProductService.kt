@@ -118,7 +118,7 @@ class ProductService : Service() {
                 tool("confirm_suggestion", request, session, generation, project, planId)
             }
         }, localDraftPort = object : ProductLocalDraftPort {
-            // Release gate: provider7ca2 failed independent Rust resolve tests.
+            // Release gate: provider316 Rust passed; real FFI/bindings still pending.
             // Enable only after fixed native + generated bindings + Android checks,
             // and durable original-attempt recovery across process loss are verified.
             override val verified = false

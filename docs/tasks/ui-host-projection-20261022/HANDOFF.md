@@ -97,3 +97,9 @@ sole FFI owner, based on actual canonical DocumentRef/operation/StoreEvidence by
 flow. Reader host/PFD implementation remains pending released native and reader2
 read-only gate; annotation immutable-anchor/original-intent transaction remains a
 separate core task. No UI shell/reader ownership was crossed.
+
+Latest parent evidence dc7f1c0c5331c5ecb53e4dfa33c0c0cb3d6b7bfa was fetched/read:
+provider316+sole export combo f0ef760ba7253f38be8e26989ca99b82a76acf8b actually passed
+provider19/19, core202, scoped fmt0. NULL Rust blocker is now closed. Only real FFI/
+generated bindings/cold-process original binding/Android gates above remain; do not
+keep labeling the fixed NULL issue pending or infer UI acceptance from Rust PASS.
