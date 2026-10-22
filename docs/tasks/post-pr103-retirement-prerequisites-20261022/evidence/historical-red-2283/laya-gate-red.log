@@ -1,0 +1,49 @@
+BEGIN {"argv": ["python3", "-B", "scripts/test_retirement_prerequisites.py"], "cwd": "/workspace/Muyon-retirement-review-fix-20261022", "source_sha": "8e27015ba9f1b73e8488f16e2cf41c16226318e1", "dirty_source": true, "start_utc": "2026-10-22T19:45:12.572579+00:00"}
+test_exact_historical_source_bytes_are_preserved (__main__.FrozenSchema.test_exact_historical_source_bytes_are_preserved) ... ok
+test_historical_reference_manifest_matches_fixed_git_objects (__main__.FrozenSchema.test_historical_reference_manifest_matches_fixed_git_objects) ... ok
+test_reference_checker_rejects_corruption_and_missing_file (__main__.FrozenSchema.test_reference_checker_rejects_corruption_and_missing_file) ... ok
+test_rust_test_consumes_frozen_reference_without_removing_assertions (__main__.FrozenSchema.test_rust_test_consumes_frozen_reference_without_removing_assertions) ... ok
+test_any_failed_child_fails_the_gate (__main__.IndependentLaya.test_any_failed_child_fails_the_gate) ... ok
+test_both_workflows_have_unconditional_independent_job (__main__.IndependentLaya.test_both_workflows_have_unconditional_independent_job) ... ok
+test_original_check_explicitly_fails_for_every_non_success_laya_result (__main__.IndependentLaya.test_original_check_explicitly_fails_for_every_non_success_laya_result) ... 
+  test_original_check_explicitly_fails_for_every_non_success_laya_result (__main__.IndependentLaya.test_original_check_explicitly_fails_for_every_non_success_laya_result) (workflow='ci') ... FAIL
+  test_original_check_explicitly_fails_for_every_non_success_laya_result (__main__.IndependentLaya.test_original_check_explicitly_fails_for_every_non_success_laya_result) (workflow='verify') ... FAIL
+test_original_flutter_jobs_and_triggers_are_preserved (__main__.IndependentLaya.test_original_flutter_jobs_and_triggers_are_preserved) ... FAIL
+test_runner_executes_all_four_from_correct_directory_without_flutter (__main__.IndependentLaya.test_runner_executes_all_four_from_correct_directory_without_flutter) ... ok
+
+======================================================================
+FAIL: test_original_check_explicitly_fails_for_every_non_success_laya_result (__main__.IndependentLaya.test_original_check_explicitly_fails_for_every_non_success_laya_result) (workflow='ci')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/Muyon-retirement-review-fix-20261022/scripts/test_retirement_prerequisites.py", line 25, in test_original_check_explicitly_fails_for_every_non_success_laya_result
+    self.assertEqual(original.get('needs'), ['laya-offline'])
+AssertionError: None != ['laya-offline']
+
+======================================================================
+FAIL: test_original_check_explicitly_fails_for_every_non_success_laya_result (__main__.IndependentLaya.test_original_check_explicitly_fails_for_every_non_success_laya_result) (workflow='verify')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/Muyon-retirement-review-fix-20261022/scripts/test_retirement_prerequisites.py", line 25, in test_original_check_explicitly_fails_for_every_non_success_laya_result
+    self.assertEqual(original.get('needs'), ['laya-offline'])
+AssertionError: None != ['laya-offline']
+
+======================================================================
+FAIL: test_original_flutter_jobs_and_triggers_are_preserved (__main__.IndependentLaya.test_original_flutter_jobs_and_triggers_are_preserved)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/Muyon-retirement-review-fix-20261022/scripts/test_retirement_prerequisites.py", line 58, in test_original_flutter_jobs_and_triggers_are_preserved
+    self.assertEqual(before['on'], after['on'])
+AssertionError: {'pus[54 chars]w/**']}, 'pull_request': {'branches': ['develop', 'main']}} != {'pus[54 chars]w/**', 'lab/pr101-coverage-contract-fix-202610[52 chars]n']}}
+  {'pull_request': {'branches': ['develop', 'main']},
+-  'push': {'branches': ['develop', 'main', 'task/**', 'review/**']}}
++  'push': {'branches': ['develop',
++                        'main',
++                        'task/**',
++                        'review/**',
++                        'lab/pr101-coverage-contract-fix-20261022']}}
+
+----------------------------------------------------------------------
+Ran 9 tests in 0.781s
+
+FAILED (failures=3)
+END {"argv": ["python3", "-B", "scripts/test_retirement_prerequisites.py"], "cwd": "/workspace/Muyon-retirement-review-fix-20261022", "source_sha": "8e27015ba9f1b73e8488f16e2cf41c16226318e1", "dirty_source": true, "start_utc": "2026-10-22T19:45:12.572579+00:00", "exit_code": 1, "duration_seconds": 1.112, "end_utc": "2026-10-22T19:45:13.583059+00:00"}

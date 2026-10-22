@@ -1,0 +1,65 @@
+BEGIN {"argv": ["python3", "-B", "scripts/test_retirement_prerequisites.py"], "cwd": "/workspace/Muyon-retirement-review-fix-20261022", "source_sha": "3a2f5aa331a5ff91b3cbf624e081dfd25d5cb5bc", "dirty_source": true, "start_utc": "2026-10-22T19:47:10.512530+00:00"}
+test_checker_rejects_missing_manifest (__main__.FrozenSchema.test_checker_rejects_missing_manifest) ... ok
+test_exact_historical_source_bytes_are_preserved (__main__.FrozenSchema.test_exact_historical_source_bytes_are_preserved) ... ok
+test_fixed_witness_rejects_manifest_blob_mutations (__main__.FrozenSchema.test_fixed_witness_rejects_manifest_blob_mutations) ... 
+  test_fixed_witness_rejects_manifest_blob_mutations (__main__.FrozenSchema.test_fixed_witness_rejects_manifest_blob_mutations) (name='store.dart') ... FAIL
+  test_fixed_witness_rejects_manifest_blob_mutations (__main__.FrozenSchema.test_fixed_witness_rejects_manifest_blob_mutations) (name='entities.dart') ... FAIL
+test_fixed_witness_rejects_synchronized_fixture_and_manifest_tampering (__main__.FrozenSchema.test_fixed_witness_rejects_synchronized_fixture_and_manifest_tampering) ... FAIL
+test_historical_reference_manifest_matches_fixed_git_objects (__main__.FrozenSchema.test_historical_reference_manifest_matches_fixed_git_objects) ... ok
+test_missing_history_is_failure_not_a_silent_skip (__main__.FrozenSchema.test_missing_history_is_failure_not_a_silent_skip) ... ok
+test_reference_checker_rejects_corruption_and_missing_file (__main__.FrozenSchema.test_reference_checker_rejects_corruption_and_missing_file) ... ok
+test_rust_test_consumes_frozen_reference_without_removing_assertions (__main__.FrozenSchema.test_rust_test_consumes_frozen_reference_without_removing_assertions) ... ok
+test_any_failed_child_fails_the_gate (__main__.IndependentLaya.test_any_failed_child_fails_the_gate) ... ok
+test_both_workflows_have_unconditional_independent_job (__main__.IndependentLaya.test_both_workflows_have_unconditional_independent_job) ... ok
+test_original_check_explicitly_fails_for_every_non_success_laya_result (__main__.IndependentLaya.test_original_check_explicitly_fails_for_every_non_success_laya_result) ... ok
+test_original_flutter_jobs_and_triggers_are_preserved (__main__.IndependentLaya.test_original_flutter_jobs_and_triggers_are_preserved) ... ok
+test_provenance_is_required_in_both_independent_jobs (__main__.IndependentLaya.test_provenance_is_required_in_both_independent_jobs) ... 
+  test_provenance_is_required_in_both_independent_jobs (__main__.IndependentLaya.test_provenance_is_required_in_both_independent_jobs) (workflow='ci') ... FAIL
+  test_provenance_is_required_in_both_independent_jobs (__main__.IndependentLaya.test_provenance_is_required_in_both_independent_jobs) (workflow='verify') ... FAIL
+test_runner_executes_all_four_from_correct_directory_without_flutter (__main__.IndependentLaya.test_runner_executes_all_four_from_correct_directory_without_flutter) ... ok
+
+======================================================================
+FAIL: test_fixed_witness_rejects_manifest_blob_mutations (__main__.FrozenSchema.test_fixed_witness_rejects_manifest_blob_mutations) (name='store.dart')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/Muyon-retirement-review-fix-20261022/scripts/test_retirement_prerequisites.py", line 141, in test_fixed_witness_rejects_manifest_blob_mutations
+    self.assertNotEqual(self.invoke_checker(directory).returncode, 0)
+AssertionError: 0 == 0
+
+======================================================================
+FAIL: test_fixed_witness_rejects_manifest_blob_mutations (__main__.FrozenSchema.test_fixed_witness_rejects_manifest_blob_mutations) (name='entities.dart')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/Muyon-retirement-review-fix-20261022/scripts/test_retirement_prerequisites.py", line 141, in test_fixed_witness_rejects_manifest_blob_mutations
+    self.assertNotEqual(self.invoke_checker(directory).returncode, 0)
+AssertionError: 0 == 0
+
+======================================================================
+FAIL: test_fixed_witness_rejects_synchronized_fixture_and_manifest_tampering (__main__.FrozenSchema.test_fixed_witness_rejects_synchronized_fixture_and_manifest_tampering)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/Muyon-retirement-review-fix-20261022/scripts/test_retirement_prerequisites.py", line 131, in test_fixed_witness_rejects_synchronized_fixture_and_manifest_tampering
+    self.assertNotEqual(self.invoke_checker(directory).returncode, 0)
+AssertionError: 0 == 0
+
+======================================================================
+FAIL: test_provenance_is_required_in_both_independent_jobs (__main__.IndependentLaya.test_provenance_is_required_in_both_independent_jobs) (workflow='ci')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/Muyon-retirement-review-fix-20261022/scripts/test_retirement_prerequisites.py", line 30, in test_provenance_is_required_in_both_independent_jobs
+    self.assertEqual(len(fetch), 1)
+AssertionError: 0 != 1
+
+======================================================================
+FAIL: test_provenance_is_required_in_both_independent_jobs (__main__.IndependentLaya.test_provenance_is_required_in_both_independent_jobs) (workflow='verify')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/Muyon-retirement-review-fix-20261022/scripts/test_retirement_prerequisites.py", line 30, in test_provenance_is_required_in_both_independent_jobs
+    self.assertEqual(len(fetch), 1)
+AssertionError: 0 != 1
+
+----------------------------------------------------------------------
+Ran 14 tests in 2.642s
+
+FAILED (failures=5)
+END {"argv": ["python3", "-B", "scripts/test_retirement_prerequisites.py"], "cwd": "/workspace/Muyon-retirement-review-fix-20261022", "source_sha": "3a2f5aa331a5ff91b3cbf624e081dfd25d5cb5bc", "dirty_source": true, "start_utc": "2026-10-22T19:47:10.512530+00:00", "exit_code": 1, "duration_seconds": 3.215, "end_utc": "2026-10-22T19:47:13.619828+00:00"}
