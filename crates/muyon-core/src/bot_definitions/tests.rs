@@ -402,7 +402,7 @@ fn project_deleted_exactly_between_pending_and_effect_must_not_commit() {
             Ok(())
         },
     );
-    assert!(result.is_err(), "revoked project must not create a Bot");
+    assert_eq!(result.unwrap_err(), "bot_query_original");
     assert_original_pending_zero_definitions(&f);
     assert_eq!(
         f.store()
@@ -434,9 +434,10 @@ fn check_mutation_trigger(body: &str, after_insert: bool) {
         INTENT,
         &r.review_digest,
     );
-    assert!(
-        result.is_err(),
-        "tail mutation must not be reported committed: {body}"
+    assert_eq!(
+        result.unwrap_err(),
+        "bot_query_original",
+        "tail mutation: {body}"
     );
     assert_original_pending_zero_definitions(&f);
     assert_eq!(
@@ -595,7 +596,10 @@ fn insert_draft_lifecycle_rolls_back() {
 }
 #[test]
 fn insert_draft_scope_rolls_back() {
-    check_mutation_trigger("UPDATE local_bot_drafts SET scope_key='changed'", true);
+    check_mutation_trigger(
+        "UPDATE local_bot_drafts SET scope_key='changed' WHERE project_id='p1'",
+        true,
+    );
 }
 #[test]
 fn tail_draft_lifecycle_rolls_back() {
@@ -603,5 +607,14 @@ fn tail_draft_lifecycle_rolls_back() {
 }
 #[test]
 fn tail_draft_scope_rolls_back() {
-    check_receipt_tail_trigger("UPDATE local_bot_drafts SET scope_key='changed'");
+    check_receipt_tail_trigger(
+        "UPDATE local_bot_drafts SET scope_key='changed' WHERE project_id='p1'",
+    );
+}
+
+#[test]
+fn tail_original_intent_rename_rolls_back() {
+    check_receipt_tail_trigger(
+        "UPDATE local_bot_definition_intents SET intent_id='33333333-3333-4333-8333-333333333333'",
+    );
 }

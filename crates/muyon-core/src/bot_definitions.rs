@@ -92,6 +92,19 @@ fn identity(s: &str) -> Result<()> {
 }
 fn scope(store: &BusinessStore, conversation: &str, project: Option<&str>) -> Result<String> {
     identity(conversation)?;
+    let workspace = sql(store
+        .database()
+        .query("SELECT value FROM meta WHERE key='workspace'", &[]))?;
+    let version = sql(store
+        .database()
+        .query("SELECT value FROM meta WHERE key='schema_version'", &[]))?;
+    if workspace.len() != 1
+        || cell(&workspace[0], 0)? != store.workspace_id()
+        || version.len() != 1
+        || cell(&version[0], 0)? != crate::business::STORE_VERSION
+    {
+        return Err("bot_workspace_changed");
+    }
     ReadScope::current(store, project).map_err(|_| "bot_scope")?;
     text(&(store.workspace_id(), conversation, project))
 }
@@ -232,8 +245,9 @@ fn load(
     project: Option<&str>,
     b: &DraftBinding,
 ) -> Result<Frozen> {
-    // Official draft schema/binding validation occurs before entering this module's transaction.
-    let rows=sql(store.database().query("SELECT workspace,conversation_id,project_id,registry_generation,stored_revision,lifecycle,CASE WHEN LENGTH(archive_hex)<=65536 THEN archive_hex ELSE NULL END,archive_digest FROM local_bot_drafts WHERE draft_id=?",&[&b.draft_id]))?;
+    // Repeat actual scope checks under the caller's live transaction, including at its tail.
+    let key = scope(store, conversation, project)?;
+    let rows=sql(store.database().query("SELECT workspace,conversation_id,project_id,registry_generation,stored_revision,lifecycle,CASE WHEN LENGTH(archive_hex)<=65536 THEN archive_hex ELSE NULL END,archive_digest,scope_key FROM local_bot_drafts WHERE draft_id=?",&[&b.draft_id]))?;
     let ns = sql(store.database().query(
         "SELECT namespace_id FROM local_bot_draft_meta WHERE id=1",
         &[],
@@ -248,6 +262,7 @@ fn load(
         || cell(r, 3)? != b.expected_generation
         || cell(r, 4)? != b.expected_stored_revision
         || cell(r, 5)? != "editing_only"
+        || cell(r, 8)? != key
     {
         return Err("bot_stale_draft");
     }
@@ -296,7 +311,7 @@ struct Intent {
 }
 fn intent(store: &BusinessStore, key: &str, id: &str) -> Result<Intent> {
     identity(id)?;
-    let rows=sql(store.database().query("SELECT scope_key,binding_digest,CASE WHEN LENGTH(frozen_json)<=32768 THEN frozen_json ELSE NULL END,owner_epoch,status,CASE WHEN LENGTH(receipt_json)<=32768 THEN receipt_json ELSE NULL END FROM local_bot_definition_intents WHERE intent_id=?",&[id]))?;
+    let rows=sql(store.database().query("SELECT scope_key,binding_digest,CASE WHEN LENGTH(frozen_json)<=32768 THEN frozen_json ELSE NULL END,owner_epoch,status,CASE WHEN LENGTH(receipt_json)<=32768 THEN receipt_json ELSE NULL END,draft_key FROM local_bot_definition_intents WHERE intent_id=?",&[id]))?;
     if rows.len() != 1 {
         return Err("bot_intent_not_found");
     }
@@ -306,7 +321,9 @@ fn intent(store: &BusinessStore, key: &str, id: &str) -> Result<Intent> {
     }
     let frozen: Frozen = serde_json::from_str(cell(r, 2)?).map_err(|_| "bot_corrupt")?;
     let h = digest(text(&frozen)?.as_bytes());
-    if h != cell(r, 1)? || text(&(&frozen.workspace, &frozen.conversation, &frozen.project))? != key
+    if h != cell(r, 1)?
+        || text(&(&frozen.workspace, &frozen.conversation, &frozen.project))? != key
+        || cell(r, 6)? != draft_key(&frozen)?
     {
         return Err("bot_corrupt");
     }
@@ -354,6 +371,63 @@ fn projection(store: &BusinessStore, id: &str, i: &Intent) -> Result<CreateRecei
     }
     Ok(expected)
 }
+// Re-read persisted authority/identity, not just the caller's in-memory scope or receipt.
+// Must be called within the effect transaction before effects AND after its last write.
+fn verify_current(
+    store: &BusinessStore,
+    key: &str,
+    id: &str,
+    original: &Intent,
+    status: &str,
+    receipt: Option<&CreateReceipt>,
+) -> Result<()> {
+    schema(store, false)?;
+    let current = intent(store, key, id)?;
+    if current.frozen != original.frozen
+        || current.digest != original.digest
+        || current.epoch != original.epoch
+        || current.epoch != store.owner_epoch()
+        || current.status != status
+    {
+        return Err("bot_query_original");
+    }
+    if scope(
+        store,
+        &original.frozen.conversation,
+        original.frozen.project.as_deref(),
+    )? != key
+        || load(
+            store,
+            &original.frozen.conversation,
+            original.frozen.project.as_deref(),
+            &binding(&original.frozen),
+        )? != original.frozen
+    {
+        return Err("bot_query_original");
+    }
+    if let Some(expected) = receipt {
+        if current.receipt.as_deref() != Some(text(expected)?.as_str())
+            || projection(store, id, &current)? != *expected
+        {
+            return Err("bot_query_original");
+        }
+        let rows = sql(store.database().query(
+            "SELECT scope_key,draft_key,definition_json FROM local_bot_definitions WHERE id=?",
+            &[&original.frozen.definition.id],
+        ))?;
+        if rows.len() != 1
+            || cell(&rows[0], 0)? != key
+            || cell(&rows[0], 1)? != draft_key(&original.frozen)?
+            || cell(&rows[0], 2)? != text(&original.frozen.definition)?
+        {
+            return Err("bot_query_original");
+        }
+    } else if current.receipt.is_some() {
+        return Err("bot_query_original");
+    }
+    Ok(())
+}
+
 /// Creates only a durable review. Host must display its exact fields and keep the original intent.
 pub fn prepare_create(
     store: &BusinessStore,
@@ -427,7 +501,7 @@ fn confirm_create_with_boundary(
     after_pending: impl FnOnce() -> Result<()>,
 ) -> Result<CreateReceipt> {
     let key = scope(store, conversation, project)?;
-    {
+    let original = {
         let tx = sql(store.database().transaction())?;
         schema(store, false)?;
         let i = intent(store, &key, id)?;
@@ -443,37 +517,39 @@ fn confirm_create_with_boundary(
         if i.epoch != store.owner_epoch() {
             return Err("bot_old_owner_query_original");
         }
-        if load(store, conversation, project, &binding(&i.frozen))? != i.frozen {
-            return Err("bot_stale_review");
-        }
+        verify_current(store, &key, id, &i, "prepared", None)?;
         sql(store.database().exec("UPDATE local_bot_definition_intents SET status='pending' WHERE intent_id=? AND status='prepared'",&[id]))?;
         sql(tx.commit())?; // durable pending before effect; any uncertainty requires original lookup
-    }
-    after_pending()?;
-    let tx = sql(store.database().transaction())?;
-    let i = intent(store, &key, id)?;
-    if i.status != "pending" || load(store, conversation, project, &binding(&i.frozen))? != i.frozen
-    {
-        return Err("bot_query_original");
-    }
-    let receipt = CreateReceipt {
-        intent_id: id.into(),
-        review_digest: i.digest.clone(),
-        status: CreateStatus::Committed,
-        definition: Some(i.frozen.definition.clone()),
+        i
     };
-    sql(store.database().exec(
-        "INSERT INTO local_bot_definitions VALUES(?,?,?,?)",
-        &[
-            &i.frozen.definition.id,
-            &key,
-            &draft_key(&i.frozen)?,
-            &text(&i.frozen.definition)?,
-        ],
-    ))?;
-    if sql(store.database().exec("UPDATE local_bot_definition_intents SET status='committed',receipt_json=? WHERE intent_id=? AND status='pending'",&[&text(&receipt)?,id]))?!=1{return Err("bot_query_original");}
-    sql(tx.commit())?;
-    Ok(receipt)
+    let outcome = (|| {
+        after_pending()?;
+        let tx = sql(store.database().transaction())?;
+        let i = intent(store, &key, id)?;
+        verify_current(store, &key, id, &original, "pending", None)?;
+        let receipt = CreateReceipt {
+            intent_id: id.into(),
+            review_digest: i.digest.clone(),
+            status: CreateStatus::Committed,
+            definition: Some(i.frozen.definition.clone()),
+        };
+        sql(store.database().exec(
+            "INSERT INTO local_bot_definitions VALUES(?,?,?,?)",
+            &[
+                &i.frozen.definition.id,
+                &key,
+                &draft_key(&i.frozen)?,
+                &text(&i.frozen.definition)?,
+            ],
+        ))?;
+        if sql(store.database().exec("UPDATE local_bot_definition_intents SET status='committed',receipt_json=? WHERE intent_id=? AND status='pending'",&[&text(&receipt)?,id]))?!=1{return Err("bot_query_original");}
+        // SQL triggers can mutate scope/CAS/epoch/identity/receipt during either write.
+        // This is the last fallible semantic check before COMMIT; any refusal rolls back both writes.
+        verify_current(store, &key, id, &original, "committed", Some(&receipt))?;
+        sql(tx.commit())?;
+        Ok(receipt)
+    })();
+    outcome.map_err(|_| "bot_query_original")
 }
 /// Local recovery only; never resubmits pending effects or unlocks unknown with an archive.
 pub fn recover_previous_owner(store: &BusinessStore) -> Result<()> {
