@@ -114,10 +114,16 @@ fn cas_scope_and_changed_confirmation_reject_without_definition() {
     let r = prepare(&f);
     assert!(confirm_create_trusted(f.store(), CONVERSATION, None, INTENT, "wrong").is_err());
     assert!(lookup_create(f.store(), OTHER, None, INTENT).is_err());
-    f.store()
-        .database()
-        .exec("UPDATE local_bot_drafts SET stored_revision='2'", &[])
-        .unwrap();
+    crate::bot_drafts::save(
+        f.store(),
+        CONVERSATION,
+        None,
+        &f.binding,
+        "44444444-4444-4444-8444-444444444444",
+        "4",
+        &archive(2),
+    )
+    .unwrap();
     assert!(
         confirm_create_trusted(f.store(), CONVERSATION, None, INTENT, &r.review_digest).is_err()
     );
@@ -143,7 +149,33 @@ fn pending_unknown_never_reexecutes_and_archive_replay_cannot_clear_stop() {
         confirm_create_trusted(f.store(), CONVERSATION, None, INTENT, &r.review_digest).unwrap(),
         unknown
     );
+    crate::bot_drafts::save(
+        f.store(),
+        CONVERSATION,
+        None,
+        &f.binding,
+        "44444444-4444-4444-8444-444444444444",
+        "4",
+        &archive(2),
+    )
+    .unwrap();
+    f.binding.expected_stored_revision = "2".into();
+    // Restored/newly saved editing data cannot erase the durable creation guard.
     assert!(prepare_create(f.store(), CONVERSATION, None, &f.binding, OTHER).is_err());
+    assert!(crate::bot_drafts::save(
+        f.store(),
+        CONVERSATION,
+        None,
+        &f.binding,
+        "55555555-5555-4555-8555-555555555555",
+        "3",
+        &archive(1)
+    )
+    .is_err());
+    assert_eq!(
+        lookup_create(f.store(), CONVERSATION, None, INTENT).unwrap(),
+        unknown
+    );
     assert!(list(f.store(), CONVERSATION, None).unwrap().is_empty());
 }
 #[test]
@@ -208,6 +240,46 @@ fn corrupted_archive_and_unknown_schema_fail_closed() {
         .exec("UPDATE local_bot_drafts SET archive_hex='00'", &[])
         .unwrap();
     assert!(prepare_create(f.store(), CONVERSATION, None, &f.binding, INTENT).is_err());
+    assert!(list(f.store(), CONVERSATION, None).unwrap().is_empty());
+    f.store()
+        .database()
+        .exec("UPDATE local_bot_definition_meta SET version='2'", &[])
+        .unwrap();
+    assert!(list(f.store(), CONVERSATION, None).is_err());
+}
+
+#[test]
+fn receipt_update_failure_rolls_back_definition_and_keeps_original_pending() {
+    let f = Fixture::new();
+    let r = prepare(&f);
+    f.store().database().exec("CREATE TRIGGER fail_receipt BEFORE UPDATE OF status ON local_bot_definition_intents WHEN NEW.status='committed' BEGIN SELECT RAISE(ABORT,'synthetic receipt failure'); END", &[]).unwrap();
+    assert!(
+        confirm_create_trusted(f.store(), CONVERSATION, None, INTENT, &r.review_digest).is_err()
+    );
+    let independent = crate::sqlite::Db::open(f.path.to_str().unwrap(), true, false).unwrap();
+    assert_eq!(
+        independent
+            .query("SELECT COUNT(*) FROM local_bot_definitions", &[])
+            .unwrap()[0][0]
+            .as_deref(),
+        Some("0")
+    );
+    assert_eq!(
+        lookup_create(f.store(), CONVERSATION, None, INTENT)
+            .unwrap()
+            .status,
+        CreateStatus::Unknown
+    );
+    f.store()
+        .database()
+        .exec("DROP TRIGGER fail_receipt", &[])
+        .unwrap();
+    assert_eq!(
+        confirm_create_trusted(f.store(), CONVERSATION, None, INTENT, &r.review_digest)
+            .unwrap()
+            .status,
+        CreateStatus::Unknown
+    );
     assert!(list(f.store(), CONVERSATION, None).unwrap().is_empty());
 }
 
