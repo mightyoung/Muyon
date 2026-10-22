@@ -1,3 +1,6 @@
+> Latest held schema2/edited preparation slice: [SCHEMA2-REPORT.md](SCHEMA2-REPORT.md).
+> Previous results below remain historical; no engine publication is enabled.
+
 > Latest durable COPY batch: see [DURABLE-REPORT.md](DURABLE-REPORT.md).
 > Earlier contract-only results and limitations below are historical.
 

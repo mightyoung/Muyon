@@ -1,0 +1,41 @@
+   Compiling muyon-core v0.1.0 (/tmp/muyon-document-durable-check.HuqkpAc8/crates/muyon-core)
+warning: struct `StoredRequest` is never constructed
+   --> muyon-core/src/document_edit/engine_protocol.rs:153:8
+    |
+153 | struct StoredRequest {
+    |        ^^^^^^^^^^^^^
+    |
+    = note: `#[warn(dead_code)]` on by default
+
+warning: function `verify_stored_request` is never used
+   --> muyon-core/src/document_edit/engine_protocol.rs:216:15
+    |
+216 | pub(super) fn verify_stored_request(
+    |               ^^^^^^^^^^^^^^^^^^^^^
+
+warning: `muyon-core` (lib) generated 2 warnings
+    Finished `test` profile [unoptimized] target(s) in 4.78s
+     Running tests/document_edit_engine_protocol.rs (/workspace/document-edit-combination/crates/target/debug/deps/document_edit_engine_protocol-50ee234a2ce5c46d)
+
+running 6 tests
+test numeric_cell_bounds_and_metadata_format_are_strict ... ok
+test real_metadata_maps_exact_identity_and_preserves_numeric_literals ... ok
+test apparently_real_status_requires_source_hash_and_simulated_diagnostics_are_hard_rejected ... ok
+test six_response_fixtures_can_never_mint_an_engine_commit_permit ... ok
+test identity_and_hash_errors_are_distinct_from_environment_hold ... ok
+test unknown_keys_versions_duplicate_keys_and_oversize_receipts_fail_closed ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/document_edit_schema2.rs (/workspace/document-edit-combination/crates/target/debug/deps/document_edit_schema2-9eaa099629d29e40)
+
+running 6 tests
+test schema2_digest_binds_locator_tree_format_source_operation_and_intent ... ok
+test expanded_tree_matches_python_ascii_json_bytes_and_hashes ... ok
+test schema2_maps_true_format_exact_locator_and_local_run_hash ... ok
+test schema2_refuses_wrong_format_locator_run_text_and_xml_space_change ... ok
+test matching_schema2_response_is_held_and_simulation_or_version_never_admitted ... ok
+test duplicate_attributes_limits_and_tree_identity_fail_closed ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+

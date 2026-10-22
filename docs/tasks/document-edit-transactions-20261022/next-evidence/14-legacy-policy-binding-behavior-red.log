@@ -1,0 +1,28 @@
+   Compiling muyon-core-agent-lab v0.1.0 (/tmp/document-edit-policy-previous/experiments/redesign/core-agent-lab/core)
+   Compiling muyon-plugin-contract-lab v0.1.0 (/tmp/document-edit-policy-previous/experiments/redesign/plugin-contract-lab/core)
+   Compiling muyon-rust-agent-host-lab v0.1.0 (/tmp/document-edit-policy-previous/experiments/redesign/rust-agent-host-lab/core)
+   Compiling muyon-web-search-lab v0.1.0 (/tmp/document-edit-policy-previous/experiments/redesign/web-search-lab/core)
+   Compiling muyon-core v0.1.0 (/tmp/document-edit-policy-previous/crates/muyon-core)
+    Finished `test` profile [unoptimized] target(s) in 6.86s
+     Running tests/document_edit_policy_epoch.rs (/workspace/document-edit-combination/crates/target/debug/deps/document_edit_policy_epoch-388aef7e81777272)
+
+running 1 test
+test tightened_schema1_preview_cannot_reuse_legacy_binding ... FAILED
+
+failures:
+
+---- tightened_schema1_preview_cannot_reuse_legacy_binding stdout ----
+
+thread 'tightened_schema1_preview_cannot_reuse_legacy_binding' panicked at muyon-core/tests/document_edit_policy_epoch.rs:15:2:
+assertion `left != right` failed: tightened source eligibility must invalidate old preview/confirmation identity
+  left: [29, 110, 172, 132, 238, 217, 97, 16, 178, 19, 8, 62, 61, 255, 70, 63, 184, 34, 51, 74, 45, 188, 213, 139, 1, 89, 79, 129, 199, 87, 142, 188]
+ right: [29, 110, 172, 132, 238, 217, 97, 16, 178, 19, 8, 62, 61, 255, 70, 63, 184, 34, 51, 74, 45, 188, 213, 139, 1, 89, 79, 129, 199, 87, 142, 188]
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    tightened_schema1_preview_cannot_reuse_legacy_binding
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+error: test failed, to rerun pass `-p muyon-core --test document_edit_policy_epoch`

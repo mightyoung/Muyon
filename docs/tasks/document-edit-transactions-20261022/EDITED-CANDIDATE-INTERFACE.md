@@ -47,3 +47,7 @@ COMMIT. All failure rolls back to original document+prepared pin; Unknown querie
 original intent only. Validation is host-owned reviewed evidence, never bool or
 fake/simulated engine receipt. Retention/quota/crash reconciliation policy must be
 explicit before external object prep is enabled. COPY hook is unusable for this.
+
+Unpublished byte delivery additionally requires fresh exact edit confirmation and
+ReadText+StructuredEdit; a source-only ReadText or new unconfirmed grant cannot
+read prepared different bytes. Cancellation retains data but blocks delivery.

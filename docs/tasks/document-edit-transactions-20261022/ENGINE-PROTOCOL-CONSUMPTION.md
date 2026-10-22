@@ -1,3 +1,6 @@
+> Latest held schema2/edited preparation slice: [SCHEMA2-REPORT.md](SCHEMA2-REPORT.md).
+> Previous results below remain historical; no engine publication is enabled.
+
 # Engine protocol consumption — no engine admission
 
 Read fixed upstream77a000bcb59dd5de3e40887f03fb612622c09e9e HOST-PROTOCOL.md and
