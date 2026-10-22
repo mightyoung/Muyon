@@ -219,6 +219,13 @@ impl DocumentReaderHost {
         if idle { session.touched = Instant::now() - IDLE; }
         else { session.opened = Instant::now() - LIFETIME; }
     }
+    #[cfg(test)]
+    pub(super) fn resample_stamp_for_test(&mut self, id: &str) {
+        let session = self.sessions.get_mut(id).unwrap();
+        let tx = self.store.database().transaction().unwrap();
+        session.stamp = self.store.document_reader_stamp_in_transaction(&tx, &session.reader).unwrap();
+        tx.commit().unwrap();
+    }
 }
 impl Drop for DocumentReaderHost { fn drop(&mut self) { let _ = self.close_all(); } }
 

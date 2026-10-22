@@ -233,6 +233,11 @@ fn thirty_mib_stream_hash_cost_is_linear_and_chunk_bytes_are_exact() {
     crate::blobs::take_document_hash_bytes();
     let opened = host.open(&access, DocumentReadPurpose::ReadText).unwrap();
     let open_hash_bytes = crate::blobs::take_document_hash_bytes();
+    let backup = host.open(&access, DocumentReadPurpose::ReadText).unwrap();
+    assert!(matches!(host.open(&access, DocumentReadPurpose::ReadText), Err(DocumentReadError::Core(ContractError::TextLimit))));
+    assert_eq!(pins(host.store()), 2, "64 MiB aggregate admission must precede pin creation");
+    let backup_hash_bytes = crate::blobs::take_document_hash_bytes();
+    host.close(&backup.session_id).unwrap();
     let mut offset = 0;
     let mut stream_hash_bytes = 0;
     loop {
@@ -245,9 +250,28 @@ fn thirty_mib_stream_hash_cost_is_linear_and_chunk_bytes_are_exact() {
         offset += chunk.bytes.len();
         if chunk.eof { break; }
     }
-    println!("source_bytes={} open_hash_bytes={open_hash_bytes} stream_hash_bytes={stream_hash_bytes}", bytes.len());
+    println!("source_bytes={} open_hash_bytes={open_hash_bytes} backup_open_hash_bytes={backup_hash_bytes} stream_hash_bytes={stream_hash_bytes}", bytes.len());
     assert_eq!(offset, bytes.len());
     assert!(open_hash_bytes <= 4 * bytes.len() as u64);
+    assert!(backup_hash_bytes <= 4 * bytes.len() as u64);
     assert_eq!(stream_hash_bytes, 0, "delivery must not repeatedly hash a complete source");
+    assert_eq!(pins(host.store()), 0);
+}
+
+#[test]
+fn authenticated_snapshot_never_delivers_mutated_disk_bytes_even_with_resampled_stamp() {
+    let (_f, mut host, access) = setup();
+    let opened = host.open(&access, DocumentReadPurpose::ReadText).unwrap();
+    let path = host.store().root_dir().join("objects").join(&opened.metadata.blob.digest);
+    let original = fs::read(&path).unwrap();
+    let mut tampered = original.clone(); tampered[0] ^= 1; fs::write(&path, &tampered).unwrap();
+    // Model metadata spoofing in this test only: snapshot cryptographic byte
+    // integrity must not depend on timestamps detecting the backing-file change.
+    host.resample_stamp_for_test(&opened.session_id);
+    let chunk = host.read_chunk(&opened.session_id, 7).unwrap();
+    assert_eq!(chunk.bytes, original[..7]);
+    assert_ne!(chunk.bytes, tampered[..7]);
+    // Explicit is_current still performs its original full held-file hash.
+    assert!(!host.is_current(&opened.session_id).unwrap());
     assert_eq!(pins(host.store()), 0);
 }
