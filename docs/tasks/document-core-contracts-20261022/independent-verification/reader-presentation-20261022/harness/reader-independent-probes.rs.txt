@@ -1,0 +1,52 @@
+
+use muyon_core::documents::reader::{DocumentReaderHost,DocumentReadPurpose};
+fn independent_reader_fixture() -> (Fixture,DocumentReaderHost,DocumentAccess) {
+    let f=Fixture::new();let s=f.initialize();let m=register(&s);let a=access(&s,&m,&all());(f,DocumentReaderHost::new(s),a)
+}
+fn independent_reader_pins(f:&Fixture)->usize { f.db().query("SELECT pin_id FROM blob_pins WHERE kind='reader'",&[]).unwrap().len() }
+#[test]
+fn independent_reader_revalidates_grant_after_successful_first_chunk() {
+    for mutation in ["UPDATE document_grants SET active=0","UPDATE document_grants SET generation='99'","UPDATE document_grants SET owner_epoch='foreign'","UPDATE document_grants SET expires_at_ms='0'","UPDATE projects SET deleted=1 WHERE id='project'"] {
+        let (f,mut h,a)=independent_reader_fixture();let session=h.open(&a,DocumentReadPurpose::ReadText).unwrap();let first=h.read_chunk(&session.session_id,4).unwrap();assert!(!first.eof);assert_eq!(first.bytes,&PDF[..4]);
+        f.db().exec(mutation,&[]).unwrap();assert!(h.read_chunk(&session.session_id,4).is_err(),"{mutation}");assert!(!h.is_current(&session.session_id).unwrap());assert_eq!(independent_reader_pins(&f),0,"{mutation}");
+    }
+}
+#[test]
+fn independent_reader_lease_loss_and_held_file_hash_change_withhold_next_bytes() {
+    let (f,mut h,a)=independent_reader_fixture();let opened=h.open(&a,DocumentReadPurpose::ReadText).unwrap();h.read_chunk(&opened.session_id,4).unwrap();
+    assert!(h.read_chunk("unissued-opaque-session",4).is_err());f.db().exec("DELETE FROM blob_pins WHERE kind='reader'",&[]).unwrap();assert!(h.read_chunk(&opened.session_id,4).is_err());assert!(!h.is_current(&opened.session_id).unwrap());assert_eq!(independent_reader_pins(&f),0);
+    let (f,mut h,a)=independent_reader_fixture();let opened=h.open(&a,DocumentReadPurpose::ReadText).unwrap();h.read_chunk(&opened.session_id,4).unwrap();let path=PathBuf::from(format!("{}.blobs",f.path().display())).join("objects").join(&opened.metadata.blob.digest);let mut data=fs::read(&path).unwrap();let last=data.len()-1;data[last]^=1;fs::write(&path,data).unwrap();assert!(h.read_chunk(&opened.session_id,4).is_err());assert!(!h.is_current(&opened.session_id).unwrap());assert_eq!(independent_reader_pins(&f),0);
+}
+#[test]
+fn independent_reader_revision_advance_never_substitutes_latest_for_old_handle() {
+    let (f,mut h,a)=independent_reader_fixture();let old=h.open(&a,DocumentReadPurpose::ReadText).unwrap();h.read_chunk(&old.session_id,4).unwrap();let changed=b"%PDF-1.4\nnew original independent Reader fixture\n%%EOF\n";
+    let next=h.store().publish_document_revision_trusted(&a.document,"New",DocumentFormat::Pdf,&upload(h.store(),changed)).unwrap();assert!(h.read_chunk(&old.session_id,4).is_err());assert!(!h.is_current(&old.session_id).unwrap());assert_eq!(independent_reader_pins(&f),0);assert!(h.inspect(&a).is_err());
+    let authority=AuthorityBinding{generation:a.authority.generation.next().unwrap(),..a.authority.clone()};h.store().issue_document_grant_trusted(&next.document,&authority,&all(),expires()).unwrap();let new=DocumentAccess{document:next.document,authority};let opened=h.open(&new,DocumentReadPurpose::ReadText).unwrap();let result=h.read_chunk(&opened.session_id,4096).unwrap();assert_eq!(result.bytes,changed);assert!(result.eof);assert!(h.read_chunk(&old.session_id,4).is_err());assert_eq!(independent_reader_pins(&f),0);
+}
+#[test]
+fn independent_one_shot_post_pin_expiry_rolls_back_before_callback_or_delivery() {
+    let (f,h,a)=independent_reader_fixture();f.db().exec("CREATE TRIGGER independent_expire AFTER INSERT ON blob_pins WHEN NEW.kind='reader' BEGIN UPDATE document_grants SET expires_at_ms='0'; END",&[]).unwrap();let called=std::cell::Cell::new(false);
+    let result=h.store().with_document_source(&a,DocumentReadPurpose::ReadText,1024,|view|{called.set(true);Ok(view.bytes().to_vec())});assert!(result.is_err());assert!(!called.get());assert_eq!(independent_reader_pins(&f),0);
+    f.db().exec("DROP TRIGGER independent_expire",&[]).unwrap();let data=h.store().with_document_source(&a,DocumentReadPurpose::ReadText,1024,|view|Ok(view.bytes().to_vec())).unwrap();assert_eq!(data,PDF);assert_eq!(independent_reader_pins(&f),0);
+}
+
+#[test]
+fn independent_one_shot_cleanup_expiry_must_withhold_returned_bytes() {
+    let (f,h,a)=independent_reader_fixture();
+    f.db().exec("CREATE TRIGGER independent_expire_on_cleanup BEFORE DELETE ON blob_pins WHEN OLD.kind='reader' BEGIN UPDATE document_grants SET expires_at_ms='0'; END",&[]).unwrap();
+    let result=h.store().with_document_source(&a,DocumentReadPurpose::ReadText,1024,|view|Ok(view.bytes().to_vec()));
+    assert_eq!(f.db().query("SELECT expires_at_ms FROM document_grants",&[]).unwrap()[0][0].as_deref(),Some("0"));
+    assert_eq!(independent_reader_pins(&f),0);
+    println!("cleanup one-shot: success={}, bytes={}, grant_expiry=0, reader_pin_count=0",result.is_ok(),result.as_ref().map(|v|v.len()).unwrap_or(0));
+    assert!(result.is_err(),"Reader must withhold delivery when real cleanup invalidated grant before COMMIT/result");
+}
+#[test]
+fn independent_eof_cleanup_expiry_must_withhold_returned_chunk() {
+    let (f,mut h,a)=independent_reader_fixture();let opened=h.open(&a,DocumentReadPurpose::ReadText).unwrap();
+    f.db().exec("CREATE TRIGGER independent_expire_on_cleanup BEFORE DELETE ON blob_pins WHEN OLD.kind='reader' BEGIN UPDATE document_grants SET expires_at_ms='0'; END",&[]).unwrap();
+    let result=h.read_chunk(&opened.session_id,65536);
+    assert_eq!(f.db().query("SELECT expires_at_ms FROM document_grants",&[]).unwrap()[0][0].as_deref(),Some("0"));
+    assert_eq!(independent_reader_pins(&f),0);
+    println!("cleanup EOF: success={}, eof={}, bytes={}, grant_expiry=0, reader_pin_count=0",result.is_ok(),result.as_ref().map(|v|v.eof).unwrap_or(false),result.as_ref().map(|v|v.bytes.len()).unwrap_or(0));
+    assert!(result.is_err(),"EOF must withhold chunk when cleanup expired live grant after initial transaction commit");
+}

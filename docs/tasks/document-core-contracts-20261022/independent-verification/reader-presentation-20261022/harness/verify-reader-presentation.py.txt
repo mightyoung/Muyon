@@ -1,0 +1,18 @@
+import datetime,hashlib,json,os,pathlib,subprocess,sys
+phase=sys.argv[1];root=pathlib.Path(sys.argv[2]);out=pathlib.Path('/workspace/Muyon-document-verification/docs/tasks/document-core-contracts-20261022/independent-verification/reader-presentation-20261022')/phase;out.mkdir(parents=True,exist_ok=True);now=lambda:datetime.datetime.now(datetime.timezone.utc).isoformat();sha=lambda p:hashlib.sha256(pathlib.Path(p).read_bytes()).hexdigest();expected={'original':'ee184fc1dd90faf2c3cdd48d735f47274de6d418'};head=subprocess.check_output(['git','rev-parse','HEAD'],cwd=root,text=True).strip();assert head==expected[phase]
+env=os.environ.copy();env.update(PATH='/tmp/muyon-rust/bin:'+env['PATH'],CARGO_HOME='/tmp/muyon-cargo',CARGO_TARGET_DIR='/tmp/muyon-document-cargo-target',RUSTFLAGS='-L native=/tmp/muyon-native-libs')
+files=sorted([str(p.relative_to(root)) for p in (root/'crates/muyon-core/src/documents').glob('*.rs')]+['crates/muyon-core/src/blobs.rs','crates/muyon-core/src/bin/business_worker.rs','crates/muyon-core/tests/documents.rs','crates/muyon-core/tests/document_storage.rs'])
+m={'source_commit':head,'phase':phase,'old_RED_source':'ff3cc928311afc12bee3205f28b662c6b7499b34','created_utc':now(),'cwd':str(root),'environment':{k:env[k] for k in ['PATH','CARGO_HOME','CARGO_TARGET_DIR','RUSTFLAGS']},'tools':{n:{'version':subprocess.check_output(['/tmp/muyon-rust/bin/'+n,'--version'],text=True).strip(),'sha256':sha('/tmp/muyon-rust/bin/'+n)} for n in ['rustc','cargo','rustfmt']},'source_sha256':{p:sha(root/p) for p in files+['crates/muyon-core/src/lib.rs','crates/Cargo.toml','crates/Cargo.lock']},'commands':[]}
+def save():(out/'manifest.json').write_text(json.dumps(m,indent=2)+'\n')
+def run(label,args):
+ start=now();print(phase,label,'START',start,flush=True)
+ with (out/(label+'.stdout.log')).open('wb') as stdout,(out/(label+'.stderr.log')).open('wb') as stderr:r=subprocess.run(args,cwd=root,env=env,stdout=stdout,stderr=stderr)
+ m['commands'].append({'label':label,'argv':args,'cwd':str(root),'start_utc':start,'end_utc':now(),'exit_status':r.returncode});save();print(phase,label,'EXIT',r.returncode,flush=True)
+save();common=['cargo','test','--offline','--locked','--manifest-path','crates/Cargo.toml','-p','muyon-core']
+if True:run('snapshot-cost',common+['--lib','documents::reader_tests::thirty_mib_stream_hash_cost_is_linear_and_chunk_bytes_are_exact','--','--exact','--nocapture'])
+run('presentation-targeted',common+['--lib','documents::presentation_tests'])
+run('reader-targeted',common+['--lib','documents::reader_tests'])
+run('scoped-fmt',['/tmp/muyon-rust/bin/rustfmt','--edition','2021','--check',*files])
+run('core-full',common)
+for name,h in m['source_sha256'].items():assert sha(root/name)==h,name
+m['source_hashes_unchanged_after_checks']=True;m['source_worktree_status_after_checks']=subprocess.check_output(['git','status','--short'],cwd=root,text=True);assert not m['source_worktree_status_after_checks'];save()

@@ -1,0 +1,30 @@
+{
+  "checks": [
+    {
+      "label": "full-staged",
+      "argv": [
+        "git",
+        "diff",
+        "--cached",
+        "--check"
+      ],
+      "exit_status": 2
+    },
+    {
+      "label": "authored",
+      "argv": [
+        "git",
+        "diff",
+        "--cached",
+        "--check",
+        "--",
+        "docs/tasks/document-core-contracts-20261022/PRESENTATION-RUST-VERIFICATION.md",
+        ":(glob)docs/tasks/document-core-contracts-20261022/independent-verification/reader-presentation-20261022/**/*.json",
+        ":(glob)docs/tasks/document-core-contracts-20261022/independent-verification/reader-presentation-20261022/**/*.xml",
+        ":(glob)docs/tasks/document-core-contracts-20261022/independent-verification/reader-presentation-20261022/harness/*.txt"
+      ],
+      "exit_status": 0
+    }
+  ],
+  "note": "Full staged raw logs/standard format-patch preserved byte-exact, includes trailing blank lines and patch context whitespace; authored JSON/JUnit/report/harness text separately checked."
+}

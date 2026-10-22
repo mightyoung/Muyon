@@ -1,0 +1,35 @@
+import pathlib,re,json,xml.etree.ElementTree as ET,hashlib
+b=pathlib.Path('/workspace/Muyon-document-verification/docs/tasks/document-core-contracts-20261022/independent-verification/reader-presentation-20261022');summary={}
+for phase in ['original','formatted']:
+ p=b/phase;m=json.loads((p/'manifest.json').read_text());results={};suites=ET.Element('testsuites',{'name':phase+' actual executed tests; derived from Rust stdout'})
+ for label in ['snapshot-cost','presentation-targeted','reader-targeted','core-full','probes/probe-tests','presentation-probes/probe-tests']:
+  stdout=(p/(label+'.stdout.log')).read_text();stderr=(p/(label+'.stderr.log')).read_text();blocks=re.split(r'\nrunning \d+ tests?\n','\n'+stdout)[1:];targets=re.findall(r'^\s*Running ([^\n]+)',stderr,re.M)
+  if label=='core-full':targets+=['Doc-tests muyon_core']
+  elif not targets:targets=[label]
+  assert len(blocks)==len(targets),(label,len(blocks),len(targets))
+  counts=[];names=[]
+  for block,target in zip(blocks,targets):
+   match=re.search(r'test result: ok\. (\d+) passed; (\d+) failed; (\d+) ignored',block);assert match
+   count,fail,ignored=map(int,match.groups());assert fail==ignored==0
+   cases=re.findall(r'^test (\S+) \.\.\. (ok|FAILED|ignored)$',block,re.M);assert len(cases)==count
+   ts=ET.SubElement(suites,'testsuite',{'name':label+' / '+target,'tests':str(count),'failures':'0','errors':'0','skipped':'0'});
+   for name,result in cases:ET.SubElement(ts,'testcase',{'classname':target,'name':name})
+   counts.append(count);names.append([name for name,result in cases])
+  results[label]={'counts_per_binary':counts,'total_executions':sum(counts),'exit_status':0}
+  if label=='core-full':
+   assert names[0]==names[1] or sorted(names[0])==sorted(names[1]);results[label]['library_worker_exact_same_test_names']=True;assert sum(counts)==294
+ assert results['presentation-targeted']['total_executions']==10
+ assert results['reader-targeted']['total_executions']==17
+ assert results['probes/probe-tests']['total_executions']==6
+ assert results['presentation-probes/probe-tests']['total_executions']==4
+ results['scoped-fmt']=next(c for c in m['commands'] if c['label']=='scoped-fmt')
+ results['source_commit']=m['source_commit'];results['explicit_format_paths']=len([p for p in m['source_sha256'] if p.endswith('.rs') and not p.endswith('/lib.rs')]);summary[phase]=results
+ ET.indent(suites);ET.ElementTree(suites).write(p/'derived-junit.xml',encoding='utf-8',xml_declaration=True)
+(b/'execution-summary.json').write_text(json.dumps({'note':'JUnit is derived from actual raw stdout, per binary class; repeated executions not unique scenarios. Shared-path collision runs excluded; no invented timings.','phases':summary},indent=2)+'\n')
+# preserve old evidence unchanged, verify prior hash inventories
+for olddir in ['reader-20261022','reader-tail-performance-20261022']:
+ old=b.parent/olddir;rows=[]
+ for line in (old/'SHA256SUMS').read_text().splitlines():
+  h,name=line.split('  ',1);p=old/name;assert hashlib.sha256(p.read_bytes()).hexdigest()==h,name;rows.append(name)
+ (b/(olddir+'-preserved.json')).write_text(json.dumps({'old_directory':olddir,'all_previous_inventory_hashes_match':True,'artifact_count':len(rows)},indent=2)+'\n')
+print(json.dumps(summary,indent=2))

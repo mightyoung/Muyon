@@ -1,0 +1,79 @@
+{
+  "source_commit": "ee184fc1dd90faf2c3cdd48d735f47274de6d418",
+  "seed_test_source_sha256": "c21f25ab0f1b49013b3f4883f02800992dd8fe4070f51139f2488415ea024513",
+  "added_probe_source_sha256": "01f944aec3a00c86107ebd6d7f6739d4f1a6946ae142cc6a26a2cce814143998",
+  "probe_source_sha256": "3b9a982fa6bc93396d6c5a18fac55a71635259084121da5fec9f908d57aa6b4c",
+  "linked_artifacts": {
+    "sha2": {
+      "path": "/tmp/muyon-document-cargo-target/debug/deps/libsha2-ac6e1e3f5db50395.rlib",
+      "sha256": "5d58c5d2c330e2d6d032065384466b3b2206d7e48eb2ff46b918935dee3a507d"
+    },
+    "serde_json": {
+      "path": "/tmp/muyon-document-cargo-target/debug/deps/libserde_json-bd1e7064091000e5.rlib",
+      "sha256": "b7471ea236ac91d5b3168928b82733d82466777d737f90b8618bfe1c399ff6b2"
+    },
+    "muyon_core": {
+      "path": "/tmp/muyon-document-cargo-target/debug/libmuyon_core.rlib",
+      "sha256": "0ade8103352b6676b697afcaea0a09c15f62937c8e06c1a4ffb42adf9ac524d9"
+    }
+  },
+  "commands": [
+    {
+      "label": "artifact-build",
+      "argv": [
+        "cargo",
+        "build",
+        "--offline",
+        "--locked",
+        "--manifest-path",
+        "crates/Cargo.toml",
+        "-p",
+        "muyon-core",
+        "--lib",
+        "--message-format=json"
+      ],
+      "cwd": "/workspace/Muyon-reader-presentation-verification",
+      "start_utc": "2026-10-22T07:38:26.284262+00:00",
+      "end_utc": "2026-10-22T07:38:29.910960+00:00",
+      "exit_status": 0
+    },
+    {
+      "label": "probe-compile",
+      "argv": [
+        "/tmp/muyon-rust/bin/rustc",
+        "--edition=2021",
+        "--test",
+        "/tmp/muyon-reader-probes-original.rs",
+        "-L",
+        "dependency=/tmp/muyon-document-cargo-target/debug/deps",
+        "-L",
+        "native=/tmp/muyon-native-libs",
+        "--extern",
+        "sha2=/tmp/muyon-document-cargo-target/debug/deps/libsha2-ac6e1e3f5db50395.rlib",
+        "--extern",
+        "serde_json=/tmp/muyon-document-cargo-target/debug/deps/libserde_json-bd1e7064091000e5.rlib",
+        "--extern",
+        "muyon_core=/tmp/muyon-document-cargo-target/debug/libmuyon_core.rlib",
+        "-o",
+        "/tmp/muyon-reader-probes-original"
+      ],
+      "cwd": "/workspace/Muyon-reader-presentation-verification",
+      "start_utc": "2026-10-22T07:38:29.912110+00:00",
+      "end_utc": "2026-10-22T07:38:30.242069+00:00",
+      "exit_status": 0
+    },
+    {
+      "label": "probe-tests",
+      "argv": [
+        "/tmp/muyon-reader-probes-original",
+        "independent_",
+        "--nocapture"
+      ],
+      "cwd": "/workspace/Muyon-reader-presentation-verification",
+      "start_utc": "2026-10-22T07:38:30.242093+00:00",
+      "end_utc": "2026-10-22T07:38:30.357820+00:00",
+      "exit_status": 0
+    }
+  ],
+  "boundary": "Original immutable six Reader probes, including the two prior real cleanup-tail RED. Copied synthetic fixture only; no product edits."
+}

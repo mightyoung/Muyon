@@ -1,0 +1,65 @@
+docs/tasks/document-core-contracts-20261022/independent-verification/reader-presentation-20261022/formatted/core-full.stdout.log:384: new blank line at EOF.
+docs/tasks/document-core-contracts-20261022/independent-verification/reader-presentation-20261022/formatted/presentation-probes-harness-collision-not-evidence/probe-tests.stdout.log:9: new blank line at EOF.
+docs/tasks/document-core-contracts-20261022/independent-verification/reader-presentation-20261022/formatted/presentation-probes/probe-tests.stdout.log:9: new blank line at EOF.
+docs/tasks/document-core-contracts-20261022/independent-verification/reader-presentation-20261022/formatted/presentation-targeted.stdout.log:15: new blank line at EOF.
+docs/tasks/document-core-contracts-20261022/independent-verification/reader-presentation-20261022/formatted/probes-harness-collision-not-evidence/probe-tests.stdout.log:9: new blank line at EOF.
+docs/tasks/document-core-contracts-20261022/independent-verification/reader-presentation-20261022/formatted/probes/probe-tests.stdout.log:13: new blank line at EOF.
+docs/tasks/document-core-contracts-20261022/independent-verification/reader-presentation-20261022/formatted/reader-targeted.stdout.log:22: new blank line at EOF.
+docs/tasks/document-core-contracts-20261022/independent-verification/reader-presentation-20261022/formatted/snapshot-cost.stdout.log:7: new blank line at EOF.
+docs/tasks/document-core-contracts-20261022/independent-verification/reader-presentation-20261022/original/core-full.stdout.log:384: new blank line at EOF.
+docs/tasks/document-core-contracts-20261022/independent-verification/reader-presentation-20261022/original/format/format-commit.patch:41: trailing whitespace.
++ 
+docs/tasks/document-core-contracts-20261022/independent-verification/reader-presentation-20261022/original/format/format-commit.patch:80: trailing whitespace.
++ 
+docs/tasks/document-core-contracts-20261022/independent-verification/reader-presentation-20261022/original/format/format-commit.patch:100: trailing whitespace.
++ 
+docs/tasks/document-core-contracts-20261022/independent-verification/reader-presentation-20261022/original/format/format-commit.patch:133: trailing whitespace.
++ 
+docs/tasks/document-core-contracts-20261022/independent-verification/reader-presentation-20261022/original/format/format-commit.patch:155: trailing whitespace.
++ 
+docs/tasks/document-core-contracts-20261022/independent-verification/reader-presentation-20261022/original/format/format-commit.patch:258: trailing whitespace.
++ 
+docs/tasks/document-core-contracts-20261022/independent-verification/reader-presentation-20261022/original/format/format-commit.patch:604: trailing whitespace.
++-- 
+docs/tasks/document-core-contracts-20261022/independent-verification/reader-presentation-20261022/original/format/format-commit.patch:606: new blank line at EOF.
+docs/tasks/document-core-contracts-20261022/independent-verification/reader-presentation-20261022/original/presentation-probes/probe-tests.stdout.log:9: new blank line at EOF.
+docs/tasks/document-core-contracts-20261022/independent-verification/reader-presentation-20261022/original/presentation-targeted.stdout.log:15: new blank line at EOF.
+docs/tasks/document-core-contracts-20261022/independent-verification/reader-presentation-20261022/original/probes/probe-tests.stdout.log:13: new blank line at EOF.
+docs/tasks/document-core-contracts-20261022/independent-verification/reader-presentation-20261022/original/reader-targeted.stdout.log:22: new blank line at EOF.
+docs/tasks/document-core-contracts-20261022/independent-verification/reader-presentation-20261022/original/scoped-fmt.stdout.log:21: trailing whitespace.
++ 
+docs/tasks/document-core-contracts-20261022/independent-verification/reader-presentation-20261022/original/scoped-fmt.stdout.log:61: trailing whitespace.
++ 
+docs/tasks/document-core-contracts-20261022/independent-verification/reader-presentation-20261022/original/scoped-fmt.stdout.log:83: trailing whitespace.
++ 
+docs/tasks/document-core-contracts-20261022/independent-verification/reader-presentation-20261022/original/scoped-fmt.stdout.log:117: trailing whitespace.
++ 
+docs/tasks/document-core-contracts-20261022/independent-verification/reader-presentation-20261022/original/scoped-fmt.stdout.log:139: trailing whitespace.
++ 
+docs/tasks/document-core-contracts-20261022/independent-verification/reader-presentation-20261022/original/scoped-fmt.stdout.log:242: trailing whitespace.
++ 
+docs/tasks/document-core-contracts-20261022/independent-verification/reader-presentation-20261022/original/scoped-fmt.stdout.log:613: trailing whitespace.
++ 
+docs/tasks/document-core-contracts-20261022/independent-verification/reader-presentation-20261022/original/scoped-fmt.stdout.log:653: trailing whitespace.
++ 
+docs/tasks/document-core-contracts-20261022/independent-verification/reader-presentation-20261022/original/scoped-fmt.stdout.log:675: trailing whitespace.
++ 
+docs/tasks/document-core-contracts-20261022/independent-verification/reader-presentation-20261022/original/scoped-fmt.stdout.log:709: trailing whitespace.
++ 
+docs/tasks/document-core-contracts-20261022/independent-verification/reader-presentation-20261022/original/scoped-fmt.stdout.log:731: trailing whitespace.
++ 
+docs/tasks/document-core-contracts-20261022/independent-verification/reader-presentation-20261022/original/scoped-fmt.stdout.log:834: trailing whitespace.
++ 
+docs/tasks/document-core-contracts-20261022/independent-verification/reader-presentation-20261022/original/scoped-fmt.stdout.log:1194: trailing whitespace.
++ 
+docs/tasks/document-core-contracts-20261022/independent-verification/reader-presentation-20261022/original/scoped-fmt.stdout.log:1234: trailing whitespace.
++ 
+docs/tasks/document-core-contracts-20261022/independent-verification/reader-presentation-20261022/original/scoped-fmt.stdout.log:1256: trailing whitespace.
++ 
+docs/tasks/document-core-contracts-20261022/independent-verification/reader-presentation-20261022/original/scoped-fmt.stdout.log:1290: trailing whitespace.
++ 
+docs/tasks/document-core-contracts-20261022/independent-verification/reader-presentation-20261022/original/scoped-fmt.stdout.log:1312: trailing whitespace.
++ 
+docs/tasks/document-core-contracts-20261022/independent-verification/reader-presentation-20261022/original/scoped-fmt.stdout.log:1415: trailing whitespace.
++ 
+docs/tasks/document-core-contracts-20261022/independent-verification/reader-presentation-20261022/original/snapshot-cost.stdout.log:7: new blank line at EOF.

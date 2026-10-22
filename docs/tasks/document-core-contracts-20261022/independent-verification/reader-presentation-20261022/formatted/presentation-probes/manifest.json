@@ -1,0 +1,79 @@
+{
+  "source_commit": "dfa63451c0d65417b425f5bf1e92a3b43e0b6052",
+  "seed_test_source_sha256": "c21f25ab0f1b49013b3f4883f02800992dd8fe4070f51139f2488415ea024513",
+  "added_probe_source_sha256": "9c57bf09aa73021e813ff3918c2714abe7bb05323541767e37b7c7f401e93e1b",
+  "probe_source_sha256": "7b59515022b132e6974e50fef1fbfe91d8a3670bc87718b8240ea062408e50c8",
+  "linked_artifacts": {
+    "sha2": {
+      "path": "/tmp/muyon-document-cargo-target/debug/deps/libsha2-ac6e1e3f5db50395.rlib",
+      "sha256": "5d58c5d2c330e2d6d032065384466b3b2206d7e48eb2ff46b918935dee3a507d"
+    },
+    "serde_json": {
+      "path": "/tmp/muyon-document-cargo-target/debug/deps/libserde_json-bd1e7064091000e5.rlib",
+      "sha256": "b7471ea236ac91d5b3168928b82733d82466777d737f90b8618bfe1c399ff6b2"
+    },
+    "muyon_core": {
+      "path": "/tmp/muyon-document-cargo-target/debug/libmuyon_core.rlib",
+      "sha256": "2101af9f26d627ed1f44a13c426767f99edd559cfa37419cfb9693290ea67323"
+    }
+  },
+  "commands": [
+    {
+      "label": "artifact-build",
+      "argv": [
+        "cargo",
+        "build",
+        "--offline",
+        "--locked",
+        "--manifest-path",
+        "crates/Cargo.toml",
+        "-p",
+        "muyon-core",
+        "--lib",
+        "--message-format=json"
+      ],
+      "cwd": "/workspace/Muyon-reader-presentation-verification",
+      "start_utc": "2026-10-22T07:40:45.476980+00:00",
+      "end_utc": "2026-10-22T07:40:45.541963+00:00",
+      "exit_status": 0
+    },
+    {
+      "label": "probe-compile",
+      "argv": [
+        "/tmp/muyon-rust/bin/rustc",
+        "--edition=2021",
+        "--test",
+        "/tmp/muyon-presentation-api-probes-formatted.rs",
+        "-L",
+        "dependency=/tmp/muyon-document-cargo-target/debug/deps",
+        "-L",
+        "native=/tmp/muyon-native-libs",
+        "--extern",
+        "sha2=/tmp/muyon-document-cargo-target/debug/deps/libsha2-ac6e1e3f5db50395.rlib",
+        "--extern",
+        "serde_json=/tmp/muyon-document-cargo-target/debug/deps/libserde_json-bd1e7064091000e5.rlib",
+        "--extern",
+        "muyon_core=/tmp/muyon-document-cargo-target/debug/libmuyon_core.rlib",
+        "-o",
+        "/tmp/muyon-presentation-api-probes-formatted"
+      ],
+      "cwd": "/workspace/Muyon-reader-presentation-verification",
+      "start_utc": "2026-10-22T07:40:45.542774+00:00",
+      "end_utc": "2026-10-22T07:40:45.861640+00:00",
+      "exit_status": 0
+    },
+    {
+      "label": "probe-tests",
+      "argv": [
+        "/tmp/muyon-presentation-api-probes-formatted",
+        "independent_",
+        "--nocapture"
+      ],
+      "cwd": "/workspace/Muyon-reader-presentation-verification",
+      "start_utc": "2026-10-22T07:40:45.861665+00:00",
+      "end_utc": "2026-10-22T07:40:47.098247+00:00",
+      "exit_status": 0
+    }
+  ],
+  "boundary": "Four independent public presentation API probes: stale ticket, actual short grant deadline, bounded invalidation overflow and legacy bypass. Temporary original synthetic fixture only; no product edits."
+}

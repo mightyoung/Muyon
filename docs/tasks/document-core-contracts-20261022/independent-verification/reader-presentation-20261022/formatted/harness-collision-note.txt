@@ -1,0 +1,1 @@
+Both initial formatted external-probe drivers inadvertently shared a temporary Rust source/binary path. Both outputs executed the four presentation probes; the transport six were not established by that run. Preserve raw outputs, exclude both from acceptance/JUnit, rerun with distinct transport and presentation temporary paths. No source product change.
