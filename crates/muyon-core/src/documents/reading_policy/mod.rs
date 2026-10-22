@@ -116,7 +116,7 @@ impl ReadingPolicyHost {
             if root.revision!=request.expected_root_revision || root.current.access.authority.grant_id!=request.expected_grant_id || root.current.access.authority.generation!=request.expected_grant_generation || root.surface!=request.surface_binding || root.presentation_id!=request.expected_presentation_id || root.frame!=request.expected_frame_generation || root.pending_renew.is_some(){return Err(ContractError::BindingMismatch);}
             validate_root(reader.store(),&tx,&root,false)?;
             let current=reader.store().reading_policy_grant_record_in_transaction(&tx,&root.current.access.authority.grant_id)?.ok_or(ContractError::InvalidAuthority)?;
-            reader.policy_predecessor(&self.ticket(&root)?,current.expires_at_ms<=self.now()?)?;
+            reader.policy_predecessor(&tx,&self.ticket(&root)?,current.expires_at_ms<=self.now()?)?;
             let mut result=outcome(reader.store(),&request.scope,PolicyKind::Renew,&request.original_attempt_id,fp.clone(),PolicyOutcomeStatus::Prepared,Some(&root))?;
             let challenge=store::native_id(reader.store(),"reader-challenge")?;result.challenge_id=Some(challenge.clone());result.valid_for_ms=Some(2000);
             let attempt=AttemptRecord{kind:PolicyKind::Renew,scope:request.scope.clone(),id:request.original_attempt_id.clone(),fingerprint:fp.clone(),prepared:Some(request.clone()),root_id:Some(root.id.clone()),renew_fingerprint:None,observation_id:None,outcome:result.clone(),handoff_fingerprint:None,handoff_outcome:None};
@@ -124,6 +124,67 @@ impl ReadingPolicyHost {
             validate_root(reader.store(),&tx,&root,false)?;store::assert_root(reader.store(),&root,false)?;store::assert_attempt(reader.store(),&attempt)?;
             tx.commit().map_err(|_|ContractError::Unknown)?;self.freshness.insert(challenge,start);Ok(result)
         })();self.track(k,result)
+    }
+    /// D: consume a native monotonic challenge and atomically issue only the
+    /// root-owned readonly child. The shared parent is never modified.
+    pub fn renew(&mut self,reader:&mut DocumentReaderHost,request:&PolicyRenewRequest)->PolicyResult<OriginalPolicyOutcome>{
+        self.ready(reader)?;scope_shape(&request.scope)?;surface_shape(&request.surface_binding)?;
+        id_shape(&request.root_id)?;id_shape(&request.original_attempt_id)?;id_shape(&request.challenge_id)?;id_shape(&request.observation_id)?;
+        let k=key(&request.scope,PolicyKind::Renew,&request.original_attempt_id)?;
+        if self.uncertain.contains(&k){return Err(ContractError::Unknown);}
+        let fp=fingerprint(request)?;
+        let (mut attempt,fenced)=store::attempt(reader.store(),&request.scope,PolicyKind::Renew,&request.original_attempt_id)?.ok_or(ContractError::NotFound)?;
+        if let Some(old)=&attempt.renew_fingerprint {
+            if old!=&fp{return Err(ContractError::BindingMismatch);}
+            // Historical evidence is immutable, never a fresh grant or lease.
+            return Ok(historical(attempt.outcome));
+        }
+        if fenced || attempt.outcome.status!=PolicyOutcomeStatus::Prepared || attempt.outcome.challenge_id.as_deref()!=Some(request.challenge_id.as_str()){return Err(ContractError::Cancelled);}
+        let started=self.freshness.remove(&request.challenge_id).ok_or(ContractError::Cancelled)?;
+        if started.elapsed()>FRESH{return Err(ContractError::Cancelled);}
+        let ticket_and_result=(||{
+            let tx=sql(reader.store().database().transaction())?;
+            let mut root=self.root(reader,&request.scope,&request.root_id)?;
+            let prepared=attempt.prepared.as_ref().ok_or(ContractError::StorageCorrupt)?;
+            if attempt.root_id.as_deref()!=Some(root.id.as_str()) || root.pending_renew.is_some() || root.revision!=request.expected_root_revision || root.revision!=prepared.expected_root_revision || root.surface!=request.surface_binding || root.surface!=prepared.surface_binding || root.presentation_id!=prepared.expected_presentation_id || root.frame!=prepared.expected_frame_generation || root.current.access.authority.grant_id!=prepared.expected_grant_id || root.current.access.authority.generation!=prepared.expected_grant_generation{return Err(ContractError::BindingMismatch);}
+            validate_root(reader.store(),&tx,&root,false)?;
+            let previous=self.ticket(&root)?;
+            let actual=reader.store().reading_policy_grant_record_in_transaction(&tx,&root.current.access.authority.grant_id)?.ok_or(ContractError::InvalidAuthority)?;
+            reader.policy_predecessor(&tx,&previous,actual.expires_at_ms<=self.now()?)?;
+            let plan=reader.store().prepare_document_source_mutation_in_transaction(&tx,&[&root.metadata.document])?;
+            store::begin_renew_guard(reader.store(),&root)?;
+            let now=self.now()?;
+            let child_id=match &root.child_id{Some(id)=>id.clone(),None=>store::native_id(reader.store(),"reader-child")?};
+            let generation=if root.child_id.is_some(){root.current.access.authority.generation.next()?}else{Revision::new(1)};
+            let next=GrantRecord{access:DocumentAccess{document:root.metadata.document.clone(),authority:AuthorityBinding{grant_id:child_id.clone(),generation,owner_epoch:self.epoch.clone()}},operations:root.readonly_operations.clone(),expires_at_ms:now.checked_add(30_000).ok_or(ContractError::InvalidAuthority)?,active:true};
+            store::issue_child(reader.store(),&tx,&root,&next)?;
+            root.child_id=Some(child_id);root.current=next;root.revision=root.revision.next()?;root.pending_renew=Some(request.original_attempt_id.clone());
+            let token=store::native_id(reader.store(),"reader-continuation")?;
+            let mut issued=outcome(reader.store(),&request.scope,PolicyKind::Renew,&request.original_attempt_id,fp.clone(),PolicyOutcomeStatus::Issued,Some(&root))?;
+            issued.continuation_token=Some(token.clone());issued.valid_for_ms=Some(2000);issued.issued_at_ms=Some(now);issued.handoff=Some(PolicyHandoffState::Pending);
+            attempt.renew_fingerprint=Some(fp.clone());attempt.observation_id=Some(request.observation_id.clone());attempt.outcome=issued.clone();
+            store::save_root(reader.store(),&root)?;store::save_attempt(reader.store(),&attempt,"issued")?;
+            let source_tail=reader.store().finish_document_source_mutation_in_transaction(&tx,plan)?;
+            validate_root(reader.store(),&tx,&root,true)?;
+            store::assert_root(reader.store(),&root,false)?;store::assert_attempt(reader.store(),&attempt)?;
+            reader.store().verify_document_source_mutation_in_transaction(&tx,&source_tail)?;
+            if started.elapsed()>FRESH{return Err(ContractError::Cancelled);}
+            let handoff_started=Instant::now();
+            tx.commit().map_err(|_|ContractError::Unknown)?;
+            self.freshness.insert(token,handoff_started);
+            Ok((previous,issued))
+        })();
+        let result=match ticket_and_result{
+            Ok((previous,issued))=>{
+                if reader.policy_suspend(&previous).is_err(){
+                    // Grant issuance already committed; never report it as
+                    // not-committed or automatically issue another child.
+                    self.uncertain.insert(k.clone());return Err(ContractError::Unknown);
+                }
+                Ok(issued)
+            },Err(error)=>Err(error),
+        };
+        self.track(k,result)
     }
     pub fn selection_changed(&mut self,reader:&mut DocumentReaderHost,scope:&PolicyScope,native_epoch:&Revision)->PolicyResult<()> {
         self.ready(reader)?;scope_shape(scope)?;if native_epoch.value()==0{return Err(ContractError::InvalidRevision);}

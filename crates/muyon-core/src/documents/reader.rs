@@ -746,9 +746,13 @@ impl DocumentReaderHost {
         if session.purpose != DocumentReadPurpose::Render || session.access != *access || session.metadata != *metadata { return Err(ContractError::BindingMismatch); }
         self.presentation_status_in_transaction(tx, session)?; Ok(())
     }
-    pub(super) fn policy_predecessor(&self, ticket: &PresentationTicket, natural_grant_expiry: bool) -> CoreResult<()> {
+    pub(super) fn policy_predecessor(&self, tx: &Transaction<'_>, ticket: &PresentationTicket, natural_grant_expiry: bool) -> CoreResult<()> {
         if self.poisoned { return Err(ContractError::Unknown); }
-        if self.sessions.contains_key(ticket.session_id()) { return self.require_presentation_ticket(ticket, false); }
+        if let Some(session) = self.sessions.get(ticket.session_id()) {
+            self.require_presentation_ticket(ticket, false)?;
+            if self.store.reading_policy_metadata_in_transaction(tx, &session.access.document)? != session.metadata || self.store.document_reader_stamp_in_transaction(tx, &session.reader)? != session.stamp { return Err(ContractError::BindingMismatch); }
+            return Ok(());
+        }
         let (closed, reason) = self.policy_closed.get(ticket.session_id()).ok_or(ContractError::Unknown)?;
         if closed.document != ticket.document || closed.authority != ticket.authority || closed.generation != ticket.generation { return Err(ContractError::InvalidAuthority); }
         match reason { PolicyClosure::Natural => Ok(()), PolicyClosure::NaturalGrantExpiry if natural_grant_expiry => Ok(()), _ => Err(ContractError::Cancelled) }
@@ -767,11 +771,11 @@ impl DocumentReaderHost {
     /// Validate before closing anything. No selection token is replayed.
     pub(super) fn policy_continue(&mut self, previous: &PresentationTicket, access: &DocumentAccess, metadata: &DocumentMetadata) -> Result<DocumentPresentationInfo> {
         if self.poisoned { return Err(ContractError::Unknown.into()); }
-        self.policy_predecessor(previous, true)?;
         for (id, session) in &self.sessions {
             if session.presentation.is_some() && id != previous.session_id() { return Err(ContractError::Cancelled.into()); }
         }
         let tx = sql(self.store.database().transaction())?;
+        self.policy_predecessor(&tx, previous, true)?;
         let current = self.store.document_access_in_transaction(&tx, access, &[DocumentOperation::Render])?;
         if current != *metadata { return Err(ContractError::BindingMismatch.into()); }
         tx.commit().map_err(|_| ContractError::Unknown)?;
