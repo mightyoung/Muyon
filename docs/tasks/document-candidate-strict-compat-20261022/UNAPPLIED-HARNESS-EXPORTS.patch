@@ -1,0 +1,24 @@
+diff --git a/crates/muyon-core/src/bin/business_worker.rs b/crates/muyon-core/src/bin/business_worker.rs
+--- a/crates/muyon-core/src/bin/business_worker.rs
++++ b/crates/muyon-core/src/bin/business_worker.rs
+@@ -17,7 +17,7 @@
+ // the library. Keep the full document owner module in this standalone harness.
+ #[path = "../documents/mod.rs"]
+ #[allow(dead_code)]
+-mod documents;
++pub mod documents;
+ #[path = "../research.rs"]
+ #[allow(dead_code)]
+ mod research;
+diff --git a/crates/muyon-core/tests/group_runtime_store.rs b/crates/muyon-core/tests/group_runtime_store.rs
+--- a/crates/muyon-core/tests/group_runtime_store.rs
++++ b/crates/muyon-core/tests/group_runtime_store.rs
+@@ -11,7 +11,7 @@
+ #[path = "../src/contract.rs"]
+ mod contract;
+ #[path = "../src/documents/mod.rs"]
+-mod documents;
++pub mod documents;
+ #[path = "../src/group_runtime/store.rs"]
+ mod group_runtime_store;
+ #[path = "../src/research.rs"]

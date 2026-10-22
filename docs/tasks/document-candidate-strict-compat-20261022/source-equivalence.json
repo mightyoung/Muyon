@@ -1,0 +1,8 @@
+{
+  "base": "b13af1124ed1b078609a3b36fcf4f56e5ec27567",
+  "fixed_source": "7557cc9fcecfac92cbec1371ce47112c413729ee",
+  "hook_and_remaining_source_byte_identical": true,
+  "hook_and_remaining_source_sha256": "17d4632e3e6de376615de38b615781f9572816d4148b04b780d65973c087f295",
+  "test_sources_changed": false,
+  "reader_source_imported": false
+}

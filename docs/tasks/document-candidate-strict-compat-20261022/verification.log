@@ -1,0 +1,28 @@
+2026-10-22 07:13:44.128147+00:00
+Source fixed before documentation; unapplied harness patch not part of source.
+
+$ git rev-parse HEAD
+7557cc9fcecfac92cbec1371ce47112c413729ee
+exit=0
+
+$ git apply --check docs/tasks/document-candidate-strict-compat-20261022/UNAPPLIED-HARNESS-EXPORTS.patch
+exit=0
+
+$ cargo test --offline --locked --manifest-path crates/Cargo.toml -p muyon-core --lib documents::candidate_tests
+[Errno 2] No such file or directory: 'cargo'
+exit=127 NOT_RUN tool absent; not pass or compiler/test failure.
+
+$ cargo test --offline --locked --manifest-path crates/Cargo.toml --workspace
+[Errno 2] No such file or directory: 'cargo'
+exit=127 NOT_RUN tool absent; not pass or compiler/test failure.
+
+$ cargo clippy --offline --locked --manifest-path crates/Cargo.toml --workspace --all-targets -- -D warnings
+[Errno 2] No such file or directory: 'cargo'
+exit=127 NOT_RUN tool absent; not pass or compiler/test failure.
+
+$ rustfmt --check --edition 2021 --config skip_children=true crates/muyon-core/src/documents/candidate.rs
+[Errno 2] No such file or directory: 'rustfmt'
+exit=127 NOT_RUN tool absent; not pass or compiler/test failure.
+
+$ git diff --check b13af1124ed1b078609a3b36fcf4f56e5ec27567 HEAD
+exit=0
