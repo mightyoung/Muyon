@@ -1,0 +1,27 @@
+Actual source checkout: 7d7edf027c50f595b5987ebd7a2051487ece71ac
+Actual Rust source manifest SHA256: ed8f6653476aee4c0c050df4bbd282f025cd3adaf1dcc2c5789fe63d2e4bad93
+Runner SHA256: a5c0d6caef2182439fe450d55c6a6b83c77a78df8efc9f11e398a1dbcbed30f3
+Generated module-only harness: /tmp/muyon-evidence-store-harness-pq8j5mlg
+All harness dependencies match repository lock versions/sources/checksums
+   Compiling muyon-core v0.1.0 (/tmp/muyon-evidence-store-harness-pq8j5mlg)
+    Finished `test` profile [unoptimized] target(s) in 4.85s
+     Running unittests lib.rs (/tmp/artifacts-target/debug/deps/muyon_core-b4ac5d1e8b153320)
+
+running 1 test
+test artifacts::local_interactions::source_tests::revocation_hook_processes_more_than_one_batch_without_blocking_revocation ... FAILED
+
+failures:
+
+---- artifacts::local_interactions::source_tests::revocation_hook_processes_more_than_one_batch_without_blocking_revocation stdout ----
+
+thread 'artifacts::local_interactions::source_tests::revocation_hook_processes_more_than_one_batch_without_blocking_revocation' (9652) panicked at /workspace/Muyon/crates/muyon-core/src/artifacts/local_interactions/source_tests.rs:87:93:
+called `Result::unwrap()` on an `Err` value: TextLimit
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    artifacts::local_interactions::source_tests::revocation_hook_processes_more_than_one_batch_without_blocking_revocation
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 84 filtered out; finished in 0.44s
+
+error: test failed, to rerun pass `--lib`

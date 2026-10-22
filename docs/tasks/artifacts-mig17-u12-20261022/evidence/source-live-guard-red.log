@@ -1,0 +1,93 @@
+NEGATIVE CONTROL, only live guard removed: source_head_change_invalidates
+Actual source checkout: negative-control-only-live-guard-removed
+Actual Rust source manifest SHA256: c79c06ce22a63f89e99a6496bfd7f35365f2855065631991010ff34fcc89cd2b
+Runner SHA256: 7c5652f0c33508f6b1069084fbfd65502d860432ff63241b40ca12239be9206d
+Generated module-only harness: /tmp/muyon-evidence-store-harness-cp9m8lef
+All harness dependencies match repository lock versions/sources/checksums
+   Compiling muyon-core-agent-lab v0.1.0 (/tmp/muyon-source-red-zywg5p_j/experiments/redesign/core-agent-lab/core)
+   Compiling muyon-plugin-contract-lab v0.1.0 (/tmp/muyon-source-red-zywg5p_j/experiments/redesign/plugin-contract-lab/core)
+   Compiling muyon-rust-agent-host-lab v0.1.0 (/tmp/muyon-source-red-zywg5p_j/experiments/redesign/rust-agent-host-lab/core)
+   Compiling muyon-web-search-lab v0.1.0 (/tmp/muyon-source-red-zywg5p_j/experiments/redesign/web-search-lab/core)
+   Compiling muyon-core v0.1.0 (/tmp/muyon-evidence-store-harness-cp9m8lef)
+warning: unused variable: `tx`
+   --> /tmp/muyon-source-red-zywg5p_j/crates/muyon-core/src/artifacts/local_sources.rs:127:46
+    |
+127 |     pub(super) fn local_source_binding(&self,tx:&Transaction<'_>,a:&LocalAccess)->Result<()> {
+    |                                              ^^ help: if this is intentional, prefix it with an underscore: `_tx`
+    |
+    = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused variable: `snapshot`
+   --> /tmp/muyon-source-red-zywg5p_j/crates/muyon-core/src/artifacts/local_sources.rs:132:13
+    |
+132 |         let snapshot:Snapshot=decode(cell(row,0)?)?;
+    |             ^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_snapshot`
+
+warning: `muyon-core` (lib test) generated 2 warnings (run `cargo fix --lib -p muyon-core --tests` to apply 2 suggestions)
+    Finished `test` profile [unoptimized] target(s) in 6.53s
+     Running unittests lib.rs (/tmp/artifacts-target/debug/deps/muyon_core-87380d33e82851df)
+
+running 1 test
+test artifacts::local_interactions::source_tests::source_head_change_invalidates_frozen_preview_without_waiting_for_lease ... FAILED
+
+failures:
+
+---- artifacts::local_interactions::source_tests::source_head_change_invalidates_frozen_preview_without_waiting_for_lease stdout ----
+
+thread 'artifacts::local_interactions::source_tests::source_head_change_invalidates_frozen_preview_without_waiting_for_lease' (11166) panicked at /tmp/muyon-source-red-zywg5p_j/crates/muyon-core/src/artifacts/local_interactions/source_tests.rs:30:5:
+assertion failed: s.lookup_local_form_preview("submit", &a).is_err()
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    artifacts::local_interactions::source_tests::source_head_change_invalidates_frozen_preview_without_waiting_for_lease
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 87 filtered out; finished in 0.02s
+
+error: test failed, to rerun pass `--lib`
+NEGATIVE CONTROL, only live guard removed: receipt_tail_source_revocation
+Actual source checkout: negative-control-only-live-guard-removed
+Actual Rust source manifest SHA256: c79c06ce22a63f89e99a6496bfd7f35365f2855065631991010ff34fcc89cd2b
+Runner SHA256: 7c5652f0c33508f6b1069084fbfd65502d860432ff63241b40ca12239be9206d
+Generated module-only harness: /tmp/muyon-evidence-store-harness-ghueh4u6
+All harness dependencies match repository lock versions/sources/checksums
+   Compiling muyon-core v0.1.0 (/tmp/muyon-evidence-store-harness-ghueh4u6)
+warning: unused variable: `tx`
+   --> /tmp/muyon-source-red-zywg5p_j/crates/muyon-core/src/artifacts/local_sources.rs:127:46
+    |
+127 |     pub(super) fn local_source_binding(&self,tx:&Transaction<'_>,a:&LocalAccess)->Result<()> {
+    |                                              ^^ help: if this is intentional, prefix it with an underscore: `_tx`
+    |
+    = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused variable: `snapshot`
+   --> /tmp/muyon-source-red-zywg5p_j/crates/muyon-core/src/artifacts/local_sources.rs:132:13
+    |
+132 |         let snapshot:Snapshot=decode(cell(row,0)?)?;
+    |             ^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_snapshot`
+
+warning: `muyon-core` (lib test) generated 2 warnings (run `cargo fix --lib -p muyon-core --tests` to apply 2 suggestions)
+    Finished `test` profile [unoptimized] target(s) in 5.77s
+     Running unittests lib.rs (/tmp/artifacts-target/debug/deps/muyon_core-87380d33e82851df)
+
+running 1 test
+test artifacts::local_interactions::source_tests::receipt_tail_source_revocation_rolls_back_state_and_receipt_preserving_pending ... FAILED
+
+failures:
+
+---- artifacts::local_interactions::source_tests::receipt_tail_source_revocation_rolls_back_state_and_receipt_preserving_pending stdout ----
+
+thread 'artifacts::local_interactions::source_tests::receipt_tail_source_revocation_rolls_back_state_and_receipt_preserving_pending' (11521) panicked at /tmp/muyon-source-red-zywg5p_j/crates/muyon-core/src/artifacts/local_interactions/source_tests.rs:42:9:
+assertion `left == right` failed
+  left: Committed
+ right: Unknown
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    artifacts::local_interactions::source_tests::receipt_tail_source_revocation_rolls_back_state_and_receipt_preserving_pending
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 87 filtered out; finished in 0.02s
+
+error: test failed, to rerun pass `--lib`
+Observed expected nonzero behavioral results: [101, 101]

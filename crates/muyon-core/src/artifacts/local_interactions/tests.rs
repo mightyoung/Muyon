@@ -2,17 +2,19 @@ use super::*;
 use crate::artifacts::tests::{Fixture, human};
 use crate::contract::*;
 use std::time::{SystemTime, UNIX_EPOCH};
-fn expiry() -> u64 { SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_millis() as u64 + 25_000 }
-fn fixture() -> (Fixture, BusinessStore, LocalAccess) {
+pub(super) fn expiry() -> u64 { SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_millis() as u64 + 25_000 }
+pub(super) fn fixture() -> (Fixture, BusinessStore, LocalAccess) {
     let f = Fixture::new(); let (s, _, _) = f.setup(); s.initialize_artifact_workflows_trusted().unwrap(); s.initialize_local_interactions_trusted().unwrap();
     let p = ArtifactProjectAccess { scope: Scope { workspace_id: "workspace".into(), project_id: Some("project".into()) }, actor_id: "actor".into(), project_revision: Revision::new(1), authority: AuthorityBinding { grant_id: "local-project".into(), generation: Revision::new(1), owner_epoch: "epoch".into() } };
     s.issue_artifact_project_grant_trusted(&p, &[ArtifactProjectOperation::LocalDraft, ArtifactProjectOperation::LocalSubmit, ArtifactProjectOperation::LocalFeedback, ArtifactProjectOperation::ReadOwnLocal], expiry()).unwrap();
-    let reference = LocalObjectRef { object_id: "form".into(), target: LocalTarget::Message { conversation_id: "conversation".into(), message_id: "message".into(), revision: Revision::new(1) }, component_id: "component".into(), component_revision: Revision::new(1), attempt_id: "attempt".into() };
+    super::source_tests::create_source(&s);
+    let proof=super::source_tests::resolved(&s,&p,ArtifactProjectOperation::LocalDraft);
+    let reference = LocalObjectRef { object_id: "form".into(), target: proof.target(), component_id: "component".into(), component_revision: Revision::new(1), attempt_id: "attempt".into() };
     let a = LocalAccess { project: p, object: reference, binding_generation: Revision::new(1) };
-    s.issue_local_binding_trusted(&a, &LocalKind::Form(FormSpec { fields: vec![LocalField::Text, LocalField::Choice, LocalField::Selections], single_options: vec!["one".into(), "two".into()], multiple_options: vec!["a".into(), "b".into()] }), expiry()).unwrap();
+    super::source_tests::issue(&s,&a, &LocalKind::Form(FormSpec { fields: vec![LocalField::Text, LocalField::Choice, LocalField::Selections], single_options: vec!["one".into(), "two".into()], multiple_options: vec!["a".into(), "b".into()] }), expiry()).unwrap();
     (f,s,a)
 }
-fn patch(text: &str, expected: u64) -> LocalMutation { LocalMutation::Patch { expected: Revision::new(expected), changes: vec![FieldChange::Text { value: text.into() }], author: human().author } }
+pub(super) fn patch(text: &str, expected: u64) -> LocalMutation { LocalMutation::Patch { expected: Revision::new(expected), changes: vec![FieldChange::Text { value: text.into() }], author: human().author } }
 #[test]
 fn draft_restart_cas_human_sticky_and_typed_allowlist() {
     let (f,s,a) = fixture();
@@ -40,11 +42,11 @@ fn confirmation_binds_original_values_and_edit_invalidates_preview() {
 #[test]
 fn feedback_exact_revision_permission_and_receipt_tail_revocation() {
     let (_f,s,a)=fixture(); let mut feedback=a.clone(); feedback.object.object_id="feedback".into();
-    s.issue_local_binding_trusted(&feedback,&LocalKind::Feedback,expiry()).unwrap();
+    super::source_tests::issue(&s,&feedback,&LocalKind::Feedback,expiry()).unwrap();
     let op=LocalMutation::React { expected:Revision::new(0), value:Some(FeedbackValue::Helpful) };
     let saved=s.mutate_local_trusted("reaction",&feedback,&op).unwrap(); assert_eq!(saved.status,ArtifactSaveStatus::Committed);
     assert_eq!(s.read_local_feedback(&feedback).unwrap().value,Some(FeedbackValue::Helpful));
-    let mut wrong=feedback.clone(); if let LocalTarget::Message { revision,.. }=&mut wrong.object.target { *revision=Revision::new(2); }
+    let mut wrong=feedback.clone(); if let LocalTarget::Evidence { revision,.. }=&mut wrong.object.target { *revision=Revision::new(2); }
     assert!(s.read_local_feedback(&wrong).is_err());
     s.database().exec("CREATE TRIGGER revoke_local AFTER UPDATE ON artifact_local_intents_v1 WHEN NEW.status='committed' BEGIN UPDATE artifact_local_bindings_v1 SET active=0; END",&[]).unwrap();
     let changed=LocalMutation::React { expected:Revision::new(1),value:Some(FeedbackValue::NotHelpful) };
@@ -73,7 +75,7 @@ fn binding_and_project_generation_changes_invalidate_prepared_confirmation() {
         let tx=s.database().transaction().unwrap(); let kind=s.local_binding(&tx,&a,ArtifactProjectOperation::LocalDraft).unwrap(); drop(tx);
         let mut renewed=a.clone(); renewed.binding_generation=Revision::new(2);
         if rotate_project {renewed.project.authority.generation=Revision::new(2); s.issue_artifact_project_grant_trusted(&renewed.project,&[ArtifactProjectOperation::LocalDraft,ArtifactProjectOperation::LocalSubmit,ArtifactProjectOperation::LocalFeedback,ArtifactProjectOperation::ReadOwnLocal],expiry()).unwrap();}
-        s.issue_local_binding_trusted(&renewed,&kind,expiry()).unwrap();
+        super::source_tests::issue(&s,&renewed,&kind,expiry()).unwrap();
         assert_eq!(s.confirm_local_form_submit_trusted("submit",&renewed,&preview.digest),Err(ContractError::BindingMismatch));
         assert_eq!(s.read_local_form(&renewed).unwrap().values.text,"frozen");
         assert!(s.read_local_form(&renewed).unwrap().submitted_intent.is_none());
@@ -83,12 +85,12 @@ fn binding_and_project_generation_changes_invalidate_prepared_confirmation() {
 #[test]
 fn fields_are_typed_and_zero_component_revision_matches_existing_ui_contract() {
     let (_f,s,a)=fixture(); let mut initial=a.clone(); initial.object.object_id="initial-component".into(); initial.object.component_revision=Revision::new(0);
-    s.issue_local_binding_trusted(&initial,&LocalKind::Form(FormSpec {fields:vec![LocalField::Text],single_options:vec![],multiple_options:vec![]}),expiry()).unwrap();
+    super::source_tests::issue(&s,&initial,&LocalKind::Form(FormSpec {fields:vec![LocalField::Text],single_options:vec![],multiple_options:vec![]}),expiry()).unwrap();
     assert_eq!(s.mutate_local_trusted("initial-save",&initial,&patch("local only",0)).unwrap().status,ArtifactSaveStatus::Committed);
     assert!(serde_json::from_str::<FieldChange>(r#"{"field":"invoke_tool","method":"send"}"#).is_err());
     assert!(serde_json::from_str::<FieldChange>(r#"{"field":"text","value":"hello","method":"execute"}"#).is_err());
-    let mut bad=initial.clone(); bad.object.object_id="bad-source".into(); if let LocalTarget::Message {revision,..}=&mut bad.object.target{*revision=Revision::new(0);}
-    assert_eq!(s.issue_local_binding_trusted(&bad,&LocalKind::Feedback,expiry()),Err(ContractError::InvalidRevision));
+    let mut bad=initial.clone(); bad.object.object_id="bad-source".into(); if let LocalTarget::Evidence {revision,..}=&mut bad.object.target{*revision=Revision::new(0);}
+    assert_eq!(super::source_tests::issue(&s,&bad,&LocalKind::Feedback,expiry()),Err(ContractError::InvalidRevision));
 }
 #[test]
 fn mutation_only_binding_can_be_revoked_without_read_permission() {
@@ -96,7 +98,7 @@ fn mutation_only_binding_can_be_revoked_without_read_permission() {
     for (kind,permission,id) in [(LocalKind::Feedback,ArtifactProjectOperation::LocalFeedback,"only-feedback"),(LocalKind::Form(FormSpec {fields:vec![LocalField::Text],single_options:vec![],multiple_options:vec![]}),ArtifactProjectOperation::LocalDraft,"only-draft")] {
         let mut limited=a.clone(); limited.object.object_id=id.into(); limited.project.authority.grant_id=id.into();
         s.issue_artifact_project_grant_trusted(&limited.project,&[permission],expiry()).unwrap();
-        s.issue_local_binding_trusted(&limited,&kind,expiry()).unwrap();
+        super::source_tests::issue(&s,&limited,&kind,expiry()).unwrap();
         assert!(s.read_local_form(&limited).is_err());
         s.revoke_local_binding_trusted(&limited).unwrap();
         let tx=s.database().transaction().unwrap(); assert!(s.local_binding(&tx,&limited,permission).is_err()); drop(tx);
@@ -144,8 +146,8 @@ fn uncertain_preview_write_and_corrupt_original_review_never_submit() {
 #[test]
 fn receipt_tail_policy_changes_keep_feedback_and_original_pending_atomic() {
     for mutation in ["UPDATE artifact_local_bindings_v1 SET expires_at_ms='0'","UPDATE artifact_local_bindings_v1 SET generation='999'","UPDATE artifact_project_grants_v1 SET active=0","UPDATE artifact_project_grants_v1 SET expires_at_ms='0'","UPDATE artifact_project_grants_v1 SET generation='999'"] {
-        let (_f,s,a)=fixture(); let mut b=a.clone(); b.object.object_id="reaction-object".into(); b.object.target=LocalTarget::Evidence {evidence_id:"evidence".into(),revision:Revision::new(1)};
-        s.issue_local_binding_trusted(&b,&LocalKind::Feedback,expiry()).unwrap();
+        let (_f,s,a)=fixture(); let mut b=a.clone(); b.object.object_id="reaction-object".into();
+        super::source_tests::issue(&s,&b,&LocalKind::Feedback,expiry()).unwrap();
         let first=LocalMutation::React {expected:Revision::new(0),value:Some(FeedbackValue::Helpful)}; s.mutate_local_trusted("first",&b,&first).unwrap();
         s.database().exec(&format!("CREATE TRIGGER late_policy AFTER UPDATE ON artifact_local_intents_v1 WHEN NEW.status='committed' BEGIN {mutation}; END"),&[]).unwrap();
         let next=LocalMutation::React {expected:Revision::new(1),value:Some(FeedbackValue::NotHelpful)};
@@ -175,7 +177,7 @@ fn binding_issue_checks_the_exact_requested_field_policy_after_its_write() {
     let requested=LocalKind::Form(FormSpec {fields:vec![LocalField::Text],single_options:vec![],multiple_options:vec![]});
     s.database().exec("CREATE TRIGGER issue_policy AFTER INSERT ON artifact_local_bindings_v1 WHEN NEW.object_id='issue-policy' BEGIN UPDATE artifact_local_bindings_v1 SET kind_json='{\"kind\":\"feedback\"}' WHERE object_id='issue-policy'; END",&[]).unwrap();
     // A different but valid kind is rejected after issuance; no row survives.
-    assert!(s.issue_local_binding_trusted(&new,&requested,expiry()).is_err());
+    assert!(super::source_tests::issue(&s,&new,&requested,expiry()).is_err());
     assert!(s.database().query("SELECT * FROM artifact_local_bindings_v1 WHERE object_id='issue-policy'",&[]).unwrap().is_empty());
 }
 #[test]

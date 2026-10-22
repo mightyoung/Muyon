@@ -1,5 +1,5 @@
 //! Bounded local component state, not business execution or canonical source data.
-//! Host must resolve the actual original source and policy before issuing leases.
+//! Actual Evidence source authority is revalidated in each local transaction.
 use super::*;
 use super::save_journal::{requires_original_lookup, ArtifactSaveFailure, JournalDomain};
 use crate::contract::{RecoveryAction,AuthorityBinding};
@@ -23,7 +23,7 @@ pub enum LocalTarget {
 #[serde(deny_unknown_fields)]
 pub struct LocalObjectRef { pub object_id:String, pub target:LocalTarget, pub component_id:String, pub component_revision:Revision, pub attempt_id:String }
 impl LocalObjectRef {
-    fn validate(&self)->Result<()> {
+    pub(super) fn validate(&self)->Result<()> {
         identifier(&self.object_id)?; identifier(&self.component_id)?; identifier(&self.attempt_id)?;
         let revision=match &self.target {
             LocalTarget::Message { conversation_id,message_id,revision } => { identifier(conversation_id)?; identifier(message_id)?; revision },
@@ -126,6 +126,7 @@ impl BusinessStore {
         let mut present=0; for (name,_) in SCHEMA { present+=sql(self.database().query("SELECT name FROM sqlite_master WHERE type='table' AND name=?",&[name]))?.len(); }
         if present==0 { for (_,ddl) in SCHEMA { sql(self.database().exec(ddl,&[]))?; } sql(self.database().exec("INSERT INTO artifact_local_meta_v1 VALUES('version','1')",&[]))?; sql(self.database().exec("INSERT INTO artifact_local_meta_v1 VALUES('workspace',?)",&[self.workspace_id()]))?; }
         else if present!=SCHEMA.len() { return Err(ContractError::InvalidVersion); }
+        self.initialize_local_sources_in_transaction(&tx)?;
         self.local_schema()?; sql(tx.commit())
     }
     fn local_schema(&self)->Result<()> {
@@ -133,21 +134,26 @@ impl BusinessStore {
         for (name,ddl) in SCHEMA { let rows=sql(self.database().query("SELECT sql FROM sqlite_master WHERE type='table' AND name=?",&[name]))?; if rows.len()!=1 || cell(&rows[0],0)?!=*ddl { return Err(ContractError::InvalidVersion); } }
         if sql(self.database().query("SELECT key,value FROM artifact_local_meta_v1 ORDER BY key",&[]))?!=vec![vec![Some("version".into()),Some("1".into())],vec![Some("workspace".into()),Some(self.workspace_id().into())]] { return Err(ContractError::InvalidVersion); } Ok(())
     }
-    /// HOST ONLY after resolving the real original object and actual source policy.
-    /// A model payload is not source resolution. Revoke when source/policy changes.
+    /// Renew an already resolved exact Evidence binding. Initial issuance requires
+    /// issue_local_evidence_binding_trusted; unresolved Message is unsupported.
     pub fn issue_local_binding_trusted(&self,a:&LocalAccess,kind:&LocalKind,expires:u64)->Result<()> {
+        let tx=sql(self.database().transaction())?;
+        self.issue_local_binding_in_transaction(&tx,a,kind,expires)?; sql(tx.commit())
+    }
+    pub(super) fn issue_local_binding_in_transaction(&self,tx:&Transaction<'_>,a:&LocalAccess,kind:&LocalKind,expires:u64)->Result<()> {
         a.object.validate()?; if let LocalKind::Form(spec)=kind { spec.validate()?; }
-        let tx=sql(self.database().transaction())?; self.local_schema()?;
+        self.local_schema()?;
+        self.local_source_binding(tx,a)?;
         let permission=match kind {LocalKind::Form(_)=>ArtifactProjectOperation::LocalDraft,LocalKind::Feedback=>ArtifactProjectOperation::LocalFeedback};
-        self.artifact_project_authorize(&tx,&a.project,permission)?;
+        self.artifact_project_authorize(tx,&a.project,permission)?;
         let clock=now()?; if expires<=clock || expires>clock.checked_add(30_000).ok_or(ContractError::InvalidAuthority)? { return Err(ContractError::InvalidAuthority); }
         let reference=encode(&a.object)?; let spec=encode(kind)?;
         let rows=sql(self.database().query("SELECT CASE WHEN length(CAST(binding_json AS BLOB))<=8192 THEN binding_json ELSE NULL END,CASE WHEN length(CAST(kind_json AS BLOB))<=8192 THEN kind_json ELSE NULL END,CASE WHEN length(CAST(generation AS BLOB))<=20 THEN generation ELSE NULL END FROM artifact_local_bindings_v1 WHERE project_id=? AND actor_id=? AND object_id=?",&[a.project.project_id()?,&a.project.actor_id,&a.object.object_id]))?;
         let expected=if rows.is_empty(){Revision::new(1)}else{if cell(&rows[0],0)?!=reference || cell(&rows[0],1)?!=spec {return Err(ContractError::BindingMismatch);} Revision::parse(cell(&rows[0],2)?)?.next()?};
         if a.binding_generation!=expected {return Err(ContractError::InvalidAuthority);}
         sql(self.database().exec("INSERT INTO artifact_local_bindings_v1 VALUES(?,?,?,?,?,?,?,?,?,?,1) ON CONFLICT(project_id,actor_id,object_id) DO UPDATE SET generation=excluded.generation,grant_id=excluded.grant_id,grant_generation=excluded.grant_generation,owner_epoch=excluded.owner_epoch,expires_at_ms=excluded.expires_at_ms,active=1",&[a.project.project_id()?,&a.project.actor_id,&a.object.object_id,&reference,&spec,a.binding_generation.as_str(),&a.project.authority.grant_id,a.project.authority.generation.as_str(),&a.project.authority.owner_epoch,&expires.to_string()]))?;
-        if self.local_binding(&tx,a,permission)?!=*kind {return Err(ContractError::BindingMismatch);}
-        self.artifact_project_authorize(&tx,&a.project,permission)?; sql(tx.commit())
+        if self.local_binding(tx,a,permission)?!=*kind {return Err(ContractError::BindingMismatch);}
+        self.artifact_project_authorize(tx,&a.project,permission)?; Ok(())
     }
     pub fn revoke_local_binding_trusted(&self,a:&LocalAccess)->Result<()> {
         let tx=sql(self.database().transaction())?; self.local_schema()?;
@@ -162,6 +168,7 @@ impl BusinessStore {
     }
     fn local_binding(&self,tx:&Transaction<'_>,a:&LocalAccess,permission:ArtifactProjectOperation)->Result<LocalKind> {
         self.local_schema()?; self.artifact_project_authorize(tx,&a.project,permission)?; a.object.validate()?;
+        self.local_source_binding(tx,a)?;
         let rows=sql(self.database().query("SELECT CASE WHEN length(CAST(binding_json AS BLOB))<=8192 THEN binding_json ELSE NULL END,CASE WHEN length(CAST(kind_json AS BLOB))<=8192 THEN kind_json ELSE NULL END,CASE WHEN length(CAST(expires_at_ms AS BLOB))<=20 THEN expires_at_ms ELSE NULL END FROM artifact_local_bindings_v1 WHERE project_id=? AND actor_id=? AND object_id=? AND generation=? AND grant_id=? AND grant_generation=? AND owner_epoch=? AND active=1",&[a.project.project_id()?,&a.project.actor_id,&a.object.object_id,a.binding_generation.as_str(),&a.project.authority.grant_id,a.project.authority.generation.as_str(),&a.project.authority.owner_epoch]))?;
         let row=rows.first().ok_or(ContractError::InvalidAuthority)?;
         if decode::<LocalObjectRef>(cell(row,0)?)?!=a.object {return Err(ContractError::BindingMismatch);}
@@ -205,7 +212,8 @@ impl BusinessStore {
         identifier(intent)?; let result=(|| {let tx=sql(self.database().transaction())?;
         let LocalKind::Form(spec)=self.local_binding(&tx,a,ArtifactProjectOperation::LocalSubmit)? else{return Err(ContractError::UnsupportedOperation);};
         self.artifact_project_authorize(&tx,&a.project,ArtifactProjectOperation::ReadOwnLocal)?;
-        let state=self.form_state(a,&spec)?; if &state.revision!=expected {return Err(ContractError::RevisionConflict);} if state.submitted_intent.is_some() || state.pending_intent.is_some() {return Err(ContractError::IntentConflict);}
+        let state=self.form_state(a,&spec)?; if &state.revision!=expected {return Err(ContractError::RevisionConflict);}
+        if state.submitted_intent.is_some() || state.pending_intent.is_some() {return Err(ContractError::IntentConflict);}
         let request=Request {intent:intent.into(),scope:a.project.scope.clone(),actor:a.project.actor_id.clone(),object:a.object.clone(),command:Command::Confirm {expected:expected.clone(),values:state.values.clone(),spec:spec.clone()},confirmation:Some(ReviewAuthority::current(a))};
         let (json,digest)=request.binding()?;
         let rows=sql(self.database().query("SELECT CASE WHEN length(CAST(request_json AS BLOB))<=16384 THEN request_json ELSE NULL END FROM artifact_local_reviews_v1 WHERE intent_id=?",&[intent]))?;
@@ -245,7 +253,8 @@ impl BusinessStore {
     fn local_project(&self,request:&Request,a:&LocalAccess)->Result<()> {if request.scope!=a.project.scope || request.actor!=a.project.actor_id || request.object!=a.object {Err(ContractError::BindingMismatch)}else{Ok(())}}
     fn local_projection(&self,intent:&str,row:&[Option<String>],p:&ArtifactProjectAccess)->Result<LocalOutcome> {
         let request:Request=decode(cell(row,1)?)?; let digest=request.binding()?.1;
-        if request.intent!=intent || cell(row,0)?!=digest {return Err(ContractError::StorageCorrupt);} if request.scope!=p.scope || request.actor!=p.actor_id {return Err(ContractError::InvalidAuthority);}
+        if request.intent!=intent || cell(row,0)?!=digest {return Err(ContractError::StorageCorrupt);}
+        if request.scope!=p.scope || request.actor!=p.actor_id {return Err(ContractError::InvalidAuthority);}
         match cell(row,2)? {
             "pending"=>Ok(LocalOutcome::failure(ContractError::Unknown)),
             "committed"=>{let receipt:LocalReceipt=decode(cell(row,3)?)?; if receipt.intent_id!=intent || receipt.digest!=digest || receipt.object!=request.object || receipt.revision!=request.expected().next()? || receipt.result!=request.result() {return Err(ContractError::StorageCorrupt);} Ok(LocalOutcome {status:ArtifactSaveStatus::Committed,receipt:Some(receipt),error:None,recovery_action:RecoveryAction::None})},
@@ -281,8 +290,11 @@ impl BusinessStore {
         let expected=request.expected(); let next=expected.next()?;
         match (&request.command,kind) {
             (Command::Mutation {mutation:LocalMutation::Patch {changes,author,..}},LocalKind::Form(spec))=>{
-                let mut state=self.form_state(a,spec)?; if &state.revision!=expected{return Err(ContractError::RevisionConflict);} if state.submitted_intent.is_some(){return Err(ContractError::IntentConflict);}
-                for change in changes {let field=change.field(); if matches!(author,AnnotationAuthor::Ai {..}) && field!=LocalField::Text {return Err(ContractError::UnsupportedOperation);} if !spec.fields.contains(&field){return Err(ContractError::InvalidPayload);} if matches!(author,AnnotationAuthor::Ai {..}) && state.manual_fields.contains(&field){return Err(ContractError::IntentConflict);}
+                let mut state=self.form_state(a,spec)?; if &state.revision!=expected{return Err(ContractError::RevisionConflict);}
+                if state.submitted_intent.is_some(){return Err(ContractError::IntentConflict);}
+                for change in changes {let field=change.field(); if matches!(author,AnnotationAuthor::Ai {..}) && field!=LocalField::Text {return Err(ContractError::UnsupportedOperation);}
+                    if !spec.fields.contains(&field){return Err(ContractError::InvalidPayload);}
+                    if matches!(author,AnnotationAuthor::Ai {..}) && state.manual_fields.contains(&field){return Err(ContractError::IntentConflict);}
                     match change {FieldChange::Text {value}=>state.values.text=value.clone(),FieldChange::Choice {value}=>state.values.choice=value.clone(),FieldChange::Selections {values}=>state.values.selections=values.clone()};
                     if let Some(origin)=state.field_origins.iter_mut().find(|origin|origin.field==field){origin.author=author.clone();}else{state.field_origins.push(FieldOrigin {field,author:author.clone()});}
                     if matches!(author,AnnotationAuthor::Human {..}) && !state.manual_fields.contains(&field){state.manual_fields.push(field);}
@@ -291,7 +303,8 @@ impl BusinessStore {
             },
             (Command::Confirm {values,spec:frozen_spec,..},LocalKind::Form(spec))=>{
                 if frozen_spec!=spec {return Err(ContractError::BindingMismatch);}
-                let mut state=self.form_state(a,spec)?; if &state.revision!=expected || state.values!=*values{return Err(ContractError::RevisionConflict);} if state.submitted_intent.is_some(){return Err(ContractError::IntentConflict);}
+                let mut state=self.form_state(a,spec)?; if &state.revision!=expected || state.values!=*values{return Err(ContractError::RevisionConflict);}
+                if state.submitted_intent.is_some(){return Err(ContractError::IntentConflict);}
                 state.revision=next.clone(); state.submitted_intent=Some(request.intent.clone()); state.pending_intent=None; self.local_put_form(a,expected,&state)?;
             },
             (Command::Mutation {mutation:LocalMutation::React {value,..}},LocalKind::Feedback)=>{
@@ -318,3 +331,6 @@ impl BusinessStore {
 }
 #[cfg(test)]
 mod tests;
+
+#[cfg(test)]
+mod source_tests;

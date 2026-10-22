@@ -1,0 +1,27 @@
+Actual source checkout: 7d7edf027c50f595b5987ebd7a2051487ece71ac
+Actual Rust source manifest SHA256: 02e6a56e12dc7fdcc16d7c74567b2a433e7e1718c1e8ed03e049aec34e25d6da
+Runner SHA256: a5c0d6caef2182439fe450d55c6a6b83c77a78df8efc9f11e398a1dbcbed30f3
+Generated module-only harness: /tmp/muyon-evidence-store-harness-u_zn2lvh
+All harness dependencies match repository lock versions/sources/checksums
+   Compiling muyon-core v0.1.0 (/tmp/muyon-evidence-store-harness-u_zn2lvh)
+    Finished `test` profile [unoptimized] target(s) in 4.65s
+     Running unittests lib.rs (/tmp/artifacts-target/debug/deps/muyon_core-b4ac5d1e8b153320)
+
+running 1 test
+test artifacts::local_interactions::source_tests::persisted_source_cannot_pair_an_evidence_id_with_another_real_document ... FAILED
+
+failures:
+
+---- artifacts::local_interactions::source_tests::persisted_source_cannot_pair_an_evidence_id_with_another_real_document stdout ----
+
+thread 'artifacts::local_interactions::source_tests::persisted_source_cannot_pair_an_evidence_id_with_another_real_document' (10130) panicked at /workspace/Muyon/crates/muyon-core/src/artifacts/local_interactions/source_tests.rs:132:5:
+assertion failed: s.read_local_form(&a).is_err()
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    artifacts::local_interactions::source_tests::persisted_source_cannot_pair_an_evidence_id_with_another_real_document
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 87 filtered out; finished in 0.02s
+
+error: test failed, to rerun pass `--lib`

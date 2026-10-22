@@ -1,0 +1,29 @@
+Actual source checkout: 7d7edf027c50f595b5987ebd7a2051487ece71ac
+Actual Rust source manifest SHA256: 0ccfea9054891dd3281f1602855d2fc83f6c2b38e81c03e0b6d0ddc23dafe42d
+Runner SHA256: 7c5652f0c33508f6b1069084fbfd65502d860432ff63241b40ca12239be9206d
+Generated module-only harness: /tmp/muyon-evidence-store-harness-qv8jkstf
+All harness dependencies match repository lock versions/sources/checksums
+    Checking muyon-core v0.1.0 (/tmp/muyon-evidence-store-harness-qv8jkstf)
+error: method `clone_blob_reference_in_transaction` is never used
+   --> /workspace/Muyon/crates/muyon-core/src/blobs.rs:646:19
+    |
+313 | impl BusinessStore {
+    | ------------------ method in this implementation
+...
+646 |     pub(crate) fn clone_blob_reference_in_transaction(
+    |                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = note: `-D dead-code` implied by `-D warnings`
+    = help: to override `-D warnings` add `#[allow(dead_code)]`
+
+error: method `document_clone_in_transaction` is never used
+   --> /workspace/Muyon/crates/muyon-core/src/documents/storage.rs:449:19
+    |
+ 88 | impl BusinessStore {
+    | ------------------ method in this implementation
+...
+449 |     pub(crate) fn document_clone_in_transaction(
+    |                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+error: could not compile `muyon-core` (lib) due to 2 previous errors
+warning: build failed, waiting for other jobs to finish...

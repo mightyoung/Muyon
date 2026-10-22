@@ -1,0 +1,130 @@
+Actual source checkout: 7d7edf027c50f595b5987ebd7a2051487ece71ac
+Actual Rust source manifest SHA256: 4415790b578e9291c283235491902845150f1f3110ccfa9da4c6fe925d259196
+Runner SHA256: 7c5652f0c33508f6b1069084fbfd65502d860432ff63241b40ca12239be9206d
+Generated module-only harness: /tmp/muyon-evidence-store-harness-8wxxg40k
+All harness dependencies match repository lock versions/sources/checksums
+   Compiling proc-macro2 v1.0.107
+   Compiling quote v1.0.47
+   Compiling unicode-ident v1.0.27
+    Checking typenum v1.20.1
+   Compiling serde_core v1.0.229
+    Checking muyon-core-agent-lab v0.1.0 (/workspace/Muyon/experiments/redesign/core-agent-lab/core)
+   Compiling zmij v1.0.23
+    Checking muyon-plugin-contract-lab v0.1.0 (/workspace/Muyon/experiments/redesign/plugin-contract-lab/core)
+    Checking hybrid-array v0.4.15
+   Compiling syn v3.0.9
+   Compiling serde_json v1.0.154
+    Checking const-oid v0.10.2
+   Compiling serde v1.0.229
+    Checking block-buffer v0.12.1
+    Checking crypto-common v0.2.2
+    Checking muyon-rust-agent-host-lab v0.1.0 (/workspace/Muyon/experiments/redesign/rust-agent-host-lab/core)
+    Checking digest v0.11.3
+    Checking memchr v2.8.3
+    Checking itoa v1.0.18
+    Checking cpufeatures v0.3.1
+    Checking tinyvec v1.13.3
+    Checking cfg-if v1.0.5
+    Checking sha2 v0.11.1
+    Checking unicode-normalization v0.1.25
+    Checking muyon-web-search-lab v0.1.0 (/workspace/Muyon/experiments/redesign/web-search-lab/core)
+   Compiling serde_derive v1.0.229
+    Checking muyon-core v0.1.0 (/tmp/muyon-evidence-store-harness-8wxxg40k)
+error: this looks like an `else if` but the `else` is missing
+   --> /workspace/Muyon/crates/muyon-core/src/artifacts/local_interactions.rs:215:121
+    |
+215 | ...   let state=self.form_state(a,&spec)?; if &state.revision!=expected {return Err(ContractError::RevisionConflict);} if state.submitted...
+    |                                                                                                                       ^
+    |
+    = note: to remove this lint, add the missing `else` or add a new line before the second `if`
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.93.0/index.html#possible_missing_else
+    = note: `-D clippy::possible-missing-else` implied by `-D warnings`
+    = help: to override `-D warnings` add `#[allow(clippy::possible_missing_else)]`
+
+error: this looks like an `else if` but the `else` is missing
+   --> /workspace/Muyon/crates/muyon-core/src/artifacts/local_interactions.rs:255:103
+    |
+255 | ...   if request.intent!=intent || cell(row,0)?!=digest {return Err(ContractError::StorageCorrupt);} if request.scope!=p.scope || request...
+    |                                                                                                     ^
+    |
+    = note: to remove this lint, add the missing `else` or add a new line before the second `if`
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.93.0/index.html#possible_missing_else
+
+error: this looks like an `else if` but the `else` is missing
+   --> /workspace/Muyon/crates/muyon-core/src/artifacts/local_interactions.rs:291:131
+    |
+291 | ...   let mut state=self.form_state(a,spec)?; if &state.revision!=expected{return Err(ContractError::RevisionConflict);} if state.submitt...
+    |                                                                                                                         ^
+    |
+    = note: to remove this lint, add the missing `else` or add a new line before the second `if`
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.93.0/index.html#possible_missing_else
+
+error: this looks like an `else if` but the `else` is missing
+   --> /workspace/Muyon/crates/muyon-core/src/artifacts/local_interactions.rs:292:189
+    |
+292 | ...ocalField::Text {return Err(ContractError::UnsupportedOperation);} if !spec.fields.contains(&field){return Err(ContractError::InvalidP...
+    |                                                                      ^
+    |
+    = note: to remove this lint, add the missing `else` or add a new line before the second `if`
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.93.0/index.html#possible_missing_else
+
+error: this looks like an `else if` but the `else` is missing
+   --> /workspace/Muyon/crates/muyon-core/src/artifacts/local_interactions.rs:292:266
+    |
+292 | ...ields.contains(&field){return Err(ContractError::InvalidPayload);} if matches!(author,AnnotationAuthor::Ai {..}) && state.manual_field...
+    |                                                                      ^
+    |
+    = note: to remove this lint, add the missing `else` or add a new line before the second `if`
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.93.0/index.html#possible_missing_else
+
+error: this looks like an `else if` but the `else` is missing
+   --> /workspace/Muyon/crates/muyon-core/src/artifacts/local_interactions.rs:301:156
+    |
+301 | ...tate.values!=*values{return Err(ContractError::RevisionConflict);} if state.submitted_intent.is_some(){return Err(ContractError::Inten...
+    |                                                                      ^
+    |
+    = note: to remove this lint, add the missing `else` or add a new line before the second `if`
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.93.0/index.html#possible_missing_else
+
+error: method `clone_blob_reference_in_transaction` is never used
+   --> /workspace/Muyon/crates/muyon-core/src/blobs.rs:646:19
+    |
+313 | impl BusinessStore {
+    | ------------------ method in this implementation
+...
+646 |     pub(crate) fn clone_blob_reference_in_transaction(
+    |                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = note: `-D dead-code` implied by `-D warnings`
+    = help: to override `-D warnings` add `#[allow(dead_code)]`
+
+error: method `document_clone_in_transaction` is never used
+   --> /workspace/Muyon/crates/muyon-core/src/documents/storage.rs:449:19
+    |
+ 88 | impl BusinessStore {
+    | ------------------ method in this implementation
+...
+449 |     pub(crate) fn document_clone_in_transaction(
+    |                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+error: this expression creates a reference which is immediately dereferenced by the compiler
+   --> /workspace/Muyon/crates/muyon-core/src/artifacts/local_interactions.rs:148:41
+    |
+148 |         self.artifact_project_authorize(&tx,&a.project,permission)?;
+    |                                         ^^^ help: change this to: `tx`
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.93.0/index.html#needless_borrow
+    = note: `-D clippy::needless-borrow` implied by `-D warnings`
+    = help: to override `-D warnings` add `#[allow(clippy::needless_borrow)]`
+
+error: this expression creates a reference which is immediately dereferenced by the compiler
+   --> /workspace/Muyon/crates/muyon-core/src/artifacts/local_interactions.rs:155:31
+    |
+155 |         if self.local_binding(&tx,a,permission)?!=*kind {return Err(ContractError::BindingMismatch);}
+    |                               ^^^ help: change this to: `tx`
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.93.0/index.html#needless_borrow
+
+error: could not compile `muyon-core` (lib) due to 10 previous errors
+warning: build failed, waiting for other jobs to finish...
+error: could not compile `muyon-core` (lib test) due to 8 previous errors

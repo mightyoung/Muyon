@@ -1,0 +1,4 @@
+Pinned official Rust 1.93.1 toolchain verified against inherited Evidence provenance. Installed only /tmp/artifacts-rust/toolchain; CARGO_HOME=/tmp/artifacts-cargo, locked dependency fetch.
+Channel manifest SHA256 4812a3c610bacc74eed12c89c312e540722dccccd867bd55096402da13b3a516
+Clippy https://static.rust-lang.org/dist/2026-02-12/clippy-1.93.1-x86_64-unknown-linux-gnu.tar.xz 60c0ce83ecc1700de724404a928c30d096c178a610c6707d4f06cee25284cc02
+LIBRARY_PATH=/tmp/artifacts-link: libsqlite3.so symlink to preexisting /usr/lib/x86_64-linux-gnu/libsqlite3.so.0, no system installation.

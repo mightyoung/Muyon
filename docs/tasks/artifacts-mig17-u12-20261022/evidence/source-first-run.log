@@ -1,0 +1,76 @@
+Actual source checkout: 7d7edf027c50f595b5987ebd7a2051487ece71ac
+Actual Rust source manifest SHA256: a48e94435e91d974689abb439b8b5ec7149a78b18185b60f3a7b3e7b05fef80f
+Runner SHA256: a5c0d6caef2182439fe450d55c6a6b83c77a78df8efc9f11e398a1dbcbed30f3
+Generated module-only harness: /tmp/muyon-evidence-store-harness-2lemawap
+All harness dependencies match repository lock versions/sources/checksums
+   Compiling proc-macro2 v1.0.107
+   Compiling unicode-ident v1.0.27
+   Compiling quote v1.0.47
+   Compiling typenum v1.20.1
+   Compiling serde_core v1.0.229
+   Compiling zmij v1.0.23
+   Compiling muyon-core-agent-lab v0.1.0 (/workspace/Muyon/experiments/redesign/core-agent-lab/core)
+   Compiling hybrid-array v0.4.15
+   Compiling syn v3.0.9
+   Compiling block-buffer v0.12.1
+   Compiling crypto-common v0.2.2
+   Compiling muyon-plugin-contract-lab v0.1.0 (/workspace/Muyon/experiments/redesign/plugin-contract-lab/core)
+   Compiling serde v1.0.229
+   Compiling const-oid v0.10.2
+   Compiling serde_json v1.0.154
+   Compiling digest v0.11.3
+   Compiling muyon-rust-agent-host-lab v0.1.0 (/workspace/Muyon/experiments/redesign/rust-agent-host-lab/core)
+   Compiling cpufeatures v0.3.1
+   Compiling tinyvec v1.13.3
+   Compiling itoa v1.0.18
+   Compiling cfg-if v1.0.5
+   Compiling memchr v2.8.3
+   Compiling sha2 v0.11.1
+   Compiling serde_derive v1.0.229
+   Compiling unicode-normalization v0.1.25
+   Compiling muyon-web-search-lab v0.1.0 (/workspace/Muyon/experiments/redesign/web-search-lab/core)
+   Compiling muyon-core v0.1.0 (/tmp/muyon-evidence-store-harness-2lemawap)
+    Finished `test` profile [unoptimized] target(s) in 9.10s
+     Running unittests lib.rs (/tmp/artifacts-target/debug/deps/muyon_core-b4ac5d1e8b153320)
+
+running 37 tests
+test artifacts::local_interactions::source_tests::source_head_change_invalidates_frozen_preview_without_waiting_for_lease ... ok
+test artifacts::local_interactions::source_tests::revocation_hook_is_atomic_and_never_replays_original_intents ... ok
+test artifacts::local_interactions::source_tests::actual_evidence_identity_quote_and_source_scope_are_required ... ok
+test artifacts::local_interactions::source_tests::unsupported_message_or_unresolved_evidence_cannot_issue_binding ... ok
+test artifacts::local_interactions::source_tests::receipt_tail_source_revocation_rolls_back_state_and_receipt_preserving_pending ... ok
+test artifacts::local_interactions::tests::actor_scope_epoch_generation_and_expiry_do_not_rebind_local_values ... ok
+test artifacts::local_interactions::tests::binding_issue_checks_the_exact_requested_field_policy_after_its_write ... ok
+test artifacts::local_interactions::tests::changed_allowlist_invalidates_frozen_confirmation_without_retargeting_values ... ok
+test artifacts::local_interactions::tests::binding_and_project_generation_changes_invalidate_prepared_confirmation ... ok
+test artifacts::local_interactions::tests::confirmation_binds_original_values_and_edit_invalidates_preview ... ok
+test artifacts::local_interactions::tests::draft_restart_cas_human_sticky_and_typed_allowlist ... ok
+test artifacts::local_interactions::tests::explicit_choices_are_human_selections_and_suggestions_do_not_select ... ok
+test artifacts::local_interactions::tests::fields_are_typed_and_zero_component_revision_matches_existing_ui_contract ... ok
+test artifacts::local_interactions::tests::feedback_exact_revision_permission_and_receipt_tail_revocation ... ok
+test artifacts::local_interactions::tests::human_selection_does_not_relabel_suggested_text_as_human_content ... ok
+test artifacts::local_interactions::tests::mutation_only_binding_can_be_revoked_without_read_permission ... ok
+test artifacts::local_interactions::tests::receipt_tail_cannot_change_the_allowed_field_policy ... ok
+test artifacts::local_interactions::tests::pending_draft_save_is_locked_and_lookup_is_private_read_only ... ok
+test artifacts::tests::exact_scope_and_write_permission_are_required ... ok
+test artifacts::tests::failed_publication_rolls_back_artifact_and_document_heads ... ok
+test artifacts::tests::invalid_sources_schema_and_oversized_rows_fail_closed ... ok
+test artifacts::local_interactions::tests::uncertain_preview_write_and_corrupt_original_review_never_submit ... ok
+test artifacts::tests::human_revision_is_atomic_and_generated_cannot_overwrite_it ... ok
+test artifacts::tests::revocation_deletion_wrong_project_and_missing_source_deny_history ... ok
+test artifacts::workflow_tests::catalog_requires_independent_project_grant_and_returns_inventory_only ... ok
+test artifacts::tests::restart_restores_exact_snapshot_and_source_advance_fails_closed ... ok
+test artifacts::workflow_tests::effect_unknown_uses_original_lookup_without_writing_a_rejection ... ok
+test artifacts::workflow_tests::independent_project_grants_reject_expiry_generation_epoch_and_project_changes ... ok
+test artifacts::workflow_tests::own_receipt_permission_never_implies_discovery_or_another_actors_journal ... ok
+test artifacts::workflow_tests::pending_storage_failure_never_reexecutes_and_lookup_never_writes ... ok
+test artifacts::workflow_tests::historical_output_and_source_require_explicit_core_history_policy ... ok
+test artifacts::workflow_tests::receipt_write_failure_rolls_back_publication_and_keeps_pending_without_retry ... ok
+test artifacts::workflow_tests::rejected_projection_requires_a_durable_terminal_row ... ok
+test artifacts::workflow_tests::save_journal_duplicates_return_original_receipt_and_parameter_change_conflicts ... ok
+test artifacts::workflow_tests::revise_receipt_is_atomic_and_survives_later_head_change ... ok
+test artifacts::local_interactions::tests::receipt_tail_policy_changes_keep_feedback_and_original_pending_atomic ... ok
+test artifacts::workflow_tests::receipt_tail_invalidation_rolls_back_all_effects_and_preserves_original_pending ... ok
+
+test result: ok. 37 passed; 0 failed; 0 ignored; 0 measured; 47 filtered out; finished in 0.51s
+

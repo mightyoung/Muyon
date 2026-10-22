@@ -1,0 +1,675 @@
+RUN cargo test --offline --manifest-path crates/Cargo.toml -p muyon-core artifacts
+   Compiling proc-macro2 v1.0.107
+   Compiling quote v1.0.47
+   Compiling typenum v1.20.1
+   Compiling unicode-ident v1.0.27
+   Compiling serde_core v1.0.229
+   Compiling zmij v1.0.23
+   Compiling muyon-core-agent-lab v0.1.0 (/tmp/muyon-artifact-verify-s8gkxk50/experiments/redesign/core-agent-lab/core)
+   Compiling syn v3.0.9
+   Compiling hybrid-array v0.4.15
+   Compiling block-buffer v0.12.1
+   Compiling crypto-common v0.2.2
+   Compiling muyon-plugin-contract-lab v0.1.0 (/tmp/muyon-artifact-verify-s8gkxk50/experiments/redesign/plugin-contract-lab/core)
+   Compiling serde v1.0.229
+   Compiling const-oid v0.10.2
+   Compiling serde_json v1.0.154
+   Compiling digest v0.11.3
+   Compiling muyon-rust-agent-host-lab v0.1.0 (/tmp/muyon-artifact-verify-s8gkxk50/experiments/redesign/rust-agent-host-lab/core)
+   Compiling tinyvec v1.13.3
+   Compiling serde_derive v1.0.229
+   Compiling cpufeatures v0.3.1
+   Compiling memchr v2.8.3
+   Compiling cfg-if v1.0.5
+   Compiling itoa v1.0.18
+   Compiling sha2 v0.11.1
+   Compiling unicode-normalization v0.1.25
+   Compiling muyon-web-search-lab v0.1.0 (/tmp/muyon-artifact-verify-s8gkxk50/experiments/redesign/web-search-lab/core)
+   Compiling muyon-core v0.1.0 (/tmp/muyon-artifact-verify-s8gkxk50/crates/muyon-core)
+warning: method `clone_blob_reference_in_transaction` is never used
+   --> muyon-core/src/blobs.rs:646:19
+    |
+313 | impl BusinessStore {
+    | ------------------ method in this implementation
+...
+646 |     pub(crate) fn clone_blob_reference_in_transaction(
+    |                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: method `document_clone_in_transaction` is never used
+   --> muyon-core/src/documents/storage.rs:449:19
+    |
+ 88 | impl BusinessStore {
+    | ------------------ method in this implementation
+...
+449 |     pub(crate) fn document_clone_in_transaction(
+    |                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: `muyon-core` (lib) generated 2 warnings
+    Finished `test` profile [unoptimized] target(s) in 13.04s
+     Running unittests src/lib.rs (/tmp/artifacts-workspace-target/debug/deps/muyon_core-cadfeb583fbb8a92)
+
+running 41 tests
+test artifacts::local_interactions::source_tests::persisted_source_cannot_pair_an_evidence_id_with_another_real_document ... ok
+test artifacts::local_interactions::source_tests::actual_evidence_identity_quote_and_source_scope_are_required ... ok
+test artifacts::local_interactions::source_tests::fresh_source_authority_restores_same_draft_and_invalidates_old_preview ... ok
+test artifacts::local_interactions::source_tests::revocation_hook_is_atomic_and_never_replays_original_intents ... ok
+test artifacts::local_interactions::source_tests::resolved_proof_is_bound_to_same_store_and_resolving_actor ... ok
+test artifacts::local_interactions::source_tests::receipt_tail_source_revocation_rolls_back_state_and_receipt_preserving_pending ... ok
+test artifacts::local_interactions::source_tests::source_head_change_invalidates_frozen_preview_without_waiting_for_lease ... ok
+test artifacts::local_interactions::source_tests::unsupported_message_or_unresolved_evidence_cannot_issue_binding ... ok
+test artifacts::local_interactions::tests::actor_scope_epoch_generation_and_expiry_do_not_rebind_local_values ... ok
+test artifacts::local_interactions::tests::binding_issue_checks_the_exact_requested_field_policy_after_its_write ... ok
+test artifacts::local_interactions::tests::changed_allowlist_invalidates_frozen_confirmation_without_retargeting_values ... ok
+test artifacts::local_interactions::tests::binding_and_project_generation_changes_invalidate_prepared_confirmation ... ok
+test artifacts::local_interactions::tests::confirmation_binds_original_values_and_edit_invalidates_preview ... ok
+test artifacts::local_interactions::tests::draft_restart_cas_human_sticky_and_typed_allowlist ... ok
+test artifacts::local_interactions::tests::explicit_choices_are_human_selections_and_suggestions_do_not_select ... ok
+test artifacts::local_interactions::tests::fields_are_typed_and_zero_component_revision_matches_existing_ui_contract ... ok
+test artifacts::local_interactions::tests::feedback_exact_revision_permission_and_receipt_tail_revocation ... ok
+test artifacts::local_interactions::tests::human_selection_does_not_relabel_suggested_text_as_human_content ... ok
+test artifacts::local_interactions::tests::mutation_only_binding_can_be_revoked_without_read_permission ... ok
+test artifacts::local_interactions::tests::pending_draft_save_is_locked_and_lookup_is_private_read_only ... ok
+test artifacts::local_interactions::tests::receipt_tail_cannot_change_the_allowed_field_policy ... ok
+test artifacts::tests::exact_scope_and_write_permission_are_required ... ok
+test artifacts::tests::failed_publication_rolls_back_artifact_and_document_heads ... ok
+test artifacts::local_interactions::tests::uncertain_preview_write_and_corrupt_original_review_never_submit ... ok
+test artifacts::tests::human_revision_is_atomic_and_generated_cannot_overwrite_it ... ok
+test artifacts::tests::invalid_sources_schema_and_oversized_rows_fail_closed ... ok
+test artifacts::tests::restart_restores_exact_snapshot_and_source_advance_fails_closed ... ok
+test artifacts::workflow_tests::catalog_requires_independent_project_grant_and_returns_inventory_only ... ok
+test artifacts::tests::revocation_deletion_wrong_project_and_missing_source_deny_history ... ok
+test artifacts::workflow_tests::effect_unknown_uses_original_lookup_without_writing_a_rejection ... ok
+test artifacts::workflow_tests::independent_project_grants_reject_expiry_generation_epoch_and_project_changes ... ok
+test artifacts::workflow_tests::own_receipt_permission_never_implies_discovery_or_another_actors_journal ... ok
+test artifacts::workflow_tests::historical_output_and_source_require_explicit_core_history_policy ... ok
+test artifacts::workflow_tests::pending_storage_failure_never_reexecutes_and_lookup_never_writes ... ok
+test artifacts::workflow_tests::receipt_write_failure_rolls_back_publication_and_keeps_pending_without_retry ... ok
+test artifacts::workflow_tests::rejected_projection_requires_a_durable_terminal_row ... ok
+test artifacts::workflow_tests::revise_receipt_is_atomic_and_survives_later_head_change ... ok
+test artifacts::workflow_tests::save_journal_duplicates_return_original_receipt_and_parameter_change_conflicts ... ok
+test artifacts::local_interactions::tests::receipt_tail_policy_changes_keep_feedback_and_original_pending_atomic ... ok
+test artifacts::workflow_tests::receipt_tail_invalidation_rolls_back_all_effects_and_preserves_original_pending ... ok
+test artifacts::local_interactions::source_tests::revocation_hook_processes_more_than_one_batch_without_blocking_revocation ... ok
+
+test result: ok. 41 passed; 0 failed; 0 ignored; 0 measured; 47 filtered out; finished in 0.71s
+
+     Running unittests src/bin/business_worker.rs (/tmp/artifacts-workspace-target/debug/deps/business_worker-ab54ddeb28b94094)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 18 filtered out; finished in 0.00s
+
+     Running tests/agent_child_tools.rs (/tmp/artifacts-workspace-target/debug/deps/agent_child_tools-9d1fbf5eea153a40)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 3 filtered out; finished in 0.00s
+
+     Running tests/agent_owner.rs (/tmp/artifacts-workspace-target/debug/deps/agent_owner-c6aa899aa339a166)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 11 filtered out; finished in 0.00s
+
+     Running tests/agent_product.rs (/tmp/artifacts-workspace-target/debug/deps/agent_product-0bc77db788025c59)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 6 filtered out; finished in 0.00s
+
+     Running tests/agent_tools.rs (/tmp/artifacts-workspace-target/debug/deps/agent_tools-948f1290538b7518)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 7 filtered out; finished in 0.00s
+
+     Running tests/agent_workflow.rs (/tmp/artifacts-workspace-target/debug/deps/agent_workflow-45ba7fda2a2ffb3f)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 16 filtered out; finished in 0.00s
+
+     Running tests/archive.rs (/tmp/artifacts-workspace-target/debug/deps/archive-0f5b68f366872f39)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 13 filtered out; finished in 0.00s
+
+     Running tests/blobs.rs (/tmp/artifacts-workspace-target/debug/deps/blobs-ba797ea72815e75e)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 8 filtered out; finished in 0.00s
+
+     Running tests/business.rs (/tmp/artifacts-workspace-target/debug/deps/business-012728dd7d9316f2)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 14 filtered out; finished in 0.00s
+
+     Running tests/contract.rs (/tmp/artifacts-workspace-target/debug/deps/contract-ff46fc0e6d1659b2)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 10 filtered out; finished in 0.00s
+
+     Running tests/contract_vectors_additional.rs (/tmp/artifacts-workspace-target/debug/deps/contract_vectors_additional-d21d12bf8a22766f)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 1 filtered out; finished in 0.00s
+
+     Running tests/document_storage.rs (/tmp/artifacts-workspace-target/debug/deps/document_storage-ca672f1a9c42ca1a)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 15 filtered out; finished in 0.00s
+
+     Running tests/documents.rs (/tmp/artifacts-workspace-target/debug/deps/documents-41754209271d7fb1)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 18 filtered out; finished in 0.00s
+
+     Running tests/evidence_local.rs (/tmp/artifacts-workspace-target/debug/deps/evidence_local-ebd7d9a43595b2e2)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 16 filtered out; finished in 0.00s
+
+     Running tests/research.rs (/tmp/artifacts-workspace-target/debug/deps/research-b7ec89db2724127f)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 16 filtered out; finished in 0.00s
+
+     Running tests/resource_boundaries_additional.rs (/tmp/artifacts-workspace-target/debug/deps/resource_boundaries_additional-e4839230fea43c83)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 3 filtered out; finished in 0.00s
+
+     Running tests/store_admission_additional.rs (/tmp/artifacts-workspace-target/debug/deps/store_admission_additional-26bc9a8de3f0414c)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 3 filtered out; finished in 0.00s
+
+EXIT 0
+RUN cargo test --offline --manifest-path crates/Cargo.toml
+   Compiling proc-macro2 v1.0.107
+   Compiling quote v1.0.47
+   Compiling serde_core v1.0.229
+   Compiling serde_json v1.0.154
+   Compiling libc v0.2.191
+   Compiling anyhow v1.0.104
+   Compiling rustix v1.1.5
+   Compiling getrandom v0.4.3
+   Compiling syn v3.0.9
+   Compiling linux-raw-sys v0.12.1
+   Compiling once_cell v1.21.4
+   Compiling bitflags v2.13.2
+   Compiling equivalent v1.0.3
+   Compiling hashbrown v0.17.1
+   Compiling serde_derive v1.0.229
+   Compiling indexmap v2.14.2
+   Compiling syn v2.0.119
+   Compiling autocfg v1.5.1
+   Compiling fastrand v2.5.0
+   Compiling fs-err v3.3.2
+   Compiling thiserror v2.0.21
+   Compiling tempfile v3.27.0
+   Compiling heck v0.5.0
+   Compiling camino v1.2.6
+   Compiling winnow v1.0.4
+   Compiling toml_parser v1.1.5+spec-1.1.0
+   Compiling thiserror-impl v2.0.21
+   Compiling serde v1.0.229
+   Compiling serde_spanned v1.1.2
+   Compiling toml_datetime v1.1.2+spec-1.1.0
+   Compiling toml_writer v1.1.3+spec-1.1.0
+   Compiling muyon-core v0.1.0 (/tmp/muyon-artifact-verify-s8gkxk50/crates/muyon-core)
+   Compiling siphasher v1.0.4
+   Compiling toml v1.1.8+spec-1.1.0
+   Compiling cargo-platform v0.3.3
+   Compiling semver v1.0.28
+   Compiling bytes v1.12.1
+   Compiling uniffi_internal_macros v0.32.2
+   Compiling static_assertions v1.1.0
+   Compiling cargo_metadata v0.23.1
+   Compiling uniffi_core v0.32.2
+   Compiling uniffi_pipeline v0.32.2
+   Compiling uniffi_meta v0.32.2
+   Compiling uniffi_macros v0.32.2
+warning: method `clone_blob_reference_in_transaction` is never used
+   --> muyon-core/src/blobs.rs:646:19
+    |
+313 | impl BusinessStore {
+    | ------------------ method in this implementation
+...
+646 |     pub(crate) fn clone_blob_reference_in_transaction(
+    |                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: method `document_clone_in_transaction` is never used
+   --> muyon-core/src/documents/storage.rs:449:19
+    |
+ 88 | impl BusinessStore {
+    | ------------------ method in this implementation
+...
+449 |     pub(crate) fn document_clone_in_transaction(
+    |                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+   Compiling uniffi v0.32.2
+warning: `muyon-core` (lib) generated 2 warnings
+   Compiling muyon-android-ffi v0.1.0 (/tmp/muyon-artifact-verify-s8gkxk50/crates/muyon-android-ffi)
+    Finished `test` profile [unoptimized] target(s) in 14.56s
+     Running unittests src/lib.rs (/tmp/artifacts-workspace-target/debug/deps/muyon_android_product-71a91a965e077abc)
+
+running 13 tests
+test tests::imported_raw_metadata_is_preserved_but_never_an_unbounded_binder_reply ... ok
+test tests::another_root_and_ordinary_chat_cannot_bypass_an_unknown_child ... ok
+test tests::configuring_a_new_budget_never_manufactures_pricing_authority_or_sends ... ok
+test tests::open_never_initializes_or_wipes_missing_or_existing_store ... ok
+test tests::child_plan_stays_blocked_and_cannot_bypass_an_unknown_root_request ... ok
+test tests::received_confirmation_and_legacy_unknown_are_never_cleared_or_replayed ... ok
+test tests::recovery_seal_refuses_an_already_queued_late_confirmation ... ok
+test tests::research_project_confirmation_not_received_recovers_without_a_write ... ok
+test tests::production_open_recovers_interrupted_upload_and_collects_only_unreferenced_objects ... ok
+test tests::review_is_explicit_and_duplicate_confirmation_returns_original_receipt ... ok
+test tests::unreceived_confirmation_is_sealed_without_resubmitting_after_restart ... ok
+test tests::production_startup_never_collects_unknown_uploads_or_intent_retained_pins ... ok
+test tests::long_unicode_pages_are_bounded_and_the_201st_supplier_is_accessible ... ok
+
+test result: ok. 13 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 10.34s
+
+     Running unittests src/lib.rs (/tmp/artifacts-workspace-target/debug/deps/muyon_core-6389a8e96dce0c09)
+
+running 88 tests
+test artifacts::local_interactions::source_tests::persisted_source_cannot_pair_an_evidence_id_with_another_real_document ... ok
+test artifacts::local_interactions::source_tests::fresh_source_authority_restores_same_draft_and_invalidates_old_preview ... ok
+test artifacts::local_interactions::source_tests::actual_evidence_identity_quote_and_source_scope_are_required ... ok
+test artifacts::local_interactions::source_tests::resolved_proof_is_bound_to_same_store_and_resolving_actor ... ok
+test artifacts::local_interactions::source_tests::revocation_hook_is_atomic_and_never_replays_original_intents ... ok
+test artifacts::local_interactions::source_tests::source_head_change_invalidates_frozen_preview_without_waiting_for_lease ... ok
+test artifacts::local_interactions::source_tests::unsupported_message_or_unresolved_evidence_cannot_issue_binding ... ok
+test artifacts::local_interactions::source_tests::receipt_tail_source_revocation_rolls_back_state_and_receipt_preserving_pending ... ok
+test artifacts::local_interactions::tests::actor_scope_epoch_generation_and_expiry_do_not_rebind_local_values ... ok
+test artifacts::local_interactions::tests::binding_issue_checks_the_exact_requested_field_policy_after_its_write ... ok
+test artifacts::local_interactions::tests::changed_allowlist_invalidates_frozen_confirmation_without_retargeting_values ... ok
+test artifacts::local_interactions::tests::binding_and_project_generation_changes_invalidate_prepared_confirmation ... ok
+test artifacts::local_interactions::tests::draft_restart_cas_human_sticky_and_typed_allowlist ... ok
+test artifacts::local_interactions::tests::confirmation_binds_original_values_and_edit_invalidates_preview ... ok
+test artifacts::local_interactions::tests::explicit_choices_are_human_selections_and_suggestions_do_not_select ... ok
+test artifacts::local_interactions::tests::fields_are_typed_and_zero_component_revision_matches_existing_ui_contract ... ok
+test artifacts::local_interactions::tests::human_selection_does_not_relabel_suggested_text_as_human_content ... ok
+test artifacts::local_interactions::tests::feedback_exact_revision_permission_and_receipt_tail_revocation ... ok
+test artifacts::local_interactions::tests::pending_draft_save_is_locked_and_lookup_is_private_read_only ... ok
+test artifacts::local_interactions::tests::receipt_tail_cannot_change_the_allowed_field_policy ... ok
+test artifacts::local_interactions::tests::mutation_only_binding_can_be_revoked_without_read_permission ... ok
+test artifacts::tests::exact_scope_and_write_permission_are_required ... ok
+test artifacts::tests::failed_publication_rolls_back_artifact_and_document_heads ... ok
+test artifacts::local_interactions::tests::uncertain_preview_write_and_corrupt_original_review_never_submit ... ok
+test artifacts::tests::invalid_sources_schema_and_oversized_rows_fail_closed ... ok
+test artifacts::tests::human_revision_is_atomic_and_generated_cannot_overwrite_it ... ok
+test artifacts::tests::restart_restores_exact_snapshot_and_source_advance_fails_closed ... ok
+test artifacts::tests::revocation_deletion_wrong_project_and_missing_source_deny_history ... ok
+test artifacts::workflow_tests::catalog_requires_independent_project_grant_and_returns_inventory_only ... ok
+test artifacts::workflow_tests::effect_unknown_uses_original_lookup_without_writing_a_rejection ... ok
+test artifacts::workflow_tests::independent_project_grants_reject_expiry_generation_epoch_and_project_changes ... ok
+test artifacts::workflow_tests::own_receipt_permission_never_implies_discovery_or_another_actors_journal ... ok
+test artifacts::workflow_tests::historical_output_and_source_require_explicit_core_history_policy ... ok
+test artifacts::workflow_tests::pending_storage_failure_never_reexecutes_and_lookup_never_writes ... ok
+test artifacts::workflow_tests::receipt_write_failure_rolls_back_publication_and_keeps_pending_without_retry ... ok
+test artifacts::workflow_tests::rejected_projection_requires_a_durable_terminal_row ... ok
+test artifacts::workflow_tests::revise_receipt_is_atomic_and_survives_later_head_change ... ok
+test artifacts::workflow_tests::save_journal_duplicates_return_original_receipt_and_parameter_change_conflicts ... ok
+test blobs::tests::corrupt_existing_object_and_dangling_symlink_are_never_replaced ... ok
+test blobs::tests::deleting_rejects_new_read_or_same_digest_upload ... ok
+test artifacts::local_interactions::tests::receipt_tail_policy_changes_keep_feedback_and_original_pending_atomic ... ok
+test blobs::tests::failed_ledger_after_solidification_keeps_staging_and_object_independent ... ok
+test blobs::tests::file_and_upload_logical_length_quotas_precede_hashing_and_writing ... ok
+test blobs::tests::gc_and_publish_barrier_preserves_either_upload_pin_or_reference ... ok
+test blobs::tests::kill_fixture ... ok
+test blobs::tests::gc_and_reader_barrier_covers_reader_after_upload_pin_release ... ok
+test blobs::tests::partial_publication_copy_is_not_reused_and_unknown_uploads_are_not_cleaned ... ok
+test blobs::tests::pinned_state_alone_does_not_replace_a_durable_upload_pin ... ok
+test blobs::tests::pending_unknown_never_expire_and_lookup_does_not_recover ... ok
+test blobs::tests::publication_binds_expected_bytes_project_revision_and_real_transaction ... ok
+test blobs::tests::real_paper_effect_receipt_and_blob_reference_survive_or_roll_back_together ... ok
+test blobs::tests::rename_then_failed_pin_commit_can_retry_existing_target_without_overwrite ... ok
+test documents::history_tests::advancing_parent_head_does_not_reuse_old_history_policy ... ok
+test documents::history_tests::canonical_history_corruption_and_missing_revision_are_not_substituted ... ok
+test documents::history_tests::historical_and_parent_revocation_expiry_generation_and_project_are_current ... ok
+test documents::history_tests::historical_identity_scope_schema_and_read_only_policy_fail_closed ... ok
+test documents::history_tests::history_denies_without_explicit_target_policy_and_then_reads_exact_snapshot ... ok
+test documents::history_tests::old_policy_is_not_inherited_by_a_new_parent_grant_generation ... ok
+test documents::history_tests::text_label_roundtrips_without_default_utf8_or_reader_capability ... ok
+test documents::history_tests::wrong_history_schema_is_rejected_without_changing_document_store ... ok
+test documents::storage_tests::clone_and_late_receipt_failure_roll_back_together ... ok
+test documents::storage_tests::clone_late_metadata_failure_and_revision_overflow_leave_original_intact ... ok
+test documents::storage_tests::clone_reference_requires_same_project_ready_source_and_unique_reference ... ok
+test documents::storage_tests::clone_rejects_changed_source_stale_base_and_foreign_transaction ... ok
+test documents::storage_tests::clone_verifies_real_source_file_hash_and_missing_file ... ok
+test documents::storage_tests::copy_clone_commits_same_bytes_and_revision_without_upload_or_staging ... ok
+test documents::storage_tests::tail_grant_rechecks_revocation_expiry_generation_epoch_and_project ... ok
+test documents::storage_tests::tail_grant_rejects_foreign_transaction_and_mismatched_document_binding ... ok
+test documents::storage_tests::tail_grant_survives_own_cas_without_authorizing_old_revision_reads ... ok
+test evidence::store::tests::actual_registered_pdf_and_ocr_have_unsupported_receipt_not_fake_content ... ok
+test evidence::store::tests::changed_current_revision_never_rebinds_old_evidence ... ok
+test evidence::store::tests::corrupt_controlled_blob_never_uses_previous_cache_as_success ... ok
+test evidence::store::tests::inspect_is_not_readtext_and_failure_opens_no_reader ... ok
+test evidence::store::tests::malformed_saved_text_is_failed_processing_not_saved_or_index_success ... ok
+test blobs::tests::real_sigkill_and_reopen_at_twelve_cross_media_windows ... ok
+test evidence::store::tests::original_unknown_intents_are_not_looked_up_retried_or_changed ... ok
+test artifacts::workflow_tests::receipt_tail_invalidation_rolls_back_all_effects_and_preserves_original_pending ... ok
+test evidence::store::tests::owner_delivery_transaction_excludes_other_sqlite_writer ... ok
+test evidence::store::tests::reader_lease_and_grant_mutation_in_same_transaction_block_delivery ... ok
+test evidence::store::tests::processing_errors_release_actual_reader_pins_without_new_intents ... ok
+test evidence::store::tests::real_saved_text_readtext_grant_produces_processing_receipt_and_exact_quote ... ok
+test evidence::store::tests::unknown_pdf_and_relabelled_pdf_never_gain_utf8_processing ... ok
+test review_lifecycle::tests::committed_claims_are_preserved_and_partial_committed_schema_is_refused ... ok
+test review_lifecycle::tests::empty_file_from_interrupted_creation_initializes_without_replacement ... ok
+test review_lifecycle::tests::uncommitted_ddl_reopens_and_initializes_the_original_database ... ok
+test evidence::store::tests::persisted_revocation_expiry_generation_epoch_and_project_deletion_deny_cached_results ... ok
+test artifacts::local_interactions::source_tests::revocation_hook_processes_more_than_one_batch_without_blocking_revocation ... ok
+test research::resource_tests::real_opaque_uploads_are_not_aggregated_when_sealing_or_importing ... ok
+
+test result: ok. 88 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.66s
+
+     Running unittests src/bin/business_worker.rs (/tmp/artifacts-workspace-target/debug/deps/business_worker-fc6d4cf71bddd457)
+
+running 18 tests
+test blobs::tests::failed_ledger_after_solidification_keeps_staging_and_object_independent ... ok
+test blobs::tests::file_and_upload_logical_length_quotas_precede_hashing_and_writing ... ok
+test blobs::tests::deleting_rejects_new_read_or_same_digest_upload ... ok
+test blobs::tests::kill_fixture ... ok
+test blobs::tests::corrupt_existing_object_and_dangling_symlink_are_never_replaced ... ok
+test blobs::tests::gc_and_reader_barrier_covers_reader_after_upload_pin_release ... ok
+test blobs::tests::gc_and_publish_barrier_preserves_either_upload_pin_or_reference ... ok
+test blobs::tests::pinned_state_alone_does_not_replace_a_durable_upload_pin ... ok
+test blobs::tests::publication_binds_expected_bytes_project_revision_and_real_transaction ... ok
+test blobs::tests::partial_publication_copy_is_not_reused_and_unknown_uploads_are_not_cleaned ... ok
+test blobs::tests::rename_then_failed_pin_commit_can_retry_existing_target_without_overwrite ... ok
+test blobs::tests::pending_unknown_never_expire_and_lookup_does_not_recover ... ok
+test review_lifecycle::tests::committed_claims_are_preserved_and_partial_committed_schema_is_refused ... ok
+test review_lifecycle::tests::empty_file_from_interrupted_creation_initializes_without_replacement ... ok
+test review_lifecycle::tests::uncommitted_ddl_reopens_and_initializes_the_original_database ... ok
+test blobs::tests::real_paper_effect_receipt_and_blob_reference_survive_or_roll_back_together ... ok
+test blobs::tests::real_sigkill_and_reopen_at_twelve_cross_media_windows ... ok
+test research::resource_tests::real_opaque_uploads_are_not_aggregated_when_sealing_or_importing ... ok
+
+test result: ok. 18 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.92s
+
+     Running tests/agent_child_tools.rs (/tmp/artifacts-workspace-target/debug/deps/agent_child_tools-e3502b77b5cdac4c)
+
+running 3 tests
+test confirmation_preview_contains_the_exact_prior_history_and_wire_fields ... ok
+test child_tool_subset_is_priced_and_enforced_on_the_actual_model_response ... ok
+test preprepared_plan_cannot_bypass_a_later_unknown_request ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/agent_owner.rs (/tmp/artifacts-workspace-target/debug/deps/agent_owner-0b29336d7504259a)
+
+running 11 tests
+test cancel_before_attempt_releases_only_held_identity_and_is_not_replayable ... ok
+test cancelled_claim_with_empty_response_never_refunds_attempt_count_after_restart ... ok
+test config_or_credential_changes_deny_dispatch_and_suppress_revoked_disclosure ... ok
+test complete_chat_usage_settles_once_and_restores_bounded_conversation_history ... ok
+test cumulative_budget_survives_reconfiguration_and_unknown_is_not_refunded ... ok
+test fixed_transport_diagnostic_survives_reopen_without_settlement_or_raw_text ... ok
+test fresh_product_settings_and_blocked_chat_plan_do_not_inherit_canary_authority ... ok
+test malformed_or_over_bound_usage_keeps_unknown_hold_without_answer ... ok
+test reserve_claim_exactly_once_and_unknown_never_resends_after_reopen ... ok
+test validated_search_sources_and_empty_result_follow_existing_settlement_contract ... ok
+test process_death_after_reservation_or_claim_keeps_original_hold_without_replay ... ok
+
+test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/agent_product.rs (/tmp/artifacts-workspace-target/debug/deps/agent_product-280bb33bbebea410)
+
+running 6 tests
+test missing_live_owners_are_explicitly_unavailable_without_synthetic_fallback ... ok
+test response_requires_full_terminal_answer_and_usage_not_http_success ... ok
+test tools_reject_writes_scope_injection_duplicate_keys_and_unbounded_pages ... ok
+test old_epoch_read_scope_cannot_be_reused_after_service_restart ... ok
+test suppliers_are_current_database_reads_and_deleted_records_are_not_context ... ok
+test newly_added_paper_is_read_from_selected_project_without_raw_json_or_blob_path ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/agent_tools.rs (/tmp/artifacts-workspace-target/debug/deps/agent_tools-209270cf4bb3e2d4)
+
+running 7 tests
+test cancellation_restart_and_unknown_never_resume_or_approve_tool_disclosure ... ok
+test disclosure_is_not_inferred_from_budget_or_copied_to_new_scope_or_generation ... ok
+test cancelled_or_changed_suggestion_is_revalidated_before_any_business_commit ... ok
+test production_unbound_proof_never_auto_sends_approved_tool_followup ... ok
+test read_call_requires_exact_visible_disclosure_then_new_followup_identity_and_budget ... ok
+test malformed_function_calls_remain_unknown_and_have_no_business_effect ... ok
+test suggestion_only_prepares_then_requires_original_committed_receipt_and_disclosure ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
+
+     Running tests/agent_workflow.rs (/tmp/artifacts-workspace-target/debug/deps/agent_workflow-e08e9f694bd2863d)
+
+running 16 tests
+test disabled_skill_blocks_existing_queued_work_and_invalid_arguments_do_not_create_children ... ok
+test actual_owner_settlement_completes_remote_child_without_accepted_answer_shortcut ... ok
+test cancellation_after_settlement_preserves_answers_and_releases_active_child_slots ... ok
+test disabling_a_skill_permanently_revokes_its_prepared_remote_plan ... ok
+test local_child_reads_actual_supplier_and_emits_only_host_activity ... ok
+test prepared_child_and_normal_chat_are_rechecked_after_another_child_becomes_unknown ... ok
+test paper_skill_reads_selected_project_and_skill_settings_do_not_leak_between_projects ... ok
+test attempted_unknown_retains_owner_hold_and_late_cancelled_response_is_not_published ... ok
+test recovery_is_read_only_and_never_replays_and_owner_is_exclusive ... ok
+test remote_tool_allowlist_is_compiled_skill_metadata_and_not_instructions_in_task ... ok
+test scope_forgery_unknown_actions_and_fields_are_rejected ... ok
+test real_owner_followup_chain_tracks_leaf_unknown_and_cancels_every_known_request ... ok
+test skill_toggle_digest_and_child_budgets_are_real ... ok
+test real_owner_blocked_plan_binds_unique_child_and_cancellation_is_not_fake_completion ... ok
+test unproven_tool_followup_is_blocked_not_confirmable_and_polling_keeps_original_budget ... ok
+test large_real_local_results_keep_complete_storage_but_project_bounded_honest_previews ... ok
+
+test result: ok. 16 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.12s
+
+     Running tests/archive.rs (/tmp/artifacts-workspace-target/debug/deps/archive-a4a8f90e9c74ecd9)
+
+running 13 tests
+test accepts_unsigned_descriptor ... ok
+test contract_entries_bind_exact_snapshot_digest_and_length ... ok
+test actual_archive409_encoder_round_trip_fixture ... ok
+test directories_validated_but_not_exposed ... ok
+test descriptor_and_decoded_content_are_independent_checks ... ok
+test overlap_guard ... ok
+test refuses_overlapping_ranges_and_unknown_extra_fields ... ok
+test rejects_offsets_local_conflicts_flags_zip64_and_quotas ... ok
+test rejects_path_aliases_links_and_special_files ... ok
+test symlink_guard ... ok
+test all_truncations_fail_without_panicking ... ok
+test stored_deflated_and_signed_descriptor_metadata ... ok
+test traversal_guard ... ok
+
+test result: ok. 13 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/blobs.rs (/tmp/artifacts-workspace-target/debug/deps/blobs-a05ff65b95d1e26c)
+
+running 8 tests
+test archive_upload_uses_actual_archive409_metadata_reader ... ok
+test durable_upload_and_repeatable_lease_reads ... ok
+test equal_content_reuses_verified_object_but_retains_independent_upload_pins ... ok
+test input_is_opaque_and_chunks_and_kinds_are_bounded ... ok
+test controlled_paths_refuse_symlinks_and_preserve_outside_files ... ok
+test private_snapshot_survives_source_removal_and_does_not_overwrite_corruption ... ok
+test lookup_is_read_only_and_restart_reconciliation_is_explicit ... ok
+test persistent_reader_pin_outlives_upload_pin_until_explicit_close ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+     Running tests/business.rs (/tmp/artifacts-workspace-target/debug/deps/business-e7af716490402eda)
+
+running 14 tests
+test cross_process_owner_lock_is_released_only_after_process_exit ... ok
+test corrupt_receipt_tail_rolls_back_all_effects_and_never_reexecutes_pending ... ok
+test current_schema_label_does_not_authorize_a_missing_required_table_or_column ... ok
+test duplicate_binding_conflict_cas_and_same_name_new_intent ... ok
+test initialize_is_explicit_and_never_truncates_or_migrates ... ok
+test old_schema_v1_missing_tail_table_is_refused_without_changing_pending_identity ... ok
+test grant_expiring_during_actual_sql_rejects_and_rolls_back_the_effect ... ok
+test project_create_and_reads_are_persistent_workspace_bound_operations ... ok
+test sigkill_after_actual_sql_rolls_back_and_original_pending_cannot_redispatch ... ok
+test real_grants_expiry_revoke_generation_scope_and_epoch_are_required ... ok
+test sigkill_after_commit_before_reply_recovers_exact_original_receipt ... ok
+test sqlite_constraints_and_corrupt_files_have_fixed_typed_errors ... ok
+test supplier_full_payload_update_soft_delete_restore_and_original_receipt ... ok
+test sqlite_revocation_transaction_barrier_precedes_business_admission ... ok
+
+test result: ok. 14 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.14s
+
+     Running tests/contract.rs (/tmp/artifacts-workspace-target/debug/deps/contract-28c479e79a9688a2)
+
+running 10 tests
+test ct02_file_metadata_bounds_and_binding_are_checked ... ok
+test ct01_revisions_are_lossless_canonical_text ... ok
+test ct01_eight_fields_normalize_with_dart_rules ... ok
+test ct01_reuses_supplier_name_boundary_vectors ... ok
+test ct02_manual_paper_requires_project_title_and_blob ... ok
+test ct03_receipt_and_unknown_states_have_distinct_invariants ... ok
+test ct03_every_security_fact_changes_retry_binding ... ok
+test ct04_strict_decode_rejects_duplicates_unknown_and_versions ... ok
+test ct02_import_is_opaque_metadata_not_manual_paper ... ok
+test ct04_digest_order_and_fixture_round_trip ... ok
+
+test result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/contract_vectors_additional.rs (/tmp/artifacts-workspace-target/debug/deps/contract_vectors_additional-f02aa7312cca09e8)
+
+running 1 test
+test ct01_ct04_shared_codec_vectors_use_real_contract_and_lossless_wire_text ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/document_storage.rs (/tmp/artifacts-workspace-target/debug/deps/document_storage-b51c907d924965e5)
+
+running 15 tests
+test corrupted_revision_keys_or_missing_snapshot_fail_closed ... ok
+test delete_expiry_at_publication_tail_preserves_previous_annotation ... ok
+test annotation_cas_tombstones_and_ai_provenance_are_durable ... ok
+test expires_deleted_project_and_missing_permissions_fail_closed ... ok
+test foreign_upload_and_bad_schema_are_rejected_without_partial_metadata ... ok
+test export_is_deterministic_sidecar_data_with_origin_and_tombstones ... ok
+test immutable_document_revisions_invalidate_access_and_preserve_old_anchors ... ok
+test grant_scope_revision_epoch_generation_and_revoke_are_current ... ok
+test invalid_or_cross_revision_anchors_do_not_leave_rows ... ok
+test late_annotation_failure_rolls_back_history ... ok
+test late_metadata_failure_rolls_back_blob_publication_and_head ... ok
+test save_expiry_at_publication_tail_rolls_back_sidecar_and_history ... ok
+test oversized_persistent_payloads_are_rejected_before_decode ... ok
+test synthetic_metadata_blob_and_annotation_survive_reopen ... ok
+test writes_cannot_strand_existing_annotations_above_read_budget ... ok
+
+test result: ok. 15 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.65s
+
+     Running tests/documents.rs (/tmp/artifacts-workspace-target/debug/deps/documents-546ce526ef90e578)
+
+running 18 tests
+test anchors_are_bound_to_identity_revision_and_format ... ok
+test current_host_and_operation_capability_must_both_allow_read ... ok
+test capability_for_other_operation_or_format_grants_nothing ... ok
+test cached_metadata_never_bypasses_revocation_or_unknown_authority ... ok
+test declared_format_never_enables_a_reader ... ok
+test each_missing_pdf_geometry_field_remains_unresolved ... ok
+test invalid_document_metadata_is_rejected_and_revision_is_preserved ... ok
+test nonfinite_empty_overflowing_and_invalid_normalized_rectangles_fail ... ok
+test host_errors_and_invalid_or_stale_lease_fail_closed ... ok
+test normalized_regions_preserve_explicit_rotation_and_reject_invalid_crop ... ok
+test old_revision_or_other_document_is_rejected ... ok
+test pdf_geometry_keeps_unknowns_without_guessing ... ok
+test read_contract_cannot_admit_edit_even_when_both_lists_allow_it ... ok
+test stale_grant_epoch_generation_and_id_are_rejected ... ok
+test structured_anchors_validate_ids_ranges_and_package_parts ... ok
+test unsupported_and_gated_capabilities_deny ... ok
+test visible_pdf_selection_must_fit_the_declared_crop ... ok
+test workspace_and_project_are_exact_not_wildcards ... ok
+
+test result: ok. 18 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/evidence_local.rs (/tmp/artifacts-workspace-target/debug/deps/evidence_local-894ee1789d4e64e3)
+
+running 16 tests
+test anchored_request_and_inspect_do_not_expand_to_whole_text ... ok
+test cache_access_rechecks_revision_scope_and_revocation ... ok
+test changed_blob_and_authority_invalidate_existing_derivation ... ok
+test debug_never_discloses_cached_text_after_revocation ... ok
+test body_citations_and_candidates_are_separate_and_citation_numbers_are_stable ... ok
+test every_derived_delivery_rechecks_permission_after_computation ... ok
+test forged_ranges_source_and_page_do_not_resolve ... ok
+test citation_order_is_explicit_and_repeated_processing_has_same_identity ... ok
+test failed_decoding_empty_and_changed_bytes_are_distinct_from_success ... ok
+test no_read_permission_never_gains_whole_text ... ok
+test pdf_and_ocr_never_manufacture_content ... ok
+test revocation_between_checks_never_delivers_extraction ... ok
+test unknown_format_never_becomes_utf8_by_caller_assertion ... ok
+test synthetic_text_has_real_receipt_and_bound_utf8_anchor ... ok
+test source_identity_separates_same_bytes_across_scope_document_and_revision ... ok
+test limits_reject_overlarge_queries_invalid_limits_and_oversized_sources ... ok
+
+test result: ok. 16 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.07s
+
+     Running tests/research.rs (/tmp/artifacts-workspace-target/debug/deps/research-8a64e64293508d22)
+
+running 16 tests
+test committed_paper_after_process_kill_recovers_original_receipt_and_private_pdf ... ok
+test directory_and_real_stored_zip_produce_equivalent_records_and_bad_decoded_crc_fails ... ok
+test api26_eleven_record_deflated_import_with_three_identical_empty_logs_commits ... ok
+test cited_same_revision_changes_reject_atomically_and_next_revision_is_retained ... ok
+test explicit_ambiguous_binding_choice_survives_refresh ... ok
+test forged_wire_records_and_snapshot_project_changes_do_not_become_imports ... ok
+test imported_raw_json_duplicate_revisions_and_material_binding_are_preserved ... ok
+test import_domain_tail_tampering_rolls_back_records_source_and_publication ... ok
+test loose_imported_metadata_uses_fallback_title_and_does_not_apply_manual_constraints ... ok
+test malformed_jsonl_paths_and_no_recognized_material_are_rejected_before_publication ... ok
+test manual_kind_project_and_exact_upload_binding_cannot_be_forged ... ok
+test receipt_fault_rolls_back_paper_publication_and_cancel_blocks_original_retry ... ok
+test prefixed_skill_root_arxiv_manifest_binds_verified_pdf_hash ... ok
+test manual_pdf_is_real_private_persistent_and_shares_catalog_with_import ... ok
+test refresh_only_removes_missing_uncited_entries_and_keeps_cited_document_bytes ... ok
+test jsonl_larger_than_wire_limit_uses_small_verified_source_ref_command ... ok
+
+test result: ok. 16 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.49s
+
+     Running tests/resource_boundaries_additional.rs (/tmp/artifacts-workspace-target/debug/deps/resource_boundaries_additional-627b5460e865f26c)
+
+running 3 tests
+test zip_metadata_exact_expansion_and_member_count_and_one_over ... ok
+test actual_pdf_and_document_exact_thirty_mib_and_one_extra_byte ... ok
+test seal_actual_total_exact_one_fifty_mib_then_one_byte_and_member_count_refuse_without_effects ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 31.69s
+
+     Running tests/store_admission_additional.rs (/tmp/artifacts-workspace-target/debug/deps/store_admission_additional-75e688421fda07c3)
+
+running 3 tests
+test real_os_file_size_write_failure_has_no_business_or_receipt_effect ... ok
+test os_process_races_preserve_original_intent_and_reject_stale_cas_after_owner_exit ... ok
+test sqlite_rejects_pending_domain_history_business_history_and_receipt_writes_atomically ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+   Doc-tests muyon_android_product
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests muyon_core
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+EXIT 0

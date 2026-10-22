@@ -1,0 +1,14 @@
+Actual source checkout: 7d7edf027c50f595b5987ebd7a2051487ece71ac
+Actual Rust source manifest SHA256: e6c51ef689489c579ec317e7d52b683c76497dc8a911bdd9aec8b409bb293c7a
+Runner SHA256: a5c0d6caef2182439fe450d55c6a6b83c77a78df8efc9f11e398a1dbcbed30f3
+Generated module-only harness: /tmp/muyon-evidence-store-harness-0kxzf71g
+All harness dependencies match repository lock versions/sources/checksums
+   Compiling muyon-core v0.1.0 (/tmp/muyon-evidence-store-harness-0kxzf71g)
+    Finished `test` profile [unoptimized] target(s) in 4.78s
+     Running unittests lib.rs (/tmp/artifacts-target/debug/deps/muyon_core-b4ac5d1e8b153320)
+
+running 1 test
+test artifacts::local_interactions::source_tests::revocation_hook_processes_more_than_one_batch_without_blocking_revocation ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 84 filtered out; finished in 0.48s
+
