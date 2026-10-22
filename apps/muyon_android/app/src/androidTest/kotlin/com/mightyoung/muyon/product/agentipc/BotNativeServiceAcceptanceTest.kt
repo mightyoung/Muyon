@@ -3,6 +3,10 @@ package com.mightyoung.muyon.product.agentipc
 import android.app.ActivityManager
 import android.content.*
 import android.os.*
+import com.mightyoung.muyon.product.BuildConfig
+import java.io.InputStream
+import java.security.MessageDigest
+import java.util.zip.ZipFile
 import androidx.test.platform.app.InstrumentationRegistry
 import com.mightyoung.muyon.product.agents.setup.BotSetupDraft
 import com.mightyoung.muyon.product.chat.persistence.*
@@ -71,7 +75,32 @@ class BotNativeServiceAcceptanceTest {
         val info = data("connect"); session = info.getString("session"); epoch = info.getString("epoch")
         assertEquals("bot-native-acceptance", info.getString("workspace"))
         if (!info.getBoolean("initialized")) data("initialize") else data("health")
+        recordInstalledIdentity(data("health"))
         generation = data("chat_scope", JSONObject().put("project_id", project ?: JSONObject.NULL)).getLong("scope_generation")
+    }
+    /** Evidence from actual loaded native health and installed APK, never fixture constants.
+     * Host must independently compare the logged APK/library hashes to sealed build inputs. */
+    private fun recordInstalledIdentity(health: JSONObject) {
+        assertTrue("unsealed APK source", BuildConfig.MUYON_SOURCE.matches(Regex("[0-9a-f]{40}:[0-9a-f]{64}")))
+        assertEquals(BuildConfig.MUYON_SOURCE, health.getString("build_id"))
+        assertFalse(health.getBoolean("synthetic"))
+        assertEquals("bot-native-acceptance", health.getString("workspace"))
+        fun hash(input: InputStream): String = input.use {
+            val digest = MessageDigest.getInstance("SHA-256")
+            val bytes = ByteArray(65_536)
+            while (true) { val count = it.read(bytes); if (count < 0) break; digest.update(bytes, 0, count) }
+            digest.digest().joinToString("") { byte -> "%02x".format(byte) }
+        }
+        val installed = File(context.applicationInfo.sourceDir)
+        val natives = JSONObject()
+        ZipFile(installed).use { zip ->
+            for (abi in listOf("arm64-v8a", "x86_64")) for (library in listOf("libmuyon_android_product.so", "libmuyon_local_embedding.so")) {
+                val path = "lib/$abi/$library"
+                natives.put(path, hash(zip.getInputStream(checkNotNull(zip.getEntry(path)))))
+            }
+        }
+        android.util.Log.i("BotNativeAcceptance", JSONObject().put("health", health)
+            .put("installed_apk_sha256", hash(installed.inputStream())).put("packaged_native_sha256", natives).toString())
     }
     private fun operation(action: String, previous: JSONObject? = null, value: String? = null, expected: Long? = null): JSONObject {
         val op = JSONObject().put("action", action)
