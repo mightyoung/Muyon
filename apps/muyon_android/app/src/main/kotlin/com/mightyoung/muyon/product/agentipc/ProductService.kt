@@ -119,18 +119,28 @@ class ProductService : Service() {
                 tool("confirm_suggestion", request, session, generation, project, planId)
             }
         }, localDraftPort = object : ProductLocalDraftPort {
-            // Real provider + FFI + generated bindings verified upstream at B88e810.
-            // Release gate remains durable original-attempt recovery across process
-            // loss and actual Android checks; this source now calls the real bridge.
+            // Real five-method provider + generated record verified upstream at B b13af112.
+            // Cold original consumer is implemented; actual Android Service/native
+            // invocation and acceptance remain unverified, so release gate stays closed.
             override val verified = false
             private fun data(raw: String) = nativeData(raw) as JSONObject
             override fun resolve(conversation: String, project: String?) = data(open(false).localDraftResolve(conversation, project))
             override fun read(conversation: String, project: String?, namespace: String, draft: String, generation: String, revision: String) =
                 data(open(false).localDraftRead(conversation, project, namespace, draft, generation, revision))
-            // Provider7bb89 uses the generated LocalDraftPrepareRequest record.
-            // Actual fifth binding pending B; no substitute record or old scalar ABI.
+            // Provider7bb89 + exact generated f604 record; named original snapshot
+            // fields only. No substitute record or obsolete scalar prepare ABI.
             override fun prepare(original: PreparedLocalSave): JSONObject =
-                error("local_draft_prepare_binding_pending")
+                data(open(false).localDraftPrepareSave(com.mightyoung.muyon.productbridge.LocalDraftPrepareRequest(
+                    conversation = original.record.conversationId,
+                    project = original.record.projectId,
+                    namespaceId = original.record.namespaceId,
+                    draftId = original.record.draftId,
+                    expectedGeneration = original.record.registryGeneration.toString(),
+                    expectedStoredRevision = original.record.storedRevision.toString(),
+                    attemptId = original.attemptId,
+                    exportedMemoryRevision = original.exportedMemoryRevision.toString(),
+                    hostEditorRevision = original.exportedLocalRevision.toString(),
+                    archive = original.archive)))
             override fun save(conversation: String, project: String?, namespace: String, draft: String, generation: String, revision: String,
                 attempt: String, exportedMemoryRevision: String, archive: ByteArray) =
                 data(open(false).localDraftSave(conversation, project, namespace, draft, generation, revision, attempt, exportedMemoryRevision, archive))
