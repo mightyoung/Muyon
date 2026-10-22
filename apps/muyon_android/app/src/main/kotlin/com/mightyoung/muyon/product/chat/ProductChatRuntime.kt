@@ -4,6 +4,9 @@ import com.mightyoung.muyon.product.agents.setup.BotSetupDraft
 import com.mightyoung.muyon.product.agents.setup.LocalSetupTemplates
 import com.mightyoung.muyon.product.agents.setup.SuggestionRequest
 import com.mightyoung.muyon.product.agents.setup.SetupStep
+import com.mightyoung.muyon.product.chat.persistence.DraftViewLease
+import com.mightyoung.muyon.product.chat.persistence.HostLocalDraftSession
+import com.mightyoung.muyon.product.chat.persistence.ProductLocalDraftPort
 import org.json.JSONArray
 import org.json.JSONObject
 import java.util.UUID
@@ -70,7 +73,7 @@ internal fun interface ProductChatExchange {
 class ProductChatRuntime internal constructor(private val port: ProductChatPort,
     private val transport: ProductChatExchange = ProductChatExchange { payload, credential, purpose, allowed, write ->
         ProductHttpsTransport().exchange(payload, credential, purpose, allowed, write)
-    }) : AutoCloseable {
+    }, private val localDraftPort: ProductLocalDraftPort? = null) : AutoCloseable {
     private val control = Executors.newSingleThreadExecutor()
     private val network = Executors.newSingleThreadExecutor()
     private val closed = AtomicBoolean(false)
@@ -320,13 +323,15 @@ class ProductChatRuntime internal constructor(private val port: ProductChatPort,
 
     private data class LocalDraftScope(val workspace: String, val session: String, val conversation: String,
         val project: String?, val generation: Long)
-    private class LocalSetup(val scope: LocalDraftScope, val draft: BotSetupDraft) {
+    private class LocalSetup(val scope: LocalDraftScope, private val memoryDraft: BotSetupDraft,
+        val persistent: HostLocalDraftSession? = null) {
+        val draft: BotSetupDraft get() = persistent?.draft ?: memoryDraft
         var revision = 0L // genuine local host CAS, never a business/component revision
         var suggestionRequest: SuggestionRequest? = null
     }
-    private val setupDrafts = linkedMapOf<LocalDraftScope, LocalSetup>() // control only; no persistence
+    private val setupDrafts = linkedMapOf<LocalDraftScope, LocalSetup>() // control only; native persistence only through verified private port
 
-    /** Local-only setup operations reuse the sole Bot reducer. No port is called. */
+    /** Setup uses the sole Bot reducer. Optional persistence is local BusinessStore only. */
     fun setupDraft(session: String, workspace: String, conversation: String, project: String?, generation: Long,
         operation: JSONObject, callback: (JSONObject) -> Unit) {
         val input = JSONObject(operation.toString()) // caller cannot mutate an enqueued CAS operation
@@ -334,8 +339,8 @@ class ProductChatRuntime internal constructor(private val port: ProductChatPort,
             if (workspace.isBlank() || conversation.isBlank() || conversation.length > 1024 ||
                 !scopes.matches(session, project, generation)) return@submit failure("setup_scope_unavailable")
             val action = input.opt("action") as? String ?: return@submit failure("setup_operation_unavailable")
-            if (action in setOf("save", "restore")) return@submit failure("setup_persistent_owner_unavailable")
-            val mutations = setOf("edit_name", "edit_purpose", "edit_role", "next", "back", "cancel", "resume", "suggest_role", "accept_role")
+            if (action in setOf("save", "restore", "query_original_save") && localDraftPort?.verified != true) return@submit failure("setup_persistent_owner_unavailable")
+            val mutations = setOf("edit_name", "edit_purpose", "edit_role", "next", "back", "cancel", "resume", "suggest_role", "accept_role", "save", "restore", "query_original_save")
             if (action !in mutations && action !in setOf("open", "read")) return@submit failure("setup_operation_unavailable")
             val required = when (action) {
                 "open" -> setOf("action")
@@ -349,10 +354,14 @@ class ProductChatRuntime internal constructor(private val port: ProductChatPort,
             val state = if (action == "open") setupDrafts[key] ?: run {
                 if (setupDrafts.size >= 32) return@submit failure("setup_draft_capacity")
                 val opaqueScope = JSONArray(listOf(workspace, session, conversation, project, generation)).toString()
-                LocalSetup(key, BotSetupDraft(opaqueScope)).also { setupDrafts[key] = it }
+                val persistent = localDraftPort?.takeIf { it.verified }?.let {
+                    HostLocalDraftSession.open(it, DraftViewLease(workspace, conversation, project, session, generation), opaqueScope)
+                }
+                LocalSetup(key, persistent?.draft ?: BotSetupDraft(opaqueScope), persistent).also { setupDrafts[key] = it }
             } else setupDrafts[key] ?: return@submit failure("setup_draft_unavailable")
             if (action != "open" && input.opt("local_draft_id") != state.draft.snapshot().draftId)
                 return@submit failure("setup_draft_unavailable")
+            if (action !in setOf("save", "restore", "query_original_save")) state.persistent?.revalidate()
             if (action in mutations) {
                 val expected = input.opt("expected_local_revision")
                 if ((expected !is Int && expected !is Long) || (expected as Number).toLong() != state.revision || state.revision == Long.MAX_VALUE)
@@ -362,6 +371,9 @@ class ProductChatRuntime internal constructor(private val port: ProductChatPort,
                     return@submit failure("setup_draft_rejected")
                 try {
                     when (action) {
+                        "save" -> checkNotNull(state.persistent).save(state.revision)
+                        "restore" -> checkNotNull(state.persistent).restore()
+                        "query_original_save" -> checkNotNull(state.persistent).queryOriginal()
                         "edit_name" -> state.draft.editName(input.get("value") as String)
                         "edit_purpose" -> state.draft.editPurpose(input.get("value") as String)
                         "edit_role" -> state.draft.editRole(input.get("value") as String)
@@ -381,9 +393,14 @@ class ProductChatRuntime internal constructor(private val port: ProductChatPort,
                         }
                     }
                 } catch (_: IllegalArgumentException) { return@submit failure("setup_draft_rejected")
-                } catch (_: IllegalStateException) { return@submit failure("setup_draft_rejected") }
-                if (action != "suggest_role") state.suggestionRequest = null
-                state.revision++
+                } catch (_: IllegalStateException) {
+                    if (state.persistent?.view(state.revision)?.queryOriginalOnly == true)
+                        return@submit failure("setup_save_unknown").put("recovery_action", "query_original_save")
+                            .put("local_draft_id", state.draft.snapshot().draftId).put("expected_local_revision", state.revision)
+                    return@submit failure("setup_draft_rejected")
+                }
+                if (action !in setOf("suggest_role", "save", "query_original_save")) state.suggestionRequest = null
+                if (action !in setOf("save", "query_original_save")) state.revision++
             }
             setupProjection(state)
         }
@@ -402,6 +419,12 @@ class ProductChatRuntime internal constructor(private val port: ProductChatPort,
         if (canAdvance) actions.add("next")
         if (draft.name.value.isNotBlank() && draft.purpose.value.isNotBlank()) actions.add("suggest_role")
         if (draft.suggestion != null && state.suggestionRequest != null && !draft.role.userLocked) actions.add("accept_role")
+        state.persistent?.let { persistent ->
+            val storage = persistent.view(state.revision)
+            if (storage.canSave && !storage.saved) actions.add("save")
+            if (storage.queryOriginalOnly) actions.add("query_original_save")
+            if (persistent.canRestore()) actions.add("restore")
+        }
         return actions
     }
     private fun setupProjection(state: LocalSetup): JSONObject {
@@ -409,13 +432,19 @@ class ProductChatRuntime internal constructor(private val port: ProductChatPort,
         val suggestion = draft.suggestion
         val token = state.suggestionRequest
         val localActions = localSetupActions(state)
+        val storage = state.persistent?.view(state.revision)
         return JSONObject().put("schema_version", 1).put("projection_type", "setup_draft").put("status", "local_only")
             .put("scope", JSONObject().put("workspace_id", state.scope.workspace).put("conversation_id", state.scope.conversation)
                 .put("project_id", state.scope.project ?: JSONObject.NULL).put("generation", state.scope.generation))
             .put("local_draft_id", draft.draftId).put("local_revision", state.revision).put("reducer_revision", draft.revision)
             .put("step", draft.step.name).put("name", draft.name.value).put("purpose", draft.purpose.value).put("role", draft.role.value)
-            .put("persistence_status", "unavailable").put("persistent_owner_status", "unavailable")
-            .put("cancelled", draft.cancelled).put("saved", false).put("can_save", false).put("can_create", false).put("can_start", false)
+            .put("persistence_status", if (storage == null) "unavailable" else if (storage.queryOriginalOnly) "unknown" else if (storage.saved && !draft.cancelled) "saved" else "editing")
+            .put("persistent_owner_status", if (storage == null) "unavailable" else "local_workspace")
+            .put("stored_revision", storage?.storedRevision?.toString() ?: JSONObject.NULL)
+            .put("original_save_attempt_id", storage?.originalAttemptId ?: JSONObject.NULL)
+            .put("can_restore", "restore" in localActions)
+            .put("cancelled", draft.cancelled).put("saved", storage?.saved == true && !draft.cancelled)
+            .put("can_save", "save" in localActions).put("can_create", false).put("can_start", false)
             .put("creation_status", "not_requested").put("agent_id", JSONObject.NULL).put("intent_id", JSONObject.NULL)
             .put("actual_micro_cny", JSONObject.NULL).put("reserved_micro_cny", JSONObject.NULL)
             .put("capability_metadata_status", "unavailable").put("material_metadata_status", "unavailable")

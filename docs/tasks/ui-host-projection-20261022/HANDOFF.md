@@ -71,3 +71,29 @@ only via controlled typed PFD, not a research cache/JSON URI grant. Annotation s
 stays disabled until reader capability gate and original intent/immutable-anchor/
 receipt transaction gateway are fixed. Existing annotation revision CAS alone is
 insufficient for durable recovery.
+
+## Fixed native consumer checkpoint (supersedes earlier owner-gap description)
+
+NATIVE-CONSUMER-REPORT.md gives implemented Runtime + strict adapter/session API,
+exact shell additive schema1 and remaining release blockers. Real local_workspace
+BusinessStore+live project ownership is sufficient for this new editing-only domain;
+no account ID, cloud secret or root-rollback protection is required or invented.
+Native baseline7ca2 has fixed-source3160208247c5257b6382106d69f2028f5ad8ccab;
+parent actual Rust verification is pending. Service verified=false remains, and its
+four typed methods explicitly unavailable until real generated bindings are composed.
+NATIVE-SERVICE-ADAPTER.patch is an unapplied, reviewable exact callsite proposal,
+not an enabled function or a substitute for actual native/Android acceptance.
+
+Strict original receipt consumer is wired into Runtime when a verified private port
+is supplied, JVM-tested with synthetic native schema/transactions only. Unknown
+keeps exact original and returns no editor fields after dispatch/query failures;
+read/edit revalidate current native project/registry or exact original lookup.
+Cold-process original attempt pointer still needs durable same-store coordination;
+never infer original from latest, auto-replay, or announce original recovery complete.
+No create/run/lifecycle ledger for execution was added; historical unknowns untouched.
+
+READER-FFI-MINIMAL-SCHEMA.md is the exact five-method minimal read-only request to
+sole FFI owner, based on actual canonical DocumentRef/operation/StoreEvidence byte
+flow. Reader host/PFD implementation remains pending released native and reader2
+read-only gate; annotation immutable-anchor/original-intent transaction remains a
+separate core task. No UI shell/reader ownership was crossed.

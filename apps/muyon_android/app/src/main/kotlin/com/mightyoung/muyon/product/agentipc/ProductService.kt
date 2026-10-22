@@ -8,6 +8,7 @@ import com.mightyoung.muyon.productbridge.ProductException
 import android.util.Base64
 import com.mightyoung.muyon.product.chat.ProductChatPort
 import com.mightyoung.muyon.product.chat.ProductChatRuntime
+import com.mightyoung.muyon.product.chat.persistence.ProductLocalDraftPort
 import org.json.JSONArray
 import org.json.JSONObject
 import org.json.JSONTokener
@@ -116,6 +117,20 @@ class ProductService : Service() {
                 check(!stopped && clients.containsValue(session) && planOwners[planId] == session && toolPlans.contains(planId))
                 tool("confirm_suggestion", request, session, generation, project, planId)
             }
+        }, localDraftPort = object : ProductLocalDraftPort {
+            // Release gate: provider7ca2 failed independent Rust resolve tests.
+            // Enable only after fixed native + generated bindings + Android checks,
+            // and durable original-attempt recovery across process loss are verified.
+            override val verified = false
+            private fun unavailable(): Nothing = error("local_draft_provider_not_released")
+            override fun resolve(conversation: String, project: String?): JSONObject = unavailable()
+            override fun read(conversation: String, project: String?, namespace: String, draft: String, generation: String, revision: String): JSONObject =
+                unavailable()
+            override fun save(conversation: String, project: String?, namespace: String, draft: String, generation: String, revision: String,
+                attempt: String, exportedMemoryRevision: String, archive: ByteArray): JSONObject =
+                unavailable()
+            override fun lookup(conversation: String, project: String?, namespace: String, draft: String, attempt: String): JSONObject =
+                unavailable()
         })
     }
     override fun onBind(intent: Intent): IBinder = messenger.binder
