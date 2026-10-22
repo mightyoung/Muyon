@@ -1,0 +1,173 @@
+   Compiling muyon-core v0.1.0 (/workspace/document-edit-combination/crates/muyon-core)
+error[E0433]: failed to resolve: could not find `document_edit` in `muyon_core`
+ --> muyon-core/tests/document_edit_gateway.rs:6:5
+  |
+6 |     document_edit::{gateway::*, Binding, Confirmation},
+  |     ^^^^^^^^^^^^^ could not find `document_edit` in `muyon_core`
+
+error[E0432]: unresolved imports `muyon_core::document_edit`, `muyon_core::documents::DocumentAccess`
+ --> muyon-core/tests/document_edit_gateway.rs:6:5
+  |
+6 |     document_edit::{gateway::*, Binding, Confirmation},
+  |     ^^^^^^^^^^^^^ could not find `document_edit` in `muyon_core`
+7 |     documents::{DocumentAccess, DocumentFormat, DocumentOperation, DocumentRef},
+  |                 ^^^^^^^^^^^^^^
+  |                 |
+  |                 no `DocumentAccess` in `documents`
+  |                 help: a similar name exists in the module: `DocumentAnchor`
+
+error[E0412]: cannot find type `DocumentEditGateway` in this scope
+   --> muyon-core/tests/document_edit_gateway.rs:129:14
+    |
+129 | fn ready(g: &DocumentEditGateway<'_>, a: &DocumentAccess, intent: &str) -> Binding {
+    |              ^^^^^^^^^^^^^^^^^^^ not found in this scope
+
+error[E0599]: no method named `initialize_documents_trusted` found for struct `BusinessStore` in the current scope
+    --> muyon-core/tests/document_edit_gateway.rs:61:11
+     |
+  61 |         s.initialize_documents_trusted().unwrap();
+     |           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     |
+help: there is a method `cite_document_trusted` with a similar name, but with different arguments
+    --> /workspace/document-edit-combination/crates/muyon-core/src/research.rs:1011:5
+     |
+1011 |     pub fn cite_document_trusted(&self, project: &str, id: &str, citation: &str) -> Result<()> {
+     |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+error[E0599]: no method named `register_document_trusted` found for struct `BusinessStore` in the current scope
+    --> muyon-core/tests/document_edit_gateway.rs:67:11
+     |
+  67 |         s.register_document_trusted(
+     |         --^^^^^^^^^^^^^^^^^^^^^^^^^
+     |
+help: there is a method `cite_document_trusted` with a similar name, but with different arguments
+    --> /workspace/document-edit-combination/crates/muyon-core/src/research.rs:1011:5
+     |
+1011 |     pub fn cite_document_trusted(&self, project: &str, id: &str, citation: &str) -> Result<()> {
+     |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+error[E0599]: no method named `issue_document_grant_trusted` found for reference `&BusinessStore` in the current scope
+   --> muyon-core/tests/document_edit_gateway.rs:114:7
+    |
+114 |     s.issue_document_grant_trusted(
+    |     --^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+help: there is a method `issue_grant_trusted` with a similar name, but with different arguments
+   --> /workspace/document-edit-combination/crates/muyon-core/src/business.rs:277:5
+    |
+277 | /     pub fn issue_grant_trusted(
+278 | |         &self,
+279 | |         command: &CommandEnvelope,
+280 | |         admission_id: Option<&str>,
+281 | |     ) -> Result<(), ContractError> {
+    | |__________________________________^
+
+error[E0433]: failed to resolve: use of undeclared type `DurableState`
+   --> muyon-core/tests/document_edit_gateway.rs:142:9
+    |
+142 |         DurableState::Candidate
+    |         ^^^^^^^^^^^^ use of undeclared type `DurableState`
+
+error[E0433]: failed to resolve: use of undeclared type `DurableState`
+   --> muyon-core/tests/document_edit_gateway.rs:146:9
+    |
+146 |         DurableState::Validated
+    |         ^^^^^^^^^^^^ use of undeclared type `DurableState`
+
+error[E0433]: failed to resolve: use of undeclared type `DocumentEditGateway`
+   --> muyon-core/tests/document_edit_gateway.rs:155:13
+    |
+155 |     let g = DocumentEditGateway::initialize_trusted(&s).unwrap();
+    |             ^^^^^^^^^^^^^^^^^^^ use of undeclared type `DocumentEditGateway`
+
+error[E0433]: failed to resolve: use of undeclared type `DocumentEditGateway`
+   --> muyon-core/tests/document_edit_gateway.rs:169:13
+    |
+169 |     let g = DocumentEditGateway::initialize_trusted(&s).unwrap();
+    |             ^^^^^^^^^^^^^^^^^^^ use of undeclared type `DocumentEditGateway`
+
+error[E0433]: failed to resolve: use of undeclared type `DurableState`
+   --> muyon-core/tests/document_edit_gateway.rs:172:9
+    |
+172 |         DurableState::Prepared
+    |         ^^^^^^^^^^^^ use of undeclared type `DurableState`
+
+error[E0433]: failed to resolve: use of undeclared type `DocumentEditGateway`
+   --> muyon-core/tests/document_edit_gateway.rs:180:13
+    |
+180 |     let g = DocumentEditGateway::initialize_trusted(&s).unwrap();
+    |             ^^^^^^^^^^^^^^^^^^^ use of undeclared type `DocumentEditGateway`
+
+error[E0433]: failed to resolve: use of undeclared type `DurableState`
+   --> muyon-core/tests/document_edit_gateway.rs:184:33
+    |
+184 |     assert_eq!(committed.state, DurableState::Committed);
+    |                                 ^^^^^^^^^^^^ use of undeclared type `DurableState`
+
+error[E0433]: failed to resolve: use of undeclared type `DocumentEditGateway`
+   --> muyon-core/tests/document_edit_gateway.rs:191:13
+    |
+191 |     let g = DocumentEditGateway::initialize_trusted(&s).unwrap();
+    |             ^^^^^^^^^^^^^^^^^^^ use of undeclared type `DocumentEditGateway`
+
+error[E0433]: failed to resolve: use of undeclared type `DocumentEditGateway`
+   --> muyon-core/tests/document_edit_gateway.rs:205:13
+    |
+205 |     let g = DocumentEditGateway::initialize_trusted(&s).unwrap();
+    |             ^^^^^^^^^^^^^^^^^^^ use of undeclared type `DocumentEditGateway`
+
+error[E0433]: failed to resolve: use of undeclared type `DurableState`
+   --> muyon-core/tests/document_edit_gateway.rs:215:28
+    |
+215 |     assert_eq!(view.state, DurableState::Conflict);
+    |                            ^^^^^^^^^^^^ use of undeclared type `DurableState`
+
+error[E0433]: failed to resolve: use of undeclared type `DocumentEditGateway`
+   --> muyon-core/tests/document_edit_gateway.rs:224:13
+    |
+224 |     let g = DocumentEditGateway::initialize_trusted(&s).unwrap();
+    |             ^^^^^^^^^^^^^^^^^^^ use of undeclared type `DocumentEditGateway`
+
+error[E0599]: no method named `revoke_document_grant_trusted` found for struct `BusinessStore` in the current scope
+   --> muyon-core/tests/document_edit_gateway.rs:251:7
+    |
+251 |     s.revoke_document_grant_trusted(&a.authority).unwrap();
+    |       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+help: there is a method `revoke_grant_trusted` with a similar name, but with different arguments
+   --> /workspace/document-edit-combination/crates/muyon-core/src/business.rs:314:5
+    |
+314 | /     pub fn revoke_grant_trusted(
+315 | |         &self,
+316 | |         grant_id: &str,
+317 | |         generation: &Revision,
+318 | |     ) -> Result<(), ContractError> {
+    | |__________________________________^
+
+error[E0433]: failed to resolve: use of undeclared type `DocumentEditGateway`
+   --> muyon-core/tests/document_edit_gateway.rs:262:13
+    |
+262 |     let g = DocumentEditGateway::initialize_trusted(&s).unwrap();
+    |             ^^^^^^^^^^^^^^^^^^^ use of undeclared type `DocumentEditGateway`
+
+error[E0433]: failed to resolve: use of undeclared type `DurableState`
+   --> muyon-core/tests/document_edit_gateway.rs:272:25
+    |
+272 |     assert_eq!(v.state, DurableState::Committed);
+    |                         ^^^^^^^^^^^^ use of undeclared type `DurableState`
+
+error[E0433]: failed to resolve: use of undeclared type `DocumentEditGateway`
+   --> muyon-core/tests/document_edit_gateway.rs:280:13
+    |
+280 |     let g = DocumentEditGateway::initialize_trusted(&s).unwrap();
+    |             ^^^^^^^^^^^^^^^^^^^ use of undeclared type `DocumentEditGateway`
+
+error[E0433]: failed to resolve: use of undeclared type `DurableState`
+   --> muyon-core/tests/document_edit_gateway.rs:284:9
+    |
+284 |         DurableState::Validated
+    |         ^^^^^^^^^^^^ use of undeclared type `DurableState`
+
+Some errors have detailed explanations: E0412, E0432, E0433, E0599.
+For more information about an error, try `rustc --explain E0412`.
+error: could not compile `muyon-core` (test "document_edit_gateway") due to 22 previous errors

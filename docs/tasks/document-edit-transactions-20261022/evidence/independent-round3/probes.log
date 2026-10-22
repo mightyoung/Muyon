@@ -1,0 +1,11 @@
+
+running 6 tests
+test each_gated_status_and_default_matrix_close_read_and_write ... ok
+test full_current_identity_and_candidate_binding_are_exact ... ok
+test new_inspect_authority_recovers_original_commit_but_not_exports ... ok
+test local_unknown_and_cancel_survive_all_authority_removal ... ok
+test recovered_cancelled_apply_preserves_candidate_and_stops ... ok
+test validation_candidate_binding_and_commit_receipt_remain_exact ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
