@@ -1,6 +1,9 @@
 package com.mightyoung.muyon.product
 
 import android.os.Bundle
+import android.content.SharedPreferences
+import android.content.res.Configuration
+import com.mightyoung.muyon.product.ui.shell.ActivityReaderSurface
 import androidx.lifecycle.ViewModelProvider
 import com.mightyoung.muyon.product.ui.shell.ShellConfigurationState
 import com.mightyoung.muyon.product.ui.shell.configurationBufferScope
@@ -34,6 +37,14 @@ import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 
 class MainActivity : ComponentActivity() {
     private lateinit var client: ProductClient
+    private lateinit var readerSurface: ActivityReaderSurface
+    private var readerProject by mutableStateOf<String?>(null)
+    private val readerProjectListener = SharedPreferences.OnSharedPreferenceChangeListener { preferences, key ->
+        if (key == "project_id" && ::readerSurface.isInitialized) {
+            readerProject = preferences.getString("project_id", null)
+            readerSurface.projectChanged(readerProject)
+        }
+    }
     private val configurationDrafts by lazy { ViewModelProvider(this)[ShellConfigurationState::class.java] }
     private var connected by mutableStateOf(false)
     private var initialized by mutableStateOf(false)
@@ -43,13 +54,18 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        readerSurface = ActivityReaderSurface.attach(this)
+        readerProject = getSharedPreferences("muyon_product_research_v2", 0).getString("project_id", null)
+        readerSurface.projectChanged(readerProject)
+        getSharedPreferences("muyon_product_research_v2", 0).registerOnSharedPreferenceChangeListener(readerProjectListener)
         client = ProductClient(this) { ready ->
             connected = ready
             if (ready) { existing = client.workspaceExists; client.call("health") { reply ->
                 initialized = reply.optString("status") == "ok"
                 workspaceId = if (initialized) (reply.optJSONObject("data")?.opt("workspace") as? String)?.takeIf { it.isNotBlank() } else null
+                readerSurface.bindActualWorkspace(workspaceId)
                 status = if (initialized) "本地工作台已连接" else if (existing) "工作台暂不可用，请重试连接" else "请创建新工作台"
-            } } else { initialized = false; workspaceId = null; status = "连接已断开；未确认的操作请查询原结果" }
+            } } else { initialized = false; workspaceId = null; readerSurface.connectionLost(); status = "连接已断开；未确认的操作请查询原结果" }
         }
         setContent {
             FoundationTheme {
@@ -57,6 +73,10 @@ class MainActivity : ComponentActivity() {
                 var conversationKey by rememberSaveable { mutableStateOf("default") }
                 var conversationTitle by rememberSaveable { mutableStateOf("Muyon 助手") }
                 var memberNames by rememberSaveable { mutableStateOf(arrayListOf<String>()) }
+                fun navigate(destination: String) {
+                    if (tab == "documents" && destination != "documents") readerSurface.leaveForNavigation()
+                    tab = destination
+                }
                 var navigationError by remember { mutableStateOf("") }
                 val shellPreferences = remember { getSharedPreferences("muyon_ui_shell_v1", 0) }
                 var shellRevision by remember { mutableIntStateOf(0) }
@@ -89,7 +109,7 @@ class MainActivity : ComponentActivity() {
                     else -> conversationTitle
                 }
                 ConversationShell(tab, title, conversationKey, conversations,
-                    onSelectDestination = { tab = it },
+                    onSelectDestination = { navigate(it) },
                     onSelectConversation = { key ->
                         try {
                             val catalog = if (key == "default") null else AgentCatalog(this@MainActivity).read()
@@ -105,7 +125,7 @@ class MainActivity : ComponentActivity() {
                                     memberNames = ArrayList(group.members.map { id -> visibleName(catalog.agents.single { it.id == id && !it.archived }.name, "未命名智能体") })
                                 }
                             }
-                            conversationKey = key; navigationError = ""; tab = "chat"
+                            conversationKey = key; navigationError = ""; navigate("chat")
                         } catch (_: Exception) { navigationError = "会话身份暂不可用，请返回目录核实。" }
                     },
                     notice = navigationError,
@@ -128,6 +148,7 @@ class MainActivity : ComponentActivity() {
                             client.call(if (existing) "health" else "initialize") { reply ->
                                 initialized = reply.optString("status") == "ok"
                                 workspaceId = if (initialized) (reply.optJSONObject("data")?.opt("workspace") as? String)?.takeIf { it.isNotBlank() } else null
+                                readerSurface.bindActualWorkspace(workspaceId)
                                 if (initialized) existing = true
                                 status = if (initialized) "本地工作台已连接" else reply.optString("error")
                             }
@@ -138,7 +159,7 @@ class MainActivity : ComponentActivity() {
                             when (tab) {
                                 "supplier" -> SupplierScreen(client)
                                 "research" -> ResearchScreen(client)
-                                "documents" -> DocumentCapabilitiesScreen { tab = "research" }
+                                "documents" -> DocumentCapabilitiesScreen(readerSurface, readerProject) { navigate("research") }
                                 "configuration" -> {
                                     val project = getSharedPreferences("muyon_product_research_v2", 0).getString("project_id", null)
                                     val preference = if (conversationKey == "default") "conversation" else "conversation:$conversationKey"
@@ -146,10 +167,10 @@ class MainActivity : ComponentActivity() {
                                     val workspace = workspaceId
                                     if (workspace == null || conversation == null) {
                                         Text("配置草稿缺少已核实的工作台或会话身份，请先打开对应对话。", Modifier.padding(20.dp))
-                                        TextButton(onClick = { tab = "chat" }) { Text("返回对话") }
+                                        TextButton(onClick = { navigate("chat") }) { Text("返回对话") }
                                     } else {
                                         val scope = configurationBufferScope(workspace, conversation, project)
-                                        ConfigurationPreviewHost(configurationDrafts.forScope(scope), client, workspace, conversation, project) { tab = "agents" }
+                                        ConfigurationPreviewHost(configurationDrafts.forScope(scope), client, workspace, conversation, project) { navigate("agents") }
                                     }
                                 }
                                 "agents" -> AgentLibraryScreen { agentId, groupId ->
@@ -169,7 +190,7 @@ class MainActivity : ComponentActivity() {
                                         }
                                         navigationError = ""
                                         rememberOpened(conversationKey)
-                                        tab = "chat"
+                                        navigate("chat")
                                     } catch (_: Exception) {
                                         navigationError = "会话身份暂不可用，请返回目录核实智能体与成员。"
                                     }
@@ -182,7 +203,7 @@ class MainActivity : ComponentActivity() {
                                         Column(Modifier.padding(24.dp)) {
                                             ConversationHeader(conversationTitle, openMenu)
                                             Text("智能体配置暂不可用，请返回目录核实后重新打开对话。")
-                                            TextButton(onClick = { tab = "agents" }) { Text("返回智能体目录") }
+                                            TextButton(onClick = { navigate("agents") }) { Text("返回智能体目录") }
                                         }
                                     } else ChatScreen(client,
                                     getSharedPreferences("muyon_product_research_v2", 0).getString("project_id", null),
@@ -198,5 +219,30 @@ class MainActivity : ComponentActivity() {
         }
         client.bind()
     }
-    override fun onDestroy() { client.close(); super.onDestroy() }
+    override fun onPause() {
+        if (::readerSurface.isInitialized) readerSurface.pausing()
+        super.onPause()
+    }
+    override fun onStop() {
+        if (::readerSurface.isInitialized) readerSurface.stopping()
+        super.onStop()
+    }
+    override fun onWindowFocusChanged(hasFocus: Boolean) {
+        super.onWindowFocusChanged(hasFocus)
+        if (::readerSurface.isInitialized) readerSurface.windowChanged()
+    }
+    override fun onMultiWindowModeChanged(isInMultiWindowMode: Boolean, newConfig: Configuration) {
+        super.onMultiWindowModeChanged(isInMultiWindowMode, newConfig)
+        if (::readerSurface.isInitialized) readerSurface.windowChanged()
+    }
+    override fun onPictureInPictureModeChanged(isInPictureInPictureMode: Boolean, newConfig: Configuration) {
+        super.onPictureInPictureModeChanged(isInPictureInPictureMode, newConfig)
+        if (::readerSurface.isInitialized) readerSurface.windowChanged()
+    }
+    override fun onDestroy() {
+        if (::readerSurface.isInitialized) readerSurface.destroy()
+        getSharedPreferences("muyon_product_research_v2", 0).unregisterOnSharedPreferenceChangeListener(readerProjectListener)
+        client.close()
+        super.onDestroy()
+    }
 }

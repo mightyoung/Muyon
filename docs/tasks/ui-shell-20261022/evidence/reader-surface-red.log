@@ -1,0 +1,3 @@
+Exception in thread "main" java.lang.IllegalStateException: visible user selection must create local exact intent
+	at com.mightyoung.muyon.product.ui.shell.ReaderSurfaceFenceChecksKt.main(ReaderSurfaceFenceChecks.kt:29)
+	at com.mightyoung.muyon.product.ui.shell.ReaderSurfaceFenceChecksKt.main(ReaderSurfaceFenceChecks.kt)
