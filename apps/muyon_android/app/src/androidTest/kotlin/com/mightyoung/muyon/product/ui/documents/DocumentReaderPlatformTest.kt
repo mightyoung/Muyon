@@ -30,7 +30,7 @@ class DocumentReaderPlatformTest {
         val result = CompletableDeferred<SidecarSaveResult>()
         val calls = AtomicInteger()
         try {
-            PdfDocument().use { doc ->
+            PdfDocument().useClosing { doc ->
                 repeat(2) { index ->
                     val page = doc.startPage(PdfDocument.PageInfo.Builder(100, 100, index + 1).create())
                     page.canvas.drawColor(Color.WHITE); doc.finishPage(page)
@@ -83,7 +83,7 @@ class DocumentReaderPlatformTest {
         val current = AtomicBoolean(true)
         val saves = AtomicInteger()
         try {
-            PdfDocument().use { doc ->
+            PdfDocument().useClosing { doc ->
                 repeat(3) { index ->
                     val page = doc.startPage(PdfDocument.PageInfo.Builder(100, 100, index + 1).create())
                     page.canvas.drawColor(Color.WHITE); doc.finishPage(page)
@@ -155,7 +155,7 @@ class DocumentReaderPlatformTest {
         val context = InstrumentationRegistry.getInstrumentation().targetContext
         val file = File.createTempFile("synthetic-reader-", ".pdf", context.cacheDir)
         try {
-            PdfDocument().use { doc ->
+            PdfDocument().useClosing { doc ->
                 listOf(Color.RED, Color.BLUE).forEachIndexed { index, color ->
                     val page = doc.startPage(PdfDocument.PageInfo.Builder(100, 200, index + 1).create())
                     page.canvas.drawRect(0f, 0f, 100f, 200f, Paint().apply { this.color = color })
@@ -196,3 +196,7 @@ class DocumentReaderPlatformTest {
         assertEquals("comment", SharedDocumentJson.replacementBody(projected.edit(projected.document, "edited")!!).getString("kind"))
     }
 }
+
+/** android.graphics.pdf.PdfDocument has close() but is not Closeable, so Kotlin's use{} does not apply. */
+private inline fun <R> PdfDocument.useClosing(block: (PdfDocument) -> R): R =
+    try { block(this) } finally { close() }
