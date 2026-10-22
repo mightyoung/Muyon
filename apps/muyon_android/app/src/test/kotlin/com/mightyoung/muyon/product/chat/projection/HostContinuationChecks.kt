@@ -31,6 +31,7 @@ fun hostContinuationChecks() {
     fun read(state: JSONObject) = setup(JSONObject().put("action", "read").put("local_draft_id", state.getString("local_draft_id")))
     try {
         var state = open()
+        check(state.getString("persistent_owner_status") == "unavailable" && state.getString("persistence_status") == "unavailable")
         check(state.getString("status") == "local_only" && state.getString("projection_type") == "setup_draft")
         check(state.getLong("local_revision") == 0L && state.getLong("reducer_revision") == 0L)
         check(state.getString("local_draft_id") == open().getString("local_draft_id"))
@@ -85,6 +86,8 @@ fun hostContinuationChecks() {
         check(!state.getJSONArray("supported_local_operations").toString().contains("next"))
         denied(setup(mutation(state, "next")))
         for (unsupported in listOf("create", "start", "save", "approve", "observe_created", "query_creation")) denied(setup(mutation(state, unsupported)))
+        check(setup(mutation(state, "save")).getString("error") == "setup_persistent_owner_unavailable")
+        check(setup(mutation(state, "restore")).getString("error") == "setup_persistent_owner_unavailable")
         check(!read(state).getBoolean("saved"))
         check(state.getJSONArray("allowed_capabilities").length() == 0 && state.getJSONArray("allowed_materials").length() == 0)
         state.put("name", "tampered"); check(read(state).getString("name") == "文献助手")

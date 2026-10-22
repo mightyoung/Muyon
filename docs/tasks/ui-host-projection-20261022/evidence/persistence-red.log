@@ -1,0 +1,133 @@
+error: source file or directory not found: /workspace/Muyon/apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/chat/persistence/HostDraftStore.kt
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/chat/persistence/HostDraftStoreChecks.kt:7:22: error: unresolved reference 'DraftStoreOwner'.
+private val ownerA = DraftStoreOwner("synthetic-account-a", "workspace", "conversation", "project")
+                     ^^^^^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/chat/persistence/HostDraftStoreChecks.kt:9:26: error: unresolved reference 'DraftStoreEdits'.
+private val firstEdits = DraftStoreEdits("草稿", "合成测试", "本地角色", "REVIEW", 3)
+                         ^^^^^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/chat/persistence/HostDraftStoreChecks.kt:14:21: error: unresolved reference 'HostDraftStore'.
+        val store = HostDraftStore(Path.of(args[1])) { point ->
+                    ^^^^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/chat/persistence/HostDraftStoreChecks.kt:14:56: error: cannot infer type for value parameter 'point'. Specify it explicitly.
+        val store = HostDraftStore(Path.of(args[1])) { point ->
+                                                       ^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/chat/persistence/HostDraftStoreChecks.kt:15:23: error: unresolved reference 'name'.
+            if (point.name == stage) Runtime.getRuntime().halt(31)
+                      ^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/chat/persistence/HostDraftStoreChecks.kt:18:54: error: unresolved reference 'DraftStoreWrite'.
+        if (args[0] == "race") println(if (result is DraftStoreWrite.Committed) "committed" else "conflict")
+                                                     ^^^^^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/chat/persistence/HostDraftStoreChecks.kt:22:19: error: unresolved reference 'HostDraftStore'.
+    fun store() = HostDraftStore(root)
+                  ^^^^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/chat/persistence/HostDraftStoreChecks.kt:23:18: error: unresolved reference 'DraftStoreRecord'.
+    fun found(): DraftStoreRecord = (store().read(ownerA, draftId) as DraftStoreRead.Found).record
+                 ^^^^^^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/chat/persistence/HostDraftStoreChecks.kt:23:71: error: unresolved reference 'DraftStoreRead'.
+    fun found(): DraftStoreRecord = (store().read(ownerA, draftId) as DraftStoreRead.Found).record
+                                                                      ^^^^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/chat/persistence/HostDraftStoreChecks.kt:23:93: error: unresolved reference 'record'.
+    fun found(): DraftStoreRecord = (store().read(ownerA, draftId) as DraftStoreRead.Found).record
+                                                                                            ^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/chat/persistence/HostDraftStoreChecks.kt:29:48: error: unresolved reference 'DraftStoreRead'.
+        check(store().read(ownerA, draftId) is DraftStoreRead.Missing)
+                                               ^^^^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/chat/persistence/HostDraftStoreChecks.kt:30:72: error: unresolved reference 'DraftStoreWrite'.
+        val first = store().save(ownerA, draftId, null, firstEdits) as DraftStoreWrite.Committed
+                                                                       ^^^^^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/chat/persistence/HostDraftStoreChecks.kt:31:21: error: unresolved reference 'receipt'.
+        check(first.receipt.storedRevision == 1L && found().edits == firstEdits)
+                    ^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/chat/persistence/HostDraftStoreChecks.kt:31:61: error: unresolved reference 'edits'.
+        check(first.receipt.storedRevision == 1L && found().edits == firstEdits)
+                                                            ^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/chat/persistence/HostDraftStoreChecks.kt:32:66: error: unresolved reference 'DraftStoreWrite'.
+        check(store().save(ownerA, draftId, null, firstEdits) is DraftStoreWrite.Rejected)
+                                                                 ^^^^^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/chat/persistence/HostDraftStoreChecks.kt:33:63: error: unresolved reference 'DraftStoreWrite'.
+        check(store().save(ownerA, draftId, 0, firstEdits) is DraftStoreWrite.Rejected)
+                                                              ^^^^^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/chat/persistence/HostDraftStoreChecks.kt:34:84: error: unresolved reference 'DraftStoreRead'.
+        check(store().read(ownerA.copy(accountId = "synthetic-other"), draftId) is DraftStoreRead.Missing)
+                                                                                   ^^^^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/chat/persistence/HostDraftStoreChecks.kt:35:96: error: unresolved reference 'DraftStoreWrite'.
+        check(store().save(ownerA, draftId, 1, firstEdits.copy(purpose = "x".repeat(8001))) is DraftStoreWrite.Rejected)
+                                                                                               ^^^^^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/chat/persistence/HostDraftStoreChecks.kt:36:23: error: unresolved reference 'storedRevision'.
+        check(found().storedRevision == 1L)
+                      ^^^^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/chat/persistence/HostDraftStoreChecks.kt:42:23: error: unresolved reference 'storedRevision'.
+        check(found().storedRevision == 2L)
+                      ^^^^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/chat/persistence/HostDraftStoreChecks.kt:43:44: error: unresolved reference 'receipt'.
+        check(store().recoverReceipt(first.receipt) is DraftStoreWrite.Rejected) // newer is not original
+                                           ^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/chat/persistence/HostDraftStoreChecks.kt:43:56: error: unresolved reference 'DraftStoreWrite'.
+        check(store().recoverReceipt(first.receipt) is DraftStoreWrite.Rejected) // newer is not original
+                                                       ^^^^^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/chat/persistence/HostDraftStoreChecks.kt:45:46: error: unresolved reference 'receipt'.
+        check(store().recoverReceipt(current.receipt()) is DraftStoreWrite.Committed)
+                                             ^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/chat/persistence/HostDraftStoreChecks.kt:45:60: error: unresolved reference 'DraftStoreWrite'.
+        check(store().recoverReceipt(current.receipt()) is DraftStoreWrite.Committed)
+                                                           ^^^^^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/chat/persistence/HostDraftStoreChecks.kt:47:22: error: unresolved reference 'HostDraftStore'.
+        val before = HostDraftStore(root) { if (it == DraftStoreStage.BEFORE_MOVE) throw java.io.IOException("synthetic") }
+                     ^^^^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/chat/persistence/HostDraftStoreChecks.kt:47:49: error: unresolved reference 'it'.
+        val before = HostDraftStore(root) { if (it == DraftStoreStage.BEFORE_MOVE) throw java.io.IOException("synthetic") }
+                                                ^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/chat/persistence/HostDraftStoreChecks.kt:47:55: error: unresolved reference 'DraftStoreStage'.
+        val before = HostDraftStore(root) { if (it == DraftStoreStage.BEFORE_MOVE) throw java.io.IOException("synthetic") }
+                                                      ^^^^^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/chat/persistence/HostDraftStoreChecks.kt:48:62: error: unresolved reference 'DraftStoreWrite'.
+        check(before.save(ownerA, draftId, 2, firstEdits) is DraftStoreWrite.Rejected)
+                                                             ^^^^^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/chat/persistence/HostDraftStoreChecks.kt:49:23: error: unresolved reference 'storedRevision'.
+        check(found().storedRevision == 2L)
+                      ^^^^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/chat/persistence/HostDraftStoreChecks.kt:50:21: error: unresolved reference 'HostDraftStore'.
+        val after = HostDraftStore(root) { if (it == DraftStoreStage.AFTER_MOVE) throw java.io.IOException("synthetic") }
+                    ^^^^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/chat/persistence/HostDraftStoreChecks.kt:50:48: error: unresolved reference 'it'.
+        val after = HostDraftStore(root) { if (it == DraftStoreStage.AFTER_MOVE) throw java.io.IOException("synthetic") }
+                                               ^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/chat/persistence/HostDraftStoreChecks.kt:50:54: error: unresolved reference 'DraftStoreStage'.
+        val after = HostDraftStore(root) { if (it == DraftStoreStage.AFTER_MOVE) throw java.io.IOException("synthetic") }
+                                                     ^^^^^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/chat/persistence/HostDraftStoreChecks.kt:51:71: error: unresolved reference 'DraftStoreWrite'.
+        val uncertain = after.save(ownerA, draftId, 2, firstEdits) as DraftStoreWrite.Unknown
+                                                                      ^^^^^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/chat/persistence/HostDraftStoreChecks.kt:52:25: error: unresolved reference 'attempt'.
+        check(uncertain.attempt.storedRevision == 3L)
+                        ^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/chat/persistence/HostDraftStoreChecks.kt:53:48: error: unresolved reference 'attempt'.
+        check(store().recoverReceipt(uncertain.attempt) is DraftStoreWrite.Committed)
+                                               ^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/chat/persistence/HostDraftStoreChecks.kt:53:60: error: unresolved reference 'DraftStoreWrite'.
+        check(store().recoverReceipt(uncertain.attempt) is DraftStoreWrite.Committed)
+                                                           ^^^^^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/chat/persistence/HostDraftStoreChecks.kt:57:48: error: unresolved reference 'DraftStoreRead'.
+        check(store().read(ownerA, draftId) is DraftStoreRead.Rejected)
+                                               ^^^^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/chat/persistence/HostDraftStoreChecks.kt:58:63: error: unresolved reference 'DraftStoreWrite'.
+        check(store().save(ownerA, draftId, 3, firstEdits) is DraftStoreWrite.Rejected)
+                                                              ^^^^^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/chat/persistence/HostDraftStoreChecks.kt:60:48: error: unresolved reference 'DraftStoreRead'.
+        check(store().read(ownerA, draftId) is DraftStoreRead.Rejected)
+                                               ^^^^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/chat/persistence/HostDraftStoreChecks.kt:62:48: error: unresolved reference 'DraftStoreRead'.
+        check(store().read(ownerA, draftId) is DraftStoreRead.Rejected)
+                                               ^^^^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/chat/persistence/HostDraftStoreChecks.kt:66:48: error: unresolved reference 'DraftStoreRead'.
+        check(store().read(ownerA, draftId) is DraftStoreRead.Rejected)
+                                               ^^^^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/chat/persistence/HostDraftStoreChecks.kt:68:48: error: unresolved reference 'DraftStoreRead'.
+        check(store().read(ownerA, draftId) is DraftStoreRead.Rejected)
+                                               ^^^^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/chat/persistence/HostDraftStoreChecks.kt:70:23: error: unresolved reference 'storedRevision'.
+        check(found().storedRevision == 3L)
+                      ^^^^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/chat/persistence/HostDraftStoreChecks.kt:74:23: error: unresolved reference 'storedRevision'.
+        check(found().storedRevision == 3L) // CAS rejected before hook because child expected1
+                      ^^^^^^^^^^^^^^

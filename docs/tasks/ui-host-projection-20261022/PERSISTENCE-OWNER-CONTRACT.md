@@ -46,3 +46,40 @@ Implementation plan: build the storage frame with a minimal edit record and synt
 failure/concurrency tests; keep production endpoints unavailable until BOTH the real
 owner resolver and canonical reducer export/restore adapter are present. This is
 partial infrastructure, not actual product persistent save/restore completion.
+
+## Fixed-codec update (supersedes the proposed minimal edit frame above)
+
+Parent released Bot branch53b9b597e190db6b6619a18e8746f2985f488fbc and exact
+interface49ad2a8dfe7fe65bad600d985f9e1631252191da. The latter was adopted through
+ordinary dependency merge22fda0c795cbcc01d9a3562c64b0a28073e541f4; canonical source
+was not locally edited. Storage now accepts ONLY the fixed exportDraft archive and
+validates it through explicit restoreDraft; there is no host-specific edit JSON,
+step, memory revision, token or creation serialization. Outer JSON carries only
+stable owner tuple, actual persistent draft UUID, schema/storedRevision, base64
+canonical archive and corruption digest. SHA256 is not authentication/encryption.
+
+Production mapping remains BLOCKED: no verified persistent account/namespace/
+conversation-project join, rollback anchor or unresolved creation/stop record guard
+exists. Runtime returns setup_persistent_owner_unavailable for save/restore and
+persistent_owner_status/persistence_status=unavailable, with saved/can_save=false.
+There is no production HostDraftStore callsite and no actual app-private root opened.
+
+Store requires an already-existing trusted durable root; host must durably create
+its namespace including parent-directory fsync. It does not create missing roots.
+Read/recover take nullable minimumStoredRevision: null means no prior trusted anchor;
+non-null including0 refuses missing/lower records. The floor must come from trusted
+persistent host state, never a value inferred from the potentially rolled-back file.
+The primitive cannot prevent rollback of its entire namespace/anchor together without
+that external trusted source; do not claim checksum or app UID solves this gap.
+
+save(owner,id,expectedStoredRevision,exportedMemoryRevision,archive) returns a local
+storage receipt for exactly the export memory revision, stored revision and digest.
+The memory revision is returned only, never persisted. Host must retain the original
+reducer instance/live callback scope and compare current revision before displaying
+saved; a late receipt cannot acknowledge newer edits. read/recover after restart
+confirms storage only, never marks a new reducer instance saved or restores grants.
+The stable record UUID is supplied explicitly as newDraftId only after verified
+owner/record checks. Codec restores NAME/revision0/no grants/NOT_REQUESTED; that is
+not permission to clear an old unknown creation: host must check the durable original
+creation/stop ledger before restore and before any future create. Missing ledger
+is a blocker, not an empty ledger. None of these absent production guards is invented.
