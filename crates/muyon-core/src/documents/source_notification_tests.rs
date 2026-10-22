@@ -449,3 +449,28 @@ fn publication_token_rejects_another_transaction_and_accepts_exact_original() {
     assert_eq!(result.document.revision(), &Revision::new(2));
     assert_eq!(store.pending_document_source_notifications_trusted(None, 256).unwrap().len(), 1);
 }
+
+#[test]
+fn earlier_grant_source_or_binding_write_cannot_reset_a_tombstone() {
+    for table in ["document_grants", "artifact_local_evidence_sources_v1", "artifact_local_bindings_v1"] {
+        let (_f, store, mut source, mut local, kind) = fixture();
+        let mut second = local.clone(); second.object.object_id = "object-z".into();
+        bind(&store, &source, &second, &kind);
+        store.revoke_document_grant_trusted(&source.authority).unwrap();
+        let first = store.pending_document_source_notifications_trusted(None, 256).unwrap();
+        store.ack_document_source_notifications_trusted(&first).unwrap();
+        source.authority.generation = source.authority.generation.next().unwrap();
+        store.issue_document_grant_trusted(&source.document, &source.authority, &[DocumentOperation::Inspect, DocumentOperation::ReadText], expiry()).unwrap();
+        local.binding_generation = local.binding_generation.next().unwrap(); second.binding_generation = second.binding_generation.next().unwrap();
+        bind(&store, &source, &local, &kind); bind(&store, &source, &second, &kind);
+        store.database().exec(&format!("CREATE TRIGGER tamper AFTER UPDATE ON {table} WHEN NEW.active=0 BEGIN DELETE FROM document_source_notifications_v1 WHERE object_id='object-z'; END"), &[]).unwrap();
+        assert!(store.revoke_document_grant_trusted(&source.authority).is_err(), "{table} write preceded frozen generation boundary");
+        assert!(store.read_document(&source).is_ok()); assert_eq!(active(&store), "1");
+        store.database().exec("DROP TRIGGER tamper", &[]).unwrap();
+        store.revoke_document_grant_trusted(&source.authority).unwrap();
+        let renewed = store.pending_document_source_notifications_trusted(None, 256).unwrap();
+        assert!(renewed.iter().all(|event| event.generation == Revision::new(2)));
+        assert_eq!(store.ack_document_source_notifications_trusted(&first).unwrap(), 0);
+        assert_eq!(store.pending_document_source_notifications_trusted(None, 256).unwrap(), renewed);
+    }
+}
