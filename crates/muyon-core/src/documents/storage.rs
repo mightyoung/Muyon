@@ -224,6 +224,7 @@ impl BusinessStore {
     pub fn read_document(&self, access: &DocumentAccess) -> Result<DocumentMetadata> {
         let tx = sql(self.database().transaction())?;
         let metadata = self.document_access(access, &[DocumentOperation::Inspect])?;
+        self.document_grant(access, &[DocumentOperation::Inspect])?;
         sql(tx.commit())?;
         Ok(metadata)
     }
@@ -290,6 +291,7 @@ impl BusinessStore {
         };
         let record = AnnotationRecord { id: annotation_id.into(), revision: expected.next()?, anchor: anchor.clone(), body: body.clone(), created_by, modified_by: author.clone(), deleted: false, anchor_state: StoredAnchorState::Current };
         self.put_annotation(&access.document, &record)?;
+        self.document_grant(access, &[DocumentOperation::ReadText, DocumentOperation::Annotate])?;
         sql(tx.commit())?;
         Ok(record)
     }
@@ -304,6 +306,7 @@ impl BusinessStore {
         record.modified_by = author.clone();
         record.deleted = true;
         self.put_annotation(&access.document, &record)?;
+        self.document_grant(access, &[DocumentOperation::ReadText, DocumentOperation::Annotate])?;
         sql(tx.commit())?;
         Ok(record)
     }
@@ -311,6 +314,7 @@ impl BusinessStore {
         let tx = sql(self.database().transaction())?;
         self.document_access(access, &[DocumentOperation::ReadText])?;
         let records = self.annotation_rows(&access.document)?;
+        self.document_grant(access, &[DocumentOperation::ReadText])?;
         sql(tx.commit())?;
         Ok(records)
     }
@@ -319,6 +323,7 @@ impl BusinessStore {
         let document = self.document_access(access, &[DocumentOperation::ReadText, DocumentOperation::Export])?;
         let export = AnnotationExport { schema: "muyon.annotation-sidecar.v1".into(), annotations: self.annotation_rows(&access.document)?, document };
         if encode(&export)?.len() > 16 * 1024 * 1024 { return Err(ContractError::TextLimit); }
+        self.document_grant(access, &[DocumentOperation::ReadText, DocumentOperation::Export])?;
         sql(tx.commit())?;
         Ok(export)
     }

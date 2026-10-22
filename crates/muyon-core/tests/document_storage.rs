@@ -234,3 +234,20 @@ fn writes_cannot_strand_existing_annotations_above_read_budget() {
     assert_eq!(store.save_annotation_trusted(&a, "new", &Revision::new(0), &anchor(&a.document), &comment("x"), &human()), Err(ContractError::TextLimit));
     assert_eq!(store.list_annotations(&a).unwrap().len(), 64);
 }
+#[test]
+fn save_expiry_at_publication_tail_rolls_back_sidecar_and_history() {
+    let f = Fixture::new(); let store = f.initialize(); let m = register(&store); let a = access(&store, &m, &all());
+    f.db().exec("CREATE TRIGGER expire_after_annotation_history AFTER INSERT ON document_annotation_history BEGIN UPDATE document_grants SET expires_at_ms='0'; END", &[]).unwrap();
+    assert_eq!(store.save_annotation_trusted(&a, "a", &Revision::new(0), &anchor(&a.document), &comment("x"), &human()), Err(ContractError::InvalidAuthority));
+    assert!(f.db().query("SELECT * FROM document_annotation_history", &[]).unwrap().is_empty());
+    assert!(store.list_annotations(&a).unwrap().is_empty());
+}
+#[test]
+fn delete_expiry_at_publication_tail_preserves_previous_annotation() {
+    let f = Fixture::new(); let store = f.initialize(); let m = register(&store); let a = access(&store, &m, &all());
+    let original = store.save_annotation_trusted(&a, "a", &Revision::new(0), &anchor(&a.document), &comment("x"), &human()).unwrap();
+    f.db().exec("CREATE TRIGGER expire_after_annotation_update AFTER UPDATE ON document_annotations BEGIN UPDATE document_grants SET expires_at_ms='0'; END", &[]).unwrap();
+    assert_eq!(store.delete_annotation_trusted(&a, "a", &original.revision, &human()), Err(ContractError::InvalidAuthority));
+    assert_eq!(store.list_annotations(&a).unwrap(), vec![original]);
+    assert_eq!(f.db().query("SELECT * FROM document_annotation_history", &[]).unwrap().len(), 1);
+}
