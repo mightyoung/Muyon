@@ -1,0 +1,18 @@
+
+running 1 test
+test independent_unknown_resolution_preserves_observed_dissent ... FAILED
+
+failures:
+
+---- independent_unknown_resolution_preserves_observed_dissent stdout ----
+
+thread 'independent_unknown_resolution_preserves_observed_dissent' (3549) panicked at /tmp/mig20-independent-review.rs:220:2:
+accepted earlier contradictory evidence vanished
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    independent_unknown_resolution_preserves_observed_dissent
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 18 filtered out; finished in 0.00s
+

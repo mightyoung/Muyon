@@ -1,0 +1,18 @@
+
+running 1 test
+test unknown_resolution_keeps_earlier_dissent_and_source_versions ... FAILED
+
+failures:
+
+---- unknown_resolution_keeps_earlier_dissent_and_source_versions stdout ----
+
+thread 'unknown_resolution_keeps_earlier_dissent_and_source_versions' (4005) panicked at crates/muyon-core/tests/group_runtime.rs:837:5:
+assertion failed: summary.claims["claim"].disputed
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    unknown_resolution_keeps_earlier_dissent_and_source_versions
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 18 filtered out; finished in 0.00s
+

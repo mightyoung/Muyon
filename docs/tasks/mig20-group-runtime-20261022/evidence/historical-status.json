@@ -1,0 +1,77 @@
+{
+  "01-missing-module.log": {
+    "exit": 1,
+    "meaning": "missing module compile failure, not behavioral RED"
+  },
+  "02-scaffold-compile.log": {
+    "exit": 0
+  },
+  "03-behavior-red.log": {
+    "exit": 101,
+    "tests": "0 passed / 13 failed; API scaffold intentionally rejects"
+  },
+  "04-implementation-compile.log": {
+    "exit": 0
+  },
+  "05-first-green.log": {
+    "exit": 0,
+    "tests": "13 passed"
+  },
+  "06-projection-missing.log": {
+    "exit": 1,
+    "meaning": "projection API missing compile failure"
+  },
+  "07-cargo-offline-first.log": {
+    "exit": 101,
+    "meaning": "missing serde cache; no tests ran"
+  },
+  "08-projection-scaffold-compile.log": {
+    "exit": 1,
+    "meaning": "dead_code denied in standalone compile"
+  },
+  "09-projection-red.log": {
+    "exit": 0,
+    "meaning": "INVALID AS CANDIDATE VERIFICATION: previous binary ran after compile failed; output is stale 13-test suite, not projection RED/GREEN"
+  },
+  "10-cargo-fetch.log": {
+    "exit": 0,
+    "meaning": "fetch existing locked dependencies to task /tmp cache; no lock changes"
+  },
+  "11-projection-scaffold-compile.log": {
+    "exit": 0
+  },
+  "12-projection-red.log": {
+    "exit": 101,
+    "tests": "15 passed / 3 failed; intentional projection scaffold"
+  },
+  "13-compile.log": {
+    "exit": 0
+  },
+  "14-green.log": {
+    "exit": 0,
+    "tests": "18 passed"
+  },
+  "15-cargo.log": {
+    "exit": 101,
+    "meaning": "system SQLite .so linker name absent; no complete suite result"
+  },
+  "16-review-regression-red.log": {
+    "exit": 101,
+    "tests": "0 passed / 1 failed (18 filtered); IR-01 dissent lost"
+  },
+  "17-review-fixed-compile.log": {
+    "exit": 0
+  },
+  "18-review-fixed-green.log": {
+    "exit": 0,
+    "tests": "19 passed"
+  },
+  "19-cargo-green.log": {
+    "exit": 0,
+    "tests": "187 passed / 0 failed; 19 runtime + 168 baseline"
+  },
+  "20-budget-boundary-green.log": {
+    "exit": 0,
+    "tests": "20 runtime passed"
+  }
+}

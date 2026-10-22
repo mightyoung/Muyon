@@ -1,0 +1,20 @@
+error: variant `Unknown` is never constructed
+  --> crates/muyon-core/tests/../src/group_runtime/mod.rs:36:41
+   |
+36 | pub enum Stance {Supports, Contradicts, Unknown}
+   |          ------ variant in this enum    ^^^^^^^
+   |
+   = note: `Stance` has derived impls for the traits `Debug` and `Clone`, but these are intentionally ignored during dead code analysis
+   = note: `-D dead-code` implied by `-D warnings`
+   = help: to override `-D warnings` add `#[expect(dead_code)]` or `#[allow(dead_code)]`
+
+error: variant `Deadline` is never constructed
+  --> crates/muyon-core/tests/../src/group_runtime/mod.rs:55:70
+   |
+55 | pub enum SchedulingState { Ready { available_slots:usize }, Stopped, Deadline, Reconciling { request_ids:BTreeSet<String> }, RoundLi...
+   |          --------------- variant in this enum                        ^^^^^^^^
+   |
+   = note: `SchedulingState` has derived impls for the traits `Debug` and `Clone`, but these are intentionally ignored during dead code analysis
+
+error: aborting due to 2 previous errors
+

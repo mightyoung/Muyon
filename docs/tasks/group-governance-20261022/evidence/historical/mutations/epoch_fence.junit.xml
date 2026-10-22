@@ -1,0 +1,33 @@
+<?xml version='1.0' encoding='utf-8'?>
+<testsuite name="historical/mutations/epoch_fence.log" tests="20" failures="1" errors="0" skipped="0">
+  <properties>
+    <property name="origin" value="derived from retained raw libtest output; not native JUnit" />
+    <property name="raw_sha256" value="901321681a0d71125ac427388c0fe8e9dd5934adfae6953111a15715a7873f98" />
+  </properties>
+  <testcase classname="epoch_fence" name="all_duplicate_states_only_lookup_and_submitted_blocks_new_dispatch" />
+  <testcase classname="epoch_fence" name="budget_overflow_and_exhaustion_never_become_zero_cost" />
+  <testcase classname="epoch_fence" name="collaborator_cannot_self_authorize_even_as_coordinator" />
+  <testcase classname="epoch_fence" name="cycles_missing_dependencies_and_duplicate_nodes_are_rejected" />
+  <testcase classname="epoch_fence" name="depth_two_and_foreign_parent_are_rejected" />
+  <testcase classname="epoch_fence" name="duplicate_command_returns_only_original_receipt_even_when_unknown" />
+  <testcase classname="epoch_fence" name="duplicate_request_identity_and_stale_config_are_not_valid_host_views" />
+  <testcase classname="epoch_fence" name="deterministic_ready_order_uses_node_identity_and_dependencies" />
+  <testcase classname="epoch_fence" name="every_authority_layer_and_member_scope_must_allow_the_request" />
+  <testcase classname="epoch_fence" name="failed_dependencies_do_not_run_and_cancelled_children_keep_lifetime_slots" />
+  <testcase classname="epoch_fence" name="eight_lifetime_children_and_two_active_slots_are_hard_caps" />
+  <testcase classname="epoch_fence" name="human_admin_can_only_narrow_existing_grant" />
+  <testcase classname="epoch_fence" name="ledger_corruption_and_unsupported_status_fail_closed" />
+  <testcase classname="epoch_fence" name="modes_roundtrip_by_explicit_name_and_unknown_fails_closed" />
+  <testcase classname="epoch_fence" name="represented_coordinator_modes_never_execute" />
+  <testcase classname="epoch_fence" name="rounds_count_original_dispatch_history_across_restarts_and_stops" />
+  <testcase classname="epoch_fence" name="unknown_budget_keeps_reserve_and_blocks_new_command" />
+  <testcase classname="epoch_fence" name="unsupported_versions_and_ownerless_groups_are_rejected" />
+  <testcase classname="epoch_fence" name="non_member_is_rejected" />
+  <testcase classname="epoch_fence" name="stale_host_epoch_leader_epoch_or_configuration_never_executes">
+    <failure message="libtest reported FAILED; see sibling raw log">thread 'stale_host_epoch_leader_epoch_or_configuration_never_executes' (4165) panicked at /tmp/muyon-group-mutations/epoch_fence/tests/group_governance.rs:361:9:
+assertion `left == right` failed
+  left: Ok(Eligible { child_id: "a" })
+ right: Err(StaleIdentity)
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace</failure>
+  </testcase>
+</testsuite>

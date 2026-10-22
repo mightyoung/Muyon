@@ -1,0 +1,49 @@
+{
+  "provenance": "Historical argv/environment reconstructed from recorded original tool invocations and REPORT.md, not an original environment dump. Fresh metadata is separate.",
+  "cwd": "/workspace/Muyon-group",
+  "standalone_final_21": {
+    "compile_argv": [
+      "/tmp/muyon-rust/bin/rustc",
+      "--edition=2021",
+      "-D",
+      "warnings",
+      "--test",
+      "crates/muyon-core/tests/group_governance.rs",
+      "-o",
+      "/tmp/muyon-group-tests"
+    ],
+    "test_argv": [
+      "/tmp/muyon-group-tests"
+    ],
+    "stdout_redirect": "/tmp/muyon-group-green.log",
+    "original_compile_output_retained": false
+  },
+  "cargo_final_168": {
+    "argv": [
+      "cargo",
+      "test",
+      "--manifest-path",
+      "crates/Cargo.toml",
+      "-p",
+      "muyon-core",
+      "--locked",
+      "--offline"
+    ],
+    "environment_overrides": {
+      "PATH_prefix": "/tmp/muyon-rust/bin:",
+      "CARGO_HOME": "/tmp/muyon-cargo",
+      "CARGO_TARGET_DIR": "/tmp/muyon-cargo-target",
+      "RUSTFLAGS": "-L native=/tmp/muyon-native-libs"
+    },
+    "combined_stdout_stderr_redirect": "/tmp/muyon-group-cargo-final.log",
+    "exit_status_from_original_session_completion": 0
+  },
+  "mutations": "See mutations/commands.json; old mutated sources are reconstructible from baseline text and individual patches.",
+  "unavailable": [
+    "Original full environment dump and process start/end timestamps",
+    "Original standalone/mutation compiler stdout/stderr",
+    "Original native JUnit (the actual output format was libtest text)",
+    "Initial 17-test RED stub module source",
+    "Dedicated raw-file capture of unknown-child targeted RED; the conversation/review report retains that historical record."
+  ]
+}
