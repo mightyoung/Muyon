@@ -173,7 +173,10 @@ fn missing_pin_or_corrupt_object_is_query_only_unknown() {
     let (_f, store, access) = setup();
     let status = store.prepare_document_candidate_trusted(&access, "candidate", "operation", NEW_BYTES).unwrap();
     let object = store.root_dir().join("objects").join(&status.expected_blob.digest);
-    fs::write(&object, b"corrupt synthetic output").unwrap();
+    // Preserve length so this exercises the hash check, not just byte count.
+    let mut corrupt = NEW_BYTES.to_vec();
+    corrupt[0] ^= 1;
+    fs::write(&object, &corrupt).unwrap();
     assert_eq!(store.lookup_document_candidate(&access, "candidate").unwrap().state, CandidateState::PreparationUnknown);
     fs::write(&object, NEW_BYTES).unwrap();
     assert_eq!(store.lookup_document_candidate(&access, "candidate").unwrap().state, CandidateState::SealedUnvalidated);

@@ -1,4 +1,5 @@
-//! Offline public document contracts only. No engine, file IO, DB or model calls.
+//! Public document contracts, authorized metadata/annotation persistence and
+//! private candidate preparation. No document engine or model calls.
 //!
 //! A valid reference/anchor/capability declaration never proves actual file
 //! reading, rendering, target resolution, editing or native format fidelity.
