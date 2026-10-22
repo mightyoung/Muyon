@@ -1,0 +1,10 @@
+Dialog: System UI isn't responding; controls package android.
+10-22 19:57:36.011  1556  1627 E ActivityManager: ANR in com.android.systemui
+10-22 19:57:36.011  1556  1627 E ActivityManager: PID: 1739
+10-22 19:57:36.011  1556  1627 E ActivityManager: Reason: executing service com.android.systemui/.SystemUIService
+10-22 19:57:36.011  1556  1627 E ActivityManager: Load: 0.0 / 0.0 / 0.0
+10-22 19:58:14.123  1556  1627 E ActivityManager: ANR in android.process.media
+10-22 19:58:14.123  1556  1627 E ActivityManager: PID: 2141
+10-22 19:58:14.123  1556  1627 E ActivityManager: Reason: Broadcast of Intent { act=android.hardware.usb.action.USB_STATE flg=0x31000010 cmp=com.android.providers.media/.MtpReceiver (has extras) }
+10-22 19:58:14.123  1556  1627 E ActivityManager: Load: 0.0 / 0.0 / 0.0
+Product start20:06:55; these system events predate product. Normal Wait once; no permission accepted.

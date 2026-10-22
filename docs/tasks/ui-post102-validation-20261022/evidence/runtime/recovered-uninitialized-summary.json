@@ -1,0 +1,30 @@
+[
+  {
+    "text": "",
+    "description": "打开工作空间导航",
+    "package": "com.mightyoung.muyon.product",
+    "bounds": "[53,148][116,211]",
+    "enabled": "true"
+  },
+  {
+    "text": "Muyon 助手",
+    "description": "",
+    "package": "com.mightyoung.muyon.product",
+    "bounds": "[425,210][655,273]",
+    "enabled": "true"
+  },
+  {
+    "text": "请创建新工作台",
+    "description": "",
+    "package": "com.mightyoung.muyon.product",
+    "bounds": "[63,357][365,420]",
+    "enabled": "true"
+  },
+  {
+    "text": "创建新工作台",
+    "description": "",
+    "package": "com.mightyoung.muyon.product",
+    "bounds": "[63,515][316,578]",
+    "enabled": "true"
+  }
+]

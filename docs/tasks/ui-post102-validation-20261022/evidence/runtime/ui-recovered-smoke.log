@@ -1,0 +1,11 @@
+
+Traceback (most recent call last):
+  File "<stdin>", line 4, in <module>
+  File "/workspace/ui-shell-tools/post102/smoke/ui.py", line 16, in capture
+    nodes=hierarchy(tag)
+          ^^^^^^^^^^^^^^
+  File "/workspace/ui-shell-tools/post102/smoke/ui.py", line 8, in hierarchy
+    if 'dumped' not in result.lower():raise RuntimeError('UI dump not confirmed: '+result)
+                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: UI dump not confirmed: ERROR: null root node returned by UiTestAutomationBridge.
+

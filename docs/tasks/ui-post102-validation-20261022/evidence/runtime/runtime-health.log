@@ -1,0 +1,4 @@
+--------- beginning of main
+--------- beginning of system
+10-22 20:15:00.620  3383  3402 I MuyonColdSmoke: HEALTH={"status":"ok","data":{"build_id":"c8044174a37fdc0e4d807307f81fc56a7cc74232:192689c72a496283f788e341516b179893824efef62f8bc113c220616cbbdda5","epoch":"623369de-579f-4afa-8e3c-ef31036029d2","protocol":1,"synthetic":false,"workspace":"local-workspace","active_clients":1,"service_pid":3468},"request_id":"f070de34-614c-44c9-a0ed-6f9bffd66161"}
+10-22 20:15:00.754  3383  3402 I MuyonColdSmoke: AVAILABILITY={"status":"ok","data":{"chat":{"configured":false,"transport_bound":false,"reason":"provider_owner_not_bound"},"search":{"configured":false,"transport_bound":false,"reason":"search_host_not_bound"},"local_reads":true,"synthetic":false,"configured":false},"request_id":"398eccab-575a-4977-b6da-c20ffe9d2417"}

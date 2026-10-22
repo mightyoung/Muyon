@@ -1,0 +1,154 @@
+--------- beginning of system
+--------- beginning of main
+10-22 19:59:34.879  1556  1556 W ActivityManager: Slow operation: 179ms so far, now at startProcess: returned from zygote!
+10-22 19:59:34.880  1556  1556 W ActivityManager: Slow operation: 180ms so far, now at startProcess: done updating battery stats
+10-22 19:59:34.880  1556  1556 W ActivityManager: Slow operation: 180ms so far, now at startProcess: building log message
+10-22 19:59:34.880  1556  1556 I ActivityManager: Start proc 2352:com.android.quicksearchbox/u0a54 for broadcast com.android.quicksearchbox/.SearchWidgetProvider
+10-22 19:59:34.880  1556  1556 W ActivityManager: Slow operation: 180ms so far, now at startProcess: starting to update pids map
+10-22 19:59:34.880  1556  1556 W ActivityManager: Slow operation: 180ms so far, now at startProcess: done updating pids map
+10-22 19:59:34.890  1556  1556 W ActivityManager: Slow operation: 191ms so far, now at startProcess: done starting proc!
+10-22 19:59:44.352  1556  1627 I ActivityManager: Waited long enough for: ServiceRecord{18b9bb7 u0 com.android.providers.media/.MediaScannerService}
+10-22 19:59:46.872  1556  1912 W ActivityManager: Slow operation: 297ms so far, now at startProcess: returned from zygote!
+10-22 19:59:46.872  1556  1912 W ActivityManager: Slow operation: 297ms so far, now at startProcess: done updating battery stats
+10-22 19:59:46.872  1556  1912 W ActivityManager: Slow operation: 297ms so far, now at startProcess: building log message
+10-22 19:59:46.872  1556  1912 I ActivityManager: Start proc 2402:com.android.calendar/u0a29 for broadcast com.android.calendar/.alerts.AlertReceiver
+10-22 19:59:46.872  1556  1912 W ActivityManager: Slow operation: 297ms so far, now at startProcess: starting to update pids map
+10-22 19:59:46.873  1556  1912 W ActivityManager: Slow operation: 298ms so far, now at startProcess: done updating pids map
+10-22 19:59:46.873  1556  1912 W ActivityManager: Slow operation: 299ms so far, now at startProcess: done starting proc!
+10-22 19:59:47.112  1556  1912 W ActivityManager: Slow operation: 66ms so far, now at attachApplicationLocked: after sendPendingBroadcastsLocked
+10-22 19:59:48.080  1556  1864 W ActivityManager: Slow operation: 97ms so far, now at startProcess: returned from zygote!
+10-22 19:59:48.088  1556  1864 W ActivityManager: Slow operation: 105ms so far, now at startProcess: done updating battery stats
+10-22 19:59:48.088  1556  1864 W ActivityManager: Slow operation: 106ms so far, now at startProcess: building log message
+10-22 19:59:48.089  1556  1864 I ActivityManager: Start proc 2426:com.android.contacts/u0a7 for broadcast com.android.contacts/.interactions.OnBootOrUpgradeReceiver
+10-22 19:59:48.089  1556  1864 W ActivityManager: Slow operation: 106ms so far, now at startProcess: starting to update pids map
+10-22 19:59:48.089  1556  1864 W ActivityManager: Slow operation: 106ms so far, now at startProcess: done updating pids map
+10-22 19:59:48.089  1556  1864 W ActivityManager: Slow operation: 107ms so far, now at startProcess: done starting proc!
+10-22 19:59:48.713  2385  2385 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+10-22 19:59:49.288  1556  1912 W ActivityManager: Slow operation: 142ms so far, now at startProcess: returned from zygote!
+10-22 19:59:49.288  1556  1912 W ActivityManager: Slow operation: 142ms so far, now at startProcess: done updating battery stats
+10-22 19:59:49.288  1556  1912 W ActivityManager: Slow operation: 142ms so far, now at startProcess: building log message
+10-22 19:59:49.288  1556  1912 I ActivityManager: Start proc 2447:com.android.email/u0a42 for broadcast com.android.email/.service.EmailBroadcastReceiver
+10-22 19:59:49.288  1556  1912 W ActivityManager: Slow operation: 142ms so far, now at startProcess: starting to update pids map
+10-22 19:59:49.289  1556  1912 W ActivityManager: Slow operation: 143ms so far, now at startProcess: done updating pids map
+10-22 19:59:49.289  1556  1912 W ActivityManager: Slow operation: 143ms so far, now at startProcess: done starting proc!
+10-22 19:59:49.442  1556  1912 W ActivityManager: Slow operation: 72ms so far, now at attachApplicationLocked: after sendPendingBroadcastsLocked
+10-22 19:59:50.207  1556  1912 W ActivityManager: Unable to start service Intent { act=com.android.email.EXCHANGE_INTENT pkg=com.android.exchange } U=0: not found
+10-22 19:59:50.227  2385  2385 D AndroidRuntime: Calling main entry com.android.commands.pm.Pm
+10-22 19:59:50.483  2385  2385 I AndroidRuntime: VM exiting with result code 0.
+10-22 19:59:50.530  1556  1700 W ActivityManager: Unable to start service Intent { act=com.android.email.EXCHANGE_INTENT pkg=com.android.exchange } U=0: not found
+10-22 19:59:51.131  1556  1912 W ActivityManager: Slow operation: 191ms so far, now at startProcess: returned from zygote!
+10-22 19:59:51.132  1556  1912 W ActivityManager: Slow operation: 192ms so far, now at startProcess: done updating battery stats
+10-22 19:59:51.132  1556  1912 W ActivityManager: Slow operation: 192ms so far, now at startProcess: building log message
+10-22 19:59:51.132  1556  1912 I ActivityManager: Start proc 2484:com.android.managedprovisioning/u0a14 for broadcast com.android.managedprovisioning/.preprovisioning.BootReminder
+10-22 19:59:51.132  1556  1912 W ActivityManager: Slow operation: 192ms so far, now at startProcess: starting to update pids map
+10-22 19:59:51.133  1556  1912 W ActivityManager: Slow operation: 193ms so far, now at startProcess: done updating pids map
+10-22 19:59:51.133  1556  1912 W ActivityManager: Slow operation: 195ms so far, now at startProcess: done starting proc!
+10-22 19:59:51.482  1556  1864 W ActivityManager: Slow operation: 60ms so far, now at attachApplicationLocked: after mServices.attachApplicationLocked
+10-22 19:59:51.484  1556  1864 W ActivityManager: Slow operation: 62ms so far, now at attachApplicationLocked: after sendPendingBroadcastsLocked
+10-22 19:59:52.255  1556  1912 W ActivityManager: Slow operation: 86ms so far, now at startProcess: returned from zygote!
+10-22 19:59:52.256  1556  1912 W ActivityManager: Slow operation: 87ms so far, now at startProcess: done updating battery stats
+10-22 19:59:52.256  1556  1912 W ActivityManager: Slow operation: 87ms so far, now at startProcess: building log message
+10-22 19:59:52.256  1556  1912 I ActivityManager: Start proc 2502:com.android.messaging/u0a56 for broadcast com.android.messaging/.receiver.BootAndPackageReplacedReceiver
+10-22 19:59:52.256  1556  1912 W ActivityManager: Slow operation: 87ms so far, now at startProcess: starting to update pids map
+10-22 19:59:52.256  1556  1912 W ActivityManager: Slow operation: 87ms so far, now at startProcess: done updating pids map
+10-22 19:59:52.256  1556  1912 W ActivityManager: Slow operation: 94ms so far, now at startProcess: done starting proc!
+10-22 19:59:54.221  1556  1912 W ActivityManager: Unable to start service Intent { act=com.android.email.EXCHANGE_INTENT pkg=com.android.exchange } U=0: not found
+10-22 19:59:54.477  1556  1700 W ActivityManager: Unable to start service Intent { cmp=com.android.email/.service.AttachmentService } U=0: not found
+10-22 19:59:54.486  1556  1700 W ActivityManager: Unable to start service Intent { act=com.android.email.EXCHANGE_INTENT pkg=com.android.exchange } U=0: not found
+10-22 19:59:54.756  1556  1912 W ActivityManager: Slow operation: 261ms so far, now at startProcess: returned from zygote!
+10-22 19:59:54.757  1556  1912 W ActivityManager: Slow operation: 262ms so far, now at startProcess: done updating battery stats
+10-22 19:59:54.757  1556  1912 W ActivityManager: Slow operation: 262ms so far, now at startProcess: building log message
+10-22 19:59:54.757  1556  1912 I ActivityManager: Start proc 2524:com.android.packageinstaller/u0a18 for broadcast com.android.packageinstaller/.TemporaryFileManager
+10-22 19:59:54.793  1556  1912 W ActivityManager: Slow operation: 263ms so far, now at startProcess: starting to update pids map
+10-22 19:59:54.793  1556  1912 W ActivityManager: Slow operation: 298ms so far, now at startProcess: done updating pids map
+10-22 19:59:54.793  1556  1912 W ActivityManager: Slow operation: 299ms so far, now at startProcess: done starting proc!
+10-22 19:59:54.807  1556  1889 W ActivityManager: Unable to start service Intent { act=com.android.email.EXCHANGE_INTENT pkg=com.android.exchange } U=0: not found
+10-22 19:59:54.890  1556  1912 W ActivityManager: Unable to start service Intent { cmp=com.android.email/.service.AttachmentService } U=0: not found
+10-22 19:59:54.967  1556  1596 W ActivityManager: Unbind failed: could not find connection for android.os.BinderProxy@a491826
+10-22 19:59:55.039  1556  1912 W ActivityManager: Unable to start service Intent { act=com.android.email.EXCHANGE_INTENT pkg=com.android.exchange } U=0: not found
+10-22 19:59:57.336  1556  1654 I ActivityManager: Finished processing BOOT_COMPLETED for u0
+10-22 19:59:58.682  1556  1595 W ActivityManager: Slow operation: 117ms so far, now at startProcess: returned from zygote!
+10-22 19:59:58.682  1556  1595 W ActivityManager: Slow operation: 128ms so far, now at startProcess: done updating battery stats
+10-22 19:59:58.682  1556  1595 W ActivityManager: Slow operation: 129ms so far, now at startProcess: building log message
+10-22 19:59:58.683  1556  1595 I ActivityManager: Start proc 2561:com.android.cellbroadcastreceiver/u0a4 for broadcast com.android.cellbroadcastreceiver/.CellBroadcastReceiver
+10-22 19:59:58.683  1556  1595 W ActivityManager: Slow operation: 129ms so far, now at startProcess: starting to update pids map
+10-22 19:59:58.683  1556  1595 W ActivityManager: Slow operation: 129ms so far, now at startProcess: done updating pids map
+10-22 19:59:58.683  1556  1595 W ActivityManager: Slow operation: 132ms so far, now at startProcess: done starting proc!
+10-22 20:00:03.147  1556  1627 I ActivityManager: Waited long enough for: ServiceRecord{3bfbc23 u0 com.android.calendar/.alerts.InitAlarmsService}
+10-22 20:00:40.200  2592  2592 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+10-22 20:00:40.675  2592  2592 D AndroidRuntime: Calling main entry com.android.commands.pm.Pm
+10-22 20:00:40.735  1556  1627 I ActivityManager: Force stopping com.mightyoung.muyon.product appid=10067 user=-1: deletePackageX
+10-22 20:00:41.532  2592  2592 I AndroidRuntime: VM exiting with result code 0.
+10-22 20:00:41.548  1556  1655 I ActivityManager: Start proc 2605:com.android.defcontainer/u0a5 for service com.android.defcontainer/.DefaultContainerService
+10-22 20:00:41.550  1556  1655 I ActivityManager: Force stopping com.mightyoung.muyon.product appid=10067 user=0: pkg removed
+10-22 20:00:41.839  1556  1627 W ActivityManager: Slow operation: 175ms so far, now at startProcess: returned from zygote!
+10-22 20:00:41.839  1556  1627 W ActivityManager: Slow operation: 175ms so far, now at startProcess: done updating battery stats
+10-22 20:00:41.839  1556  1627 W ActivityManager: Slow operation: 175ms so far, now at startProcess: building log message
+10-22 20:00:41.839  1556  1627 I ActivityManager: Start proc 2624:com.android.gallery3d/u0a43 for broadcast com.android.gallery3d/.app.PackagesMonitor
+10-22 20:00:41.839  1556  1627 W ActivityManager: Slow operation: 175ms so far, now at startProcess: starting to update pids map
+10-22 20:00:41.839  1556  1627 W ActivityManager: Slow operation: 175ms so far, now at startProcess: done updating pids map
+10-22 20:00:41.839  1556  1627 W ActivityManager: Slow operation: 176ms so far, now at startProcess: done starting proc!
+10-22 20:00:42.627  1556  1595 W ActivityManager: Slow operation: 65ms so far, now at attachApplicationLocked: after updateLruProcessLocked
+10-22 20:00:42.634  1556  1595 W ActivityManager: Slow operation: 73ms so far, now at attachApplicationLocked: after mServices.attachApplicationLocked
+10-22 20:00:42.640  1556  1595 W ActivityManager: Slow operation: 79ms so far, now at attachApplicationLocked: after sendPendingBroadcastsLocked
+10-22 20:00:43.525  1556  1889 W ActivityManager: Slow operation: 157ms so far, now at startProcess: returned from zygote!
+10-22 20:00:43.526  1556  1889 W ActivityManager: Slow operation: 158ms so far, now at startProcess: done updating battery stats
+10-22 20:00:43.526  1556  1889 W ActivityManager: Slow operation: 158ms so far, now at startProcess: building log message
+10-22 20:00:43.527  1556  1889 I ActivityManager: Start proc 2653:com.android.documentsui/u0a10 for broadcast com.android.documentsui/.PackageReceiver
+10-22 20:00:43.527  1556  1889 W ActivityManager: Slow operation: 159ms so far, now at startProcess: starting to update pids map
+10-22 20:00:43.527  1556  1889 W ActivityManager: Slow operation: 159ms so far, now at startProcess: done updating pids map
+10-22 20:00:43.527  1556  1889 W ActivityManager: Slow operation: 160ms so far, now at startProcess: done starting proc!
+10-22 20:00:43.593  1556  1700 I ActivityManager: Killing 1952:android.ext.services/u0a9 (adj 906): empty #17
+10-22 20:00:44.814  1556  1595 W ActivityManager: Slow operation: 105ms so far, now at startProcess: returned from zygote!
+10-22 20:00:44.814  1556  1595 W ActivityManager: Slow operation: 105ms so far, now at startProcess: done updating battery stats
+10-22 20:00:44.815  1556  1595 W ActivityManager: Slow operation: 106ms so far, now at startProcess: building log message
+10-22 20:00:44.815  1556  1595 I ActivityManager: Start proc 2671:com.android.externalstorage/u0a12 for content provider com.android.externalstorage/.ExternalStorageProvider
+10-22 20:00:44.815  1556  1595 W ActivityManager: Slow operation: 106ms so far, now at startProcess: starting to update pids map
+10-22 20:00:44.815  1556  1595 W ActivityManager: Slow operation: 106ms so far, now at startProcess: done updating pids map
+10-22 20:00:44.815  1556  1595 W ActivityManager: Slow operation: 107ms so far, now at startProcess: done starting proc!
+10-22 20:00:44.815  1556  1595 W ActivityManager: Slow operation: 109ms so far, now at getContentProviderImpl: after start process
+10-22 20:00:44.815  1556  1595 W ActivityManager: Slow operation: 109ms so far, now at getContentProviderImpl: updating data structures
+10-22 20:00:44.815  1556  1595 W ActivityManager: Slow operation: 109ms so far, now at getContentProviderImpl: done!
+10-22 20:00:45.430  1556  1595 I ActivityManager: Killing 2484:com.android.managedprovisioning/u0a14 (adj 906): empty #17
+10-22 20:00:45.433  1556  1595 I ActivityManager: Killing 2426:com.android.contacts/u0a7 (adj 906): empty #18
+10-22 20:00:46.437  1556  1889 I ActivityManager: Start proc 2693:com.android.mtp/u0a8 for content provider com.android.mtp/.MtpDocumentsProvider
+10-22 20:00:46.538  2622  2622 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+10-22 20:00:46.607  1556  1700 I ActivityManager: Killing 2524:com.android.packageinstaller/u0a18 (adj 906): empty #17
+10-22 20:00:47.505  2622  2622 D AndroidRuntime: Calling main entry com.android.commands.pm.Pm
+10-22 20:00:47.554  2622  2622 I AndroidRuntime: VM exiting with result code 0.
+10-22 20:00:48.685  1556  1595 I ActivityManager: Killing 2214:com.android.deskclock/u0a36 (adj 906): empty #17
+10-22 20:00:49.802  2721  2721 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+10-22 20:00:50.673  2721  2721 D AndroidRuntime: Calling main entry com.android.commands.pm.Pm
+10-22 20:00:50.744  1556  1627 I ActivityManager: Force stopping com.mightyoung.muyon.product.test appid=10068 user=-1: deletePackageX
+10-22 20:00:51.120  2721  2721 I AndroidRuntime: VM exiting with result code 0.
+10-22 20:00:51.254  1556  1655 I ActivityManager: Force stopping com.mightyoung.muyon.product.test appid=10068 user=0: pkg removed
+10-22 20:00:54.495  2742  2742 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+10-22 20:00:55.037  2742  2742 D AndroidRuntime: Calling main entry com.android.commands.pm.Pm
+10-22 20:00:55.098  2742  2742 I AndroidRuntime: VM exiting with result code 0.
+10-22 20:01:18.779  2772  2772 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+10-22 20:01:19.306  2772  2772 D AndroidRuntime: Calling main entry com.android.commands.pm.Pm
+10-22 20:01:19.366  2772  2772 I AndroidRuntime: VM exiting with result code 0.
+10-22 20:06:00.004  1556  1556 I ActivityManager: Killing 2352:com.android.quicksearchbox/u0a54 (adj 906): empty #17
+10-22 20:06:55.052  1556  1912 I ActivityManager: START u0 {flg=0x10000000 cmp=com.mightyoung.muyon.product/.MainActivity} from uid 2000
+10-22 20:06:55.483  1556  1596 I ActivityManager: Start proc 2867:com.mightyoung.muyon.product/u0a69 for activity com.mightyoung.muyon.product/.MainActivity
+10-22 20:06:55.484  1556  1596 W ActivityManager: Slow operation: 51ms so far, now at startProcess: starting to update pids map
+10-22 20:06:55.484  1556  1596 W ActivityManager: Slow operation: 51ms so far, now at startProcess: done updating pids map
+10-22 20:06:55.484  1556  1596 W ActivityManager: Slow operation: 52ms so far, now at startProcess: done starting proc!
+10-22 20:06:56.604  1556  1889 W ActivityManager: Slow operation: 168ms so far, now at attachApplicationLocked: after mServices.attachApplicationLocked
+10-22 20:06:57.493  1556  1889 W ActivityManager: Slow operation: 84ms so far, now at startProcess: returned from zygote!
+10-22 20:06:57.494  1556  1889 W ActivityManager: Slow operation: 85ms so far, now at startProcess: done updating battery stats
+10-22 20:06:57.494  1556  1889 W ActivityManager: Slow operation: 85ms so far, now at startProcess: building log message
+10-22 20:06:57.494  1556  1889 I ActivityManager: Start proc 2884:com.mightyoung.muyon.product:core/u0a69 for service com.mightyoung.muyon.product/.agentipc.ProductService
+10-22 20:06:57.495  1556  1889 W ActivityManager: Slow operation: 86ms so far, now at startProcess: starting to update pids map
+10-22 20:06:57.495  1556  1889 W ActivityManager: Slow operation: 86ms so far, now at startProcess: done updating pids map
+10-22 20:06:57.495  1556  1889 W ActivityManager: Slow operation: 87ms so far, now at startProcess: done starting proc!
+10-22 20:07:01.706  1556  1640 I ActivityManager: Displayed com.mightyoung.muyon.product/.MainActivity: +6s96ms
+10-22 20:07:35.804  2920  2920 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+10-22 20:07:37.009  2920  2920 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
+10-22 20:07:38.474  2920  2920 D AndroidRuntime: Shutting down VM
+10-22 20:07:40.183  2941  2941 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+10-22 20:07:40.747  2941  2941 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
+10-22 20:07:42.037  2941  2941 D AndroidRuntime: Shutting down VM
+10-22 20:07:43.828  2959  2959 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+10-22 20:07:44.453  2959  2959 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
+10-22 20:07:45.673  2959  2959 D AndroidRuntime: Shutting down VM

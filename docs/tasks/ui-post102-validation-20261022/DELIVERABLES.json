@@ -1,0 +1,22 @@
+[
+  {
+    "name": "c8044174a37fdc0e4d807307f81fc56a7cc74232-PRODUCT-RUNTIME-PR102-PLUS-UI-CANDIDATE-api26-1080x1920-font1.0-menu-open-actual.png",
+    "size_bytes": 114704,
+    "sha256": "79a667ba49ceea72d4212e099b59cbf1b992752374aa55ead1bff63911902430"
+  },
+  {
+    "name": "c8044174a37fdc0e4d807307f81fc56a7cc74232-PRODUCT-RUNTIME-PR102-PLUS-UI-CANDIDATE-api26-1080x1920-font1.0-main-empty-confirmed.png",
+    "size_bytes": 84719,
+    "sha256": "5cd45dfe28a1da95268c5f049de6ab91299e2fecbd755c3e98ef018afb2982fe"
+  },
+  {
+    "name": "Muyon-c8044174a37fdc0e4d807307f81fc56a7cc74232-DEBUG-CANDIDATE-LICENSES-ONLY.zip",
+    "size_bytes": 27816,
+    "sha256": "3ead8ebbf7637f098413c963f3e883f9baac9ec37a77839e7d6e7f7c0c1503c9"
+  },
+  {
+    "name": "Muyon-c8044174a37fdc0e4d807307f81fc56a7cc74232-DEBUG-PR102-Office-Bot-UI-candidate.apk",
+    "size_bytes": 430153912,
+    "sha256": "bf54a74d7df4d0f2f48d59be7d9608d26f813b1d20494d8e7538218b49ff6841"
+  }
+]

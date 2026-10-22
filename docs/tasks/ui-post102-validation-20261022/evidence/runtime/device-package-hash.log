@@ -1,0 +1,19 @@
+bf54a74d7df4d0f2f48d59be7d9608d26f813b1d20494d8e7538218b49ff6841  /data/app/com.mightyoung.muyon.product-dnLhjf3ZCRvx9JfXNnPDWw==/base.apk
+
+D AndroidRuntime: Calling main entry com.android.commands.input.Input
+10-22 20:12:28.234  3233  3233 D AndroidRuntime: Shutting down VM
+10-22 20:12:33.710  3245  3245 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+10-22 20:12:34.767  3245  3245 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
+10-22 20:12:37.013  3245  3245 D AndroidRuntime: Shutting down VM
+10-22 20:12:41.290  3263  3263 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+10-22 20:12:42.406  3263  3263 D AndroidRuntime: Calling main entry com.android.commands.input.Input
+10-22 20:12:42.723  3263  3263 D AndroidRuntime: Shutting down VM
+10-22 20:12:47.444  3280  3280 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+10-22 20:12:48.734  3280  3280 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
+10-22 20:12:50.766  3280  3280 D AndroidRuntime: Shutting down VM
+10-22 20:12:54.065  3297  3297 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+10-22 20:12:55.133  3297  3297 D AndroidRuntime: Calling main entry com.android.commands.input.Input
+10-22 20:12:55.256  3297  3297 D AndroidRuntime: Shutting down VM
+10-22 20:12:57.353  1556  1627 I ActivityManager: Killing 1845:com.android.settings/1000 (adj 906): empty #17
+10-22 20:12:57.355  1556  1627 I ActivityManager: Killing 2502:com.android.messaging/u0a56 (adj 906): empty #18
+

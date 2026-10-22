@@ -1,0 +1,93 @@
+[
+  {
+    "text": "Muyon",
+    "description": "",
+    "package": "com.mightyoung.muyon.product",
+    "bounds": "[201,132][421,227]",
+    "enabled": "true"
+  },
+  {
+    "text": "主 Agent 与置顶",
+    "description": "",
+    "package": "com.mightyoung.muyon.product",
+    "bounds": "[64,317][322,370]",
+    "enabled": "true"
+  },
+  {
+    "text": "",
+    "description": "Muyon 助手，当前会话，主 Agent",
+    "package": "com.mightyoung.muyon.product",
+    "bounds": "[32,423][810,613]",
+    "enabled": "true"
+  },
+  {
+    "text": "• Muyon 助手",
+    "description": "",
+    "package": "com.mightyoung.muyon.product",
+    "bounds": "[64,455][320,518]",
+    "enabled": "true"
+  },
+  {
+    "text": "主 Agent",
+    "description": "",
+    "package": "com.mightyoung.muyon.product",
+    "bounds": "[64,518][234,581]",
+    "enabled": "true"
+  },
+  {
+    "text": "最近会话",
+    "description": "",
+    "package": "com.mightyoung.muyon.product",
+    "bounds": "[64,732][209,785]",
+    "enabled": "true"
+  },
+  {
+    "text": "尚无其他已打开的会话",
+    "description": "",
+    "package": "com.mightyoung.muyon.product",
+    "bounds": "[64,870][495,933]",
+    "enabled": "true"
+  },
+  {
+    "text": "智能体与群组",
+    "description": "",
+    "package": "com.mightyoung.muyon.product",
+    "bounds": "[295,1084][548,1147]",
+    "enabled": "true"
+  },
+  {
+    "text": "供应商",
+    "description": "",
+    "package": "com.mightyoung.muyon.product",
+    "bounds": "[358,1231][485,1294]",
+    "enabled": "true"
+  },
+  {
+    "text": "科研工作台",
+    "description": "",
+    "package": "com.mightyoung.muyon.product",
+    "bounds": "[316,1378][527,1441]",
+    "enabled": "true"
+  },
+  {
+    "text": "配置预览（未保存）",
+    "description": "",
+    "package": "com.mightyoung.muyon.product",
+    "bounds": "[232,1525][611,1588]",
+    "enabled": "true"
+  },
+  {
+    "text": "公共文档",
+    "description": "",
+    "package": "com.mightyoung.muyon.product",
+    "bounds": "[337,1672][506,1735]",
+    "enabled": "true"
+  },
+  {
+    "text": "×",
+    "description": "关闭菜单",
+    "package": "com.mightyoung.muyon.product",
+    "bounds": "[989,95][1023,179]",
+    "enabled": "true"
+  }
+]

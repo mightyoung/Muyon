@@ -1,0 +1,10 @@
+--------- beginning of main
+10-22 20:14:36.147  3383  3402 I TestRunner: finished: pageReadFailureCanNavigateAndExplicitlyRetryWithoutResendingUnknownSave(com.mightyoung.muyon.product.ui.documents.DocumentReaderPlatformTest)
+10-22 20:14:36.301  3383  3402 I TestRunner: started: nativePdfRendersActualPagesAndRejectsBadPage(com.mightyoung.muyon.product.ui.documents.DocumentReaderPlatformTest)
+--------- beginning of system
+10-22 20:14:40.705  3383  3402 I TestRunner: finished: nativePdfRendersActualPagesAndRejectsBadPage(com.mightyoung.muyon.product.ui.documents.DocumentReaderPlatformTest)
+10-22 20:14:40.759  3383  3402 I TestRunner: started: sharedCoreJsonPreservesAnchorAndExactRevision(com.mightyoung.muyon.product.ui.documents.DocumentReaderPlatformTest)
+10-22 20:14:44.243  3383  3402 I TestRunner: finished: sharedCoreJsonPreservesAnchorAndExactRevision(com.mightyoung.muyon.product.ui.documents.DocumentReaderPlatformTest)
+10-22 20:14:44.275  3383  3402 I TestRunner: started: pendingSaveAndUnknownLockSurvivePageNavigationAndOtherScopesAreHidden(com.mightyoung.muyon.product.ui.documents.DocumentReaderPlatformTest)
+10-22 20:14:57.719  3383  3402 I TestRunner: finished: pendingSaveAndUnknownLockSurvivePageNavigationAndOtherScopesAreHidden(com.mightyoung.muyon.product.ui.documents.DocumentReaderPlatformTest)
+10-22 20:14:57.787  3383  3402 I TestRunner: started: actualServiceHealthAndNoProviderConfiguration(com.mightyoung.muyon.product.ui.shell.RuntimeHealthSmokeProbe)

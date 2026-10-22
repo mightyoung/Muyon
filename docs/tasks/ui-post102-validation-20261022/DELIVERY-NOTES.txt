@@ -1,0 +1,6 @@
+Muyon 调试产品候选；源码 c8044174a37fdc0e4d807307f81fc56a7cc74232
+包含 PR102 Office/Bot 和最小 UI 无障碍增量。尚未据此确认已合入。
+APK 430153912 bytes; SHA256 bf54a74d7df4d0f2f48d59be7d9608d26f813b1d20494d8e7538218b49ff6841
+API26 x86_64软件模拟器，真实产品空库冒烟；首次有System UI ANR，正常等待恢复，原始日志保留。
+不含真实账户/消息/搜索/推理验收。verified=false与Reader受控授权门槛保持；不是全部业务可用证明。
+APK内部assets/notices/完整许可原字节在licenses/。模型派生字典与上游声明来源修正见MODEL-LICENSE-NOTICE.md。

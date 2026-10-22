@@ -1,0 +1,10 @@
+--------- beginning of main
+10-22 20:13:58.453  3383  3402 I TestRunner: finished: menuUsesRealEntriesAndSeparatesPinnedFromOrdinary(com.mightyoung.muyon.product.ui.shell.ConversationShellTest)
+10-22 20:13:58.465  3383  3402 I TestRunner: started: mainHeaderHasOneOriginalMascotAboveTheBody(com.mightyoung.muyon.product.ui.shell.ConversationShellTest)
+--------- beginning of system
+10-22 20:14:02.605  3383  3402 I TestRunner: finished: mainHeaderHasOneOriginalMascotAboveTheBody(com.mightyoung.muyon.product.ui.shell.ConversationShellTest)
+10-22 20:14:02.620  3383  3402 I TestRunner: started: ordinaryHeaderDoesNotRepeatMainMascot(com.mightyoung.muyon.product.ui.shell.ConversationShellTest)
+10-22 20:14:06.430  3383  3402 I TestRunner: finished: ordinaryHeaderDoesNotRepeatMainMascot(com.mightyoung.muyon.product.ui.shell.ConversationShellTest)
+10-22 20:14:06.460  3383  3402 I TestRunner: started: navigationHeadingsAndFailureAnnouncementRemainDiscoverable(com.mightyoung.muyon.product.ui.shell.ConversationShellTest)
+10-22 20:14:13.439  3383  3402 I TestRunner: finished: navigationHeadingsAndFailureAnnouncementRemainDiscoverable(com.mightyoung.muyon.product.ui.shell.ConversationShellTest)
+10-22 20:14:13.608  3383  3402 I TestRunner: started: pageReadFailureCanNavigateAndExplicitlyRetryWithoutResendingUnknownSave(com.mightyoung.muyon.product.ui.documents.DocumentReaderPlatformTest)

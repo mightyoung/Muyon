@@ -1,0 +1,4 @@
+--------- beginning of main
+--------- beginning of system
+10-22 20:13:49.929  3383  3402 I TestRunner: finished: dismissKeepsMountedBodyAndDraft(com.mightyoung.muyon.product.ui.shell.ConversationShellTest)
+10-22 20:13:50.013  3383  3402 I TestRunner: started: menuUsesRealEntriesAndSeparatesPinnedFromOrdinary(com.mightyoung.muyon.product.ui.shell.ConversationShellTest)

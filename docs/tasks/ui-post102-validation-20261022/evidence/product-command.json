@@ -1,0 +1,27 @@
+{
+  "source_sha": "c8044174a37fdc0e4d807307f81fc56a7cc74232",
+  "build_id": "c8044174a37fdc0e4d807307f81fc56a7cc74232:192689c72a496283f788e341516b179893824efef62f8bc113c220616cbbdda5",
+  "command": [
+    "/workspace/ui-shell-tools/gradle-8.13/bin/gradle",
+    "--offline",
+    "--no-daemon",
+    "--console=plain",
+    "--init-script",
+    "/workspace/ui-shell-tools/maven-offline-restore/local.init.gradle",
+    "-p",
+    "apps/muyon_android",
+    "-PmuyonProductNativeInputs=/workspace/ui-shell-tools/post102/native/jni",
+    "-PmuyonModelAssets=/workspace/ui-shell-tools/candidate-model-assets",
+    "-PmuyonSource=c8044174a37fdc0e4d807307f81fc56a7cc74232:192689c72a496283f788e341516b179893824efef62f8bc113c220616cbbdda5",
+    ":app:clean",
+    ":app:assembleDebug",
+    ":app:assembleDebugAndroidTest",
+    ":app:lintDebug"
+  ],
+  "environment": {
+    "JAVA_HOME": "/workspace/ui-shell-tools/jdk-17.0.21+9",
+    "ANDROID_HOME": "/workspace/ui-shell-tools/sdk",
+    "ANDROID_USER_HOME": "/workspace/ui-shell-tools/android-user",
+    "GRADLE_USER_HOME": "/workspace/ui-shell-tools/gradle-cache"
+  }
+}

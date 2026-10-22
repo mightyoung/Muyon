@@ -1,0 +1,190 @@
+Success
+
+INSTRUMENTATION_STATUS: numtests=11
+INSTRUMENTATION_STATUS: stream=
+com.mightyoung.muyon.product.ui.shell.ConversationShellTest:
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=draftHasStableAccessiblePurposeAfterTypingAndPreviewRemainsDisabled
+INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.product.ui.shell.ConversationShellTest
+INSTRUMENTATION_STATUS: current=1
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: numtests=11
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=draftHasStableAccessiblePurposeAfterTypingAndPreviewRemainsDisabled
+INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.product.ui.shell.ConversationShellTest
+INSTRUMENTATION_STATUS: current=1
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: numtests=11
+INSTRUMENTATION_STATUS: stream=
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=dismissKeepsMountedBodyAndDraft
+INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.product.ui.shell.ConversationShellTest
+INSTRUMENTATION_STATUS: current=2
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: numtests=11
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=dismissKeepsMountedBodyAndDraft
+INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.product.ui.shell.ConversationShellTest
+INSTRUMENTATION_STATUS: current=2
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: numtests=11
+INSTRUMENTATION_STATUS: stream=
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=menuUsesRealEntriesAndSeparatesPinnedFromOrdinary
+INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.product.ui.shell.ConversationShellTest
+INSTRUMENTATION_STATUS: current=3
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: numtests=11
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=menuUsesRealEntriesAndSeparatesPinnedFromOrdinary
+INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.product.ui.shell.ConversationShellTest
+INSTRUMENTATION_STATUS: current=3
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: numtests=11
+INSTRUMENTATION_STATUS: stream=
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=mainHeaderHasOneOriginalMascotAboveTheBody
+INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.product.ui.shell.ConversationShellTest
+INSTRUMENTATION_STATUS: current=4
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: numtests=11
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=mainHeaderHasOneOriginalMascotAboveTheBody
+INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.product.ui.shell.ConversationShellTest
+INSTRUMENTATION_STATUS: current=4
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: numtests=11
+INSTRUMENTATION_STATUS: stream=
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=ordinaryHeaderDoesNotRepeatMainMascot
+INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.product.ui.shell.ConversationShellTest
+INSTRUMENTATION_STATUS: current=5
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: numtests=11
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=ordinaryHeaderDoesNotRepeatMainMascot
+INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.product.ui.shell.ConversationShellTest
+INSTRUMENTATION_STATUS: current=5
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: numtests=11
+INSTRUMENTATION_STATUS: stream=
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=navigationHeadingsAndFailureAnnouncementRemainDiscoverable
+INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.product.ui.shell.ConversationShellTest
+INSTRUMENTATION_STATUS: current=6
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: numtests=11
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=navigationHeadingsAndFailureAnnouncementRemainDiscoverable
+INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.product.ui.shell.ConversationShellTest
+INSTRUMENTATION_STATUS: current=6
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: numtests=11
+INSTRUMENTATION_STATUS: stream=
+com.mightyoung.muyon.product.ui.documents.DocumentReaderPlatformTest:
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=pageReadFailureCanNavigateAndExplicitlyRetryWithoutResendingUnknownSave
+INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.product.ui.documents.DocumentReaderPlatformTest
+INSTRUMENTATION_STATUS: current=7
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: numtests=11
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=pageReadFailureCanNavigateAndExplicitlyRetryWithoutResendingUnknownSave
+INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.product.ui.documents.DocumentReaderPlatformTest
+INSTRUMENTATION_STATUS: current=7
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: numtests=11
+INSTRUMENTATION_STATUS: stream=
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=nativePdfRendersActualPagesAndRejectsBadPage
+INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.product.ui.documents.DocumentReaderPlatformTest
+INSTRUMENTATION_STATUS: current=8
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: numtests=11
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=nativePdfRendersActualPagesAndRejectsBadPage
+INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.product.ui.documents.DocumentReaderPlatformTest
+INSTRUMENTATION_STATUS: current=8
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: numtests=11
+INSTRUMENTATION_STATUS: stream=
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=sharedCoreJsonPreservesAnchorAndExactRevision
+INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.product.ui.documents.DocumentReaderPlatformTest
+INSTRUMENTATION_STATUS: current=9
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: numtests=11
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=sharedCoreJsonPreservesAnchorAndExactRevision
+INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.product.ui.documents.DocumentReaderPlatformTest
+INSTRUMENTATION_STATUS: current=9
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: numtests=11
+INSTRUMENTATION_STATUS: stream=
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=pendingSaveAndUnknownLockSurvivePageNavigationAndOtherScopesAreHidden
+INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.product.ui.documents.DocumentReaderPlatformTest
+INSTRUMENTATION_STATUS: current=10
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: numtests=11
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=pendingSaveAndUnknownLockSurvivePageNavigationAndOtherScopesAreHidden
+INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.product.ui.documents.DocumentReaderPlatformTest
+INSTRUMENTATION_STATUS: current=10
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: numtests=11
+INSTRUMENTATION_STATUS: stream=
+com.mightyoung.muyon.product.ui.shell.RuntimeHealthSmokeProbe:
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=actualServiceHealthAndNoProviderConfiguration
+INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.product.ui.shell.RuntimeHealthSmokeProbe
+INSTRUMENTATION_STATUS: current=11
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: numtests=11
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=actualServiceHealthAndNoProviderConfiguration
+INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.product.ui.shell.RuntimeHealthSmokeProbe
+INSTRUMENTATION_STATUS: current=11
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_RESULT: stream=
+
+Time: 96.77
+
+OK (11 tests)
+
+
+INSTRUMENTATION_CODE: -1
+
+--------- beginning of main
+--------- beginning of system
+10-22 20:15:00.620  3383  3402 I MuyonColdSmoke: HEALTH={"status":"ok","data":{"build_id":"c8044174a37fdc0e4d807307f81fc56a7cc74232:192689c72a496283f788e341516b179893824efef62f8bc113c220616cbbdda5","epoch":"623369de-579f-4afa-8e3c-ef31036029d2","protocol":1,"synthetic":false,"workspace":"local-workspace","active_clients":1,"service_pid":3468},"request_id":"f070de34-614c-44c9-a0ed-6f9bffd66161"}
+10-22 20:15:00.754  3383  3402 I MuyonColdSmoke: AVAILABILITY={"status":"ok","data":{"chat":{"configured":false,"transport_bound":false,"reason":"provider_owner_not_bound"},"search":{"configured":false,"transport_bound":false,"reason":"search_host_not_bound"},"local_reads":true,"synthetic":false,"configured":false},"request_id":"398eccab-575a-4977-b6da-c20ffe9d2417"}
+
+total 236
+drwx------ 3 u0_a69 u0_a69   4096 2026-10-22 20:15 .
+drwxrwx--x 3 u0_a69 u0_a69   4096 2026-10-22 20:11 ..
+-rw------- 1 u0_a69 u0_a69  32768 2026-10-22 20:12 agent-workflows-v1.sqlite
+-rw------- 1 u0_a69 u0_a69      0 2026-10-22 20:11 agent-workflows-v1.sqlite.owner.lock
+-rw------- 1 u0_a69 u0_a69 172032 2026-10-22 20:11 business-v2.sqlite
+drwx------ 4 u0_a69 u0_a69   4096 2026-10-22 20:11 business-v2.sqlite.blobs
+-rw------- 1 u0_a69 u0_a69      0 2026-10-22 20:11 business-v2.sqlite.owner.lock
+-rw------- 1 u0_a69 u0_a69  24576 2026-10-22 20:12 business-v2.sqlite.reviews-v1.sqlite
+
+26
+x86_64
+Physical size: 1080x1920
+Physical density: 420
+1.0
+Night mode: yes
+

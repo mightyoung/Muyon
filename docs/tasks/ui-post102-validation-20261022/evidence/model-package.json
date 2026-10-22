@@ -1,0 +1,109 @@
+{
+  "gate": "PASS",
+  "model_files": 6,
+  "notices": [
+    {
+      "name": "LOCAL_MODELS.txt",
+      "sha256": "03a02d017ec07dffdd3280b02e4b9131541da33b05edba9a5ab7e4ee70ce79e4"
+    },
+    {
+      "name": "REVIEWED_MODEL_PROVENANCE.txt",
+      "sha256": "70c3be384f330d302339e6762353c738e11e736297c48992315790a819b8407e"
+    },
+    {
+      "name": "llama-MIT.txt",
+      "sha256": "94f29bbed6a22c35b992c5c6ebf0e7c92f13b836b90f36f461c9cf2f0f1d010d"
+    },
+    {
+      "name": "onnxruntime-MIT.txt",
+      "sha256": "2f07c72751aed99790b8a4869cf2311df85a860b22ded05fa22803587a48922c"
+    },
+    {
+      "name": "PaddleOCR-Apache2.txt",
+      "sha256": "3840c5c0c61c294264d2dd77b8777be6ddd90121ef4e0e64abcd22edea581d6e"
+    },
+    {
+      "name": "Embedding-GGUF-model-card.txt",
+      "sha256": "319bbb434d2abe8f54f8571fa1e90973aa3cde85ab260312b7b7f8e3d9da02f5"
+    },
+    {
+      "name": "Embedding-base-model-card.txt",
+      "sha256": "b677a0ee2818c36f091b65fd3d9b4baea9f04d53b02b49cae916c74bf9682037"
+    },
+    {
+      "name": "PaddleOCR-det-model-card.txt",
+      "sha256": "951c155673ac6c15feb85857c9024a62266e5956d15319ce578a8f508f399d66"
+    },
+    {
+      "name": "PaddleOCR-rec-model-card.txt",
+      "sha256": "7331c129fd5024b6a0abd1f510cfdfb2d7714fdcdbb00df21a0cb8b48e6683ee"
+    },
+    {
+      "name": "Model-Apache-2.0.txt",
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+    }
+  ],
+  "libraries": [
+    {
+      "name": "lib/arm64-v8a/libandroidx.graphics.path.so",
+      "sha256": "41e9a793c43a0f4fddb19e33f346bace464f30f888ba7b9eaf96294ea115bfb6",
+      "alignment": 16384
+    },
+    {
+      "name": "lib/arm64-v8a/libjnidispatch.so",
+      "sha256": "abc26e994517bcaa3309acdb0a27373864086c7569c89d3087b8626fada9ef06",
+      "alignment": 16384
+    },
+    {
+      "name": "lib/arm64-v8a/libmuyon_android_product.so",
+      "sha256": "9a8a8361b9a97448519ad9a5d8a46744385982797f50089f5d26d535644bd940",
+      "alignment": 16384
+    },
+    {
+      "name": "lib/arm64-v8a/libmuyon_local_embedding.so",
+      "sha256": "33d3a41d8aff4b63447e52adb22a821eb499f1c9fc22bfb9938dfb339033c10e",
+      "alignment": 16384
+    },
+    {
+      "name": "lib/arm64-v8a/libonnxruntime.so",
+      "sha256": "cd1285f8955f3abcb0127d1ffaf1e5da7893d2547872a831b4717c0bfe388328",
+      "alignment": 16384
+    },
+    {
+      "name": "lib/arm64-v8a/libonnxruntime4j_jni.so",
+      "sha256": "b475dec0daca8df567c8bed806b99a4caa984aef274a9aa7089d8c3b539dfa30",
+      "alignment": 16384
+    },
+    {
+      "name": "lib/x86_64/libandroidx.graphics.path.so",
+      "sha256": "4e56c996f13670e70082658de7880c4020eabf4f25e43387f88ed78a713fc9f0",
+      "alignment": 16384
+    },
+    {
+      "name": "lib/x86_64/libjnidispatch.so",
+      "sha256": "3809247e9b804a05ed8377b87d545cf5b5e97f960f75e725bc8497b40260e417",
+      "alignment": 16384
+    },
+    {
+      "name": "lib/x86_64/libmuyon_android_product.so",
+      "sha256": "afd2576c10fbe338436ad5c6462d0fa12ba545237c545bc5ef7850663128756a",
+      "alignment": 16384
+    },
+    {
+      "name": "lib/x86_64/libmuyon_local_embedding.so",
+      "sha256": "5ef73c15435d835079eeea81980c269f6d8e4476c222bf4bbec1634ef4a0cd15",
+      "alignment": 16384
+    },
+    {
+      "name": "lib/x86_64/libonnxruntime.so",
+      "sha256": "63950eb2495baec6c561309c833f81ba5b6d90222491772941780c210c054fac",
+      "alignment": 16384
+    },
+    {
+      "name": "lib/x86_64/libonnxruntime4j_jni.so",
+      "sha256": "708c0695867fe1dd4c4bd0fbd3210210a5412e9842a3a9c2d1fbcabba38dc50a",
+      "alignment": 16384
+    }
+  ],
+  "boundary": "Static APK bytes/alignment only; API26 inference and 16KiB-kernel execution are separate evidence."
+}

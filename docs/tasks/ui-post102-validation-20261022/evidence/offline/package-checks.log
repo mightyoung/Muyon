@@ -1,0 +1,22 @@
+test_conflicting_legacy_notice_is_not_silently_deleted (test_ci_model_inputs.ModelInputDownloadTest.test_conflicting_legacy_notice_is_not_silently_deleted) ... ok
+test_corrupt_or_oversized_new_download_is_never_published (test_ci_model_inputs.ModelInputDownloadTest.test_corrupt_or_oversized_new_download_is_never_published) ... ok
+test_existing_verified_official_input_is_reused_without_network (test_ci_model_inputs.ModelInputDownloadTest.test_existing_verified_official_input_is_reused_without_network) ... ok
+test_mismatch_and_oversize_preserve_previous_verified_file (test_ci_model_inputs.ModelInputDownloadTest.test_mismatch_and_oversize_preserve_previous_verified_file) ... ok
+test_non_https_credentials_and_downgraded_redirect_are_rejected (test_ci_model_inputs.ModelInputDownloadTest.test_non_https_credentials_and_downgraded_redirect_are_rejected) ... ok
+test_official_fetch_needs_no_repository_variable_and_keeps_all_pins (test_ci_model_inputs.ModelInputDownloadTest.test_official_fetch_needs_no_repository_variable_and_keeps_all_pins) ... ok
+test_reviewed_notice_has_distinct_asset_name_and_preserves_input (test_ci_model_inputs.ModelInputDownloadTest.test_reviewed_notice_has_distinct_asset_name_and_preserves_input) ... ok
+test_verified_bytes_publish_and_no_partial_remains (test_ci_model_inputs.ModelInputDownloadTest.test_verified_bytes_publish_and_no_partial_remains) ... ok
+test_wrong_existing_model_is_never_overwritten_by_official_fetch (test_ci_model_inputs.ModelInputDownloadTest.test_wrong_existing_model_is_never_overwritten_by_official_fetch) ... ok
+test_actual_required_success (test_instrumentation_gate.ContentGateTest.test_actual_required_success) ... ok
+test_false_success_cannot_be_hidden_by_adb_exit_or_summary (test_instrumentation_gate.ContentGateTest.test_false_success_cannot_be_hidden_by_adb_exit_or_summary) ... ok
+test_both_source_summary_and_distinct_reviewed_provenance_are_required (test_model_notices.ModelNoticePackageTest.test_both_source_summary_and_distinct_reviewed_provenance_are_required) ... ok
+test_changed_packaged_provenance_or_local_summary_cannot_pass (test_model_notices.ModelNoticePackageTest.test_changed_packaged_provenance_or_local_summary_cannot_pass) ... ok
+test_legacy_external_name_and_empty_reviewed_notice_are_rejected (test_model_notices.ModelNoticePackageTest.test_legacy_external_name_and_empty_reviewed_notice_are_rejected) ... ok
+test_different_run_or_source_identity_is_refused (test_suite_gate.SuiteProvenanceTest.test_different_run_or_source_identity_is_refused) ... ok
+test_passing_text_cannot_substitute_for_another_captured_log (test_suite_gate.SuiteProvenanceTest.test_passing_text_cannot_substitute_for_another_captured_log) ... ok
+test_timeout_annotation_is_required_in_inventory (test_suite_gate.SuiteProvenanceTest.test_timeout_annotation_is_required_in_inventory) ... ok
+
+----------------------------------------------------------------------
+Ran 17 tests in 0.017s
+
+OK
