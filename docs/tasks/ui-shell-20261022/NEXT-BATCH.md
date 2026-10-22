@@ -9,13 +9,15 @@ actual request-bound user bubble, retained gated configuration previews and neut
 public document capability entry. Fixed dependencies combined; independent static
 review findings addressed. Actual offline results and limits remain in REPORT.md.
 
-Next inputs, owned by other coordinated workers; exact reviewed SHAs pending:
+Next inputs are coordinated by the parent. Brand/foundation follow-up now source-
+combined; read-only host projection exact reviewed SHA remains pending. See
+BRAND-FOUNDATION-BATCH.md for actual placement/checks and unchanged build blockers.
 
-- Foundation original owner: neutralize remaining used Material container roles.
-  Shell will consume the updated exact dependency without editing ui/system/.
-- `task/ui-brand-resources-20261022`: document owner adds unchanged original brand
-  resources to drawable-nodpi. Shell will place only those exact original resources
-  after parent provides the fixed resource/interface commit.
+- Foundation DONE_SOURCE: exacta2213ce2cc35bf5d42cdb306197d02a531539380 combined,
+  remaining used Material roles neutralized. No local ui/system/ edits.
+- Brand DONE_SOURCE: task/ui-brand-resources-20261022 exact11d28aa8c85cfeb41a3efffefa6ab446257fc0c1
+  combined. Original main mascot and menu icon placed;3 assets verified byte-identical
+  to archive400e. No binary edits or contact-sheet identity rendering.
 - `task/ui-host-projection-20261022`, delegated thread
   `01a161cf-39fb-738e-89ec-39f7e3dee024`: exclusive owner of ProductChatRuntime.kt,
   ProductService.kt and necessary Rust read-only projection adaptation. Shell will

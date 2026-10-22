@@ -1,5 +1,10 @@
 # UI shell integration — partial source delivery, 2026-10-22
 
+Current follow-up: original brand placement and neutral Material role dependency
+are source-complete; see [follow-up report](BRAND-FOUNDATION-BATCH.md). Other
+runtime/Android acceptance gaps below remain open. Earlier checkpoint verification
+counts are preserved as historical results; current foundation checks pass2 tests.
+
 Branch: `task/ui-shell-20261022`, isolated worktree `/workspace/muyon-ui-shell`.
 Base `f4781e16ddf4e542b983fbd77f266a0071148255` verified by fresh origin head lookup.
 Original `/workspace/Muyon` clean `work` checkout retained. No AGENTS.md in the
@@ -133,7 +138,7 @@ and Android license disposition need parent coordination, without bypassing deni
 Gradle plugin resolution also remains unresolved. No new CI dispatched or paid quota.
 
 This is a minimal source integration batch, NOT all requested UI completion. Outstanding:
-original icon/mascot production resource placement outside the initial file boundary;
+brand resource placement is now source-complete in the follow-up; remaining items:
 typed cards/attachment/business-confirmation production host bindings (dependency
 source is combined, not a real runtime snapshot);
 trusted configuration persistence/create/host snapshots/FFI/query mappings; actual common document reader/annotation/editing resolver (only the neutral
@@ -147,7 +152,9 @@ Foundation adapter risk found independently: the provided theme leaves some Mate
 roles at defaults (secondaryContainer/onSecondaryContainer, surfaceContainerLow).
 Existing workflow FilterChip / local research panel can retain non-neutral defaults.
 New shell/bubbles use neutral surfaceVariant; system owner must coordinate role fix.
-No modification to system/ was made. No image shown is runtime evidence.
+No local modification to system/ was made. Follow-up exacta2213ce2 source dependency
+closes this role mapping issue; actual rendered verification remains open.
+No image shown is runtime evidence.
 
 Historical two unknown requests and ¥0.002620 reservation untouched; no model/search
 request, resubmission, refund, credential setup, permission expansion, deployment,

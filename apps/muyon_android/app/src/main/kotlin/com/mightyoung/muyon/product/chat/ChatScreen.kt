@@ -263,7 +263,7 @@ private fun ChatConversation(client: ProductClient, projectId: String?, conversa
     }
 
     Column(Modifier.fillMaxSize().imePadding()) {
-        ConversationHeader(displayName, onOpenMenu, onMore = { moreOpen = true })
+        ConversationHeader(displayName, onOpenMenu, onMore = { moreOpen = true }, mainAgent = conversationKey == "default")
         Column(Modifier.weight(1f).fillMaxWidth().verticalScroll(rememberScrollState())) {
         Column(Modifier.fillMaxWidth().padding(18.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
         if (resultText.isEmpty() && source.isEmpty() && businessIntent == null && !historyOpen) {

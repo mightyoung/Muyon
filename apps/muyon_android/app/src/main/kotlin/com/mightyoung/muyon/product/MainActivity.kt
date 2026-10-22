@@ -115,7 +115,7 @@ class MainActivity : ComponentActivity() {
                         } else navigationError = "置顶状态未能保存，请重试。"
                     }) { openMenu ->
                     Column(Modifier.fillMaxSize()) {
-                        if (tab == "chat" && (!connected || !initialized)) ConversationHeader(title, openMenu)
+                        if (tab == "chat" && (!connected || !initialized)) ConversationHeader(title, openMenu, mainAgent = conversationKey == "default")
                         if (!connected || !initialized) {
                             Text(status, Modifier.padding(24.dp), style = MaterialTheme.typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant)
