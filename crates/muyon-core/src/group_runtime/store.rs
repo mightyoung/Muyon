@@ -1,5 +1,7 @@
 //! Real local coordination persistence on BusinessStore's owned connection.
 //! Local group grants authorize only these local mutations, never Agent dispatch.
+#[path = "binding.rs"]
+pub mod binding;
 use crate::{
     agent::owner::AgentOwner,
     business::BusinessStore,
@@ -34,6 +36,12 @@ pub struct GroupCommand {
 }
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub enum GroupOperation {
+    BindCanonical {
+        run_id: String,
+        node_id: String,
+        workflow_run_id: String,
+        request_id: String,
+    },
     Configure {
         mode: String,
         fixed_leader: Option<String>,
@@ -257,6 +265,12 @@ impl GroupScope {
 struct GroupGrantWitness {
     expires_at_ms: String,
 }
+#[derive(Default)]
+struct GroupEffectWitness {
+    expected_group: Vec<Vec<Option<String>>>,
+    configured_runs: Option<Vec<Vec<Option<String>>>>,
+    canonical: Option<binding::BindingWitness>,
+}
 impl BusinessStore {
     /// Explicitly creates only the extension namespace, never a group/account.
     pub fn initialize_group_runtime(&self) -> Result<()> {
@@ -464,8 +478,7 @@ impl BusinessStore {
         binding: &str,
         grant: &GroupGrantWitness,
         receipt: &LocalReceipt,
-        expected_group: &[Vec<Option<String>>],
-        configured_runs: &Option<Vec<Vec<Option<String>>>>,
+        witness: &GroupEffectWitness,
     ) -> Result<()> {
         let db = self.database();
         if !tx.belongs_to(db) {
@@ -487,17 +500,20 @@ impl BusinessStore {
             return Err(ContractError::RevisionConflict);
         }
         let actual_group=io(db.query("SELECT workspace,project_id,revision,record FROM group_runtime_groups WHERE group_id=?",&[&c.group_id]))?;
-        if actual_group != expected_group {
+        if actual_group != witness.expected_group {
             return Err(ContractError::Storage);
         }
         // Configure must preserve every existing run's captured coordination
         // facts, including legacy rows frozen before changing future defaults.
         // Compare the intended complete set after ALL trigger-capable writes.
-        if let Some(expected) = configured_runs {
+        if let Some(expected) = &witness.configured_runs {
             let actual = io(db.query("SELECT run_id,group_id,record FROM group_runtime_runs WHERE group_id=? ORDER BY run_id", &[&c.group_id]))?;
             if &actual != expected {
                 return Err(ContractError::Storage);
             }
+        }
+        if let Some(canonical) = &witness.canonical {
+            binding::verify_tail(self, canonical)?;
         }
         self.group_verify_intent_tail(c, binding, "committed", receipt)?;
         let events = io(db.query(
@@ -566,6 +582,27 @@ impl BusinessStore {
         c: &GroupCommand,
         owner: Option<&AgentOwner>,
     ) -> Result<LocalReceipt> {
+        self.execute_group_local_internal(c, owner, None)
+    }
+    pub fn execute_group_canonical_local(
+        &self,
+        c: &GroupCommand,
+        owner: &AgentOwner,
+        ledger: &crate::agent::workflow::RunLedger,
+        scope: &crate::agent::workflow::RunScope,
+    ) -> Result<LocalReceipt> {
+        self.execute_group_local_internal(
+            c,
+            Some(owner),
+            Some(binding::CanonicalContext { ledger, scope }),
+        )
+    }
+    fn execute_group_local_internal(
+        &self,
+        c: &GroupCommand,
+        owner: Option<&AgentOwner>,
+        context: Option<binding::CanonicalContext<'_>>,
+    ) -> Result<LocalReceipt> {
         self.group_check(c)?;
         let binding = digest(c)?;
         let db = self.database();
@@ -610,9 +647,8 @@ impl BusinessStore {
             let tx = io(db.transaction())?;
             self.group_check(c)?;
             let original_grant = self.group_authority(c, &binding)?;
-            let mut configured_runs = None;
-            let mut expected_group = Vec::new();
-            let result = self.group_effect(c, owner, &mut configured_runs, &mut expected_group)?;
+            let mut witness = GroupEffectWitness::default();
+            let result = self.group_effect(c, owner, context, &mut witness)?;
             if self.group_authority(c, &binding)? != original_grant {
                 return Err(ContractError::InvalidAuthority);
             }
@@ -638,8 +674,7 @@ impl BusinessStore {
                 &binding,
                 &original_grant,
                 &receipt,
-                &expected_group,
-                &configured_runs,
+                &witness,
             )?;
             io(tx.commit())?;
             Ok(receipt)
@@ -743,6 +778,18 @@ impl BusinessStore {
         }
         Ok(g)
     }
+    pub(crate) fn group_original_conversation(
+        &self,
+        scope: &GroupScope,
+        run: &str,
+        node: &str,
+        owner: &AgentOwner,
+    ) -> Result<String> {
+        let group = self.group_owner(scope, owner)?;
+        Ok(self
+            .group_canonical_conversation(scope, run, node, owner)?
+            .unwrap_or(group.conversation_id))
+    }
     pub fn group_lookup_original(
         &self,
         scope: &GroupScope,
@@ -753,10 +800,13 @@ impl BusinessStore {
         let g = self.group_owner(scope, owner)?;
         let n = self.group_node(scope, run, node)?;
         let request = n.request_id.ok_or(ContractError::NotFound)?;
+        let expected_conversation = self
+            .group_canonical_conversation(scope, run, node, owner)?
+            .unwrap_or(g.conversation_id);
         if owner
             .request_conversation(&request)
             .map_err(original_identity_read_error)?
-            != g.conversation_id
+            != expected_conversation
         {
             return Err(ContractError::ScopeMismatch);
         }
@@ -783,6 +833,13 @@ impl BusinessStore {
         }
         if now()? >= r.deadline_ms {
             return Err(ContractError::Cancelled);
+        }
+        if let Some(request_id) = self
+            .group_pending_canonical_originals(scope, run, owner)?
+            .into_iter()
+            .next()
+        {
+            return Ok(PendingAdvice::LookupOriginal { request_id });
         }
         let nodes = self.group_nodes(scope, run)?;
         for n in &nodes {
@@ -820,8 +877,8 @@ impl BusinessStore {
         &self,
         c: &GroupCommand,
         owner: Option<&AgentOwner>,
-        configured_runs: &mut Option<Vec<Vec<Option<String>>>>,
-        expected_group: &mut Vec<Vec<Option<String>>>,
+        context: Option<binding::CanonicalContext<'_>>,
+        witness: &mut GroupEffectWitness,
     ) -> Result<serde_json::Value> {
         let db = self.database();
         let new_revision = c.expected_revision.next()?;
@@ -883,7 +940,7 @@ impl BusinessStore {
                 members: members.clone(),
             };
             let record = encode(&r)?;
-            *expected_group = vec![vec![
+            witness.expected_group = vec![vec![
                 Some(self.workspace_id().into()),
                 Some(c.project_id.clone()),
                 Some(new_revision.as_str().into()),
@@ -939,7 +996,7 @@ impl BusinessStore {
                     row[2] = Some(record);
                 }
             }
-            *configured_runs = Some(expected);
+            witness.configured_runs = Some(expected);
             group.mode = mode.clone();
             group.fixed_leader = fixed_leader.clone();
             group.members = members.clone();
@@ -1068,6 +1125,12 @@ impl BusinessStore {
                     };
                     io(db.exec("INSERT INTO group_runtime_nodes(node_id,run_id,request_id,record) VALUES(?,?,NULL,?)",&[node_id,rid,&encode(&n)?]))?;
                 }
+                GroupOperation::BindCanonical { .. } => {
+                    let owner = owner.ok_or(ContractError::InvalidAuthority)?;
+                    let context = context.ok_or(ContractError::InvalidAuthority)?;
+                    witness.canonical =
+                        Some(self.group_bind_canonical_effect(c, &scope, owner, context)?);
+                }
                 GroupOperation::BindOriginal {
                     node_id,
                     request_id,
@@ -1152,6 +1215,15 @@ impl BusinessStore {
                     }
                     let owner = owner.ok_or(ContractError::InvalidAuthority)?;
                     self.group_owner(&scope, owner)?;
+                    for request in self.group_pending_canonical_originals(&scope, rid, owner)? {
+                        let chain = owner
+                            .request_chain(&request)
+                            .map_err(|_| ContractError::Storage)?;
+                        let last = chain.last().ok_or(ContractError::Storage)?;
+                        if !terminal(&last.status) {
+                            return Err(ContractError::Unknown);
+                        }
+                    }
                     owner
                         .ensure_conversation_resolved(&group.conversation_id)
                         .map_err(|error| {
@@ -1224,16 +1296,24 @@ impl BusinessStore {
                 _ => return Err(ContractError::UnsupportedOperation),
             }
             run.summary = self.group_summary(&scope, rid, run.epoch)?;
+            let record = encode(&run)?;
+            if let Some(canonical) = &mut witness.canonical {
+                canonical.expected_run = vec![vec![
+                    Some(rid.into()),
+                    Some(c.group_id.clone()),
+                    Some(record.clone()),
+                ]];
+            }
             io(db.exec(
                 "UPDATE group_runtime_runs SET record=? WHERE run_id=? AND group_id=?",
-                &[&encode(&run)?, rid, &c.group_id],
+                &[&record, rid, &c.group_id],
             ))?;
         }
         group.revision = new_revision.clone();
         // Capture intended bytes before any trigger-capable group write. A
         // post-write database snapshot could already contain a reverted config.
         let record = encode(&group)?;
-        *expected_group = vec![vec![
+        witness.expected_group = vec![vec![
             Some(self.workspace_id().into()),
             Some(c.project_id.clone()),
             Some(new_revision.as_str().into()),
@@ -1279,6 +1359,7 @@ fn run_id(op: &GroupOperation) -> Option<&str> {
         GroupOperation::Start { run_id, .. }
         | GroupOperation::Plan { run_id, .. }
         | GroupOperation::BindOriginal { run_id, .. }
+        | GroupOperation::BindCanonical { run_id, .. }
         | GroupOperation::Observe { run_id, .. }
         | GroupOperation::Handoff { run_id, .. }
         | GroupOperation::Stop { run_id } => Some(run_id),

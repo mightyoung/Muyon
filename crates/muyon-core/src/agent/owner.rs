@@ -116,6 +116,41 @@ pub struct AgentPlan {
     pub outbound_preview: Value,
     pub outbound_endpoint: String,
 }
+/// Actual immutable request identity, reloaded and digest-checked by its owner.
+/// No Deserialize or public constructor: a caller plan/JSON is not this fact.
+#[derive(Clone, Debug, PartialEq, Eq, Serialize)]
+pub struct OriginalRequestBinding {
+    request_id: String,
+    workspace_id: String,
+    conversation_id: String,
+    purpose: String,
+    configuration_id: String,
+    request_epoch: String,
+    payload_digest: String,
+}
+impl OriginalRequestBinding {
+    pub fn request_id(&self) -> &str {
+        &self.request_id
+    }
+    pub fn workspace_id(&self) -> &str {
+        &self.workspace_id
+    }
+    pub fn conversation_id(&self) -> &str {
+        &self.conversation_id
+    }
+    pub fn purpose(&self) -> &str {
+        &self.purpose
+    }
+    pub fn configuration_id(&self) -> &str {
+        &self.configuration_id
+    }
+    pub fn request_epoch(&self) -> &str {
+        &self.request_epoch
+    }
+    pub fn payload_digest(&self) -> &str {
+        &self.payload_digest
+    }
+}
 #[derive(Clone, Debug, Serialize)]
 pub struct Observation {
     pub request_id: String,
@@ -743,6 +778,35 @@ impl AgentOwner {
             return Err("conversation_original_outcome_required");
         }
         Ok(())
+    }
+    /// Read-only current owner identity, not an execution lease or permission.
+    pub fn owner_epoch(&self) -> &str {
+        &self.epoch
+    }
+    /// Reload the exact persisted canonical bytes. Configuration history/price,
+    /// group/project/member and endpoint are not request columns and not invented.
+    pub fn request_binding(&self, request: &str) -> Result<OriginalRequestBinding> {
+        let row = self.request(request)?;
+        if cell(&row, 0)? != request || digest(cell(&row, 5)?.as_bytes()) != cell(&row, 6)? {
+            return Err("agent_request_binding_mismatch");
+        }
+        for value in [
+            cell(&row, 1)?,
+            cell(&row, 2)?,
+            cell(&row, 3)?,
+            cell(&row, 4)?,
+        ] {
+            id(value)?;
+        }
+        Ok(OriginalRequestBinding {
+            request_id: request.into(),
+            workspace_id: self.workspace.clone(),
+            conversation_id: cell(&row, 1)?.into(),
+            purpose: cell(&row, 2)?.into(),
+            configuration_id: cell(&row, 3)?.into(),
+            request_epoch: cell(&row, 4)?.into(),
+            payload_digest: cell(&row, 6)?.into(),
+        })
     }
     /// Host-only routing identity, never sourced from action/model JSON.
     pub fn request_conversation(&self, request: &str) -> Result<String> {
