@@ -64,8 +64,13 @@ Source check manifest separately verifies five draft bodies/signatures unchanged
 mode dispatch/no redundant full hash, core purefmt byte equality and evidence SHA.
 Independent static review original2notification findings and repairs are preserved.
 The earlier12FFI pass reported by parent belongs to pre-presentation combination,
-not this new source. B's earlier FFI purefmt proposal is pending separate handoff;
-no overlapping format-only task was started and no global lint allow was added.
+not this new source. B's sealed old FFI purefmta5acfba1cc87db348c9078313e0f84bb361e0590 was
+partially reconciled AFTER5a7a2add: lib/bridge accepted under exact literal-aware
+source equality; test candidate rejected and whole test file kept unchanged.
+Proof/harness/rejection are in evidence/presentation-format-*. New source still
+requires B's actual formatter/bindings, not old db40 bindings. No separate formatter
+task was started or global lint allow added. Follow-up independent FORMAT-ONLY
+review hit model capacity and is NOT_RUN; source behavioral review remains as above.
 
 ## Host/B acceptance still pending
 

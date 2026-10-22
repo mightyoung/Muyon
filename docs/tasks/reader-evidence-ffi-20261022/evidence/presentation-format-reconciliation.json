@@ -1,0 +1,38 @@
+{
+  "provider": "a5acfba1cc87db348c9078313e0f84bb361e0590",
+  "feature_source": "5a7a2addd43e5d8fb32b0622abc5b03437f5d2b3",
+  "algorithm": "git merge-file current/provider-parent/provider; retain current in conflicts; non-whitespace character stream plus exact literal/comment payload; normalize ONLY optional delimiter-trailing commas and one known DocumentBridge root import movement and sealed InvalidRequest|InvalidAnchor literal-arm braces",
+  "complete_new_rustfmt_status": "NOT_RUN; pending B new-source formatter, no new format task spawned",
+  "files": [
+    {
+      "file": "crates/muyon-android-ffi/src/lib.rs",
+      "before_sha256": "7a112b31fd21fe3e7f2b218d56977d8ba778d7e882caef4e9d7fa359ae87d1e7",
+      "after_sha256": "cfd375dbb50942ed61270c1b5320e0a571bbf6e55bd96cf8ec9c4770bea15ddf",
+      "semantic_sha256": "4250b7964f901e51476ea4692085a91373242124b16681b771614aab1dd3921a",
+      "provider_semantic_equal": true,
+      "reconciled_semantic_equal": true,
+      "conflicts_kept_current": 0,
+      "kept_entire_feature_file_after_rejected_candidate": false
+    },
+    {
+      "file": "crates/muyon-android-ffi/src/document_bridge.rs",
+      "before_sha256": "a65e5041c8180f320b3c4488dbb43184cbee9e2f9dbf0b90d25c5468e42fe766",
+      "after_sha256": "86be13f06524e5c86301b9df200e3c632d95f582d9bf264a7d28cee51ddd4d0e",
+      "semantic_sha256": "406a55e4931f10436dea606eef3124707afa5b8ceabedae8acb62555c034ccde",
+      "provider_semantic_equal": true,
+      "reconciled_semantic_equal": true,
+      "conflicts_kept_current": 5,
+      "kept_entire_feature_file_after_rejected_candidate": false
+    },
+    {
+      "file": "crates/muyon-android-ffi/src/document_bridge_tests.rs",
+      "before_sha256": "2b39d05da9ead9f88f65f4cb560375cc3358965fc256affcd6cb7dde77938eda",
+      "after_sha256": "2b39d05da9ead9f88f65f4cb560375cc3358965fc256affcd6cb7dde77938eda",
+      "semantic_sha256": "529cc3e5e49478ac11ccce684420623992ab27750b5a87460dc587ff3cc7d954",
+      "provider_semantic_equal": true,
+      "reconciled_semantic_equal": true,
+      "conflicts_kept_current": 2,
+      "kept_entire_feature_file_after_rejected_candidate": true
+    }
+  ]
+}

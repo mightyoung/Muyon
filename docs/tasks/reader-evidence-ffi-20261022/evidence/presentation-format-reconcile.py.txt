@@ -1,0 +1,73 @@
+from pathlib import Path
+import subprocess,tempfile,re,hashlib,json
+formatter='a5acfba1cc87db348c9078313e0f84bb361e0590'
+files=['crates/muyon-android-ffi/src/lib.rs','crates/muyon-android-ffi/src/document_bridge.rs','crates/muyon-android-ffi/src/document_bridge_tests.rs']
+def semantic(s):
+    known_import='use document_bridge::DocumentBridge;\n'
+    if known_import in s:
+        assert s.count(known_import)==1
+        s=s.replace(known_import,'')+'\n'+known_import
+    s=re.sub(r'(EvidenceError::InvalidRequest\s*\|\s*EvidenceError::InvalidAnchor\s*=>)\s*\{\s*("DOCUMENT_INVALID_REQUEST")\s*\}',r'\1\2',s)
+    tokens=[];i=0
+    while i<len(s):
+        if s[i].isspace():i+=1;continue
+        if s.startswith('//',i):
+            j=s.find('\n',i);j=len(s) if j<0 else j;tokens.append(s[i:j]);i=j;continue
+        if s.startswith('/*',i):
+            j=i+2;depth=1
+            while depth:
+                if s.startswith('/*',j):depth+=1;j+=2
+                elif s.startswith('*/',j):depth-=1;j+=2
+                else:j+=1
+                assert j<=len(s)
+            tokens.append(s[i:j]);i=j;continue
+        raw=re.match(r'(?:br|rb|r)(#*)"',s[i:])
+        if raw:
+            end='"'+raw[1];j=s.index(end,i+len(raw[0]))+len(end);tokens.append(s[i:j]);i=j;continue
+        start=i+1 if s.startswith(('b"','c"'),i) else i
+        if s[start]=='"':
+            j=start+1
+            while s[j]!='"':j+=2 if s[j]=='\\' else 1
+            j+=1;tokens.append(s[i:j]);i=j;continue
+        char=re.match(r"(?:b)?'(?:\\(?:u\{[0-9a-fA-F_]+\}|x[0-9a-fA-F]{2}|.)|[^'\\\n])'",s[i:])
+        if char:tokens.append(char[0]);i+=len(char[0]);continue
+        tokens.append(s[i]);i+=1
+    # Rustfmt adds optional trailing commas. Only before a closing delimiter;
+    # commas separating arguments/fields remain exact.
+    tokens=[token for index,token in enumerate(tokens) if not (token==',' and index+1<len(tokens) and tokens[index+1] in [')',']','}'])]
+    return '\x00'.join(tokens)
+
+proof=[];updates={}
+with tempfile.TemporaryDirectory(prefix='muyon-presentation-fmt-') as tmp:
+    for index,file in enumerate(files):
+        original=Path(file).read_text()
+        base=subprocess.check_output(['git','show',formatter+'^:'+file],text=True)
+        formatted=subprocess.check_output(['git','show',formatter+':'+file],text=True)
+        assert semantic(base)==semantic(formatted),file+' provider format is not token-equivalent'
+        paths=[Path(tmp)/(str(index)+'-'+name) for name in ['current','base','formatted']]
+        for p,content in zip(paths,[original,base,formatted]):p.write_text(content)
+        merged=subprocess.run(['git','merge-file','-p',*map(str,paths)],capture_output=True,text=True)
+        assert merged.returncode>=0 and merged.returncode<128,merged.stderr
+        lines=merged.stdout.splitlines(keepends=True);result=[];state='normal';conflicts=0
+        for line in lines:
+            if state=='normal' and line.startswith('<<<<<<< '):state='ours';conflicts+=1
+            elif state=='ours' and line.startswith('======='):state='theirs'
+            elif state=='theirs' and line.startswith('>>>>>>> '):state='normal'
+            elif state in ['normal','ours']:result.append(line)
+        assert state=='normal'
+        resolved=''.join(result)
+        skipped = semantic(original)!=semantic(resolved)
+        if skipped:
+            # Fail closed for a whole file: keep exact feature source, never
+            # resolve a format conflict by dropping new declarations/tests.
+            import difflib
+            rejected=''.join(difflib.unified_diff(semantic(original).split('\x00'),semantic(resolved).split('\x00'),fromfile='feature-tokens',tofile='rejected-merge-tokens',lineterm='\n'))
+            Path('docs/tasks/reader-evidence-ffi-20261022/evidence/presentation-format-rejected-test-merge.diff.txt').write_text(rejected)
+            resolved=original
+        assert semantic(original)==semantic(resolved)
+        updates[file]=resolved
+        proof.append({'file':file,'before_sha256':hashlib.sha256(original.encode()).hexdigest(),'after_sha256':hashlib.sha256(resolved.encode()).hexdigest(),'semantic_sha256':hashlib.sha256(semantic(original).encode()).hexdigest(),'provider_semantic_equal':True,'reconciled_semantic_equal':True,'conflicts_kept_current':conflicts,'kept_entire_feature_file_after_rejected_candidate':skipped})
+for file,content in updates.items():Path(file).write_text(content)
+out=Path('docs/tasks/reader-evidence-ffi-20261022/evidence')
+(out/'presentation-format-reconciliation.json').write_text(json.dumps({'provider':formatter,'feature_source':subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip(),'algorithm':'git merge-file current/provider-parent/provider; retain current in conflicts; non-whitespace character stream plus exact literal/comment payload; normalize ONLY optional delimiter-trailing commas and one known DocumentBridge root import movement and sealed InvalidRequest|InvalidAnchor literal-arm braces','complete_new_rustfmt_status':'NOT_RUN; pending B new-source formatter, no new format task spawned','files':proof},indent=2)+'\n')
+print(json.dumps(proof,indent=2))

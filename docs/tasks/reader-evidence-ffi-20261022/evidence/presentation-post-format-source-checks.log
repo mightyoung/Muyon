@@ -1,0 +1,6 @@
+PASS: final file SHA256 match reconciliation proof
+PASS: five draft method signatures/bodies byte-identical7bb89
+PASS: whole21 API test file byte-identical5a7a2add
+PASS: owned git diff --check
+NOT_RUN: follow-up independent format-only review (selected model at capacity)
+NOT_RUN: new-source Rust/UniFFI/formatter/Android, missing local cargo; prior logs retained
