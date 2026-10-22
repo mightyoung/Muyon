@@ -1,0 +1,11 @@
+/dev/kvm exists=False
+/dev/bus/usb exists=False
+/workspace/host-projection-tools/android-build/sdk/ndk/28.2.13676358 exists=False
+/workspace/host-projection-tools/android-build/sdk/cmake/3.22.1 exists=False
+/workspace/host-projection-tools/android-build/sdk/emulator/emulator exists=False
+PATH java=/usr/bin/java
+PATH cargo=None
+PATH rustc=None
+PATH adb=None
+PATH emulator=None
+Existing official platform-tools adb devices -l was attempted during initial inventory; aborted exit134 trying to mkdir /home/agent/.android on read-only filesystem, including ANDROID_USER_HOME attempt. No HOME reassignment, new ADB keys/credentials, permission escalation or system change used. Device enumeration therefore not established.

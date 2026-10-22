@@ -1,0 +1,4 @@
+4bb0195fac9e0ecbe3490f0e0499b0b55945b3f036644a3c72c5c0f77bde6580  apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/agentipc/ProductService.kt
+e84f41f425a31383bad72a70b82c18e2e0a9cebf70c5d38becd72e24eec2bdee  apps/muyon_android/app/src/debug/kotlin/com/mightyoung/muyon/product/agentipc/BotNativeAcceptanceService.kt
+03d90d612b0577d901b08aaba71e3210b44726148d1b51e7f91a9004d9d0c62b  apps/muyon_android/app/src/debug/AndroidManifest.xml
+48301773cdf4dc138b8eca16eec77676df46262441cae48d265c8a066a34d01b  apps/muyon_android/app/src/androidTest/kotlin/com/mightyoung/muyon/product/agentipc/BotNativeServiceAcceptanceTest.kt
