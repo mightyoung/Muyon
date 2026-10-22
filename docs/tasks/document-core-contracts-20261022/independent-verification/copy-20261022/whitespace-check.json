@@ -1,0 +1,60 @@
+{
+  "at_utc": "2026-10-22T05:25:27.704396+00:00",
+  "raw_log_and_format_patch_bytes_preserved": true,
+  "results": [
+    {
+      "argv": [
+        "git",
+        "diff",
+        "--cached",
+        "--check"
+      ],
+      "exit_status": 2,
+      "stdout": "docs/tasks/document-core-contracts-20261022/independent-verification/copy-20261022/format/format-commit.patch:139: trailing whitespace.\n+ \ndocs/tasks/document-core-contracts-20261022/independent-verification/copy-20261022/format/format-commit.patch:210: trailing whitespace.\n+ \ndocs/tasks/document-core-contracts-20261022/independent-verification/copy-20261022/format/format-commit.patch:266: trailing whitespace.\n+ \ndocs/tasks/document-core-contracts-20261022/independent-verification/copy-20261022/format/format-commit.patch:324: trailing whitespace.\n+ \ndocs/tasks/document-core-contracts-20261022/independent-verification/copy-20261022/format/format-commit.patch:354: trailing whitespace.\n+ \ndocs/tasks/document-core-contracts-20261022/independent-verification/copy-20261022/format/format-commit.patch:429: trailing whitespace.\n+-- \ndocs/tasks/document-core-contracts-20261022/independent-verification/copy-20261022/format/format-commit.patch:431: new blank line at EOF.\ndocs/tasks/document-core-contracts-20261022/independent-verification/copy-20261022/formatted/copy-targeted.stdout.log:11: new blank line at EOF.\ndocs/tasks/document-core-contracts-20261022/independent-verification/copy-20261022/formatted/core-full.stdout.log:279: new blank line at EOF.\ndocs/tasks/document-core-contracts-20261022/independent-verification/copy-20261022/formatted/document-hooks.stdout.log:14: new blank line at EOF.\ndocs/tasks/document-core-contracts-20261022/independent-verification/copy-20261022/original/copy-targeted.stdout.log:11: new blank line at EOF.\ndocs/tasks/document-core-contracts-20261022/independent-verification/copy-20261022/original/core-full.stdout.log:279: new blank line at EOF.\ndocs/tasks/document-core-contracts-20261022/independent-verification/copy-20261022/original/document-hooks.stdout.log:14: new blank line at EOF.\ndocs/tasks/document-core-contracts-20261022/independent-verification/copy-20261022/original/scoped-fmt.stdout.log:117: trailing whitespace.\n+ \ndocs/tasks/document-core-contracts-20261022/independent-verification/copy-20261022/original/scoped-fmt.stdout.log:188: trailing whitespace.\n+ \ndocs/tasks/document-core-contracts-20261022/independent-verification/copy-20261022/original/scoped-fmt.stdout.log:245: trailing whitespace.\n+ \ndocs/tasks/document-core-contracts-20261022/independent-verification/copy-20261022/original/scoped-fmt.stdout.log:303: trailing whitespace.\n+ \ndocs/tasks/document-core-contracts-20261022/independent-verification/copy-20261022/original/scoped-fmt.stdout.log:334: trailing whitespace.\n+ \ndocs/tasks/document-core-contracts-20261022/independent-verification/copy-20261022/original/scoped-fmt.stdout.log:409: trailing whitespace.\n+ \ndocs/tasks/document-core-contracts-20261022/independent-verification/copy-20261022/original/scoped-fmt.stdout.log:512: trailing whitespace.\n+ \ndocs/tasks/document-core-contracts-20261022/independent-verification/copy-20261022/original/scoped-fmt.stdout.log:583: trailing whitespace.\n+ \ndocs/tasks/document-core-contracts-20261022/independent-verification/copy-20261022/original/scoped-fmt.stdout.log:640: trailing whitespace.\n+ \ndocs/tasks/document-core-contracts-20261022/independent-verification/copy-20261022/original/scoped-fmt.stdout.log:698: trailing whitespace.\n+ \ndocs/tasks/document-core-contracts-20261022/independent-verification/copy-20261022/original/scoped-fmt.stdout.log:729: trailing whitespace.\n+ \ndocs/tasks/document-core-contracts-20261022/independent-verification/copy-20261022/original/scoped-fmt.stdout.log:804: trailing whitespace.\n+ \ndocs/tasks/document-core-contracts-20261022/independent-verification/copy-20261022/original/scoped-fmt.stdout.log:804: new blank line at EOF.\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "git",
+        "diff",
+        "--cached",
+        "--check",
+        "--",
+        ".",
+        ":(exclude)docs/tasks/document-core-contracts-20261022/independent-verification/copy-20261022/**/*.log"
+      ],
+      "exit_status": 2,
+      "stdout": "docs/tasks/document-core-contracts-20261022/independent-verification/copy-20261022/format/format-commit.patch:139: trailing whitespace.\n+ \ndocs/tasks/document-core-contracts-20261022/independent-verification/copy-20261022/format/format-commit.patch:210: trailing whitespace.\n+ \ndocs/tasks/document-core-contracts-20261022/independent-verification/copy-20261022/format/format-commit.patch:266: trailing whitespace.\n+ \ndocs/tasks/document-core-contracts-20261022/independent-verification/copy-20261022/format/format-commit.patch:324: trailing whitespace.\n+ \ndocs/tasks/document-core-contracts-20261022/independent-verification/copy-20261022/format/format-commit.patch:354: trailing whitespace.\n+ \ndocs/tasks/document-core-contracts-20261022/independent-verification/copy-20261022/format/format-commit.patch:429: trailing whitespace.\n+-- \ndocs/tasks/document-core-contracts-20261022/independent-verification/copy-20261022/format/format-commit.patch:431: new blank line at EOF.\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "git",
+        "diff",
+        "--cached",
+        "--check",
+        "--",
+        ".",
+        ":(exclude)docs/tasks/document-core-contracts-20261022/independent-verification/copy-20261022/**/*.log",
+        ":(exclude)docs/tasks/document-core-contracts-20261022/independent-verification/copy-20261022/format/format-commit.patch"
+      ],
+      "exit_status": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/workspace/Muyon-document-copy",
+        "show",
+        "--check",
+        "--oneline",
+        "93de8ad99fad105bc3ca32036de30803d87fd6c7"
+      ],
+      "exit_status": 0,
+      "stdout": "93de8ad9 style(documents): format copy-only clone hooks and tests\n",
+      "stderr": ""
+    }
+  ]
+}

@@ -1,0 +1,97 @@
+{
+  "at_utc": "2026-10-22T05:24:58.092005+00:00",
+  "original_manifest_source_hashes_match_fixed_git_objects": true,
+  "results": [
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/workspace/Muyon-document-copy",
+        "rev-parse",
+        "HEAD"
+      ],
+      "exit_status": 0,
+      "stdout": "93de8ad99fad105bc3ca32036de30803d87fd6c7\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/workspace/Muyon-document-copy",
+        "status",
+        "--short"
+      ],
+      "exit_status": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "git",
+        "diff",
+        "--exit-code",
+        "f6ab7fd78f46319cf46e9754d80c7cf0f6781205",
+        "a27f04aa2460971940d4bdf2c8263bdf81f381c2",
+        "--",
+        "crates"
+      ],
+      "exit_status": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "git",
+        "diff",
+        "--exit-code",
+        "d6e90845062dca287aab089967ce1c5388a8a176",
+        "--",
+        "crates",
+        "experiments"
+      ],
+      "exit_status": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/workspace/Muyon-group",
+        "rev-parse",
+        "HEAD"
+      ],
+      "exit_status": 0,
+      "stdout": "7fde617bab8f45644820590529def5b2f2193454\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/workspace/Muyon-group",
+        "status",
+        "--short"
+      ],
+      "exit_status": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "git",
+        "ls-remote",
+        "origin",
+        "refs/heads/task/document-core-contracts-20261022",
+        "refs/heads/task/document-core-copy-format-20261022",
+        "refs/heads/task/document-core-verification-20261022",
+        "refs/heads/main",
+        "refs/heads/develop"
+      ],
+      "exit_status": 0,
+      "stdout": "0ab2c4f667681b9aacb017f8cd2eea6f576cf78e\trefs/heads/develop\ncc7c8d14d30e3d3c4c7c6cb2bf2059a99e46e003\trefs/heads/main\na27f04aa2460971940d4bdf2c8263bdf81f381c2\trefs/heads/task/document-core-contracts-20261022\n93de8ad99fad105bc3ca32036de30803d87fd6c7\trefs/heads/task/document-core-copy-format-20261022\nd6e90845062dca287aab089967ce1c5388a8a176\trefs/heads/task/document-core-verification-20261022\n",
+      "stderr": ""
+    }
+  ]
+}

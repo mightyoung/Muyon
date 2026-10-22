@@ -1,0 +1,74 @@
+{
+  "at_utc": "2026-10-22T05:23:01.954507+00:00",
+  "format_commit": "93de8ad99fad105bc3ca32036de30803d87fd6c7",
+  "format_branch": "task/document-core-copy-format-20261022",
+  "parent": "a27f04aa2460971940d4bdf2c8263bdf81f381c2",
+  "changed_paths": [
+    "crates/muyon-core/src/blobs.rs",
+    "crates/muyon-core/src/documents/storage.rs",
+    "crates/muyon-core/src/documents/storage_tests.rs"
+  ],
+  "files": [
+    {
+      "path": "crates/muyon-core/src/blobs.rs",
+      "actual_sha256": "54aa4644eb6093ccc1fed442cec7906eca8d6a53192d09d2f430bcc8df989719",
+      "expected_sha256": "54aa4644eb6093ccc1fed442cec7906eca8d6a53192d09d2f430bcc8df989719",
+      "byte_identical": true
+    },
+    {
+      "path": "crates/muyon-core/src/documents/anchor.rs",
+      "actual_sha256": "f2f278fc26bd2451b7eee9336fc0a70f4ef9f0321c3f0cc1fa7cefbdfaccf47b",
+      "expected_sha256": "f2f278fc26bd2451b7eee9336fc0a70f4ef9f0321c3f0cc1fa7cefbdfaccf47b",
+      "byte_identical": true
+    },
+    {
+      "path": "crates/muyon-core/src/documents/annotation.rs",
+      "actual_sha256": "2e42ababc5ab32c69a08fa04926d437ea06d994f90558b61f24355ce950dc6b2",
+      "expected_sha256": "2e42ababc5ab32c69a08fa04926d437ea06d994f90558b61f24355ce950dc6b2",
+      "byte_identical": true
+    },
+    {
+      "path": "crates/muyon-core/src/documents/capability.rs",
+      "actual_sha256": "f03ee25e66dde42318b14cf88871184ead5780d56c47407cb4577358d22d614d",
+      "expected_sha256": "f03ee25e66dde42318b14cf88871184ead5780d56c47407cb4577358d22d614d",
+      "byte_identical": true
+    },
+    {
+      "path": "crates/muyon-core/src/documents/identity.rs",
+      "actual_sha256": "14ff7b35128b41faf132db9dd59fdd3216757ce7efe67b577f630befa753f7cf",
+      "expected_sha256": "14ff7b35128b41faf132db9dd59fdd3216757ce7efe67b577f630befa753f7cf",
+      "byte_identical": true
+    },
+    {
+      "path": "crates/muyon-core/src/documents/mod.rs",
+      "actual_sha256": "ad3ad8a94cf24310d53c24e66a0074bbf0ebb3864afaf0e9afe7dbebec9ce830",
+      "expected_sha256": "ad3ad8a94cf24310d53c24e66a0074bbf0ebb3864afaf0e9afe7dbebec9ce830",
+      "byte_identical": true
+    },
+    {
+      "path": "crates/muyon-core/src/documents/storage.rs",
+      "actual_sha256": "57c731e34afe73b13fc03fda113a0d0026370a146cb544c4588fb4b356652f8f",
+      "expected_sha256": "57c731e34afe73b13fc03fda113a0d0026370a146cb544c4588fb4b356652f8f",
+      "byte_identical": true
+    },
+    {
+      "path": "crates/muyon-core/src/documents/storage_tests.rs",
+      "actual_sha256": "3f27461d1ae7a870ac2d5852abde94b7877724a0d989bba23c6b05671e05336f",
+      "expected_sha256": "3f27461d1ae7a870ac2d5852abde94b7877724a0d989bba23c6b05671e05336f",
+      "byte_identical": true
+    },
+    {
+      "path": "crates/muyon-core/tests/document_storage.rs",
+      "actual_sha256": "c21f25ab0f1b49013b3f4883f02800992dd8fe4070f51139f2488415ea024513",
+      "expected_sha256": "c21f25ab0f1b49013b3f4883f02800992dd8fe4070f51139f2488415ea024513",
+      "byte_identical": true
+    },
+    {
+      "path": "crates/muyon-core/tests/documents.rs",
+      "actual_sha256": "a1e4c3d1dc0cfc37d5020e909977ccca311c39602265f19d75073dae1795440a",
+      "expected_sha256": "a1e4c3d1dc0cfc37d5020e909977ccca311c39602265f19d75073dae1795440a",
+      "byte_identical": true
+    }
+  ],
+  "no_behavior_or_expectation_changes": "Every checked file is byte-identical to the output of running the existing rustfmt on the original fixed source in temporary copies."
+}

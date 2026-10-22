@@ -1,0 +1,11 @@
+
+running 6 tests
+test documents::storage_tests::clone_late_metadata_failure_and_revision_overflow_leave_original_intact ... ok
+test documents::storage_tests::clone_and_late_receipt_failure_roll_back_together ... ok
+test documents::storage_tests::clone_rejects_changed_source_stale_base_and_foreign_transaction ... ok
+test documents::storage_tests::clone_reference_requires_same_project_ready_source_and_unique_reference ... ok
+test documents::storage_tests::clone_verifies_real_source_file_hash_and_missing_file ... ok
+test documents::storage_tests::copy_clone_commits_same_bytes_and_revision_without_upload_or_staging ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 21 filtered out; finished in 0.02s
+

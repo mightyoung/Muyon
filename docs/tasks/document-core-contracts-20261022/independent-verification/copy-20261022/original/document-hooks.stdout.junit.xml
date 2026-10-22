@@ -1,0 +1,16 @@
+<?xml version='1.0' encoding='utf-8'?>
+<testsuite name="original/document-hooks" tests="9" failures="0" errors="0" skipped="0">
+  <properties>
+    <property name="origin" value="derived from retained libtest stdout; not native runner XML" />
+    <property name="raw_sha256" value="6ff393473705d571751031d8ddd988914d5d28125847ef2e0d58e7c57636ccf9" />
+  </properties>
+  <testcase classname="document-hooks" name="documents::storage_tests::clone_and_late_receipt_failure_roll_back_together" />
+  <testcase classname="document-hooks" name="documents::storage_tests::clone_late_metadata_failure_and_revision_overflow_leave_original_intact" />
+  <testcase classname="document-hooks" name="documents::storage_tests::clone_reference_requires_same_project_ready_source_and_unique_reference" />
+  <testcase classname="document-hooks" name="documents::storage_tests::clone_rejects_changed_source_stale_base_and_foreign_transaction" />
+  <testcase classname="document-hooks" name="documents::storage_tests::clone_verifies_real_source_file_hash_and_missing_file" />
+  <testcase classname="document-hooks" name="documents::storage_tests::copy_clone_commits_same_bytes_and_revision_without_upload_or_staging" />
+  <testcase classname="document-hooks" name="documents::storage_tests::tail_grant_rejects_foreign_transaction_and_mismatched_document_binding" />
+  <testcase classname="document-hooks" name="documents::storage_tests::tail_grant_survives_own_cas_without_authorizing_old_revision_reads" />
+  <testcase classname="document-hooks" name="documents::storage_tests::tail_grant_rechecks_revocation_expiry_generation_epoch_and_project" />
+</testsuite>

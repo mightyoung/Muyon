@@ -1,0 +1,13 @@
+<?xml version='1.0' encoding='utf-8'?>
+<testsuite name="original/copy-targeted" tests="6" failures="0" errors="0" skipped="0">
+  <properties>
+    <property name="origin" value="derived from retained libtest stdout; not native runner XML" />
+    <property name="raw_sha256" value="bfcf96b81f6c5d8714e43b272b83c313f2212f91c277342cd954648b0d9c5608" />
+  </properties>
+  <testcase classname="copy-targeted" name="documents::storage_tests::clone_reference_requires_same_project_ready_source_and_unique_reference" />
+  <testcase classname="copy-targeted" name="documents::storage_tests::clone_and_late_receipt_failure_roll_back_together" />
+  <testcase classname="copy-targeted" name="documents::storage_tests::clone_late_metadata_failure_and_revision_overflow_leave_original_intact" />
+  <testcase classname="copy-targeted" name="documents::storage_tests::clone_rejects_changed_source_stale_base_and_foreign_transaction" />
+  <testcase classname="copy-targeted" name="documents::storage_tests::copy_clone_commits_same_bytes_and_revision_without_upload_or_staging" />
+  <testcase classname="copy-targeted" name="documents::storage_tests::clone_verifies_real_source_file_hash_and_missing_file" />
+</testsuite>
