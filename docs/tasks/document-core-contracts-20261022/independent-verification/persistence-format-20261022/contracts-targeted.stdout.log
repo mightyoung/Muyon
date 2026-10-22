@@ -1,0 +1,23 @@
+
+running 18 tests
+test anchors_are_bound_to_identity_revision_and_format ... ok
+test cached_metadata_never_bypasses_revocation_or_unknown_authority ... ok
+test current_host_and_operation_capability_must_both_allow_read ... ok
+test capability_for_other_operation_or_format_grants_nothing ... ok
+test declared_format_never_enables_a_reader ... ok
+test each_missing_pdf_geometry_field_remains_unresolved ... ok
+test host_errors_and_invalid_or_stale_lease_fail_closed ... ok
+test invalid_document_metadata_is_rejected_and_revision_is_preserved ... ok
+test normalized_regions_preserve_explicit_rotation_and_reject_invalid_crop ... ok
+test nonfinite_empty_overflowing_and_invalid_normalized_rectangles_fail ... ok
+test old_revision_or_other_document_is_rejected ... ok
+test pdf_geometry_keeps_unknowns_without_guessing ... ok
+test read_contract_cannot_admit_edit_even_when_both_lists_allow_it ... ok
+test structured_anchors_validate_ids_ranges_and_package_parts ... ok
+test stale_grant_epoch_generation_and_id_are_rejected ... ok
+test unsupported_and_gated_capabilities_deny ... ok
+test visible_pdf_selection_must_fit_the_declared_crop ... ok
+test workspace_and_project_are_exact_not_wildcards ... ok
+
+test result: ok. 18 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

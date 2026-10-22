@@ -1,0 +1,31 @@
+{
+  "at_utc": "2026-10-22T05:14:27.346578+00:00",
+  "raw_bytes_preserved": true,
+  "results": [
+    {
+      "argv": [
+        "git",
+        "diff",
+        "--cached",
+        "--check"
+      ],
+      "exit_status": 2,
+      "stdout": "docs/tasks/document-core-contracts-20261022/independent-verification/persistence-format-20261022/contracts-targeted.stdout.log:23: new blank line at EOF.\ndocs/tasks/document-core-contracts-20261022/independent-verification/persistence-format-20261022/core-full.stdout.log:273: new blank line at EOF.\ndocs/tasks/document-core-contracts-20261022/independent-verification/persistence-format-20261022/storage-targeted.stdout.log:20: new blank line at EOF.\ndocs/tasks/document-core-contracts-20261022/independent-verification/persistence-format-20261022/tail-hook-targeted.stdout.log:8: new blank line at EOF.\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "git",
+        "diff",
+        "--cached",
+        "--check",
+        "--",
+        ".",
+        ":(exclude)docs/tasks/document-core-contracts-20261022/independent-verification/persistence-format-20261022/*.log"
+      ],
+      "exit_status": 0,
+      "stdout": "",
+      "stderr": ""
+    }
+  ]
+}

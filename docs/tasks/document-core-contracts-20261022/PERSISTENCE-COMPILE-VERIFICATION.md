@@ -33,3 +33,7 @@
 仍没有文档引擎、native格式编辑/渲染、真实用户文件、可信actor/group来源适配、字节交付/派生缓存授权接线、总磁盘配额、历史压缩/保留政策或端到端网关回执组合证据。行/JSON读取限额不等同总存储有界。持久化单元/集成夹具通过不使这些门槛自动关闭。
 
 main/develop未改、无合并/部署/付费/真实模型或搜索请求/历史unknown重试/预占释放；现有Leader B仍是唯一develop合入者。当前结论是“新源编译和测试通过，格式仍HOLD，生产集成未验收”。
+
+## 后续七文件格式补修闭环
+
+本页f043固定源的格式失败历史保留。作者新源 `f4a8e8d3971208f16d4a3b1ddff5d4e8fb2a63ac` 已独立确认只含预期七文件格式变动，并实际复验scoped fmt exit0、持久化15/15、hook3/3、旧合同18/18、完整core183/183通过。仅关闭本批格式门槛，可作为父侧网关组合验证输入，不能当作已整合。见 [PERSISTENCE-FORMAT-RECHECK.md](PERSISTENCE-FORMAT-RECHECK.md) 及其新分目录原始证据/SHA256SUMS。既有workspace、TDD历史和生产边界不变。

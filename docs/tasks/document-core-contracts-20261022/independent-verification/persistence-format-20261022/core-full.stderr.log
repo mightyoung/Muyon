@@ -1,0 +1,59 @@
+warning: suspicious definition of the runtime `read` symbol used by the standard library
+   --> /workspace/Muyon-document-persistence-formatted/experiments/redesign/core-agent-lab/core/src/host_session.rs:132:124
+    |
+132 | ...ount: usize, timeout: i32) -> i32; fn read(fd: i32, buffer: *mut u8, count: usize) -> isize; fn write(fd: i32, buffer: *const u8...
+    |                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = note: expected `unsafe extern "C" fn(i32, *mut c_void, usize) -> isize` (for the current target)
+            found    `unsafe extern "C" fn(i32, *mut u8, usize) -> isize`
+    = help: either fix the signature or remove any attributes like `#[unsafe(no_mangle)]`, `#[unsafe(export_name = "read")]`, or `#[link_name = "read"]`
+    = help: allow this lint if the signature is compatible
+    = note: `#[warn(suspicious_runtime_symbol_definitions)]` on by default
+
+warning: suspicious definition of the runtime `write` symbol used by the standard library
+   --> /workspace/Muyon-document-persistence-formatted/experiments/redesign/core-agent-lab/core/src/host_session.rs:132:182
+    |
+132 | ... *mut u8, count: usize) -> isize; fn write(fd: i32, buffer: *const u8, count: usize) -> isize; }
+    |                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = note: expected `unsafe extern "C" fn(i32, *const c_void, usize) -> isize` (for the current target)
+            found    `unsafe extern "C" fn(i32, *const u8, usize) -> isize`
+    = help: either fix the signature or remove any attributes like `#[unsafe(no_mangle)]`, `#[unsafe(export_name = "write")]`, or `#[link_name = "write"]`
+    = help: allow this lint if the signature is compatible
+
+warning: `muyon-core-agent-lab` (lib) generated 2 warnings
+warning: methods `document_access_in_transaction` and `document_grant_in_transaction` are never used
+   --> muyon-core/src/documents/storage.rs:211:19
+    |
+ 75 | impl BusinessStore {
+    | ------------------ methods in this implementation
+...
+211 |     pub(crate) fn document_access_in_transaction(
+    |                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+...
+227 |     pub(crate) fn document_grant_in_transaction(
+    |                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: `muyon-core` (lib) generated 1 warning
+   Compiling muyon-core v0.1.0 (/workspace/Muyon-document-persistence-formatted/crates/muyon-core)
+    Finished `test` profile [unoptimized] target(s) in 2.16s
+     Running unittests src/lib.rs (/tmp/muyon-document-cargo-target/debug/deps/muyon_core-911fe8605b56ec54)
+     Running unittests src/bin/business_worker.rs (/tmp/muyon-document-cargo-target/debug/deps/business_worker-5c4a50a84bfc8587)
+     Running tests/agent_child_tools.rs (/tmp/muyon-document-cargo-target/debug/deps/agent_child_tools-c9c0432593b7031d)
+     Running tests/agent_owner.rs (/tmp/muyon-document-cargo-target/debug/deps/agent_owner-1913ff22f4e0a731)
+     Running tests/agent_product.rs (/tmp/muyon-document-cargo-target/debug/deps/agent_product-32af8d6fdab322fb)
+     Running tests/agent_tools.rs (/tmp/muyon-document-cargo-target/debug/deps/agent_tools-4489efe2ba464288)
+     Running tests/agent_workflow.rs (/tmp/muyon-document-cargo-target/debug/deps/agent_workflow-d8750ccd5c38f215)
+     Running tests/archive.rs (/tmp/muyon-document-cargo-target/debug/deps/archive-d8140b41d7a85a3b)
+     Running tests/blobs.rs (/tmp/muyon-document-cargo-target/debug/deps/blobs-1b0094500ff0181c)
+     Running tests/business.rs (/tmp/muyon-document-cargo-target/debug/deps/business-fac723b933850e62)
+     Running tests/contract.rs (/tmp/muyon-document-cargo-target/debug/deps/contract-1529e5569e76cfbc)
+     Running tests/contract_vectors_additional.rs (/tmp/muyon-document-cargo-target/debug/deps/contract_vectors_additional-46d838708f3f4651)
+     Running tests/document_storage.rs (/tmp/muyon-document-cargo-target/debug/deps/document_storage-7a89612e716b7700)
+     Running tests/documents.rs (/tmp/muyon-document-cargo-target/debug/deps/documents-834c179ff4a8acb7)
+     Running tests/research.rs (/tmp/muyon-document-cargo-target/debug/deps/research-5431e5580d2991ec)
+     Running tests/resource_boundaries_additional.rs (/tmp/muyon-document-cargo-target/debug/deps/resource_boundaries_additional-480995937f28e8d2)
+     Running tests/store_admission_additional.rs (/tmp/muyon-document-cargo-target/debug/deps/store_admission_additional-265271dd8968df0d)
+   Doc-tests muyon_core
