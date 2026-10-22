@@ -51,3 +51,9 @@ production host now consumes a175's single memory reducer with passive original-
 recovery. Do not reintroduce a UI-owned reducer or standalone file-store truth.
 Candidate reads are explicit and cannot enable typed-card actions. Document owner
 exclusively owns product/ui/documents; shell owns final MainActivity/ChatScreen wire.
+
+Parent-released reader8d2b7931 is now ordinarily composed (merge935d48b2), with its
+owner's directories unchanged. READER-COMPOSITION.md records combined-tree JVM PASS,
+actual blocked Android build and the closed public entry. Consume this branch's next
+fixed composition SHA rather than separately reapplying that reader history. Actual
+DocumentReaderHost authority/FD/durable receipt adapter remains the original owner's work.

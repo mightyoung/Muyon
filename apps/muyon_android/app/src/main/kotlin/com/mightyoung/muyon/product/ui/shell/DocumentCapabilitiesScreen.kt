@@ -8,23 +8,23 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
-/** Neutral capability entry only. It neither selects an engine nor grants a business scope. */
+/** Reader source is composed; access remains closed until the authoritative host bridge exists. */
 @Composable
 fun DocumentCapabilitiesScreen(onOpenExistingProjectMaterials: () -> Unit) {
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(20.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)) {
         Text("公共文档能力", style = MaterialTheme.typography.headlineSmall)
-        Text("阅读与适量编辑规划覆盖 PDF、Word、PPT、Excel。公共入口尚未接线；引擎选型与权限验证进行中。")
+        Text("公共阅读尚未连接已授权文件。接通后可查看 PDF 页面和 Word、PPT、Excel 文本预览；Office 预览不保留原版式。")
         Text("现有项目 PDF 资料入口保留；公共能力不会扩大科研或供应商的数据范围与授权。")
         Button(onClick = onOpenExistingProjectMaterials, modifier = Modifier.heightIn(min = 48.dp)) {
             Text("打开现有项目资料")
         }
         OutlinedButton(onClick = {}, enabled = false, modifier = Modifier.heightIn(min = 48.dp)) {
-            Text("公共文档阅读（未接线）")
+            Text("公共文档阅读（等待授权接口）")
         }
         OutlinedButton(onClick = {}, enabled = false, modifier = Modifier.heightIn(min = 48.dp)) {
-            Text("适量编辑（未接线）")
+            Text("批注编辑与保存（尚不可用）")
         }
-        Text("尚未支持的格式会保留原文件并准确说明；这里不导入文档、不修改文件，也不显示已可编辑。")
+        Text("批注保存尚不可用：需要核实当前文档权限、版本与保存回执。源文件编辑与排版尚不支持；原文件保持不变。")
     }
 }
