@@ -1,0 +1,6 @@
+test_actual_light_and_dark_palette_have_accessible_text_and_boundaries (test_contrast.PaletteContrastTest.test_actual_light_and_dark_palette_have_accessible_text_and_boundaries) ... ok
+
+----------------------------------------------------------------------
+Ran 1 test in 0.001s
+
+OK

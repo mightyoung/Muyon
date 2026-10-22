@@ -1,0 +1,37 @@
+# Independent shell review
+
+Non-author agent `review_shell` read the actual working tree without editing files
+or making service/network/model calls. Review covered authored MainActivity,
+ChatScreen, shell sources and test targets; final configuration-host changes received
+a separate follow-up review. This is static review, not Android acceptance.
+
+Initial issues found and fixed:
+
+1. Custom overlay did not isolate hardware-keyboard focus. Replaced with full-screen
+   modal Dialog, left78% panel, dismiss scrim and unified onDismissRequest.
+2. Opened-menu preference write failure was immediately cleared. Kept its error.
+3. Returning to Main Agent unnecessarily required a readable optional catalog.
+   Default now resolves independently of the catalog.
+4. Accumulated draft/submitted text could overflow Activity Bundle. Drafts moved to
+   isolated local preferences; single actual submitted-message display metadata is
+   stored separately. SaveableStateHolder no longer retains these large strings.
+5. Menu-retention test overlaid its edit button with the header. Test now uses a
+   Column and real input draft, avoiding a false click target.
+6. Generic connection errors could clear draft-save failure warning. Separate
+   draftSaveError now clears only after a successful local draft write.
+
+Final source conclusion: these six issues code-level closed; no new business
+confirmation/intent/original-request authority regression or obvious Kotlin syntax
+issue identified. File ownership respected. Final configuration-host review found
+no blocking issue: same editor retained per local scope in Activity ViewModel,
+process loss explicitly disclosed, IME-first Back and child step navigation, all
+unsupported execution/query capabilities closed, no FFI or old cancel signature.
+
+Residual: inherited FoundationTheme leaves some used Material roles at defaults,
+including workflow chip secondaryContainer and research surfaceContainerLow.
+New shell/user bubble uses surfaceVariant. Follow-up belongs to foundation owner.
+
+Build/device evidence must come from actual subsequent runs. The review did not
+independently execute Android compilation, IME/Back/rotation, TalkBack, screenshot,
+200% font or inherited Kotlin tests. Those tests' actual integrator-run evidence is
+listed separately in REPORT.md. No static approval is called runtime acceptance.

@@ -6,6 +6,9 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import com.mightyoung.muyon.product.ui.shell.ConversationHeader
+import com.mightyoung.muyon.product.ui.shell.ShellInputDock
+import com.mightyoung.muyon.product.ui.shell.LocalShellDrafts
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.platform.testTag
@@ -27,15 +30,16 @@ fun ChatScreen(
     memberNames: List<String> = emptyList(),
     agentRole: String = "",
     agentInstructions: String = "",
+    onOpenMenu: () -> Unit = {},
 ) {
     var configured by remember(client) { mutableStateOf(false) }
     key(conversationKey, projectId) {
-        ChatConversation(client, projectId, conversationKey, displayName, memberNames, agentRole, agentInstructions, configured) { configured = it }
+        ChatConversation(client, projectId, conversationKey, displayName, memberNames, agentRole, agentInstructions, configured, onOpenMenu) { configured = it }
     }
 }
 
 @Composable
-private fun ChatConversation(client: ProductClient, projectId: String?, conversationKey: String, displayName: String, memberNames: List<String>, agentRole: String, agentInstructions: String, configured: Boolean, onConfigured: (Boolean) -> Unit) {
+private fun ChatConversation(client: ProductClient, projectId: String?, conversationKey: String, displayName: String, memberNames: List<String>, agentRole: String, agentInstructions: String, configured: Boolean, onOpenMenu: () -> Unit, onConfigured: (Boolean) -> Unit) {
     val context = LocalContext.current
     val saved = remember { context.getSharedPreferences("product-chat-state", android.content.Context.MODE_PRIVATE) }
     val conversationPreference = remember(conversationKey) { if (conversationKey == "default") "conversation" else "conversation:$conversationKey" }
@@ -52,6 +56,11 @@ private fun ChatConversation(client: ProductClient, projectId: String?, conversa
     var cap by remember { mutableStateOf("1000000") }
     var calls by remember { mutableStateOf("10") }
     var review by remember { mutableStateOf<JSONObject?>(null) }
+    var reviewInput by remember { mutableStateOf("") }
+    val shellSaved = remember { context.getSharedPreferences("muyon_ui_shell_v1", android.content.Context.MODE_PRIVATE) }
+    var submittedInput by remember { mutableStateOf(shellSaved.getString("submitted_input", "").orEmpty()) }
+    var submittedRequest by remember { mutableStateOf(shellSaved.getString("submitted_request", "").orEmpty()) }
+    var submittedConversation by remember { mutableStateOf(shellSaved.getString("submitted_conversation", "").orEmpty()) }
     var reviewConversationKey by remember { mutableStateOf<String?>(null) }
     var reviewDisplayName by remember { mutableStateOf<String?>(null) }
     var resultText by remember { mutableStateOf("") }
@@ -73,11 +82,14 @@ private fun ChatConversation(client: ProductClient, projectId: String?, conversa
     var scopeReady by remember(projectId) { mutableStateOf(false) }
     var availability by remember { mutableStateOf<JSONObject?>(null) }
     var error by remember { mutableStateOf("") }
+    var draftSaveError by remember { mutableStateOf("") }
     var loading by remember { mutableStateOf(false) }
     var records by remember { mutableStateOf<List<JSONObject>>(emptyList()) }
     var tool by remember { mutableStateOf("supplier_list") }
     var offset by remember { mutableIntStateOf(0) }
-    var draft by remember { mutableStateOf("") }
+    // Draft text stays out of the Activity Bundle and is isolated by actual selection and project.
+    val localDrafts = remember { LocalShellDrafts(shellSaved) }
+    var draft by remember { mutableStateOf(localDrafts.read(conversationKey, projectId)) }
     var source by remember { mutableStateOf("") }
     val currentProject by rememberUpdatedState(projectId)
     val currentReview by rememberUpdatedState(review)
@@ -151,10 +163,12 @@ private fun ChatConversation(client: ProductClient, projectId: String?, conversa
         }
     }
     fun preview(search: Boolean) {
+        val frozenDraft = draft
         scopedCall("chat_prepare", JSONObject().put("conversation_id", conversation)
-            .put("text", if (search) draft else agentUserInput(draft, agentRole, agentInstructions)).put("search", search).put("count", 5).put("project_id", projectId ?: JSONObject.NULL)) { reply ->
+            .put("text", if (search) frozenDraft else agentUserInput(frozenDraft, agentRole, agentInstructions)).put("search", search).put("count", 5).put("project_id", projectId ?: JSONObject.NULL)) { reply ->
             val data = reply.optJSONObject("data")
             if (reply.optString("status") == "ok" && data?.has("request_id") == true) {
+                reviewInput = frozenDraft
                 reviewConversationKey = conversationKey; reviewDisplayName = displayName; review = data
             }
             else error = if (reply.optString("error") == "chat_tool_history_review_required" || data?.optString("error") == "chat_tool_history_review_required")
@@ -249,12 +263,24 @@ private fun ChatConversation(client: ProductClient, projectId: String?, conversa
     }
 
     Column(Modifier.fillMaxSize().imePadding()) {
+        ConversationHeader(displayName, onOpenMenu, onMore = { moreOpen = true })
         Column(Modifier.weight(1f).fillMaxWidth().verticalScroll(rememberScrollState())) {
         Column(Modifier.fillMaxWidth().padding(18.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
         if (resultText.isEmpty() && source.isEmpty() && businessIntent == null && !historyOpen) {
-            ChatEmptyState(displayName, memberNames)
+            Column(Modifier.fillMaxWidth().padding(vertical = 40.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                Text("今天想做些什么？", style = MaterialTheme.typography.headlineSmall)
+                if (memberNames.isNotEmpty()) Text("群组仅作本地组织；不会自动调度成员。", style = MaterialTheme.typography.bodyMedium)
+            }
         }
         if (conversationNotice.isNotEmpty()) Text(conversationNotice, style = MaterialTheme.typography.bodySmall)
+        if (submittedRequest == original && submittedConversation == conversation && originalConversationKey == conversationKey && submittedInput.isNotBlank()) {
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+                Surface(Modifier.widthIn(max = 320.dp).fillMaxWidth(.82f).testTag("chat-submitted-input"),
+                    shape = RoundedCornerShape(24.dp), color = MaterialTheme.colorScheme.surfaceVariant) {
+                    Text(submittedInput, Modifier.padding(16.dp), style = MaterialTheme.typography.bodyLarge)
+                }
+            }
+        }
         if (original != null || resultText.isNotEmpty()) ChatPanel {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(originalOriginLabel, Modifier.weight(1f).testTag("chat-original-origin"), style = MaterialTheme.typography.labelMedium)
@@ -285,7 +311,7 @@ private fun ChatConversation(client: ProductClient, projectId: String?, conversa
             }) { Text("查看将披露的实际字段") }
             if (followupReady) OutlinedButton(onClick = { toolAction("followup") {
                 reviewConversationKey = originalConversationKey; reviewDisplayName = originalDisplayName
-                review = it; followupReady = false
+                reviewInput = ""; review = it; followupReady = false
             } }) { Text("预览独立的后续模型请求") }
             }
         }
@@ -309,8 +335,9 @@ private fun ChatConversation(client: ProductClient, projectId: String?, conversa
                 workflowOpen = false
                 reviewConversationKey = "$conversationKey / ${plan.optString("workflow_id")}"
                 reviewDisplayName = "$displayName · AI子任务"
-                review = plan
+                reviewInput = ""; review = plan
             })
+        if (draftSaveError.isNotEmpty()) Text(draftSaveError, color = MaterialTheme.colorScheme.error, modifier = Modifier.testTag("chat-draft-save-error"))
         if (error.isNotEmpty()) Text(error, color = MaterialTheme.colorScheme.error, modifier = Modifier.testTag("chat-error"))
         if (source.isNotEmpty()) {
             Text(source, modifier = Modifier.testTag("chat-local-source"))
@@ -333,7 +360,11 @@ private fun ChatConversation(client: ProductClient, projectId: String?, conversa
         }
         }
         }
-        ChatInputDock(draft, { draft = it.take(4096) }, configured && scopeReady && draft.isNotBlank(),
+        ShellInputDock(draft, {
+            draft = it.take(4096)
+            draftSaveError = if (localDrafts.write(conversationKey, projectId, draft)) ""
+                else "草稿尚未写入本机，当前输入仍保留；请勿离开页面。"
+        }, configured && scopeReady && draft.isNotBlank(),
             onChat = { preview(false) }, onMore = { moreOpen = true }, moreMenu = {
                 DropdownMenu(expanded = moreOpen, onDismissRequest = { moreOpen = false }) {
                     DropdownMenuItem(text = { Text("任务与技能") }, enabled = scopeReady, onClick = { moreOpen = false; workflowOpen = true })
@@ -346,7 +377,7 @@ private fun ChatConversation(client: ProductClient, projectId: String?, conversa
                             review?.optString("request_id")?.takeIf { it.isNotBlank() }?.let {
                                 client.call("chat_cancel", JSONObject().put("request_id", it)) {}
                             }
-                            conversation = next; review = null; reviewConversationKey = null; reviewDisplayName = null
+                            conversation = next; submittedInput = ""; submittedRequest = ""; submittedConversation = ""; reviewInput = ""; review = null; reviewConversationKey = null; reviewDisplayName = null
                             pendingTool = null; disclosure = null; suggestion = null; followupReady = false
                             resultText = ""; requestObservation = null; usageDetails = ""; searchResults = emptyList(); records = emptyList(); source = ""; historyOpen = false
                             conversationNotice = "已开始新会话；原请求仍可独立查询。"
@@ -414,6 +445,9 @@ private fun ChatConversation(client: ProductClient, projectId: String?, conversa
             if (saved.edit().putString("original_request", request)
                     .putString("original_request_conversation_key", reviewConversationKey)
                     .putString("original_request_display_name", reviewDisplayName).commit()) {
+                submittedInput = reviewInput; submittedRequest = request; submittedConversation = conversation
+                // Display metadata only; it never participates in dispatch authority.
+                shellSaved.edit().putString("submitted_input", submittedInput).putString("submitted_request", submittedRequest).putString("submitted_conversation", submittedConversation).apply()
                 original = request; originalConversationKey = reviewConversationKey; originalDisplayName = reviewDisplayName
                 pendingTool = null; searchResults = emptyList(); resultText = ""; requestObservation = null; usageDetails = ""; review = null
                 disclosure = null; suggestion = null; followupReady = false
