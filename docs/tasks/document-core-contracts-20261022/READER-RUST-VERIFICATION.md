@@ -60,3 +60,7 @@ BEGIN UPDATE document_grants SET expires_at_ms='0'; END;
 当前不满足“仅fmt问题”的条件，**没有生成纯格式补修提交/分支**。原candidate publish仍硬拒，无真实validator或Office引擎。生命周期/PFD、reader/evidence consumer、缓存与实际外发/格式解释仍待组合验收。历史NOT_RUN/TDD、未知费用、原拒绝与Leader B唯一合入职责保持；无合入/部署/付费/真实模型请求/历史unknown重试或预占释放。
 
 封存全量staged diff-check exit2来自原始libtest/formatter输出空白；保留字节，排除本批原始.log后的编写文件检查exit0，精确命令/输出见whitespace-check.json。不能把证据空白检查与四文件源码fmt失败或两个真实RED混为一谈。
+
+## 分版本实际修复复验
+
+本页ff3cc上的两个59-byte成功交付RED及全部原输出保持原样。后续纯tail fec40dc8和snapshot2e71384e分别实际复用完全相同六探针，均6/6通过；Reader/core分别15/270与17/274通过，原源各四文件fmt失败。对应纯格式1785fd2d、97969f9a逐字节匹配rustfmt原源输出，并各自重跑全部相关检查/fmt通过。性能计数仅属于snapshot两组，预算只为host snapshot payload64MiB，不跨源借用。见 [READER-TAIL-PERFORMANCE-RUST-VERIFICATION.md](READER-TAIL-PERFORMANCE-RUST-VERIFICATION.md)。

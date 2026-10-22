@@ -1,0 +1,24 @@
+<?xml version='1.0' encoding='utf-8'?>
+<testsuite name="performance-formatted/reader-targeted" tests="17" failures="0" errors="0" skipped="0">
+  <properties>
+    <property name="origin" value="derived actual libtest output; version/binary overlaps not added as coverage" />
+    <property name="raw_sha256" value="b5dbca26259f4e3659d025d5d96805a47ea028c0c95798201452c84d84bbf27a" />
+  </properties>
+  <testcase classname="unittests src/lib.rs" name="documents::reader_tests::corrupt_oversize_blob_length_is_rejected_without_creating_reader_pin" />
+  <testcase classname="unittests src/lib.rs" name="documents::reader_tests::cleanup_failure_withholds_bytes_and_poisoned_host_refuses_new_sessions" />
+  <testcase classname="unittests src/lib.rs" name="documents::reader_tests::authenticated_snapshot_never_delivers_mutated_disk_bytes_even_with_resampled_stamp" />
+  <testcase classname="unittests src/lib.rs" name="documents::reader_tests::dropping_host_releases_sessions_before_reopening_same_store" />
+  <testcase classname="unittests src/lib.rs" name="documents::reader_tests::eof_cleanup_time_revocation_withholds_prepared_chunk" />
+  <testcase classname="unittests src/lib.rs" name="documents::reader_tests::deleted_pin_or_same_length_corruption_invalidates_session" />
+  <testcase classname="unittests src/lib.rs" name="documents::reader_tests::bounded_sessions_idle_absolute_lifetime_and_invalid_chunk_release_pins" />
+  <testcase classname="unittests src/lib.rs" name="documents::reader_tests::inspect_grant_cannot_open_bytes_and_forged_scope_never_substitutes_source" />
+  <testcase classname="unittests src/lib.rs" name="documents::reader_tests::exact_metadata_and_sequential_bytes_close_at_eof" />
+  <testcase classname="unittests src/lib.rs" name="documents::reader_tests::one_shot_callback_failure_and_cleanup_failure_return_no_success_or_pin" />
+  <testcase classname="unittests src/lib.rs" name="documents::reader_tests::one_shot_cleanup_time_revocation_withholds_prepared_output" />
+  <testcase classname="unittests src/lib.rs" name="documents::reader_tests::open_commit_rejection_maps_to_unknown_and_cleans_original_pin" />
+  <testcase classname="unittests src/lib.rs" name="documents::reader_tests::one_shot_view_is_live_bounded_and_tail_rechecks_expiry_before_delivery" />
+  <testcase classname="unittests src/lib.rs" name="documents::reader_tests::open_failure_after_pin_creation_rolls_back_without_exposing_a_session" />
+  <testcase classname="unittests src/lib.rs" name="documents::reader_tests::generation_epoch_expiry_and_project_deletion_revoke_existing_sessions" />
+  <testcase classname="unittests src/lib.rs" name="documents::reader_tests::revoked_or_advanced_session_never_delivers_cached_bytes" />
+  <testcase classname="unittests src/lib.rs" name="documents::reader_tests::thirty_mib_stream_hash_cost_is_linear_and_chunk_bytes_are_exact" />
+</testsuite>

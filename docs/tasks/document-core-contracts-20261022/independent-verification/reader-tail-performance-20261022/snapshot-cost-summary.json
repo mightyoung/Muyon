@@ -1,0 +1,31 @@
+{
+  "pure_tail_has_no_snapshot_cost_claim": true,
+  "measurements": [
+    {
+      "phase": "performance",
+      "source_commit": "2e71384e808ecbe5bb010d05e87094e33e9cd3fd",
+      "source_bytes": 31457280,
+      "open_hashed_bytes": 94371840,
+      "backup_open_hashed_bytes": 94371840,
+      "stream_whole_source_hashed_bytes": 0,
+      "chunk_count": 480,
+      "host_snapshot_payload_limit_bytes": 67108864,
+      "observed_test_assertions": "two30MiB sessions admitted; third refused; pins remain2, then cleaned to0; compare every returned byte",
+      "raw_stdout_sha256": "bbc4727aa419c20f3b9c2e675161e2e0687216709b6914b7e1c6649eb61c5e96",
+      "limitations": "Actual cfg(test) hash-work counters; no RSS/mobile throughput/host call-pattern claim."
+    },
+    {
+      "phase": "performance-formatted",
+      "source_commit": "97969f9ab6728e8022b3ff7b7a069a655e94c9d8",
+      "source_bytes": 31457280,
+      "open_hashed_bytes": 94371840,
+      "backup_open_hashed_bytes": 94371840,
+      "stream_whole_source_hashed_bytes": 0,
+      "chunk_count": 480,
+      "host_snapshot_payload_limit_bytes": 67108864,
+      "observed_test_assertions": "two30MiB sessions admitted; third refused; pins remain2, then cleaned to0; compare every returned byte",
+      "raw_stdout_sha256": "bf6b590975801207dc83f7754523d9a5f501d06bb9305b5703a14a286d0b1178",
+      "limitations": "Actual cfg(test) hash-work counters; no RSS/mobile throughput/host call-pattern claim."
+    }
+  ]
+}

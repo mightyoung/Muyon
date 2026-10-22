@@ -1,0 +1,6 @@
+   Compiling muyon-core-agent-lab v0.1.0 (/workspace/Muyon-reader-performance-verification/experiments/redesign/core-agent-lab/core)
+   Compiling muyon-plugin-contract-lab v0.1.0 (/workspace/Muyon-reader-performance-verification/experiments/redesign/plugin-contract-lab/core)
+   Compiling muyon-rust-agent-host-lab v0.1.0 (/workspace/Muyon-reader-performance-verification/experiments/redesign/rust-agent-host-lab/core)
+   Compiling muyon-web-search-lab v0.1.0 (/workspace/Muyon-reader-performance-verification/experiments/redesign/web-search-lab/core)
+   Compiling muyon-core v0.1.0 (/workspace/Muyon-reader-performance-verification/crates/muyon-core)
+    Finished `dev` profile [unoptimized] target(s) in 5.22s

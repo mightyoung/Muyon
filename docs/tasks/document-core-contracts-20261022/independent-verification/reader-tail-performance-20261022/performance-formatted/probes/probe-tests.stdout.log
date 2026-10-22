@@ -1,0 +1,13 @@
+
+running 6 tests
+cleanup one-shot: success=false, bytes=0, grant_expiry=0, reader_pin_count=0
+test independent_one_shot_cleanup_expiry_must_withhold_returned_bytes ... ok
+cleanup EOF: success=false, eof=false, bytes=0, grant_expiry=0, reader_pin_count=0
+test independent_one_shot_post_pin_expiry_rolls_back_before_callback_or_delivery ... ok
+test independent_eof_cleanup_expiry_must_withhold_returned_chunk ... ok
+test independent_reader_lease_loss_and_held_file_hash_change_withhold_next_bytes ... ok
+test independent_reader_revision_advance_never_substitutes_latest_for_old_handle ... ok
+test independent_reader_revalidates_grant_after_successful_first_chunk ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 15 filtered out; finished in 0.07s
+

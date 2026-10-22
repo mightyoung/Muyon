@@ -1,0 +1,13 @@
+<?xml version='1.0' encoding='utf-8'?>
+<testsuite name="pure-tail-formatted/old-six-probes" tests="6" failures="0" errors="0" skipped="0">
+  <properties>
+    <property name="origin" value="derived actual libtest output; version/binary overlaps not added as coverage" />
+    <property name="raw_sha256" value="485accc736147724ec553ec1b5d3280ab610d630b22f9172b07f5d66a6f77bb3" />
+  </properties>
+  <testcase classname="Unchanged external Reader regressions" name="independent_one_shot_cleanup_expiry_must_withhold_returned_bytes" />
+  <testcase classname="Unchanged external Reader regressions" name="independent_eof_cleanup_expiry_must_withhold_returned_chunk" />
+  <testcase classname="Unchanged external Reader regressions" name="independent_one_shot_post_pin_expiry_rolls_back_before_callback_or_delivery" />
+  <testcase classname="Unchanged external Reader regressions" name="independent_reader_lease_loss_and_held_file_hash_change_withhold_next_bytes" />
+  <testcase classname="Unchanged external Reader regressions" name="independent_reader_revision_advance_never_substitutes_latest_for_old_handle" />
+  <testcase classname="Unchanged external Reader regressions" name="independent_reader_revalidates_grant_after_successful_first_chunk" />
+</testsuite>

@@ -1,0 +1,174 @@
+{
+  "at_utc": "2026-10-22T07:15:28.275637+00:00",
+  "old_30_RED_evidence_hashes_unchanged": true,
+  "new_style_sources_still_match_tested_hashes": true,
+  "results": [
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/workspace/Muyon-reader-tail-verification",
+        "rev-parse",
+        "HEAD"
+      ],
+      "exit_status": 0,
+      "stdout": "1785fd2d6e7a9d63b32341ad95b563d5c2b11365\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/workspace/Muyon-reader-tail-verification",
+        "status",
+        "--short"
+      ],
+      "exit_status": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/workspace/Muyon-reader-performance-verification",
+        "rev-parse",
+        "HEAD"
+      ],
+      "exit_status": 0,
+      "stdout": "97969f9ab6728e8022b3ff7b7a069a655e94c9d8\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/workspace/Muyon-reader-performance-verification",
+        "status",
+        "--short"
+      ],
+      "exit_status": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "git",
+        "diff-tree",
+        "--no-commit-id",
+        "--name-only",
+        "-r",
+        "1785fd2d6e7a9d63b32341ad95b563d5c2b11365"
+      ],
+      "exit_status": 0,
+      "stdout": "crates/muyon-core/src/blobs.rs\ncrates/muyon-core/src/documents/mod.rs\ncrates/muyon-core/src/documents/reader.rs\ncrates/muyon-core/src/documents/reader_tests.rs\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "git",
+        "diff-tree",
+        "--no-commit-id",
+        "--name-only",
+        "-r",
+        "97969f9ab6728e8022b3ff7b7a069a655e94c9d8"
+      ],
+      "exit_status": 0,
+      "stdout": "crates/muyon-core/src/blobs.rs\ncrates/muyon-core/src/documents/mod.rs\ncrates/muyon-core/src/documents/reader.rs\ncrates/muyon-core/src/documents/reader_tests.rs\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "git",
+        "diff",
+        "--exit-code",
+        "2e71384e808ecbe5bb010d05e87094e33e9cd3fd",
+        "8d7323aab51ff76616ee196b90a7d4ee83b45d97",
+        "--",
+        "crates"
+      ],
+      "exit_status": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "git",
+        "diff",
+        "--exit-code",
+        "4fae7905fd40a6a6234699c6f00a1c1555adab66",
+        "--",
+        "crates",
+        "experiments"
+      ],
+      "exit_status": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/workspace/Muyon-group",
+        "rev-parse",
+        "HEAD"
+      ],
+      "exit_status": 0,
+      "stdout": "7fde617bab8f45644820590529def5b2f2193454\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/workspace/Muyon-group",
+        "status",
+        "--short"
+      ],
+      "exit_status": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/workspace/Muyon-bot-provider-verification",
+        "rev-parse",
+        "HEAD"
+      ],
+      "exit_status": 0,
+      "stdout": "c4bc82b60f919eeedb7e466279efb783bc31a562\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/workspace/Muyon-bot-provider-verification",
+        "status",
+        "--short"
+      ],
+      "exit_status": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "git",
+        "ls-remote",
+        "origin",
+        "refs/heads/task/document-reader-tail-fix-20261022",
+        "refs/heads/task/document-reader-tail-format-20261022",
+        "refs/heads/task/document-reader-snapshot-format-20261022",
+        "refs/heads/task/document-core-contracts-20261022",
+        "refs/heads/task/document-core-verification-20261022",
+        "refs/heads/main",
+        "refs/heads/develop"
+      ],
+      "exit_status": 0,
+      "stdout": "0ab2c4f667681b9aacb017f8cd2eea6f576cf78e\trefs/heads/develop\ncc7c8d14d30e3d3c4c7c6cb2bf2059a99e46e003\trefs/heads/main\n8d7323aab51ff76616ee196b90a7d4ee83b45d97\trefs/heads/task/document-core-contracts-20261022\n4fae7905fd40a6a6234699c6f00a1c1555adab66\trefs/heads/task/document-core-verification-20261022\n97969f9ab6728e8022b3ff7b7a069a655e94c9d8\trefs/heads/task/document-reader-snapshot-format-20261022\nfec40dc8aeec350ef6d77005d4efb79fd186eb7a\trefs/heads/task/document-reader-tail-fix-20261022\n1785fd2d6e7a9d63b32341ad95b563d5c2b11365\trefs/heads/task/document-reader-tail-format-20261022\n",
+      "stderr": ""
+    }
+  ]
+}

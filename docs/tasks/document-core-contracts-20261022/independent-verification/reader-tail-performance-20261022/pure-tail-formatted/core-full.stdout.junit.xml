@@ -1,0 +1,277 @@
+<?xml version='1.0' encoding='utf-8'?>
+<testsuite name="pure-tail-formatted/core-full" tests="270" failures="0" errors="0" skipped="0">
+  <properties>
+    <property name="origin" value="derived actual libtest output; version/binary overlaps not added as coverage" />
+    <property name="raw_sha256" value="c29693264ecd98a3ac48149c1baff3fd17178161f97979ad3a47021816df7b16" />
+  </properties>
+  <testcase classname="unittests src/lib.rs" name="blobs::tests::file_and_upload_logical_length_quotas_precede_hashing_and_writing" />
+  <testcase classname="unittests src/lib.rs" name="blobs::tests::failed_ledger_after_solidification_keeps_staging_and_object_independent" />
+  <testcase classname="unittests src/lib.rs" name="blobs::tests::deleting_rejects_new_read_or_same_digest_upload" />
+  <testcase classname="unittests src/lib.rs" name="blobs::tests::kill_fixture" />
+  <testcase classname="unittests src/lib.rs" name="blobs::tests::corrupt_existing_object_and_dangling_symlink_are_never_replaced" />
+  <testcase classname="unittests src/lib.rs" name="blobs::tests::gc_and_publish_barrier_preserves_either_upload_pin_or_reference" />
+  <testcase classname="unittests src/lib.rs" name="blobs::tests::gc_and_reader_barrier_covers_reader_after_upload_pin_release" />
+  <testcase classname="unittests src/lib.rs" name="blobs::tests::publication_binds_expected_bytes_project_revision_and_real_transaction" />
+  <testcase classname="unittests src/lib.rs" name="blobs::tests::pinned_state_alone_does_not_replace_a_durable_upload_pin" />
+  <testcase classname="unittests src/lib.rs" name="blobs::tests::partial_publication_copy_is_not_reused_and_unknown_uploads_are_not_cleaned" />
+  <testcase classname="unittests src/lib.rs" name="blobs::tests::rename_then_failed_pin_commit_can_retry_existing_target_without_overwrite" />
+  <testcase classname="unittests src/lib.rs" name="blobs::tests::pending_unknown_never_expire_and_lookup_does_not_recover" />
+  <testcase classname="unittests src/lib.rs" name="blobs::tests::real_paper_effect_receipt_and_blob_reference_survive_or_roll_back_together" />
+  <testcase classname="unittests src/lib.rs" name="documents::candidate_tests::duplicate_preparation_is_query_only_and_conflicting_binding_is_rejected" />
+  <testcase classname="unittests src/lib.rs" name="documents::candidate_tests::expiry_after_durable_pin_is_unknown_and_never_source_success" />
+  <testcase classname="unittests src/lib.rs" name="documents::candidate_tests::late_seal_failure_leaves_unpublished_object_and_query_only_unknown" />
+  <testcase classname="unittests src/lib.rs" name="documents::candidate_tests::missing_pin_or_corrupt_object_is_query_only_unknown" />
+  <testcase classname="unittests src/lib.rs" name="documents::candidate_tests::new_bytes_are_private_sealed_unvalidated_and_never_publish" />
+  <testcase classname="unittests src/lib.rs" name="documents::candidate_tests::oversize_nonpayload_fields_fail_before_status_decode" />
+  <testcase classname="unittests src/lib.rs" name="documents::candidate_tests::partial_staging_restart_preserves_candidate_without_blocking_unrelated_gc" />
+  <testcase classname="unittests src/lib.rs" name="documents::candidate_tests::reservation_failure_has_no_upload_or_output_effect" />
+  <testcase classname="unittests src/lib.rs" name="documents::candidate_tests::restart_retains_prepared_pin_but_never_adopts_original_execution_authority" />
+  <testcase classname="unittests src/lib.rs" name="documents::candidate_tests::revocation_conflict_invalid_input_and_foreign_publication_fail_closed" />
+  <testcase classname="unittests src/lib.rs" name="documents::candidate_tests::source_head_advance_rejects_old_candidate_without_latest_substitution" />
+  <testcase classname="unittests src/lib.rs" name="documents::history_tests::advancing_parent_head_does_not_reuse_old_history_policy" />
+  <testcase classname="unittests src/lib.rs" name="documents::history_tests::canonical_history_corruption_and_missing_revision_are_not_substituted" />
+  <testcase classname="unittests src/lib.rs" name="documents::history_tests::historical_and_parent_revocation_expiry_generation_and_project_are_current" />
+  <testcase classname="unittests src/lib.rs" name="documents::history_tests::historical_identity_scope_schema_and_read_only_policy_fail_closed" />
+  <testcase classname="unittests src/lib.rs" name="documents::history_tests::history_denies_without_explicit_target_policy_and_then_reads_exact_snapshot" />
+  <testcase classname="unittests src/lib.rs" name="documents::history_tests::old_policy_is_not_inherited_by_a_new_parent_grant_generation" />
+  <testcase classname="unittests src/lib.rs" name="documents::history_tests::text_label_roundtrips_without_default_utf8_or_reader_capability" />
+  <testcase classname="unittests src/lib.rs" name="documents::history_tests::wrong_history_schema_is_rejected_without_changing_document_store" />
+  <testcase classname="unittests src/lib.rs" name="blobs::tests::real_sigkill_and_reopen_at_twelve_cross_media_windows" />
+  <testcase classname="unittests src/lib.rs" name="documents::reader_tests::bounded_sessions_idle_absolute_lifetime_and_invalid_chunk_release_pins" />
+  <testcase classname="unittests src/lib.rs" name="documents::reader_tests::corrupt_oversize_blob_length_is_rejected_without_creating_reader_pin" />
+  <testcase classname="unittests src/lib.rs" name="documents::reader_tests::cleanup_failure_withholds_bytes_and_poisoned_host_refuses_new_sessions" />
+  <testcase classname="unittests src/lib.rs" name="documents::reader_tests::dropping_host_releases_sessions_before_reopening_same_store" />
+  <testcase classname="unittests src/lib.rs" name="documents::reader_tests::deleted_pin_or_same_length_corruption_invalidates_session" />
+  <testcase classname="unittests src/lib.rs" name="documents::reader_tests::eof_cleanup_time_revocation_withholds_prepared_chunk" />
+  <testcase classname="unittests src/lib.rs" name="documents::candidate_tests::candidate_gc_crosses_page_boundary_preserving_exact_objects_and_project_quotas" />
+  <testcase classname="unittests src/lib.rs" name="documents::reader_tests::exact_metadata_and_sequential_bytes_close_at_eof" />
+  <testcase classname="unittests src/lib.rs" name="documents::reader_tests::inspect_grant_cannot_open_bytes_and_forged_scope_never_substitutes_source" />
+  <testcase classname="unittests src/lib.rs" name="documents::reader_tests::one_shot_cleanup_time_revocation_withholds_prepared_output" />
+  <testcase classname="unittests src/lib.rs" name="documents::reader_tests::one_shot_callback_failure_and_cleanup_failure_return_no_success_or_pin" />
+  <testcase classname="unittests src/lib.rs" name="documents::reader_tests::generation_epoch_expiry_and_project_deletion_revoke_existing_sessions" />
+  <testcase classname="unittests src/lib.rs" name="documents::reader_tests::open_failure_after_pin_creation_rolls_back_without_exposing_a_session" />
+  <testcase classname="unittests src/lib.rs" name="documents::reader_tests::open_commit_rejection_maps_to_unknown_and_cleans_original_pin" />
+  <testcase classname="unittests src/lib.rs" name="documents::reader_tests::one_shot_view_is_live_bounded_and_tail_rechecks_expiry_before_delivery" />
+  <testcase classname="unittests src/lib.rs" name="documents::storage_tests::clone_late_metadata_failure_and_revision_overflow_leave_original_intact" />
+  <testcase classname="unittests src/lib.rs" name="documents::storage_tests::clone_and_late_receipt_failure_roll_back_together" />
+  <testcase classname="unittests src/lib.rs" name="documents::reader_tests::revoked_or_advanced_session_never_delivers_cached_bytes" />
+  <testcase classname="unittests src/lib.rs" name="documents::storage_tests::clone_reference_requires_same_project_ready_source_and_unique_reference" />
+  <testcase classname="unittests src/lib.rs" name="documents::storage_tests::clone_rejects_changed_source_stale_base_and_foreign_transaction" />
+  <testcase classname="unittests src/lib.rs" name="documents::storage_tests::clone_verifies_real_source_file_hash_and_missing_file" />
+  <testcase classname="unittests src/lib.rs" name="documents::storage_tests::tail_grant_rechecks_revocation_expiry_generation_epoch_and_project" />
+  <testcase classname="unittests src/lib.rs" name="documents::storage_tests::copy_clone_commits_same_bytes_and_revision_without_upload_or_staging" />
+  <testcase classname="unittests src/lib.rs" name="documents::storage_tests::tail_grant_rejects_foreign_transaction_and_mismatched_document_binding" />
+  <testcase classname="unittests src/lib.rs" name="review_lifecycle::tests::committed_claims_are_preserved_and_partial_committed_schema_is_refused" />
+  <testcase classname="unittests src/lib.rs" name="review_lifecycle::tests::empty_file_from_interrupted_creation_initializes_without_replacement" />
+  <testcase classname="unittests src/lib.rs" name="documents::storage_tests::tail_grant_survives_own_cas_without_authorizing_old_revision_reads" />
+  <testcase classname="unittests src/lib.rs" name="review_lifecycle::tests::uncommitted_ddl_reopens_and_initializes_the_original_database" />
+  <testcase classname="unittests src/lib.rs" name="research::resource_tests::real_opaque_uploads_are_not_aggregated_when_sealing_or_importing" />
+  <testcase classname="unittests src/lib.rs" name="documents::candidate_tests::candidate_count_and_expected_byte_admission_limits_precede_file_writes" />
+  <testcase classname="unittests src/bin/business_worker.rs" name="blobs::tests::file_and_upload_logical_length_quotas_precede_hashing_and_writing" />
+  <testcase classname="unittests src/bin/business_worker.rs" name="blobs::tests::failed_ledger_after_solidification_keeps_staging_and_object_independent" />
+  <testcase classname="unittests src/bin/business_worker.rs" name="blobs::tests::deleting_rejects_new_read_or_same_digest_upload" />
+  <testcase classname="unittests src/bin/business_worker.rs" name="blobs::tests::kill_fixture" />
+  <testcase classname="unittests src/bin/business_worker.rs" name="blobs::tests::corrupt_existing_object_and_dangling_symlink_are_never_replaced" />
+  <testcase classname="unittests src/bin/business_worker.rs" name="blobs::tests::gc_and_publish_barrier_preserves_either_upload_pin_or_reference" />
+  <testcase classname="unittests src/bin/business_worker.rs" name="blobs::tests::gc_and_reader_barrier_covers_reader_after_upload_pin_release" />
+  <testcase classname="unittests src/bin/business_worker.rs" name="blobs::tests::pinned_state_alone_does_not_replace_a_durable_upload_pin" />
+  <testcase classname="unittests src/bin/business_worker.rs" name="blobs::tests::publication_binds_expected_bytes_project_revision_and_real_transaction" />
+  <testcase classname="unittests src/bin/business_worker.rs" name="blobs::tests::partial_publication_copy_is_not_reused_and_unknown_uploads_are_not_cleaned" />
+  <testcase classname="unittests src/bin/business_worker.rs" name="blobs::tests::rename_then_failed_pin_commit_can_retry_existing_target_without_overwrite" />
+  <testcase classname="unittests src/bin/business_worker.rs" name="blobs::tests::pending_unknown_never_expire_and_lookup_does_not_recover" />
+  <testcase classname="unittests src/bin/business_worker.rs" name="blobs::tests::real_paper_effect_receipt_and_blob_reference_survive_or_roll_back_together" />
+  <testcase classname="unittests src/bin/business_worker.rs" name="documents::candidate_tests::duplicate_preparation_is_query_only_and_conflicting_binding_is_rejected" />
+  <testcase classname="unittests src/bin/business_worker.rs" name="documents::candidate_tests::expiry_after_durable_pin_is_unknown_and_never_source_success" />
+  <testcase classname="unittests src/bin/business_worker.rs" name="documents::candidate_tests::late_seal_failure_leaves_unpublished_object_and_query_only_unknown" />
+  <testcase classname="unittests src/bin/business_worker.rs" name="documents::candidate_tests::missing_pin_or_corrupt_object_is_query_only_unknown" />
+  <testcase classname="unittests src/bin/business_worker.rs" name="documents::candidate_tests::new_bytes_are_private_sealed_unvalidated_and_never_publish" />
+  <testcase classname="unittests src/bin/business_worker.rs" name="documents::candidate_tests::oversize_nonpayload_fields_fail_before_status_decode" />
+  <testcase classname="unittests src/bin/business_worker.rs" name="documents::candidate_tests::partial_staging_restart_preserves_candidate_without_blocking_unrelated_gc" />
+  <testcase classname="unittests src/bin/business_worker.rs" name="documents::candidate_tests::reservation_failure_has_no_upload_or_output_effect" />
+  <testcase classname="unittests src/bin/business_worker.rs" name="documents::candidate_tests::restart_retains_prepared_pin_but_never_adopts_original_execution_authority" />
+  <testcase classname="unittests src/bin/business_worker.rs" name="documents::candidate_tests::revocation_conflict_invalid_input_and_foreign_publication_fail_closed" />
+  <testcase classname="unittests src/bin/business_worker.rs" name="documents::candidate_tests::source_head_advance_rejects_old_candidate_without_latest_substitution" />
+  <testcase classname="unittests src/bin/business_worker.rs" name="documents::history_tests::advancing_parent_head_does_not_reuse_old_history_policy" />
+  <testcase classname="unittests src/bin/business_worker.rs" name="documents::history_tests::canonical_history_corruption_and_missing_revision_are_not_substituted" />
+  <testcase classname="unittests src/bin/business_worker.rs" name="documents::history_tests::historical_and_parent_revocation_expiry_generation_and_project_are_current" />
+  <testcase classname="unittests src/bin/business_worker.rs" name="documents::history_tests::historical_identity_scope_schema_and_read_only_policy_fail_closed" />
+  <testcase classname="unittests src/bin/business_worker.rs" name="documents::history_tests::history_denies_without_explicit_target_policy_and_then_reads_exact_snapshot" />
+  <testcase classname="unittests src/bin/business_worker.rs" name="documents::history_tests::old_policy_is_not_inherited_by_a_new_parent_grant_generation" />
+  <testcase classname="unittests src/bin/business_worker.rs" name="documents::history_tests::text_label_roundtrips_without_default_utf8_or_reader_capability" />
+  <testcase classname="unittests src/bin/business_worker.rs" name="documents::history_tests::wrong_history_schema_is_rejected_without_changing_document_store" />
+  <testcase classname="unittests src/bin/business_worker.rs" name="blobs::tests::real_sigkill_and_reopen_at_twelve_cross_media_windows" />
+  <testcase classname="unittests src/bin/business_worker.rs" name="documents::reader_tests::bounded_sessions_idle_absolute_lifetime_and_invalid_chunk_release_pins" />
+  <testcase classname="unittests src/bin/business_worker.rs" name="documents::reader_tests::cleanup_failure_withholds_bytes_and_poisoned_host_refuses_new_sessions" />
+  <testcase classname="unittests src/bin/business_worker.rs" name="documents::reader_tests::corrupt_oversize_blob_length_is_rejected_without_creating_reader_pin" />
+  <testcase classname="unittests src/bin/business_worker.rs" name="documents::reader_tests::dropping_host_releases_sessions_before_reopening_same_store" />
+  <testcase classname="unittests src/bin/business_worker.rs" name="documents::reader_tests::deleted_pin_or_same_length_corruption_invalidates_session" />
+  <testcase classname="unittests src/bin/business_worker.rs" name="documents::candidate_tests::candidate_gc_crosses_page_boundary_preserving_exact_objects_and_project_quotas" />
+  <testcase classname="unittests src/bin/business_worker.rs" name="documents::reader_tests::eof_cleanup_time_revocation_withholds_prepared_chunk" />
+  <testcase classname="unittests src/bin/business_worker.rs" name="documents::reader_tests::inspect_grant_cannot_open_bytes_and_forged_scope_never_substitutes_source" />
+  <testcase classname="unittests src/bin/business_worker.rs" name="documents::reader_tests::exact_metadata_and_sequential_bytes_close_at_eof" />
+  <testcase classname="unittests src/bin/business_worker.rs" name="documents::reader_tests::one_shot_callback_failure_and_cleanup_failure_return_no_success_or_pin" />
+  <testcase classname="unittests src/bin/business_worker.rs" name="documents::reader_tests::one_shot_cleanup_time_revocation_withholds_prepared_output" />
+  <testcase classname="unittests src/bin/business_worker.rs" name="documents::reader_tests::open_commit_rejection_maps_to_unknown_and_cleans_original_pin" />
+  <testcase classname="unittests src/bin/business_worker.rs" name="documents::reader_tests::generation_epoch_expiry_and_project_deletion_revoke_existing_sessions" />
+  <testcase classname="unittests src/bin/business_worker.rs" name="documents::reader_tests::one_shot_view_is_live_bounded_and_tail_rechecks_expiry_before_delivery" />
+  <testcase classname="unittests src/bin/business_worker.rs" name="documents::storage_tests::clone_and_late_receipt_failure_roll_back_together" />
+  <testcase classname="unittests src/bin/business_worker.rs" name="documents::reader_tests::open_failure_after_pin_creation_rolls_back_without_exposing_a_session" />
+  <testcase classname="unittests src/bin/business_worker.rs" name="documents::storage_tests::clone_late_metadata_failure_and_revision_overflow_leave_original_intact" />
+  <testcase classname="unittests src/bin/business_worker.rs" name="documents::reader_tests::revoked_or_advanced_session_never_delivers_cached_bytes" />
+  <testcase classname="unittests src/bin/business_worker.rs" name="documents::storage_tests::clone_reference_requires_same_project_ready_source_and_unique_reference" />
+  <testcase classname="unittests src/bin/business_worker.rs" name="documents::storage_tests::clone_rejects_changed_source_stale_base_and_foreign_transaction" />
+  <testcase classname="unittests src/bin/business_worker.rs" name="documents::storage_tests::clone_verifies_real_source_file_hash_and_missing_file" />
+  <testcase classname="unittests src/bin/business_worker.rs" name="documents::storage_tests::copy_clone_commits_same_bytes_and_revision_without_upload_or_staging" />
+  <testcase classname="unittests src/bin/business_worker.rs" name="documents::storage_tests::tail_grant_rechecks_revocation_expiry_generation_epoch_and_project" />
+  <testcase classname="unittests src/bin/business_worker.rs" name="documents::storage_tests::tail_grant_rejects_foreign_transaction_and_mismatched_document_binding" />
+  <testcase classname="unittests src/bin/business_worker.rs" name="review_lifecycle::tests::committed_claims_are_preserved_and_partial_committed_schema_is_refused" />
+  <testcase classname="unittests src/bin/business_worker.rs" name="documents::storage_tests::tail_grant_survives_own_cas_without_authorizing_old_revision_reads" />
+  <testcase classname="unittests src/bin/business_worker.rs" name="review_lifecycle::tests::empty_file_from_interrupted_creation_initializes_without_replacement" />
+  <testcase classname="unittests src/bin/business_worker.rs" name="review_lifecycle::tests::uncommitted_ddl_reopens_and_initializes_the_original_database" />
+  <testcase classname="unittests src/bin/business_worker.rs" name="research::resource_tests::real_opaque_uploads_are_not_aggregated_when_sealing_or_importing" />
+  <testcase classname="unittests src/bin/business_worker.rs" name="documents::candidate_tests::candidate_count_and_expected_byte_admission_limits_precede_file_writes" />
+  <testcase classname="tests/agent_child_tools.rs" name="preprepared_plan_cannot_bypass_a_later_unknown_request" />
+  <testcase classname="tests/agent_child_tools.rs" name="child_tool_subset_is_priced_and_enforced_on_the_actual_model_response" />
+  <testcase classname="tests/agent_child_tools.rs" name="confirmation_preview_contains_the_exact_prior_history_and_wire_fields" />
+  <testcase classname="tests/agent_owner.rs" name="cancel_before_attempt_releases_only_held_identity_and_is_not_replayable" />
+  <testcase classname="tests/agent_owner.rs" name="cancelled_claim_with_empty_response_never_refunds_attempt_count_after_restart" />
+  <testcase classname="tests/agent_owner.rs" name="config_or_credential_changes_deny_dispatch_and_suppress_revoked_disclosure" />
+  <testcase classname="tests/agent_owner.rs" name="complete_chat_usage_settles_once_and_restores_bounded_conversation_history" />
+  <testcase classname="tests/agent_owner.rs" name="fresh_product_settings_and_blocked_chat_plan_do_not_inherit_canary_authority" />
+  <testcase classname="tests/agent_owner.rs" name="cumulative_budget_survives_reconfiguration_and_unknown_is_not_refunded" />
+  <testcase classname="tests/agent_owner.rs" name="fixed_transport_diagnostic_survives_reopen_without_settlement_or_raw_text" />
+  <testcase classname="tests/agent_owner.rs" name="malformed_or_over_bound_usage_keeps_unknown_hold_without_answer" />
+  <testcase classname="tests/agent_owner.rs" name="reserve_claim_exactly_once_and_unknown_never_resends_after_reopen" />
+  <testcase classname="tests/agent_owner.rs" name="validated_search_sources_and_empty_result_follow_existing_settlement_contract" />
+  <testcase classname="tests/agent_owner.rs" name="process_death_after_reservation_or_claim_keeps_original_hold_without_replay" />
+  <testcase classname="tests/agent_product.rs" name="missing_live_owners_are_explicitly_unavailable_without_synthetic_fallback" />
+  <testcase classname="tests/agent_product.rs" name="response_requires_full_terminal_answer_and_usage_not_http_success" />
+  <testcase classname="tests/agent_product.rs" name="tools_reject_writes_scope_injection_duplicate_keys_and_unbounded_pages" />
+  <testcase classname="tests/agent_product.rs" name="old_epoch_read_scope_cannot_be_reused_after_service_restart" />
+  <testcase classname="tests/agent_product.rs" name="suppliers_are_current_database_reads_and_deleted_records_are_not_context" />
+  <testcase classname="tests/agent_product.rs" name="newly_added_paper_is_read_from_selected_project_without_raw_json_or_blob_path" />
+  <testcase classname="tests/agent_tools.rs" name="cancellation_restart_and_unknown_never_resume_or_approve_tool_disclosure" />
+  <testcase classname="tests/agent_tools.rs" name="disclosure_is_not_inferred_from_budget_or_copied_to_new_scope_or_generation" />
+  <testcase classname="tests/agent_tools.rs" name="production_unbound_proof_never_auto_sends_approved_tool_followup" />
+  <testcase classname="tests/agent_tools.rs" name="read_call_requires_exact_visible_disclosure_then_new_followup_identity_and_budget" />
+  <testcase classname="tests/agent_tools.rs" name="malformed_function_calls_remain_unknown_and_have_no_business_effect" />
+  <testcase classname="tests/agent_tools.rs" name="cancelled_or_changed_suggestion_is_revalidated_before_any_business_commit" />
+  <testcase classname="tests/agent_tools.rs" name="suggestion_only_prepares_then_requires_original_committed_receipt_and_disclosure" />
+  <testcase classname="tests/agent_workflow.rs" name="disabled_skill_blocks_existing_queued_work_and_invalid_arguments_do_not_create_children" />
+  <testcase classname="tests/agent_workflow.rs" name="actual_owner_settlement_completes_remote_child_without_accepted_answer_shortcut" />
+  <testcase classname="tests/agent_workflow.rs" name="cancellation_after_settlement_preserves_answers_and_releases_active_child_slots" />
+  <testcase classname="tests/agent_workflow.rs" name="disabling_a_skill_permanently_revokes_its_prepared_remote_plan" />
+  <testcase classname="tests/agent_workflow.rs" name="local_child_reads_actual_supplier_and_emits_only_host_activity" />
+  <testcase classname="tests/agent_workflow.rs" name="paper_skill_reads_selected_project_and_skill_settings_do_not_leak_between_projects" />
+  <testcase classname="tests/agent_workflow.rs" name="prepared_child_and_normal_chat_are_rechecked_after_another_child_becomes_unknown" />
+  <testcase classname="tests/agent_workflow.rs" name="attempted_unknown_retains_owner_hold_and_late_cancelled_response_is_not_published" />
+  <testcase classname="tests/agent_workflow.rs" name="recovery_is_read_only_and_never_replays_and_owner_is_exclusive" />
+  <testcase classname="tests/agent_workflow.rs" name="remote_tool_allowlist_is_compiled_skill_metadata_and_not_instructions_in_task" />
+  <testcase classname="tests/agent_workflow.rs" name="scope_forgery_unknown_actions_and_fields_are_rejected" />
+  <testcase classname="tests/agent_workflow.rs" name="skill_toggle_digest_and_child_budgets_are_real" />
+  <testcase classname="tests/agent_workflow.rs" name="real_owner_followup_chain_tracks_leaf_unknown_and_cancels_every_known_request" />
+  <testcase classname="tests/agent_workflow.rs" name="real_owner_blocked_plan_binds_unique_child_and_cancellation_is_not_fake_completion" />
+  <testcase classname="tests/agent_workflow.rs" name="unproven_tool_followup_is_blocked_not_confirmable_and_polling_keeps_original_budget" />
+  <testcase classname="tests/agent_workflow.rs" name="large_real_local_results_keep_complete_storage_but_project_bounded_honest_previews" />
+  <testcase classname="tests/archive.rs" name="accepts_unsigned_descriptor" />
+  <testcase classname="tests/archive.rs" name="actual_archive409_encoder_round_trip_fixture" />
+  <testcase classname="tests/archive.rs" name="contract_entries_bind_exact_snapshot_digest_and_length" />
+  <testcase classname="tests/archive.rs" name="descriptor_and_decoded_content_are_independent_checks" />
+  <testcase classname="tests/archive.rs" name="overlap_guard" />
+  <testcase classname="tests/archive.rs" name="directories_validated_but_not_exposed" />
+  <testcase classname="tests/archive.rs" name="refuses_overlapping_ranges_and_unknown_extra_fields" />
+  <testcase classname="tests/archive.rs" name="rejects_offsets_local_conflicts_flags_zip64_and_quotas" />
+  <testcase classname="tests/archive.rs" name="rejects_path_aliases_links_and_special_files" />
+  <testcase classname="tests/archive.rs" name="symlink_guard" />
+  <testcase classname="tests/archive.rs" name="traversal_guard" />
+  <testcase classname="tests/archive.rs" name="stored_deflated_and_signed_descriptor_metadata" />
+  <testcase classname="tests/archive.rs" name="all_truncations_fail_without_panicking" />
+  <testcase classname="tests/blobs.rs" name="archive_upload_uses_actual_archive409_metadata_reader" />
+  <testcase classname="tests/blobs.rs" name="controlled_paths_refuse_symlinks_and_preserve_outside_files" />
+  <testcase classname="tests/blobs.rs" name="durable_upload_and_repeatable_lease_reads" />
+  <testcase classname="tests/blobs.rs" name="equal_content_reuses_verified_object_but_retains_independent_upload_pins" />
+  <testcase classname="tests/blobs.rs" name="persistent_reader_pin_outlives_upload_pin_until_explicit_close" />
+  <testcase classname="tests/blobs.rs" name="input_is_opaque_and_chunks_and_kinds_are_bounded" />
+  <testcase classname="tests/blobs.rs" name="lookup_is_read_only_and_restart_reconciliation_is_explicit" />
+  <testcase classname="tests/blobs.rs" name="private_snapshot_survives_source_removal_and_does_not_overwrite_corruption" />
+  <testcase classname="tests/business.rs" name="corrupt_receipt_tail_rolls_back_all_effects_and_never_reexecutes_pending" />
+  <testcase classname="tests/business.rs" name="cross_process_owner_lock_is_released_only_after_process_exit" />
+  <testcase classname="tests/business.rs" name="duplicate_binding_conflict_cas_and_same_name_new_intent" />
+  <testcase classname="tests/business.rs" name="current_schema_label_does_not_authorize_a_missing_required_table_or_column" />
+  <testcase classname="tests/business.rs" name="old_schema_v1_missing_tail_table_is_refused_without_changing_pending_identity" />
+  <testcase classname="tests/business.rs" name="grant_expiring_during_actual_sql_rejects_and_rolls_back_the_effect" />
+  <testcase classname="tests/business.rs" name="initialize_is_explicit_and_never_truncates_or_migrates" />
+  <testcase classname="tests/business.rs" name="project_create_and_reads_are_persistent_workspace_bound_operations" />
+  <testcase classname="tests/business.rs" name="sigkill_after_actual_sql_rolls_back_and_original_pending_cannot_redispatch" />
+  <testcase classname="tests/business.rs" name="real_grants_expiry_revoke_generation_scope_and_epoch_are_required" />
+  <testcase classname="tests/business.rs" name="sqlite_constraints_and_corrupt_files_have_fixed_typed_errors" />
+  <testcase classname="tests/business.rs" name="sigkill_after_commit_before_reply_recovers_exact_original_receipt" />
+  <testcase classname="tests/business.rs" name="supplier_full_payload_update_soft_delete_restore_and_original_receipt" />
+  <testcase classname="tests/business.rs" name="sqlite_revocation_transaction_barrier_precedes_business_admission" />
+  <testcase classname="tests/contract.rs" name="ct01_revisions_are_lossless_canonical_text" />
+  <testcase classname="tests/contract.rs" name="ct01_eight_fields_normalize_with_dart_rules" />
+  <testcase classname="tests/contract.rs" name="ct01_reuses_supplier_name_boundary_vectors" />
+  <testcase classname="tests/contract.rs" name="ct02_file_metadata_bounds_and_binding_are_checked" />
+  <testcase classname="tests/contract.rs" name="ct03_receipt_and_unknown_states_have_distinct_invariants" />
+  <testcase classname="tests/contract.rs" name="ct02_manual_paper_requires_project_title_and_blob" />
+  <testcase classname="tests/contract.rs" name="ct04_strict_decode_rejects_duplicates_unknown_and_versions" />
+  <testcase classname="tests/contract.rs" name="ct04_digest_order_and_fixture_round_trip" />
+  <testcase classname="tests/contract.rs" name="ct02_import_is_opaque_metadata_not_manual_paper" />
+  <testcase classname="tests/contract.rs" name="ct03_every_security_fact_changes_retry_binding" />
+  <testcase classname="tests/contract_vectors_additional.rs" name="ct01_ct04_shared_codec_vectors_use_real_contract_and_lossless_wire_text" />
+  <testcase classname="tests/document_storage.rs" name="delete_expiry_at_publication_tail_preserves_previous_annotation" />
+  <testcase classname="tests/document_storage.rs" name="annotation_cas_tombstones_and_ai_provenance_are_durable" />
+  <testcase classname="tests/document_storage.rs" name="expires_deleted_project_and_missing_permissions_fail_closed" />
+  <testcase classname="tests/document_storage.rs" name="corrupted_revision_keys_or_missing_snapshot_fail_closed" />
+  <testcase classname="tests/document_storage.rs" name="export_is_deterministic_sidecar_data_with_origin_and_tombstones" />
+  <testcase classname="tests/document_storage.rs" name="foreign_upload_and_bad_schema_are_rejected_without_partial_metadata" />
+  <testcase classname="tests/document_storage.rs" name="grant_scope_revision_epoch_generation_and_revoke_are_current" />
+  <testcase classname="tests/document_storage.rs" name="immutable_document_revisions_invalidate_access_and_preserve_old_anchors" />
+  <testcase classname="tests/document_storage.rs" name="invalid_or_cross_revision_anchors_do_not_leave_rows" />
+  <testcase classname="tests/document_storage.rs" name="late_metadata_failure_rolls_back_blob_publication_and_head" />
+  <testcase classname="tests/document_storage.rs" name="late_annotation_failure_rolls_back_history" />
+  <testcase classname="tests/document_storage.rs" name="oversized_persistent_payloads_are_rejected_before_decode" />
+  <testcase classname="tests/document_storage.rs" name="save_expiry_at_publication_tail_rolls_back_sidecar_and_history" />
+  <testcase classname="tests/document_storage.rs" name="synthetic_metadata_blob_and_annotation_survive_reopen" />
+  <testcase classname="tests/document_storage.rs" name="writes_cannot_strand_existing_annotations_above_read_budget" />
+  <testcase classname="tests/documents.rs" name="cached_metadata_never_bypasses_revocation_or_unknown_authority" />
+  <testcase classname="tests/documents.rs" name="anchors_are_bound_to_identity_revision_and_format" />
+  <testcase classname="tests/documents.rs" name="current_host_and_operation_capability_must_both_allow_read" />
+  <testcase classname="tests/documents.rs" name="capability_for_other_operation_or_format_grants_nothing" />
+  <testcase classname="tests/documents.rs" name="declared_format_never_enables_a_reader" />
+  <testcase classname="tests/documents.rs" name="invalid_document_metadata_is_rejected_and_revision_is_preserved" />
+  <testcase classname="tests/documents.rs" name="each_missing_pdf_geometry_field_remains_unresolved" />
+  <testcase classname="tests/documents.rs" name="host_errors_and_invalid_or_stale_lease_fail_closed" />
+  <testcase classname="tests/documents.rs" name="nonfinite_empty_overflowing_and_invalid_normalized_rectangles_fail" />
+  <testcase classname="tests/documents.rs" name="normalized_regions_preserve_explicit_rotation_and_reject_invalid_crop" />
+  <testcase classname="tests/documents.rs" name="old_revision_or_other_document_is_rejected" />
+  <testcase classname="tests/documents.rs" name="pdf_geometry_keeps_unknowns_without_guessing" />
+  <testcase classname="tests/documents.rs" name="read_contract_cannot_admit_edit_even_when_both_lists_allow_it" />
+  <testcase classname="tests/documents.rs" name="stale_grant_epoch_generation_and_id_are_rejected" />
+  <testcase classname="tests/documents.rs" name="unsupported_and_gated_capabilities_deny" />
+  <testcase classname="tests/documents.rs" name="visible_pdf_selection_must_fit_the_declared_crop" />
+  <testcase classname="tests/documents.rs" name="workspace_and_project_are_exact_not_wildcards" />
+  <testcase classname="tests/documents.rs" name="structured_anchors_validate_ids_ranges_and_package_parts" />
+  <testcase classname="tests/research.rs" name="committed_paper_after_process_kill_recovers_original_receipt_and_private_pdf" />
+  <testcase classname="tests/research.rs" name="directory_and_real_stored_zip_produce_equivalent_records_and_bad_decoded_crc_fails" />
+  <testcase classname="tests/research.rs" name="api26_eleven_record_deflated_import_with_three_identical_empty_logs_commits" />
+  <testcase classname="tests/research.rs" name="forged_wire_records_and_snapshot_project_changes_do_not_become_imports" />
+  <testcase classname="tests/research.rs" name="cited_same_revision_changes_reject_atomically_and_next_revision_is_retained" />
+  <testcase classname="tests/research.rs" name="explicit_ambiguous_binding_choice_survives_refresh" />
+  <testcase classname="tests/research.rs" name="import_domain_tail_tampering_rolls_back_records_source_and_publication" />
+  <testcase classname="tests/research.rs" name="imported_raw_json_duplicate_revisions_and_material_binding_are_preserved" />
+  <testcase classname="tests/research.rs" name="malformed_jsonl_paths_and_no_recognized_material_are_rejected_before_publication" />
+  <testcase classname="tests/research.rs" name="loose_imported_metadata_uses_fallback_title_and_does_not_apply_manual_constraints" />
+  <testcase classname="tests/research.rs" name="manual_kind_project_and_exact_upload_binding_cannot_be_forged" />
+  <testcase classname="tests/research.rs" name="receipt_fault_rolls_back_paper_publication_and_cancel_blocks_original_retry" />
+  <testcase classname="tests/research.rs" name="manual_pdf_is_real_private_persistent_and_shares_catalog_with_import" />
+  <testcase classname="tests/research.rs" name="prefixed_skill_root_arxiv_manifest_binds_verified_pdf_hash" />
+  <testcase classname="tests/research.rs" name="refresh_only_removes_missing_uncited_entries_and_keeps_cited_document_bytes" />
+  <testcase classname="tests/research.rs" name="jsonl_larger_than_wire_limit_uses_small_verified_source_ref_command" />
+  <testcase classname="tests/resource_boundaries_additional.rs" name="zip_metadata_exact_expansion_and_member_count_and_one_over" />
+  <testcase classname="tests/resource_boundaries_additional.rs" name="actual_pdf_and_document_exact_thirty_mib_and_one_extra_byte" />
+  <testcase classname="tests/resource_boundaries_additional.rs" name="seal_actual_total_exact_one_fifty_mib_then_one_byte_and_member_count_refuse_without_effects" />
+  <testcase classname="tests/store_admission_additional.rs" name="real_os_file_size_write_failure_has_no_business_or_receipt_effect" />
+  <testcase classname="tests/store_admission_additional.rs" name="sqlite_rejects_pending_domain_history_business_history_and_receipt_writes_atomically" />
+  <testcase classname="tests/store_admission_additional.rs" name="os_process_races_preserve_original_intent_and_reject_stale_cas_after_owner_exit" />
+</testsuite>

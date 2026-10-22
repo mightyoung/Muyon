@@ -1,0 +1,8 @@
+<?xml version='1.0' encoding='utf-8'?>
+<testsuite name="performance-formatted/snapshot-cost" tests="1" failures="0" errors="0" skipped="0">
+  <properties>
+    <property name="origin" value="derived actual libtest output; version/binary overlaps not added as coverage" />
+    <property name="raw_sha256" value="bf6b590975801207dc83f7754523d9a5f501d06bb9305b5703a14a286d0b1178" />
+  </properties>
+  <testcase classname="unittests src/lib.rs" name="documents::reader_tests::thirty_mib_stream_hash_cost_is_linear_and_chunk_bytes_are_exact" />
+</testsuite>
