@@ -1,0 +1,92 @@
+    Updating crates.io index
+ Downloading crates ...
+  Downloaded cpufeatures v0.3.1
+  Downloaded crypto-common v0.2.2
+  Downloaded quote v1.0.47
+  Downloaded block-buffer v0.12.1
+  Downloaded cfg-if v1.0.5
+  Downloaded hybrid-array v0.4.15
+  Downloaded memchr v2.8.3
+  Downloaded const-oid v0.10.2
+  Downloaded serde v1.0.229
+  Downloaded itoa v1.0.18
+  Downloaded proc-macro2 v1.0.107
+  Downloaded digest v0.11.3
+  Downloaded serde_derive v1.0.229
+  Downloaded sha2 v0.11.1
+  Downloaded serde_json v1.0.154
+  Downloaded tinyvec v1.13.3
+  Downloaded syn v3.0.9
+  Downloaded serde_core v1.0.229
+  Downloaded unicode-normalization v0.1.25
+  Downloaded typenum v1.20.1
+  Downloaded unicode-ident v1.0.27
+  Downloaded zmij v1.0.23
+   Compiling proc-macro2 v1.0.107
+   Compiling typenum v1.20.1
+   Compiling quote v1.0.47
+   Compiling unicode-ident v1.0.27
+   Compiling serde_core v1.0.229
+   Compiling zmij v1.0.23
+   Compiling muyon-core-agent-lab v0.1.0 (/tmp/muyon-bot-create-7yo590b3/repo/experiments/redesign/core-agent-lab/core)
+   Compiling hybrid-array v0.4.15
+warning: suspicious definition of the runtime `read` symbol used by the standard library
+   --> /tmp/muyon-bot-create-7yo590b3/repo/experiments/redesign/core-agent-lab/core/src/host_session.rs:132:124
+    |
+132 | ...ount: usize, timeout: i32) -> i32; fn read(fd: i32, buffer: *mut u8, count: usize) -> isize; fn write(fd: i32, buffer: *const u8...
+    |                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = note: expected `unsafe extern "C" fn(i32, *mut c_void, usize) -> isize` (for the current target)
+            found    `unsafe extern "C" fn(i32, *mut u8, usize) -> isize`
+    = help: either fix the signature or remove any attributes like `#[unsafe(no_mangle)]`, `#[unsafe(export_name = "read")]`, or `#[link_name = "read"]`
+    = help: allow this lint if the signature is compatible
+    = note: `#[warn(suspicious_runtime_symbol_definitions)]` on by default
+
+warning: suspicious definition of the runtime `write` symbol used by the standard library
+   --> /tmp/muyon-bot-create-7yo590b3/repo/experiments/redesign/core-agent-lab/core/src/host_session.rs:132:182
+    |
+132 | ... *mut u8, count: usize) -> isize; fn write(fd: i32, buffer: *const u8, count: usize) -> isize; }
+    |                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = note: expected `unsafe extern "C" fn(i32, *const c_void, usize) -> isize` (for the current target)
+            found    `unsafe extern "C" fn(i32, *const u8, usize) -> isize`
+    = help: either fix the signature or remove any attributes like `#[unsafe(no_mangle)]`, `#[unsafe(export_name = "write")]`, or `#[link_name = "write"]`
+    = help: allow this lint if the signature is compatible
+
+   Compiling syn v3.0.9
+   Compiling crypto-common v0.2.2
+warning: `muyon-core-agent-lab` (lib) generated 2 warnings
+   Compiling block-buffer v0.12.1
+   Compiling muyon-plugin-contract-lab v0.1.0 (/tmp/muyon-bot-create-7yo590b3/repo/experiments/redesign/plugin-contract-lab/core)
+   Compiling const-oid v0.10.2
+   Compiling serde_json v1.0.154
+   Compiling serde v1.0.229
+   Compiling digest v0.11.3
+   Compiling muyon-rust-agent-host-lab v0.1.0 (/tmp/muyon-bot-create-7yo590b3/repo/experiments/redesign/rust-agent-host-lab/core)
+   Compiling memchr v2.8.3
+   Compiling itoa v1.0.18
+   Compiling cpufeatures v0.3.1
+   Compiling tinyvec v1.13.3
+   Compiling cfg-if v1.0.5
+   Compiling sha2 v0.11.1
+   Compiling unicode-normalization v0.1.25
+   Compiling serde_derive v1.0.229
+   Compiling muyon-web-search-lab v0.1.0 (/tmp/muyon-bot-create-7yo590b3/repo/experiments/redesign/web-search-lab/core)
+   Compiling muyon-core v0.1.0 (/tmp/muyon-bot-create-7yo590b3/repo/crates/muyon-core)
+error[E0583]: file not found for module `bot_definitions`
+  --> muyon-core/src/lib.rs:12:1
+   |
+12 | pub mod bot_definitions;
+   | ^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = help: to create the module `bot_definitions`, create file "muyon-core/src/bot_definitions.rs" or "muyon-core/src/bot_definitions/mod.rs"
+   = note: if there is a `mod bot_definitions` elsewhere in the crate already, import it with `use crate::...` instead
+
+For more information about this error, try `rustc --explain E0583`.
+error: could not compile `muyon-core` (lib test) due to 1 previous error
+Traceback (most recent call last):
+  File "/workspace/bot-setup-draft/docs/tasks/bot-setup-draft-20261022/run-creation-checks.py", line 17, in <module>
+    subprocess.run(['/tmp/bot-cargo/bin/cargo','test','--manifest-path',str(target/'crates/Cargo.toml'),'-p','muyon-core','--lib','bot_definitions','--','--test-threads=1','--nocapture'],env=env,check=True)
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/subprocess.py", line 571, in run
+    raise CalledProcessError(retcode, process.args,
+subprocess.CalledProcessError: Command '['/tmp/bot-cargo/bin/cargo', 'test', '--manifest-path', '/tmp/muyon-bot-create-7yo590b3/repo/crates/Cargo.toml', '-p', 'muyon-core', '--lib', 'bot_definitions', '--', '--test-threads=1', '--nocapture']' returned non-zero exit status 101.
