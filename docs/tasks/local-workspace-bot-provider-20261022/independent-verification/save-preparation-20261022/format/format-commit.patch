@@ -1,0 +1,752 @@
+From 111e51178645bdcf147a8a24a0caf3a76755db39 Mon Sep 17 00:00:00 2001
+From: yi mu <wolfh1641713779@gmail.com>
+Date: Thu, 22 Oct 2026 06:26:40 +0000
+Subject: [PATCH] style(bot-provider): format durable save preparation and
+ native facade
+
+---
+ crates/muyon-android-ffi/src/lib.rs   | 105 +++++++--
+ crates/muyon-core/src/bot_drafts.rs   |  88 +++++---
+ crates/muyon-core/tests/bot_drafts.rs | 311 +++++++++++++++++++++++---
+ 3 files changed, 419 insertions(+), 85 deletions(-)
+
+diff --git a/crates/muyon-android-ffi/src/lib.rs b/crates/muyon-android-ffi/src/lib.rs
+index fd483bc5..12500593 100644
+--- a/crates/muyon-android-ffi/src/lib.rs
++++ b/crates/muyon-android-ffi/src/lib.rs
+@@ -194,16 +194,24 @@ impl ProductCore {
+             code: "local_draft_unavailable".into(),
+         })?;
+         let binding = muyon_core::bot_drafts::DraftBinding {
+-            namespace_id, draft_id, expected_generation, expected_stored_revision,
++            namespace_id,
++            draft_id,
++            expected_generation,
++            expected_stored_revision,
+         };
+         let value = muyon_core::bot_drafts::prepare_save(
+-            &state.store, &conversation, project.as_deref(), &binding, &attempt_id,
++            &state.store,
++            &conversation,
++            project.as_deref(),
++            &binding,
++            &attempt_id,
+             muyon_core::bot_drafts::SaveRevisions {
+                 exported_memory_revision: &exported_memory_revision,
+                 host_editor_revision: &host_editor_revision,
+             },
+             &archive,
+-        ).map_err(|code| ProductError::Failure { code: code.into() })?;
++        )
++        .map_err(|code| ProductError::Failure { code: code.into() })?;
+         encode(&value)
+     }
+ 
+@@ -1781,31 +1789,72 @@ mod local_draft_bridge_tests {
+     #[test]
+     fn prepared_attempt_is_discovered_and_fenced_after_native_restart() {
+         let root = std::env::temp_dir().join(format!(
+-            "muyon-local-prepared-ffi-{}-{}", std::process::id(),
++            "muyon-local-prepared-ffi-{}-{}",
++            std::process::id(),
+             NEXT.fetch_add(1, Ordering::Relaxed)
+         ));
+-        let core = ProductCore::open(root.to_str().unwrap().into(),
+-            "workspace".into(), "epoch".into(), true).unwrap();
++        let core = ProductCore::open(
++            root.to_str().unwrap().into(),
++            "workspace".into(),
++            "epoch".into(),
++            true,
++        )
++        .unwrap();
+         let desc = parse(core.local_draft_resolve(CONVERSATION.into(), None).unwrap());
+         let text = |key: &str| desc[key].as_str().unwrap().to_owned();
+         let hex = "4d59424400000001000000000000000100000000000000000000000000000000000000fbd7ab6104f8d45a51a4ae9335d359af13ab91abe8747df7952c7ef571c7cd2c";
+-        let archive: Vec<u8> = (0..hex.len()).step_by(2)
+-            .map(|i| u8::from_str_radix(&hex[i..i + 2], 16).unwrap()).collect();
+-        core.local_draft_prepare_save(CONVERSATION.into(), None,
+-            text("namespace_id"), text("draft_id"), text("registry_generation"),
+-            "0".into(), ATTEMPT.into(), "17".into(), "42".into(), archive.clone()).unwrap();
++        let archive: Vec<u8> = (0..hex.len())
++            .step_by(2)
++            .map(|i| u8::from_str_radix(&hex[i..i + 2], 16).unwrap())
++            .collect();
++        core.local_draft_prepare_save(
++            CONVERSATION.into(),
++            None,
++            text("namespace_id"),
++            text("draft_id"),
++            text("registry_generation"),
++            "0".into(),
++            ATTEMPT.into(),
++            "17".into(),
++            "42".into(),
++            archive.clone(),
++        )
++        .unwrap();
+         drop(core);
+-        let core = ProductCore::open(root.to_str().unwrap().into(),
+-            "workspace".into(), "next-epoch".into(), false).unwrap();
++        let core = ProductCore::open(
++            root.to_str().unwrap().into(),
++            "workspace".into(),
++            "next-epoch".into(),
++            false,
++        )
++        .unwrap();
+         let recovered = parse(core.local_draft_resolve(CONVERSATION.into(), None).unwrap());
+         assert_eq!(recovered["save_attempt"]["attempt_id"], ATTEMPT);
+         assert_eq!(recovered["save_attempt"]["host_editor_revision"], "42");
+-        let result = parse(core.local_draft_lookup_save(CONVERSATION.into(), None,
+-            text("namespace_id"), text("draft_id"), ATTEMPT.into()).unwrap());
++        let result = parse(
++            core.local_draft_lookup_save(
++                CONVERSATION.into(),
++                None,
++                text("namespace_id"),
++                text("draft_id"),
++                ATTEMPT.into(),
++            )
++            .unwrap(),
++        );
+         assert_eq!(result["status"], "not_committed_local_storage");
+-        let error = core.local_draft_save(CONVERSATION.into(), None,
+-            text("namespace_id"), text("draft_id"), text("registry_generation"),
+-            "0".into(), ATTEMPT.into(), "17".into(), archive).unwrap_err();
++        let error = core
++            .local_draft_save(
++                CONVERSATION.into(),
++                None,
++                text("namespace_id"),
++                text("draft_id"),
++                text("registry_generation"),
++                "0".into(),
++                ATTEMPT.into(),
++                "17".into(),
++                archive,
++            )
++            .unwrap_err();
+         assert_eq!(error.to_string(), "local_draft_terminal");
+         let unchanged = parse(core.local_draft_resolve(CONVERSATION.into(), None).unwrap());
+         assert_eq!(unchanged["stored_revision"], "0");
+@@ -1849,11 +1898,21 @@ mod local_draft_bridge_tests {
+             .step_by(2)
+             .map(|i| u8::from_str_radix(&archive_hex[i..i + 2], 16).unwrap())
+             .collect();
+-        let prepared = parse(core.local_draft_prepare_save(
+-            CONVERSATION.into(), None, text("namespace_id"), text("draft_id"),
+-            text("registry_generation"), "0".into(), ATTEMPT.into(), "17".into(),
+-            "42".into(), archive.clone(),
+-        ).unwrap());
++        let prepared = parse(
++            core.local_draft_prepare_save(
++                CONVERSATION.into(),
++                None,
++                text("namespace_id"),
++                text("draft_id"),
++                text("registry_generation"),
++                "0".into(),
++                ATTEMPT.into(),
++                "17".into(),
++                "42".into(),
++                archive.clone(),
++            )
++            .unwrap(),
++        );
+         assert_eq!(prepared["state"], "prepared");
+         assert_eq!(prepared["host_editor_revision"], "42");
+         let receipt = parse(
+diff --git a/crates/muyon-core/src/bot_drafts.rs b/crates/muyon-core/src/bot_drafts.rs
+index 2fdc3de4..0ac37802 100644
+--- a/crates/muyon-core/src/bot_drafts.rs
++++ b/crates/muyon-core/src/bot_drafts.rs
+@@ -303,8 +303,8 @@ fn bound(rec: &Record, b: &DraftBinding, version: bool) -> Result<()> {
+ }
+ fn descriptor(store: &BusinessStore, r: &Record) -> Result<Value> {
+     let mut out = json!({"schema":1,"owner_kind":"local_workspace","namespace_id":r.namespace,"workspace_id":store.workspace_id(),"conversation_id":r.conversation,"project_id":r.project,"draft_id":r.draft,"registry_generation":r.generation,"stored_revision":r.revision,"lifecycle":"editing_only","archive_present":r.archive.is_some()});
+-    out["save_attempt"] = serde_json::to_value(journal_pointer(store, r)?)
+-        .map_err(|_| "local_draft_unavailable")?;
++    out["save_attempt"] =
++        serde_json::to_value(journal_pointer(store, r)?).map_err(|_| "local_draft_unavailable")?;
+     Ok(out)
+ }
+ fn scalar(store: &BusinessStore, query: &str) -> Result<usize> {
+@@ -400,9 +400,11 @@ fn original(
+     }
+     let preparation = journal_attempt(store, key, r, attempt)?;
+     if let Some(p) = &preparation {
+-        if p.state != "committed" || p.expected_stored_revision != cell(row, 4)?
++        if p.state != "committed"
++            || p.expected_stored_revision != cell(row, 4)?
+             || p.next_stored_revision != cell(row, 5)?
+-            || p.exported_memory_revision != cell(row, 6)? || p.archive_digest != h
++            || p.exported_memory_revision != cell(row, 6)?
++            || p.archive_digest != h
+         {
+             return Err("local_draft_corrupt");
+         }
+@@ -468,8 +470,8 @@ pub fn save(
+         return serde_json::to_value(receipt).map_err(|_| "local_draft_unavailable");
+     }
+     bound(&r, b, true)?;
+-    let preparation = journal_attempt(store, &key, &r, attempt)?
+-        .ok_or("local_draft_not_prepared")?;
++    let preparation =
++        journal_attempt(store, &key, &r, attempt)?.ok_or("local_draft_not_prepared")?;
+     if preparation.state != "prepared" {
+         return Err("local_draft_terminal");
+     }
+@@ -563,8 +565,7 @@ pub fn lookup_save(
+         sql(tx.commit())?;
+         return serde_json::to_value(receipt).map_err(|_| "local_draft_unavailable");
+     }
+-    let p = journal_attempt(store, &key, &r, attempt)?
+-        .ok_or("local_draft_attempt_not_found")?;
++    let p = journal_attempt(store, &key, &r, attempt)?.ok_or("local_draft_attempt_not_found")?;
+     let terminal = if p.state == "prepared" {
+         if journal_pointer(store, &r)?.as_ref() != Some(&p) {
+             return Err("local_draft_corrupt");
+@@ -660,16 +661,24 @@ fn journal_attempt(
+     if cell(row, 0)? != r.draft || cell(row, 1)? != key {
+         return Err("local_draft_attempt_conflict");
+     }
+-    let p: SavePreparation = serde_json::from_str(cell(row, 3)?)
+-        .map_err(|_| "local_draft_corrupt")?;
+-    if p.schema != 1 || p.owner_kind != "local_workspace"
+-        || p.namespace_id != r.namespace || p.workspace_id != store.workspace_id()
+-        || p.conversation_id != r.conversation || p.project_id != r.project
+-        || p.draft_id != r.draft || p.registry_generation != r.generation
+-        || p.attempt_id != attempt || p.state != cell(row, 2)?
++    let p: SavePreparation =
++        serde_json::from_str(cell(row, 3)?).map_err(|_| "local_draft_corrupt")?;
++    if p.schema != 1
++        || p.owner_kind != "local_workspace"
++        || p.namespace_id != r.namespace
++        || p.workspace_id != store.workspace_id()
++        || p.conversation_id != r.conversation
++        || p.project_id != r.project
++        || p.draft_id != r.draft
++        || p.registry_generation != r.generation
++        || p.attempt_id != attempt
++        || p.state != cell(row, 2)?
+         || !["prepared", "committed", "not_committed"].contains(&p.state.as_str())
+         || p.archive_digest.len() != 64
+-        || !p.archive_digest.bytes().all(|b| b.is_ascii_digit() || (b'a'..=b'f').contains(&b))
++        || !p
++            .archive_digest
++            .bytes()
++            .all(|b| b.is_ascii_digit() || (b'a'..=b'f').contains(&b))
+     {
+         return Err("local_draft_corrupt");
+     }
+@@ -712,10 +721,12 @@ fn journal_pointer(store: &BusinessStore, r: &Record) -> Result<Option<SavePrepa
+     uuid(attempt).map_err(|_| "local_draft_corrupt")?;
+     let key = scope_key(store, r)?;
+     let p = journal_attempt(store, &key, r, attempt)
+-        .map_err(|error| if error == "local_draft_attempt_conflict" {
+-            "local_draft_corrupt"
+-        } else {
+-            error
++        .map_err(|error| {
++            if error == "local_draft_attempt_conflict" {
++                "local_draft_corrupt"
++            } else {
++                error
++            }
+         })?
+         .ok_or("local_draft_corrupt")?;
+     let receipt = original(store, &key, r, attempt)?;
+@@ -757,12 +768,16 @@ pub fn prepare_save(
+     revisions: SaveRevisions<'_>,
+     archive: &[u8],
+ ) -> Result<Value> {
+-    let SaveRevisions { exported_memory_revision, host_editor_revision } = revisions;
++    let SaveRevisions {
++        exported_memory_revision,
++        host_editor_revision,
++    } = revisions;
+     uuid(attempt)?;
+     number(exported_memory_revision)?;
+     number(host_editor_revision)?;
+     let next = number(&b.expected_stored_revision)?
+-        .checked_add(1).ok_or("local_draft_version")?;
++        .checked_add(1)
++        .ok_or("local_draft_version")?;
+     let h = archive_check(archive, next)?;
+     let tx = sql(store.database().transaction())?;
+     let key = scope(store, conversation, project)?;
+@@ -772,15 +787,24 @@ pub fn prepare_save(
+     journal_schema(store, true)?;
+     let existing = journal_attempt(store, &key, &r, attempt)?;
+     let p = SavePreparation {
+-        schema: 1, owner_kind: "local_workspace".into(), namespace_id: ns,
+-        workspace_id: store.workspace_id().into(), conversation_id: r.conversation.clone(),
+-        project_id: r.project.clone(), draft_id: r.draft.clone(),
+-        registry_generation: r.generation.clone(), attempt_id: attempt.into(),
++        schema: 1,
++        owner_kind: "local_workspace".into(),
++        namespace_id: ns,
++        workspace_id: store.workspace_id().into(),
++        conversation_id: r.conversation.clone(),
++        project_id: r.project.clone(),
++        draft_id: r.draft.clone(),
++        registry_generation: r.generation.clone(),
++        attempt_id: attempt.into(),
+         expected_stored_revision: b.expected_stored_revision.clone(),
+         next_stored_revision: next.to_string(),
+         exported_memory_revision: exported_memory_revision.into(),
+-        host_editor_revision: host_editor_revision.into(), archive_digest: h,
+-        state: existing.as_ref().map_or("prepared", |old| old.state.as_str()).into(),
++        host_editor_revision: host_editor_revision.into(),
++        archive_digest: h,
++        state: existing
++            .as_ref()
++            .map_or("prepared", |old| old.state.as_str())
++            .into(),
+     };
+     if let Some(old) = existing {
+         if old != p {
+@@ -803,8 +827,12 @@ pub fn prepare_save(
+     }
+     if scalar(store, "SELECT COUNT(*) FROM local_bot_save_attempts_v1")? >= MAX_RECEIPTS
+         || scalar(store, "SELECT COUNT(*) FROM local_bot_draft_saves")?
+-            .checked_add(scalar(store, "SELECT COUNT(*) FROM local_bot_save_attempts_v1 WHERE state='prepared'")?)
+-            .ok_or("local_draft_corrupt")? >= MAX_RECEIPTS
++            .checked_add(scalar(
++                store,
++                "SELECT COUNT(*) FROM local_bot_save_attempts_v1 WHERE state='prepared'",
++            )?)
++            .ok_or("local_draft_corrupt")?
++            >= MAX_RECEIPTS
+     {
+         return Err("local_draft_capacity");
+     }
+diff --git a/crates/muyon-core/tests/bot_drafts.rs b/crates/muyon-core/tests/bot_drafts.rs
+index 89c9aee9..a355c86c 100644
+--- a/crates/muyon-core/tests/bot_drafts.rs
++++ b/crates/muyon-core/tests/bot_drafts.rs
+@@ -70,9 +70,27 @@ fn save(
+     memory: &str,
+     archive: &[u8],
+ ) -> Result<Value, &'static str> {
+-    prepare_save(store, conversation, project, binding, attempt,
+-        SaveRevisions { exported_memory_revision: memory, host_editor_revision: memory }, archive)?;
+-    muyon_core::bot_drafts::save(store, conversation, project, binding, attempt, memory, archive)
++    prepare_save(
++        store,
++        conversation,
++        project,
++        binding,
++        attempt,
++        SaveRevisions {
++            exported_memory_revision: memory,
++            host_editor_revision: memory,
++        },
++        archive,
++    )?;
++    muyon_core::bot_drafts::save(
++        store,
++        conversation,
++        project,
++        binding,
++        attempt,
++        memory,
++        archive,
++    )
+ }
+ 
+ #[test]
+@@ -570,7 +588,19 @@ fn preparation_is_durable_discoverable_and_never_replays_after_restart() {
+         muyon_core::bot_drafts::save(&s, C, None, &b, A, "17", &archive(1)).unwrap_err(),
+         "local_draft_not_prepared"
+     );
+-    let prepared = prepare_save(&s, C, None, &b, A, SaveRevisions { exported_memory_revision: "17", host_editor_revision: "42" }, &archive(1)).unwrap();
++    let prepared = prepare_save(
++        &s,
++        C,
++        None,
++        &b,
++        A,
++        SaveRevisions {
++            exported_memory_revision: "17",
++            host_editor_revision: "42",
++        },
++        &archive(1),
++    )
++    .unwrap();
+     assert_eq!(prepared["state"], "prepared");
+     assert_eq!(prepared["host_editor_revision"], "42");
+     assert_eq!(prepared["next_stored_revision"], "1");
+@@ -579,7 +609,19 @@ fn preparation_is_durable_discoverable_and_never_replays_after_restart() {
+     assert_eq!(resolve(&s, C, None).unwrap()["save_attempt"], prepared);
+     assert_eq!(read(&s, C, None, &b).unwrap()["status"], "not_saved");
+     assert_eq!(
+-        prepare_save(&s, C, None, &b, B, SaveRevisions { exported_memory_revision: "18", host_editor_revision: "43" }, &archive(1)).unwrap_err(),
++        prepare_save(
++            &s,
++            C,
++            None,
++            &b,
++            B,
++            SaveRevisions {
++                exported_memory_revision: "18",
++                host_editor_revision: "43"
++            },
++            &archive(1)
++        )
++        .unwrap_err(),
+         "local_draft_pending"
+     );
+     let terminal = lookup_save(&s, C, None, &b.namespace_id, &b.draft_id, A).unwrap();
+@@ -591,8 +633,23 @@ fn preparation_is_durable_discoverable_and_never_replays_after_restart() {
+         muyon_core::bot_drafts::save(&s, C, None, &b, A, "17", &archive(1)).unwrap_err(),
+         "local_draft_terminal"
+     );
+-    assert_eq!(lookup_save(&s, C, None, &b.namespace_id, &b.draft_id, A).unwrap(), terminal);
+-    prepare_save(&s, C, None, &b, B, SaveRevisions { exported_memory_revision: "18", host_editor_revision: "43" }, &archive(1)).unwrap();
++    assert_eq!(
++        lookup_save(&s, C, None, &b.namespace_id, &b.draft_id, A).unwrap(),
++        terminal
++    );
++    prepare_save(
++        &s,
++        C,
++        None,
++        &b,
++        B,
++        SaveRevisions {
++            exported_memory_revision: "18",
++            host_editor_revision: "43",
++        },
++        &archive(1),
++    )
++    .unwrap();
+     assert_eq!(resolve(&s, C, None).unwrap()["stored_revision"], "0");
+ }
+ 
+@@ -601,17 +658,68 @@ fn exact_preparation_binding_idempotency_and_committed_editor_survive_callback_l
+     let f = Fixture::new();
+     let s = f.open();
+     let b = binding(&resolve(&s, C, None).unwrap());
+-    let first = prepare_save(&s, C, None, &b, A, SaveRevisions { exported_memory_revision: "17", host_editor_revision: "42" }, &archive(1)).unwrap();
+-    assert_eq!(prepare_save(&s, C, None, &b, A, SaveRevisions { exported_memory_revision: "17", host_editor_revision: "42" }, &archive(1)).unwrap(), first);
++    let first = prepare_save(
++        &s,
++        C,
++        None,
++        &b,
++        A,
++        SaveRevisions {
++            exported_memory_revision: "17",
++            host_editor_revision: "42",
++        },
++        &archive(1),
++    )
++    .unwrap();
++    assert_eq!(
++        prepare_save(
++            &s,
++            C,
++            None,
++            &b,
++            A,
++            SaveRevisions {
++                exported_memory_revision: "17",
++                host_editor_revision: "42"
++            },
++            &archive(1)
++        )
++        .unwrap(),
++        first
++    );
+     assert_eq!(
+-        prepare_save(&s, C, None, &b, A, SaveRevisions { exported_memory_revision: "17", host_editor_revision: "43" }, &archive(1)).unwrap_err(),
++        prepare_save(
++            &s,
++            C,
++            None,
++            &b,
++            A,
++            SaveRevisions {
++                exported_memory_revision: "17",
++                host_editor_revision: "43"
++            },
++            &archive(1)
++        )
++        .unwrap_err(),
+         "local_draft_attempt_conflict"
+     );
+     assert_eq!(
+         muyon_core::bot_drafts::save(&s, C, None, &b, A, "18", &archive(1)).unwrap_err(),
+         "local_draft_attempt_conflict"
+     );
+-    assert!(prepare_save(&s, B, None, &b, A, SaveRevisions { exported_memory_revision: "17", host_editor_revision: "42" }, &archive(1)).is_err());
++    assert!(prepare_save(
++        &s,
++        B,
++        None,
++        &b,
++        A,
++        SaveRevisions {
++            exported_memory_revision: "17",
++            host_editor_revision: "42"
++        },
++        &archive(1)
++    )
++    .is_err());
+     let receipt = muyon_core::bot_drafts::save(&s, C, None, &b, A, "17", &archive(1)).unwrap();
+     assert_eq!(receipt["host_editor_revision"], "42");
+     drop(s);
+@@ -619,11 +727,29 @@ fn exact_preparation_binding_idempotency_and_committed_editor_survive_callback_l
+     let current = resolve(&s, C, None).unwrap();
+     assert_eq!(current["save_attempt"]["state"], "committed");
+     assert_eq!(current["save_attempt"]["attempt_id"], A);
+-    assert_eq!(lookup_save(&s, C, None, &b.namespace_id, &b.draft_id, A).unwrap(), receipt);
++    assert_eq!(
++        lookup_save(&s, C, None, &b.namespace_id, &b.draft_id, A).unwrap(),
++        receipt
++    );
+     let next = binding(&current);
+-    prepare_save(&s, C, None, &next, B, SaveRevisions { exported_memory_revision: "18", host_editor_revision: "43" }, &archive(2)).unwrap();
++    prepare_save(
++        &s,
++        C,
++        None,
++        &next,
++        B,
++        SaveRevisions {
++            exported_memory_revision: "18",
++            host_editor_revision: "43",
++        },
++        &archive(2),
++    )
++    .unwrap();
+     muyon_core::bot_drafts::save(&s, C, None, &next, B, "18", &archive(2)).unwrap();
+-    assert_eq!(lookup_save(&s, C, None, &b.namespace_id, &b.draft_id, A).unwrap(), receipt);
++    assert_eq!(
++        lookup_save(&s, C, None, &b.namespace_id, &b.draft_id, A).unwrap(),
++        receipt
++    );
+     assert!(receipt.get("saved").is_none());
+ }
+ 
+@@ -632,7 +758,19 @@ fn failed_commit_keeps_original_pointer_and_lookup_fences_queued_dispatch() {
+     let f = Fixture::new();
+     let s = f.open();
+     let b = binding(&resolve(&s, C, None).unwrap());
+-    prepare_save(&s, C, None, &b, A, SaveRevisions { exported_memory_revision: "17", host_editor_revision: "42" }, &archive(1)).unwrap();
++    prepare_save(
++        &s,
++        C,
++        None,
++        &b,
++        A,
++        SaveRevisions {
++            exported_memory_revision: "17",
++            host_editor_revision: "42",
++        },
++        &archive(1),
++    )
++    .unwrap();
+     f.db().exec("CREATE TRIGGER journal_receipt_fail BEFORE INSERT ON local_bot_draft_saves BEGIN SELECT RAISE(ABORT,'synthetic'); END", &[]).unwrap();
+     assert!(muyon_core::bot_drafts::save(&s, C, None, &b, A, "17", &archive(1)).is_err());
+     drop(s);
+@@ -642,7 +780,9 @@ fn failed_commit_keeps_original_pointer_and_lookup_fences_queued_dispatch() {
+     assert_eq!(discovered["save_attempt"]["state"], "prepared");
+     assert_eq!(discovered["save_attempt"]["attempt_id"], A);
+     lookup_save(&s, C, None, &b.namespace_id, &b.draft_id, A).unwrap();
+-    f.db().exec("DROP TRIGGER journal_receipt_fail", &[]).unwrap();
++    f.db()
++        .exec("DROP TRIGGER journal_receipt_fail", &[])
++        .unwrap();
+     assert_eq!(
+         muyon_core::bot_drafts::save(&s, C, None, &b, A, "17", &archive(1)).unwrap_err(),
+         "local_draft_terminal"
+@@ -654,11 +794,25 @@ fn preparation_scope_schema_and_foreign_pointer_fail_closed() {
+     let f = Fixture::new();
+     let s = f.open();
+     let b = binding(&resolve(&s, C, None).unwrap());
+-    prepare_save(&s, C, None, &b, A, SaveRevisions { exported_memory_revision: "17", host_editor_revision: "42" }, &archive(1)).unwrap();
++    prepare_save(
++        &s,
++        C,
++        None,
++        &b,
++        A,
++        SaveRevisions {
++            exported_memory_revision: "17",
++            host_editor_revision: "42",
++        },
++        &archive(1),
++    )
++    .unwrap();
+     assert!(lookup_save(&s, B, None, &b.namespace_id, &b.draft_id, A).is_err());
+     f.db().exec("UPDATE local_bot_save_pointer_v1 SET attempt_id='32345678-1234-4234-8234-123456789abc'", &[]).unwrap();
+     assert_eq!(resolve(&s, C, None).unwrap_err(), "local_draft_corrupt");
+-    f.db().exec("DROP TABLE local_bot_save_pointer_v1", &[]).unwrap();
++    f.db()
++        .exec("DROP TABLE local_bot_save_pointer_v1", &[])
++        .unwrap();
+     assert_eq!(resolve(&s, C, None).unwrap_err(), "local_draft_schema");
+ }
+ 
+@@ -670,7 +824,10 @@ fn legacy_receipt_without_journal_or_editor_remains_queryable_after_upgrade() {
+     let b = binding(&d);
+     let bytes = archive(1);
+     let hex: String = bytes.iter().map(|v| format!("{v:02x}")).collect();
+-    let digest: String = Sha256::digest(&bytes).iter().map(|v| format!("{v:02x}")).collect();
++    let digest: String = Sha256::digest(&bytes)
++        .iter()
++        .map(|v| format!("{v:02x}"))
++        .collect();
+     let key = serde_json::to_string(&("workspace", C, Option::<&str>::None)).unwrap();
+     let legacy = serde_json::json!({
+         "schema":1,"owner_kind":"local_workspace","namespace_id":b.namespace_id,
+@@ -680,14 +837,53 @@ fn legacy_receipt_without_journal_or_editor_remains_queryable_after_upgrade() {
+         "attempt_id":A,"exported_memory_revision":"17","archive_digest":digest,
+         "status":"committed_local_storage"
+     });
+-    f.db().exec("UPDATE local_bot_drafts SET stored_revision='1',archive_hex=?,archive_digest=?", &[&hex, &digest]).unwrap();
+-    f.db().exec("INSERT INTO local_bot_draft_saves VALUES(?,?,?,?,?,'0','1','17',?,?)", &[A,&b.namespace_id,&b.draft_id,&key,"1",&digest,&legacy.to_string()]).unwrap();
+-    assert_eq!(lookup_save(&s, C, None, &b.namespace_id, &b.draft_id, A).unwrap(), legacy);
++    f.db()
++        .exec(
++            "UPDATE local_bot_drafts SET stored_revision='1',archive_hex=?,archive_digest=?",
++            &[&hex, &digest],
++        )
++        .unwrap();
++    f.db()
++        .exec(
++            "INSERT INTO local_bot_draft_saves VALUES(?,?,?,?,?,'0','1','17',?,?)",
++            &[
++                A,
++                &b.namespace_id,
++                &b.draft_id,
++                &key,
++                "1",
++                &digest,
++                &legacy.to_string(),
++            ],
++        )
++        .unwrap();
++    assert_eq!(
++        lookup_save(&s, C, None, &b.namespace_id, &b.draft_id, A).unwrap(),
++        legacy
++    );
+     assert!(resolve(&s, C, None).unwrap()["save_attempt"].is_null());
+-    assert_eq!(muyon_core::bot_drafts::save(&s, C, None, &b, A, "17", &bytes).unwrap(), legacy);
++    assert_eq!(
++        muyon_core::bot_drafts::save(&s, C, None, &b, A, "17", &bytes).unwrap(),
++        legacy
++    );
+     let next = binding(&resolve(&s, C, None).unwrap());
+-    prepare_save(&s, C, None, &next, B, SaveRevisions { exported_memory_revision: "18", host_editor_revision: "43" }, &archive(2)).unwrap();
+-    assert_eq!(lookup_save(&s, C, None, &b.namespace_id, &b.draft_id, A).unwrap(), legacy);
++    prepare_save(
++        &s,
++        C,
++        None,
++        &next,
++        B,
++        SaveRevisions {
++            exported_memory_revision: "18",
++            host_editor_revision: "43",
++        },
++        &archive(2),
++    )
++    .unwrap();
++    assert_eq!(
++        lookup_save(&s, C, None, &b.namespace_id, &b.draft_id, A).unwrap(),
++        legacy
++    );
+ }
+ 
+ #[test]
+@@ -695,12 +891,42 @@ fn preparation_pointer_failure_rolls_back_new_original_row() {
+     let f = Fixture::new();
+     let s = f.open();
+     let b = binding(&resolve(&s, C, None).unwrap());
+-    prepare_save(&s, C, None, &b, A, SaveRevisions { exported_memory_revision: "17", host_editor_revision: "42" }, &archive(1)).unwrap();
++    prepare_save(
++        &s,
++        C,
++        None,
++        &b,
++        A,
++        SaveRevisions {
++            exported_memory_revision: "17",
++            host_editor_revision: "42",
++        },
++        &archive(1),
++    )
++    .unwrap();
+     lookup_save(&s, C, None, &b.namespace_id, &b.draft_id, A).unwrap();
+     f.db().exec("CREATE TRIGGER pointer_fail BEFORE UPDATE ON local_bot_save_pointer_v1 BEGIN SELECT RAISE(ABORT,'synthetic'); END", &[]).unwrap();
+-    assert!(prepare_save(&s, C, None, &b, B, SaveRevisions { exported_memory_revision: "18", host_editor_revision: "43" }, &archive(1)).is_err());
+-    assert_eq!(lookup_save(&s, C, None, &b.namespace_id, &b.draft_id, B).unwrap_err(), "local_draft_attempt_not_found");
+-    assert_eq!(resolve(&s, C, None).unwrap()["save_attempt"]["attempt_id"], A);
++    assert!(prepare_save(
++        &s,
++        C,
++        None,
++        &b,
++        B,
++        SaveRevisions {
++            exported_memory_revision: "18",
++            host_editor_revision: "43"
++        },
++        &archive(1)
++    )
++    .is_err());
++    assert_eq!(
++        lookup_save(&s, C, None, &b.namespace_id, &b.draft_id, B).unwrap_err(),
++        "local_draft_attempt_not_found"
++    );
++    assert_eq!(
++        resolve(&s, C, None).unwrap()["save_attempt"]["attempt_id"],
++        A
++    );
+ }
+ 
+ #[test]
+@@ -708,12 +934,33 @@ fn receipt_and_journal_terminal_transition_are_one_commit() {
+     let f = Fixture::new();
+     let s = f.open();
+     let b = binding(&resolve(&s, C, None).unwrap());
+-    prepare_save(&s, C, None, &b, A, SaveRevisions { exported_memory_revision: "17", host_editor_revision: "42" }, &archive(1)).unwrap();
++    prepare_save(
++        &s,
++        C,
++        None,
++        &b,
++        A,
++        SaveRevisions {
++            exported_memory_revision: "17",
++            host_editor_revision: "42",
++        },
++        &archive(1),
++    )
++    .unwrap();
+     f.db().exec("CREATE TRIGGER terminal_fail BEFORE UPDATE ON local_bot_save_attempts_v1 WHEN NEW.state='committed' BEGIN SELECT RAISE(ABORT,'synthetic'); END", &[]).unwrap();
+     assert!(muyon_core::bot_drafts::save(&s, C, None, &b, A, "17", &archive(1)).is_err());
+     let current = resolve(&s, C, None).unwrap();
+     assert_eq!(current["stored_revision"], "0");
+     assert_eq!(current["save_attempt"]["state"], "prepared");
+-    assert_eq!(f.db().query("SELECT COUNT(*) FROM local_bot_draft_saves", &[]).unwrap()[0][0].as_deref(), Some("0"));
+-    assert_eq!(lookup_save(&s, C, None, &b.namespace_id, &b.draft_id, A).unwrap()["status"], "not_committed_local_storage");
++    assert_eq!(
++        f.db()
++            .query("SELECT COUNT(*) FROM local_bot_draft_saves", &[])
++            .unwrap()[0][0]
++            .as_deref(),
++        Some("0")
++    );
++    assert_eq!(
++        lookup_save(&s, C, None, &b.namespace_id, &b.draft_id, A).unwrap()["status"],
++        "not_committed_local_storage"
++    );
+ }
+-- 
+2.52.0
+
