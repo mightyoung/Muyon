@@ -1,0 +1,68 @@
+2026-10-22T05:49:04.392179+00:00
+cargo: NOT_FOUND
+rustc: NOT_FOUND
+rustfmt: NOT_FOUND
+/tmp/muyon-rust/bin: ABSENT
+/tmp/muyon-cargo: ABSENT
+/tmp/muyon-native-libs: ABSENT
+/tmp/muyon-document-cargo-target: ABSENT
+$ cargo test --offline --locked --manifest-path crates/Cargo.toml -p muyon-core --test bot_drafts
+NOT_RUN: executable absent; no software installed
+$ cargo test --offline --locked --manifest-path crates/Cargo.toml -p muyon-android-ffi --lib local_draft_bridge_tests
+NOT_RUN: executable absent; no software installed
+$ rustfmt --edition 2021 --check crates/muyon-core/src/bot_drafts.rs crates/muyon-core/tests/bot_drafts.rs crates/muyon-android-ffi/src/lib.rs
+NOT_RUN: executable absent; no software installed
+$ sha256sum -c SHA256SUMS
+exit=0
+custody.json: OK
+derive-junit-correction.json: OK
+derive-junit-initial.stderr.log: OK
+derive-junit-initial.stdout.log: OK
+derive_junit.py: OK
+format-diff-paths.json: OK
+null-projection-diagnostic.json: OK
+original/core-full.stderr.log: OK
+original/core-full.stdout.junit.xml: OK
+original/core-full.stdout.log: OK
+original/ffi-targeted.stderr.log: OK
+original/ffi-targeted.stdout.log: OK
+original/manifest.json: OK
+original/provider-targeted.stderr.log: OK
+original/provider-targeted.stdout.junit.xml: OK
+original/provider-targeted.stdout.log: OK
+original/scoped-fmt.stderr.log: OK
+original/scoped-fmt.stdout.log: OK
+test-summary.json: OK
+whitespace-check.json: OK
+
+$ python3 /workspace/Muyon/docs/tasks/local-workspace-bot-provider-20261022/evidence/sql_smoke.py
+exit=0
+PASS actual DDL + initial NULL archive + registry fact + actual bounded projection
+PASS actual archive NULL/text/BLOB/exact65536/oversize65537/multibyte/NUL and digest type projections
+PASS all extracted production SQL parses and parameter counts
+PASS unique structured scope
+PASS injected receipt failure rolls back archive/revision/attempt
+PASS save commit + stale editor CAS refuses
+PASS actual original-receipt text/BLOB/exact4096/oversize4097/byte-length/digest projection bounds
+PASS restart stable registry and exact original receipt after callback loss
+PASS original receipt is not replaced with latest head
+PASS SQL CAS also checks editing_only lifecycle
+PASS bounded archive and receipt SQL projections
+PASS two original unknowns and reservation untouched
+NOT_RUN Rust behavior, FFI compilation/bindings, canonical Kotlin roundtrip, Android: absent toolchain/export integration
+
+$ git apply --check /workspace/Muyon/docs/tasks/local-workspace-bot-provider-20261022/CORE-EXPORT.patch
+exit=0
+
+$ git diff --check
+exit=0
+
+PASS FFI formatting-only changes: whitespace and optional trailing commas; no interface/behavior change
+19 provider tests in source; repaired-source Rust NOT_RUN, not 19 PASS
+Original authoritative history: targeted1 PASS/14 FAIL; partial core104 PASS/14 FAIL; FFI BLOCKED; scoped fmt3 FAIL
+c2cef10b0e63cdd81f61398e05ea3d55aaf2e9649d52deef2a701e4da6b1b5ba  crates/muyon-core/src/bot_drafts.rs
+77d4888b7a21e0f4a76da2804fe00f87bc02b510844ae89ef0b958655506747e  crates/muyon-core/tests/bot_drafts.rs
+f4fea774da3ff4cbe93d94e350dc260f52bdeb0272c487da6b19eee22e901503  crates/muyon-android-ffi/src/lib.rs
+3f0cce296a46a285bd6816dc046c9d5778f3ab92150d9f4b3abaf7bd66dc170f  crates/muyon-core/src/lib.rs
+f26104ba02b1428992464a393d902dad2b9d328a9ffd364a9ddd7d7f1cc091e3  crates/Cargo.toml
+3a87fdce6228dff89d292547057627f999e7286ccf0a774c1683c4ba5f95f367  crates/Cargo.lock

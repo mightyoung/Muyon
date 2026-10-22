@@ -1,0 +1,32 @@
+[
+  {
+    "path": "crates/muyon-core/src/documents/anchor.rs",
+    "unique_hunks": 7,
+    "before_sha256": "0adf9a83313c78d9bf41b839b6c385fa404f21facaa538612ee1b4be3de1c417",
+    "after_sha256": "96fbfc461f6c376024428cddf0d4ca3422c28f743de8ae4da6ef1fb835a9e470"
+  },
+  {
+    "path": "crates/muyon-core/src/documents/capability.rs",
+    "unique_hunks": 5,
+    "before_sha256": "9829204f354c3e89337456fae83c21f02609cbb8d60f1a3af62e68a8a2ef5b00",
+    "after_sha256": "acc72370f24258f5cc3aee87f3a88ec3e99ce67df7142dceca01c5baf6a61cb6"
+  },
+  {
+    "path": "crates/muyon-core/src/documents/identity.rs",
+    "unique_hunks": 4,
+    "before_sha256": "a99b3d85d4f4d48bad8c34bb4b4128049dfcecbb5a2beedc103719641f773e49",
+    "after_sha256": "8d1939488620cd2b7a1c6453e2b8116e8cf60d98dd2fcc4546408f956ad436b4"
+  },
+  {
+    "path": "crates/muyon-core/src/documents/mod.rs",
+    "unique_hunks": 7,
+    "before_sha256": "693ffc1aac7fe43406380ec7b27f8098594f344d6d1c8af9bdc1a651de8f0464",
+    "after_sha256": "d72c71cc523af61fd93fe3dc2b336e0f5b0fed25b53c5dc64a14ef9db86a24ea"
+  },
+  {
+    "path": "crates/muyon-core/tests/documents.rs",
+    "unique_hunks": 21,
+    "before_sha256": "a50b7a15ba6533c6738f89b697d411b7bfb7d1470e095dfec8f71a11306f38ee",
+    "after_sha256": "a1e4c3d1dc0cfc37d5020e909977ccca311c39602265f19d75073dae1795440a"
+  }
+]

@@ -49,14 +49,24 @@ fun FoundationTheme(
         MaterialTheme(
             colorScheme = scheme.copy(
                 primary = p.action, onPrimary = p.onAction,
+                primaryContainer = p.background, onPrimaryContainer = p.text,
+                inversePrimary = p.onAction,
                 secondary = p.text, onSecondary = p.panel,
+                secondaryContainer = p.background, onSecondaryContainer = p.text,
+                tertiary = p.text, onTertiary = p.panel,
+                tertiaryContainer = p.background, onTertiaryContainer = p.text,
                 background = p.background, onBackground = p.text,
                 surface = p.panel, onSurface = p.text,
                 surfaceVariant = p.background, onSurfaceVariant = p.secondary,
+                surfaceDim = p.background, surfaceBright = p.panel,
+                surfaceContainerLowest = p.background, surfaceContainerLow = p.panel,
                 surfaceContainer = p.panel, surfaceContainerHigh = p.panel,
                 surfaceContainerHighest = p.background,
                 outline = p.border, outlineVariant = p.border,
-                error = p.error, onError = p.background, surfaceTint = Color.Transparent
+                inverseSurface = p.text, inverseOnSurface = p.panel,
+                error = p.error, onError = p.background,
+                errorContainer = p.panel, onErrorContainer = p.error,
+                scrim = FoundationTokens.light.text, surfaceTint = Color.Transparent
             ),
             typography = type.copy(
                 bodyMedium = type.bodyMedium.copy(fontSize = 16.sp, lineHeight = 24.sp),

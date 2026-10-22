@@ -17,6 +17,27 @@ import org.junit.Test
 class ConversationShellTest {
     @get:Rule val compose = createComposeRule()
 
+    @Test fun mainHeaderHasOneOriginalMascotAboveTheBody() {
+        compose.setContent {
+            MaterialTheme {
+                Column {
+                    ConversationHeader("主助手", {}, mainAgent = true)
+                    Text("正文保持可见", Modifier.testTag("test-reading-body"))
+                }
+            }
+        }
+        compose.onAllNodesWithTag("shell-original-mascot").assertCountEquals(1)
+        compose.onNodeWithTag("shell-original-mascot").assertIsDisplayed()
+        val identity = compose.onNodeWithTag("shell-header").fetchSemanticsNode().boundsInRoot
+        val body = compose.onNodeWithTag("test-reading-body").fetchSemanticsNode().boundsInRoot
+        org.junit.Assert.assertTrue("header must be laid out above reading body", identity.bottom <= body.top)
+    }
+
+    @Test fun ordinaryHeaderDoesNotRepeatMainMascot() {
+        compose.setContent { MaterialTheme { ConversationHeader("用户配置的助手", {}) } }
+        compose.onNodeWithTag("shell-original-mascot").assertDoesNotExist()
+    }
+
     @Test fun menuUsesRealEntriesAndSeparatesPinnedFromOrdinary() {
         var opened = ""
         var pinned = ""
@@ -33,6 +54,7 @@ class ConversationShellTest {
             }
         }
         compose.onNodeWithContentDescription("打开工作空间导航").performClick()
+        compose.onNodeWithTag("shell-original-brand-icon").assertIsDisplayed()
         compose.onNodeWithTag("shell-conversation-agent:a").assertIsSelected()
         compose.onNodeWithText("主 Agent 与置顶").assertExists()
         compose.onNodeWithText("最近会话").assertExists()

@@ -1,6 +1,7 @@
 package com.mightyoung.muyon.product.ui.shell
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -13,6 +14,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
@@ -63,7 +65,12 @@ fun ConversationShell(
                     .semantics { paneTitle = "工作空间导航" }, color = MaterialTheme.colorScheme.background) {
                     Column(Modifier.safeDrawingPadding().verticalScroll(rememberScrollState()).padding(12.dp),
                         verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        Text("Muyon", Modifier.padding(12.dp), style = MaterialTheme.typography.headlineMedium)
+                        Row(Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                            Image(painterResource(R.drawable.muyon_brand_icon), contentDescription = null,
+                                modifier = Modifier.size(40.dp).testTag("shell-original-brand-icon"), contentScale = ContentScale.Fit)
+                            Text("Muyon", style = MaterialTheme.typography.headlineMedium)
+                        }
                         if (notice.isNotBlank()) Text(notice, Modifier.padding(12.dp), color = MaterialTheme.colorScheme.error)
                         Text("主 Agent 与置顶", Modifier.padding(12.dp), style = MaterialTheme.typography.titleSmall)
                         conversations.filter { it.main || it.pinned }.forEach { item ->
@@ -122,13 +129,17 @@ private fun ConversationEntry(item: ShellConversation, active: Boolean, onOpen: 
 
 /** Natural height at large font sizes; body is laid out below, never behind the header. */
 @Composable
-fun ConversationHeader(title: String, onOpenMenu: () -> Unit, onMore: (() -> Unit)? = null) {
-    Row(Modifier.fillMaxWidth().heightIn(min = 64.dp).padding(horizontal = 8.dp), verticalAlignment = Alignment.CenterVertically) {
+fun ConversationHeader(title: String, onOpenMenu: () -> Unit, onMore: (() -> Unit)? = null, mainAgent: Boolean = false) {
+    Row(Modifier.fillMaxWidth().heightIn(min = 64.dp).testTag("shell-header").padding(horizontal = 8.dp), verticalAlignment = Alignment.CenterVertically) {
         IconButton(onClick = onOpenMenu, modifier = Modifier.size(48.dp)) {
             Icon(painterResource(R.drawable.wb_menu), "打开工作空间导航")
         }
-        Text(title, Modifier.weight(1f).padding(8.dp), style = MaterialTheme.typography.titleMedium,
-            textAlign = androidx.compose.ui.text.style.TextAlign.Center, maxLines = 3, overflow = TextOverflow.Ellipsis)
+        Column(Modifier.weight(1f).padding(8.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+            if (mainAgent) Image(painterResource(R.drawable.muyon_brand_mascot_front), contentDescription = null,
+                modifier = Modifier.size(48.dp).testTag("shell-original-mascot"), contentScale = ContentScale.Fit)
+            Text(title, style = MaterialTheme.typography.titleMedium,
+                textAlign = androidx.compose.ui.text.style.TextAlign.Center, maxLines = 3, overflow = TextOverflow.Ellipsis)
+        }
         if (onMore != null) IconButton(onClick = onMore, modifier = Modifier.size(48.dp).testTag("chat-more")) {
             Text("···", Modifier.semantics { contentDescription = "更多聊天操作" }, style = MaterialTheme.typography.titleLarge)
         } else Spacer(Modifier.width(48.dp))

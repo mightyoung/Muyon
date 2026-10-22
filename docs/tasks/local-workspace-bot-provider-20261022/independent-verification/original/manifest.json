@@ -1,0 +1,112 @@
+{
+  "source_commit": "1e81e19c170bf65aa01923b082a2175f5009490c",
+  "provider_commit": "7ca2bd4e9edf9cd0952ce784d3f85561583537db",
+  "ui_dependency": "98baa979223d96094f11a56c3ac6d48f9b84c0eb",
+  "core_dependency": "f4a8e8d3971208f16d4a3b1ddff5d4e8fb2a63ac",
+  "created_utc": "2026-10-22T05:36:39.924232+00:00",
+  "cwd": "/workspace/Muyon-bot-provider-verification",
+  "environment": {
+    "PATH": "/tmp/muyon-rust/bin:/home/agent/.local/bin:/opt/codex/runtimes/codex-primary-runtime/dependencies/bin/override:/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin:/opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin:/opt/codex/runtimes/codex-primary-runtime/dependencies/bin:/opt/codex/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/home/agent/.local/bin:/opt/codex/runtimes/codex-primary-runtime/dependencies/bin/fallback",
+    "CARGO_HOME": "/tmp/muyon-cargo",
+    "CARGO_TARGET_DIR": "/tmp/muyon-document-cargo-target",
+    "RUSTFLAGS": "-L native=/tmp/muyon-native-libs"
+  },
+  "tools": {
+    "rustc": {
+      "version": "rustc 1.99.1 (58cf8f9c3 2026-10-13)",
+      "sha256": "b53b780f77f952062f8ca8a3b70aef2390b1e45ad91939be94afdc9543026853"
+    },
+    "cargo": {
+      "version": "cargo 1.99.1 (5f94df478 2026-08-27)",
+      "sha256": "a670e02cfa39ac2e53f77a2d911ca1fc9e2c479b0603ec956625be1daf24e3af"
+    },
+    "rustfmt": {
+      "version": "rustfmt 1.10.0-stable (58cf8f9c35 2026-10-13)",
+      "sha256": "68cb47a2a38daa8ff2ec6d623a2374b0a165d77ec74f1f654216665018c04598"
+    }
+  },
+  "source_sha256": {
+    "crates/muyon-core/src/bot_drafts.rs": "851d19e69e2ba2ce0517fe27f33a3386ac7e58ddcc573b4cbe673f8d4096066f",
+    "crates/muyon-core/tests/bot_drafts.rs": "b3fdf13bade0272eced9b41e6ebbc6206d58898d0a6285a838a5ff3fb792f38a",
+    "crates/muyon-android-ffi/src/lib.rs": "311336558cc826249f28383276bfdd0d9a94d23b55dab026d81181b46017e982",
+    "crates/muyon-core/src/lib.rs": "e1b07c6ef86ead95c1bf783b4dea5e111d378eb563acc87d9a5161a5105e4830",
+    "crates/Cargo.toml": "f26104ba02b1428992464a393d902dad2b9d328a9ffd364a9ddd7d7f1cc091e3",
+    "crates/Cargo.lock": "3a87fdce6228dff89d292547057627f999e7286ccf0a774c1683c4ba5f95f367",
+    "crates/muyon-android-ffi/Cargo.toml": "99edb37bdaa5ca91b7940c1dcbbd1fea7ac7ba5670de7c72252fb0394fec5ab4",
+    "docs/tasks/local-workspace-bot-provider-20261022/CORE-EXPORT.patch": "ecf65070ccc4f1e5141310496b8799744e77c59579759971569176bfebfb91e2"
+  },
+  "commands": [
+    {
+      "label": "provider-targeted",
+      "argv": [
+        "cargo",
+        "test",
+        "--offline",
+        "--locked",
+        "--manifest-path",
+        "crates/Cargo.toml",
+        "-p",
+        "muyon-core",
+        "--test",
+        "bot_drafts"
+      ],
+      "cwd": "/workspace/Muyon-bot-provider-verification",
+      "start_utc": "2026-10-22T05:36:40.000230+00:00",
+      "end_utc": "2026-10-22T05:36:47.381281+00:00",
+      "exit_status": 101
+    },
+    {
+      "label": "ffi-targeted",
+      "argv": [
+        "cargo",
+        "test",
+        "--offline",
+        "--locked",
+        "--manifest-path",
+        "crates/Cargo.toml",
+        "-p",
+        "muyon-android-ffi",
+        "--lib",
+        "local_draft_bridge_tests"
+      ],
+      "cwd": "/workspace/Muyon-bot-provider-verification",
+      "start_utc": "2026-10-22T05:36:47.381722+00:00",
+      "end_utc": "2026-10-22T05:36:47.409017+00:00",
+      "exit_status": 101
+    },
+    {
+      "label": "scoped-fmt",
+      "argv": [
+        "/tmp/muyon-rust/bin/rustfmt",
+        "--edition",
+        "2021",
+        "--check",
+        "crates/muyon-core/src/bot_drafts.rs",
+        "crates/muyon-core/tests/bot_drafts.rs",
+        "crates/muyon-android-ffi/src/lib.rs"
+      ],
+      "cwd": "/workspace/Muyon-bot-provider-verification",
+      "start_utc": "2026-10-22T05:36:47.409419+00:00",
+      "end_utc": "2026-10-22T05:36:47.453438+00:00",
+      "exit_status": 1
+    },
+    {
+      "label": "core-full",
+      "argv": [
+        "cargo",
+        "test",
+        "--offline",
+        "--locked",
+        "--manifest-path",
+        "crates/Cargo.toml",
+        "-p",
+        "muyon-core"
+      ],
+      "cwd": "/workspace/Muyon-bot-provider-verification",
+      "start_utc": "2026-10-22T05:36:47.453816+00:00",
+      "end_utc": "2026-10-22T05:36:53.074776+00:00",
+      "exit_status": 101
+    }
+  ],
+  "source_hashes_unchanged_after_checks": true
+}
