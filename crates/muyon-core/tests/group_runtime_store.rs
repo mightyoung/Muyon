@@ -922,3 +922,549 @@ fn a_new_run_id_cannot_reset_the_same_registered_root_lifetime() {
     let scope = GroupScope::current(&s, "project", "group").unwrap();
     assert!(s.group_run(&scope, "replacement-run").is_err());
 }
+
+// Parent review: SQL writes after the last authorization read are observable
+// mutation boundaries, including the grant-consumption write itself.
+fn authority_tail_fault(boundary: &str, mutation_sql: &str) {
+    let f = Fixture::new();
+    let s = f.init();
+    start(&s);
+    let c = mutation(
+        "tail-target",
+        2,
+        1,
+        GroupOperation::Stop {
+            run_id: "run".into(),
+        },
+    );
+    s.issue_group_local_grant_trusted(&c).unwrap();
+    let db = s.database();
+    let group_before = db
+        .query("SELECT * FROM group_runtime_groups ORDER BY group_id", &[])
+        .unwrap();
+    let runs_before = db
+        .query("SELECT * FROM group_runtime_runs ORDER BY run_id", &[])
+        .unwrap();
+    let nodes_before = db
+        .query("SELECT * FROM group_runtime_nodes ORDER BY node_id", &[])
+        .unwrap();
+    let grants_before = db
+        .query("SELECT * FROM business_grants ORDER BY grant_id", &[])
+        .unwrap();
+    let project_before = db.query("SELECT * FROM projects ORDER BY id", &[]).unwrap();
+    let trigger=match boundary{
+ "events"=>format!("CREATE TRIGGER inject_authority_tail AFTER INSERT ON group_runtime_events WHEN NEW.intent_id='tail-target' BEGIN {mutation_sql}; END"),
+ "receipt"=>format!("CREATE TRIGGER inject_authority_tail AFTER UPDATE ON group_runtime_local_intents WHEN NEW.intent_id='tail-target' AND NEW.status='committed' BEGIN {mutation_sql}; END"),
+ "consume"=>format!("CREATE TRIGGER inject_authority_tail AFTER UPDATE OF active ON business_grants WHEN NEW.grant_id='grant-tail-target' AND OLD.active=1 AND NEW.active=0 BEGIN {mutation_sql}; END"),_=>panic!("unknown boundary")};
+    db.exec(&trigger, &[]).unwrap();
+    let r = s.execute_group_local(&c, None).unwrap();
+    assert_ne!(
+        r.status,
+        LocalStatus::Committed,
+        "{boundary} committed after: {mutation_sql}"
+    );
+    assert_eq!(
+        db.query("SELECT * FROM group_runtime_groups ORDER BY group_id", &[])
+            .unwrap(),
+        group_before
+    );
+    assert_eq!(
+        db.query("SELECT * FROM group_runtime_runs ORDER BY run_id", &[])
+            .unwrap(),
+        runs_before
+    );
+    assert_eq!(
+        db.query("SELECT * FROM group_runtime_nodes ORDER BY node_id", &[])
+            .unwrap(),
+        nodes_before
+    );
+    assert_eq!(
+        db.query("SELECT * FROM business_grants ORDER BY grant_id", &[])
+            .unwrap(),
+        grants_before
+    );
+    assert_eq!(
+        db.query("SELECT * FROM projects ORDER BY id", &[]).unwrap(),
+        project_before
+    );
+    assert!(db
+        .query(
+            "SELECT * FROM group_runtime_events WHERE intent_id='tail-target'",
+            &[]
+        )
+        .unwrap()
+        .is_empty());
+    let row = db
+        .query(
+            "SELECT status,receipt FROM group_runtime_local_intents WHERE intent_id='tail-target'",
+            &[],
+        )
+        .unwrap();
+    assert_ne!(row[0][0].as_deref(), Some("committed"));
+    if let Some(raw) = &row[0][1] {
+        let receipt: LocalReceipt = serde_json::from_str(raw).unwrap();
+        assert_eq!(receipt.status, LocalStatus::Rejected);
+    }
+    assert_ne!(
+        s.execute_group_local(&c, None).unwrap().status,
+        LocalStatus::Committed
+    );
+}
+macro_rules! tail_case {
+    ($name:ident,$boundary:literal,$sql:literal) => {
+        #[test]
+        fn $name() {
+            authority_tail_fault($boundary, $sql);
+        }
+    };
+}
+tail_case!(
+    receipt_tail_expiry_revokes_local_commit,
+    "receipt",
+    "UPDATE business_grants SET expires_at_ms='0' WHERE grant_id='grant-tail-target'"
+);
+tail_case!(
+    events_tail_expiry_revokes_local_commit,
+    "events",
+    "UPDATE business_grants SET expires_at_ms='0' WHERE grant_id='grant-tail-target'"
+);
+tail_case!(
+    receipt_tail_revoke_is_not_mistaken_for_this_transaction_consumption,
+    "receipt",
+    "UPDATE business_grants SET active=0 WHERE grant_id='grant-tail-target'"
+);
+tail_case!(
+    events_tail_revoke_is_not_mistaken_for_this_transaction_consumption,
+    "events",
+    "UPDATE business_grants SET active=0 WHERE grant_id='grant-tail-target'"
+);
+tail_case!(
+    receipt_tail_epoch_change_revokes_local_commit,
+    "receipt",
+    "UPDATE business_grants SET owner_epoch='other-epoch' WHERE grant_id='grant-tail-target'"
+);
+tail_case!(
+    events_tail_epoch_change_revokes_local_commit,
+    "events",
+    "UPDATE business_grants SET owner_epoch='other-epoch' WHERE grant_id='grant-tail-target'"
+);
+tail_case!(
+    receipt_tail_generation_change_revokes_local_commit,
+    "receipt",
+    "UPDATE business_grants SET generation='2' WHERE grant_id='grant-tail-target'"
+);
+tail_case!(
+    events_tail_generation_change_revokes_local_commit,
+    "events",
+    "UPDATE business_grants SET generation='2' WHERE grant_id='grant-tail-target'"
+);
+tail_case!(
+    receipt_tail_project_delete_revokes_local_commit,
+    "receipt",
+    "UPDATE projects SET deleted=1 WHERE id='project'"
+);
+tail_case!(
+    events_tail_project_delete_revokes_local_commit,
+    "events",
+    "UPDATE projects SET deleted=1 WHERE id='project'"
+);
+tail_case!(
+    receipt_tail_group_scope_change_revokes_local_commit,
+    "receipt",
+    "UPDATE group_runtime_groups SET workspace='other-workspace' WHERE group_id='group'"
+);
+tail_case!(
+    events_tail_group_scope_change_revokes_local_commit,
+    "events",
+    "UPDATE group_runtime_groups SET workspace='other-workspace' WHERE group_id='group'"
+);
+tail_case!(
+    consume_tail_expiry_is_checked_after_this_transaction_consumption,
+    "consume",
+    "UPDATE business_grants SET expires_at_ms='0' WHERE grant_id='grant-tail-target'"
+);
+tail_case!(
+    consume_tail_epoch_is_checked_after_this_transaction_consumption,
+    "consume",
+    "UPDATE business_grants SET owner_epoch='other-epoch' WHERE grant_id='grant-tail-target'"
+);
+tail_case!(
+    consume_tail_generation_is_checked_after_this_transaction_consumption,
+    "consume",
+    "UPDATE business_grants SET generation='2' WHERE grant_id='grant-tail-target'"
+);
+tail_case!(
+    consume_tail_project_is_checked_after_this_transaction_consumption,
+    "consume",
+    "UPDATE projects SET deleted=1 WHERE id='project'"
+);
+tail_case!(
+    consume_tail_group_scope_is_checked_after_this_transaction_consumption,
+    "consume",
+    "UPDATE group_runtime_groups SET workspace='other-workspace' WHERE group_id='group'"
+);
+tail_case!(
+    consume_tail_grant_readmission_is_checked,
+    "consume",
+    "UPDATE business_grants SET active=1 WHERE grant_id='grant-tail-target'"
+);
+tail_case!(consume_tail_admission_id_is_checked,"consume","UPDATE business_grants SET admission_id='foreign-admission' WHERE grant_id='grant-tail-target'");
+tail_case!(receipt_tail_binding_change_is_checked,"receipt","UPDATE business_grants SET binding_digest='changed-binding' WHERE grant_id='grant-tail-target'");
+#[test]
+fn rejected_update_ignored_returns_original_pending_instead_of_fabricated_rejection() {
+    let f = Fixture::new();
+    let s = f.init();
+    start(&s);
+    let c = mutation(
+        "reject-ignored",
+        99,
+        1,
+        GroupOperation::Stop {
+            run_id: "run".into(),
+        },
+    );
+    s.issue_group_local_grant_trusted(&c).unwrap();
+    s.database().exec("CREATE TRIGGER ignore_rejection BEFORE UPDATE ON group_runtime_local_intents WHEN NEW.intent_id='reject-ignored' AND NEW.status='rejected' BEGIN SELECT RAISE(IGNORE); END",&[]).unwrap();
+    assert_eq!(
+        s.execute_group_local(&c, None).unwrap().status,
+        LocalStatus::PendingOriginal
+    );
+    let rows=s.database().query("SELECT status,receipt FROM group_runtime_local_intents WHERE intent_id='reject-ignored'",&[]).unwrap();
+    assert_eq!(rows[0], vec![Some("pending".into()), None]);
+    assert_eq!(
+        s.execute_group_local(&c, None).unwrap().status,
+        LocalStatus::PendingOriginal
+    );
+}
+#[test]
+fn changed_pending_does_not_return_rejected_without_a_persisted_terminal_receipt() {
+    let f = Fixture::new();
+    let s = f.init();
+    start(&s);
+    let c = mutation(
+        "reject-changed",
+        99,
+        1,
+        GroupOperation::Stop {
+            run_id: "run".into(),
+        },
+    );
+    s.issue_group_local_grant_trusted(&c).unwrap();
+    s.database().exec("CREATE TRIGGER change_pending AFTER INSERT ON group_runtime_local_intents WHEN NEW.intent_id='reject-changed' BEGIN UPDATE group_runtime_local_intents SET status='committed' WHERE intent_id=NEW.intent_id; END",&[]).unwrap();
+    assert_eq!(
+        s.execute_group_local(&c, None).unwrap().status,
+        LocalStatus::PendingOriginal
+    );
+    assert_eq!(
+        s.database()
+            .query(
+                "SELECT receipt FROM group_runtime_local_intents WHERE intent_id='reject-changed'",
+                &[]
+            )
+            .unwrap()[0][0],
+        None
+    );
+}
+#[test]
+fn rejected_receipt_tail_tampering_returns_original_pending_instead_of_fabricated_rejection() {
+    let f = Fixture::new();
+    let s = f.init();
+    start(&s);
+    let c = mutation(
+        "reject-tampered",
+        99,
+        1,
+        GroupOperation::Stop {
+            run_id: "run".into(),
+        },
+    );
+    s.issue_group_local_grant_trusted(&c).unwrap();
+    s.database().exec("CREATE TRIGGER tamper_rejection AFTER UPDATE ON group_runtime_local_intents WHEN NEW.intent_id='reject-tampered' AND NEW.status='rejected' BEGIN UPDATE group_runtime_local_intents SET receipt=NULL,status='pending' WHERE intent_id=NEW.intent_id; END",&[]).unwrap();
+    assert_eq!(
+        s.execute_group_local(&c, None).unwrap().status,
+        LocalStatus::PendingOriginal
+    );
+}
+
+#[test]
+fn failed_request_chain_read_keeps_original_unknown_and_local_observation_pending() {
+    let f = Fixture::new();
+    let s = f.init();
+    start(&s);
+    apply(&s, &plan("plan", 2, 1, "node"));
+    let o = owner(&f);
+    let req = original(&o, "conversation");
+    let c = mutation(
+        "bind",
+        3,
+        1,
+        GroupOperation::BindOriginal {
+            run_id: "run".into(),
+            node_id: "node".into(),
+            request_id: req.clone(),
+        },
+    );
+    s.issue_group_local_grant_trusted(&c).unwrap();
+    s.execute_group_local(&c, Some(&o)).unwrap();
+    let before = serde_json::to_value(o.lookup(&req).unwrap()).unwrap();
+    let held = o.budget().unwrap().held_micro_cny;
+    let raw = sqlite::Db::open(f.0.join("agent.sqlite").to_str().unwrap(), false, false).unwrap();
+    raw.exec(
+        "ALTER TABLE tool_steps RENAME TO synthetic_unavailable_tool_steps",
+        &[],
+    )
+    .unwrap();
+    let c = mutation(
+        "observe-read-fault",
+        4,
+        1,
+        GroupOperation::Observe {
+            run_id: "run".into(),
+            node_id: "node".into(),
+            evidence: vec![],
+        },
+    );
+    s.issue_group_local_grant_trusted(&c).unwrap();
+    assert_eq!(
+        s.execute_group_local(&c, Some(&o)).unwrap().status,
+        LocalStatus::PendingOriginal
+    );
+    assert_eq!(
+        serde_json::to_value(o.lookup(&req).unwrap()).unwrap(),
+        before
+    );
+    assert_eq!(o.budget().unwrap().held_micro_cny, held);
+    assert_eq!(s.database().query("SELECT status,receipt FROM group_runtime_local_intents WHERE intent_id='observe-read-fault'",&[]).unwrap()[0],vec![Some("pending".into()),None]);
+}
+#[test]
+fn failed_request_chain_read_during_handoff_is_inconclusive_not_rejected() {
+    let f = Fixture::new();
+    let s = f.init();
+    start(&s);
+    apply(&s, &plan("plan", 2, 1, "node"));
+    let o = owner(&f);
+    let req = original(&o, "conversation");
+    let c = mutation(
+        "bind",
+        3,
+        1,
+        GroupOperation::BindOriginal {
+            run_id: "run".into(),
+            node_id: "node".into(),
+            request_id: req.clone(),
+        },
+    );
+    s.issue_group_local_grant_trusted(&c).unwrap();
+    s.execute_group_local(&c, Some(&o)).unwrap();
+    let response=json!({"id":"offline-only","model":agent::owner::MODEL,"choices":[{"index":0,"finish_reason":"stop","message":{"role":"assistant","content":"Synthetic output"}}],"usage":{"prompt_tokens":17,"completion_tokens":4,"total_tokens":21}}).to_string();
+    o.settle_response(&req, &response).unwrap();
+    let raw = sqlite::Db::open(f.0.join("agent.sqlite").to_str().unwrap(), false, false).unwrap();
+    raw.exec(
+        "ALTER TABLE tool_steps RENAME TO synthetic_unavailable_tool_steps",
+        &[],
+    )
+    .unwrap();
+    let c = mutation(
+        "handoff-read-fault",
+        4,
+        1,
+        GroupOperation::Handoff {
+            run_id: "run".into(),
+            to: "b".into(),
+        },
+    );
+    s.issue_group_local_grant_trusted(&c).unwrap();
+    assert_eq!(
+        s.execute_group_local(&c, Some(&o)).unwrap().status,
+        LocalStatus::PendingOriginal
+    );
+    let scope = GroupScope::current(&s, "project", "group").unwrap();
+    assert_eq!(s.group_run(&scope, "run").unwrap().epoch, 1);
+}
+#[test]
+fn register_tail_checks_the_newly_persisted_group_scope() {
+    for boundary in ["receipt", "events"] {
+        let f = Fixture::new();
+        let s = f.init();
+        let c = command("register-tail", 0, registration());
+        s.issue_group_local_grant_trusted(&c).unwrap();
+        let trigger = if boundary == "receipt" {
+            "CREATE TRIGGER corrupt_registered_scope AFTER UPDATE ON group_runtime_local_intents WHEN NEW.intent_id='register-tail' AND NEW.status='committed' BEGIN UPDATE group_runtime_groups SET workspace='other-workspace' WHERE group_id='group'; END"
+        } else {
+            "CREATE TRIGGER corrupt_registered_scope AFTER INSERT ON group_runtime_events WHEN NEW.intent_id='register-tail' BEGIN UPDATE group_runtime_groups SET workspace='other-workspace' WHERE group_id='group'; END"
+        };
+        s.database().exec(trigger, &[]).unwrap();
+        assert_ne!(
+            s.execute_group_local(&c, None).unwrap().status,
+            LocalStatus::Committed
+        );
+        assert!(s
+            .database()
+            .query("SELECT * FROM group_runtime_groups", &[])
+            .unwrap()
+            .is_empty());
+        assert!(s
+            .database()
+            .query("SELECT * FROM group_runtime_events", &[])
+            .unwrap()
+            .is_empty());
+        assert_eq!(
+            s.database()
+                .query(
+                    "SELECT active FROM business_grants WHERE grant_id='grant-register-tail'",
+                    &[]
+                )
+                .unwrap()[0][0]
+                .as_deref(),
+            Some("1")
+        );
+    }
+}
+#[test]
+fn rejected_write_sql_failure_is_pending_without_a_terminal_receipt() {
+    let f = Fixture::new();
+    let s = f.init();
+    start(&s);
+    let c = mutation(
+        "reject-storage",
+        99,
+        1,
+        GroupOperation::Stop {
+            run_id: "run".into(),
+        },
+    );
+    s.issue_group_local_grant_trusted(&c).unwrap();
+    s.database().exec("CREATE TRIGGER fail_rejection BEFORE UPDATE ON group_runtime_local_intents WHEN NEW.intent_id='reject-storage' AND NEW.status='rejected' BEGIN SELECT RAISE(ABORT,'synthetic write failure'); END",&[]).unwrap();
+    assert_eq!(
+        s.execute_group_local(&c, None).unwrap().status,
+        LocalStatus::PendingOriginal
+    );
+    assert_eq!(s.database().query("SELECT status,receipt FROM group_runtime_local_intents WHERE intent_id='reject-storage'",&[]).unwrap()[0],vec![Some("pending".into()),None]);
+}
+
+#[test]
+fn original_identity_storage_failure_is_pending_not_definitive_not_found() {
+    let f = Fixture::new();
+    let s = f.init();
+    start(&s);
+    apply(&s, &plan("plan", 2, 1, "node"));
+    let o = owner(&f);
+    let req = original(&o, "conversation");
+    let c = mutation(
+        "bind",
+        3,
+        1,
+        GroupOperation::BindOriginal {
+            run_id: "run".into(),
+            node_id: "node".into(),
+            request_id: req.clone(),
+        },
+    );
+    s.issue_group_local_grant_trusted(&c).unwrap();
+    s.execute_group_local(&c, Some(&o)).unwrap();
+    let before = serde_json::to_value(o.lookup(&req).unwrap()).unwrap();
+    let held = o.budget().unwrap().held_micro_cny;
+    let raw = sqlite::Db::open(f.0.join("agent.sqlite").to_str().unwrap(), false, false).unwrap();
+    raw.exec(
+        "ALTER TABLE requests RENAME TO synthetic_unavailable_requests",
+        &[],
+    )
+    .unwrap();
+    let c = mutation(
+        "identity-read-fault",
+        4,
+        1,
+        GroupOperation::Observe {
+            run_id: "run".into(),
+            node_id: "node".into(),
+            evidence: vec![],
+        },
+    );
+    s.issue_group_local_grant_trusted(&c).unwrap();
+    let result = s.execute_group_local(&c, Some(&o)).unwrap();
+    raw.exec(
+        "ALTER TABLE synthetic_unavailable_requests RENAME TO requests",
+        &[],
+    )
+    .unwrap();
+    assert_eq!(result.status, LocalStatus::PendingOriginal);
+    assert_eq!(
+        serde_json::to_value(o.lookup(&req).unwrap()).unwrap(),
+        before
+    );
+    assert_eq!(o.budget().unwrap().held_micro_cny, held);
+    assert_eq!(s.database().query("SELECT status,receipt FROM group_runtime_local_intents WHERE intent_id='identity-read-fault'",&[]).unwrap()[0],vec![Some("pending".into()),None]);
+}
+#[test]
+fn rejected_commit_failure_is_pending_without_committing_rejected_receipt() {
+    let f = Fixture::new();
+    let s = f.init();
+    start(&s);
+    let c = mutation(
+        "reject-commit-fault",
+        99,
+        1,
+        GroupOperation::Stop {
+            run_id: "run".into(),
+        },
+    );
+    s.issue_group_local_grant_trusted(&c).unwrap();
+    s.database().exec("CREATE TABLE synthetic_commit_fault(project TEXT REFERENCES projects(id) DEFERRABLE INITIALLY DEFERRED)",&[]).unwrap();
+    s.database().exec("CREATE TRIGGER fail_rejection_commit AFTER UPDATE ON group_runtime_local_intents WHEN NEW.intent_id='reject-commit-fault' AND NEW.status='rejected' BEGIN INSERT INTO synthetic_commit_fault VALUES('missing-project'); END",&[]).unwrap();
+    assert_eq!(
+        s.execute_group_local(&c, None).unwrap().status,
+        LocalStatus::PendingOriginal
+    );
+    assert_eq!(s.database().query("SELECT status,receipt FROM group_runtime_local_intents WHERE intent_id='reject-commit-fault'",&[]).unwrap()[0],vec![Some("pending".into()),None]);
+    assert!(s
+        .database()
+        .query("SELECT * FROM synthetic_commit_fault", &[])
+        .unwrap()
+        .is_empty());
+}
+#[test]
+fn business_commit_failure_rolls_back_receipt_event_stop_and_grant() {
+    let f = Fixture::new();
+    let s = f.init();
+    start(&s);
+    let c = mutation(
+        "commit-fault",
+        2,
+        1,
+        GroupOperation::Stop {
+            run_id: "run".into(),
+        },
+    );
+    s.issue_group_local_grant_trusted(&c).unwrap();
+    s.database().exec("CREATE TABLE synthetic_commit_fault(project TEXT REFERENCES projects(id) DEFERRABLE INITIALLY DEFERRED)",&[]).unwrap();
+    s.database().exec("CREATE TRIGGER fail_business_commit AFTER UPDATE ON group_runtime_local_intents WHEN NEW.intent_id='commit-fault' AND NEW.status='committed' BEGIN INSERT INTO synthetic_commit_fault VALUES('missing-project'); END",&[]).unwrap();
+    assert_eq!(
+        s.execute_group_local(&c, None).unwrap().status,
+        LocalStatus::PendingOriginal
+    );
+    let scope = GroupScope::current(&s, "project", "group").unwrap();
+    assert!(!s.group_run(&scope, "run").unwrap().stopped);
+    assert_eq!(
+        s.group_registration(&scope).unwrap().revision,
+        Revision::new(2)
+    );
+    assert_eq!(s.database().query("SELECT status,receipt FROM group_runtime_local_intents WHERE intent_id='commit-fault'",&[]).unwrap()[0],vec![Some("pending".into()),None]);
+    assert_eq!(
+        s.database()
+            .query(
+                "SELECT active FROM business_grants WHERE grant_id='grant-commit-fault'",
+                &[]
+            )
+            .unwrap()[0][0]
+            .as_deref(),
+        Some("1")
+    );
+    assert!(s
+        .database()
+        .query(
+            "SELECT * FROM group_runtime_events WHERE intent_id='commit-fault'",
+            &[]
+        )
+        .unwrap()
+        .is_empty());
+}
