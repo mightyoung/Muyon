@@ -29,3 +29,13 @@ Ruling: use UI518 base and path-scoped reviewed deltas — avoids repeated histo
 Ruling: permanent exports are integration changes in this worktree only — source owners' lib.rs branches untouched. Cost if wrong: exposed API remains nonproduction and combination HOLD until review.
 
 Restrictions: no main/develop mutation/merge, deploy, force push/delete, real model/search/provider or credentials/payment/security expansion. Old PR95/API26/job117726786359 log403 and other historical403 access remain stopped; no retry/reroute/new run to replace denied diagnostics. Two old unknowns and reserved ¥0.002620 untouched. No real Office/PDF/worker engine execution or SDK denial bypass.
+
+## Accepted fixed updates and application record
+
+- Core updated toaec085fafef8aa02f86f2fc60626f168b10f4caa, including COPY formatter and new explicit historical metadata authority/Text. Parent static review limited acceptance; eight new Rust tests remain to be executed. Evidence owner must adapt Text; artifact owner must consume history hook. Those consumer changes are not invented here.
+- Bot native provider7ca2bd4e9edf9cd0952ce784d3f85561583537db accepted for actual combination: bot_drafts + actual ProductCore FFI methods + tests/docs only; stale bundled documents excluded. Its author SQL smoke is not Rust/FFI PASS. Host remains can_savefalse pending real adapter.
+- Reader source8d2b7931fa6b9194338ec81f1add8110075b92bc accepted for source combination after parent's static closure; pure Kotlin rerun still pending. This does not release Android/runtime acceptance.
+- COPY gateway90b7a35a parent limited static review accepted; no real Office engine.
+- Applied ten path-scoped deltas successfully without textual conflicts: Bot, host, core, evidence, artifact, group, adapter, gateway, provider, reader. No full branch merge. Shared source from evidence/artifact/provider snapshots excluded; bot-vs-host codec bytes verified identical.
+- Integration lib.rs adds artifacts, bot_drafts, document_edit, evidence, group_governance and group_runtime exactly once. No author branch was modified.
+- Rust1.93.1 (repository CI pin) was prepared under authorized /tmp directories only, without profile/system writes or SDK installation. Initial version invocation omitted RUSTUP_HOME and attempted the default read-only /home/agent/.rustup; that default-home target is not retried. Subsequent commands use the explicitly installed task-local toolchain/home. This is not a workaround for the stopped Android SDK action; Android remains no-SDK/Gradle NOT_RUN. Existing Cargo.lock is retained and dependencies fetched only as needed for compilation.
