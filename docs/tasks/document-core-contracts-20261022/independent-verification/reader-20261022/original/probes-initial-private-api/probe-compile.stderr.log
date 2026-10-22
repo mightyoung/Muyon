@@ -1,0 +1,13 @@
+error[E0624]: method `root_dir` is private
+   --> /tmp/muyon-reader-probes-original.rs:777:174
+    |
+777 | ...k(&opened.session_id,4).unwrap();let path=h.store().root_dir().join("objects").join(&opened.metadata.blob.digest);let mut data=f...
+    |                                                        ^^^^^^^^ private method
+    |
+   --> muyon-core/src/business.rs:242:4
+    |
+    = note: private method defined here
+
+error: aborting due to 1 previous error
+
+For more information about this error, try `rustc --explain E0624`.

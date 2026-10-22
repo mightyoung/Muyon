@@ -1,0 +1,418 @@
+{
+  "invocations": [
+    {
+      "command": "reader-targeted",
+      "passed": 13,
+      "failed": 0,
+      "ignored": 0,
+      "groups": [
+        {
+          "binary": "unittests src/lib.rs",
+          "test_names": [
+            "documents::reader_tests::corrupt_oversize_blob_length_is_rejected_without_creating_reader_pin",
+            "documents::reader_tests::cleanup_failure_withholds_bytes_and_poisoned_host_refuses_new_sessions",
+            "documents::reader_tests::bounded_sessions_idle_absolute_lifetime_and_invalid_chunk_release_pins",
+            "documents::reader_tests::dropping_host_releases_sessions_before_reopening_same_store",
+            "documents::reader_tests::deleted_pin_or_same_length_corruption_invalidates_session",
+            "documents::reader_tests::inspect_grant_cannot_open_bytes_and_forged_scope_never_substitutes_source",
+            "documents::reader_tests::one_shot_view_is_live_bounded_and_tail_rechecks_expiry_before_delivery",
+            "documents::reader_tests::exact_metadata_and_sequential_bytes_close_at_eof",
+            "documents::reader_tests::one_shot_callback_failure_and_cleanup_failure_return_no_success_or_pin",
+            "documents::reader_tests::open_commit_rejection_maps_to_unknown_and_cleans_original_pin",
+            "documents::reader_tests::generation_epoch_expiry_and_project_deletion_revoke_existing_sessions",
+            "documents::reader_tests::open_failure_after_pin_creation_rolls_back_without_exposing_a_session",
+            "documents::reader_tests::revoked_or_advanced_session_never_delivers_cached_bytes"
+          ]
+        }
+      ]
+    },
+    {
+      "command": "core-full",
+      "passed": 266,
+      "failed": 0,
+      "ignored": 0,
+      "groups": [
+        {
+          "binary": "unittests src/lib.rs",
+          "test_names": [
+            "blobs::tests::file_and_upload_logical_length_quotas_precede_hashing_and_writing",
+            "blobs::tests::failed_ledger_after_solidification_keeps_staging_and_object_independent",
+            "blobs::tests::deleting_rejects_new_read_or_same_digest_upload",
+            "blobs::tests::kill_fixture",
+            "blobs::tests::corrupt_existing_object_and_dangling_symlink_are_never_replaced",
+            "blobs::tests::gc_and_publish_barrier_preserves_either_upload_pin_or_reference",
+            "blobs::tests::gc_and_reader_barrier_covers_reader_after_upload_pin_release",
+            "blobs::tests::pinned_state_alone_does_not_replace_a_durable_upload_pin",
+            "blobs::tests::partial_publication_copy_is_not_reused_and_unknown_uploads_are_not_cleaned",
+            "blobs::tests::publication_binds_expected_bytes_project_revision_and_real_transaction",
+            "blobs::tests::rename_then_failed_pin_commit_can_retry_existing_target_without_overwrite",
+            "blobs::tests::pending_unknown_never_expire_and_lookup_does_not_recover",
+            "blobs::tests::real_paper_effect_receipt_and_blob_reference_survive_or_roll_back_together",
+            "documents::candidate_tests::duplicate_preparation_is_query_only_and_conflicting_binding_is_rejected",
+            "documents::candidate_tests::expiry_after_durable_pin_is_unknown_and_never_source_success",
+            "documents::candidate_tests::late_seal_failure_leaves_unpublished_object_and_query_only_unknown",
+            "documents::candidate_tests::missing_pin_or_corrupt_object_is_query_only_unknown",
+            "documents::candidate_tests::new_bytes_are_private_sealed_unvalidated_and_never_publish",
+            "documents::candidate_tests::oversize_nonpayload_fields_fail_before_status_decode",
+            "documents::candidate_tests::partial_staging_restart_preserves_candidate_without_blocking_unrelated_gc",
+            "documents::candidate_tests::reservation_failure_has_no_upload_or_output_effect",
+            "documents::candidate_tests::restart_retains_prepared_pin_but_never_adopts_original_execution_authority",
+            "documents::candidate_tests::revocation_conflict_invalid_input_and_foreign_publication_fail_closed",
+            "documents::candidate_tests::source_head_advance_rejects_old_candidate_without_latest_substitution",
+            "documents::history_tests::advancing_parent_head_does_not_reuse_old_history_policy",
+            "documents::history_tests::canonical_history_corruption_and_missing_revision_are_not_substituted",
+            "documents::history_tests::historical_and_parent_revocation_expiry_generation_and_project_are_current",
+            "documents::history_tests::historical_identity_scope_schema_and_read_only_policy_fail_closed",
+            "documents::history_tests::history_denies_without_explicit_target_policy_and_then_reads_exact_snapshot",
+            "documents::history_tests::old_policy_is_not_inherited_by_a_new_parent_grant_generation",
+            "documents::history_tests::text_label_roundtrips_without_default_utf8_or_reader_capability",
+            "blobs::tests::real_sigkill_and_reopen_at_twelve_cross_media_windows",
+            "documents::history_tests::wrong_history_schema_is_rejected_without_changing_document_store",
+            "documents::reader_tests::cleanup_failure_withholds_bytes_and_poisoned_host_refuses_new_sessions",
+            "documents::reader_tests::corrupt_oversize_blob_length_is_rejected_without_creating_reader_pin",
+            "documents::reader_tests::bounded_sessions_idle_absolute_lifetime_and_invalid_chunk_release_pins",
+            "documents::reader_tests::dropping_host_releases_sessions_before_reopening_same_store",
+            "documents::reader_tests::deleted_pin_or_same_length_corruption_invalidates_session",
+            "documents::reader_tests::exact_metadata_and_sequential_bytes_close_at_eof",
+            "documents::reader_tests::inspect_grant_cannot_open_bytes_and_forged_scope_never_substitutes_source",
+            "documents::reader_tests::generation_epoch_expiry_and_project_deletion_revoke_existing_sessions",
+            "documents::reader_tests::one_shot_callback_failure_and_cleanup_failure_return_no_success_or_pin",
+            "documents::candidate_tests::candidate_gc_crosses_page_boundary_preserving_exact_objects_and_project_quotas",
+            "documents::reader_tests::open_failure_after_pin_creation_rolls_back_without_exposing_a_session",
+            "documents::reader_tests::one_shot_view_is_live_bounded_and_tail_rechecks_expiry_before_delivery",
+            "documents::reader_tests::open_commit_rejection_maps_to_unknown_and_cleans_original_pin",
+            "documents::storage_tests::clone_and_late_receipt_failure_roll_back_together",
+            "documents::storage_tests::clone_late_metadata_failure_and_revision_overflow_leave_original_intact",
+            "documents::reader_tests::revoked_or_advanced_session_never_delivers_cached_bytes",
+            "documents::storage_tests::clone_reference_requires_same_project_ready_source_and_unique_reference",
+            "documents::storage_tests::clone_rejects_changed_source_stale_base_and_foreign_transaction",
+            "documents::storage_tests::clone_verifies_real_source_file_hash_and_missing_file",
+            "documents::storage_tests::tail_grant_rechecks_revocation_expiry_generation_epoch_and_project",
+            "documents::storage_tests::copy_clone_commits_same_bytes_and_revision_without_upload_or_staging",
+            "documents::storage_tests::tail_grant_rejects_foreign_transaction_and_mismatched_document_binding",
+            "review_lifecycle::tests::committed_claims_are_preserved_and_partial_committed_schema_is_refused",
+            "review_lifecycle::tests::empty_file_from_interrupted_creation_initializes_without_replacement",
+            "review_lifecycle::tests::uncommitted_ddl_reopens_and_initializes_the_original_database",
+            "documents::storage_tests::tail_grant_survives_own_cas_without_authorizing_old_revision_reads",
+            "documents::candidate_tests::candidate_count_and_expected_byte_admission_limits_precede_file_writes",
+            "research::resource_tests::real_opaque_uploads_are_not_aggregated_when_sealing_or_importing"
+          ]
+        },
+        {
+          "binary": "unittests src/bin/business_worker.rs",
+          "test_names": [
+            "blobs::tests::file_and_upload_logical_length_quotas_precede_hashing_and_writing",
+            "blobs::tests::failed_ledger_after_solidification_keeps_staging_and_object_independent",
+            "blobs::tests::deleting_rejects_new_read_or_same_digest_upload",
+            "blobs::tests::kill_fixture",
+            "blobs::tests::gc_and_publish_barrier_preserves_either_upload_pin_or_reference",
+            "blobs::tests::corrupt_existing_object_and_dangling_symlink_are_never_replaced",
+            "blobs::tests::gc_and_reader_barrier_covers_reader_after_upload_pin_release",
+            "blobs::tests::pinned_state_alone_does_not_replace_a_durable_upload_pin",
+            "blobs::tests::publication_binds_expected_bytes_project_revision_and_real_transaction",
+            "blobs::tests::partial_publication_copy_is_not_reused_and_unknown_uploads_are_not_cleaned",
+            "blobs::tests::rename_then_failed_pin_commit_can_retry_existing_target_without_overwrite",
+            "blobs::tests::pending_unknown_never_expire_and_lookup_does_not_recover",
+            "blobs::tests::real_paper_effect_receipt_and_blob_reference_survive_or_roll_back_together",
+            "documents::candidate_tests::duplicate_preparation_is_query_only_and_conflicting_binding_is_rejected",
+            "documents::candidate_tests::expiry_after_durable_pin_is_unknown_and_never_source_success",
+            "documents::candidate_tests::late_seal_failure_leaves_unpublished_object_and_query_only_unknown",
+            "documents::candidate_tests::missing_pin_or_corrupt_object_is_query_only_unknown",
+            "documents::candidate_tests::new_bytes_are_private_sealed_unvalidated_and_never_publish",
+            "documents::candidate_tests::oversize_nonpayload_fields_fail_before_status_decode",
+            "documents::candidate_tests::partial_staging_restart_preserves_candidate_without_blocking_unrelated_gc",
+            "documents::candidate_tests::reservation_failure_has_no_upload_or_output_effect",
+            "documents::candidate_tests::restart_retains_prepared_pin_but_never_adopts_original_execution_authority",
+            "documents::candidate_tests::revocation_conflict_invalid_input_and_foreign_publication_fail_closed",
+            "documents::candidate_tests::source_head_advance_rejects_old_candidate_without_latest_substitution",
+            "documents::history_tests::advancing_parent_head_does_not_reuse_old_history_policy",
+            "documents::history_tests::canonical_history_corruption_and_missing_revision_are_not_substituted",
+            "documents::history_tests::historical_and_parent_revocation_expiry_generation_and_project_are_current",
+            "documents::history_tests::historical_identity_scope_schema_and_read_only_policy_fail_closed",
+            "documents::history_tests::history_denies_without_explicit_target_policy_and_then_reads_exact_snapshot",
+            "documents::history_tests::old_policy_is_not_inherited_by_a_new_parent_grant_generation",
+            "documents::history_tests::text_label_roundtrips_without_default_utf8_or_reader_capability",
+            "documents::history_tests::wrong_history_schema_is_rejected_without_changing_document_store",
+            "blobs::tests::real_sigkill_and_reopen_at_twelve_cross_media_windows",
+            "documents::reader_tests::cleanup_failure_withholds_bytes_and_poisoned_host_refuses_new_sessions",
+            "documents::reader_tests::corrupt_oversize_blob_length_is_rejected_without_creating_reader_pin",
+            "documents::reader_tests::bounded_sessions_idle_absolute_lifetime_and_invalid_chunk_release_pins",
+            "documents::reader_tests::dropping_host_releases_sessions_before_reopening_same_store",
+            "documents::candidate_tests::candidate_gc_crosses_page_boundary_preserving_exact_objects_and_project_quotas",
+            "documents::reader_tests::deleted_pin_or_same_length_corruption_invalidates_session",
+            "documents::reader_tests::inspect_grant_cannot_open_bytes_and_forged_scope_never_substitutes_source",
+            "documents::reader_tests::exact_metadata_and_sequential_bytes_close_at_eof",
+            "documents::reader_tests::one_shot_callback_failure_and_cleanup_failure_return_no_success_or_pin",
+            "documents::reader_tests::open_commit_rejection_maps_to_unknown_and_cleans_original_pin",
+            "documents::reader_tests::one_shot_view_is_live_bounded_and_tail_rechecks_expiry_before_delivery",
+            "documents::reader_tests::open_failure_after_pin_creation_rolls_back_without_exposing_a_session",
+            "documents::reader_tests::generation_epoch_expiry_and_project_deletion_revoke_existing_sessions",
+            "documents::storage_tests::clone_and_late_receipt_failure_roll_back_together",
+            "documents::storage_tests::clone_late_metadata_failure_and_revision_overflow_leave_original_intact",
+            "documents::reader_tests::revoked_or_advanced_session_never_delivers_cached_bytes",
+            "documents::storage_tests::clone_reference_requires_same_project_ready_source_and_unique_reference",
+            "documents::storage_tests::clone_rejects_changed_source_stale_base_and_foreign_transaction",
+            "documents::storage_tests::clone_verifies_real_source_file_hash_and_missing_file",
+            "documents::storage_tests::tail_grant_rechecks_revocation_expiry_generation_epoch_and_project",
+            "documents::storage_tests::copy_clone_commits_same_bytes_and_revision_without_upload_or_staging",
+            "documents::storage_tests::tail_grant_rejects_foreign_transaction_and_mismatched_document_binding",
+            "review_lifecycle::tests::committed_claims_are_preserved_and_partial_committed_schema_is_refused",
+            "documents::storage_tests::tail_grant_survives_own_cas_without_authorizing_old_revision_reads",
+            "review_lifecycle::tests::empty_file_from_interrupted_creation_initializes_without_replacement",
+            "review_lifecycle::tests::uncommitted_ddl_reopens_and_initializes_the_original_database",
+            "research::resource_tests::real_opaque_uploads_are_not_aggregated_when_sealing_or_importing",
+            "documents::candidate_tests::candidate_count_and_expected_byte_admission_limits_precede_file_writes"
+          ]
+        },
+        {
+          "binary": "tests/agent_child_tools.rs",
+          "test_names": [
+            "child_tool_subset_is_priced_and_enforced_on_the_actual_model_response",
+            "preprepared_plan_cannot_bypass_a_later_unknown_request",
+            "confirmation_preview_contains_the_exact_prior_history_and_wire_fields"
+          ]
+        },
+        {
+          "binary": "tests/agent_owner.rs",
+          "test_names": [
+            "cancel_before_attempt_releases_only_held_identity_and_is_not_replayable",
+            "config_or_credential_changes_deny_dispatch_and_suppress_revoked_disclosure",
+            "fixed_transport_diagnostic_survives_reopen_without_settlement_or_raw_text",
+            "cancelled_claim_with_empty_response_never_refunds_attempt_count_after_restart",
+            "cumulative_budget_survives_reconfiguration_and_unknown_is_not_refunded",
+            "fresh_product_settings_and_blocked_chat_plan_do_not_inherit_canary_authority",
+            "malformed_or_over_bound_usage_keeps_unknown_hold_without_answer",
+            "complete_chat_usage_settles_once_and_restores_bounded_conversation_history",
+            "reserve_claim_exactly_once_and_unknown_never_resends_after_reopen",
+            "validated_search_sources_and_empty_result_follow_existing_settlement_contract",
+            "process_death_after_reservation_or_claim_keeps_original_hold_without_replay"
+          ]
+        },
+        {
+          "binary": "tests/agent_product.rs",
+          "test_names": [
+            "missing_live_owners_are_explicitly_unavailable_without_synthetic_fallback",
+            "response_requires_full_terminal_answer_and_usage_not_http_success",
+            "old_epoch_read_scope_cannot_be_reused_after_service_restart",
+            "tools_reject_writes_scope_injection_duplicate_keys_and_unbounded_pages",
+            "suppliers_are_current_database_reads_and_deleted_records_are_not_context",
+            "newly_added_paper_is_read_from_selected_project_without_raw_json_or_blob_path"
+          ]
+        },
+        {
+          "binary": "tests/agent_tools.rs",
+          "test_names": [
+            "cancellation_restart_and_unknown_never_resume_or_approve_tool_disclosure",
+            "disclosure_is_not_inferred_from_budget_or_copied_to_new_scope_or_generation",
+            "production_unbound_proof_never_auto_sends_approved_tool_followup",
+            "read_call_requires_exact_visible_disclosure_then_new_followup_identity_and_budget",
+            "cancelled_or_changed_suggestion_is_revalidated_before_any_business_commit",
+            "malformed_function_calls_remain_unknown_and_have_no_business_effect",
+            "suggestion_only_prepares_then_requires_original_committed_receipt_and_disclosure"
+          ]
+        },
+        {
+          "binary": "tests/agent_workflow.rs",
+          "test_names": [
+            "disabled_skill_blocks_existing_queued_work_and_invalid_arguments_do_not_create_children",
+            "actual_owner_settlement_completes_remote_child_without_accepted_answer_shortcut",
+            "cancellation_after_settlement_preserves_answers_and_releases_active_child_slots",
+            "disabling_a_skill_permanently_revokes_its_prepared_remote_plan",
+            "local_child_reads_actual_supplier_and_emits_only_host_activity",
+            "attempted_unknown_retains_owner_hold_and_late_cancelled_response_is_not_published",
+            "paper_skill_reads_selected_project_and_skill_settings_do_not_leak_between_projects",
+            "prepared_child_and_normal_chat_are_rechecked_after_another_child_becomes_unknown",
+            "recovery_is_read_only_and_never_replays_and_owner_is_exclusive",
+            "remote_tool_allowlist_is_compiled_skill_metadata_and_not_instructions_in_task",
+            "scope_forgery_unknown_actions_and_fields_are_rejected",
+            "real_owner_blocked_plan_binds_unique_child_and_cancellation_is_not_fake_completion",
+            "skill_toggle_digest_and_child_budgets_are_real",
+            "real_owner_followup_chain_tracks_leaf_unknown_and_cancels_every_known_request",
+            "unproven_tool_followup_is_blocked_not_confirmable_and_polling_keeps_original_budget",
+            "large_real_local_results_keep_complete_storage_but_project_bounded_honest_previews"
+          ]
+        },
+        {
+          "binary": "tests/archive.rs",
+          "test_names": [
+            "accepts_unsigned_descriptor",
+            "contract_entries_bind_exact_snapshot_digest_and_length",
+            "actual_archive409_encoder_round_trip_fixture",
+            "overlap_guard",
+            "descriptor_and_decoded_content_are_independent_checks",
+            "directories_validated_but_not_exposed",
+            "refuses_overlapping_ranges_and_unknown_extra_fields",
+            "rejects_path_aliases_links_and_special_files",
+            "symlink_guard",
+            "rejects_offsets_local_conflicts_flags_zip64_and_quotas",
+            "traversal_guard",
+            "stored_deflated_and_signed_descriptor_metadata",
+            "all_truncations_fail_without_panicking"
+          ]
+        },
+        {
+          "binary": "tests/blobs.rs",
+          "test_names": [
+            "archive_upload_uses_actual_archive409_metadata_reader",
+            "equal_content_reuses_verified_object_but_retains_independent_upload_pins",
+            "durable_upload_and_repeatable_lease_reads",
+            "input_is_opaque_and_chunks_and_kinds_are_bounded",
+            "controlled_paths_refuse_symlinks_and_preserve_outside_files",
+            "lookup_is_read_only_and_restart_reconciliation_is_explicit",
+            "persistent_reader_pin_outlives_upload_pin_until_explicit_close",
+            "private_snapshot_survives_source_removal_and_does_not_overwrite_corruption"
+          ]
+        },
+        {
+          "binary": "tests/business.rs",
+          "test_names": [
+            "cross_process_owner_lock_is_released_only_after_process_exit",
+            "corrupt_receipt_tail_rolls_back_all_effects_and_never_reexecutes_pending",
+            "duplicate_binding_conflict_cas_and_same_name_new_intent",
+            "grant_expiring_during_actual_sql_rejects_and_rolls_back_the_effect",
+            "initialize_is_explicit_and_never_truncates_or_migrates",
+            "current_schema_label_does_not_authorize_a_missing_required_table_or_column",
+            "project_create_and_reads_are_persistent_workspace_bound_operations",
+            "old_schema_v1_missing_tail_table_is_refused_without_changing_pending_identity",
+            "real_grants_expiry_revoke_generation_scope_and_epoch_are_required",
+            "sigkill_after_actual_sql_rolls_back_and_original_pending_cannot_redispatch",
+            "sqlite_constraints_and_corrupt_files_have_fixed_typed_errors",
+            "sigkill_after_commit_before_reply_recovers_exact_original_receipt",
+            "supplier_full_payload_update_soft_delete_restore_and_original_receipt",
+            "sqlite_revocation_transaction_barrier_precedes_business_admission"
+          ]
+        },
+        {
+          "binary": "tests/contract.rs",
+          "test_names": [
+            "ct02_file_metadata_bounds_and_binding_are_checked",
+            "ct01_revisions_are_lossless_canonical_text",
+            "ct01_eight_fields_normalize_with_dart_rules",
+            "ct01_reuses_supplier_name_boundary_vectors",
+            "ct02_manual_paper_requires_project_title_and_blob",
+            "ct03_receipt_and_unknown_states_have_distinct_invariants",
+            "ct03_every_security_fact_changes_retry_binding",
+            "ct04_strict_decode_rejects_duplicates_unknown_and_versions",
+            "ct02_import_is_opaque_metadata_not_manual_paper",
+            "ct04_digest_order_and_fixture_round_trip"
+          ]
+        },
+        {
+          "binary": "tests/contract_vectors_additional.rs",
+          "test_names": [
+            "ct01_ct04_shared_codec_vectors_use_real_contract_and_lossless_wire_text"
+          ]
+        },
+        {
+          "binary": "tests/document_storage.rs",
+          "test_names": [
+            "corrupted_revision_keys_or_missing_snapshot_fail_closed",
+            "expires_deleted_project_and_missing_permissions_fail_closed",
+            "delete_expiry_at_publication_tail_preserves_previous_annotation",
+            "annotation_cas_tombstones_and_ai_provenance_are_durable",
+            "foreign_upload_and_bad_schema_are_rejected_without_partial_metadata",
+            "export_is_deterministic_sidecar_data_with_origin_and_tombstones",
+            "invalid_or_cross_revision_anchors_do_not_leave_rows",
+            "late_annotation_failure_rolls_back_history",
+            "grant_scope_revision_epoch_generation_and_revoke_are_current",
+            "immutable_document_revisions_invalidate_access_and_preserve_old_anchors",
+            "late_metadata_failure_rolls_back_blob_publication_and_head",
+            "save_expiry_at_publication_tail_rolls_back_sidecar_and_history",
+            "synthetic_metadata_blob_and_annotation_survive_reopen",
+            "oversized_persistent_payloads_are_rejected_before_decode",
+            "writes_cannot_strand_existing_annotations_above_read_budget"
+          ]
+        },
+        {
+          "binary": "tests/documents.rs",
+          "test_names": [
+            "anchors_are_bound_to_identity_revision_and_format",
+            "capability_for_other_operation_or_format_grants_nothing",
+            "cached_metadata_never_bypasses_revocation_or_unknown_authority",
+            "current_host_and_operation_capability_must_both_allow_read",
+            "declared_format_never_enables_a_reader",
+            "each_missing_pdf_geometry_field_remains_unresolved",
+            "invalid_document_metadata_is_rejected_and_revision_is_preserved",
+            "host_errors_and_invalid_or_stale_lease_fail_closed",
+            "normalized_regions_preserve_explicit_rotation_and_reject_invalid_crop",
+            "nonfinite_empty_overflowing_and_invalid_normalized_rectangles_fail",
+            "old_revision_or_other_document_is_rejected",
+            "read_contract_cannot_admit_edit_even_when_both_lists_allow_it",
+            "pdf_geometry_keeps_unknowns_without_guessing",
+            "stale_grant_epoch_generation_and_id_are_rejected",
+            "structured_anchors_validate_ids_ranges_and_package_parts",
+            "visible_pdf_selection_must_fit_the_declared_crop",
+            "workspace_and_project_are_exact_not_wildcards",
+            "unsupported_and_gated_capabilities_deny"
+          ]
+        },
+        {
+          "binary": "tests/research.rs",
+          "test_names": [
+            "committed_paper_after_process_kill_recovers_original_receipt_and_private_pdf",
+            "directory_and_real_stored_zip_produce_equivalent_records_and_bad_decoded_crc_fails",
+            "api26_eleven_record_deflated_import_with_three_identical_empty_logs_commits",
+            "cited_same_revision_changes_reject_atomically_and_next_revision_is_retained",
+            "forged_wire_records_and_snapshot_project_changes_do_not_become_imports",
+            "import_domain_tail_tampering_rolls_back_records_source_and_publication",
+            "explicit_ambiguous_binding_choice_survives_refresh",
+            "imported_raw_json_duplicate_revisions_and_material_binding_are_preserved",
+            "malformed_jsonl_paths_and_no_recognized_material_are_rejected_before_publication",
+            "loose_imported_metadata_uses_fallback_title_and_does_not_apply_manual_constraints",
+            "manual_kind_project_and_exact_upload_binding_cannot_be_forged",
+            "receipt_fault_rolls_back_paper_publication_and_cancel_blocks_original_retry",
+            "prefixed_skill_root_arxiv_manifest_binds_verified_pdf_hash",
+            "manual_pdf_is_real_private_persistent_and_shares_catalog_with_import",
+            "refresh_only_removes_missing_uncited_entries_and_keeps_cited_document_bytes",
+            "jsonl_larger_than_wire_limit_uses_small_verified_source_ref_command"
+          ]
+        },
+        {
+          "binary": "tests/resource_boundaries_additional.rs",
+          "test_names": [
+            "zip_metadata_exact_expansion_and_member_count_and_one_over",
+            "actual_pdf_and_document_exact_thirty_mib_and_one_extra_byte",
+            "seal_actual_total_exact_one_fifty_mib_then_one_byte_and_member_count_refuse_without_effects"
+          ]
+        },
+        {
+          "binary": "tests/store_admission_additional.rs",
+          "test_names": [
+            "real_os_file_size_write_failure_has_no_business_or_receipt_effect",
+            "sqlite_rejects_pending_domain_history_business_history_and_receipt_writes_atomically",
+            "os_process_races_preserve_original_intent_and_reject_stale_cas_after_owner_exit"
+          ]
+        },
+        {
+          "binary": "Doc-tests muyon_core",
+          "test_names": []
+        }
+      ]
+    },
+    {
+      "command": "independent-probes",
+      "passed": 4,
+      "failed": 2,
+      "ignored": 0,
+      "groups": [
+        {
+          "binary": "External public Reader probes",
+          "test_names": [
+            "independent_eof_cleanup_expiry_must_withhold_returned_chunk",
+            "independent_one_shot_post_pin_expiry_rolls_back_before_callback_or_delivery",
+            "independent_one_shot_cleanup_expiry_must_withhold_returned_bytes",
+            "independent_reader_lease_loss_and_held_file_hash_change_withhold_next_bytes",
+            "independent_reader_revision_advance_never_substitutes_latest_for_old_handle",
+            "independent_reader_revalidates_grant_after_successful_first_chunk"
+          ]
+        }
+      ]
+    }
+  ],
+  "shared_library_worker_source_test_count": 61,
+  "notes": [
+    "Owner Reader13 repeated in core library and worker; core266 execution count is not independent coverage.",
+    "Independent6 comprises4 pass and2 genuine cleanup-tail behavior RED. No author or product code changed.",
+    "Initial private API probe compile failure ran zero tests and is not a vulnerability reproduction."
+  ]
+}

@@ -1,0 +1,122 @@
+{
+  "at_utc": "2026-10-22T06:50:45.048577+00:00",
+  "requested_source_unchanged": true,
+  "production_code_edits": false,
+  "pure_format_patch_created": false,
+  "results": [
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/workspace/Muyon-reader-core-verification",
+        "rev-parse",
+        "HEAD"
+      ],
+      "exit_status": 0,
+      "stdout": "ff3cc928311afc12bee3205f28b662c6b7499b34\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/workspace/Muyon-reader-core-verification",
+        "status",
+        "--short"
+      ],
+      "exit_status": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "git",
+        "diff",
+        "--exit-code",
+        "b3592e9bc1b0d9c3c52800e5ec1f566e36b8a297",
+        "ff3cc928311afc12bee3205f28b662c6b7499b34",
+        "--",
+        "crates"
+      ],
+      "exit_status": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "git",
+        "diff",
+        "--exit-code",
+        "f076e068e65b59b1b0aff0efefd9fa540f176e86",
+        "--",
+        "crates",
+        "experiments"
+      ],
+      "exit_status": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/workspace/Muyon-group",
+        "rev-parse",
+        "HEAD"
+      ],
+      "exit_status": 0,
+      "stdout": "7fde617bab8f45644820590529def5b2f2193454\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/workspace/Muyon-group",
+        "status",
+        "--short"
+      ],
+      "exit_status": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/workspace/Muyon-bot-provider-verification",
+        "rev-parse",
+        "HEAD"
+      ],
+      "exit_status": 0,
+      "stdout": "c4bc82b60f919eeedb7e466279efb783bc31a562\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/workspace/Muyon-bot-provider-verification",
+        "status",
+        "--short"
+      ],
+      "exit_status": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "git",
+        "ls-remote",
+        "origin",
+        "refs/heads/task/document-core-contracts-20261022",
+        "refs/heads/task/document-core-verification-20261022",
+        "refs/heads/main",
+        "refs/heads/develop"
+      ],
+      "exit_status": 0,
+      "stdout": "0ab2c4f667681b9aacb017f8cd2eea6f576cf78e\trefs/heads/develop\ncc7c8d14d30e3d3c4c7c6cb2bf2059a99e46e003\trefs/heads/main\nfdcdd48e8c85896be4310cc90e63046db65cb6cf\trefs/heads/task/document-core-contracts-20261022\nf076e068e65b59b1b0aff0efefd9fa540f176e86\trefs/heads/task/document-core-verification-20261022\n",
+      "stderr": ""
+    }
+  ]
+}

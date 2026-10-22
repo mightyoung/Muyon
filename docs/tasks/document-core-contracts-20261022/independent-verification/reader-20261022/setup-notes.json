@@ -1,0 +1,11 @@
+{
+  "record_type": "Tool transcript summary, not an original per-process log",
+  "initial_fetch": "RPC HTTP503; git show bad object and worktree add invalid reference; no target worktree existed, no test ran",
+  "checked_before_retry": [
+    "git worktree list: no target worktree",
+    "git cat-file target: object unavailable",
+    "git ls-remote: exact requested branch hash ff3cc928311afc12bee3205f28b662c6b7499b34"
+  ],
+  "retry": "Same read-only branch fetch succeeded; detached target worktree then created",
+  "policy_denial": false
+}

@@ -1,0 +1,20 @@
+<?xml version='1.0' encoding='utf-8'?>
+<testsuite name="independent-probes" tests="6" failures="2" errors="0" skipped="0">
+  <properties>
+    <property name="origin" value="derived from actual raw libtest; RED retained, not native runner XML" />
+    <property name="raw_sha256" value="d676bf6ac2066cea7201b93459339ce63c431a57632f83ee692b42942459dd60" />
+  </properties>
+  <testcase classname="External public Reader probes" name="independent_eof_cleanup_expiry_must_withhold_returned_chunk">
+    <failure message="Expected delivery rejection; actual original Reader returned success after cleanup expired grant">(19969) panicked at /tmp/muyon-reader-probes-original.rs:810:5:
+EOF must withhold chunk when cleanup expired live grant after initial transaction commit
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace</failure>
+  </testcase>
+  <testcase classname="External public Reader probes" name="independent_one_shot_post_pin_expiry_rolls_back_before_callback_or_delivery" />
+  <testcase classname="External public Reader probes" name="independent_one_shot_cleanup_expiry_must_withhold_returned_bytes">
+    <failure message="Expected delivery rejection; actual original Reader returned success after cleanup expired grant">(19970) panicked at /tmp/muyon-reader-probes-original.rs:800:5:
+Reader must withhold delivery when real cleanup invalidated grant before COMMIT/result</failure>
+  </testcase>
+  <testcase classname="External public Reader probes" name="independent_reader_lease_loss_and_held_file_hash_change_withhold_next_bytes" />
+  <testcase classname="External public Reader probes" name="independent_reader_revision_advance_never_substitutes_latest_for_old_handle" />
+  <testcase classname="External public Reader probes" name="independent_reader_revalidates_grant_after_successful_first_chunk" />
+</testsuite>

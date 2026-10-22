@@ -1,0 +1,31 @@
+{
+  "at_utc": "2026-10-22T06:51:36.194295+00:00",
+  "raw_GREEN_RED_and_harness_error_bytes_preserved": true,
+  "results": [
+    {
+      "argv": [
+        "git",
+        "diff",
+        "--cached",
+        "--check"
+      ],
+      "exit_status": 2,
+      "stdout": "docs/tasks/document-core-contracts-20261022/independent-verification/reader-20261022/original/core-full.stdout.log:356: new blank line at EOF.\ndocs/tasks/document-core-contracts-20261022/independent-verification/reader-20261022/original/probes/probe-tests.stdout.log:19: new blank line at EOF.\ndocs/tasks/document-core-contracts-20261022/independent-verification/reader-20261022/original/reader-targeted.stdout.log:18: new blank line at EOF.\ndocs/tasks/document-core-contracts-20261022/independent-verification/reader-20261022/original/scoped-fmt.stdout.log:72: trailing whitespace.\n+ \ndocs/tasks/document-core-contracts-20261022/independent-verification/reader-20261022/original/scoped-fmt.stdout.log:76: trailing whitespace.\n+ \ndocs/tasks/document-core-contracts-20261022/independent-verification/reader-20261022/original/scoped-fmt.stdout.log:113: trailing whitespace.\n+ \ndocs/tasks/document-core-contracts-20261022/independent-verification/reader-20261022/original/scoped-fmt.stdout.log:151: trailing whitespace.\n+ \ndocs/tasks/document-core-contracts-20261022/independent-verification/reader-20261022/original/scoped-fmt.stdout.log:415: trailing whitespace.\n+ \ndocs/tasks/document-core-contracts-20261022/independent-verification/reader-20261022/original/scoped-fmt.stdout.log:556: trailing whitespace.\n+ \ndocs/tasks/document-core-contracts-20261022/independent-verification/reader-20261022/original/scoped-fmt.stdout.log:594: trailing whitespace.\n+ \ndocs/tasks/document-core-contracts-20261022/independent-verification/reader-20261022/original/scoped-fmt.stdout.log:655: trailing whitespace.\n+ \ndocs/tasks/document-core-contracts-20261022/independent-verification/reader-20261022/original/scoped-fmt.stdout.log:855: trailing whitespace.\n+ \ndocs/tasks/document-core-contracts-20261022/independent-verification/reader-20261022/original/scoped-fmt.stdout.log:946: trailing whitespace.\n+ \ndocs/tasks/document-core-contracts-20261022/independent-verification/reader-20261022/original/scoped-fmt.stdout.log:950: trailing whitespace.\n+ \ndocs/tasks/document-core-contracts-20261022/independent-verification/reader-20261022/original/scoped-fmt.stdout.log:987: trailing whitespace.\n+ \ndocs/tasks/document-core-contracts-20261022/independent-verification/reader-20261022/original/scoped-fmt.stdout.log:1025: trailing whitespace.\n+ \ndocs/tasks/document-core-contracts-20261022/independent-verification/reader-20261022/original/scoped-fmt.stdout.log:1289: trailing whitespace.\n+ \ndocs/tasks/document-core-contracts-20261022/independent-verification/reader-20261022/original/scoped-fmt.stdout.log:1430: trailing whitespace.\n+ \ndocs/tasks/document-core-contracts-20261022/independent-verification/reader-20261022/original/scoped-fmt.stdout.log:1468: trailing whitespace.\n+ \ndocs/tasks/document-core-contracts-20261022/independent-verification/reader-20261022/original/scoped-fmt.stdout.log:1529: trailing whitespace.\n+ \ndocs/tasks/document-core-contracts-20261022/independent-verification/reader-20261022/original/scoped-fmt.stdout.log:1729: trailing whitespace.\n+ \ndocs/tasks/document-core-contracts-20261022/independent-verification/reader-20261022/original/scoped-fmt.stdout.log:1768: trailing whitespace.\n+ \ndocs/tasks/document-core-contracts-20261022/independent-verification/reader-20261022/original/scoped-fmt.stdout.log:1772: trailing whitespace.\n+ \ndocs/tasks/document-core-contracts-20261022/independent-verification/reader-20261022/original/scoped-fmt.stdout.log:1809: trailing whitespace.\n+ \ndocs/tasks/document-core-contracts-20261022/independent-verification/reader-20261022/original/scoped-fmt.stdout.log:1847: trailing whitespace.\n+ \ndocs/tasks/document-core-contracts-20261022/independent-verification/reader-20261022/original/scoped-fmt.stdout.log:2111: trailing whitespace.\n+ \ndocs/tasks/document-core-contracts-20261022/independent-verification/reader-20261022/original/scoped-fmt.stdout.log:2252: trailing whitespace.\n+ \ndocs/tasks/document-core-contracts-20261022/independent-verification/reader-20261022/original/scoped-fmt.stdout.log:2290: trailing whitespace.\n+ \ndocs/tasks/document-core-contracts-20261022/independent-verification/reader-20261022/original/scoped-fmt.stdout.log:2351: trailing whitespace.\n+ \ndocs/tasks/document-core-contracts-20261022/independent-verification/reader-20261022/original/scoped-fmt.stdout.log:2551: trailing whitespace.\n+ \n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "git",
+        "diff",
+        "--cached",
+        "--check",
+        "--",
+        ".",
+        ":(exclude)docs/tasks/document-core-contracts-20261022/independent-verification/reader-20261022/**/*.log"
+      ],
+      "exit_status": 0,
+      "stdout": "",
+      "stderr": ""
+    }
+  ]
+}

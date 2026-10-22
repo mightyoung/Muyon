@@ -1,0 +1,12 @@
+{
+  "initial_probe_compile": "exit1 E0624; no test ran because root_dir is crate-private",
+  "retained_directory": "original/probes-initial-private-api",
+  "correction": "Only external probe path construction changed to fixture SQLite path + .blobs namespace, matching existing BusinessStore source. Author source never changed.",
+  "actual_corrected_probe_compile_exit": 0,
+  "actual_corrected_probe_tests_exit": 101,
+  "actual_product_red": [
+    "independent_one_shot_cleanup_expiry_must_withhold_returned_bytes",
+    "independent_eof_cleanup_expiry_must_withhold_returned_chunk"
+  ],
+  "applicability": "Both red tests first assert actual grant expiry=0 and reader pins=0, then fail only the expected-withhold assertion; current code returned59 bytes."
+}
