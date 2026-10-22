@@ -1,5 +1,7 @@
 # 任务派发索引
 
+> **2026-10-22 文档归档入口：** [三产品研究、阶段任务与 UI v1.0](DESIGN-INTAKE-20261022.md)；[完整原件及九图](../design/2026-10-22/README.md)。本批只归档，不把计划/派发当完工。当前候选与旧 CI/设备证据的版本边界见[校正说明](../design/2026-10-22/EVIDENCE-NOTES.md)。下文历史索引保留原时态；唯一 develop 合入者仍为 Leader B。
+
 **当前入口：先读[当前状态与默认开启计划](CURRENT-STATUS-2026-10-10.md)，再读[当前交接](HANDOVER-LEADER.md)与[本批集成审查](AIUI-36-39-integration-review.md)。** [较早状态快照 v1](CURRENT-STATUS-2026-10-10-v1.md)固定8deb，只作历史记录；[下一批交付队列 v1](NEXT-DELIVERIES-2026-10-10-v1.md)保留7773时点规划。角色与规则见 [ADR-0001](../adr/0001-leadership-and-scope-freeze.md)。**当前是第二阶段**：范围见 [ADR-0003](../adr/0003-phase2-scope.md)，计划见[第二至第四阶段路线图](../superpowers/plans/2026-10-07-roadmap-phase2-4.md)（第一阶段已于 2026-10-07 退出）。
 
 ## 规则

@@ -1,0 +1,193 @@
+{
+  "archive_date_utc": "2026-10-22T03:43:46.109041+00:00",
+  "candidate_sha": "f4781e16ddf4e542b983fbd77f266a0071148255",
+  "files": [
+    {
+      "path": "originals/Muyon-三产品借鉴与UI统一改进总纲-v1.0.md",
+      "library_file_id": "libfile_d1ffab06dfa4819180f0affb933237bf",
+      "file_id": "file_00000000b87881f8899a8550f7029aae",
+      "library_version_number": 0,
+      "size_bytes": 23438,
+      "sha256": "7a4537008d4b29474b519add3fcfc83cf41f4bfea531ae70932a331ca5b5b5de",
+      "complete": true,
+      "access_route": "Library whole-file original byte download",
+      "classification": "original research/specification; historical claims retain original time scope"
+    },
+    {
+      "path": "originals/Perplexity-APK-信息收集与展示设计分析.md",
+      "library_file_id": "libfile_dd58851650ec819188d9707fe160846d",
+      "file_id": "file_0000000095fc823083f10b9c40551153",
+      "library_version_number": 0,
+      "size_bytes": 15642,
+      "sha256": "b6526fb48b14fa6e47e727a336e9ea780e7e44217751b9187412624a98b79cd6",
+      "complete": true,
+      "access_route": "Library whole-file original byte download",
+      "classification": "original research/specification; historical claims retain original time scope"
+    },
+    {
+      "path": "originals/Muyon-Perplexity借鉴改进项-v1.0.md",
+      "library_file_id": "libfile_0bb0fe0116808191a3daa38ad25752da",
+      "file_id": "file_000000004f7481fd8abfda0e5b3416c3",
+      "library_version_number": 0,
+      "size_bytes": 18911,
+      "sha256": "ca92e8e8106d3098d4960458358546bba0a00a5092fdc089e8ff4747abf88ff1",
+      "complete": true,
+      "access_route": "Library whole-file original byte download",
+      "classification": "original research/specification; historical claims retain original time scope"
+    },
+    {
+      "path": "originals/Muyon-Muse对话组件借鉴报告-v1.0.md",
+      "library_file_id": "libfile_03bfe1916f4881918b028ae0acac8bfd",
+      "file_id": "file_00000000b7fc81fd8d48c6052793042e",
+      "library_version_number": 0,
+      "size_bytes": 20918,
+      "sha256": "e01e3e1917e437d2bd6dac601f927799212a4945be2d61d4b0ad8c06c7fe12b0",
+      "complete": true,
+      "access_route": "Library whole-file original byte download",
+      "classification": "original research/specification; historical claims retain original time scope"
+    },
+    {
+      "path": "originals/Muyon-Grokbot渐进配置静态分析与改进项-v1.0.md",
+      "library_file_id": "libfile_de7d567abee8819187963fcb5f2dae68",
+      "file_id": "file_00000000b704822fae61e1aec3345366",
+      "library_version_number": 0,
+      "size_bytes": 11981,
+      "sha256": "c43102686095e9ff3f0cb68fa76ba45cefdbf9ca562933c1200ed4c39638946a",
+      "complete": true,
+      "access_route": "Library whole-file original byte download",
+      "classification": "original research/specification; historical claims retain original time scope"
+    },
+    {
+      "path": "originals/Muyon-群组协作研究与任务-v1.0.md",
+      "library_file_id": "libfile_1dc39497fd788191913071611441fa0f",
+      "file_id": "file_00000000729481fda4b5bc288a04dba9",
+      "library_version_number": 0,
+      "size_bytes": 14999,
+      "sha256": "daa78f2b1b08f4abccf0aa8c0ddcc731a78e60563b40f449e057676c902622e5",
+      "complete": true,
+      "access_route": "Library whole-file original byte download",
+      "classification": "original research/specification; historical claims retain original time scope"
+    },
+    {
+      "path": "originals/Muyon-菜单与对话规范-v0.5.md",
+      "library_file_id": "libfile_4b3ae2889b14819190c9ba43c3c96323",
+      "file_id": "file_00000000559881f58b02f451b731f0f2",
+      "library_version_number": 0,
+      "size_bytes": 6218,
+      "sha256": "6c75cfa94f9c632e31ac650b9f51be2fab180934ec3e19eecd7662799797499b",
+      "complete": true,
+      "access_route": "Library whole-file original byte download",
+      "classification": "original research/specification; historical claims retain original time scope"
+    },
+    {
+      "path": "ui-v1.0/Muyon-统一UI规范与覆盖-v1.0.md",
+      "library_file_id": "libfile_a0b55e1cdb208191b7156e193d173c05",
+      "file_id": "file_00000000affc820caadab9d6b5a99732",
+      "library_version_number": 0,
+      "size_bytes": 6818,
+      "sha256": "1b6fdff69cacb64f88a9de5fa5f5125f5f0f4342d98681672a9653d52d36f74c",
+      "complete": true,
+      "access_route": "Library whole-file original byte download",
+      "classification": "original research/specification; historical claims retain original time scope"
+    },
+    {
+      "path": "ui-v1.0/01-菜单与置顶-v1.0.png",
+      "library_file_id": "libfile_60286c78b83481918d08bd484e596b9f",
+      "file_id": "file_00000000221c820d9175d10a08d7d9bf",
+      "library_version_number": 0,
+      "size_bytes": 1191087,
+      "sha256": "b8b10e25efb0618b4d3bd90ee08f60f340b0c8d8e43a67b690b7c4578cbef6ee",
+      "complete": true,
+      "access_route": "Library whole-file original byte download",
+      "classification": "design example, not APK or implemented feature"
+    },
+    {
+      "path": "ui-v1.0/02-会话与证据-v1.0.png",
+      "library_file_id": "libfile_26a07a5c772c8191abd3b3a01d2a8808",
+      "file_id": "file_00000000fdec81f5a39ba48cebea797b",
+      "library_version_number": 0,
+      "size_bytes": 1377698,
+      "sha256": "928a17c0584c9e379207e9166cc806e762fa1661b0256aea0f22c8d65ab618aa",
+      "complete": true,
+      "access_route": "Library whole-file original byte download",
+      "classification": "design example, not APK or implemented feature"
+    },
+    {
+      "path": "ui-v1.0/03-附件处理与未知回执-v1.0.png",
+      "library_file_id": "libfile_9abf280e469c8191a6171792cb9086be",
+      "file_id": "file_00000000ea1881f59fdcb0b3d01862ca",
+      "library_version_number": 0,
+      "size_bytes": 1590434,
+      "sha256": "3c26408bd04b2e8cd1a303f1c4ca515a163c7d4fe0662ca0d5564f37ebff20e9",
+      "complete": true,
+      "access_route": "Library whole-file original byte download",
+      "classification": "design example, not APK or implemented feature"
+    },
+    {
+      "path": "ui-v1.0/04-原生表单与草稿-v1.0.png",
+      "library_file_id": "libfile_f25f1d2770b881918a0ac21559475340",
+      "file_id": "file_000000004f6081f592ad50584cf4e0ef",
+      "library_version_number": 0,
+      "size_bytes": 1539624,
+      "sha256": "708d9b00df91c7fc9745af67f9b30737771fa207a7759caabd37e9bf4f9a7968",
+      "complete": true,
+      "access_route": "Library whole-file original byte download",
+      "classification": "design example, not APK or implemented feature"
+    },
+    {
+      "path": "ui-v1.0/05-业务确认与回执-v1.0.png",
+      "library_file_id": "libfile_773b2f3339e4819191c41591c2cbaf7a",
+      "file_id": "file_00000000e608822faa4870866e5ece7b",
+      "library_version_number": 0,
+      "size_bytes": 1537144,
+      "sha256": "dc15b10101cd5a3810d4f8181a2c12dd1977f91a24be99b502b9fc705206efd1",
+      "complete": true,
+      "access_route": "Library whole-file original byte download",
+      "classification": "design example, not APK or implemented feature"
+    },
+    {
+      "path": "ui-v1.0/06-Bot渐进配置-设计提案-v1.0.png",
+      "library_file_id": "libfile_1bb8bcacd44c8191a88aededb7012f65",
+      "file_id": "file_0000000008d4822f99e6e0356dd72d00",
+      "library_version_number": 0,
+      "size_bytes": 1325251,
+      "sha256": "c41780a31db5aeabd4e5ef20e054f29242c621e38f2f0c0661ad67c3f4c1f8d8",
+      "complete": true,
+      "access_route": "Library whole-file original byte download",
+      "classification": "design example, not APK or implemented feature"
+    },
+    {
+      "path": "ui-v1.0/07-项目材料与版本-v1.0.png",
+      "library_file_id": "libfile_ee7a9217b2e881919c8d88f4b28413b5",
+      "file_id": "file_00000000fc1081f5861c8fba3abae40f",
+      "library_version_number": 0,
+      "size_bytes": 1223342,
+      "sha256": "a3bf552110f671d8989d15a711abab25ad50b1beb1eef447d51718fc7401bc60",
+      "complete": true,
+      "access_route": "Library whole-file original byte download",
+      "classification": "design example, not APK or implemented feature"
+    },
+    {
+      "path": "ui-v1.0/08-基础组件状态-v1.0.png",
+      "library_file_id": "libfile_f7ab1e3e06b48191be6766f0c733c298",
+      "file_id": "file_000000009f6c822f8466118ab81445aa",
+      "library_version_number": 0,
+      "size_bytes": 1289644,
+      "sha256": "9cdf958b537a33fc2b1b00067eefb1003beec3bfd77da0481efb0a69e7969acc",
+      "complete": true,
+      "access_route": "Library whole-file original byte download",
+      "classification": "design example, not APK or implemented feature"
+    },
+    {
+      "path": "ui-v1.0/09-群组协作-设计提案-v1.0.png",
+      "library_file_id": "libfile_86e11d3b513c8191b14626ef543ef787",
+      "file_id": "file_0000000072b4822f91b695fab4d94a60",
+      "library_version_number": 0,
+      "size_bytes": 1225608,
+      "sha256": "2c55930502086824cf8f229c2aaa261d67c0f2626298812780ea600365570442",
+      "complete": true,
+      "access_route": "Library whole-file original byte download",
+      "classification": "design example, not APK or implemented feature"
+    }
+  ]
+}
