@@ -1,0 +1,11 @@
+# Staging ownership and mapped device checkpoint
+
+Base e46f4eab00e49a88edfee881f6d0005330846c4f. Safe local files and fake syscall tests only. Real qualification, namespace, supervisor, worker, engine and cgroup actions remain NOT_RUN/HOLD. No bwrap retry, resource/security configuration or installation.
+
+Independent e46 review identified maps inode-only matching. maps-red.log records two accepted-device negative failures; maps-green.log passes seven tests after matching hexadecimal maps major/minor AND inode against the actual opened artifact FD. Existing readonly/hash checks remain mandatory.
+
+staging-red.log reproduces source written, job open failed, rmtree failed, reconciliation incorrectly known-empty. It also reproduces loss of the record after successful discard. The first log accidentally discovered 28 imported runner test cases as well; the import is now module-qualified. Backend now requires a registration callback before staging effects, checks returned record identity, and retains the partially populated record. Native staging chooses/registers its private root pathname before mkdir; every staging FD is tracked immediately, including memfd before writes/seals. Close ambiguity is recorded and its numeric FD is never retried. Failed cleanup retains root, errors, uncertain FDs and a quarantined marker; reconciliation is unknown. Successfully completed early discard returns known-empty while retaining its audit record. No process launches after stage failure.
+
+staging-extra-red.log separately reproduces mkdir-side-effect-then-exception being falsely discarded. Fixed with creation-attempt tracking: cannot establish ownership/identity => retain and quarantine, never delete. It also tests ambiguous close once and source preservation. staging-extra-green.log: four tests PASS. linux-staging-green.log: 37 tests PASS (safe socketpair/file tests and fake kernel calls). maps and staging fixes are source correctness, not proof of actual sandbox security.
+
+OPEN: the previously confirmed cgroup recursive populated/child-domain check is not yet fixed at this checkpoint. Next slice adds leaf-only read-only validation and recursive emptiness regression evidence before independent final review. Do not treat this checkpoint as production qualification or overall Office completion.

@@ -5,7 +5,7 @@ and dedicated subreaper broker must already be provisioned by trusted host.
 """
 from dataclasses import dataclass,field,asdict
 from pathlib import Path
-import ctypes,fcntl,hashlib,json,os,platform,re,select,shutil,socket,stat,subprocess,tempfile,time
+import ctypes,fcntl,hashlib,json,os,platform,re,secrets,select,shutil,socket,stat,subprocess,time
 from .. import model
 from . import ipc,snapshot
 from .layout import HOST_CODE,SANDBOX_CODE
@@ -41,15 +41,25 @@ class NativeState:
     spec:dict
     source:bytes
     job:bytes
-    root:Path
-    root_identity:tuple
-    input_fd:int
-    job_dir_fd:int
-    output_fd:int
-    launch_fd:int
-    source_fd:int
-    job_fd:int
-    image_fd:int
+    root:object=None
+    root_identity:object=None
+    input_fd:object=None
+    job_dir_fd:object=None
+    output_fd:object=None
+    launch_fd:object=None
+    source_fd:object=None
+    job_fd:object=None
+    image_fd:object=None
+    root_created:bool=False
+    root_creation_attempted:bool=False
+    stage_complete:bool=False
+    staging_failed:bool=False
+    cleanup_failed:bool=False
+    stage_discarded:bool=False
+    quarantined:bool=False
+    owned_fds:set=field(default_factory=set)
+    uncertain_fds:set=field(default_factory=set)
+    cleanup_errors:list=field(default_factory=list)
     process:object=None
     pidfd:object=None
     starttime:object=None
@@ -183,13 +193,14 @@ def _mounts(text,format):
         if 'ro' not in mounts.get(target,set()):raise ValueError('readonly_mount_missing')
     if 'rw' not in mounts.get('/output',set()):raise ValueError('private_output_missing')
 
-def _sealed(data):
+def _sealed(data,own=lambda fd:fd,close=os.close):
     fd=os.memfd_create('document-launch',os.MFD_CLOEXEC|os.MFD_ALLOW_SEALING)
+    own(fd)
     try:
         os.write(fd,data);os.lseek(fd,0,os.SEEK_SET)
         fcntl.fcntl(fd,1033,0x0001|0x0002|0x0004|0x0008)
         return fd
-    except BaseException:os.close(fd);raise
+    except BaseException:close(fd);raise
 
 class RecoveredProcess:
     """Only a kernel-credential-authenticated child of this broker can recover."""
@@ -267,28 +278,62 @@ class NativeLinuxSystem:
         except BaseException:os.close(domain);os.close(image);self.config=None;raise
         self.qualified=True
         return model.digest({'image':pins,'domain':config.domain_identity,'reviews':[r.id for r in (config.provenance,config.license,config.isolation)]})
-    def stage(self,attempt,spec,source,job):
+    def stage(self,attempt,spec,source,job,register):
         if not self.qualified:raise ValueError('unqualified')
-        root=Path(tempfile.mkdtemp(prefix=attempt+'-',dir=self.config.workspace_parent));fds=[]
+        # Register the known pathname before the first mkdir/open side effect.
+        # A partial stage is owned even when its cleanup also throws.
+        root=self.config.workspace_parent/('document-'+secrets.token_hex(16))
+        state=NativeState(attempt,spec,source,job,root)
+        register(state)
+        def own(fd):state.owned_fds.add(fd);return fd
         try:
+            state.root_creation_attempted=True
+            os.mkdir(root,0o700);state.root_created=True
+            st=os.stat(root,follow_symlinks=False);state.root_identity=(st.st_dev,st.st_ino)
             for name in ('input','job','output'):(root/name).mkdir(mode=0o700)
             source_path=root/'input'/('source.'+spec['format']);job_path=root/'job'/'request.json'
             for path,data in ((source_path,source),(job_path,job)):
-                fd=os.open(path,os.O_WRONLY|os.O_CREAT|os.O_EXCL|os.O_NOFOLLOW,0o400)
+                fd=own(os.open(path,os.O_WRONLY|os.O_CREAT|os.O_EXCL|os.O_NOFOLLOW,0o400))
                 try:
                     offset=0
-                    while offset<len(data):offset+=os.write(fd,data[offset:])
-                finally:os.close(fd)
+                    while offset<len(data):
+                        written=os.write(fd,data[offset:])
+                        if written<=0:raise OSError('staging_write_no_progress')
+                        offset+=written
+                finally:self._close_staged_fd(state,fd)
             launch=dict(spec=spec,host_pid=os.getpid(),host_uid=os.geteuid(),engine=asdict(self.config.engine),policy=asdict(self.config.policy),bwrap=str(self.config.bwrap),bwrap_sha256=self.config.bwrap_sha256)
-            launch_fd=_sealed(json.dumps(launch,sort_keys=True,separators=(',',':')).encode());fds.append(launch_fd)
-            for path in (root/'input',root/'job',root/'output'):
-                fds.append(os.open(path,os.O_RDONLY|os.O_DIRECTORY|os.O_NOFOLLOW|os.O_CLOEXEC))
-            for path in (source_path,job_path):fds.append(os.open(path,os.O_RDONLY|os.O_NOFOLLOW|os.O_CLOEXEC))
-            st=os.stat(root,follow_symlinks=False)
-            return NativeState(attempt,spec,source,job,root,(st.st_dev,st.st_ino),fds[1],fds[2],fds[3],fds[0],fds[4],fds[5],os.dup(self.image_fd))
+            state.launch_fd=_sealed(json.dumps(launch,sort_keys=True,separators=(',',':')).encode(),own,lambda fd:self._close_staged_fd(state,fd))
+            for name in ('input','job','output'):
+                setattr(state,{'input':'input_fd','job':'job_dir_fd','output':'output_fd'}[name],own(os.open(root/name,os.O_RDONLY|os.O_DIRECTORY|os.O_NOFOLLOW|os.O_CLOEXEC)))
+            state.source_fd=own(os.open(source_path,os.O_RDONLY|os.O_NOFOLLOW|os.O_CLOEXEC))
+            state.job_fd=own(os.open(job_path,os.O_RDONLY|os.O_NOFOLLOW|os.O_CLOEXEC))
+            state.image_fd=own(os.dup(self.image_fd));state.stage_complete=True
+            return state
         except BaseException:
-            for fd in fds:os.close(fd)
-            shutil.rmtree(root);raise
+            state.staging_failed=True
+            for fd in tuple(state.owned_fds):
+                try:self._close_staged_fd(state,fd)
+                except BaseException:pass # retained below; never retry ambiguous close
+            try:
+                if state.cleanup_failed:raise ValueError('staging_fd_close_uncertain')
+                if state.root_creation_attempted and not state.root_created:raise ValueError('staging_mkdir_outcome_unknown')
+                if state.root_created:
+                    st=os.stat(root,follow_symlinks=False)
+                    if state.root_identity is None or (st.st_dev,st.st_ino)!=state.root_identity:raise ValueError('staging_root_identity_unknown')
+                    shutil.rmtree(root)
+                state.stage_discarded=True;state.closed=True
+            except BaseException as error:
+                state.cleanup_failed=True;state.cleanup_errors.append(type(error).__name__)
+            raise
+    def _close_staged_fd(self,state,fd):
+        state.owned_fds.remove(fd)
+        try:os.close(fd)
+        except BaseException as error:
+            # A failed close may already have released the numeric FD. Retain
+            # its uncertainty, never close that integer again after reuse.
+            state.uncertain_fds.add(fd);state.cleanup_failed=True
+            state.cleanup_errors.append(type(error).__name__)
+            raise
     def launch(self,state):
         preflight() # refresh before even socketpair/Popen; no child on missing API
         # Ownership record exists in LinuxBackend before this call. Host-stage
@@ -418,7 +463,9 @@ class NativeLinuxSystem:
                     fd=os.open(path,os.O_RDONLY|os.O_NOFOLLOW|os.O_CLOEXEC)
                 try:
                     info=os.fstat(fd)
-                    if info.st_ino!=int(fields[4]) or _regular_hash(fd,mount_pid=pid if sandbox else None)!=pin:raise ValueError('mapped_object_identity_or_hash')
+                    if not re.fullmatch(r'[0-9a-fA-F]+:[0-9a-fA-F]+',fields[3]):raise ValueError('mapped_object_device')
+                    device=tuple(int(p,16) for p in fields[3].split(':'))
+                    if device!=(os.major(info.st_dev),os.minor(info.st_dev)) or info.st_ino!=int(fields[4]) or _regular_hash(fd,mount_pid=pid if sandbox else None)!=pin:raise ValueError('mapped_object_identity_or_hash')
                     observed.append((path,info.st_dev,info.st_ino,pin))
                 finally:os.close(fd)
         finally:
@@ -524,7 +571,8 @@ class NativeLinuxSystem:
         if state.closed:return
         for channel in (state.gate,state.sandbox):
             if channel is not None:channel.close()
-        for fd in (state.input_fd,state.job_dir_fd,state.output_fd,state.launch_fd,state.source_fd,state.job_fd,state.image_fd,state.pidfd,state.sandbox_pidfd):
+        for fd in tuple(state.owned_fds):self._close_staged_fd(state,fd)
+        for fd in (state.pidfd,state.sandbox_pidfd):
             if fd is not None:os.close(fd)
         if state.process is not None:
             for stream in (state.process.stdout,state.process.stderr):
@@ -533,5 +581,6 @@ class NativeLinuxSystem:
     def quarantine(self,state):
         # Keep owned handles/workspace for reconciliation; never delete unknown
         # live state or silently retry a refused/uncertain launch.
+        state.quarantined=True
         if state.gate is not None:state.gate.close()
         if state.sandbox is not None:state.sandbox.close()

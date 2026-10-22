@@ -1,0 +1,9 @@
+test_failed_close_is_retained_and_never_retried_by_cleanup (tools.document_fidelity.adapters.runner.linux.tests.test_ownership.OwnershipTests.test_failed_close_is_retained_and_never_retried_by_cleanup) ... ok
+test_mkdir_uncertainty_retains_registered_path_without_deletion (tools.document_fidelity.adapters.runner.linux.tests.test_ownership.OwnershipTests.test_mkdir_uncertainty_retains_registered_path_without_deletion) ... ok
+test_source_written_open_failure_and_failed_rmtree_retain_owned_staging (tools.document_fidelity.adapters.runner.linux.tests.test_ownership.OwnershipTests.test_source_written_open_failure_and_failed_rmtree_retain_owned_staging) ... ok
+test_successful_early_staging_discard_has_record_and_no_process (tools.document_fidelity.adapters.runner.linux.tests.test_ownership.OwnershipTests.test_successful_early_staging_discard_has_record_and_no_process) ... ok
+
+----------------------------------------------------------------------
+Ran 4 tests in 0.005s
+
+OK

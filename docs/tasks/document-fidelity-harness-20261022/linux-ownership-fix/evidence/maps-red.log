@@ -1,0 +1,26 @@
+test_mapped_object_device_and_inode_must_match_opened_reviewed_fd (tools.document_fidelity.adapters.runner.linux.tests.test_capabilities.CapabilityTests.test_mapped_object_device_and_inode_must_match_opened_reviewed_fd) ... 
+  test_mapped_object_device_and_inode_must_match_opened_reviewed_fd (tools.document_fidelity.adapters.runner.linux.tests.test_capabilities.CapabilityTests.test_mapped_object_device_and_inode_must_match_opened_reviewed_fd) (device='02:03') ... FAIL
+  test_mapped_object_device_and_inode_must_match_opened_reviewed_fd (tools.document_fidelity.adapters.runner.linux.tests.test_capabilities.CapabilityTests.test_mapped_object_device_and_inode_must_match_opened_reviewed_fd) (device='invalid') ... FAIL
+
+======================================================================
+FAIL: test_mapped_object_device_and_inode_must_match_opened_reviewed_fd (tools.document_fidelity.adapters.runner.linux.tests.test_capabilities.CapabilityTests.test_mapped_object_device_and_inode_must_match_opened_reviewed_fd) (device='02:03')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/document-fidelity/tools/document_fidelity/adapters/runner/linux/tests/test_capabilities.py", line 108, in test_mapped_object_device_and_inode_must_match_opened_reviewed_fd
+    with self.assertRaises(ValueError):native._check_maps(71,False)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ValueError not raised
+
+======================================================================
+FAIL: test_mapped_object_device_and_inode_must_match_opened_reviewed_fd (tools.document_fidelity.adapters.runner.linux.tests.test_capabilities.CapabilityTests.test_mapped_object_device_and_inode_must_match_opened_reviewed_fd) (device='invalid')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/document-fidelity/tools/document_fidelity/adapters/runner/linux/tests/test_capabilities.py", line 108, in test_mapped_object_device_and_inode_must_match_opened_reviewed_fd
+    with self.assertRaises(ValueError):native._check_maps(71,False)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ValueError not raised
+
+----------------------------------------------------------------------
+Ran 1 test in 0.002s
+
+FAILED (failures=2)

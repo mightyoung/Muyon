@@ -1,0 +1,12 @@
+test_kernel_enosys_and_signal_permission_failure_are_prelaunch_hold (tools.document_fidelity.adapters.runner.linux.tests.test_capabilities.CapabilityTests.test_kernel_enosys_and_signal_permission_failure_are_prelaunch_hold) ... ok
+test_mapped_object_device_and_inode_must_match_opened_reviewed_fd (tools.document_fidelity.adapters.runner.linux.tests.test_capabilities.CapabilityTests.test_mapped_object_device_and_inode_must_match_opened_reviewed_fd) ... ok
+test_missing_api_and_fd_exec_hold_before_any_ipc_or_popen (tools.document_fidelity.adapters.runner.linux.tests.test_capabilities.CapabilityTests.test_missing_api_and_fd_exec_hold_before_any_ipc_or_popen) ... ok
+test_preexec_python_maps_never_substitute_for_postexec_bwrap_maps (tools.document_fidelity.adapters.runner.linux.tests.test_capabilities.CapabilityTests.test_preexec_python_maps_never_substitute_for_postexec_bwrap_maps) ... ok
+test_readonly_hash_rejects_writable_mount_even_when_bytes_match (tools.document_fidelity.adapters.runner.linux.tests.test_capabilities.CapabilityTests.test_readonly_hash_rejects_writable_mount_even_when_bytes_match) ... ok
+test_root_ro_cannot_hide_writable_nested_mount_or_readonly_bind (tools.document_fidelity.adapters.runner.linux.tests.test_capabilities.CapabilityTests.test_root_ro_cannot_hide_writable_nested_mount_or_readonly_bind) ... ok
+test_success_probes_only_current_pid_signal_zero_and_sealed_memfd (tools.document_fidelity.adapters.runner.linux.tests.test_capabilities.CapabilityTests.test_success_probes_only_current_pid_signal_zero_and_sealed_memfd) ... ok
+
+----------------------------------------------------------------------
+Ran 7 tests in 0.010s
+
+OK

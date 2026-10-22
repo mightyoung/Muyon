@@ -97,3 +97,12 @@ class CapabilityTests(unittest.TestCase):
                 else:
                     result=native._observe(state);self.assertEqual('b'*64,result['root']['executable'])
                 self.assertIn((71,'bwrap'),seen)
+
+    def test_mapped_object_device_and_inode_must_match_opened_reviewed_fd(self):
+        native=kernel.NativeLinuxSystem()
+        native.config=SimpleNamespace(image=__import__('pathlib').Path('/image'),image_manifest=(),host_libraries=(('/lib/reviewed.so','a'*64),),bwrap=__import__('pathlib').Path('/bin/bwrap'),bwrap_sha256='b'*64)
+        for device,allowed in [('02:03',False),('00:01',True),('invalid',False)]:
+            with self.subTest(device=device),patch.object(kernel,'_proc',return_value='1000-2000 r-xp 00000000 '+device+' 42 /lib/reviewed.so\n'),patch.object(kernel.os,'open',return_value=99),patch.object(kernel.os,'close'),patch.object(kernel.os,'fstat',return_value=SimpleNamespace(st_ino=42,st_dev=os.makedev(0,1))),patch.object(kernel,'_regular_hash',return_value='a'*64):
+                if allowed:self.assertEqual(1,len(native._check_maps(71,False)))
+                else:
+                    with self.assertRaises(ValueError):native._check_maps(71,False)

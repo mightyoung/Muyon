@@ -43,7 +43,11 @@ class LinuxBackend(model.HostOSBackend):
         if self.attempt is not None:raise Hold('single_attempt_backend_no_retry')
         self.qualify()
         state=Attempt(attempt,spec,source,job);self.attempt=state
-        state.native=self.system.stage(attempt,spec,source,job)
+        def register(native):
+            if native is None or state.native is not None:raise Hold('staging_record_registration')
+            state.native=native
+        staged=self.system.stage(attempt,spec,source,job,register)
+        if staged is not state.native:raise Hold('staging_record_mismatch')
         # Record ownership BEFORE launch; reconciliation must inspect even if
         # logical spawn never happened or launch throws after creating a child.
         state.launch_attempted=True
@@ -83,6 +87,9 @@ class LinuxBackend(model.HostOSBackend):
         if state is None:return model.Reconciliation(True,None,None)
         if state.id!=attempt:return model.Reconciliation(False,None,None)
         if state.native is None:return model.Reconciliation(True,None,None)
+        if getattr(state.native,'cleanup_failed',False):return model.Reconciliation(False,state,None)
+        if getattr(state.native,'stage_discarded',False):return model.Reconciliation(True,None,None)
+        if getattr(state.native,'staging_failed',False):return model.Reconciliation(False,state,None)
         if state.launch_attempted and self.native_provider() and not self.system.reconcile(state.native):return model.Reconciliation(False,state,None)
         return model.Reconciliation(True,state,state if state.launch_attempted else None)
     def poll(self,process,wait_ms):return self.system.poll(self._state(process).native,wait_ms)

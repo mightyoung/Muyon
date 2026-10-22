@@ -1,0 +1,51 @@
+test_admission_expiry_during_terminal_callback_cannot_report_success (tools.document_fidelity.adapters.runner.tests.test_launcher.LauncherTests.test_admission_expiry_during_terminal_callback_cannot_report_success) ... ok
+test_admission_registry_is_bounded_without_eviction_or_replay (tools.document_fidelity.adapters.runner.tests.test_launcher.LauncherTests.test_admission_registry_is_bounded_without_eviction_or_replay) ... ok
+test_cancel_before_spawn_and_running_are_reaped (tools.document_fidelity.adapters.runner.tests.test_launcher.LauncherTests.test_cancel_before_spawn_and_running_are_reaped) ... ok
+test_cancellation_during_snapshot_discards_candidate (tools.document_fidelity.adapters.runner.tests.test_launcher.LauncherTests.test_cancellation_during_snapshot_discards_candidate) ... ok
+test_deadline_before_spawn_and_after_cleanup_prevents_release (tools.document_fidelity.adapters.runner.tests.test_launcher.LauncherTests.test_deadline_before_spawn_and_after_cleanup_prevents_release) ... ok
+test_docx_and_pptx_fake_os_pipeline_remains_inert (tools.document_fidelity.adapters.runner.tests.test_launcher.LauncherTests.test_docx_and_pptx_fake_os_pipeline_remains_inert) ... ok
+test_fake_trusted_interface_requires_strict_executor_and_proof_shapes (tools.document_fidelity.adapters.runner.tests.test_launcher.LauncherTests.test_fake_trusted_interface_requires_strict_executor_and_proof_shapes) ... ok
+test_full_fake_lifecycle_receipt_is_never_txn_eligible (tools.document_fidelity.adapters.runner.tests.test_launcher.LauncherTests.test_full_fake_lifecycle_receipt_is_never_txn_eligible) ... ok
+test_kill_reap_and_uncertain_reap_quarantine (tools.document_fidelity.adapters.runner.tests.test_launcher.LauncherTests.test_kill_reap_and_uncertain_reap_quarantine) ... ok
+test_missing_or_mismatched_authenticated_engine_observation_is_hold (tools.document_fidelity.adapters.runner.tests.test_launcher.LauncherTests.test_missing_or_mismatched_authenticated_engine_observation_is_hold) ... ok
+test_missing_ready_and_wrong_engine_proof_never_spawn (tools.document_fidelity.adapters.runner.tests.test_launcher.LauncherTests.test_missing_ready_and_wrong_engine_proof_never_spawn) ... ok
+test_policy_only_tightens_and_no_json_host_session_or_opaque_factory (tools.document_fidelity.adapters.runner.tests.test_launcher.LauncherTests.test_policy_only_tightens_and_no_json_host_session_or_opaque_factory) ... ok
+test_production_default_and_plain_json_can_never_open_execution (tools.document_fidelity.adapters.runner.tests.test_launcher.LauncherTests.test_production_default_and_plain_json_can_never_open_execution) ... ok
+test_ready_or_cancel_callback_cannot_reopen_closed_worker_phase (tools.document_fidelity.adapters.runner.tests.test_launcher.LauncherTests.test_ready_or_cancel_callback_cannot_reopen_closed_worker_phase) ... ok
+test_ready_transition_is_single_use_and_guards_are_strict_booleans (tools.document_fidelity.adapters.runner.tests.test_launcher.LauncherTests.test_ready_transition_is_single_use_and_guards_are_strict_booleans) ... ok
+test_scope_expiry_and_replay_and_simulated_worker_permits (tools.document_fidelity.adapters.runner.tests.test_launcher.LauncherTests.test_scope_expiry_and_replay_and_simulated_worker_permits) ... ok
+test_snapshot_source_links_and_unknown_parts_fail_validation (tools.document_fidelity.adapters.runner.tests.test_launcher.LauncherTests.test_snapshot_source_links_and_unknown_parts_fail_validation) ... ok
+test_spawn_is_not_evidence_of_third_party_engine_execution (tools.document_fidelity.adapters.runner.tests.test_launcher.LauncherTests.test_spawn_is_not_evidence_of_third_party_engine_execution) ... ok
+test_spawn_uncertainty_reconciles_without_retry (tools.document_fidelity.adapters.runner.tests.test_launcher.LauncherTests.test_spawn_uncertainty_reconciles_without_retry) ... ok
+test_stopping_and_cleanup_callbacks_cannot_issue_or_consume_worker (tools.document_fidelity.adapters.runner.tests.test_launcher.LauncherTests.test_stopping_and_cleanup_callbacks_cannot_issue_or_consume_worker) ... ok
+test_terminal_close_revokes_preissued_worker_and_slow_verifier (tools.document_fidelity.adapters.runner.tests.test_launcher.LauncherTests.test_terminal_close_revokes_preissued_worker_and_slow_verifier) ... ok
+test_terminal_host_callback_cancellation_revokes_synthetic_capability (tools.document_fidelity.adapters.runner.tests.test_launcher.LauncherTests.test_terminal_host_callback_cancellation_revokes_synthetic_capability) ... ok
+test_terminal_lease_cannot_mint_worker_permit_and_credential_has_expiry (tools.document_fidelity.adapters.runner.tests.test_launcher.LauncherTests.test_terminal_lease_cannot_mint_worker_permit_and_credential_has_expiry) ... ok
+test_terminal_verifier_reentry_cannot_issue_second_credential (tools.document_fidelity.adapters.runner.tests.test_launcher.LauncherTests.test_terminal_verifier_reentry_cannot_issue_second_credential) ... ok
+test_terminate_failure_still_attempts_kill_and_reap (tools.document_fidelity.adapters.runner.tests.test_launcher.LauncherTests.test_terminate_failure_still_attempts_kill_and_reap) ... ok
+test_time_logs_outputs_exit_and_exception_fail_closed (tools.document_fidelity.adapters.runner.tests.test_launcher.LauncherTests.test_time_logs_outputs_exit_and_exception_fail_closed) ... ok
+test_uncertain_spawn_never_claims_engine_not_run (tools.document_fidelity.adapters.runner.tests.test_launcher.LauncherTests.test_uncertain_spawn_never_claims_engine_not_run) ... ok
+test_worker_stage_close_is_irreversible_without_closing_validation_lease (tools.document_fidelity.adapters.runner.tests.test_launcher.LauncherTests.test_worker_stage_close_is_irreversible_without_closing_validation_lease) ... ok
+test_source_written_open_failure_and_failed_rmtree_retain_owned_staging (tools.document_fidelity.adapters.runner.linux.tests.test_ownership.OwnershipTests.test_source_written_open_failure_and_failed_rmtree_retain_owned_staging) ... FAIL
+test_successful_early_staging_discard_has_record_and_no_process (tools.document_fidelity.adapters.runner.linux.tests.test_ownership.OwnershipTests.test_successful_early_staging_discard_has_record_and_no_process) ... FAIL
+
+======================================================================
+FAIL: test_source_written_open_failure_and_failed_rmtree_retain_owned_staging (tools.document_fidelity.adapters.runner.linux.tests.test_ownership.OwnershipTests.test_source_written_open_failure_and_failed_rmtree_retain_owned_staging)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/document-fidelity/tools/document_fidelity/adapters/runner/linux/tests/test_ownership.py", line 23, in test_source_written_open_failure_and_failed_rmtree_retain_owned_staging
+    self.assertFalse(result.known,'failed staging cleanup must never become known-empty')
+AssertionError: True is not false : failed staging cleanup must never become known-empty
+
+======================================================================
+FAIL: test_successful_early_staging_discard_has_record_and_no_process (tools.document_fidelity.adapters.runner.linux.tests.test_ownership.OwnershipTests.test_successful_early_staging_discard_has_record_and_no_process)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/document-fidelity/tools/document_fidelity/adapters/runner/linux/tests/test_ownership.py", line 43, in test_successful_early_staging_discard_has_record_and_no_process
+    self.assertIsNotNone(b.attempt.native,'record must precede staging effects')
+AssertionError: unexpectedly None : record must precede staging effects
+
+----------------------------------------------------------------------
+Ran 30 tests in 0.260s
+
+FAILED (failures=2)

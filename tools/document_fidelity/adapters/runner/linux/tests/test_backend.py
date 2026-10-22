@@ -9,7 +9,9 @@ class FakeNative:
     def __init__(self,mode='ok'):self.mode=mode;self.calls=[];self.logs=[];self.tick=0;self.exists=False;self.reaped=False
     def now_ms(self):return self.tick
     def qualify(self,config):self.calls.append('qualify');return 'FAKE_NOT_PRODUCTION'
-    def stage(self,attempt,spec,source,job):self.calls.append('stage');self.exists=True;return {'attempt':attempt,'source':source,'job':job,'output':b'abc'}
+    def stage(self,attempt,spec,source,job,register):
+        self.calls.append('stage');self.exists=True
+        state={'attempt':attempt,'source':source,'job':job,'output':b'abc'};register(state);return state
     def launch(self,state):
         self.calls.append('launch')
         if self.mode=='launch_uncertain':raise RuntimeError('fake uncertain launch')
