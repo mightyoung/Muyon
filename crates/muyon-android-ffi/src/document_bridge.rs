@@ -5,7 +5,10 @@ use muyon_core::{
     business::BusinessStore,
     contract::{AuthorityBinding, ContractError, Revision},
     documents::{
-        reader::{DocumentReadError, DocumentReadPurpose, DocumentReaderHost, PresentationStatus, PresentationTicket, PresentationInvalidations},
+        reader::{
+            DocumentReadError, DocumentReadPurpose, DocumentReaderHost, PresentationInvalidations,
+            PresentationStatus, PresentationTicket,
+        },
         DocumentAccess, DocumentMetadata, DocumentRef,
     },
     evidence::{
@@ -228,8 +231,19 @@ impl Deref for DocumentBridge {
 }
 impl DocumentBridge {
     pub(crate) fn new(store: BusinessStore, workspace: String, epoch: String) -> Self {
-        Self { host: DocumentReaderHost::new(store), workspace, epoch, reads: BTreeMap::new(),
-            processing: BTreeMap::new(), cleanup_blocked: false, evidence_cleanup_failed: false, stopped: false, presentation_notices: Vec::new(), presentation_clear_all: false, presentation_selection: None }
+        Self {
+            host: DocumentReaderHost::new(store),
+            workspace,
+            epoch,
+            reads: BTreeMap::new(),
+            processing: BTreeMap::new(),
+            cleanup_blocked: false,
+            evidence_cleanup_failed: false,
+            stopped: false,
+            presentation_notices: Vec::new(),
+            presentation_clear_all: false,
+            presentation_selection: None,
+        }
     }
     fn ready(&self) -> Result<()> {
         if self.stopped {
@@ -329,13 +343,22 @@ impl DocumentBridge {
         let access = self.access(&request)?;
         if self.reads.len() >= 8 {
             self.synchronize_reads()?;
-            if self.reads.len() >= 8 { return Err(failure("DOCUMENT_LIMIT")); }
+            if self.reads.len() >= 8 {
+                return Err(failure("DOCUMENT_LIMIT"));
+            }
         }
         let id = opaque_id("document-reader")?;
         let result = self.host.open(&access, purpose.into());
         let info = self.reader_result(result)?;
-        self.reads.insert(id.clone(), ReadLease { scope: request.scope, core_id: info.session_id,
-            reference: info.metadata.document.clone(), presentation: None });
+        self.reads.insert(
+            id.clone(),
+            ReadLease {
+                scope: request.scope,
+                core_id: info.session_id,
+                reference: info.metadata.document.clone(),
+                presentation: None,
+            },
+        );
         if info.metadata.blob.byte_length.value() > MAX_STREAM {
             let lease = self
                 .reads
@@ -375,7 +398,9 @@ impl DocumentBridge {
             None => Ok(None),
             Some(lease) => {
                 same_scope(&lease.scope, &request.scope)?;
-                if lease.presentation.is_some() { return Err(failure("DOCUMENT_MODE_MISMATCH")); }
+                if lease.presentation.is_some() {
+                    return Err(failure("DOCUMENT_MODE_MISMATCH"));
+                }
                 Ok(Some((lease.core_id.clone(), lease.reference.clone())))
             }
         }
@@ -439,8 +464,18 @@ impl DocumentBridge {
     }
     pub(crate) fn release_owner(&mut self, owner: &str) -> Result<()> {
         identifier(owner)?;
-        let closing: Vec<_> = self.reads.iter().filter(|(_, lease)| lease.scope.service_session == owner)
-            .map(|(id, lease)| (id.clone(), lease.core_id.clone(), lease.presentation.clone())).collect();
+        let closing: Vec<_> = self
+            .reads
+            .iter()
+            .filter(|(_, lease)| lease.scope.service_session == owner)
+            .map(|(id, lease)| {
+                (
+                    id.clone(),
+                    lease.core_id.clone(),
+                    lease.presentation.clone(),
+                )
+            })
+            .collect();
         let mut first = None;
         for (id, core_id, ticket) in closing {
             let result = match ticket {
@@ -450,16 +485,31 @@ impl DocumentBridge {
             let result = self.reader_result(result);
             self.collect_invalidations();
             match result {
-                Ok(()) => { self.reads.remove(&id); }
-                Err(error) => { if first.is_none() { first = Some(error); } }
+                Ok(()) => {
+                    self.reads.remove(&id);
+                }
+                Err(error) => {
+                    if first.is_none() {
+                        first = Some(error);
+                    }
+                }
             }
         }
-        self.processing.retain(|_, entry| entry.scope.service_session != owner);
-        if self.presentation_selection.as_ref().is_some_and(|selection| selection.scope.service_session == owner) {
+        self.processing
+            .retain(|_, entry| entry.scope.service_session != owner);
+        if self
+            .presentation_selection
+            .as_ref()
+            .is_some_and(|selection| selection.scope.service_session == owner)
+        {
             self.presentation_selection = None;
         }
-        if let Some(error) = first { return Err(error); }
-        if self.cleanup_blocked { return Err(failure("DOCUMENT_CLEANUP_REQUIRED")); }
+        if let Some(error) = first {
+            return Err(error);
+        }
+        if self.cleanup_blocked {
+            return Err(failure("DOCUMENT_CLEANUP_REQUIRED"));
+        }
         Ok(())
     }
     /// Explicit trusted Service shutdown: invalidates every document output, not
@@ -486,21 +536,34 @@ impl DocumentBridge {
     fn apply_invalidations(&mut self, events: PresentationInvalidations) {
         self.presentation_clear_all |= events.clear_all;
         for event in events.invalidated {
-            let id = self.reads.iter().find(|(_, lease)| lease.core_id == event.session_id && lease.presentation.is_some())
+            let id = self
+                .reads
+                .iter()
+                .find(|(_, lease)| {
+                    lease.core_id == event.session_id && lease.presentation.is_some()
+                })
                 .map(|(id, _)| id.clone());
             if let Some(id) = id {
                 if let Some(lease) = self.reads.remove(&id) {
                     // Advance can increment N -> N+1 and then fail before Host
                     // receives N+1. Its N display must still be invalidated.
-                    if lease.presentation.as_ref().is_some_and(|ticket| ticket.generation() != &event.generation) {
+                    if lease
+                        .presentation
+                        .as_ref()
+                        .is_some_and(|ticket| ticket.generation() != &event.generation)
+                    {
                         self.presentation_clear_all = true;
                     }
                     if self.presentation_notices.len() >= 8 {
                         self.presentation_clear_all = true;
                         self.presentation_notices.clear();
                     }
-                    self.presentation_notices.push(PresentationNotice { scope: lease.scope, presentation_id: id,
-                        frame_generation: event.generation.as_str().into(), cleanup_pending: event.cleanup_pending });
+                    self.presentation_notices.push(PresentationNotice {
+                        scope: lease.scope,
+                        presentation_id: id,
+                        frame_generation: event.generation.as_str().into(),
+                        cleanup_pending: event.cleanup_pending,
+                    });
                 }
             } else {
                 // An unsuccessful native open may terminate before a bridge ID
@@ -511,7 +574,9 @@ impl DocumentBridge {
     }
     pub(crate) fn take_invalidations(&mut self) -> Result<String> {
         self.collect_invalidations();
-        let out = encode(&json!({"schema":1,"clear_all":self.presentation_clear_all,"invalidated":self.presentation_notices}))?;
+        let out = encode(
+            &json!({"schema":1,"clear_all":self.presentation_clear_all,"invalidated":self.presentation_notices}),
+        )?;
         self.presentation_notices.clear();
         self.presentation_clear_all = false;
         Ok(out)
@@ -519,8 +584,17 @@ impl DocumentBridge {
     fn synchronize_reads(&mut self) -> Result<()> {
         // Full admission only, never a per-chunk full-file hash. Presentation
         // dispatches to its cheap ticket API; legacy cannot bypass that fence.
-        let known: Vec<_> = self.reads.iter().map(|(id, lease)|
-            (id.clone(), lease.core_id.clone(), lease.presentation.clone())).collect();
+        let known: Vec<_> = self
+            .reads
+            .iter()
+            .map(|(id, lease)| {
+                (
+                    id.clone(),
+                    lease.core_id.clone(),
+                    lease.presentation.clone(),
+                )
+            })
+            .collect();
         for (id, core_id, ticket) in known {
             if let Some(ticket) = ticket {
                 let result = self.host.check_presentation(&ticket);
@@ -528,51 +602,89 @@ impl DocumentBridge {
                 match result {
                     Ok(_) => (),
                     Err(DocumentReadError::Cleanup { primary, cleanup }) => {
-                        return self.reader_result(Err(DocumentReadError::Cleanup { primary, cleanup }));
+                        return self
+                            .reader_result(Err(DocumentReadError::Cleanup { primary, cleanup }));
                     }
-                    Err(_) => { self.reads.remove(&id); }
+                    Err(_) => {
+                        self.reads.remove(&id);
+                    }
                 }
             } else {
                 let result = self.host.is_current(&core_id);
                 let current = self.reader_result(result)?;
                 self.collect_invalidations();
-                if !current { self.reads.remove(&id); }
+                if !current {
+                    self.reads.remove(&id);
+                }
             }
         }
         Ok(())
     }
-    fn presentation_ticket(&self, request: &DocumentPresentationUseRequest) -> Result<PresentationTicket> {
+    fn presentation_ticket(
+        &self,
+        request: &DocumentPresentationUseRequest,
+    ) -> Result<PresentationTicket> {
         scope(&request.scope)?;
         identifier(&request.presentation_id)?;
         let generation = Revision::parse(&request.frame_generation).map_err(core_error)?;
-        let lease = self.reads.get(&request.presentation_id).ok_or_else(|| failure("DOCUMENT_SOURCE_INVALIDATED"))?;
+        let lease = self
+            .reads
+            .get(&request.presentation_id)
+            .ok_or_else(|| failure("DOCUMENT_SOURCE_INVALIDATED"))?;
         same_scope(&lease.scope, &request.scope)?;
-        let ticket = lease.presentation.as_ref().ok_or_else(|| failure("DOCUMENT_MODE_MISMATCH"))?;
-        if ticket.generation() != &generation { return Err(failure("DOCUMENT_PRESENTATION_STALE")); }
+        let ticket = lease
+            .presentation
+            .as_ref()
+            .ok_or_else(|| failure("DOCUMENT_MODE_MISMATCH"))?;
+        if ticket.generation() != &generation {
+            return Err(failure("DOCUMENT_PRESENTATION_STALE"));
+        }
         // This is the EXACT native ticket validated against the incoming frame,
         // never constructing from wire or upgrading an old callback to latest.
         Ok(ticket.clone())
     }
-    fn presentation_projection(&self, id: &str, status: &PresentationStatus, metadata: Option<&DocumentMetadata>) -> Result<String> {
-        encode(&json!({"schema":1,"status":"current","mode":"presentation","presentation_id":id,
+    fn presentation_projection(
+        &self,
+        id: &str,
+        status: &PresentationStatus,
+        metadata: Option<&DocumentMetadata>,
+    ) -> Result<String> {
+        encode(
+            &json!({"schema":1,"status":"current","mode":"presentation","presentation_id":id,
             "frame_generation":status.ticket.generation(),"document":status.ticket.document(),"metadata":metadata,
             "phase":status.phase,"valid_for_ms":status.valid_for_ms,"check_after_ms":status.check_after_ms,
-            "annotation_editing":false,"safety_status":"not_assessed"}))
+            "annotation_editing":false,"safety_status":"not_assessed"}),
+        )
     }
-    pub(crate) fn presentation_begin(&mut self, scope_value: DocumentReaderScope) -> Result<String> {
+    pub(crate) fn presentation_begin(
+        &mut self,
+        scope_value: DocumentReaderScope,
+    ) -> Result<String> {
         self.ready()?;
         scope(&scope_value)?;
         // Trusted Service invokes this synchronously on its authenticated real
         // selection event, before asynchronous lookup. Never on late completion.
         let id = opaque_id("document-selection")?;
-        let out = encode(&json!({"schema":1,"selection_id":id,"scope":scope_value,"valid_for_ms":15000}))?;
-        self.presentation_selection = Some(PresentationSelection { scope: scope_value, id, opened: Instant::now() });
+        let out = encode(
+            &json!({"schema":1,"selection_id":id,"scope":scope_value,"valid_for_ms":15000}),
+        )?;
+        self.presentation_selection = Some(PresentationSelection {
+            scope: scope_value,
+            id,
+            opened: Instant::now(),
+        });
         Ok(out)
     }
-    pub(crate) fn presentation_open(&mut self, request: DocumentPresentationOpenRequest) -> Result<String> {
+    pub(crate) fn presentation_open(
+        &mut self,
+        request: DocumentPresentationOpenRequest,
+    ) -> Result<String> {
         let access = self.access(&request.access)?;
         identifier(&request.selection_id)?;
-        let selected = self.presentation_selection.as_ref().ok_or_else(|| failure("DOCUMENT_SELECTION_STALE"))?;
+        let selected = self
+            .presentation_selection
+            .as_ref()
+            .ok_or_else(|| failure("DOCUMENT_SELECTION_STALE"))?;
         same_scope(&selected.scope, &request.access.scope)?;
         if selected.id != request.selection_id || selected.opened.elapsed() >= IDLE {
             return Err(failure("DOCUMENT_SELECTION_STALE"));
@@ -580,17 +692,32 @@ impl DocumentBridge {
         // Exact one-use native selection fence before any call that can close
         // the old core selection, including failed opens and duplicate retries.
         self.presentation_selection = None;
-        if self.reads.len() >= 8 { self.synchronize_reads()?; }
+        if self.reads.len() >= 8 {
+            self.synchronize_reads()?;
+        }
         // Core replaces its one presentation selection; raw sessions cannot be
         // displaced. Count only raw entries for this admission decision.
-        if self.reads.values().filter(|lease| lease.presentation.is_none()).count() >= 8 {
+        if self
+            .reads
+            .values()
+            .filter(|lease| lease.presentation.is_none())
+            .count()
+            >= 8
+        {
             return Err(failure("DOCUMENT_LIMIT"));
         }
         let id = opaque_id("document-presentation")?;
         let result = self.host.open_presentation(&access);
         let info = self.reader_result(result)?;
-        self.reads.insert(id.clone(), ReadLease { scope: request.access.scope, core_id: info.session.session_id,
-            reference: info.session.metadata.document.clone(), presentation: Some(info.status.ticket.clone()) });
+        self.reads.insert(
+            id.clone(),
+            ReadLease {
+                scope: request.access.scope,
+                core_id: info.session.session_id,
+                reference: info.session.metadata.document.clone(),
+                presentation: Some(info.status.ticket.clone()),
+            },
+        );
         self.collect_invalidations();
         let result = if info.session.metadata.blob.byte_length.value() > MAX_STREAM {
             Err(failure("DOCUMENT_LIMIT"))
@@ -604,36 +731,61 @@ impl DocumentBridge {
         }
         result
     }
-    pub(crate) fn presentation_chunk(&mut self, request: DocumentPresentationUseRequest, max_bytes: u32) -> Result<DocumentPresentationChunkResult> {
+    pub(crate) fn presentation_chunk(
+        &mut self,
+        request: DocumentPresentationUseRequest,
+        max_bytes: u32,
+    ) -> Result<DocumentPresentationChunkResult> {
         self.ready()?;
         let ticket = self.presentation_ticket(&request)?;
-        let result = self.host.read_presentation_chunk(&ticket, max_bytes as usize);
+        let result = self
+            .host
+            .read_presentation_chunk(&ticket, max_bytes as usize);
         let chunk = self.reader_result(result)?;
         // EOF retains the original native pin/snapshot/ticket and bridge ID.
-        Ok(DocumentPresentationChunkResult { offset: chunk.offset.as_str().into(), bytes: chunk.bytes,
-            eof: chunk.eof, session_active: true, frame_generation: request.frame_generation })
+        Ok(DocumentPresentationChunkResult {
+            offset: chunk.offset.as_str().into(),
+            bytes: chunk.bytes,
+            eof: chunk.eof,
+            session_active: true,
+            frame_generation: request.frame_generation,
+        })
     }
-    pub(crate) fn presentation_check(&mut self, request: DocumentPresentationUseRequest) -> Result<String> {
+    pub(crate) fn presentation_check(
+        &mut self,
+        request: DocumentPresentationUseRequest,
+    ) -> Result<String> {
         self.ready()?;
         let ticket = self.presentation_ticket(&request)?;
         let result = self.host.check_presentation(&ticket);
         let status = self.reader_result(result)?;
         self.presentation_projection(&request.presentation_id, &status, None)
     }
-    pub(crate) fn presentation_advance(&mut self, request: DocumentPresentationUseRequest) -> Result<String> {
+    pub(crate) fn presentation_advance(
+        &mut self,
+        request: DocumentPresentationUseRequest,
+    ) -> Result<String> {
         self.ready()?;
         let ticket = self.presentation_ticket(&request)?;
         let result = self.host.advance_presentation_frame(&ticket);
         let status = self.reader_result(result)?;
-        let lease = self.reads.get_mut(&request.presentation_id).ok_or_else(|| failure("DOCUMENT_SOURCE_INVALIDATED"))?;
+        let lease = self
+            .reads
+            .get_mut(&request.presentation_id)
+            .ok_or_else(|| failure("DOCUMENT_SOURCE_INVALIDATED"))?;
         lease.presentation = Some(status.ticket.clone());
         self.presentation_projection(&request.presentation_id, &status, None)
     }
-    pub(crate) fn presentation_close(&mut self, request: DocumentPresentationUseRequest) -> Result<()> {
+    pub(crate) fn presentation_close(
+        &mut self,
+        request: DocumentPresentationUseRequest,
+    ) -> Result<()> {
         scope(&request.scope)?;
         identifier(&request.presentation_id)?;
         Revision::parse(&request.frame_generation).map_err(core_error)?;
-        if !self.reads.contains_key(&request.presentation_id) { return Ok(()); }
+        if !self.reads.contains_key(&request.presentation_id) {
+            return Ok(());
+        }
         let ticket = self.presentation_ticket(&request)?;
         let result = self.host.close_presentation(&ticket);
         // Do not erase the mapping until its terminal notification is translated.
@@ -838,54 +990,96 @@ impl DocumentBridge {
 mod presentation_projection_tests {
     use super::*;
     use crate::{document_bridge_tests::Fixture, DocumentPresentationOpenRequest};
-    use muyon_core::documents::{DocumentFormat, DocumentOperation};
     use muyon_core::documents::reader::{PresentationInvalidation, PresentationInvalidations};
+    use muyon_core::documents::{DocumentFormat, DocumentOperation};
     fn opened() -> (Fixture, String) {
-        let f=Fixture::new(b"synthetic projection only",DocumentFormat::Text,&[DocumentOperation::Render]);
-        let selection:serde_json::Value=serde_json::from_str(&f.core.document_presentation_begin_selection(f.request.scope.clone()).unwrap()).unwrap();
-        let raw=f.core.document_presentation_open(DocumentPresentationOpenRequest {access:f.request.clone(),selection_id:selection["selection_id"].as_str().unwrap().into()}).unwrap();
-        let value:serde_json::Value=serde_json::from_str(&raw).unwrap();
-        (f,value["presentation_id"].as_str().unwrap().into())
+        let f = Fixture::new(
+            b"synthetic projection only",
+            DocumentFormat::Text,
+            &[DocumentOperation::Render],
+        );
+        let selection: serde_json::Value = serde_json::from_str(
+            &f.core
+                .document_presentation_begin_selection(f.request.scope.clone())
+                .unwrap(),
+        )
+        .unwrap();
+        let raw = f
+            .core
+            .document_presentation_open(DocumentPresentationOpenRequest {
+                access: f.request.clone(),
+                selection_id: selection["selection_id"].as_str().unwrap().into(),
+            })
+            .unwrap();
+        let value: serde_json::Value = serde_json::from_str(&raw).unwrap();
+        (f, value["presentation_id"].as_str().unwrap().into())
     }
     #[test]
     fn simulated_post_increment_terminal_event_clears_host_original_generation() {
         // Real native ticket/grant/source, synthetic failure-event injection only.
         // Does NOT claim to force the core runtime's post-increment failure.
-        let (f,id)=opened();
+        let (f, id) = opened();
         {
-            let mut state=f.core.state.lock().unwrap();
-            let lease=state.store.reads.get(&id).unwrap();
-            let core_id=lease.core_id.clone();
-            let next=lease.presentation.as_ref().unwrap().generation().next().unwrap();
-            state.store.apply_invalidations(PresentationInvalidations {clear_all:false,
-                invalidated:vec![PresentationInvalidation {session_id:core_id,generation:next,cleanup_pending:false}]});
+            let mut state = f.core.state.lock().unwrap();
+            let lease = state.store.reads.get(&id).unwrap();
+            let core_id = lease.core_id.clone();
+            let next = lease
+                .presentation
+                .as_ref()
+                .unwrap()
+                .generation()
+                .next()
+                .unwrap();
+            state.store.apply_invalidations(PresentationInvalidations {
+                clear_all: false,
+                invalidated: vec![PresentationInvalidation {
+                    session_id: core_id,
+                    generation: next,
+                    cleanup_pending: false,
+                }],
+            });
         }
-        let events:serde_json::Value=serde_json::from_str(&f.core.document_presentation_take_invalidations().unwrap()).unwrap();
-        assert_eq!(events["clear_all"],true);
-        assert_eq!(events["invalidated"][0]["presentation_id"],id);
-        assert_eq!(events["invalidated"][0]["frame_generation"],"2");
+        let events: serde_json::Value =
+            serde_json::from_str(&f.core.document_presentation_take_invalidations().unwrap())
+                .unwrap();
+        assert_eq!(events["clear_all"], true);
+        assert_eq!(events["invalidated"][0]["presentation_id"], id);
+        assert_eq!(events["invalidated"][0]["frame_generation"], "2");
         f.core.document_read_shutdown().unwrap();
     }
     #[test]
     fn simulated_global_cleanup_errors_notify_even_without_core_terminal_event() {
-        for evidence in [true,false] {
-            let (f,_)=opened();
+        for evidence in [true, false] {
+            let (f, _) = opened();
             {
-                let mut state=f.core.state.lock().unwrap();
-                let result:Result<()> = if evidence {
-                    state.store.evidence_result(Err(StoreEvidenceError::Cleanup {primary:None,cleanup:ContractError::Storage}))
+                let mut state = f.core.state.lock().unwrap();
+                let result: Result<()> = if evidence {
+                    state
+                        .store
+                        .evidence_result(Err(StoreEvidenceError::Cleanup {
+                            primary: None,
+                            cleanup: ContractError::Storage,
+                        }))
                 } else {
-                    state.store.reader_result(Err(DocumentReadError::Cleanup {primary:None,cleanup:ContractError::Storage}))
+                    state.store.reader_result(Err(DocumentReadError::Cleanup {
+                        primary: None,
+                        cleanup: ContractError::Storage,
+                    }))
                 };
                 assert!(result.is_err());
                 assert!(state.store.ready().is_err());
             }
-            let events:serde_json::Value=serde_json::from_str(&f.core.document_presentation_take_invalidations().unwrap()).unwrap();
-            assert_eq!(events["clear_all"],true);
+            let events: serde_json::Value =
+                serde_json::from_str(&f.core.document_presentation_take_invalidations().unwrap())
+                    .unwrap();
+            assert_eq!(events["clear_all"], true);
             // Actual core cleanup is still attempted. Evidence cleanup remains
             // uncertain and correctly reports failure rather than claiming done.
-            if evidence { assert!(f.core.document_read_shutdown().is_err()); }
-            else { f.core.document_read_shutdown().unwrap(); }
+            if evidence {
+                assert!(f.core.document_read_shutdown().is_err());
+            } else {
+                f.core.document_read_shutdown().unwrap();
+            }
         }
     }
 }
