@@ -409,6 +409,74 @@ impl BusinessStore {
         })
     }
     /// Trusted picker owner only; never expose to model-generated commands.
+    /// Candidate reservation is linked to its journal in the caller's same SQL
+    /// transaction BEFORE file creation. It never commits or writes output bytes.
+    pub(crate) fn reserve_candidate_upload_in_transaction(
+        &self,
+        tx: &Transaction<'_>,
+        project_id: &str,
+    ) -> Result<UploadHandle> {
+        if !tx.belongs_to(self.database()) {
+            return Err(ContractError::InvalidAuthority);
+        }
+        self.blob_directories()?;
+        let revision = self.project_revision_for_blob(project_id)?;
+        let id = random_id("up_")?;
+        let snapshot = random_id("snap_")?;
+        sql(self.database().exec("INSERT INTO blob_uploads(upload_id,snapshot_id,workspace,project_id,project_revision,owner_epoch,state,byte_length,digest,kind) VALUES(?,?,?,?,?,?,'copying','0',NULL,NULL)", &[&id, &snapshot, self.workspace_id(), project_id, &revision, self.owner_epoch()]))?;
+        Ok(UploadHandle {
+            upload_id: id,
+            snapshot_id: snapshot,
+        })
+    }
+    /// First materialization only. Never reuse/overwrite a path after an uncertain
+    /// prior call. File creation/fsync are NOT reverted by a later SQL rollback.
+    pub(crate) fn materialize_candidate_upload_trusted(&self, upload_id: &str) -> Result<()> {
+        let upload = self.load_upload(upload_id)?;
+        self.check_live_upload(&upload)?;
+        if upload.state != "copying" || upload.length != 0 {
+            return Err(ContractError::IntentConflict);
+        }
+        let file = io(OpenOptions::new()
+            .write(true)
+            .create_new(true)
+            .mode(0o600)
+            .custom_flags(NOFOLLOW)
+            .open(self.staging_path(upload_id)?))?;
+        io(file.sync_all())?;
+        sync_dir(&self.root_dir().join("staging"))
+    }
+    /// Read-only preparation inspection, including old-owner pins after restart.
+    /// True means pinned exact bytes exist, NEVER engine validation/publication.
+    pub(crate) fn candidate_upload_is_pinned(
+        &self,
+        upload_id: &str,
+        project_id: &str,
+        expected: &BlobRef,
+    ) -> Result<bool> {
+        expected.validate()?;
+        let upload = self.load_upload(upload_id)?;
+        self.project_revision_for_blob(project_id)?;
+        if upload.project != project_id
+            || upload.state != "pinned"
+            || upload.kind != Some(BlobKind::Document)
+            || upload.length != expected.byte_length.value()
+            || upload.digest.as_deref() != Some(expected.digest.as_str())
+        {
+            return Ok(false);
+        }
+        let rows = sql(self.database().query("SELECT CASE WHEN length(CAST(b.byte_length AS BLOB))<=20 THEN b.byte_length ELSE NULL END FROM blobs b WHERE b.digest=? AND b.state='ready' AND EXISTS(SELECT 1 FROM blob_pins p WHERE p.digest=b.digest AND p.kind='upload' AND p.upload_id=? AND p.owner_epoch=? AND p.snapshot_id=?)", &[&expected.digest, upload_id, &upload.owner, &upload.snapshot]))?;
+        if rows.len() != 1 || cell(&rows[0], 0)? != expected.byte_length.as_str() {
+            return Ok(false);
+        }
+        verify_file(
+            &self.object_path(&expected.digest)?,
+            upload.length,
+            &expected.digest,
+        )?;
+        Ok(true)
+    }
+    /// Trusted picker owner only; never expose to model-generated commands.
     pub fn begin_upload(&self, project_id: &str) -> Result<UploadHandle> {
         self.blob_directories()?;
         let tx = sql(self.database().transaction())?;
@@ -640,6 +708,48 @@ impl BusinessStore {
             byte_length: Revision::new(u.length),
         })
     }
+    /// COPY-only: add a reference to an already-published immutable source blob.
+    /// The caller owns authorization/intent and the same SQL transaction. This
+    /// performs no upload, staging, file write, pin change or independent commit.
+    pub(crate) fn clone_blob_reference_in_transaction(
+        &self,
+        tx: &Transaction<'_>,
+        project_id: &str,
+        target_id: &str,
+        expected_blob: &BlobRef,
+        new_reference_id: &str,
+    ) -> Result<BlobRef> {
+        if !tx.belongs_to(self.database()) {
+            return Err(ContractError::InvalidAuthority);
+        }
+        identity(target_id)?;
+        identity(new_reference_id)?;
+        expected_blob.validate()?;
+        self.project_revision_for_blob(project_id)?;
+        let rows = sql(self.database().query(
+            "SELECT CASE WHEN length(CAST(b.byte_length AS BLOB))<=20 THEN b.byte_length ELSE NULL END FROM blob_references r JOIN blobs b ON b.digest=r.digest WHERE r.project_id=? AND r.digest=? AND b.state='ready' LIMIT 1",
+            &[project_id, &expected_blob.digest],
+        ))?;
+        let row = rows.first().ok_or(ContractError::NotFound)?;
+        if cell(row, 0)? != expected_blob.byte_length.as_str() {
+            return Err(ContractError::BindingMismatch);
+        }
+        verify_file(
+            &self.object_path(&expected_blob.digest)?,
+            expected_blob.byte_length.value(),
+            &expected_blob.digest,
+        )?;
+        sql(self.database().exec(
+            "INSERT INTO blob_references(reference_id,project_id,target_id,digest) VALUES(?,?,?,?)",
+            &[
+                new_reference_id,
+                project_id,
+                target_id,
+                &expected_blob.digest,
+            ],
+        ))?;
+        Ok(expected_blob.clone())
+    }
     fn open_reader_for(
         &self,
         project: &str,
@@ -648,7 +758,7 @@ impl BusinessStore {
     ) -> Result<ControlledReader> {
         blob.validate()?;
         let rows = sql(self.database().query(
-            "SELECT byte_length FROM blobs WHERE digest=? AND state='ready'",
+            "SELECT CASE WHEN length(CAST(byte_length AS BLOB))<=20 THEN byte_length ELSE NULL END FROM blobs WHERE digest=? AND state='ready'",
             &[&blob.digest],
         ))?;
         if rows.is_empty() || cell(&rows[0], 0)? != blob.byte_length.as_str() {
@@ -750,6 +860,47 @@ impl BusinessStore {
         ))?;
         Ok(())
     }
+    /// Document facade only: keep reader acquisition in the caller's real
+    /// authorization transaction, with no nested transaction or path input.
+    pub(crate) fn open_document_reader_in_transaction(
+        &self,
+        tx: &Transaction<'_>,
+        project: &str,
+        blob: &BlobRef,
+    ) -> Result<ControlledReader> {
+        if !tx.belongs_to(self.database()) {
+            return Err(ContractError::InvalidAuthority);
+        }
+        let refs = sql(self.database().query(
+            "SELECT 1 FROM blob_references WHERE project_id=? AND digest=? LIMIT 1",
+            &[project, &blob.digest],
+        ))?;
+        if refs.is_empty() { return Err(ContractError::NotFound); }
+        self.open_reader_for(project, &random_id("snap_")?, blob)
+    }
+    pub(crate) fn verify_document_reader_in_transaction(
+        &self,
+        tx: &Transaction<'_>,
+        reader: &mut ControlledReader,
+    ) -> Result<()> {
+        if !tx.belongs_to(self.database()) { return Err(ContractError::InvalidAuthority); }
+        self.check_reader(reader)?;
+        let digest = hash_file(&mut reader.file, reader.source.blob.byte_length.value())?;
+        io(reader.file.seek(SeekFrom::Start(reader.position)))?;
+        if digest != reader.source.blob.digest { return Err(ContractError::BindingMismatch); }
+        Ok(())
+    }
+    /// Cleanup requires an actual nonconstructible reader, not document rights.
+    /// It still works after revocation, deleted pins or corrupt/missing objects.
+    pub(crate) fn release_document_reader(&self, reader: &ControlledReader) -> Result<()> {
+        let source = reader.source();
+        if source.lease.owner_epoch != self.owner_epoch() { return Err(ContractError::InvalidAuthority); }
+        sql(self.database().exec(
+            "DELETE FROM blob_pins WHERE pin_id=? AND owner_epoch=? AND snapshot_id=? AND digest=? AND kind='reader'",
+            &[&source.lease.lease_id, self.owner_epoch(), &source.snapshot_id, &source.blob.digest],
+        ))?;
+        Ok(())
+    }
     /// Explicit maintenance after the OS owner lock proves the old owner is gone.
     /// pending/unknown business intents conservatively retain old upload pins.
     pub fn reconcile_blobs_after_restart(&self) -> Result<BlobRecovery> {
@@ -762,6 +913,9 @@ impl BusinessStore {
         let stale=sql(self.database().query("SELECT upload_id,state FROM blob_uploads WHERE workspace=? AND owner_epoch<>? AND state IN('copying','pinned')",&[self.workspace_id(),self.owner_epoch()]))?;
         let mut recovery = BlobRecovery::default();
         for row in &stale {
+            if self.document_candidate_upload_retained(cell(row, 0)?)? {
+                continue;
+            }
             if cell(row, 1)? == "copying" || unknown.is_empty() {
                 let id = cell(row, 0)?;
                 sql(self.database().exec(
@@ -787,8 +941,30 @@ impl BusinessStore {
         Ok(recovery)
     }
     fn can_delete_blob(&self, digest: &str) -> Result<bool> {
-        let blocked=sql(self.database().query("SELECT 1 WHERE EXISTS(SELECT 1 FROM blob_references WHERE digest=?) OR EXISTS(SELECT 1 FROM blob_pins WHERE digest=?) OR EXISTS(SELECT 1 FROM blob_uploads WHERE state NOT IN('committed','aborted') AND (digest=? OR digest IS NULL)) OR EXISTS(SELECT 1 FROM intents WHERE status IN('pending','unknown'))",&[digest,digest,digest]))?;
-        Ok(blocked.is_empty())
+        let blocked=sql(self.database().query("SELECT 1 WHERE EXISTS(SELECT 1 FROM blob_references WHERE digest=?) OR EXISTS(SELECT 1 FROM blob_pins WHERE digest=?) OR EXISTS(SELECT 1 FROM blob_uploads WHERE state NOT IN('committed','aborted') AND digest=?) OR EXISTS(SELECT 1 FROM intents WHERE status IN('pending','unknown'))",&[digest,digest,digest]))?;
+        if !blocked.is_empty() {
+            return Ok(false);
+        }
+        let mut cursor = String::new();
+        loop {
+            let unresolved = sql(self.database().query("SELECT CASE WHEN length(CAST(upload_id AS BLOB))<=128 THEN upload_id ELSE NULL END FROM blob_uploads WHERE state NOT IN('committed','aborted') AND digest IS NULL AND (?='' OR upload_id>?) ORDER BY upload_id LIMIT 128", &[&cursor, &cursor]))?;
+            if unresolved.is_empty() {
+                return Ok(true);
+            }
+            for row in &unresolved {
+                let upload = cell(row, 0)?;
+                match self.document_candidate_reserves_digest(upload, digest)? {
+                    Some(false) => {}
+                    // Legacy unresolved uploads keep their original conservative
+                    // behavior; journal-backed candidates reserve exact digests.
+                    Some(true) | None => return Ok(false),
+                }
+                cursor = upload.into();
+            }
+            if unresolved.len() < 128 {
+                return Ok(true);
+            }
+        }
     }
     /// Explicit, serialized maintenance. Marking deleting commits before unlink;
     /// publication/read acquisition both require ready in the same database.

@@ -1,0 +1,22 @@
+2026-10-22 06:34:58.426043+00:00
+Linux-6.18.55-x86_64-with-glibc2.41
+Source fixed at HEAD; prior candidate results are not new reader validation.
+
+$ git rev-parse HEAD
+b3592e9bc1b0d9c3c52800e5ec1f566e36b8a297
+exit=0
+
+$ cargo test --offline --locked --manifest-path crates/Cargo.toml -p muyon-core --lib documents::reader_tests
+[Errno 2] No such file or directory: 'cargo'
+exit=127 NOT_RUN (tools missing, not compiler/test pass or failure)
+
+$ cargo test --offline --locked --manifest-path crates/Cargo.toml -p muyon-core
+[Errno 2] No such file or directory: 'cargo'
+exit=127 NOT_RUN (tools missing, not compiler/test pass or failure)
+
+$ rustfmt --check --edition 2021 crates/muyon-core/src/documents/reader.rs crates/muyon-core/src/documents/reader_tests.rs crates/muyon-core/src/documents/mod.rs crates/muyon-core/src/blobs.rs
+[Errno 2] No such file or directory: 'rustfmt'
+exit=127 NOT_RUN (tools missing, not compiler/test pass or failure)
+
+$ git diff --check
+exit=0
