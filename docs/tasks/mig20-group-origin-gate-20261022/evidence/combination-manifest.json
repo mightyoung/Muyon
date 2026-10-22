@@ -1,0 +1,75 @@
+{
+  "pin": "863ece54c3d9ba0fc9900d71ec310a4764b9e1a4",
+  "overlay": [
+    "src/agent/owner.rs",
+    "src/agent/workflow.rs",
+    "src/agent/origin.rs",
+    "src/agent/tools.rs",
+    "src/group_runtime/store.rs",
+    "src/group_runtime/bridge.rs",
+    "src/group_runtime/binding.rs",
+    "src/group_runtime/gate.rs",
+    "tests/group_request_binding.rs",
+    "tests/support/group_origin_gate_cases.rs"
+  ],
+  "runs": [
+    {
+      "name": "tests",
+      "command": [
+        "cargo",
+        "test",
+        "--manifest-path",
+        "/tmp/mig20-canonical-B-x50kxpeu/snapshot/crates/Cargo.toml",
+        "-p",
+        "muyon-core",
+        "--offline",
+        "--locked",
+        "--test",
+        "group_request_binding",
+        "--test",
+        "group_runtime_store",
+        "--test",
+        "group_runtime_bridge"
+      ],
+      "start_utc": "2026-10-22T09:00:48.879290+00:00",
+      "end_utc": "2026-10-22T09:01:46.450700+00:00",
+      "exit_code": 0,
+      "status": "PASS",
+      "reason": null
+    },
+    {
+      "name": "clippy-arguments",
+      "command": [
+        "cargo",
+        "clippy",
+        "--manifest-path",
+        "/tmp/mig20-canonical-B-x50kxpeu/snapshot/crates/Cargo.toml",
+        "-p",
+        "muyon-core",
+        "--offline",
+        "--locked",
+        "--all-targets",
+        "--",
+        "-D",
+        "clippy::too_many_arguments"
+      ],
+      "start_utc": "2026-10-22T09:01:46.451130+00:00",
+      "end_utc": "2026-10-22T09:01:46.461893+00:00",
+      "exit_code": 101,
+      "status": "NOT_RUN",
+      "reason": "cargo clippy unavailable in selected toolchain"
+    }
+  ],
+  "source_sha256": {
+    "src/agent/owner.rs": "6ea4885df03b101b1726fb3b289802b932eb6fdff76c07558a4573859800abad",
+    "src/agent/workflow.rs": "4054f20b63ac3d1a0037e2b2d1465e09e12270a9d1de2ab5f89ad5cc5db1a332",
+    "src/agent/origin.rs": "5f8ee59ce9ac5aed70ba5c887850151cb53bdf9d2dded06ddb035cf868313099",
+    "src/agent/tools.rs": "896c66ff972cf7b22624c0c5f0b817289978b2c8171e6db4fd369d27f71a2788",
+    "src/group_runtime/store.rs": "0e0d0e214dc4994836692c8dded1c8d8178c391a7ec8792a35f52c9e338528de",
+    "src/group_runtime/bridge.rs": "836507e862b3ddbd720a68662702cd34df781cce24aadb21d6ea7b77b6bdfaae",
+    "src/group_runtime/binding.rs": "da5814f087ff30a185e7aeffc784ed32177b86782711e102bb0f418000f7298e",
+    "src/group_runtime/gate.rs": "bdfb7bb344573f9a5fc7e816b1f43c335a74cda292856a3dea450fa461a9d3eb",
+    "tests/group_request_binding.rs": "a6f50545ff3ddcce97732d31da3ee160b06831525ae71711cca7537889a99e6c",
+    "tests/support/group_origin_gate_cases.rs": "32b122043b135c036d616fe00e1b0b78d70d060ba850edd53765807b4d5f7120"
+  }
+}

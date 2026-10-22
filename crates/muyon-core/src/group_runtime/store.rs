@@ -2,6 +2,8 @@
 //! Local group grants authorize only these local mutations, never Agent dispatch.
 #[path = "binding.rs"]
 pub mod binding;
+#[path = "gate.rs"]
+pub mod gate;
 use crate::{
     agent::owner::AgentOwner,
     business::BusinessStore,

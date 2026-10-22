@@ -1,0 +1,21 @@
+diff --git a/crates/muyon-core/src/agent/tools.rs b/crates/muyon-core/src/agent/tools.rs
+index 32d668b0..9ba66e38 100644
+--- a/crates/muyon-core/src/agent/tools.rs
++++ b/crates/muyon-core/src/agent/tools.rs
+@@ -588,7 +588,7 @@ impl AgentOwner {
+         // One DB transaction publishes the new request and consumes this step.
+         let tx = db(self.tool_db().transaction())?;
+         self.check_binding(request, context)?;
+-        let plan = self.tool_prepare_followup(field(&original, 1)?, payload, verifier)?;
++        let (plan, origin_witness) = self.tool_prepare_followup(request, payload, verifier)?;
+         let binding = serde_json::to_string(&context.binding).map_err(|_| "tool_scope_invalid")?;
+         db(self.tool_db().exec(
+             "UPDATE requests SET tool_binding=? WHERE id=? AND status='prepared'",
+@@ -602,6 +602,7 @@ impl AgentOwner {
+             "UPDATE requests SET status='tool_consumed' WHERE id=? AND status='tool_pending'",
+             &[request],
+         ))?;
++        self.verify_prepare_origin_tail(&origin_witness, Some(&binding))?;
+         db(tx.commit())?;
+         Ok(plan)
+     }

@@ -14,6 +14,9 @@ use std::{
     os::fd::AsRawFd,
     path::{Path, PathBuf},
 };
+#[path = "origin.rs"]
+pub mod origin;
+use origin::{OriginDraft, PrepareWitness};
 pub type Result<T> = std::result::Result<T, &'static str>;
 pub const PRICE_REVISION: &str = "product-deepseek-cny-2-8-search5000-v1";
 pub const MODEL: &str = "deepseek-flash";
@@ -215,10 +218,11 @@ impl AgentOwner {
             "CREATE TABLE meta(workspace TEXT NOT NULL,version TEXT NOT NULL)",
             &[],
         ))?;
-        storage(db.exec("INSERT INTO meta VALUES(?,'3')", &[workspace]))?;
+        storage(db.exec("INSERT INTO meta VALUES(?,'4')", &[workspace]))?;
         storage(db.exec("CREATE TABLE configuration(slot INTEGER PRIMARY KEY CHECK(slot=1),id TEXT NOT NULL,settings TEXT NOT NULL,epoch TEXT NOT NULL)",&[]))?;
         storage(db.exec("CREATE TABLE requests(id TEXT PRIMARY KEY,conversation TEXT NOT NULL,purpose TEXT NOT NULL,config TEXT NOT NULL,epoch TEXT NOT NULL,payload TEXT NOT NULL,digest TEXT NOT NULL,reserved INTEGER NOT NULL,charged INTEGER NOT NULL DEFAULT 0,status TEXT NOT NULL,cancelled INTEGER NOT NULL DEFAULT 0,answer TEXT,input_upper INTEGER NOT NULL,attempted INTEGER NOT NULL DEFAULT 0 CHECK(attempted IN (0,1)),failure_stage TEXT,http_status INTEGER,tool_binding TEXT)",&[]))?;
         storage(db.exec("CREATE TABLE tool_steps(request_id TEXT PRIMARY KEY,binding TEXT NOT NULL,stage TEXT NOT NULL,review TEXT NOT NULL,digest TEXT NOT NULL,followup TEXT,plan_intent TEXT,plan_binding TEXT)",&[]))?;
+        origin::initialize(&db)?;
         storage(tx.commit())?;
         Ok(())
     }
@@ -241,10 +245,17 @@ impl AgentOwner {
             false,
         ))?;
         let rows = storage(db.query("SELECT workspace,version FROM meta", &[]))?;
-        if rows.len() != 1 || cell(&rows[0], 0)? != workspace || cell(&rows[0], 1)? != "3" {
+        if rows.len() != 1
+            || cell(&rows[0], 0)? != workspace
+            || !matches!(cell(&rows[0], 1)?, "3" | "4")
+        {
             return Err("agent_database_invalid");
         }
         storage(db.exec("PRAGMA synchronous=FULL", &[]))?;
+        if cell(&rows[0], 1)? == "3" {
+            origin::migrate(&db, workspace)?;
+        }
+        origin::validate(&db)?;
         Ok(Self {
             db,
             workspace: workspace.into(),
@@ -329,7 +340,7 @@ impl AgentOwner {
         text: &str,
         verifier: Option<&dyn HostedCostVerifier>,
     ) -> Result<AgentPlan> {
-        self.prepare_chat_inner(conversation, text, verifier, None)
+        self.prepare_chat_inner(conversation, text, verifier, None, OriginDraft::Direct)
     }
     /// Host-selected child/skill tools are an actual capability subset.
     pub fn prepare_chat_restricted(
@@ -342,7 +353,13 @@ impl AgentOwner {
         if allowed.is_empty() || allowed.len() > 6 {
             return Err("tool_not_allowed");
         }
-        self.prepare_chat_inner(conversation, text, verifier, Some(allowed))
+        self.prepare_chat_inner(
+            conversation,
+            text,
+            verifier,
+            Some(allowed),
+            OriginDraft::Direct,
+        )
     }
     fn prepare_chat_inner(
         &self,
@@ -350,6 +367,7 @@ impl AgentOwner {
         text: &str,
         verifier: Option<&dyn HostedCostVerifier>,
         allowed: Option<&[&str]>,
+        origin: OriginDraft,
     ) -> Result<AgentPlan> {
         check_text(text).map_err(|_| "chat_text_denied")?;
         let configuration = self.configuration()?;
@@ -425,6 +443,7 @@ impl AgentOwner {
                 input,
                 reason,
             },
+            origin,
         )
     }
     pub fn prepare_search(&self, conversation: &str, query: &str, count: u64) -> Result<AgentPlan> {
@@ -464,6 +483,7 @@ impl AgentOwner {
                     .is_none()
                     .then(|| "search_price_proof_unavailable".into()),
             },
+            OriginDraft::Direct,
         )
     }
     fn prepare(
@@ -472,7 +492,22 @@ impl AgentOwner {
         purpose: &str,
         config: &Configuration,
         draft: DraftRequest,
+        origin: OriginDraft,
     ) -> Result<AgentPlan> {
+        let tx = storage(self.db.transaction())?;
+        let (plan, witness) = self.prepare_record(conversation, purpose, config, draft, origin)?;
+        self.verify_prepare_origin_tail(&witness, None)?;
+        storage(tx.commit())?;
+        Ok(plan)
+    }
+    fn prepare_record(
+        &self,
+        conversation: &str,
+        purpose: &str,
+        config: &Configuration,
+        draft: DraftRequest,
+        origin: OriginDraft,
+    ) -> Result<(AgentPlan, PrepareWitness)> {
         let DraftRequest {
             payload,
             reserved,
@@ -483,10 +518,30 @@ impl AgentOwner {
         if payload.len() > 8192 {
             return Err("agent_payload_limit");
         }
+        let origin_source = self.origin_source_before_prepare(&origin, conversation)?;
         let request_id = opaque()?;
         let payload_digest = digest(payload.as_bytes());
         storage(self.db.exec("INSERT INTO requests(id,conversation,purpose,config,epoch,payload,digest,reserved,status,input_upper) VALUES(?,?,?,?,?,?,?,?,'prepared',?)",&[&request_id,conversation,purpose,&config.id,&self.epoch,&payload,&payload_digest,&reserved.to_string(),&input.to_string()]))?;
-        Ok(AgentPlan {
+        let expected = vec![
+            Some(request_id.clone()),
+            Some(conversation.into()),
+            Some(purpose.into()),
+            Some(config.id.clone()),
+            Some(self.epoch.clone()),
+            Some(payload.clone()),
+            Some(payload_digest.clone()),
+            Some(reserved.to_string()),
+            Some("0".into()),
+            Some("prepared".into()),
+            Some("0".into()),
+            None,
+            Some(input.to_string()),
+            Some("0".into()),
+            None,
+            None,
+            None,
+        ];
+        let plan = AgentPlan {
             request_id,
             conversation_id: conversation.into(),
             purpose: purpose.into(),
@@ -501,7 +556,9 @@ impl AgentOwner {
             } else {
                 "https://api.deepseek.com/chat/completions".into()
             },
-        })
+        };
+        let witness = self.write_origin(&plan, expected, origin, origin_source)?;
+        Ok((plan, witness))
     }
     /// Durable reservation and one-use request identity. Only visible user
     /// confirmation may call this; model tools must not expose it.
@@ -857,10 +914,13 @@ impl AgentOwner {
     }
     pub(super) fn tool_prepare_followup(
         &self,
-        conversation: &str,
+        parent_request: &str,
         payload: String,
         verifier: Option<&dyn HostedCostVerifier>,
-    ) -> Result<AgentPlan> {
+    ) -> Result<(AgentPlan, PrepareWitness)> {
+        let parent = self.request_origin(parent_request)?;
+        let conversation = self.request_conversation(parent_request)?;
+        let conversation = conversation.as_str();
         let body = decode_json(&payload).map_err(|_| "tool_history_invalid")?;
         if body["tools"]
             .as_array()
@@ -889,7 +949,7 @@ impl AgentOwner {
             ),
             None => (0, 0, Some("hosted_cost_proof_unavailable".into())),
         };
-        self.prepare(
+        self.prepare_record(
             conversation,
             "chat",
             &configuration,
@@ -899,6 +959,7 @@ impl AgentOwner {
                 input,
                 reason,
             },
+            OriginDraft::Followup(parent),
         )
     }
 }

@@ -1,0 +1,52 @@
+COMMAND: cargo test --offline --manifest-path /tmp/mig20-origin-gate-independent-review/Cargo.toml independent_ -- --nocapture
+EXIT: 101
+warning: suspicious definition of the runtime `read` symbol used by the standard library
+   --> /workspace/mig20/experiments/redesign/core-agent-lab/core/src/host_session.rs:132:124
+    |
+132 | ...ount: usize, timeout: i32) -> i32; fn read(fd: i32, buffer: *mut u8, count: usize) -> isize; fn write(fd: i32, buffer: *const u8...
+    |                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = note: expected `unsafe extern "C" fn(i32, *mut c_void, usize) -> isize` (for the current target)
+            found    `unsafe extern "C" fn(i32, *mut u8, usize) -> isize`
+    = help: either fix the signature or remove any attributes like `#[unsafe(no_mangle)]`, `#[unsafe(export_name = "read")]`, or `#[link_name = "read"]`
+    = help: allow this lint if the signature is compatible
+    = note: `#[warn(suspicious_runtime_symbol_definitions)]` on by default
+
+warning: suspicious definition of the runtime `write` symbol used by the standard library
+   --> /workspace/mig20/experiments/redesign/core-agent-lab/core/src/host_session.rs:132:182
+    |
+132 | ... *mut u8, count: usize) -> isize; fn write(fd: i32, buffer: *const u8, count: usize) -> isize; }
+    |                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = note: expected `unsafe extern "C" fn(i32, *const c_void, usize) -> isize` (for the current target)
+            found    `unsafe extern "C" fn(i32, *const u8, usize) -> isize`
+    = help: either fix the signature or remove any attributes like `#[unsafe(no_mangle)]`, `#[unsafe(export_name = "write")]`, or `#[link_name = "write"]`
+    = help: allow this lint if the signature is compatible
+
+warning: `muyon-core-agent-lab` (lib) generated 2 warnings
+   Compiling mig20-origin-gate-independent-review v0.1.0 (/tmp/mig20-origin-gate-independent-review)
+    Finished `test` profile [unoptimized] target(s) in 4.36s
+     Running review.rs (/tmp/mig20-target/debug/deps/review-29a1b483824d0a9a)
+
+running 2 tests
+MISSING_ACTUAL_GROUP_RUN_GATE={"canonical":null,"cross_owner_atomic":false,"execution_authority":false,"group_hold":false,"origin":{"classification":"direct","configuration_id":"1618e9a4dce4ff6a237f2940afbe7566","conversation_id":"child-a43cdaf0caa472cd07c1fd90201bdd6d","group":null,"parent_request_id":null,"payload_digest":"c5038fbeb0d9e975a1f159e9cc56c0186be06607e71a6252236b48b902ea9054","request_epoch":"epoch","request_id":"978a48e078487b40f0d93cc33bc99eef","root_request_id":"978a48e078487b40f0d93cc33bc99eef","workspace_id":"ws"},"reason":"direct_non_group_observed","request_id":"978a48e078487b40f0d93cc33bc99eef","source_error":null,"workflow":{"chain_contains_request":true,"child_id":"c966b5041f49a7272288b48762ecb94e","facts":{"active_child_count":1,"children":[{"arguments_digest":"6cfad4c45c68e5d0140f8fa7cef6c798175d1e69bc6bc9c4258f34b3c9861de5","cancel_requested":false,"conversation_id":"child-a43cdaf0caa472cd07c1fd90201bdd6d","created_seq":"2","host_session":"session","id":"c966b5041f49a7272288b48762ecb94e","kind":"remote_chat","native_context_current":true,"observations":[{"answer":null,"attempted":false,"blocked_reason":null,"cancelled":false,"charged_micro_cny":"0","failure_stage":null,"http_status":null,"recovery_action":"none","request_id":"978a48e078487b40f0d93cc33bc99eef","reserved_micro_cny":"3024","status":"prepared"}],"originals":[{"configuration_id":"1618e9a4dce4ff6a237f2940afbe7566","conversation_id":"child-a43cdaf0caa472cd07c1fd90201bdd6d","payload_digest":"c5038fbeb0d9e975a1f159e9cc56c0186be06607e71a6252236b48b902ea9054","purpose":"chat","request_epoch":"epoch","request_id":"978a48e078487b40f0d93cc33bc99eef","workspace_id":"ws"}],"owner_epoch":"epoch","project_id":"project","root_id":"c8351ed824254b3cbeea5e3cae8a9d20","skill_current":true,"skill_digest":"6a04822d58cadf1b20f8b677f16ef1573e82302cdffe467642eb11cbbed1636a","status":"waiting_confirmation","updated_seq":"4"}],"complete_lifetime_children":true,"cross_owner_atomic":false,"execution_authority":false,"host_session":"session","owner_epoch":"epoch","root":{"arguments_digest":"44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a","cancel_requested":false,"conversation_id":"conversation","created_seq":"1","host_session":"session","id":"c8351ed824254b3cbeea5e3cae8a9d20","kind":"workflow","native_context_current":true,"observations":[],"originals":[],"owner_epoch":"epoch","project_id":"project","root_id":"c8351ed824254b3cbeea5e3cae8a9d20","skill_current":true,"skill_digest":null,"status":"waiting_confirmation","updated_seq":"4"},"root_budget_available":false,"workspace_id":"ws"}}}
+
+thread 'independent_origin_gate_cannot_downgrade_when_actual_group_run_row_is_missing' (35247) panicked at review.rs:1159:2:
+actual group registration and committed Start provenance remain; missing group run cannot prove nongroup
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test independent_origin_gate_cannot_downgrade_when_actual_group_run_row_is_missing ... FAILED
+DAMAGED_CONVERSATION_GATE={"canonical":null,"cross_owner_atomic":false,"execution_authority":false,"group_hold":false,"origin":{"classification":"direct","configuration_id":"4f3f9d49e8cfa538729c62289bff124e","conversation_id":"child-41584184904a59c7f759a4761eb8b1ab","group":null,"parent_request_id":null,"payload_digest":"443ab8865b2404124b29f7bf3f353f08c1a618aa1447a32a602969c30c0dffde","request_epoch":"epoch","request_id":"70ea0f6b6f9e0557a1c3f0da874ee157","root_request_id":"70ea0f6b6f9e0557a1c3f0da874ee157","workspace_id":"ws"},"reason":"direct_non_group_observed","request_id":"70ea0f6b6f9e0557a1c3f0da874ee157","source_error":null,"workflow":null}
+
+thread 'independent_origin_gate_cannot_drop_a_bound_child_after_conversation_damage' (35248) panicked at review.rs:1150:2:
+actual persisted request reference still belongs to the group child; conversation damage must not erase reverse attribution and create Direct
+test independent_origin_gate_cannot_drop_a_bound_child_after_conversation_damage ... FAILED
+
+failures:
+
+failures:
+    independent_origin_gate_cannot_downgrade_when_actual_group_run_row_is_missing
+    independent_origin_gate_cannot_drop_a_bound_child_after_conversation_damage
+
+test result: FAILED. 0 passed; 2 failed; 0 ignored; 0 measured; 49 filtered out; finished in 0.02s
+
+error: test failed, to rerun pass `--test review`

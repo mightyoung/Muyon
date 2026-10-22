@@ -1,0 +1,75 @@
+warning: suspicious definition of the runtime `read` symbol used by the standard library
+   --> /workspace/mig20/experiments/redesign/core-agent-lab/core/src/host_session.rs:132:124
+    |
+132 | ...ount: usize, timeout: i32) -> i32; fn read(fd: i32, buffer: *mut u8, count: usize) -> isize; fn write(fd: i32, buffer: *const u8...
+    |                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = note: expected `unsafe extern "C" fn(i32, *mut c_void, usize) -> isize` (for the current target)
+            found    `unsafe extern "C" fn(i32, *mut u8, usize) -> isize`
+    = help: either fix the signature or remove any attributes like `#[unsafe(no_mangle)]`, `#[unsafe(export_name = "read")]`, or `#[link_name = "read"]`
+    = help: allow this lint if the signature is compatible
+    = note: `#[warn(suspicious_runtime_symbol_definitions)]` on by default
+
+warning: suspicious definition of the runtime `write` symbol used by the standard library
+   --> /workspace/mig20/experiments/redesign/core-agent-lab/core/src/host_session.rs:132:182
+    |
+132 | ... *mut u8, count: usize) -> isize; fn write(fd: i32, buffer: *const u8, count: usize) -> isize; }
+    |                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = note: expected `unsafe extern "C" fn(i32, *const c_void, usize) -> isize` (for the current target)
+            found    `unsafe extern "C" fn(i32, *const u8, usize) -> isize`
+    = help: either fix the signature or remove any attributes like `#[unsafe(no_mangle)]`, `#[unsafe(export_name = "write")]`, or `#[link_name = "write"]`
+    = help: allow this lint if the signature is compatible
+
+warning: `muyon-core-agent-lab` (lib) generated 2 warnings
+warning: method `group_seed` is never used
+  --> muyon-core/src/agent/origin.rs:38:19
+   |
+34 | impl RequestOrigin {
+   | ------------------ method in this implementation
+...
+38 |     pub(crate) fn group_seed(&self)->Option<&GroupOriginSeed> {self.record.group.as_ref()}
+   |                   ^^^^^^^^^^
+   |
+   = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: variant `Group` is never constructed
+  --> muyon-core/src/agent/origin.rs:40:39
+   |
+40 | pub(super) enum OriginDraft { Direct, Group(GroupOriginSeed), Followup(RequestOrigin) }
+   |                 -----------           ^^^^^
+   |                 |
+   |                 variant in this enum
+
+warning: method `prepare_group_chat_trusted` is never used
+   --> muyon-core/src/agent/origin.rs:112:19
+    |
+ 74 | impl AgentOwner {
+    | --------------- method in this implementation
+...
+112 |     pub(crate) fn prepare_group_chat_trusted(&self,origin:GroupOriginSeed,text:&str,verifier:Option<&dyn HostedCostVerifier>,allowe...
+    |                   ^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: `muyon-core` (lib) generated 3 warnings
+   Compiling muyon-core v0.1.0 (/workspace/mig20/crates/muyon-core)
+    Finished `test` profile [unoptimized] target(s) in 4.30s
+     Running tests/group_request_binding.rs (/tmp/mig20-target/debug/deps/group_request_binding-2e9ca052016f892d)
+
+running 14 tests
+test group_origin_gate_cases::direct_and_non_group_workflow_controls_remain_non_group_observations_without_permit ... ok
+test group_origin_gate_cases::followup_first_insert_cannot_change_parent_charge_before_source_witness_capture ... ok
+test group_origin_gate_cases::canonical_mapping_evidence_survives_missing_workflow_child_for_direct_entry ... ok
+test group_origin_gate_cases::durable_followup_inherits_group_origin_and_request_only_gate_finds_first_original_mapping ... ok
+test group_origin_gate_cases::legacy_v3_migration_preserves_original_bytes_and_unknown_hold_without_guessing_direct ... ok
+test group_origin_gate_cases::group_prepare_records_real_group_root_child_before_canonical_mapping_exists ... ok
+test group_origin_gate_cases::ordinary_origin_is_persisted_at_prepare_and_missing_origin_never_means_direct ... ok
+test group_origin_gate_cases::ordinary_prepare_in_actual_group_child_cannot_bypass_request_only_gate ... ok
+test group_origin_gate_cases::origin_gate_cannot_downgrade_when_actual_group_run_row_is_missing ... ok
+test group_origin_gate_cases::followup_tail_fault_rolls_back_new_identity_link_and_preserves_parent_origin ... ok
+test group_origin_gate_cases::prepare_origin_tail_fault_rolls_back_request_and_origin ... ok
+test group_origin_gate_cases::pending_canonical_evidence_survives_missing_workflow_child_for_direct_entry ... ok
+test group_origin_gate_cases::origin_gate_cannot_drop_a_bound_child_after_conversation_damage ... ok
+test group_origin_gate_cases::legacy_origin_migration_trigger_faults_rollback_whole_upgrade ... ok
+
+test result: ok. 14 passed; 0 failed; 0 ignored; 0 measured; 40 filtered out; finished in 0.10s
+

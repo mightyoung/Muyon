@@ -1,0 +1,130 @@
+warning: suspicious definition of the runtime `read` symbol used by the standard library
+   --> /workspace/mig20/experiments/redesign/core-agent-lab/core/src/host_session.rs:132:124
+    |
+132 | ...ount: usize, timeout: i32) -> i32; fn read(fd: i32, buffer: *mut u8, count: usize) -> isize; fn write(fd: i32, buffer: *const u8...
+    |                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = note: expected `unsafe extern "C" fn(i32, *mut c_void, usize) -> isize` (for the current target)
+            found    `unsafe extern "C" fn(i32, *mut u8, usize) -> isize`
+    = help: either fix the signature or remove any attributes like `#[unsafe(no_mangle)]`, `#[unsafe(export_name = "read")]`, or `#[link_name = "read"]`
+    = help: allow this lint if the signature is compatible
+    = note: `#[warn(suspicious_runtime_symbol_definitions)]` on by default
+
+warning: suspicious definition of the runtime `write` symbol used by the standard library
+   --> /workspace/mig20/experiments/redesign/core-agent-lab/core/src/host_session.rs:132:182
+    |
+132 | ... *mut u8, count: usize) -> isize; fn write(fd: i32, buffer: *const u8, count: usize) -> isize; }
+    |                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = note: expected `unsafe extern "C" fn(i32, *const c_void, usize) -> isize` (for the current target)
+            found    `unsafe extern "C" fn(i32, *const u8, usize) -> isize`
+    = help: either fix the signature or remove any attributes like `#[unsafe(no_mangle)]`, `#[unsafe(export_name = "write")]`, or `#[link_name = "write"]`
+    = help: allow this lint if the signature is compatible
+
+warning: `muyon-core-agent-lab` (lib) generated 2 warnings
+   Compiling muyon-core v0.1.0 (/workspace/mig20/crates/muyon-core)
+error[E0433]: cannot find `gate` in `group_runtime_store`
+  --> muyon-core/tests/support/group_origin_gate_cases.rs:27:69
+   |
+27 |     let p=s.group_prepare_chat(&g,&o,&l,&scope,group_runtime_store::gate::GroupChatPreparation{run_id:"run",workflow_run_id:&child,m...
+   |                                                                     ^^^^ could not find `gate` in `group_runtime_store`
+
+error[E0599]: no method named `request_origin` found for struct `agent::owner::AgentOwner` in the current scope
+   --> muyon-core/tests/support/group_origin_gate_cases.rs:6:34
+    |
+  6 |     let v=serde_json::to_value(o.request_origin(&p.request_id).unwrap()).unwrap();
+    |                                  ^^^^^^^^^^^^^^
+    |
+   ::: muyon-core/tests/../src/agent/owner.rs:192:1
+    |
+192 | pub struct AgentOwner {
+    | --------------------- method `request_origin` not found for this struct
+    |
+help: there is a method `request_chain` with a similar name
+    |
+  6 -     let v=serde_json::to_value(o.request_origin(&p.request_id).unwrap()).unwrap();
+  6 +     let v=serde_json::to_value(o.request_chain(&p.request_id).unwrap()).unwrap();
+    |
+
+error[E0599]: no method named `request_origin` found for struct `agent::owner::AgentOwner` in the current scope
+   --> muyon-core/tests/support/group_origin_gate_cases.rs:10:15
+    |
+ 10 |     assert!(o.request_origin(&p.request_id).is_err());
+    |               ^^^^^^^^^^^^^^
+    |
+   ::: muyon-core/tests/../src/agent/owner.rs:192:1
+    |
+192 | pub struct AgentOwner {
+    | --------------------- method `request_origin` not found for this struct
+    |
+help: there is a method `request_chain` with a similar name
+    |
+ 10 -     assert!(o.request_origin(&p.request_id).is_err());
+ 10 +     assert!(o.request_chain(&p.request_id).is_err());
+    |
+
+error[E0599]: no method named `group_prepare_chat` found for struct `business::BusinessStore` in the current scope
+  --> muyon-core/tests/support/group_origin_gate_cases.rs:27:13
+   |
+27 |     let p=s.group_prepare_chat(&g,&o,&l,&scope,group_runtime_store::gate::GroupChatPreparation{run_id:"run",workflow_run_id:&child,m...
+   |             ^^^^^^^^^^^^^^^^^^ method not found in `business::BusinessStore`
+   |
+  ::: muyon-core/tests/../src/business.rs:69:1
+   |
+69 | pub struct BusinessStore {
+   | ------------------------ method `group_prepare_chat` not found for this struct
+
+error[E0599]: no method named `request_origin` found for struct `agent::owner::AgentOwner` in the current scope
+   --> muyon-core/tests/support/group_origin_gate_cases.rs:28:34
+    |
+ 28 |     let v=serde_json::to_value(o.request_origin(&p.request_id).unwrap()).unwrap();
+    |                                  ^^^^^^^^^^^^^^
+    |
+   ::: muyon-core/tests/../src/agent/owner.rs:192:1
+    |
+192 | pub struct AgentOwner {
+    | --------------------- method `request_origin` not found for this struct
+    |
+help: there is a method `request_chain` with a similar name
+    |
+ 28 -     let v=serde_json::to_value(o.request_origin(&p.request_id).unwrap()).unwrap();
+ 28 +     let v=serde_json::to_value(o.request_chain(&p.request_id).unwrap()).unwrap();
+    |
+
+error[E0599]: no method named `group_request_gate` found for struct `business::BusinessStore` in the current scope
+  --> muyon-core/tests/support/group_origin_gate_cases.rs:30:37
+   |
+30 |     let gate=serde_json::to_value(s.group_request_gate(&p.request_id,&o,&l)).unwrap();
+   |                                     ^^^^^^^^^^^^^^^^^^
+   |
+  ::: muyon-core/tests/../src/business.rs:69:1
+   |
+69 | pub struct BusinessStore {
+   | ------------------------ method `group_request_gate` not found for this struct
+   |
+help: there is a method `group_request_binding` with a similar name
+   |
+30 -     let gate=serde_json::to_value(s.group_request_gate(&p.request_id,&o,&l)).unwrap();
+30 +     let gate=serde_json::to_value(s.group_request_binding(&p.request_id,&o,&l)).unwrap();
+   |
+
+error[E0599]: no method named `group_request_gate` found for struct `business::BusinessStore` in the current scope
+  --> muyon-core/tests/support/group_origin_gate_cases.rs:38:43
+   |
+38 |     let gate=serde_json::to_value(f.store.group_request_gate(&f.plan.request_id,&f.owner,&f.ledger)).unwrap();
+   |                                           ^^^^^^^^^^^^^^^^^^
+   |
+  ::: muyon-core/tests/../src/business.rs:69:1
+   |
+69 | pub struct BusinessStore {
+   | ------------------------ method `group_request_gate` not found for this struct
+   |
+help: there is a method `group_request_binding` with a similar name
+   |
+38 -     let gate=serde_json::to_value(f.store.group_request_gate(&f.plan.request_id,&f.owner,&f.ledger)).unwrap();
+38 +     let gate=serde_json::to_value(f.store.group_request_binding(&f.plan.request_id,&f.owner,&f.ledger)).unwrap();
+   |
+
+Some errors have detailed explanations: E0433, E0599.
+For more information about an error, try `rustc --explain E0433`.
+error: could not compile `muyon-core` (test "group_request_binding") due to 7 previous errors

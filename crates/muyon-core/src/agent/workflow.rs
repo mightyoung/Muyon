@@ -326,6 +326,29 @@ impl Run {
         v
     }
 }
+/// Request-only reverse attribution from actual persisted child conversations.
+/// Includes unbound preparation; the bool separately reports exact bound chain.
+#[derive(Serialize)]
+pub struct WorkflowRequestAttribution {
+    facts: RunAdmissionFacts,
+    child_id: String,
+    chain_contains_request: bool,
+}
+impl WorkflowRequestAttribution {
+    pub fn facts(&self) -> &RunAdmissionFacts {
+        &self.facts
+    }
+    pub fn child(&self) -> &AdmissionRun {
+        self.facts
+            .children
+            .iter()
+            .find(|r| r.id == self.child_id)
+            .expect("validated attribution child")
+    }
+    pub fn chain_contains_request(&self) -> bool {
+        self.chain_contains_request
+    }
+}
 pub struct RunLedger {
     db: Db,
     workspace: String,
@@ -1003,6 +1026,92 @@ impl RunLedger {
             root_budget_available: false,
             execution_authority: false,
         })
+    }
+    /// Actual conversation lookup cannot drop an unbound group-child prepare.
+    /// No caller scope/plan/JSON is accepted as request ownership evidence.
+    pub fn request_attribution(
+        &self,
+        request: &str,
+        owner: &AgentOwner,
+    ) -> Result<Option<WorkflowRequestAttribution>> {
+        let original = owner.request_binding(request)?;
+        let origin = owner.request_origin(request)?;
+        if owner.workspace() != self.workspace || owner.owner_epoch() != self.epoch {
+            return Err("workflow_scope_mismatch");
+        }
+        let tx = sql(self.db.transaction())?;
+        let rows = sql(self.db.query("SELECT record FROM runs ORDER BY rowid", &[]))?;
+        let mut selected = None;
+        for row in rows {
+            let run: Run =
+                serde_json::from_str(cell(&row, 0)?).map_err(|_| "workflow_storage_invalid")?;
+            let names_request = run.remote_request_id.as_deref() == Some(request)
+                || run.current_request_id.as_deref() == Some(request)
+                || run.remote_request_ids.iter().any(|id| id == request)
+                || origin.root_request_id().is_some_and(|root| {
+                    run.remote_request_id.as_deref() == Some(root)
+                        || run.remote_request_ids.iter().any(|id| id == root)
+                });
+            if run.kind == "remote_chat"
+                && (run.conversation_id == original.conversation_id() || names_request)
+                && selected.replace(run).is_some()
+            {
+                return Err("workflow_remote_binding_invalid");
+            }
+        }
+        // Also validate all physical records when no child matches. A moved
+        // conversation/index must not be silently considered a positive Direct.
+        if let Some(run) = selected {
+            let root_rows = sql(self
+                .db
+                .query("SELECT record FROM runs WHERE id=?", &[&run.root_id]))?;
+            let root: Run =
+                serde_json::from_str(cell(root_rows.first().ok_or("workflow_run_not_found")?, 0)?)
+                    .map_err(|_| "workflow_storage_invalid")?;
+            let scope = RunScope {
+                workspace: self.workspace.clone(),
+                epoch: self.epoch.clone(),
+                session: run.session.clone(),
+                conversation: root.conversation_id,
+                project: run.project_id,
+            };
+            // End this read transaction before the existing facts reader opens
+            // its own. This is explicitly not a cross-database atomic snapshot.
+            sql(tx.commit())?;
+            let facts = self.admission_facts(&scope, &run.root_id, owner)?;
+            let child = facts
+                .children
+                .iter()
+                .find(|r| r.id == run.id)
+                .ok_or("workflow_storage_invalid")?;
+            let chain_contains_request = child.originals.iter().any(|o| o.request_id() == request);
+            Ok(Some(WorkflowRequestAttribution {
+                facts,
+                child_id: run.id,
+                chain_contains_request,
+            }))
+        } else {
+            // Validate index/record coherence even for unrelated rows before
+            // claiming no workflow child. Scope is stored as [ws,rootconv,project].
+            let all = sql(self.db.query("SELECT id,scope,root,record FROM runs", &[]))?;
+            for row in all {
+                let run: Run =
+                    serde_json::from_str(cell(&row, 3)?).map_err(|_| "workflow_storage_invalid")?;
+                let scope: Value =
+                    serde_json::from_str(cell(&row, 1)?).map_err(|_| "workflow_storage_invalid")?;
+                if cell(&row, 0)? != run.id
+                    || cell(&row, 2)? != run.root_id
+                    || scope.as_array().map(Vec::len) != Some(3)
+                    || scope[0] != self.workspace
+                    || scope[2] != json!(run.project_id)
+                    || scope[1].as_str().is_none()
+                {
+                    return Err("workflow_storage_invalid");
+                }
+            }
+            sql(tx.commit())?;
+            Ok(None)
+        }
     }
     pub fn remote_context(&self, scope: &RunScope, run_id: &str) -> Result<Value> {
         let run = self.get(scope, run_id, true)?;

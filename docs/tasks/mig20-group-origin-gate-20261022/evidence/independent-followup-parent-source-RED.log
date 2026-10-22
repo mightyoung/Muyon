@@ -1,0 +1,14 @@
+COMMAND: cargo test --offline --manifest-path /tmp/mig20-origin-gate-independent-review/Cargo.toml independent_followup_insert -- --nocapture
+EXIT: 101
+Relevant original tool completion excerpt captured from exec session88710 before parent repair. Subsequent rerun after the repair returned0, saved separately as independent-followup-parent-source-first-fix-GREEN.log.
+
+running 1 test
+FOLLOWUP_INSERT_PARENT_SOURCE_RESULT=Ok(AgentPlan { request_id: "6041c36bda81b2b9d369597935d2284b", ... })
+PARENT_STATUS=Ok(Observation { request_id: "52c42417af0ebcbf53d4b24f96bfa368", status: "tool_consumed", charged_micro_cny: Revision("67"), ... })
+thread 'independent_followup_insert_cannot_mutate_parent_before_the_source_witness_is_captured' (35359) panicked at review.rs:1185:2:
+source parent must be frozen before the first new request INSERT, not captured after its trigger changed charged cost
+test independent_followup_insert_cannot_mutate_parent_before_the_source_witness_is_captured ... FAILED
+failures:
+ independent_followup_insert_cannot_mutate_parent_before_the_source_witness_is_captured
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 53 filtered out; finished in 0.02s
+error: test failed, to rerun pass --test review

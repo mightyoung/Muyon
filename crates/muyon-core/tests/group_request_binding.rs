@@ -1136,3 +1136,6 @@ fn canonical_tail_preserves_exact_source_plan_provenance_or_rolls_back() {
         );
     }
 }
+
+#[path = "support/group_origin_gate_cases.rs"]
+mod group_origin_gate_cases;

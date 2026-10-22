@@ -1,0 +1,67 @@
+warning: suspicious definition of the runtime `read` symbol used by the standard library
+   --> /workspace/mig20/experiments/redesign/core-agent-lab/core/src/host_session.rs:132:124
+    |
+132 | ...ount: usize, timeout: i32) -> i32; fn read(fd: i32, buffer: *mut u8, count: usize) -> isize; fn write(fd: i32, buffer: *const u8...
+    |                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = note: expected `unsafe extern "C" fn(i32, *mut c_void, usize) -> isize` (for the current target)
+            found    `unsafe extern "C" fn(i32, *mut u8, usize) -> isize`
+    = help: either fix the signature or remove any attributes like `#[unsafe(no_mangle)]`, `#[unsafe(export_name = "read")]`, or `#[link_name = "read"]`
+    = help: allow this lint if the signature is compatible
+    = note: `#[warn(suspicious_runtime_symbol_definitions)]` on by default
+
+warning: suspicious definition of the runtime `write` symbol used by the standard library
+   --> /workspace/mig20/experiments/redesign/core-agent-lab/core/src/host_session.rs:132:182
+    |
+132 | ... *mut u8, count: usize) -> isize; fn write(fd: i32, buffer: *const u8, count: usize) -> isize; }
+    |                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = note: expected `unsafe extern "C" fn(i32, *const c_void, usize) -> isize` (for the current target)
+            found    `unsafe extern "C" fn(i32, *const u8, usize) -> isize`
+    = help: either fix the signature or remove any attributes like `#[unsafe(no_mangle)]`, `#[unsafe(export_name = "write")]`, or `#[link_name = "write"]`
+    = help: allow this lint if the signature is compatible
+
+warning: `muyon-core-agent-lab` (lib) generated 2 warnings
+   Compiling muyon-core v0.1.0 (/workspace/mig20/crates/muyon-core)
+error[E0583]: file not found for module `origin`
+  --> muyon-core/src/agent/owner.rs:17:1
+   |
+17 | pub mod origin;
+   | ^^^^^^^^^^^^^^^
+   |
+   = help: to create the module `origin`, create file "muyon-core/src/agent/owner/origin.rs" or "muyon-core/src/agent/owner/origin/mod.rs"
+   = note: if there is a `mod origin` elsewhere in the crate already, import it with `use crate::...` instead
+
+error[E0599]: no method named `verify_prepare_origin_tail` found for reference `&AgentOwner` in the current scope
+   --> muyon-core/src/agent/owner.rs:487:14
+    |
+487 |         self.verify_prepare_origin_tail(&witness,None)?;
+    |              ^^^^^^^^^^^^^^^^^^^^^^^^^^ method not found in `&AgentOwner`
+
+error[E0599]: no method named `write_origin` found for reference `&AgentOwner` in the current scope
+   --> muyon-core/src/agent/owner.rs:522:26
+    |
+522 |         let witness=self.write_origin(&plan,expected,origin)?;
+    |                          ^^^^^^^^^^^^ method not found in `&AgentOwner`
+
+error[E0599]: no method named `request_origin` found for reference `&AgentOwner` in the current scope
+   --> muyon-core/src/agent/owner.rs:883:25
+    |
+883 |         let parent=self.request_origin(parent_request)?;
+    |                         ^^^^^^^^^^^^^^
+    |
+help: there is a method `request` with a similar name
+    |
+883 -         let parent=self.request_origin(parent_request)?;
+883 +         let parent=self.request(parent_request)?;
+    |
+
+error[E0599]: no method named `verify_prepare_origin_tail` found for reference `&AgentOwner` in the current scope
+   --> muyon-core/src/agent/tools.rs:605:14
+    |
+605 |         self.verify_prepare_origin_tail(&origin_witness,Some(&binding))?;
+    |              ^^^^^^^^^^^^^^^^^^^^^^^^^^ method not found in `&AgentOwner`
+
+Some errors have detailed explanations: E0583, E0599.
+For more information about an error, try `rustc --explain E0583`.
+error: could not compile `muyon-core` (lib) due to 5 previous errors

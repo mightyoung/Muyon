@@ -1,0 +1,85 @@
+COMMAND: cargo test --offline -p muyon-core --test group_request_binding group_origin_gate_cases:: -- --nocapture
+EXIT: 0
+warning: suspicious definition of the runtime `read` symbol used by the standard library
+   --> /workspace/mig20/experiments/redesign/core-agent-lab/core/src/host_session.rs:132:124
+    |
+132 | ...ount: usize, timeout: i32) -> i32; fn read(fd: i32, buffer: *mut u8, count: usize) -> isize; fn write(fd: i32, buffer: *const u8...
+    |                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = note: expected `unsafe extern "C" fn(i32, *mut c_void, usize) -> isize` (for the current target)
+            found    `unsafe extern "C" fn(i32, *mut u8, usize) -> isize`
+    = help: either fix the signature or remove any attributes like `#[unsafe(no_mangle)]`, `#[unsafe(export_name = "read")]`, or `#[link_name = "read"]`
+    = help: allow this lint if the signature is compatible
+    = note: `#[warn(suspicious_runtime_symbol_definitions)]` on by default
+
+warning: suspicious definition of the runtime `write` symbol used by the standard library
+   --> /workspace/mig20/experiments/redesign/core-agent-lab/core/src/host_session.rs:132:182
+    |
+132 | ... *mut u8, count: usize) -> isize; fn write(fd: i32, buffer: *const u8, count: usize) -> isize; }
+    |                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = note: expected `unsafe extern "C" fn(i32, *const c_void, usize) -> isize` (for the current target)
+            found    `unsafe extern "C" fn(i32, *const u8, usize) -> isize`
+    = help: either fix the signature or remove any attributes like `#[unsafe(no_mangle)]`, `#[unsafe(export_name = "write")]`, or `#[link_name = "write"]`
+    = help: allow this lint if the signature is compatible
+
+warning: `muyon-core-agent-lab` (lib) generated 2 warnings
+warning: method `group_seed` is never used
+  --> muyon-core/src/agent/origin.rs:60:19
+   |
+47 | impl RequestOrigin {
+   | ------------------ method in this implementation
+...
+60 |     pub(crate) fn group_seed(&self) -> Option<&GroupOriginSeed> {
+   |                   ^^^^^^^^^^
+   |
+   = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: variant `Group` is never constructed
+  --> muyon-core/src/agent/origin.rs:66:5
+   |
+64 | pub(super) enum OriginDraft {
+   |                 ----------- variant in this enum
+65 |     Direct,
+66 |     Group(GroupOriginSeed),
+   |     ^^^^^
+
+warning: method `prepare_group_chat_trusted` is never used
+   --> muyon-core/src/agent/origin.rs:214:19
+    |
+142 | impl AgentOwner {
+    | --------------- method in this implementation
+...
+214 |     pub(crate) fn prepare_group_chat_trusted(
+    |                   ^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: `muyon-core` (lib) generated 3 warnings
+    Finished `test` profile [unoptimized] target(s) in 0.02s
+     Running tests/group_request_binding.rs (/tmp/mig20-target/debug/deps/group_request_binding-2e9ca052016f892d)
+
+running 19 tests
+test group_origin_gate_cases::direct_and_non_group_workflow_controls_remain_non_group_observations_without_permit ... ok
+test group_origin_gate_cases::canonical_mapping_evidence_survives_missing_workflow_child_for_direct_entry ... ok
+test group_origin_gate_cases::followup_first_insert_cannot_change_parent_charge_before_source_witness_capture ... ok
+test group_origin_gate_cases::group_prepare_records_real_group_root_child_before_canonical_mapping_exists ... ok
+test group_origin_gate_cases::durable_followup_inherits_group_origin_and_request_only_gate_finds_first_original_mapping ... ok
+test group_origin_gate_cases::legacy_v3_migration_preserves_original_bytes_and_unknown_hold_without_guessing_direct ... ok
+test group_origin_gate_cases::isolated_owned_namespace_remnants_are_inconclusive_not_never_initialized ... ok
+test group_origin_gate_cases::ordinary_origin_is_persisted_at_prepare_and_missing_origin_never_means_direct ... ok
+test group_origin_gate_cases::ordinary_followup_stays_direct_non_group_and_keeps_existing_confirmation_semantics ... ok
+test group_origin_gate_cases::followup_tail_fault_rolls_back_new_identity_link_and_preserves_parent_origin ... ok
+test group_origin_gate_cases::ordinary_prepare_in_actual_group_child_cannot_bypass_request_only_gate ... ok
+MISSING_ACTUAL_GROUP_RUN_GATE={"canonical":null,"cross_owner_atomic":false,"execution_authority":false,"group_hold":true,"origin":{"classification":"direct","configuration_id":"66e14a5e545d4c6f198c0ee52a18cefa","conversation_id":"child-883813b8e3dab203beb020ba50245f56","group":null,"parent_request_id":null,"payload_digest":"c5038fbeb0d9e975a1f159e9cc56c0186be06607e71a6252236b48b902ea9054","request_epoch":"epoch","request_id":"7e8b8ba5df5e5adbb89a1f39c3522089","root_request_id":"7e8b8ba5df5e5adbb89a1f39c3522089","workspace_id":"ws"},"reason":"actual_group_child_missing_group_origin","request_id":"7e8b8ba5df5e5adbb89a1f39c3522089","source_error":null,"workflow":{"chain_contains_request":true,"child_id":"f851aab6f375ca6570790a6e0283d0f8","facts":{"active_child_count":1,"children":[{"arguments_digest":"6cfad4c45c68e5d0140f8fa7cef6c798175d1e69bc6bc9c4258f34b3c9861de5","cancel_requested":false,"conversation_id":"child-883813b8e3dab203beb020ba50245f56","created_seq":"2","host_session":"session","id":"f851aab6f375ca6570790a6e0283d0f8","kind":"remote_chat","native_context_current":true,"observations":[{"answer":null,"attempted":false,"blocked_reason":null,"cancelled":false,"charged_micro_cny":"0","failure_stage":null,"http_status":null,"recovery_action":"none","request_id":"7e8b8ba5df5e5adbb89a1f39c3522089","reserved_micro_cny":"3024","status":"prepared"}],"originals":[{"configuration_id":"66e14a5e545d4c6f198c0ee52a18cefa","conversation_id":"child-883813b8e3dab203beb020ba50245f56","payload_digest":"c5038fbeb0d9e975a1f159e9cc56c0186be06607e71a6252236b48b902ea9054","purpose":"chat","request_epoch":"epoch","request_id":"7e8b8ba5df5e5adbb89a1f39c3522089","workspace_id":"ws"}],"owner_epoch":"epoch","project_id":"project","root_id":"004c7e60903f6789d5f281fd0f08aae3","skill_current":true,"skill_digest":"6a04822d58cadf1b20f8b677f16ef1573e82302cdffe467642eb11cbbed1636a","status":"waiting_confirmation","updated_seq":"4"}],"complete_lifetime_children":true,"cross_owner_atomic":false,"execution_authority":false,"host_session":"session","owner_epoch":"epoch","root":{"arguments_digest":"44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a","cancel_requested":false,"conversation_id":"conversation","created_seq":"1","host_session":"session","id":"004c7e60903f6789d5f281fd0f08aae3","kind":"workflow","native_context_current":true,"observations":[],"originals":[],"owner_epoch":"epoch","project_id":"project","root_id":"004c7e60903f6789d5f281fd0f08aae3","skill_current":true,"skill_digest":null,"status":"waiting_confirmation","updated_seq":"4"},"root_budget_available":false,"workspace_id":"ws"}}}
+test group_origin_gate_cases::origin_gate_cannot_downgrade_when_actual_group_run_row_is_missing ... ok
+ACTUAL_LEGACY_BIND_ORIGINAL_GATE={"canonical":null,"cross_owner_atomic":false,"execution_authority":false,"group_hold":true,"origin":{"classification":"direct","configuration_id":"6aba9059689451d7e26943b2276efe69","conversation_id":"conversation","group":null,"parent_request_id":null,"payload_digest":"4a99c808550d10722aa5015af11d2f891d67b638e6099e25c66c71e5e31c3b51","request_epoch":"epoch","request_id":"0c90968908c5d6a2c15c61e4c6ea5015","root_request_id":"0c90968908c5d6a2c15c61e4c6ea5015","workspace_id":"ws"},"reason":"actual_group_child_missing_group_origin","request_id":"0c90968908c5d6a2c15c61e4c6ea5015","source_error":null,"workflow":null}
+test group_origin_gate_cases::origin_gate_holds_actual_legacy_bind_original_without_a_workflow_child ... ok
+test group_origin_gate_cases::legacy_origin_migration_trigger_faults_rollback_whole_upgrade ... ok
+test group_origin_gate_cases::prepare_origin_tail_fault_rolls_back_request_and_origin ... ok
+DAMAGED_CONVERSATION_GATE={"canonical":null,"cross_owner_atomic":false,"execution_authority":false,"group_hold":true,"origin":{"classification":"direct","configuration_id":"9a49555ff159ea27f5ef0eb5825d5a75","conversation_id":"child-23cada9b91aa27660da1a002894630c7","group":null,"parent_request_id":null,"payload_digest":"443ab8865b2404124b29f7bf3f353f08c1a618aa1447a32a602969c30c0dffde","request_epoch":"epoch","request_id":"48198b62c39218b9294d045f87ad157d","root_request_id":"48198b62c39218b9294d045f87ad157d","workspace_id":"ws"},"reason":"source_inconclusive","request_id":"48198b62c39218b9294d045f87ad157d","source_error":"workflow_remote_binding_invalid","workflow":null}
+test group_origin_gate_cases::origin_gate_cannot_drop_a_bound_child_after_conversation_damage ... ok
+test group_origin_gate_cases::pending_canonical_evidence_survives_missing_workflow_child_for_direct_entry ... ok
+test group_origin_gate_cases::second_followup_encoder_refusal_preserves_existing_group_chain_and_hold ... ok
+test group_origin_gate_cases::registered_group_sources_never_downgrade_under_missing_or_corrupt_mapping_and_source_tables ... ok
+
+test result: ok. 19 passed; 0 failed; 0 ignored; 0 measured; 40 filtered out; finished in 0.19s
+

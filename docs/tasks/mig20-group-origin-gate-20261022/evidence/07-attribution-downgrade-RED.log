@@ -1,0 +1,84 @@
+warning: suspicious definition of the runtime `read` symbol used by the standard library
+   --> /workspace/mig20/experiments/redesign/core-agent-lab/core/src/host_session.rs:132:124
+    |
+132 | ...ount: usize, timeout: i32) -> i32; fn read(fd: i32, buffer: *mut u8, count: usize) -> isize; fn write(fd: i32, buffer: *const u8...
+    |                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = note: expected `unsafe extern "C" fn(i32, *mut c_void, usize) -> isize` (for the current target)
+            found    `unsafe extern "C" fn(i32, *mut u8, usize) -> isize`
+    = help: either fix the signature or remove any attributes like `#[unsafe(no_mangle)]`, `#[unsafe(export_name = "read")]`, or `#[link_name = "read"]`
+    = help: allow this lint if the signature is compatible
+    = note: `#[warn(suspicious_runtime_symbol_definitions)]` on by default
+
+warning: suspicious definition of the runtime `write` symbol used by the standard library
+   --> /workspace/mig20/experiments/redesign/core-agent-lab/core/src/host_session.rs:132:182
+    |
+132 | ... *mut u8, count: usize) -> isize; fn write(fd: i32, buffer: *const u8, count: usize) -> isize; }
+    |                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = note: expected `unsafe extern "C" fn(i32, *const c_void, usize) -> isize` (for the current target)
+            found    `unsafe extern "C" fn(i32, *const u8, usize) -> isize`
+    = help: either fix the signature or remove any attributes like `#[unsafe(no_mangle)]`, `#[unsafe(export_name = "write")]`, or `#[link_name = "write"]`
+    = help: allow this lint if the signature is compatible
+
+warning: `muyon-core-agent-lab` (lib) generated 2 warnings
+warning: method `group_seed` is never used
+  --> muyon-core/src/agent/origin.rs:38:19
+   |
+34 | impl RequestOrigin {
+   | ------------------ method in this implementation
+...
+38 |     pub(crate) fn group_seed(&self)->Option<&GroupOriginSeed> {self.record.group.as_ref()}
+   |                   ^^^^^^^^^^
+   |
+   = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: variant `Group` is never constructed
+  --> muyon-core/src/agent/origin.rs:40:39
+   |
+40 | pub(super) enum OriginDraft { Direct, Group(GroupOriginSeed), Followup(RequestOrigin) }
+   |                 -----------           ^^^^^
+   |                 |
+   |                 variant in this enum
+
+warning: method `prepare_group_chat_trusted` is never used
+   --> muyon-core/src/agent/origin.rs:111:19
+    |
+ 73 | impl AgentOwner {
+    | --------------- method in this implementation
+...
+111 |     pub(crate) fn prepare_group_chat_trusted(&self,origin:GroupOriginSeed,text:&str,verifier:Option<&dyn HostedCostVerifier>,allowe...
+    |                   ^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: `muyon-core` (lib) generated 3 warnings
+   Compiling muyon-core v0.1.0 (/workspace/mig20/crates/muyon-core)
+    Finished `test` profile [unoptimized] target(s) in 4.44s
+     Running tests/group_request_binding.rs (/tmp/mig20-target/debug/deps/group_request_binding-2e9ca052016f892d)
+
+running 2 tests
+test group_origin_gate_cases::origin_gate_cannot_downgrade_when_actual_group_run_row_is_missing ... FAILED
+test group_origin_gate_cases::origin_gate_cannot_drop_a_bound_child_after_conversation_damage ... FAILED
+
+failures:
+
+---- group_origin_gate_cases::origin_gate_cannot_downgrade_when_actual_group_run_row_is_missing stdout ----
+MISSING_ACTUAL_GROUP_RUN_GATE={"canonical":null,"cross_owner_atomic":false,"execution_authority":false,"group_hold":false,"origin":{"classification":"direct","configuration_id":"884d26afdf76d8e734549f8c1013eb3a","conversation_id":"child-b415c19c3cf0066955f0ee73c648e649","group":null,"parent_request_id":null,"payload_digest":"c5038fbeb0d9e975a1f159e9cc56c0186be06607e71a6252236b48b902ea9054","request_epoch":"epoch","request_id":"09e0e2d963d7ec22c346bb6f14f9d37f","root_request_id":"09e0e2d963d7ec22c346bb6f14f9d37f","workspace_id":"ws"},"reason":"direct_non_group_observed","request_id":"09e0e2d963d7ec22c346bb6f14f9d37f","source_error":null,"workflow":{"chain_contains_request":true,"child_id":"cc75f1eb101fa12687d9024eb9766e0b","facts":{"active_child_count":1,"children":[{"arguments_digest":"6cfad4c45c68e5d0140f8fa7cef6c798175d1e69bc6bc9c4258f34b3c9861de5","cancel_requested":false,"conversation_id":"child-b415c19c3cf0066955f0ee73c648e649","created_seq":"2","host_session":"session","id":"cc75f1eb101fa12687d9024eb9766e0b","kind":"remote_chat","native_context_current":true,"observations":[{"answer":null,"attempted":false,"blocked_reason":null,"cancelled":false,"charged_micro_cny":"0","failure_stage":null,"http_status":null,"recovery_action":"none","request_id":"09e0e2d963d7ec22c346bb6f14f9d37f","reserved_micro_cny":"3024","status":"prepared"}],"originals":[{"configuration_id":"884d26afdf76d8e734549f8c1013eb3a","conversation_id":"child-b415c19c3cf0066955f0ee73c648e649","payload_digest":"c5038fbeb0d9e975a1f159e9cc56c0186be06607e71a6252236b48b902ea9054","purpose":"chat","request_epoch":"epoch","request_id":"09e0e2d963d7ec22c346bb6f14f9d37f","workspace_id":"ws"}],"owner_epoch":"epoch","project_id":"project","root_id":"c5fcd9fedefbc358c4cd147b626078bf","skill_current":true,"skill_digest":"6a04822d58cadf1b20f8b677f16ef1573e82302cdffe467642eb11cbbed1636a","status":"waiting_confirmation","updated_seq":"4"}],"complete_lifetime_children":true,"cross_owner_atomic":false,"execution_authority":false,"host_session":"session","owner_epoch":"epoch","root":{"arguments_digest":"44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a","cancel_requested":false,"conversation_id":"conversation","created_seq":"1","host_session":"session","id":"c5fcd9fedefbc358c4cd147b626078bf","kind":"workflow","native_context_current":true,"observations":[],"originals":[],"owner_epoch":"epoch","project_id":"project","root_id":"c5fcd9fedefbc358c4cd147b626078bf","skill_current":true,"skill_digest":null,"status":"waiting_confirmation","updated_seq":"4"},"root_budget_available":false,"workspace_id":"ws"}}}
+
+thread 'group_origin_gate_cases::origin_gate_cannot_downgrade_when_actual_group_run_row_is_missing' (35308) panicked at muyon-core/tests/support/group_origin_gate_cases.rs:134:2:
+actual group registration and committed Start provenance remain; missing group run cannot prove nongroup
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+---- group_origin_gate_cases::origin_gate_cannot_drop_a_bound_child_after_conversation_damage stdout ----
+DAMAGED_CONVERSATION_GATE={"canonical":null,"cross_owner_atomic":false,"execution_authority":false,"group_hold":false,"origin":{"classification":"direct","configuration_id":"f4087b5e332a64533c708b03467e9d0d","conversation_id":"child-1c28743953393f546739873e87005aed","group":null,"parent_request_id":null,"payload_digest":"443ab8865b2404124b29f7bf3f353f08c1a618aa1447a32a602969c30c0dffde","request_epoch":"epoch","request_id":"255286608c236184fe75f603b79421c1","root_request_id":"255286608c236184fe75f603b79421c1","workspace_id":"ws"},"reason":"direct_non_group_observed","request_id":"255286608c236184fe75f603b79421c1","source_error":null,"workflow":null}
+
+thread 'group_origin_gate_cases::origin_gate_cannot_drop_a_bound_child_after_conversation_damage' (35309) panicked at muyon-core/tests/support/group_origin_gate_cases.rs:125:2:
+actual persisted request reference still belongs to the group child; conversation damage must not erase reverse attribution and create Direct
+
+
+failures:
+    group_origin_gate_cases::origin_gate_cannot_downgrade_when_actual_group_run_row_is_missing
+    group_origin_gate_cases::origin_gate_cannot_drop_a_bound_child_after_conversation_damage
+
+test result: FAILED. 0 passed; 2 failed; 0 ignored; 0 measured; 49 filtered out; finished in 0.02s
+
+error: test failed, to rerun pass `-p muyon-core --test group_request_binding`

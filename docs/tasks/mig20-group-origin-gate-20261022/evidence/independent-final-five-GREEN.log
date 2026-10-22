@@ -1,0 +1,45 @@
+COMMAND: cargo test --offline --manifest-path /tmp/mig20-origin-gate-independent-review/Cargo.toml independent_ -- --nocapture
+EXIT: 0
+warning: suspicious definition of the runtime `read` symbol used by the standard library
+   --> /workspace/mig20/experiments/redesign/core-agent-lab/core/src/host_session.rs:132:124
+    |
+132 | ...ount: usize, timeout: i32) -> i32; fn read(fd: i32, buffer: *mut u8, count: usize) -> isize; fn write(fd: i32, buffer: *const u8...
+    |                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = note: expected `unsafe extern "C" fn(i32, *mut c_void, usize) -> isize` (for the current target)
+            found    `unsafe extern "C" fn(i32, *mut u8, usize) -> isize`
+    = help: either fix the signature or remove any attributes like `#[unsafe(no_mangle)]`, `#[unsafe(export_name = "read")]`, or `#[link_name = "read"]`
+    = help: allow this lint if the signature is compatible
+    = note: `#[warn(suspicious_runtime_symbol_definitions)]` on by default
+
+warning: suspicious definition of the runtime `write` symbol used by the standard library
+   --> /workspace/mig20/experiments/redesign/core-agent-lab/core/src/host_session.rs:132:182
+    |
+132 | ... *mut u8, count: usize) -> isize; fn write(fd: i32, buffer: *const u8, count: usize) -> isize; }
+    |                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = note: expected `unsafe extern "C" fn(i32, *const c_void, usize) -> isize` (for the current target)
+            found    `unsafe extern "C" fn(i32, *const u8, usize) -> isize`
+    = help: either fix the signature or remove any attributes like `#[unsafe(no_mangle)]`, `#[unsafe(export_name = "write")]`, or `#[link_name = "write"]`
+    = help: allow this lint if the signature is compatible
+
+warning: `muyon-core-agent-lab` (lib) generated 2 warnings
+   Compiling mig20-origin-gate-independent-review v0.1.0 (/tmp/mig20-origin-gate-independent-review)
+    Finished `test` profile [unoptimized] target(s) in 4.92s
+     Running review.rs (/tmp/mig20-target/debug/deps/review-29a1b483824d0a9a)
+
+running 5 tests
+MISSING_ACTUAL_GROUP_RUN_GATE={"canonical":null,"cross_owner_atomic":false,"execution_authority":false,"group_hold":true,"origin":{"classification":"direct","configuration_id":"12c0b98ac6080e697464106cbdb442e3","conversation_id":"child-8ee737f4c39e7981616fb0e7723e6b44","group":null,"parent_request_id":null,"payload_digest":"c5038fbeb0d9e975a1f159e9cc56c0186be06607e71a6252236b48b902ea9054","request_epoch":"epoch","request_id":"8e127dcdb073782a6eb727c620a9244b","root_request_id":"8e127dcdb073782a6eb727c620a9244b","workspace_id":"ws"},"reason":"actual_group_child_missing_group_origin","request_id":"8e127dcdb073782a6eb727c620a9244b","source_error":null,"workflow":{"chain_contains_request":true,"child_id":"4c865d261b5607f87712724baea9bd4d","facts":{"active_child_count":1,"children":[{"arguments_digest":"6cfad4c45c68e5d0140f8fa7cef6c798175d1e69bc6bc9c4258f34b3c9861de5","cancel_requested":false,"conversation_id":"child-8ee737f4c39e7981616fb0e7723e6b44","created_seq":"2","host_session":"session","id":"4c865d261b5607f87712724baea9bd4d","kind":"remote_chat","native_context_current":true,"observations":[{"answer":null,"attempted":false,"blocked_reason":null,"cancelled":false,"charged_micro_cny":"0","failure_stage":null,"http_status":null,"recovery_action":"none","request_id":"8e127dcdb073782a6eb727c620a9244b","reserved_micro_cny":"3024","status":"prepared"}],"originals":[{"configuration_id":"12c0b98ac6080e697464106cbdb442e3","conversation_id":"child-8ee737f4c39e7981616fb0e7723e6b44","payload_digest":"c5038fbeb0d9e975a1f159e9cc56c0186be06607e71a6252236b48b902ea9054","purpose":"chat","request_epoch":"epoch","request_id":"8e127dcdb073782a6eb727c620a9244b","workspace_id":"ws"}],"owner_epoch":"epoch","project_id":"project","root_id":"7285a5542c3114cceba61f231544827c","skill_current":true,"skill_digest":"6a04822d58cadf1b20f8b677f16ef1573e82302cdffe467642eb11cbbed1636a","status":"waiting_confirmation","updated_seq":"4"}],"complete_lifetime_children":true,"cross_owner_atomic":false,"execution_authority":false,"host_session":"session","owner_epoch":"epoch","root":{"arguments_digest":"44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a","cancel_requested":false,"conversation_id":"conversation","created_seq":"1","host_session":"session","id":"7285a5542c3114cceba61f231544827c","kind":"workflow","native_context_current":true,"observations":[],"originals":[],"owner_epoch":"epoch","project_id":"project","root_id":"7285a5542c3114cceba61f231544827c","skill_current":true,"skill_digest":null,"status":"waiting_confirmation","updated_seq":"4"},"root_budget_available":false,"workspace_id":"ws"}}}
+test independent_origin_gate_cannot_downgrade_when_actual_group_run_row_is_missing ... ok
+ACTUAL_LEGACY_BIND_ORIGINAL_GATE={"canonical":null,"cross_owner_atomic":false,"execution_authority":false,"group_hold":true,"origin":{"classification":"direct","configuration_id":"b51c1ae983776edc2d46c50192855fb9","conversation_id":"conversation","group":null,"parent_request_id":null,"payload_digest":"4a99c808550d10722aa5015af11d2f891d67b638e6099e25c66c71e5e31c3b51","request_epoch":"epoch","request_id":"44df93809ea5d0b12564830c4f824ffd","root_request_id":"44df93809ea5d0b12564830c4f824ffd","workspace_id":"ws"},"reason":"actual_group_child_missing_group_origin","request_id":"44df93809ea5d0b12564830c4f824ffd","source_error":null,"workflow":null}
+test independent_origin_gate_holds_actual_legacy_bind_original_without_a_workflow_child ... ok
+LOCAL_CANONICAL_REFERENCE_WITH_MISSING_CHILD pending=false {"canonical":null,"cross_owner_atomic":false,"execution_authority":false,"group_hold":true,"origin":{"classification":"direct","configuration_id":"7534ae40ca27d1bebd2b95442c2b8c61","conversation_id":"child-9c69ef2fe9d6db268e1cf17e3f22a129","group":null,"parent_request_id":null,"payload_digest":"443ab8865b2404124b29f7bf3f353f08c1a618aa1447a32a602969c30c0dffde","request_epoch":"epoch","request_id":"a131acf904d92347bd10ba44be41e3ce","root_request_id":"a131acf904d92347bd10ba44be41e3ce","workspace_id":"ws"},"reason":"actual_group_child_missing_group_origin","request_id":"a131acf904d92347bd10ba44be41e3ce","source_error":null,"workflow":null}
+FOLLOWUP_INSERT_PARENT_SOURCE_RESULT=Err("agent_origin_chain_invalid") PARENT_STATUS=Ok(Observation { request_id: "3cf00fe25a27281fe558770e3a6cfa4c", status: "tool_pending", reserved_micro_cny: Revision("3024"), charged_micro_cny: Revision("66"), cancelled: false, answer: Some(Object {"call": Object {"arguments": Object {"limit": Number(5), "offset": Number(0)}, "call_ref": String("call_a"), "name": String("product.supplier_list")}, "input_tokens": String("17"), "output_tokens": String("4"), "provider_request_id": String("synthetic-tool"), "synthetic": Bool(false), "turn": String("tool_call")}), recovery_action: "none", attempted: true, failure_stage: None, http_status: None, blocked_reason: None })
+test independent_followup_insert_cannot_mutate_parent_before_the_source_witness_is_captured ... ok
+DAMAGED_CONVERSATION_GATE={"canonical":null,"cross_owner_atomic":false,"execution_authority":false,"group_hold":true,"origin":{"classification":"direct","configuration_id":"e2f42e9fff3aed1a46c3fbf772d35dc1","conversation_id":"child-2bf5d6b61771066ee6c953aa38359291","group":null,"parent_request_id":null,"payload_digest":"443ab8865b2404124b29f7bf3f353f08c1a618aa1447a32a602969c30c0dffde","request_epoch":"epoch","request_id":"f3b4d4b9333d32500e5e42ee5c65b19b","root_request_id":"f3b4d4b9333d32500e5e42ee5c65b19b","workspace_id":"ws"},"reason":"source_inconclusive","request_id":"f3b4d4b9333d32500e5e42ee5c65b19b","source_error":"workflow_remote_binding_invalid","workflow":null}
+test independent_origin_gate_cannot_drop_a_bound_child_after_conversation_damage ... ok
+LOCAL_CANONICAL_REFERENCE_WITH_MISSING_CHILD pending=true {"canonical":null,"cross_owner_atomic":false,"execution_authority":false,"group_hold":true,"origin":{"classification":"direct","configuration_id":"4fd0c9b1903e7ac9bf568ed12afecfa4","conversation_id":"child-a7bc575e6b6ce1486b710304bf2609e4","group":null,"parent_request_id":null,"payload_digest":"443ab8865b2404124b29f7bf3f353f08c1a618aa1447a32a602969c30c0dffde","request_epoch":"epoch","request_id":"09db67669b02152c89c6c00ea7e5f41c","root_request_id":"09db67669b02152c89c6c00ea7e5f41c","workspace_id":"ws"},"reason":"actual_group_child_missing_group_origin","request_id":"09db67669b02152c89c6c00ea7e5f41c","source_error":null,"workflow":null}
+test independent_origin_gate_holds_canonical_local_reference_when_workflow_child_is_missing ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 59 filtered out; finished in 0.05s
+
