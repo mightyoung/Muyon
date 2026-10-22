@@ -99,7 +99,7 @@ impl BusinessStore {
     }
     fn current_document(&self, document: &DocumentRef) -> Result<DocumentMetadata> {
         let project = self.document_project(document)?;
-        let rows = sql(self.database().query("SELECT h.revision,r.revision,CASE WHEN length(CAST(r.payload AS BLOB))<=8192 THEN r.payload ELSE NULL END FROM document_heads h LEFT JOIN document_revisions r ON r.project_id=h.project_id AND r.document_id=h.document_id AND r.revision=h.revision WHERE h.project_id=? AND h.document_id=?", &[project, document.document_id()]))?;
+        let rows = sql(self.database().query("SELECT CASE WHEN length(CAST(h.revision AS BLOB))<=20 THEN h.revision ELSE NULL END,CASE WHEN length(CAST(r.revision AS BLOB))<=20 THEN r.revision ELSE NULL END,CASE WHEN length(CAST(r.payload AS BLOB))<=8192 THEN r.payload ELSE NULL END FROM document_heads h LEFT JOIN document_revisions r ON r.project_id=h.project_id AND r.document_id=h.document_id AND r.revision=h.revision WHERE h.project_id=? AND h.document_id=?", &[project, document.document_id()]))?;
         if rows.is_empty() { return Err(ContractError::NotFound); }
         let metadata: DocumentMetadata = decode(cell(&rows[0], 2)?)?;
         if metadata.document.revision().as_str() != cell(&rows[0], 0)?
@@ -240,6 +240,13 @@ impl BusinessStore {
         let project = self.document_project(document)?;
         let payload = encode(record)?;
         if payload.len() > 256 * 1024 { return Err(ContractError::TextLimit); }
+        // Preserve the read budget on writes too, so legitimate growth cannot
+        // strand a document above the limit with no ability to edit/delete.
+        let remaining = sql(self.database().query("SELECT COALESCE(SUM(length(CAST(payload AS BLOB))),0) FROM document_annotations WHERE project_id=? AND document_id=? AND annotation_id<>?", &[project, document.document_id(), &record.id]))?;
+        let bytes: u64 = cell(&remaining[0], 0)?.parse().map_err(|_| ContractError::StorageCorrupt)?;
+        if bytes.checked_add(payload.len() as u64).ok_or(ContractError::TextLimit)? > 16 * 1024 * 1024 {
+            return Err(ContractError::TextLimit);
+        }
         sql(self.database().exec("INSERT INTO document_annotation_history VALUES(?,?,?,?,?)", &[project, document.document_id(), &record.id, record.revision.as_str(), &payload]))?;
         sql(self.database().exec("INSERT INTO document_annotations VALUES(?,?,?,?,?) ON CONFLICT(project_id,document_id,annotation_id) DO UPDATE SET revision=excluded.revision,payload=excluded.payload", &[project, document.document_id(), &record.id, record.revision.as_str(), &payload]))?;
         Ok(())

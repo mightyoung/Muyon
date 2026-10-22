@@ -219,3 +219,18 @@ fn late_annotation_failure_rolls_back_history() {
     f.db().exec("DROP TRIGGER fail_annotation_head", &[]).unwrap();
     assert!(store.save_annotation_trusted(&a, "a", &Revision::new(0), &anchor(&a.document), &comment("x"), &human()).is_ok());
 }
+#[test]
+fn writes_cannot_strand_existing_annotations_above_read_budget() {
+    let f = Fixture::new(); let store = f.initialize(); let m = register(&store); let a = access(&store, &m, &all());
+    let record = store.save_annotation_trusted(&a, "initial", &Revision::new(0), &anchor(&a.document), &comment("x"), &human()).unwrap();
+    let db = f.db();
+    db.exec("DELETE FROM document_annotations", &[]).unwrap();
+    for n in 0..64 {
+        let mut row = record.clone(); row.id = format!("padded-{n}");
+        let mut payload = serde_json::to_string(&row).unwrap();
+        payload.extend(std::iter::repeat(' ').take(262144 - payload.len()));
+        db.exec("INSERT INTO document_annotations VALUES('project','document',?,'1',?)", &[&row.id, &payload]).unwrap();
+    }
+    assert_eq!(store.save_annotation_trusted(&a, "new", &Revision::new(0), &anchor(&a.document), &comment("x"), &human()), Err(ContractError::TextLimit));
+    assert_eq!(store.list_annotations(&a).unwrap().len(), 64);
+}

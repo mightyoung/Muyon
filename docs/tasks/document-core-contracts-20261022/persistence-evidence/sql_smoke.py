@@ -63,9 +63,10 @@ with tempfile.TemporaryDirectory(prefix="muyon-document-source-sql-") as directo
 
     db = sqlite3.connect(path, isolation_level=None)
     db.execute("PRAGMA foreign_keys=ON")
-    restored = db.execute(statement("SELECT r.payload FROM document_heads"), ("project", "document")).fetchone()
-    assert json.loads(restored[0]) == metadata
-    rows = db.execute(statement("SELECT annotation_id,revision,payload FROM document_annotations"), ("project", "document")).fetchall()
+    restored = db.execute(statement("SELECT CASE WHEN length(CAST(h.revision AS BLOB))"), ("project", "document")).fetchone()
+    assert restored[:2] == ("1", "1")
+    assert json.loads(restored[2]) == metadata
+    rows = db.execute(statement("SELECT annotation_id,revision,CASE"), ("project", "document")).fetchall()
     assert json.loads(rows[0][2]) == row
     print("PASS: exact source schema and", len(statements), "SQL statements prepare")
     print("PASS: committed synthetic metadata/annotation rows survive reopen")
@@ -83,7 +84,7 @@ with tempfile.TemporaryDirectory(prefix="muyon-document-source-sql-") as directo
         db.execute(statement(prefix), ("project", "document", "annotation", "2", json.dumps(row)))
     db.execute(statement("UPDATE document_grants SET active=0"), ("grant", "1", "epoch"))
     db.execute("COMMIT")
-    assert db.execute(statement("SELECT document_json,permissions,expires_at_ms FROM document_grants"), ("grant", "1", "epoch")).fetchall() == []
+    assert db.execute(statement("SELECT CASE WHEN length(CAST(document_json AS BLOB))"), ("grant", "1", "epoch")).fetchall() == []
     assert db.execute("SELECT COUNT(*) FROM document_annotation_history").fetchone()[0] == 2
     stored = json.loads(db.execute("SELECT payload FROM document_annotations").fetchone()[0])
     assert stored["deleted"] and stored["created_by"]["kind"] == "human" and stored["modified_by"]["kind"] == "ai"
