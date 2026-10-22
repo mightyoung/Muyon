@@ -1,0 +1,142 @@
+{
+  "official_repository": "https://dl.google.com/android/repository/repository2-1.xml",
+  "repository_sha256": "29b31c17e49aa3e79c1c248dc35efc23fa60bbd0fa5ccc5a8e8f2c316435b6e1",
+  "license_record_present": false,
+  "license_id": "android-sdk-license",
+  "action_status": "PENDING_EXPLICIT_SDK_LICENSE_ACCEPTANCE; no acceptance or SDK package download/install performed",
+  "install_plan_stable_only": [
+    "platforms;android-36 (base r2, not extension/preview)",
+    "build-tools;35.0.0",
+    "platform-tools (stable37.0.1)",
+    "emulator (stable37.2.12 only)"
+  ],
+  "runtime_image_candidates": [
+    {
+      "path": "system-images;android-26;default;x86_64",
+      "license": "android-sdk-license",
+      "revision": "1"
+    }
+  ],
+  "software_emulator_assessment": {
+    "kvm_available": false,
+    "cpu_quota_cores": 4,
+    "ram_gib_approx": 17,
+    "workspace_disk_gib_available_approx": 29,
+    "execution": "NOT_ATTEMPTED; emulator/image download gated by license",
+    "possible_option_after_approval": "official -accel off software TCG with documented ANDROID_I_WANT_MY_TCG=yes; -gpu software; no security/hardware/network changes",
+    "limitation": "official docs call this unsupported and very slow; success is not assumed"
+  },
+  "sdk_repository_license_text_date": "2019-01-16",
+  "current_download_page_license_text_date": "2026-04-28",
+  "current_download_page_url": "https://developer.android.com/studio#terms",
+  "agreement_status": "No acceptance performed; repository package license and current download-page text are separately identified, not assumed interchangeable.",
+  "catalog_candidates_NOT_install_input": [
+    {
+      "path": "platforms;android-36",
+      "license": "android-sdk-license",
+      "display": "Android SDK Platform 36-ext19",
+      "revision": "1",
+      "archives": [
+        {
+          "size": "66057671",
+          "checksum": "52e240c229cf2ad561ee262ebdfff266e180c585",
+          "url": "platform-36-ext19_r01.zip"
+        }
+      ],
+      "selected_for_future_plan": false,
+      "action_now": "NONE; acceptance pending"
+    },
+    {
+      "path": "platforms;android-36",
+      "license": "android-sdk-license",
+      "display": "Android SDK Platform 36-ext18",
+      "revision": "1",
+      "archives": [
+        {
+          "size": "66044874",
+          "checksum": "33a7af9f531f6ce67b3ec357f619e69aa0a95c8a",
+          "url": "platform-36-ext18_r01.zip"
+        }
+      ],
+      "selected_for_future_plan": false,
+      "action_now": "NONE; acceptance pending"
+    },
+    {
+      "path": "platforms;android-36",
+      "license": "android-sdk-license",
+      "display": "Android SDK Platform 36",
+      "revision": "2",
+      "archives": [
+        {
+          "size": "65878410",
+          "checksum": "2c1a80dd4d9f7d0e6dd336ec603d9b5c55a6f576",
+          "url": "platform-36_r02.zip"
+        }
+      ],
+      "selected_for_future_plan": true,
+      "action_now": "NONE; acceptance pending"
+    },
+    {
+      "path": "build-tools;35.0.0",
+      "license": "android-sdk-license",
+      "display": "Android SDK Build-Tools 35",
+      "revision": "35.0.0",
+      "archives": [
+        {
+          "size": "61958799",
+          "checksum": "2cfaa0bbb2336e9ec18ed3ecea84fa2e2af607bc",
+          "url": "build-tools_r35_linux.zip"
+        }
+      ],
+      "selected_for_future_plan": true,
+      "action_now": "NONE; acceptance pending"
+    },
+    {
+      "path": "platform-tools",
+      "license": "android-sdk-license",
+      "display": "Android SDK Platform-Tools",
+      "revision": "37.0.1",
+      "archives": [
+        {
+          "size": "9054187",
+          "checksum": "477254aa5f903c15cf51001717bdf347fb6b53e0",
+          "url": "platform-tools_r37.0.1-linux.zip"
+        }
+      ],
+      "selected_for_future_plan": true,
+      "action_now": "NONE; acceptance pending"
+    },
+    {
+      "path": "emulator",
+      "license": "android-sdk-preview-license",
+      "display": "Android Emulator",
+      "revision": "37.3.5",
+      "archives": [
+        {
+          "size": "353538566",
+          "checksum": "a7e7c486f392cbf1a7502441b079b3f35493f134",
+          "url": "emulator-linux_x64-16632760.zip"
+        }
+      ],
+      "selected_for_future_plan": false,
+      "action_now": "NONE; acceptance pending"
+    },
+    {
+      "path": "emulator",
+      "license": "android-sdk-license",
+      "display": "Android Emulator",
+      "revision": "37.2.12",
+      "archives": [
+        {
+          "size": "349654171",
+          "checksum": "cd7362ea55dfb86a418958138dc396e74165dd01",
+          "url": "emulator-linux_x64-16428233.zip"
+        }
+      ],
+      "selected_for_future_plan": true,
+      "action_now": "NONE; acceptance pending"
+    }
+  ],
+  "license_repository_url": "https://dl.google.com/android/repository/repository2-1.xml",
+  "repository_license_sha256": "1f8729233617b193fd619213792ae16a41b95d2bbbf525dfe66998252ba68b16"
+}

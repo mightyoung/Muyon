@@ -81,3 +81,13 @@ heading/draft-purpose/polite notice source changes have only bounded static revi
 Pure reader1+host3 regressions PASS, not Compose/TalkBack acceptance. The same report
 registers original static-mascot mapping/unknown fallback and multi-reason pause
 requirements; do not infer task state from animation or let offscreen cancel work.
+
+Toolchain installation authorization received after043bed. TOOLCHAIN-RECOVERY.md
+records cache reuse/checksum, actual ONLINE Gradle failure and info SocketException
+network-unreachable diagnostics, separate from SDK license acceptance pending.
+Official package metadata and proposed stable-only install scope are archived;
+no SDK package/license acceptance, emulator startup or current PNG/Library ID yet.
+Ordinary software TCG route assessed only; no KVM/security/network enablement.
+Obtain the specific applicable SDK agreement acceptance before installing, then
+validate the unchanged043bed UI source first. Do not infer acceptance from the
+separate general toolchain-install approval or falsely inherit214/07fd rendering.

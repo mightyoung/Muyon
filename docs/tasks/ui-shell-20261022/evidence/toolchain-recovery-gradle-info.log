@@ -1,0 +1,100 @@
+Initialized native services in: /workspace/ui-shell-tools/gradle-cache/native
+Initialized jansi services in: /workspace/ui-shell-tools/gradle-cache/native
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/8.13/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Starting process 'Gradle build daemon'. Working directory: /workspace/ui-shell-tools/gradle-cache/daemon/8.13 Command: /usr/lib/jvm/java-21-openjdk-amd64/bin/java --add-opens=java.base/java.lang=ALL-UNNAMED --add-opens=java.base/java.lang.invoke=ALL-UNNAMED --add-opens=java.base/java.util=ALL-UNNAMED --add-opens=java.prefs/java.util.prefs=ALL-UNNAMED --add-exports=jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED --add-exports=jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED --add-opens=java.base/java.util=ALL-UNNAMED --add-opens=java.prefs/java.util.prefs=ALL-UNNAMED --add-opens=java.base/java.nio.charset=ALL-UNNAMED --add-opens=java.base/java.net=ALL-UNNAMED --add-opens=java.base/java.util.concurrent.atomic=ALL-UNNAMED --add-opens=java.xml/javax.xml.namespace=ALL-UNNAMED -Xmx2g -Dfile.encoding=UTF-8 -Duser.country -Duser.language=en -Duser.variant -cp /workspace/ui-shell-tools/gradle-8.13/lib/gradle-daemon-main-8.13.jar -javaagent:/workspace/ui-shell-tools/gradle-8.13/lib/agents/gradle-instrumentation-agent-8.13.jar org.gradle.launcher.daemon.bootstrap.GradleDaemon 8.13
+Successfully started process 'Gradle build daemon'
+An attempt to start the daemon took 0.923 secs.
+The client will now receive all logging from the daemon (pid: 1695). The daemon log file: /workspace/ui-shell-tools/gradle-cache/daemon/8.13/daemon-1695.out.log
+Daemon will be stopped at the end of the build 
+Using 4 worker leases.
+Received JVM installation metadata from '/usr/lib/jvm/java-21-openjdk-amd64': {JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64, JAVA_VERSION=21.0.12.1, JAVA_VENDOR=Debian, RUNTIME_NAME=OpenJDK Runtime Environment, RUNTIME_VERSION=21.0.12.1+1-1-deb13u1-Debian, VM_NAME=OpenJDK 64-Bit Server VM, VM_VERSION=21.0.12.1+1-1-deb13u1-Debian, VM_VENDOR=Debian, OS_ARCH=amd64}
+Watching the file system is configured to be enabled if available
+Not watching /workspace/muyon-ui-shell/apps/muyon_android since the file system is not supported
+File system watching is active
+Starting Build
+Settings evaluated using settings file '/workspace/muyon-ui-shell/apps/muyon_android/settings.gradle.kts'.
+Projects loaded. Root project using build file '/workspace/muyon-ui-shell/apps/muyon_android/build.gradle.kts'.
+Included projects: [root project 'muyon-android-product', project ':app']
+
+> Configure project :
+Evaluating root project 'muyon-android-product' using build file '/workspace/muyon-ui-shell/apps/muyon_android/build.gradle.kts'.
+I/O exception (java.net.SocketException) caught when processing request to {s}->https://dl.google.com:443: Network is unreachable
+Retrying request to {s}->https://dl.google.com:443
+I/O exception (java.net.SocketException) caught when processing request to {s}->https://dl.google.com:443: Network is unreachable
+Retrying request to {s}->https://dl.google.com:443
+I/O exception (java.net.SocketException) caught when processing request to {s}->https://dl.google.com:443: Network is unreachable
+Retrying request to {s}->https://dl.google.com:443
+I/O exception (java.net.SocketException) caught when processing request to {s}->https://dl.google.com:443: Network is unreachable
+Retrying request to {s}->https://dl.google.com:443
+I/O exception (java.net.SocketException) caught when processing request to {s}->https://dl.google.com:443: Network is unreachable
+Retrying request to {s}->https://dl.google.com:443
+I/O exception (java.net.SocketException) caught when processing request to {s}->https://dl.google.com:443: Network is unreachable
+Retrying request to {s}->https://dl.google.com:443
+I/O exception (java.net.SocketException) caught when processing request to {s}->https://dl.google.com:443: Network is unreachable
+Retrying request to {s}->https://dl.google.com:443
+I/O exception (java.net.SocketException) caught when processing request to {s}->https://dl.google.com:443: Network is unreachable
+Retrying request to {s}->https://dl.google.com:443
+I/O exception (java.net.SocketException) caught when processing request to {s}->https://dl.google.com:443: Network is unreachable
+Retrying request to {s}->https://dl.google.com:443
+I/O exception (java.net.SocketException) caught when processing request to {s}->https://repo.maven.apache.org:443: Network is unreachable
+Retrying request to {s}->https://repo.maven.apache.org:443
+I/O exception (java.net.SocketException) caught when processing request to {s}->https://repo.maven.apache.org:443: Network is unreachable
+Retrying request to {s}->https://repo.maven.apache.org:443
+I/O exception (java.net.SocketException) caught when processing request to {s}->https://repo.maven.apache.org:443: Network is unreachable
+Retrying request to {s}->https://repo.maven.apache.org:443
+I/O exception (java.net.SocketException) caught when processing request to {s}->https://repo.maven.apache.org:443: Network is unreachable
+Retrying request to {s}->https://repo.maven.apache.org:443
+I/O exception (java.net.SocketException) caught when processing request to {s}->https://repo.maven.apache.org:443: Network is unreachable
+Retrying request to {s}->https://repo.maven.apache.org:443
+I/O exception (java.net.SocketException) caught when processing request to {s}->https://repo.maven.apache.org:443: Network is unreachable
+Retrying request to {s}->https://repo.maven.apache.org:443
+I/O exception (java.net.SocketException) caught when processing request to {s}->https://repo.maven.apache.org:443: Network is unreachable
+Retrying request to {s}->https://repo.maven.apache.org:443
+I/O exception (java.net.SocketException) caught when processing request to {s}->https://repo.maven.apache.org:443: Network is unreachable
+Retrying request to {s}->https://repo.maven.apache.org:443
+I/O exception (java.net.SocketException) caught when processing request to {s}->https://repo.maven.apache.org:443: Network is unreachable
+Retrying request to {s}->https://repo.maven.apache.org:443
+I/O exception (java.net.SocketException) caught when processing request to {s}->https://plugins.gradle.org:443: Network is unreachable
+Retrying request to {s}->https://plugins.gradle.org:443
+I/O exception (java.net.SocketException) caught when processing request to {s}->https://plugins.gradle.org:443: Network is unreachable
+Retrying request to {s}->https://plugins.gradle.org:443
+I/O exception (java.net.SocketException) caught when processing request to {s}->https://plugins.gradle.org:443: Network is unreachable
+Retrying request to {s}->https://plugins.gradle.org:443
+I/O exception (java.net.SocketException) caught when processing request to {s}->https://plugins.gradle.org:443: Network is unreachable
+Retrying request to {s}->https://plugins.gradle.org:443
+I/O exception (java.net.SocketException) caught when processing request to {s}->https://plugins.gradle.org:443: Network is unreachable
+Retrying request to {s}->https://plugins.gradle.org:443
+I/O exception (java.net.SocketException) caught when processing request to {s}->https://plugins.gradle.org:443: Network is unreachable
+Retrying request to {s}->https://plugins.gradle.org:443
+I/O exception (java.net.SocketException) caught when processing request to {s}->https://plugins.gradle.org:443: Network is unreachable
+Retrying request to {s}->https://plugins.gradle.org:443
+I/O exception (java.net.SocketException) caught when processing request to {s}->https://plugins.gradle.org:443: Network is unreachable
+Retrying request to {s}->https://plugins.gradle.org:443
+I/O exception (java.net.SocketException) caught when processing request to {s}->https://plugins.gradle.org:443: Network is unreachable
+Retrying request to {s}->https://plugins.gradle.org:443
+Resolved plugin [id: 'com.android.application', version: '8.11.1', apply: false]
+
+FAILURE: Build failed with an exception.
+
+* Where:
+Build file '/workspace/muyon-ui-shell/apps/muyon_android/build.gradle.kts' line: 1
+
+* What went wrong:
+Plugin [id: 'com.android.application', version: '8.11.1', apply: false] was not found in any of the following sources:
+
+- Gradle Core Plugins (plugin is not in 'org.gradle' namespace)
+- Included Builds (No included builds contain this plugin)
+- Plugin Repositories (could not resolve plugin artifact 'com.android.application:com.android.application.gradle.plugin:8.11.1')
+  Searched in the following repositories:
+    Google
+    MavenRepo
+    Gradle Central Plugin Repository
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --debug option to get more log output.
+> Run with --scan to get full insights.
+> Get more help at https://help.gradle.org.
+
+BUILD FAILED in 1m 40s
+Some of the file system contents retained in the virtual file system are on file systems that Gradle doesn't support watching. The relevant state was discarded to ensure changes to these locations are properly detected. You can override this by explicitly enabling file system watching.
