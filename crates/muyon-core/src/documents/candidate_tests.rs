@@ -93,13 +93,83 @@ fn revocation_conflict_invalid_input_and_foreign_publication_fail_closed() {
 // It never creates a production validation credential or a publication permit.
 fn reserve_fixture(store: &BusinessStore, access: &DocumentAccess, id: &str, expected: &BlobRef) -> crate::blobs::UploadHandle {
     let source = store.read_document(access).unwrap();
+    let project = access.document.scope().project_id.as_deref().unwrap();
     let tx = store.database().transaction().unwrap();
-    let upload = store.reserve_candidate_upload_in_transaction(&tx, "project").unwrap();
+    let upload = store.reserve_candidate_upload_in_transaction(&tx, project).unwrap();
     let payload = serde_json::json!({"candidate_id": id, "operation_id": "operation", "base": access.document,
         "source_blob": source.blob, "authority": access.authority, "expected_blob": expected, "upload_id": upload.upload_id});
-    store.database().exec("INSERT INTO document_candidates_v1 VALUES(?,'workspace','project',?,?,?,'preparing')", &[id, &upload.upload_id, expected.byte_length.as_str(), &payload.to_string()]).unwrap();
+    store.database().exec("INSERT INTO document_candidates_v1 VALUES(?,'workspace',?,?,?,?,'preparing')", &[id, project, &upload.upload_id, expected.byte_length.as_str(), &payload.to_string()]).unwrap();
     tx.commit().unwrap();
     upload
+}
+
+fn add_project_fixture(store: &BusinessStore, project: &str) -> DocumentAccess {
+    store.database().exec("INSERT INTO projects VALUES(?,'workspace','Synthetic','1',0)", &[project]).unwrap();
+    let upload = store.begin_upload(project).unwrap();
+    store.append_chunk(&upload.upload_id, b"original synthetic multi-project source").unwrap();
+    let finished = store.finish_blob(&upload.upload_id, crate::blobs::BlobKind::Document).unwrap();
+    let metadata = store.register_document_trusted(project, &format!("document-{project}"), "Synthetic", DocumentFormat::Text, &finished).unwrap();
+    let authority = AuthorityBinding { grant_id: format!("grant-{project}"), generation: Revision::new(1), owner_epoch: "epoch".into() };
+    store.issue_document_grant_trusted(&metadata.document, &authority, &[DocumentOperation::Inspect, DocumentOperation::ReadText, DocumentOperation::StructuredEdit], expiry()).unwrap();
+    DocumentAccess { document: metadata.document, authority }
+}
+
+#[test]
+fn candidate_gc_crosses_page_boundary_preserving_exact_objects_and_project_quotas() {
+    let (f, store, access) = setup();
+    let mut projects = vec![access];
+    for n in 1..5 { projects.push(add_project_fixture(&store, &format!("project-{n}"))); }
+    let mut reserved = Vec::new();
+    for (project_n, access) in projects.iter().enumerate() {
+        // A real committed reservation is the crash point before CREATE_NEW.
+        // Keep each project within its actual 32-entry admission policy.
+        for n in 0..32 {
+            let bytes = format!("original synthetic candidate {project_n}/{n}").into_bytes();
+            let blob = expected(&bytes);
+            let upload = reserve_fixture(&store, access, &format!("candidate-{project_n}-{n}"), &blob);
+            reserved.push((upload.upload_id, blob, bytes));
+        }
+        assert_eq!(store.prepare_document_candidate_trusted(access, &format!("over-quota-{project_n}"), "operation", NEW_BYTES), Err(ContractError::TextLimit));
+    }
+    reserved.sort_by(|a, b| a.0.cmp(&b.0));
+    assert_eq!(reserved.len(), 160);
+    // Different expected digests before/on/after the 128-row boundary and at
+    // the final row. Files model rename durability before the blob-ledger commit.
+    let mut protected = Vec::new();
+    for index in [0, 127, 128, 159] {
+        let (_, blob, bytes) = &reserved[index];
+        let path = store.root_dir().join("objects").join(&blob.digest);
+        fs::write(&path, bytes).unwrap();
+        protected.push((path, bytes.clone()));
+    }
+    // The final unresolved upload also has actual partial durable staging.
+    let final_upload = &reserved[159].0;
+    store.materialize_candidate_upload_trusted(final_upload).unwrap();
+    store.append_chunk(final_upload, b"partial").unwrap();
+    let partial = store.root_dir().join("staging").join(final_upload);
+    let unrelated = b"unrelated synthetic object absent from every reservation";
+    let orphan_path = store.root_dir().join("objects").join(expected(unrelated).digest);
+    fs::write(&orphan_path, unrelated).unwrap();
+    // Per-project quota must not become a global admission cap.
+    let sixth = add_project_fixture(&store, "project-5");
+    assert_eq!(store.prepare_document_candidate_trusted(&sixth, "sixth-candidate", "operation", NEW_BYTES).unwrap().state, CandidateState::SealedUnvalidated);
+    assert!(store.lookup_document_candidate(&sixth, "candidate-0-0").is_err());
+    let uploads = store.database().query("SELECT * FROM blob_uploads ORDER BY upload_id", &[]).unwrap();
+    let journals = store.database().query("SELECT * FROM document_candidates_v1 ORDER BY candidate_id", &[]).unwrap();
+    assert_eq!(journals.len(), 161);
+    drop(store);
+    let store = BusinessStore::open_existing(&f.path(), "workspace", "new-epoch").unwrap();
+    assert_eq!(store.reconcile_blobs_after_restart().unwrap().aborted_uploads, 0);
+    assert_eq!(fs::read(&partial).unwrap(), b"partial");
+    assert_eq!(store.collect_blobs().unwrap(), 1);
+    assert!(!orphan_path.exists());
+    for (path, bytes) in &protected { assert_eq!(fs::read(path).unwrap(), *bytes); }
+    assert_eq!(store.database().query("SELECT * FROM blob_uploads ORDER BY upload_id", &[]).unwrap(), uploads);
+    assert_eq!(store.database().query("SELECT * FROM document_candidates_v1 ORDER BY candidate_id", &[]).unwrap(), journals);
+    // A second sweep cannot repeat deletion or alter an uncertain reservation.
+    assert_eq!(store.collect_blobs().unwrap(), 0);
+    assert_eq!(fs::read(&partial).unwrap(), b"partial");
+    assert_eq!(store.database().query("SELECT * FROM document_candidates_v1 ORDER BY candidate_id", &[]).unwrap(), journals);
 }
 fn expected(bytes: &[u8]) -> BlobRef {
     BlobRef { digest: Sha256::digest(bytes).iter().map(|b| format!("{b:02x}")).collect(), byte_length: Revision::new(bytes.len() as u64) }
