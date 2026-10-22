@@ -1,0 +1,418 @@
+diff --git a/crates/muyon-core/src/documents/mod.rs b/crates/muyon-core/src/documents/mod.rs
+index 8c3985cd..ed84cd9f 100644
+--- a/crates/muyon-core/src/documents/mod.rs
++++ b/crates/muyon-core/src/documents/mod.rs
+@@ -132,3 +132,6 @@ pub struct RevisionPrecondition {
+     pub document: DocumentRef,
+     pub authority: AuthorityBinding,
+ }
++pub mod source_notifications;
++#[cfg(test)]
++mod source_notification_tests;
+diff --git a/crates/muyon-core/src/documents/source_notification_tests.rs b/crates/muyon-core/src/documents/source_notification_tests.rs
+new file mode 100644
+index 00000000..d51140f8
+--- /dev/null
++++ b/crates/muyon-core/src/documents/source_notification_tests.rs
+@@ -0,0 +1,228 @@
++//! Integration regressions against real fixed Artifacts/Evidence, synthetic data.
++use super::{storage_tests::Fixture, *};
++use crate::{artifacts::{*, local_interactions::*}, blobs::BlobKind, business::BusinessStore, contract::*, evidence::{store::StoreEvidence, InputKind}, sqlite::Db};
++use std::collections::BTreeSet;
++
++fn expiry() -> u64 { std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).unwrap().as_millis() as u64 + 25_000 }
++fn upload(store: &BusinessStore, project: &str, bytes: &[u8]) -> crate::blobs::FinishedBlob {
++    let upload = store.begin_upload(project).unwrap();
++    store.append_chunk(&upload.upload_id, bytes).unwrap();
++    store.finish_blob(&upload.upload_id, BlobKind::Document).unwrap()
++}
++fn bind(store: &BusinessStore, source: &DocumentAccess, local: &LocalAccess, kind: &LocalKind) {
++    let evidence = StoreEvidence::new(store);
++    let processing = evidence.process(source, InputKind::Utf8Text).unwrap();
++    let hits = evidence.find_literal(source, &processing, "synthetic", 1).unwrap();
++    let proof = store.resolve_local_evidence_trusted(&local.project, ArtifactProjectOperation::LocalDraft, source, &processing, &hits[0]).unwrap();
++    assert_eq!(local.object.target, proof.target());
++    store.issue_local_evidence_binding_trusted(local, kind, expiry(), &proof).unwrap();
++}
++fn fixture() -> (Fixture, BusinessStore, DocumentAccess, LocalAccess, LocalKind) {
++    let f = Fixture::new(); let (store, _) = f.setup();
++    store.initialize_artifacts_trusted().unwrap();
++    store.initialize_artifact_workflows_trusted().unwrap();
++    store.initialize_local_interactions_trusted().unwrap();
++    let blob = upload(&store, "project", b"Original synthetic evidence passage.");
++    let metadata = store.register_document_trusted("project", "text-source", "Synthetic", DocumentFormat::Text, &blob).unwrap();
++    let source = DocumentAccess { document: metadata.document, authority: AuthorityBinding { grant_id: "source-grant".into(), generation: Revision::new(1), owner_epoch: "epoch".into() } };
++    store.issue_document_grant_trusted(&source.document, &source.authority, &[DocumentOperation::Inspect, DocumentOperation::ReadText, DocumentOperation::StructuredEdit], expiry()).unwrap();
++    let project = ArtifactProjectAccess { scope: source.document.scope().clone(), actor_id: "actor".into(), project_revision: Revision::new(1), authority: AuthorityBinding { grant_id: "project-grant".into(), generation: Revision::new(1), owner_epoch: "epoch".into() } };
++    store.issue_artifact_project_grant_trusted(&project, &[ArtifactProjectOperation::LocalDraft, ArtifactProjectOperation::ReadOwnLocal], expiry()).unwrap();
++    let evidence = StoreEvidence::new(&store);
++    let processing = evidence.process(&source, InputKind::Utf8Text).unwrap();
++    let hits = evidence.find_literal(&source, &processing, "synthetic", 1).unwrap();
++    let proof = store.resolve_local_evidence_trusted(&project, ArtifactProjectOperation::LocalDraft, &source, &processing, &hits[0]).unwrap();
++    let local = LocalAccess { project, object: LocalObjectRef { object_id: "object".into(), target: proof.target(), component_id: "component".into(), component_revision: Revision::new(1), attempt_id: "attempt".into() }, binding_generation: Revision::new(1) };
++    let kind = LocalKind::Form(FormSpec { fields: vec![LocalField::Text], single_options: Vec::new(), multiple_options: Vec::new() });
++    store.issue_local_evidence_binding_trusted(&local, &kind, expiry(), &proof).unwrap();
++    drop(proof);
++    let change = LocalMutation::Patch { expected: Revision::new(0), changes: vec![FieldChange::Text { value: "original manual draft".into() }], author: AnnotationAuthor::Human { actor_id: "actor".into() } };
++    assert_eq!(store.mutate_local_trusted("manual", &local, &change).unwrap().status, ArtifactSaveStatus::Committed);
++    (f, store, source, local, kind)
++}
++fn active(store: &BusinessStore) -> String { store.database().query("SELECT active FROM artifact_local_evidence_sources_v1 WHERE object_id='object'", &[]).unwrap()[0][0].clone().unwrap() }
++fn head(store: &BusinessStore) -> String { store.database().query("SELECT revision FROM document_heads WHERE document_id='text-source'", &[]).unwrap()[0][0].clone().unwrap() }
++fn raw_forms(store: &BusinessStore) -> Vec<Vec<Option<String>>> { store.database().query("SELECT * FROM artifact_local_forms_v1 ORDER BY object_id", &[]).unwrap() }
++
++#[test]
++fn uninitialized_source_feature_does_not_block_docs_or_create_tables_on_read() {
++    let f = Fixture::new(); let (store, access) = f.setup();
++    assert!(store.pending_document_source_notifications_trusted(None, 256).unwrap().is_empty());
++    store.revoke_document_grant_trusted(&access.authority).unwrap();
++    assert!(store.database().query("SELECT name FROM sqlite_master WHERE name='document_source_notifications_v1'", &[]).unwrap().is_empty());
++}
++
++#[test]
++fn legacy_local_tables_without_source_namespace_remain_compatible() {
++    let f = Fixture::new(); let (store, access) = f.setup();
++    store.initialize_artifacts_trusted().unwrap();
++    store.initialize_artifact_workflows_trusted().unwrap();
++    store.initialize_local_interactions_trusted().unwrap();
++    // Reproduce the previous six-table feature shape before a tracked source or
++    // core notification marker exists. This is not the damaged-installed case.
++    store.database().exec("DROP TABLE artifact_local_evidence_sources_v1", &[]).unwrap();
++    store.revoke_document_grant_trusted(&access.authority).unwrap();
++    assert!(store.pending_document_source_notifications_trusted(None, 256).unwrap().is_empty());
++    assert!(store.database().query("SELECT name FROM sqlite_master WHERE name='document_source_notifications_v1'", &[]).unwrap().is_empty());
++}
++
++#[test]
++fn reissuing_same_document_grant_invalidates_active_original_generation() {
++    let (_f, store, source, _, _) = fixture();
++    let forms = raw_forms(&store);
++    let next = AuthorityBinding { generation: source.authority.generation.next().unwrap(), ..source.authority };
++    store.issue_document_grant_trusted(&source.document, &next, &[DocumentOperation::ReadText], expiry()).unwrap();
++    assert_eq!(active(&store), "0");
++    assert_eq!(raw_forms(&store), forms);
++    assert_eq!(store.pending_document_source_notifications_trusted(None, 256).unwrap().len(), 1);
++}
++
++#[test]
++fn publish_and_copy_call_real_hook_preserving_manual_values() {
++    for copy in [false, true] {
++        let (_f, store, source, _, _) = fixture();
++        let forms = raw_forms(&store);
++        if copy {
++            let metadata = store.read_document(&source).unwrap();
++            let tx = store.database().transaction().unwrap();
++            store.document_clone_in_transaction(&tx, &source.document, "Copy", &metadata.blob).unwrap();
++            tx.commit().unwrap();
++        } else {
++            let blob = upload(&store, "project", b"Replacement synthetic source.");
++            store.publish_document_revision_trusted(&source.document, "Next", DocumentFormat::Text, &blob).unwrap();
++        }
++        assert_eq!(head(&store), "2"); assert_eq!(active(&store), "0");
++        assert_eq!(raw_forms(&store), forms);
++        let pending = store.pending_document_source_notifications_trusted(None, 256).unwrap();
++        assert_eq!(pending.len(), 1);
++        assert_eq!((pending[0].project_id.as_str(), pending[0].actor_id.as_str(), pending[0].object_id.as_str()), ("project", "actor", "object"));
++    }
++}
++
++#[test]
++fn source_and_notifications_are_not_visible_until_commit_and_rollback_keeps_both() {
++    let (f, store, source, _, _) = fixture();
++    let observer = Db::open(f.path().to_str().unwrap(), true, false).unwrap();
++    let metadata = store.read_document(&source).unwrap();
++    let tx = store.database().transaction().unwrap();
++    store.document_clone_in_transaction(&tx, &source.document, "Uncommitted", &metadata.blob).unwrap();
++    assert!(store.pending_document_source_notifications_trusted(None, 256).is_err(), "nested transaction cannot publish pending IDs");
++    assert_eq!(observer.query("SELECT active FROM artifact_local_evidence_sources_v1", &[]).unwrap()[0][0].as_deref(), Some("1"));
++    assert!(observer.query("SELECT 1 FROM document_source_notifications_v1 WHERE pending=1", &[]).unwrap().is_empty());
++    drop(tx);
++    assert_eq!(active(&store), "1"); assert_eq!(head(&store), "1");
++    assert!(store.pending_document_source_notifications_trusted(None, 256).unwrap().is_empty());
++    let tx = store.database().transaction().unwrap();
++    store.document_clone_in_transaction(&tx, &source.document, "Committed", &metadata.blob).unwrap();
++    tx.commit().unwrap();
++    assert_eq!(store.pending_document_source_notifications_trusted(None, 256).unwrap().len(), 1);
++}
++
++#[test]
++fn notification_failure_rolls_back_original_head_and_grant_mutations() {
++    for mutation in [0, 1, 2] {
++        let (_f, store, source, _, _) = fixture();
++        store.database().exec("CREATE TRIGGER fail_source_notification BEFORE INSERT ON document_source_notifications_v1 BEGIN SELECT RAISE(ABORT,'synthetic notification failure'); END", &[]).unwrap();
++        if mutation == 0 {
++            let blob = upload(&store, "project", b"Replacement synthetic source.");
++            assert!(store.publish_document_revision_trusted(&source.document, "Next", DocumentFormat::Text, &blob).is_err());
++        } else if mutation == 1 { assert!(store.revoke_document_grant_trusted(&source.authority).is_err()); }
++        else {
++            let next = AuthorityBinding { generation: source.authority.generation.next().unwrap(), ..source.authority.clone() };
++            assert!(store.issue_document_grant_trusted(&source.document, &next, &[DocumentOperation::ReadText], expiry()).is_err());
++        }
++        assert_eq!(head(&store), "1"); assert_eq!(active(&store), "1");
++        assert!(store.read_document(&source).is_ok());
++        assert!(store.pending_document_source_notifications_trusted(None, 256).unwrap().is_empty());
++    }
++}
++
++#[test]
++fn grant_replacement_invalidates_old_document_even_when_new_scope_differs() {
++    let (_f, store, source, _, _) = fixture();
++    let forms = raw_forms(&store);
++    store.database().exec("INSERT INTO projects VALUES('other-project','workspace','Other','1',0)", &[]).unwrap();
++    let blob = upload(&store, "other-project", b"Other original synthetic source.");
++    let other = store.register_document_trusted("other-project", "other-document", "Other", DocumentFormat::Text, &blob).unwrap();
++    let authority = AuthorityBinding { generation: source.authority.generation.next().unwrap(), ..source.authority };
++    store.issue_document_grant_trusted(&other.document, &authority, &[DocumentOperation::ReadText], expiry()).unwrap();
++    assert_eq!(active(&store), "0"); assert_eq!(raw_forms(&store), forms);
++    let pending = store.pending_document_source_notifications_trusted(None, 256).unwrap();
++    assert_eq!(pending.len(), 1); assert_eq!(pending[0].project_id, "project");
++}
++
++#[test]
++fn malformed_feature_or_notification_schema_rejects_without_committing_revocation() {
++    for damage in [
++        "DROP TABLE artifact_local_evidence_sources_v1",
++        "DROP TABLE artifact_local_evidence_sources_v1; CREATE TABLE artifact_local_evidence_sources_v1(wrong TEXT)",
++        "DROP TABLE document_source_notifications_v1; CREATE TABLE document_source_notifications_v1(wrong TEXT)",
++    ] {
++        let (_f, store, source, _, _) = fixture();
++        for statement in damage.split(';') { store.database().exec(statement.trim(), &[]).unwrap(); }
++        assert!(store.revoke_document_grant_trusted(&source.authority).is_err(), "{damage}");
++        assert_eq!(store.database().query("SELECT active FROM document_grants WHERE grant_id='source-grant'", &[]).unwrap()[0][0].as_deref(), Some("1"));
++    }
++}
++
++#[test]
++fn malformed_original_grant_target_is_not_discarded_during_reissue_or_revoke() {
++    let (_f, store, mut source, _, _) = fixture();
++    store.database().exec("UPDATE document_grants SET document_json='{' WHERE grant_id='source-grant'", &[]).unwrap();
++    assert!(store.revoke_document_grant_trusted(&source.authority).is_err());
++    source.authority.generation = source.authority.generation.next().unwrap();
++    assert!(store.issue_document_grant_trusted(&source.document, &source.authority, &[DocumentOperation::ReadText], expiry()).is_err());
++    assert_eq!(store.database().query("SELECT generation,active FROM document_grants WHERE grant_id='source-grant'", &[]).unwrap()[0], vec![Some("1".into()), Some("1".into())]);
++}
++
++#[test]
++fn pending_notifications_repeat_until_ack_and_stale_ack_cannot_erase_new_generation() {
++    let (_f, store, mut source, mut local, kind) = fixture();
++    let forms = raw_forms(&store);
++    store.revoke_document_grant_trusted(&source.authority).unwrap();
++    let first = store.pending_document_source_notifications_trusted(None, 256).unwrap();
++    assert_eq!(store.pending_document_source_notifications_trusted(None, 256).unwrap(), first);
++    assert_eq!(store.ack_document_source_notifications_trusted(&first).unwrap(), 1);
++    source.authority.generation = source.authority.generation.next().unwrap();
++    store.issue_document_grant_trusted(&source.document, &source.authority, &[DocumentOperation::Inspect, DocumentOperation::ReadText], expiry()).unwrap();
++    local.binding_generation = local.binding_generation.next().unwrap();
++    bind(&store, &source, &local, &kind);
++    store.revoke_document_grant_trusted(&source.authority).unwrap();
++    let second = store.pending_document_source_notifications_trusted(None, 256).unwrap();
++    assert!(second[0].generation.value() > first[0].generation.value());
++    assert_eq!(store.ack_document_source_notifications_trusted(&first).unwrap(), 0);
++    assert_eq!(store.pending_document_source_notifications_trusted(None, 256).unwrap(), second);
++    assert_eq!(store.ack_document_source_notifications_trusted(&second).unwrap(), 1);
++    assert_eq!(raw_forms(&store), forms);
++}
++
++#[test]
++fn more_than_256_real_bindings_revoke_and_queue_without_a_global_limit() {
++    let (_f, store, source, local, kind) = fixture();
++    let evidence = StoreEvidence::new(&store);
++    let processing = evidence.process(&source, InputKind::Utf8Text).unwrap();
++    let hits = evidence.find_literal(&source, &processing, "synthetic", 1).unwrap();
++    let proof = store.resolve_local_evidence_trusted(&local.project, ArtifactProjectOperation::LocalDraft, &source, &processing, &hits[0]).unwrap();
++    for n in 0..257 {
++        let mut extra = local.clone(); extra.object.object_id = format!("object-{n:03}");
++        store.issue_local_evidence_binding_trusted(&extra, &kind, expiry(), &proof).unwrap();
++    }
++    drop(proof);
++    store.revoke_document_grant_trusted(&source.authority).unwrap();
++    assert!(store.database().query("SELECT 1 FROM artifact_local_evidence_sources_v1 WHERE active=1", &[]).unwrap().is_empty());
++    let first = store.pending_document_source_notifications_trusted(None, 256).unwrap();
++    let second = store.pending_document_source_notifications_trusted(first.last(), 256).unwrap();
++    assert_eq!(first.len(), 256); assert_eq!(second.len(), 2);
++    let unique: BTreeSet<_> = first.iter().chain(&second).map(|event| (&event.project_id, &event.actor_id, &event.object_id)).collect();
++    assert_eq!(unique.len(), 258);
++}
++
++#[test]
++fn foreign_transaction_and_oversized_pages_are_rejected() {
++    let (_f, store, source, _, _) = fixture();
++    let other = Db::open(":memory:", false, true).unwrap();
++    let tx = other.transaction().unwrap();
++    assert!(store.invalidate_document_dependents_in_transaction(&tx, &source.document).is_err());
++    assert!(store.pending_document_source_notifications_trusted(None, 0).is_err());
++    assert!(store.pending_document_source_notifications_trusted(None, 257).is_err());
++}
+diff --git a/crates/muyon-core/src/documents/source_notifications.rs b/crates/muyon-core/src/documents/source_notifications.rs
+new file mode 100644
+index 00000000..86998740
+--- /dev/null
++++ b/crates/muyon-core/src/documents/source_notifications.rs
+@@ -0,0 +1,101 @@
++//! Same-transaction metadata-only outbox for the actual Artifacts source hook.
++//! Requires fixed resolver0e85c6e9 plus real library/harness composition by B.
++use super::{identity::valid_id, DocumentRef};
++use crate::{business::BusinessStore, contract::{ContractError, Revision}, sqlite::Transaction};
++use serde::Serialize;
++
++type Result<T> = std::result::Result<T, ContractError>;
++const SOURCE: &str = "artifact_local_evidence_sources_v1";
++const NAME: &str = "document_source_notifications_v1";
++const DDL: &str = "CREATE TABLE document_source_notifications_v1(project_id TEXT NOT NULL REFERENCES projects(id),actor_id TEXT NOT NULL,object_id TEXT NOT NULL,generation TEXT NOT NULL,pending INTEGER NOT NULL CHECK(pending IN(0,1)),PRIMARY KEY(project_id,actor_id,object_id))";
++const MAX_PAGE: usize = 256;
++
++/// Trusted Runtime-routing metadata only, never source permission or content.
++#[derive(Clone, Debug, PartialEq, Eq, Serialize)]
++pub struct DocumentSourceNotification {
++    pub project_id: String,
++    pub actor_id: String,
++    pub object_id: String,
++    pub generation: Revision,
++}
++fn sql<T>(value: crate::sqlite::Result<T>) -> Result<T> { value.map_err(|_| ContractError::Storage) }
++fn cell(row: &[Option<String>], index: usize) -> Result<&str> { row.get(index).and_then(Option::as_deref).ok_or(ContractError::StorageCorrupt) }
++fn ids(project: &str, actor: &str, object: &str) -> Result<()> {
++    if [project, actor, object].iter().all(|id| valid_id(id)) { Ok(()) } else { Err(ContractError::StorageCorrupt) }
++}
++impl BusinessStore {
++    fn document_notification_schema(&self) -> Result<bool> {
++        let rows = sql(self.database().query("SELECT type,CASE WHEN length(CAST(sql AS BLOB))<=1024 THEN sql ELSE NULL END FROM sqlite_master WHERE name=?", &[NAME]))?;
++        if rows.is_empty() { return Ok(false); }
++        if rows.len() != 1 || cell(&rows[0], 0)? != "table" || cell(&rows[0], 1)? != DDL { return Err(ContractError::InvalidVersion); }
++        Ok(true)
++    }
++    /// All callers propagate failure; no commit/event publication occurs here.
++    pub(crate) fn invalidate_document_dependents_in_transaction(&self, tx: &Transaction<'_>, changed: &DocumentRef) -> Result<()> {
++        if !tx.belongs_to(self.database()) || changed.scope().workspace_id != self.workspace_id() { return Err(ContractError::ScopeMismatch); }
++        let source = sql(self.database().query("SELECT type FROM sqlite_master WHERE name=?", &[SOURCE]))?;
++        let notifications = self.document_notification_schema()?;
++        if source.is_empty() {
++            // Legacy/uninitialized resolver, not a swallowed resolver failure.
++            return if notifications { Err(ContractError::InvalidVersion) } else { Ok(()) };
++        }
++        if source.len() != 1 || cell(&source[0], 0)? != "table" { return Err(ContractError::InvalidVersion); }
++        // The real source owner validates its exact schema and rechecks every
++        // source. Never duplicate that truth, substitute TTL or accept all errors.
++        let affected = self.invalidate_local_evidence_sources_in_transaction(tx, changed)?;
++        if !notifications { sql(self.database().exec(DDL, &[]))?; }
++        for event in affected {
++            ids(&event.project_id, &event.actor_id, &event.object_id)?;
++            let old = sql(self.database().query("SELECT CASE WHEN length(CAST(generation AS BLOB))<=20 THEN generation ELSE NULL END FROM document_source_notifications_v1 WHERE project_id=? AND actor_id=? AND object_id=?", &[&event.project_id, &event.actor_id, &event.object_id]))?;
++            let generation = match old.first() {
++                Some(row) => {
++                    let current = Revision::parse(cell(row, 0)?)?;
++                    if current.value() == 0 { return Err(ContractError::StorageCorrupt); }
++                    current.next()?
++                }
++                None => Revision::new(1),
++            };
++            sql(self.database().exec("INSERT INTO document_source_notifications_v1 VALUES(?,?,?,?,1) ON CONFLICT(project_id,actor_id,object_id) DO UPDATE SET generation=excluded.generation,pending=1", &[&event.project_id, &event.actor_id, &event.object_id, generation.as_str()]))?;
++        }
++        Ok(())
++    }
++    /// Post-commit trusted Host call only. Nested calls during a source mutation
++    /// fail to start a transaction; no Runtime event may be emitted before COMMIT.
++    pub fn pending_document_source_notifications_trusted(&self, after: Option<&DocumentSourceNotification>, limit: usize) -> Result<Vec<DocumentSourceNotification>> {
++        if limit == 0 || limit > MAX_PAGE { return Err(ContractError::TextLimit); }
++        let tx = sql(self.database().transaction())?;
++        self.document_schema()?;
++        if !self.document_notification_schema()? { sql(tx.commit())?; return Ok(Vec::new()); }
++        let (project, actor, object) = match after {
++            Some(cursor) => { ids(&cursor.project_id, &cursor.actor_id, &cursor.object_id)?; (cursor.project_id.as_str(), cursor.actor_id.as_str(), cursor.object_id.as_str()) }
++            None => ("", "", ""),
++        };
++        let rows = sql(self.database().query("SELECT CASE WHEN length(CAST(project_id AS BLOB))<=128 THEN project_id ELSE NULL END,CASE WHEN length(CAST(actor_id AS BLOB))<=128 THEN actor_id ELSE NULL END,CASE WHEN length(CAST(object_id AS BLOB))<=128 THEN object_id ELSE NULL END,CASE WHEN length(CAST(generation AS BLOB))<=20 THEN generation ELSE NULL END FROM document_source_notifications_v1 WHERE pending=1 AND (project_id>? OR (project_id=? AND (actor_id>? OR (actor_id=? AND object_id>?)))) ORDER BY project_id,actor_id,object_id LIMIT ?", &[project, project, actor, actor, object, &limit.to_string()]))?;
++        let mut events = Vec::with_capacity(rows.len());
++        for row in rows {
++            ids(cell(&row, 0)?, cell(&row, 1)?, cell(&row, 2)?)?;
++            let generation = Revision::parse(cell(&row, 3)?)?;
++            if generation.value() == 0 { return Err(ContractError::StorageCorrupt); }
++            events.push(DocumentSourceNotification { project_id: cell(&row, 0)?.into(), actor_id: cell(&row, 1)?.into(), object_id: cell(&row, 2)?.into(), generation });
++        }
++        sql(tx.commit())?;
++        Ok(events)
++    }
++    /// Call only after Runtime accepted the corresponding local notification.
++    /// Keep tombstones: deleting an acked row could reuse generation1 (ABA).
++    pub fn ack_document_source_notifications_trusted(&self, events: &[DocumentSourceNotification]) -> Result<usize> {
++        if events.len() > MAX_PAGE { return Err(ContractError::TextLimit); }
++        if events.is_empty() { return Ok(0); }
++        let tx = sql(self.database().transaction())?;
++        self.document_schema()?;
++        if !self.document_notification_schema()? { return Err(ContractError::NotFound); }
++        let mut acknowledged = 0;
++        for event in events {
++            ids(&event.project_id, &event.actor_id, &event.object_id)?;
++            if event.generation.value() == 0 { return Err(ContractError::InvalidRevision); }
++            acknowledged += sql(self.database().exec("UPDATE document_source_notifications_v1 SET pending=0 WHERE project_id=? AND actor_id=? AND object_id=? AND generation=? AND pending=1", &[&event.project_id, &event.actor_id, &event.object_id, event.generation.as_str()]))?;
++        }
++        tx.commit().map_err(|_| ContractError::Unknown)?;
++        Ok(acknowledged)
++    }
++}
+diff --git a/crates/muyon-core/src/documents/storage.rs b/crates/muyon-core/src/documents/storage.rs
+index b0976ce4..14384f30 100644
+--- a/crates/muyon-core/src/documents/storage.rs
++++ b/crates/muyon-core/src/documents/storage.rs
+@@ -498,6 +498,7 @@ impl BusinessStore {
+                 &encode(&metadata)?,
+             ],
+         ))?;
++        self.invalidate_document_dependents_in_transaction(tx, &metadata.document)?;
+         Ok(metadata)
+     }
+     /// COPY-only: append metadata for the exact existing source bytes. There is
+@@ -564,6 +565,7 @@ impl BusinessStore {
+                 &encode(&metadata)?,
+             ],
+         ))?;
++        self.invalidate_document_dependents_in_transaction(tx, &metadata.document)?;
+         Ok(metadata)
+     }
+     /// HOST ONLY, after authentic current policy/user authorization. No model or
+@@ -591,7 +593,8 @@ impl BusinessStore {
+         {
+             return Err(ContractError::InvalidAuthority);
+         }
+-        let old = sql(self.database().query("SELECT CASE WHEN length(CAST(generation AS BLOB))<=20 THEN generation ELSE NULL END FROM document_grants WHERE grant_id=?", &[&authority.grant_id]))?;
++        let old = sql(self.database().query("SELECT CASE WHEN length(CAST(generation AS BLOB))<=20 THEN generation ELSE NULL END,CASE WHEN length(CAST(document_json AS BLOB))<=8192 THEN document_json ELSE NULL END FROM document_grants WHERE grant_id=?", &[&authority.grant_id]))?;
++        let old_document = old.first().map(|row| self.document_grant_target(cell(row, 1)?)).transpose()?;
+         let expected = if old.is_empty() {
+             Revision::new(1)
+         } else {
+@@ -601,8 +604,21 @@ impl BusinessStore {
+             return Err(ContractError::InvalidAuthority);
+         }
+         sql(self.database().exec("INSERT INTO document_grants VALUES(?,?,?,?,?,?,1) ON CONFLICT(grant_id) DO UPDATE SET generation=excluded.generation,owner_epoch=excluded.owner_epoch,document_json=excluded.document_json,permissions=excluded.permissions,expires_at_ms=excluded.expires_at_ms,active=1", &[&authority.grant_id, authority.generation.as_str(), self.owner_epoch(), &encode(document)?, &encode(&operations)?, &expires_at_ms.to_string()]))?;
++        if let Some(previous) = old_document.as_ref() {
++            self.invalidate_document_dependents_in_transaction(&tx, previous)?;
++        }
++        if old_document.as_ref() != Some(document) {
++            self.invalidate_document_dependents_in_transaction(&tx, document)?;
++        }
+         sql(tx.commit())
+     }
++    fn document_grant_target(&self, payload: &str) -> Result<DocumentRef> {
++        let document: DocumentRef = decode(payload)?;
++        if document.scope().workspace_id != self.workspace_id() || document.scope().project_id.is_none() || document.revision().value() == 0 {
++            return Err(ContractError::StorageCorrupt);
++        }
++        Ok(document)
++    }
+     pub fn revoke_document_grant_trusted(&self, authority: &AuthorityBinding) -> Result<()> {
+         let tx = sql(self.database().transaction())?;
+         self.document_schema()?;
+@@ -610,10 +626,13 @@ impl BusinessStore {
+         if authority.owner_epoch != self.owner_epoch() {
+             return Err(ContractError::InvalidAuthority);
+         }
++        let targets = sql(self.database().query("SELECT CASE WHEN length(CAST(document_json AS BLOB))<=8192 THEN document_json ELSE NULL END FROM document_grants WHERE grant_id=? AND generation=? AND owner_epoch=?", &[&authority.grant_id, authority.generation.as_str(), self.owner_epoch()]))?;
++        let target = self.document_grant_target(cell(targets.first().ok_or(ContractError::InvalidAuthority)?, 0)?)?;
+         let changed = sql(self.database().exec("UPDATE document_grants SET active=0 WHERE grant_id=? AND generation=? AND owner_epoch=?", &[&authority.grant_id, authority.generation.as_str(), self.owner_epoch()]))?;
+         if changed != 1 {
+             return Err(ContractError::InvalidAuthority);
+         }
++        self.invalidate_document_dependents_in_transaction(&tx, &target)?;
+         sql(tx.commit())
+     }
+     pub fn read_document(&self, access: &DocumentAccess) -> Result<DocumentMetadata> {

@@ -1,0 +1,26 @@
+diff --git a/crates/muyon-core/src/bin/business_worker.rs b/crates/muyon-core/src/bin/business_worker.rs
+--- a/crates/muyon-core/src/bin/business_worker.rs
++++ b/crates/muyon-core/src/bin/business_worker.rs
+@@ -94,3 +94,9 @@
+     }
+     Ok(())
+ }
++
++// Real source-invalidation dependency modules; no permissive hook stub.
++#[path = "../artifacts/mod.rs"]
++pub mod artifacts;
++#[path = "../evidence/mod.rs"]
++pub mod evidence;
+diff --git a/crates/muyon-core/tests/group_runtime_store.rs b/crates/muyon-core/tests/group_runtime_store.rs
+--- a/crates/muyon-core/tests/group_runtime_store.rs
++++ b/crates/muyon-core/tests/group_runtime_store.rs
+@@ -1470,3 +1470,9 @@
+         .unwrap()
+         .is_empty());
+ }
++
++// Real source-invalidation dependency modules; no permissive hook stub.
++#[path = "../src/artifacts/mod.rs"]
++pub mod artifacts;
++#[path = "../src/evidence/mod.rs"]
++pub mod evidence;
