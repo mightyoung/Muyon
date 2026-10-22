@@ -61,3 +61,13 @@ consumer logic only. SAVE-CONSUMER-REPORT.md gives exact late/unknown/repeat/lea
 semantics. No private native wire schema or RPC is guessed; no production save flag
 is enabled. The assigned Rust owner supplies fixed SQLite descriptor/save/load/
 original-receipt API next, then Runtime/Service adaptation can use this consumer.
+
+## Shared reader next dependency
+
+Read READER-HOST-BRIDGE-REQUEST.md for exact new Kotlin file ownership and proposed
+native read-session/list/check/chunk/close contract for the assigned sole FFI owner.
+No reader/shell/Rust file was edited or final reader2 combined. First bridge is read
+only via controlled typed PFD, not a research cache/JSON URI grant. Annotation save
+stays disabled until reader capability gate and original intent/immutable-anchor/
+receipt transaction gateway are fixed. Existing annotation revision CAS alone is
+insufficient for durable recovery.
