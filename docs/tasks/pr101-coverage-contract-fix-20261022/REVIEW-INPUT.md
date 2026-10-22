@@ -21,3 +21,14 @@ seven zero records all become hit and nothing regresses,2395+7=2402>=2401; actua
 result may differ and is authoritative. No old run rerun, artifact retry, CI
 threshold alteration, PR101 source update or merge. One first CI on the new
 reviewed branch is authorized, then monitor terminal and preserve failures.
+
+
+Trigger checkpoint: initial sourceaeb75a83 pushed successfully, remote verified;
+after multiple read-only checks over four minutes it has zero runs/check suites.
+Existing ci workflow ID375643992 is active. One Actions-settings read returned403
+(Resource not accessible by integration), stopped; this does not prove run-start
+was denied. Existing authenticated user is mightyoung, no identity/credential
+change. Add only no-argument workflow_dispatch to same original CI for one normal
+API attempt; do not assume main registration works, do not alter main. Explicit
+API denial/default-branch unavailability must stop that action, not reroute it.
+No previous CI executed at aeb, so this is first execution request, not a rerun.
