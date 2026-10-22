@@ -71,3 +71,13 @@ reauthorization Host port is installed: production remains explicitly unavailabl
 Native presentation binding662ae/01e1 was read only; original Host owner must supply
 private binding/catalog, serialized native selection fence and current policy bridge.
 Local observationId/time is not a native original issuance attempt or grant deadline.
+
+Screenshot continuation (after90df): SCREENSHOT-CONTINUATION.md and independent
+SCREENSHOT-CONTINUATION-REVIEW.md record exact214/90df checks, current capture
+NOT_CAPTURED and old07fd archive-only boundaries. Local SDK/runtime absent; user's
+official tool install/license decision is pending. No install or new CI dispatched.
+Two minimal accessibility device tests added first, but AGP blocks compilation;
+heading/draft-purpose/polite notice source changes have only bounded static review.
+Pure reader1+host3 regressions PASS, not Compose/TalkBack acceptance. The same report
+registers original static-mascot mapping/unknown fallback and multi-reason pause
+requirements; do not infer task state from animation or let offscreen cancel work.

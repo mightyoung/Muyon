@@ -1,0 +1,69 @@
+Independent screenshot continuation review 2026-10-22T17:50:13.453617+00:00
+HEAD 90df4d09d75537786d64e703dd94ca2abe7319c2
+BEFORE SHA256
+f6df3af2ca2de6322eff475c633c7d46232d8d78068cbe6fe4d4dbb5cf5f5489  apps/muyon_android/app/src/androidTest/kotlin/com/mightyoung/muyon/product/ui/shell/ConversationShellTest.kt
+063fee7952e29d693b30201f2a9b478577541faf5b9120be1b48594eb45bb26b  apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/ui/shell/ActivityReaderSurface.kt
+451899cd9d1d7646f79a6a410f9337cbe8d52339641efc9e8c5494c9be0aae85  apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/ui/shell/ConfigurationLocalState.kt
+ae7b6aa0b82c38567fdef717dcd7fa7b7f3be34b8a411815568f785e2a9cacee  apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/ui/shell/ConfigurationPreviewHost.kt
+d46ca6efcf97a3d1f34d233a7cf83742ab52cb9d14c427627ca4a01bbddcc00a  apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/ui/shell/ConversationShell.kt
+bc55df9661146503ff0cdfe5955c1c86da3df94fbff626194812e535e43318e2  apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/ui/shell/DocumentCapabilitiesScreen.kt
+b1d017774fd45bcad6fb0e3877ed13318df84db1550620b45de22c5a629f2937  apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/ui/shell/HostDraftPersistence.kt
+13d009f695dbec2cac2ede383a5775439ef8eeac9f8fb3ef6167692bfe0cfc44  apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/ui/shell/HostSetupController.kt
+5c316baa368aed4f51b9a5931c4db9229d8d21e6a5fe71f1c704154eae8aa87d  apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/ui/shell/HostSetupScreen.kt
+ab1ba20faa9df993a11e0bea09d9906d4082bbeb34f613b4684f976ac5112de5  apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/ui/shell/LocalShellDrafts.kt
+d0f70f2ec2f48931783a17ffc662dd8feeefd001a4967cf7e11b468bc2ef234c  apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/ui/shell/ReadOnlySnapshot.kt
+07345c42041bf4b4e418396cd0f531e9a5289e0d5d879876b69ecc37f5a8770d  apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/ui/shell/ReadOnlySnapshotPanel.kt
+5d0fd778e4ccf759136ddf9c7112400c60b367c366f50b3a809bab4ad8a236b9  apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/ui/shell/ReaderSelectionSurface.kt
+0e20ae687f2471d5d16dce07e75f7946da03493ece5f6bbf69ce27e182a7da42  apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/ui/shell/ReaderSurfaceFence.kt
+296fe4663b23c49401e9f64f719e38eb41cf6f486ec8410e34899bf17270e324  apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/ui/shell/RequestCandidatePanel.kt
+c30ca08815352a901bb45ddbc428241ebea89279b8f68bf221bf98e8afe4d7c2  apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/ui/shell/RequestCandidates.kt
+a19e2dfd8d490ab2f2168de1535f3da4c84fe3f6a732e73ce57e2b1630258a3f  apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/ui/shell/ShellInputDock.kt
+1db7eab0c2596dadc2dad6613fe4a9bd291e8b8c3e3709f09cd068895caa5e44  apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/ui/shell/HostPersistenceProjectionChecks.kt
+e10298405402a72ab45d28b848ed29a3cc93451a3b68efa87ca0bbb2469993ec  apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/ui/shell/HostSetupControllerChecks.kt
+e4219f712c378b057a1d0e41e2289a7e1e035939d0849cb1225f994547af97b7  apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/ui/shell/ReadOnlySnapshotChecks.kt
+45d883b10dfdeea32d9ff57a40544eed8d532997f65c8eda5e5f2fda983775b0  apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/ui/shell/ReaderSurfaceFenceChecks.kt
+a11eeccfb504ad5e673eefe6d5ae82c74d544e86a974f4608ce3a2cd6c303e25  apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/ui/shell/RequestCandidateChecks.kt
+8a1e27f3b7ede95d4ee7c0c09702b114ae70ffb5d73c7e66ae6e1991df89fe6f  apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/ui/shell/run-host-shell-checks.sh
+2fe0183b36e8597b07dec3c44d00b79404973d398f2546fd1b46f5279fc615a6  apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/ui/shell/run-reader-surface-checks.sh
+b62276cf87e79488432326eb735fb7700b5d99ea70b20d3aeb507c84bd4eb6a5  apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/ui/shell/run-snapshot-checks.sh
+JSON_JAR_SHA256 dfb7bae2f404cfe0b72b4d23944698cb716b7665171812a0a4d0f5926c0fac79
+COMMAND KOTLINC=/workspace/ui-shell-tools/kotlin-2.2.20/kotlinc/bin/kotlinc JSON_JAR=/workspace/ui-shell-tools/android-json-0.0.20131108.vaadin1.jar bash apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/ui/shell/run-reader-surface-checks.sh
+PASS reader surface fence: single-use exact readonly selection intent and lifecycle-only typed cleanup; exact A/B/A and frame identity; stale pre-Host zero calls; owning-thread fresh sample; background/focus/scope/route/destroy cleanup; no auto-resume; unavailable and cleanup hold
+
+EXIT 0
+COMMAND KOTLINC=/workspace/ui-shell-tools/kotlin-2.2.20/kotlinc/bin/kotlinc JSON_JAR=/workspace/ui-shell-tools/android-json-0.0.20131108.vaadin1.jar bash apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/ui/shell/run-host-shell-checks.sh
+PASS real host/controller: one reducer, exact CAS, stale/double action rejection, template token/manual buffer, lost outcome original read, cancel/resume, same-CAS immutability, closed-view callback isolation, re-entry original-ID read and expired-session retention; no native/transport
+PASS real host candidate: original request/config identity, exact scope, finite read-only kind, binding/actions absent, unknown charge remains unknown, mismatched duplicate observation rejects; no transport
+PASS cold shell: actual host unknown/history decode; plain open/read zero lookup; closed persistence actions; same-CAS storage observation; cold0/0 never saved; malformed facts rejected
+
+EXIT 0
+AFTER SHA256
+f6df3af2ca2de6322eff475c633c7d46232d8d78068cbe6fe4d4dbb5cf5f5489  apps/muyon_android/app/src/androidTest/kotlin/com/mightyoung/muyon/product/ui/shell/ConversationShellTest.kt
+063fee7952e29d693b30201f2a9b478577541faf5b9120be1b48594eb45bb26b  apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/ui/shell/ActivityReaderSurface.kt
+451899cd9d1d7646f79a6a410f9337cbe8d52339641efc9e8c5494c9be0aae85  apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/ui/shell/ConfigurationLocalState.kt
+ae7b6aa0b82c38567fdef717dcd7fa7b7f3be34b8a411815568f785e2a9cacee  apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/ui/shell/ConfigurationPreviewHost.kt
+d46ca6efcf97a3d1f34d233a7cf83742ab52cb9d14c427627ca4a01bbddcc00a  apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/ui/shell/ConversationShell.kt
+bc55df9661146503ff0cdfe5955c1c86da3df94fbff626194812e535e43318e2  apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/ui/shell/DocumentCapabilitiesScreen.kt
+b1d017774fd45bcad6fb0e3877ed13318df84db1550620b45de22c5a629f2937  apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/ui/shell/HostDraftPersistence.kt
+13d009f695dbec2cac2ede383a5775439ef8eeac9f8fb3ef6167692bfe0cfc44  apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/ui/shell/HostSetupController.kt
+5c316baa368aed4f51b9a5931c4db9229d8d21e6a5fe71f1c704154eae8aa87d  apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/ui/shell/HostSetupScreen.kt
+ab1ba20faa9df993a11e0bea09d9906d4082bbeb34f613b4684f976ac5112de5  apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/ui/shell/LocalShellDrafts.kt
+d0f70f2ec2f48931783a17ffc662dd8feeefd001a4967cf7e11b468bc2ef234c  apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/ui/shell/ReadOnlySnapshot.kt
+07345c42041bf4b4e418396cd0f531e9a5289e0d5d879876b69ecc37f5a8770d  apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/ui/shell/ReadOnlySnapshotPanel.kt
+5d0fd778e4ccf759136ddf9c7112400c60b367c366f50b3a809bab4ad8a236b9  apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/ui/shell/ReaderSelectionSurface.kt
+0e20ae687f2471d5d16dce07e75f7946da03493ece5f6bbf69ce27e182a7da42  apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/ui/shell/ReaderSurfaceFence.kt
+296fe4663b23c49401e9f64f719e38eb41cf6f486ec8410e34899bf17270e324  apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/ui/shell/RequestCandidatePanel.kt
+c30ca08815352a901bb45ddbc428241ebea89279b8f68bf221bf98e8afe4d7c2  apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/ui/shell/RequestCandidates.kt
+a19e2dfd8d490ab2f2168de1535f3da4c84fe3f6a732e73ce57e2b1630258a3f  apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/ui/shell/ShellInputDock.kt
+1db7eab0c2596dadc2dad6613fe4a9bd291e8b8c3e3709f09cd068895caa5e44  apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/ui/shell/HostPersistenceProjectionChecks.kt
+e10298405402a72ab45d28b848ed29a3cc93451a3b68efa87ca0bbb2469993ec  apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/ui/shell/HostSetupControllerChecks.kt
+e4219f712c378b057a1d0e41e2289a7e1e035939d0849cb1225f994547af97b7  apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/ui/shell/ReadOnlySnapshotChecks.kt
+45d883b10dfdeea32d9ff57a40544eed8d532997f65c8eda5e5f2fda983775b0  apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/ui/shell/ReaderSurfaceFenceChecks.kt
+a11eeccfb504ad5e673eefe6d5ae82c74d544e86a974f4608ce3a2cd6c303e25  apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/ui/shell/RequestCandidateChecks.kt
+8a1e27f3b7ede95d4ee7c0c09702b114ae70ffb5d73c7e66ae6e1991df89fe6f  apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/ui/shell/run-host-shell-checks.sh
+2fe0183b36e8597b07dec3c44d00b79404973d398f2546fd1b46f5279fc615a6  apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/ui/shell/run-reader-surface-checks.sh
+b62276cf87e79488432326eb735fb7700b5d99ea70b20d3aeb507c84bd4eb6a5  apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/ui/shell/run-snapshot-checks.sh
+INPUTS_UNCHANGED True
+COMMAND git diff --check
+
+EXIT 0

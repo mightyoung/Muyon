@@ -71,14 +71,14 @@ fun ConversationShell(
                                 modifier = Modifier.size(40.dp).testTag("shell-original-brand-icon"), contentScale = ContentScale.Fit)
                             Text("Muyon", style = MaterialTheme.typography.headlineMedium)
                         }
-                        if (notice.isNotBlank()) Text(notice, Modifier.padding(12.dp), color = MaterialTheme.colorScheme.error)
-                        Text("主 Agent 与置顶", Modifier.padding(12.dp), style = MaterialTheme.typography.titleSmall)
+                        if (notice.isNotBlank()) Text(notice, Modifier.padding(12.dp).semantics { liveRegion = LiveRegionMode.Polite }, color = MaterialTheme.colorScheme.error)
+                        Text("主 Agent 与置顶", Modifier.padding(12.dp).semantics { heading() }, style = MaterialTheme.typography.titleSmall)
                         conversations.filter { it.main || it.pinned }.forEach { item ->
                             ConversationEntry(item, destination == "chat" && selectedConversation == item.key,
                                 { onSelectConversation(item.key); menuOpen = false }, { onTogglePin(item.key) })
                         }
                         HorizontalDivider(Modifier.padding(vertical = 8.dp))
-                        Text("最近会话", Modifier.padding(12.dp), style = MaterialTheme.typography.titleSmall)
+                        Text("最近会话", Modifier.padding(12.dp).semantics { heading() }, style = MaterialTheme.typography.titleSmall)
                         val ordinary = conversations.filterNot { it.main || it.pinned }
                         if (ordinary.isEmpty()) Text("尚无其他已打开的会话", Modifier.padding(12.dp), style = MaterialTheme.typography.bodyMedium)
                         ordinary.forEach { item ->
@@ -137,7 +137,7 @@ fun ConversationHeader(title: String, onOpenMenu: () -> Unit, onMore: (() -> Uni
         Column(Modifier.weight(1f).padding(8.dp), horizontalAlignment = Alignment.CenterHorizontally) {
             if (mainAgent) Image(painterResource(R.drawable.muyon_brand_mascot_front), contentDescription = null,
                 modifier = Modifier.size(48.dp).testTag("shell-original-mascot"), contentScale = ContentScale.Fit)
-            Text(title, style = MaterialTheme.typography.titleMedium,
+            Text(title, modifier = Modifier.semantics { heading() }, style = MaterialTheme.typography.titleMedium,
                 textAlign = androidx.compose.ui.text.style.TextAlign.Center, maxLines = 3, overflow = TextOverflow.Ellipsis)
         }
         if (onMore != null) IconButton(onClick = onMore, modifier = Modifier.size(48.dp).testTag("chat-more")) {

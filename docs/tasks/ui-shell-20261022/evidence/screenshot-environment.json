@@ -1,0 +1,102 @@
+{
+  "source_shell": "90df4d09d75537786d64e703dd94ca2abe7319c2",
+  "source_pr101": "214b4031deb38ca7dfd35ee86396089eb48157d5",
+  "commands": {
+    "java": "/usr/bin/java",
+    "adb": null,
+    "emulator": null,
+    "sdkmanager": null,
+    "flutter": null
+  },
+  "sdk_directories": [
+    "cmdline-tools"
+  ],
+  "kvm_exists": false,
+  "agent_files": [],
+  "captures": [
+    {
+      "surface": "menu_open",
+      "status": "NOT_CAPTURED",
+      "mode": "neither_runtime_nor_compose_preview",
+      "synthetic_data": null,
+      "device": null,
+      "api": null,
+      "font_scale": null
+    },
+    {
+      "surface": "main_agent_chat",
+      "status": "NOT_CAPTURED",
+      "mode": "neither_runtime_nor_compose_preview",
+      "synthetic_data": null,
+      "device": null,
+      "api": null,
+      "font_scale": null
+    },
+    {
+      "surface": "bubbles_cards",
+      "status": "NOT_CAPTURED",
+      "mode": "neither_runtime_nor_compose_preview",
+      "synthetic_data": null,
+      "device": null,
+      "api": null,
+      "font_scale": null
+    },
+    {
+      "surface": "bot_progressive_configuration",
+      "status": "NOT_CAPTURED",
+      "mode": "neither_runtime_nor_compose_preview",
+      "synthetic_data": null,
+      "device": null,
+      "api": null,
+      "font_scale": null
+    },
+    {
+      "surface": "group_leader_preview",
+      "status": "NOT_CAPTURED",
+      "mode": "neither_runtime_nor_compose_preview",
+      "synthetic_data": null,
+      "device": null,
+      "api": null,
+      "font_scale": null
+    },
+    {
+      "surface": "light_dark_theme",
+      "status": "NOT_CAPTURED",
+      "mode": "neither_runtime_nor_compose_preview",
+      "synthetic_data": null,
+      "device": null,
+      "api": null,
+      "font_scale": null
+    }
+  ],
+  "ci_read_only": {
+    "run": 39822618778,
+    "head_sha": "214b4031deb38ca7dfd35ee86396089eb48157d5",
+    "conclusion": "success",
+    "artifact_ids": [
+      12446106580,
+      12445476555
+    ],
+    "android_artifact_bytes": 56385,
+    "workflow_retention": "logs/packaging evidence only; no APK or screenshots",
+    "emulator_launch": false
+  },
+  "visual_blob_comparison": {
+    "apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/MainActivity.kt": {
+      "214b4031deb38ca7dfd35ee86396089eb48157d5": "39dd8f91fe6b93bed66aee3d6965028343badd08",
+      "90df4d09d75537786d64e703dd94ca2abe7319c2": "34f38ecdbea42941e8ed86f28601e2e5f8d26151"
+    },
+    "apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/chat/ChatScreen.kt": {
+      "214b4031deb38ca7dfd35ee86396089eb48157d5": "38c6373d1a1942a894c11bf3e346b57133aefaa1",
+      "90df4d09d75537786d64e703dd94ca2abe7319c2": "38c6373d1a1942a894c11bf3e346b57133aefaa1"
+    },
+    "apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/ui/shell/ConversationShell.kt": {
+      "214b4031deb38ca7dfd35ee86396089eb48157d5": "a9cafffc72294048470c455c104e86365d0bddd9",
+      "90df4d09d75537786d64e703dd94ca2abe7319c2": "a9cafffc72294048470c455c104e86365d0bddd9"
+    },
+    "apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/ui/shell/ShellInputDock.kt": {
+      "214b4031deb38ca7dfd35ee86396089eb48157d5": "41225c211e0200e8b567cb695c6cc0c45c0d6ef3",
+      "90df4d09d75537786d64e703dd94ca2abe7319c2": "41225c211e0200e8b567cb695c6cc0c45c0d6ef3"
+    }
+  }
+}
