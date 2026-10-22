@@ -1,6 +1,8 @@
 # MU-01 / MU-04 / PX-09 — offline component contract
 
 Status: offline contract implemented; production integration and Android acceptance NOT_RUN.
+
+Follow-up: parent review identified scope-only cancellation targeting as Important. See [cancel identity/CAS repair](CANCEL-IDENTITY-FIX.md) for the reproduced old failure, revised API, 20-group rerun, raw outputs and independent follow-up review. Earlier 16-group evidence below is retained as historical, not proof against this later finding.
 Branch: `task/chat-component-contracts-20261022`. Base: `f4781e16ddf4e542b983fbd77f266a0071148255`.
 
 ## Inputs and repository checks

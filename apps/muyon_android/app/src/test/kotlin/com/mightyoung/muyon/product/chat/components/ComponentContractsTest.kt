@@ -92,7 +92,7 @@ fun main() {
         check(l.snapshot().pending?.phase == PendingPhase.UNKNOWN)
         check(l.recovery(scope) == Recovery.LookupOriginal(first.identity))
         check(l.submit(scope, 3, l.snapshot().stateRevision, "save", "retry") is SubmitDecision.LookupOriginal)
-        l.requestCancel(scope)
+        l.requestCancel(scope, first.identity, l.snapshot().stateRevision)
         check(l.snapshot().pending?.phase == PendingPhase.CANCEL_REQUESTED)
         check(l.snapshot().committed.isEmpty())
         check(l.snapshot().heldMicroCny == 2620L && l.snapshot().actualMicroCny == null)
@@ -124,7 +124,7 @@ fun main() {
     }
     test("confirmed cancellation and rejection are not success and preserve draft") {
         for (status in listOf(ReceiptStatus.CANCELLED, ReceiptStatus.REJECTED, ReceiptStatus.NOT_SUBMITTED)) {
-            val l = edited(); val p = begin(l); l.requestCancel(scope)
+            val l = edited(); val p = begin(l); l.requestCancel(scope, p.identity, l.snapshot().stateRevision)
             val result = receipt(p, status); l.observe(scope, result)
             check(l.snapshot().pending == null && l.snapshot().committed.isEmpty())
             check(l.snapshot().draft["answer"] == "A")
@@ -205,6 +205,68 @@ fun main() {
         }
         l.edit(scope, 3, 0, "choose", "Valid \uD83D\uDE00")
         check(l.snapshot().draft["answer"] == "Valid \uD83D\uDE00")
+    }
+    test("late cancellation from attempt A must not mutate pending attempt B") {
+        val l = edited(); val a = begin(l)
+        val capturedScope = scope
+        val capturedIdentity = a.identity
+        val capturedRevision = l.snapshot().stateRevision
+        l.observe(scope, receipt(a)); l.redo(scope, "attempt-B")
+        l.edit(scope, 3, l.snapshot().stateRevision, "choose", "B")
+        val b = begin(l, "intent-B"); val before = l.snapshot()
+        rejected { l.requestCancel(capturedScope, capturedIdentity, capturedRevision) }
+        // Matching B's current CAS token must not make A's identity eligible either.
+        rejected { l.requestCancel(capturedScope, capturedIdentity, before.stateRevision) }
+        val after = l.snapshot()
+        println("late-cancel probe: original=${a.identity.intentId} current=${b.identity.intentId} before=${before.pending?.phase} after=${after.pending?.phase}")
+        check(after == before) { "Late cancellation for A mutated pending B" }
+    }
+    test("normal and repeated cancellation require exact pending identity and current CAS") {
+        val l = edited(); val p = begin(l); val before = l.snapshot()
+        val cancelled = l.requestCancel(scope, p.identity, before.stateRevision)
+        val after = l.snapshot()
+        check(cancelled.identity == p.identity && cancelled.phase == PendingPhase.CANCEL_REQUESTED)
+        check(after.stateRevision == before.stateRevision + 1 && after.pending == cancelled)
+        check(after.history == before.history && after.committed == before.committed && after.draft == before.draft)
+        check(l.requestCancel(scope, p.identity, after.stateRevision) == cancelled)
+        check(l.snapshot() == after) // Idempotent current-revision duplicate.
+        rejected { l.requestCancel(scope, p.identity, before.stateRevision) }
+        check(l.snapshot() == after) // Stale duplicate must not silently refresh its CAS.
+        check(l.recovery(scope) == Recovery.LookupOriginal(p.identity))
+        l.observe(scope, receipt(p, ReceiptStatus.CANCELLED))
+        val terminal = l.snapshot()
+        rejected { l.requestCancel(scope, p.identity, terminal.stateRevision) }
+        check(l.snapshot() == terminal && terminal.committed.isEmpty())
+    }
+    test("cancellation rejects stale revision and every altered identity field without mutation") {
+        val l = edited(); val p = begin(l); val before = l.snapshot(); val id = p.identity
+        for (bad in listOf(id.copy(intentId = "other"), id.copy(attemptId = "other"),
+            id.copy(componentId = "other"), id.copy(messageId = "other"), id.copy(actionId = "other"),
+            id.copy(componentRevision = 2), id.copy(stateRevision = id.stateRevision + 1),
+            id.copy(paramsDigest = "0".repeat(64)), id.copy(scope = scope.copy(conversationId = "other")))) {
+            rejected { l.requestCancel(scope, bad, before.stateRevision) }
+            check(l.snapshot() == before)
+        }
+        for (revision in listOf(-1L, before.stateRevision - 1, before.stateRevision + 1)) {
+            rejected { l.requestCancel(scope, id, revision) }; check(l.snapshot() == before)
+        }
+        for (other in listOf(scope.copy(conversationId = "other"), scope.copy(projectId = null),
+            scope.copy(agentId = "other"), scope.copy(workspaceId = "other"), scope.copy(generation = 8))) {
+            rejected { l.requestCancel(other, id, before.stateRevision) }; check(l.snapshot() == before)
+            rejected { l.requestCancel(other, id.copy(scope = other), before.stateRevision) }; check(l.snapshot() == before)
+        }
+    }
+    test("unknown cancellation preserves original identity costs and lookup-only recovery") {
+        val l = edited(); val p = begin(l); val captured = l.snapshot().stateRevision
+        l.observe(scope, receipt(p, ReceiptStatus.UNKNOWN)); val unknown = l.snapshot()
+        rejected { l.requestCancel(scope, p.identity, captured) }
+        check(l.snapshot() == unknown)
+        l.requestCancel(scope, p.identity, unknown.stateRevision); val cancelled = l.snapshot()
+        check(cancelled.pending?.phase == PendingPhase.CANCEL_REQUESTED && cancelled.pending.identity == p.identity)
+        check(cancelled.heldMicroCny == unknown.heldMicroCny && cancelled.actualMicroCny == null)
+        check(cancelled.committed == unknown.committed && cancelled.history == unknown.history)
+        check(l.recovery(scope) == Recovery.LookupOriginal(p.identity))
+        check(l.submit(scope, 3, cancelled.stateRevision, "save", "retry") is SubmitDecision.LookupOriginal)
     }
     println("PASS $passed offline contract groups; no network/provider/IPC code invoked")
 }

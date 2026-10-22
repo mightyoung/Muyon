@@ -1,5 +1,7 @@
 # Independent review — MU-01 / MU-04 / PX-09 offline contract
 
+Historical review at the source below. Parent review later found an Important stale-cancellation identity gap; this initial scoped conclusion did not cover it. The gap and follow-up evidence are tracked in [CANCEL-IDENTITY-FIX.md](CANCEL-IDENTITY-FIX.md); do not use this older review to waive that repair.
+
 Reviewed source: `37015799dcda3ef918ae9c6e161bfebff30103c8`.
 Base: `f4781e16ddf4e542b983fbd77f266a0071148255`.
 Reviewer: independent non-author agent `independent_contract_review`; this report transcribes its returned result. Reviewer did not edit, commit, push or access real requests.

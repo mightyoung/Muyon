@@ -179,11 +179,22 @@ class ComponentLedger private constructor(private val component: ChatComponent, 
         return SubmitDecision.NewPending(pending)
     }
 
-    /** A cancellation request is only local intent. It never synthesizes a terminal receipt. */
-    @Synchronized fun requestCancel(scope: ComponentScope) {
-        checkContext(scope, component.revision)
+    /**
+     * Record local cancellation intent for exactly the captured pending operation and CAS revision.
+     * A current-revision duplicate is idempotent; stale callbacks are rejected, never rebound.
+     * This does not dispatch remote cancellation, establish success, or authorize rollback.
+     */
+    @Synchronized fun requestCancel(
+        scope: ComponentScope, pendingIdentity: SubmissionIdentity, expectedRevision: Long
+    ): PendingSubmission {
+        checkContext(scope, pendingIdentity.componentRevision)
         val pending = state.pending ?: throw IllegalArgumentException("no pending request")
-        state = freeze(state.copy(stateRevision = nextRevision(), pending = pending.copy(phase = PendingPhase.CANCEL_REQUESTED)))
+        require(pending.identity == pendingIdentity) { "cancel identity mismatch" }
+        require(expectedRevision == state.stateRevision) { "stale cancel revision" }
+        if (pending.phase == PendingPhase.CANCEL_REQUESTED) return pending
+        val requested = pending.copy(phase = PendingPhase.CANCEL_REQUESTED)
+        state = freeze(state.copy(stateRevision = nextRevision(), pending = requested))
+        return requested
     }
 
     @Synchronized fun observe(scope: ComponentScope, receipt: OriginalReceipt) {
