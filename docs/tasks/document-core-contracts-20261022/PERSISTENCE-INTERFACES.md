@@ -27,6 +27,21 @@ same transaction. It must NOT edit the document tables directly, adopt a second
 database or interpret this low-level trusted hook as user confirmation.
 Do not co-own/modify each other's source directories.
 
+Authoritative permission/revision read for that same gateway transaction:
+`pub(crate) document_access_in_transaction(&self, tx: &Transaction<'_>,
+access: &DocumentAccess, required: &[DocumentOperation])
+-> Result<DocumentMetadata, ContractError>`. Both hooks reject a transaction
+from another connection. Obtain the connection through the existing crate-local
+`BusinessStore::database()`; do not begin a nested transaction. Propagate every
+hook error and roll back, then journal/query any uncertain outcome through the
+gateway's own protocol. Do not call the self-committing public wrapper inside
+the gateway transaction. Register/create uses a base DocumentRef at revision0;
+existing source publication requires exact current identity/revision and produces
+the next revision. Schema SQL and constants are authoritative in
+`documents/storage.rs::SCHEMA`. Initialization is explicit, before gateway work.
+Permission grants can name all nine typed DocumentOperation variants but do not
+establish an engine capability; gateway still checks capabilities separately.
+
 ## Concrete API
 
 `DocumentMetadata { document: DocumentRef, title: String, blob: BlobRef }`.

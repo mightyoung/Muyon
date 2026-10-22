@@ -175,3 +175,47 @@ fn foreign_upload_and_bad_schema_are_rejected_without_partial_metadata() {
     f.db().exec("UPDATE document_store_meta SET value='999' WHERE key='version'", &[]).unwrap();
     assert!(store.initialize_documents_trusted().is_err());
 }
+#[test]
+fn corrupted_revision_keys_or_missing_snapshot_fail_closed() {
+    let f = Fixture::new(); let store = f.initialize(); let m = register(&store); let a = access(&store, &m, &all());
+    f.db().exec("UPDATE document_heads SET revision='2'", &[]).unwrap();
+    f.db().exec("UPDATE document_revisions SET revision='2'", &[]).unwrap();
+    assert_eq!(store.read_document(&a), Err(ContractError::StorageCorrupt));
+    f.db().exec("DELETE FROM document_revisions", &[]).unwrap();
+    assert_eq!(store.read_document(&a), Err(ContractError::StorageCorrupt));
+}
+#[test]
+fn oversized_persistent_payloads_are_rejected_before_decode() {
+    let f = Fixture::new(); let store = f.initialize(); let m = register(&store); let a = access(&store, &m, &all());
+    store.save_annotation_trusted(&a, "a", &Revision::new(0), &anchor(&a.document), &comment("x"), &human()).unwrap();
+    f.db().exec("UPDATE document_annotations SET payload=replace(hex(zeroblob(150000)),'0','x')", &[]).unwrap();
+    assert!(store.list_annotations(&a).is_err());
+    assert!(store.export_annotations(&a).is_err());
+    f.db().exec("UPDATE document_grants SET document_json=hex(zeroblob(20000))", &[]).unwrap();
+    assert!(store.read_document(&a).is_err());
+    f.db().exec("UPDATE document_revisions SET payload=hex(zeroblob(20000))", &[]).unwrap();
+    assert_eq!(store.read_document(&a), Err(ContractError::StorageCorrupt));
+}
+#[test]
+fn late_metadata_failure_rolls_back_blob_publication_and_head() {
+    let f = Fixture::new(); let store = f.initialize(); let finished = upload(&store, PDF);
+    f.db().exec("CREATE TRIGGER fail_document_metadata BEFORE INSERT ON document_revisions BEGIN SELECT RAISE(ABORT,'synthetic injected failure'); END", &[]).unwrap();
+    assert!(store.register_document_trusted("project", "document", "title", DocumentFormat::Pdf, &finished).is_err());
+    let db = f.db();
+    assert!(db.query("SELECT * FROM document_heads", &[]).unwrap().is_empty());
+    assert!(db.query("SELECT * FROM blob_references", &[]).unwrap().is_empty());
+    assert_eq!(db.query("SELECT state FROM blob_uploads WHERE upload_id=?", &[&finished.upload_id]).unwrap()[0][0].as_deref(), Some("pinned"));
+    assert_eq!(db.query("SELECT pin_id FROM blob_pins WHERE upload_id=?", &[&finished.upload_id]).unwrap().len(), 1);
+    db.exec("DROP TRIGGER fail_document_metadata", &[]).unwrap();
+    assert!(store.register_document_trusted("project", "document", "title", DocumentFormat::Pdf, &finished).is_ok());
+}
+#[test]
+fn late_annotation_failure_rolls_back_history() {
+    let f = Fixture::new(); let store = f.initialize(); let m = register(&store); let a = access(&store, &m, &all());
+    f.db().exec("CREATE TRIGGER fail_annotation_head BEFORE INSERT ON document_annotations BEGIN SELECT RAISE(ABORT,'synthetic injected failure'); END", &[]).unwrap();
+    assert!(store.save_annotation_trusted(&a, "a", &Revision::new(0), &anchor(&a.document), &comment("x"), &human()).is_err());
+    assert!(f.db().query("SELECT * FROM document_annotation_history", &[]).unwrap().is_empty());
+    assert!(store.list_annotations(&a).unwrap().is_empty());
+    f.db().exec("DROP TRIGGER fail_annotation_head", &[]).unwrap();
+    assert!(store.save_annotation_trusted(&a, "a", &Revision::new(0), &anchor(&a.document), &comment("x"), &human()).is_ok());
+}

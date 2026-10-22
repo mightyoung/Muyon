@@ -99,9 +99,14 @@ impl BusinessStore {
     }
     fn current_document(&self, document: &DocumentRef) -> Result<DocumentMetadata> {
         let project = self.document_project(document)?;
-        let rows = sql(self.database().query("SELECT r.payload FROM document_heads h JOIN document_revisions r ON r.project_id=h.project_id AND r.document_id=h.document_id AND r.revision=h.revision WHERE h.project_id=? AND h.document_id=?", &[project, document.document_id()]))?;
+        let rows = sql(self.database().query("SELECT h.revision,r.revision,CASE WHEN length(CAST(r.payload AS BLOB))<=8192 THEN r.payload ELSE NULL END FROM document_heads h LEFT JOIN document_revisions r ON r.project_id=h.project_id AND r.document_id=h.document_id AND r.revision=h.revision WHERE h.project_id=? AND h.document_id=?", &[project, document.document_id()]))?;
         if rows.is_empty() { return Err(ContractError::NotFound); }
-        let metadata: DocumentMetadata = decode(cell(&rows[0], 0)?)?;
+        let metadata: DocumentMetadata = decode(cell(&rows[0], 2)?)?;
+        if metadata.document.revision().as_str() != cell(&rows[0], 0)?
+            || metadata.document.revision().as_str() != cell(&rows[0], 1)?
+            || metadata.document.scope() != document.scope()
+            || metadata.document.document_id() != document.document_id()
+        { return Err(ContractError::StorageCorrupt); }
         metadata.blob.validate()?;
         document.matches(&metadata.document).map_err(|reason| match reason {
             super::ReadInvalidation::StaleRevision => ContractError::RevisionConflict,
@@ -116,7 +121,7 @@ impl BusinessStore {
         binding_shape(&access.authority)?;
         if access.authority.owner_epoch != self.owner_epoch() { return Err(ContractError::InvalidAuthority); }
         let metadata = self.current_document(&access.document)?;
-        let rows = sql(self.database().query("SELECT document_json,permissions,expires_at_ms FROM document_grants WHERE grant_id=? AND generation=? AND owner_epoch=? AND active=1", &[&access.authority.grant_id, access.authority.generation.as_str(), self.owner_epoch()]))?;
+        let rows = sql(self.database().query("SELECT CASE WHEN length(CAST(document_json AS BLOB))<=8192 THEN document_json ELSE NULL END,CASE WHEN length(CAST(permissions AS BLOB))<=1024 THEN permissions ELSE NULL END,CASE WHEN length(CAST(expires_at_ms AS BLOB))<=20 THEN expires_at_ms ELSE NULL END FROM document_grants WHERE grant_id=? AND generation=? AND owner_epoch=? AND active=1", &[&access.authority.grant_id, access.authority.generation.as_str(), self.owner_epoch()]))?;
         if rows.len() != 1 { return Err(ContractError::InvalidAuthority); }
         let granted: DocumentRef = decode(cell(&rows[0], 0)?)?;
         let operations: Vec<DocumentOperation> = decode(cell(&rows[0], 1)?)?;
@@ -125,6 +130,13 @@ impl BusinessStore {
             return Err(ContractError::InvalidAuthority);
         }
         Ok(metadata)
+    }
+    /// Gateway integration seam: current persisted authority plus exact head
+    /// revision under the gateway's existing transaction. Does not commit or
+    /// imply engine support/confirmation. Propagate errors and roll back.
+    pub(crate) fn document_access_in_transaction(&self, tx: &Transaction<'_>, access: &DocumentAccess, required: &[DocumentOperation]) -> Result<DocumentMetadata> {
+        if !tx.belongs_to(self.database()) { return Err(ContractError::InvalidAuthority); }
+        self.document_access(access, required)
     }
     pub fn register_document_trusted(&self, project_id: &str, document_id: &str, title: &str, format: DocumentFormat, finished: &FinishedBlob) -> Result<DocumentMetadata> {
         let base = DocumentRef::new(Scope { workspace_id: self.workspace_id().into(), project_id: Some(project_id.into()) }, document_id, Revision::new(0), format).map_err(|_| ContractError::InvalidIdentity)?;
@@ -145,7 +157,7 @@ impl BusinessStore {
         self.document_schema()?;
         let project = self.document_project(base)?;
         let title = normalize_text(title, 500, true)?.ok_or(ContractError::Required)?;
-        let rows = sql(self.database().query("SELECT revision FROM document_heads WHERE project_id=? AND document_id=?", &[project, base.document_id()]))?;
+        let rows = sql(self.database().query("SELECT CASE WHEN length(CAST(revision AS BLOB))<=20 THEN revision ELSE NULL END FROM document_heads WHERE project_id=? AND document_id=?", &[project, base.document_id()]))?;
         if rows.is_empty() {
             if base.revision().value() != 0 { return Err(ContractError::RevisionConflict); }
         } else { self.current_document(base)?; }
@@ -174,10 +186,9 @@ impl BusinessStore {
         let now = now_ms()?;
         if authority.owner_epoch != self.owner_epoch() || expires_at_ms <= now
             || expires_at_ms > now.checked_add(30_000).ok_or(ContractError::InvalidAuthority)?
-            || operations.is_empty() || operations.len() > 4
-            || operations.iter().any(|op| !matches!(op, DocumentOperation::Inspect | DocumentOperation::ReadText | DocumentOperation::Annotate | DocumentOperation::Export))
+            || operations.is_empty() || operations.len() > 9
         { return Err(ContractError::InvalidAuthority); }
-        let old = sql(self.database().query("SELECT generation FROM document_grants WHERE grant_id=?", &[&authority.grant_id]))?;
+        let old = sql(self.database().query("SELECT CASE WHEN length(CAST(generation AS BLOB))<=20 THEN generation ELSE NULL END FROM document_grants WHERE grant_id=?", &[&authority.grant_id]))?;
         let expected = if old.is_empty() { Revision::new(1) } else { Revision::parse(cell(&old[0], 0)?)?.next()? };
         if authority.generation != expected { return Err(ContractError::InvalidAuthority); }
         sql(self.database().exec("INSERT INTO document_grants VALUES(?,?,?,?,?,?,1) ON CONFLICT(grant_id) DO UPDATE SET generation=excluded.generation,owner_epoch=excluded.owner_epoch,document_json=excluded.document_json,permissions=excluded.permissions,expires_at_ms=excluded.expires_at_ms,active=1", &[&authority.grant_id, authority.generation.as_str(), self.owner_epoch(), &encode(document)?, &encode(&operations)?, &expires_at_ms.to_string()]))?;
@@ -200,7 +211,14 @@ impl BusinessStore {
     }
     fn annotation_rows(&self, document: &DocumentRef) -> Result<Vec<AnnotationRecord>> {
         let project = self.document_project(document)?;
-        let rows = sql(self.database().query("SELECT annotation_id,revision,payload FROM document_annotations WHERE project_id=? AND document_id=? ORDER BY annotation_id LIMIT 1001", &[project, document.document_id()]))?;
+        // SQL computes byte/count budgets before returning any payload TEXT to
+        // the C ABI. Corrupt oversized strings never reach Rust's row allocator.
+        let budget = sql(self.database().query("SELECT COUNT(*),COALESCE(SUM(length(CAST(payload AS BLOB))),0),COALESCE(MAX(length(CAST(payload AS BLOB))),0),COALESCE(MAX(length(CAST(annotation_id AS BLOB))),0),COALESCE(MAX(length(CAST(revision AS BLOB))),0) FROM document_annotations WHERE project_id=? AND document_id=?", &[project, document.document_id()]))?;
+        let size = |index| -> Result<u64> { cell(&budget[0], index)?.parse().map_err(|_| ContractError::StorageCorrupt) };
+        if size(0)? > MAX_ANNOTATIONS as u64 || size(1)? > 16 * 1024 * 1024
+            || size(2)? > 256 * 1024 || size(3)? > 128 || size(4)? > 20
+        { return Err(ContractError::TextLimit); }
+        let rows = sql(self.database().query("SELECT annotation_id,revision,CASE WHEN length(CAST(payload AS BLOB))<=262144 THEN payload ELSE NULL END FROM document_annotations WHERE project_id=? AND document_id=? ORDER BY annotation_id LIMIT 1001", &[project, document.document_id()]))?;
         if rows.len() > MAX_ANNOTATIONS { return Err(ContractError::TextLimit); }
         rows.iter().map(|row| {
             let mut record: AnnotationRecord = decode(cell(row, 2)?)?;
@@ -221,6 +239,7 @@ impl BusinessStore {
     fn put_annotation(&self, document: &DocumentRef, record: &AnnotationRecord) -> Result<()> {
         let project = self.document_project(document)?;
         let payload = encode(record)?;
+        if payload.len() > 256 * 1024 { return Err(ContractError::TextLimit); }
         sql(self.database().exec("INSERT INTO document_annotation_history VALUES(?,?,?,?,?)", &[project, document.document_id(), &record.id, record.revision.as_str(), &payload]))?;
         sql(self.database().exec("INSERT INTO document_annotations VALUES(?,?,?,?,?) ON CONFLICT(project_id,document_id,annotation_id) DO UPDATE SET revision=excluded.revision,payload=excluded.payload", &[project, document.document_id(), &record.id, record.revision.as_str(), &payload]))?;
         Ok(())
