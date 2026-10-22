@@ -51,3 +51,7 @@ Restrictions: no main/develop mutation/merge, deploy, force push/delete, real mo
 - Group persistenceecef00d8b296930bd40ad8f1ed06890fd7b8a7fc extends runtime12a001 via8032140f. Integration exports group_runtime_store exactly once. Actual same-crate harness35 includes17 dedicated cases and18 repeated module cases. Public export compiles; host/gateway remains unwired. Parent Important post-receipt grant-expiry HOLD is unresolved.
 - Provider3160208247c5257b6382106d69f2028f5ad8ccab replaces7ca2 via11fc5868. Actual19 provider PASS; original14 failures retained. No API or host policy change.
 - Artifactfdc8f28e2cbfaf8fd22c3370b156fb7d0a5bf734 replaces53bad via cf26a7bf. Actual17 PASS including10 receipt-tail mutation cases; test-firstc5ee source reproduces real failure in independent worktree. Parent static Important closure and independent integration review do not enable production.
+
+- Artifact test-only strict-lint source de3ec5b56de80f30c5a98c0b22bae64ece6167ae replaces fdc test expressions via0cdd05ef. Production unchanged, affected17PASS; artifact47 strict diagnostics cleared, provider/gateway3 remain. See CLIPPY-ARTIFACT-RECHECK.md.
+
+- Provider lint-only8b2d7783a0bfe5c5207edb7cf37a83631f1cfb0f replaces31602082 expression viabc6ccea1; strict Clippy now blocked only on gateway2 diagnostics. No provider semantics/FFI API change.

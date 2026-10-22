@@ -1,3 +1,5 @@
+> Latest lint delta at bc6ccea1: artifact47 and provider1 diagnostics cleared; core391 fresh PASS. Strict Clippy still FAIL101 with gateway.rs:91:12 and :357:27 only. Later-target lint validation remains pending. See CLIPPY-ARTIFACT-RECHECK.md. Earlier records below retain their fixed-version status.
+
 # Current combination result — HOLD
 
 Validated code commit cf26a7bf. Current immutable source replacements are in MATRIX.md; independent fixed-range composition reviews are in INDEPENDENT-REVIEW.md. Prior failures and NOT_RUN remain below as historical evidence, not current-version results.

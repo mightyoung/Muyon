@@ -1,3 +1,5 @@
+> Latest lint delta at bc6ccea1: artifact47 and provider1 diagnostics cleared; core391 fresh PASS. Strict Clippy still FAIL101 with gateway.rs:91:12 and :357:27 only. Later-target lint validation remains pending. See CLIPPY-ARTIFACT-RECHECK.md. Earlier records below retain their fixed-version status.
+
 # Strict Clippy source-owner handoff
 
 Locked combination: `88e810672661b0a6e3e1c4063ceff2dd0d0b82c1`.

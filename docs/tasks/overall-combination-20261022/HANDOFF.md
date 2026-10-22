@@ -1,3 +1,5 @@
+> Latest lint delta at bc6ccea1: artifact47 and provider1 diagnostics cleared; core391 fresh PASS. Strict Clippy still FAIL101 with gateway.rs:91:12 and :357:27 only. Later-target lint validation remains pending. See CLIPPY-ARTIFACT-RECHECK.md. Earlier records below retain their fixed-version status.
+
 # Leader B combination handoff — HOLD
 
 Branch: `lab/overall-combination-20261022`.

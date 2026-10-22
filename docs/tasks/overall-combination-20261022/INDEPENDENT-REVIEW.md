@@ -11,3 +11,10 @@ Reviewer: separate read-only source_review agent. No writer delegation. Reviewed
 | 8032140f..cf26a7bf | Provider source/test/FFI match31602082; artifact source/docs matchfdc8f28e. NULL/type/byte projection fix and post-receipt output/source-history/project checks retained. No shared-source overwrite or interface conflict; generation signatures unchanged. No automatic retry or host save enablement. Group HOLD remains. |
 
 These findings cover composition and stated source boundaries, not Android, live execution, complete owner policy or release acceptance. No develop merge authorized. Test execution belongs to the integrator's evidence ledger, not this static review.
+
+## Fixed lint-only owner deltas
+
+- f26b189e..0cdd05ef: independent read-only reviewer verified source matches artifactde3ec5b5; exactly47 singleton slice replacements (22+25), no assertions/mutations or duplicate-source negative removed; production save_journal identical tofdc8f28e.
+- 0cdd05ef..bc6ccea1: reviewer verified source matches provider8b2d7783; only equivalent parity predicate, no suppression or NULL/storage/CAS changes.
+
+Reviewer did not write files, run tests or access network. Actual runs are separate in CLIPPY-ARTIFACT-RECHECK.md. Both reviews concluded no new delta finding; existing HOLD and quality-gate failures not waived.
