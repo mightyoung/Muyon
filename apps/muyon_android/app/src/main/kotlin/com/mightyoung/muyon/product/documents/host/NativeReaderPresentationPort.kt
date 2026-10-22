@@ -18,6 +18,7 @@ import org.json.JSONObject
 internal class NativeReaderPresentationPort internal constructor(
     private val principal: LocalWorkspaceReaderPrincipal,
     private val domain: ReaderDocumentBatchDomain,
+    val administrativeOwner: ReaderAdministrativeOwner,
     private val core: () -> ProductCore,
 ) {
     private fun scope() = DocumentReaderScope(serviceSession = principal.serviceSession,
@@ -66,6 +67,22 @@ internal class NativeReaderPresentationPort internal constructor(
     fun closeExact(permit: ReaderNativeBatchPermit, presentationId: String, originalFrameGeneration: String) {
         business(permit)
         core().documentPresentationClose(use(presentationId, originalFrameGeneration))
+    }
+    /** Exact recorded ticket cleanup after UI/scope permission died. Old A
+     * cannot substitute a current frame: native validates ORIGINAL scope/id/gen. */
+    fun closeAdministrative(permit: ReaderAdministrativePermit, originalPresentationId: String, originalFrameGeneration: String) {
+        permit.requireOwner(administrativeOwner, domain)
+        core().documentPresentationClose(use(originalPresentationId, originalFrameGeneration))
+    }
+    /** ONLY actual Binder/session release, never selection/page cleanup: it closes
+     * all original client's readers. Do not use it for old A inside live client B. */
+    fun releaseDisconnectedClient(permit: ReaderAdministrativePermit) {
+        permit.requireDisconnected(administrativeOwner, domain)
+        core().documentReadReleaseOwner(administrativeOwner.serviceSession)
+    }
+    fun takeAdministrativeInvalidations(permit: ReaderAdministrativePermit): String {
+        permit.requireOwner(administrativeOwner, domain)
+        return core().documentPresentationTakeInvalidations()
     }
     /** Drain must run after success AND error, even if scope died mid-operation.
      * It is administration for THIS native owner, never a client listing endpoint.

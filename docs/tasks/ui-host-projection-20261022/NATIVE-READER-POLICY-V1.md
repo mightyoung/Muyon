@@ -318,23 +318,15 @@ Host tests additionally A/B/ABA stale pre-call and shared call/drain/publish bat
 Real Android >30s, lifecycle/page/PFD/revoke/invalidation tests remain NOT_RUN; no gate
 flip from these native/unit tests alone.
 
-## 6. Only remaining product rule (if no existing grant can be supplied)
+## 6. Initial-access rule — NOW APPROVED; see addendum
 
-Continuation above is fully specified development within already-authorized reading;
-no new user permission is requested to implement it. Initial access with NO prior
-valid grant is different: existing code contains no production policy assigning one
-merely because a document is registered. Do not infer universal file disclosure.
-
-Single decision to pin with product owner: should a genuine explicit selection of an
-exact registered document in current LOCAL workspace/project create FIRST readonly
-Render access for that reading session? Recommended YES, limited to app-private
-registered source, exact revision/digest, current real Activity/Binder scope and a NEW
-recorded reading intent; readonly minimum, no file-system scan/URI grants/account ACL/
-external source/annotation/write/execution. Implement as a separate explicit initial
-policy admission, not observe/expiry recovery or hidden continuation fallback. This
-is a product semantics choice to record, not a reason to request permission for normal
-adapter/backend development. Until pinned, implement all continuation endpoints and
-fail initial_no_authorization honestly rather than fake a grant.
+The user approved the precise local explicit-selection policy via trusted parent
+session evidence2026-10-22 09:23:33UTC. Read FIRST-READ-APPROVED.md: additive native
+initial admission, before-root stop/reconcile, one-use genuine selection event and
+persistent document-read deny/version vs lifecycle cleanup. Missing code is not a
+new authorization blocker. Seven continuation endpoints above remain proposed APIs;
+initial admission is an additional native contract, not hidden observe/renew behavior.
+No production gate was enabled and no synthetic native result is substituted.
 
 
 ## Independent review correction retained

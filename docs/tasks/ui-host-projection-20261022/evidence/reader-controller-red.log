@@ -1,0 +1,6 @@
+PASS reader batch: shared Service domain serializes A op/drain before B; stale A zero calls/no B clear; errors still drain; unknown drain poisons/clears; fixture faults are not native/device evidence
+PASS reader continuation: native earliest deadlines/no check renewal; retained-owner administration independent of live scope/poison, exact owner/domain/expired permits; synthetic fixtures only
+Exception in thread "main" java.lang.IllegalStateException: Check failed.
+	at com.mightyoung.muyon.product.documents.host.ReaderControllerChecksKt.readerControllerChecks(ReaderControllerChecks.kt:55)
+	at com.mightyoung.muyon.product.documents.host.ReaderAdmissionChecksKt.main(ReaderAdmissionChecks.kt:43)
+	at com.mightyoung.muyon.product.documents.host.ReaderAdmissionChecksKt.main(ReaderAdmissionChecks.kt)

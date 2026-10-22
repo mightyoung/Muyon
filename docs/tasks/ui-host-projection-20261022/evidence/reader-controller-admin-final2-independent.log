@@ -1,0 +1,4 @@
+PASS reader batch: shared Service domain serializes A op/drain before B; stale A zero calls/no B clear; errors still drain; unknown drain poisons/clears; fixture faults are not native/device evidence
+PASS reader continuation: native earliest deadlines/no check renewal; retained-owner administration independent of live scope/poison, exact owner/domain/expired permits; synthetic fixtures only
+PASS reader controller: static-page earliest-TTL renew, one-use challenge, duplicate native-frame reply, hard expiry/no replay; synthetic backend/clock only
+PASS reader admission: exact actual-owner/scope identity; stale A rejected BEFORE native callback; ABA, cross-owner/generation, duplicate-conflict and terminal stop; no authority or native grant fabricated

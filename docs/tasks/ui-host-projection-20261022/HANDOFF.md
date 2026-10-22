@@ -211,3 +211,18 @@ NOT generated/currently implemented policy endpoints. Needs native core ticket
 transfer/reopen hook and FFI mapping; ordinary missing code is not new user permission.
 Only first read without any prior valid grant has a stated narrow product policy
 choice/recommendation. Native/Host/Android policy and >30s execution still pending.
+
+
+## Latest controller/admin and approved first-read source checkpoint
+
+Read READER-CONTROLLER-ADMIN-CHECKPOINT.md, READER-CONTROLLER-SHELL-REQUEST.md and
+FIRST-READ-APPROVED.md. Controller uses actual Shell types/Service clock, min native
+TTL early renewal/static-page checks, watchdog and retained unknown. Independent
+owner admin bypasses dead business scope, guards real disconnected-client release;
+native owner fixed/no reopen. Source and pure regressions independently reviewed.
+Shellc0 immutable merge conflict cold fixture OLD ABI RED fixed by EXACT B662 test
+file restore, no handwritten UI edits; all4 pure runners PASS, Android exit2NOT_RUN.
+First-read explicit-selection policy NOW approved, no new user authorization needed.
+Initial native admission + persistent explicit-deny/version vs lifecycle cleanup in
+addendum awaiting real native/backend implementation. Backend=null, host=null and
+verifiedfalse remain. Real worker/IPC/catalog/resource ledger/PFD/device still pending.

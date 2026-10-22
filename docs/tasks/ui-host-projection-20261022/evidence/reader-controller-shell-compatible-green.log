@@ -1,0 +1,3 @@
+PASS real host/controller: one reducer, exact CAS, stale/double action rejection, template token/manual buffer, lost outcome original read, cancel/resume, same-CAS immutability, closed-view callback isolation, re-entry original-ID read and expired-session retention; no native/transport
+PASS real host candidate: original request/config identity, exact scope, finite read-only kind, binding/actions absent, unknown charge remains unknown, mismatched duplicate observation rejects; no transport
+PASS cold shell: actual host unknown/history decode; plain open/read zero lookup; closed persistence actions; same-CAS storage observation; cold0/0 never saved; malformed facts rejected

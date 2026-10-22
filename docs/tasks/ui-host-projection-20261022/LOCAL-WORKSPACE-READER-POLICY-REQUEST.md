@@ -1,5 +1,9 @@
 # Concrete native policy port request / real Host identity implementation
 
+Latest update: the user approved precise first readonly selection09:23:33UTC; see
+FIRST-READ-APPROVED.md. Earlier initial-policy question below is historical, NOT a
+current user-approval blocker. New controller/admin code: READER-CONTROLLER-ADMIN-CHECKPOINT.md.
+
 This continues eb853; missing Activity adapter is NOT an overall development stop.
 Runtime/Service identity producer and shared pre-call/batch admission are now code,
 with real existing identity sources. Native policy/issuance remains a separate owner

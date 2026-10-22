@@ -3,6 +3,7 @@ package com.mightyoung.muyon.product.ui.shell
 import com.mightyoung.muyon.product.agents.setup.BotSetupDraft
 import com.mightyoung.muyon.product.chat.*
 import com.mightyoung.muyon.product.chat.persistence.ProductLocalDraftPort
+import com.mightyoung.muyon.product.chat.persistence.PreparedLocalSave
 import org.json.JSONObject
 import java.lang.reflect.Proxy
 import java.security.MessageDigest
@@ -29,8 +30,7 @@ private class ColdProjectionPort : ProductLocalDraftPort {
     override fun resolve(conversation: String, project: String?) = descriptor()
     override fun read(conversation: String, project: String?, namespace: String, draft: String, generation: String, revision: String) =
         descriptor().put("status", "stored").put("archive_hex", archive.joinToString("") { "%02x".format(it) }).put("archive_digest", digest)
-    override fun prepare(conversation: String, project: String?, namespace: String, draft: String, generation: String, revision: String,
-        attempt: String, exportedMemoryRevision: String, hostEditorRevision: String, archive: ByteArray): JSONObject = error("PREPARE FORBIDDEN")
+    override fun prepare(original: PreparedLocalSave): JSONObject = error("PREPARE FORBIDDEN")
     override fun save(conversation: String, project: String?, namespace: String, draft: String, generation: String, revision: String,
         attempt: String, exportedMemoryRevision: String, archive: ByteArray): JSONObject = error("SAVE FORBIDDEN")
     override fun lookup(conversation: String, project: String?, namespace: String, draft: String, attempt: String): JSONObject {

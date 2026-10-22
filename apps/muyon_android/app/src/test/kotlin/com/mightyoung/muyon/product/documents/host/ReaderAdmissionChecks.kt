@@ -39,6 +39,8 @@ fun main() {
     check(runCatching { registry.acceptSelection(fresh, 4, a) }.isFailure)
     check(calls == 1)
     readerBatchChecks()
+    readerContinuationChecks()
+    readerControllerChecks()
     println("PASS reader admission: exact actual-owner/scope identity; stale A rejected BEFORE native callback; ABA, cross-owner/generation, duplicate-conflict and terminal stop; no authority or native grant fabricated")
 }
 

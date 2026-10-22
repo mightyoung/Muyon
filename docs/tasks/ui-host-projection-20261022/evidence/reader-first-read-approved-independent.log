@@ -1,0 +1,10 @@
+Independent static review: FIRST-READ-APPROVED.md + policy v1 section6
+Result: no new Important found in this documentation-only scope.
+Fresh actual user selection / exact registered local source / current scope is the approved initial readonly trigger. No extra confirmation, background issuer, model authority or guessed Kotlin ABI added.
+Initial authorization and open use distinct one-use phases of the actual original native selection token; duplicate/altered attempts cannot refresh expiry or replay begin_selection.
+Persistent native document-read deny/version is independent of grant/root/Service epoch and revision. Authorize/revoke are transactionally ordered; changing grant IDs cannot clear deny. Alias boundary must be fixed from native registration, not checksum guesses.
+Lifecycle stop closes owned initial/child grants and exact reading intent; no permanent document ban and no shared external parent revocation. Before-root stop/reconcile accepts original intent/attempt, including lost root/intent reply.
+Legacy inactive/expired grant is not fabricated permanent document revocation; no un-revoke fallback is authorized.
+Current policy version/source identity must come from actual native producer when owner fixes the records; no Host constants or fake catalog may fill these fields.
+Production backend remains null. Native APIs/bindings/Activity/IPC/resource ledger and device/PFD/continuous-reading acceptance are pending. No behavior tests run for this documentation-only task.
+git diff --check exit 0. Reviewer made no repository changes.

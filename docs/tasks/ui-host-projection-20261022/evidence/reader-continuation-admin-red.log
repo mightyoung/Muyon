@@ -1,0 +1,83 @@
+error: source file or directory not found: /workspace/Muyon/apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/documents/host/ReaderAdministrativeBatch.kt
+error: source file or directory not found: /workspace/Muyon/apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/documents/host/ReaderPresentationDeadline.kt
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/documents/host/ReaderContinuationChecks.kt:5:20: error: unresolved reference 'ReaderPresentationDeadline'.
+    val deadline = ReaderPresentationDeadline.fromNative(1_000, 15_000, 1_000)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/documents/host/ReaderContinuationChecks.kt:12:22: error: unresolved reference 'ReaderPresentationDeadline'.
+    val shortGrant = ReaderPresentationDeadline.fromNative(1_000, 600, 100)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/documents/host/ReaderContinuationChecks.kt:14:11: error: cannot infer type for type parameter 'R'. Specify it explicitly.
+    check(runCatching { ReaderPresentationDeadline.fromNative(Long.MAX_VALUE, 100, 10) }.isFailure)
+          ^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/documents/host/ReaderContinuationChecks.kt:14:25: error: unresolved reference 'ReaderPresentationDeadline'.
+    check(runCatching { ReaderPresentationDeadline.fromNative(Long.MAX_VALUE, 100, 10) }.isFailure)
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/documents/host/ReaderContinuationChecks.kt:15:11: error: cannot infer type for type parameter 'R'. Specify it explicitly.
+    check(runCatching { ReaderPresentationDeadline.fromNative(0, 0, 1) }.isFailure)
+          ^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/documents/host/ReaderContinuationChecks.kt:15:25: error: unresolved reference 'ReaderPresentationDeadline'.
+    check(runCatching { ReaderPresentationDeadline.fromNative(0, 0, 1) }.isFailure)
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/documents/host/ReaderContinuationChecks.kt:16:11: error: cannot infer type for type parameter 'R'. Specify it explicitly.
+    check(runCatching { ReaderPresentationDeadline.fromNative(0, 15_000, 1_001) }.isFailure)
+          ^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/documents/host/ReaderContinuationChecks.kt:16:25: error: unresolved reference 'ReaderPresentationDeadline'.
+    check(runCatching { ReaderPresentationDeadline.fromNative(0, 15_000, 1_001) }.isFailure)
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/documents/host/ReaderContinuationChecks.kt:20:20: error: unresolved reference 'ReaderAdministrativeOwner'.
+    val original = ReaderAdministrativeOwner(domain, "epoch", "session-A") { nativeOwnerPresent }
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/documents/host/ReaderContinuationChecks.kt:21:17: error: unresolved reference 'ReaderAdministrativeOwner'.
+    val other = ReaderAdministrativeOwner(domain, "epoch", "session-B") { nativeOwnerPresent }
+                ^^^^^^^^^^^^^^^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/documents/host/ReaderContinuationChecks.kt:22:17: error: unresolved reference 'ReaderAdministrativePermit'.
+    var permit: ReaderAdministrativePermit? = null
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/documents/host/ReaderContinuationChecks.kt:24:12: error: unresolved reference 'runAdministrativeBatch'.
+    domain.runAdministrativeBatch(original, { admitted ->
+           ^^^^^^^^^^^^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/documents/host/ReaderContinuationChecks.kt:24:47: error: cannot infer type for value parameter 'admitted'. Specify it explicitly.
+    domain.runAdministrativeBatch(original, { admitted ->
+                                              ^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/documents/host/ReaderContinuationChecks.kt:25:18: error: unresolved reference 'requireOwner'.
+        admitted.requireOwner(original, domain); permit = admitted; calls++
+                 ^^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/documents/host/ReaderContinuationChecks.kt:26:15: error: cannot infer type for type parameter 'R'. Specify it explicitly.
+        check(runCatching { admitted.requireOwner(other, domain) }.isFailure)
+              ^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/documents/host/ReaderContinuationChecks.kt:26:38: error: unresolved reference 'requireOwner'.
+        check(runCatching { admitted.requireOwner(other, domain) }.isFailure)
+                                     ^^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/documents/host/ReaderContinuationChecks.kt:27:15: error: cannot infer type for type parameter 'R'. Specify it explicitly.
+        check(runCatching { admitted.requireOwner(original, ReaderDocumentBatchDomain()) }.isFailure)
+              ^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/documents/host/ReaderContinuationChecks.kt:27:38: error: unresolved reference 'requireOwner'.
+        check(runCatching { admitted.requireOwner(original, ReaderDocumentBatchDomain()) }.isFailure)
+                                     ^^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/documents/host/ReaderContinuationChecks.kt:28:10: error: cannot infer type for value parameter 'admitted'. Specify it explicitly.
+    }, { admitted -> admitted.requireOwner(original, domain); drains++; false }, { globals++ })
+         ^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/documents/host/ReaderContinuationChecks.kt:28:31: error: unresolved reference 'requireOwner'.
+    }, { admitted -> admitted.requireOwner(original, domain); drains++; false }, { globals++ })
+                              ^^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/documents/host/ReaderContinuationChecks.kt:30:11: error: cannot infer type for type parameter 'R'. Specify it explicitly.
+    check(runCatching { checkNotNull(permit).requireOwner(original, domain) }.isFailure)
+          ^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/documents/host/ReaderContinuationChecks.kt:30:25: error: cannot infer type for type parameter 'T'. Specify it explicitly.
+    check(runCatching { checkNotNull(permit).requireOwner(original, domain) }.isFailure)
+                        ^^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/documents/host/ReaderContinuationChecks.kt:30:46: error: unresolved reference 'requireOwner'.
+    check(runCatching { checkNotNull(permit).requireOwner(original, domain) }.isFailure)
+                                             ^^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/documents/host/ReaderContinuationChecks.kt:33:12: error: unresolved reference 'runAdministrativeBatch'.
+    domain.runAdministrativeBatch(original, { it.requireOwner(original, domain); calls++ }, { drains++; false }, { globals++ })
+           ^^^^^^^^^^^^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/documents/host/ReaderContinuationChecks.kt:33:47: error: unresolved reference 'it'.
+    domain.runAdministrativeBatch(original, { it.requireOwner(original, domain); calls++ }, { drains++; false }, { globals++ })
+                                              ^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/documents/host/ReaderContinuationChecks.kt:36:11: error: cannot infer type for type parameter 'R'. Specify it explicitly.
+    check(runCatching { domain.runAdministrativeBatch(original, { calls++ }, { drains++; false }, { globals++ }) }.isFailure)
+          ^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/documents/host/ReaderContinuationChecks.kt:36:32: error: unresolved reference 'runAdministrativeBatch'.
+    check(runCatching { domain.runAdministrativeBatch(original, { calls++ }, { drains++; false }, { globals++ }) }.isFailure)
+                               ^^^^^^^^^^^^^^^^^^^^^^

@@ -8,6 +8,13 @@ import com.mightyoung.muyon.productbridge.ProductException
 import android.util.Base64
 import com.mightyoung.muyon.product.documents.host.LocalWorkspaceReaderPrincipal
 import com.mightyoung.muyon.product.documents.host.ReaderDocumentBatchDomain
+import com.mightyoung.muyon.product.documents.host.ReaderAdministrativeOwner
+import com.mightyoung.muyon.product.documents.host.ReaderContinuationController
+import com.mightyoung.muyon.product.documents.host.ReaderContinuationFrame
+import com.mightyoung.muyon.product.documents.host.ReaderContinuationScheduler
+import com.mightyoung.muyon.product.documents.host.ReaderActivityChallengeSampler
+import com.mightyoung.muyon.product.documents.host.ReaderSelectionLease
+import com.mightyoung.muyon.product.ui.shell.ReaderSurfaceRequest
 import com.mightyoung.muyon.product.documents.host.NativeReaderPresentationPort
 import com.mightyoung.muyon.product.documents.host.ReaderAdmissionRegistry
 import com.mightyoung.muyon.product.chat.ProductChatPort
@@ -171,8 +178,46 @@ class ProductService : Service() {
     /** Private typed reader adapter only. No JSON principal/allow parameter or model route.
      * Identity facts do not authorize documents; current native policy remains mandatory. */
     private fun newReaderAdmission(principal: LocalWorkspaceReaderPrincipal) = ReaderAdmissionRegistry(principal, readerDocumentBatches)
-    private fun newReaderPresentationTransport(principal: LocalWorkspaceReaderPrincipal) =
-        NativeReaderPresentationPort(principal, readerDocumentBatches) { open(false) }
+    private fun newReaderPresentationTransport(principal: LocalWorkspaceReaderPrincipal): NativeReaderPresentationPort {
+        check(principal.isLive() && principal.serviceEpoch == epoch && principal.workspaceId == workspace)
+        val originalNativeOwner = open(false)
+        val administration = ReaderAdministrativeOwner(readerDocumentBatches, epoch, principal.serviceSession,
+            originalClientGone = { !clients.containsValue(principal.serviceSession) }) {
+            synchronized(this@ProductService) { core === originalNativeOwner }
+        }
+        return NativeReaderPresentationPort(principal, readerDocumentBatches, administration) {
+            // Cleanup may run after stopped/scope release. NEVER open/rebind a new core.
+            synchronized(this@ProductService) { check(core === originalNativeOwner); originalNativeOwner }
+        }
+    }
+    private val readerScheduler = object : ReaderContinuationScheduler {
+        override fun requireOwnerThread() { check(Looper.myLooper() == worker.looper) }
+        override fun nowMillis() = SystemClock.elapsedRealtime()
+        override fun scheduleAt(monotonicMillis: Long, action: () -> Unit): AutoCloseable {
+            requireOwnerThread()
+            val callback = Runnable { action() }
+            check(handler.postDelayed(callback, (monotonicMillis - nowMillis()).coerceAtLeast(0)))
+            return AutoCloseable { handler.removeCallbacks(callback) }
+        }
+        override fun post(action: () -> Unit) { check(handler.post { action() }) }
+    }
+    /** Real Service clock/queue and original registered scope; no alternate UI
+     * facts. Backend stays absent until actual seven policy APIs are generated.
+     * Sampler must be the Shell Activity's future original-challenge callback. */
+    private fun newReaderContinuationController(principal: LocalWorkspaceReaderPrincipal,
+        admission: ReaderAdmissionRegistry, selection: ReaderSelectionLease, original: ReaderSurfaceRequest,
+        activity: ReaderActivityChallengeSampler?, clearExact: (ReaderContinuationFrame) -> Unit,
+        publish: (ReaderContinuationFrame) -> Unit, disposeLate: (ReaderContinuationFrame) -> Unit,
+        stopOriginal: (ReaderContinuationFrame) -> Unit): ReaderContinuationController {
+        val selected = selection.source
+        val document = original.selection.document
+        require(document.workspaceId == selected.workspaceId && document.projectId == selected.projectId &&
+            document.documentId == selected.documentId && document.revision == selected.revision &&
+            document.format.name.lowercase(java.util.Locale.ROOT) == selected.format && original.selection.sha256 == selected.sourceDigest)
+        return ReaderContinuationController(readerScheduler,
+            { request -> request === original && admission.isCurrent(principal, selection) },
+            clearExact, publish, disposeLate, stopOriginal, backend = null, activity = activity)
+    }
     private fun withReaderPrincipal(owner: IBinder, project: String?, generation: Long,
         callback: (LocalWorkspaceReaderPrincipal?) -> Unit) {
         val session = clients[owner]
@@ -376,7 +421,11 @@ class ProductService : Service() {
             chat.close()
             fun drainAndClose() {
                 if (chat.awaitDrain(1000)) {
-                    synchronized(this@ProductService) { core?.close(); core = null }
+                    // Same order as all native reader/admin batches. Exact owner
+                    // close cannot race a permitted operation or its final drain.
+                    synchronized(readerDocumentBatches.lock) {
+                        synchronized(this@ProductService) { core?.close(); core = null }
+                    }
                     drained.countDown()
                     retiringOwners.remove(epoch, drained)
                     worker.quitSafely()
