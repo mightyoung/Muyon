@@ -1,0 +1,36 @@
+{
+  "source_commit": "769feb7f15c32d514ce9ef1d87187345afb76ab1",
+  "kind": "read-only source inventory, not a behavior/lifecycle test",
+  "files": [
+    {
+      "path": "apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/MainActivity.kt",
+      "sha256": "d7c05aec6041d4182f2414e9fec217bc246c4533483074564be9558cd758b648",
+      "onStart_override": false,
+      "onStop_override": false,
+      "onPause_override": false,
+      "onDestroy_override": true,
+      "reader_reauthorization_endpoint": false,
+      "grant_cap_30_000": false
+    },
+    {
+      "path": "apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/agentipc/ProductService.kt",
+      "sha256": "e24f8dbfbcab5d69f4fc9f25857ead8b34e20a9127618fbd0365d8fed4d7c137",
+      "onStart_override": false,
+      "onStop_override": false,
+      "onPause_override": false,
+      "onDestroy_override": true,
+      "reader_reauthorization_endpoint": false,
+      "grant_cap_30_000": false
+    },
+    {
+      "path": "crates/muyon-core/src/documents/storage.rs",
+      "sha256": "e66e7494061dbd3ba9f6a35873b2a0f941d21e72ba7a117e7fc43710630f1317",
+      "onStart_override": false,
+      "onStop_override": false,
+      "onPause_override": false,
+      "onDestroy_override": false,
+      "reader_reauthorization_endpoint": false,
+      "grant_cap_30_000": true
+    }
+  ]
+}

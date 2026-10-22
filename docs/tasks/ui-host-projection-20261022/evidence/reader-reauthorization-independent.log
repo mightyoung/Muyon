@@ -1,0 +1,14 @@
+STATIC REVIEW ONLY; no lifecycle/reauthorization behavior test executed
+HEAD 769feb7f15c32d514ce9ef1d87187345afb76ab1
+inventory_match apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/MainActivity.kt True d7c05aec6041d4182f2414e9fec217bc246c4533483074564be9558cd758b648
+inventory_match apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/agentipc/ProductService.kt True e24f8dbfbcab5d69f4fc9f25857ead8b34e20a9127618fbd0365d8fed4d7c137
+inventory_match crates/muyon-core/src/documents/storage.rs True e66e7494061dbd3ba9f6a35873b2a0f941d21e72ba7a117e7fc43710630f1317
+Activity_has_onStart_override False
+Activity_has_onResume_override False
+Activity_has_onPause_override False
+Activity_has_onStop_override False
+Activity_document_route_is_capabilities True
+Service_local_draft_release_gate_false True
+Tracked_production_worktree_delta_exit 0
+Whitespace_check_exit 0
+Conclusion: contract-only HOLD; genuine visibility/selection adapter, native policy/principal/atomic issuer, guarded presentation FFI and real Android acceptance remain absent

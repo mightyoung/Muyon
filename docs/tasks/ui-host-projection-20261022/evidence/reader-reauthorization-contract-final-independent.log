@@ -1,0 +1,46 @@
+   generation and exact current immutable source. The Host cannot substitute an
+   allow flag for this atomic native predicate.
+
+Freshness is a required port field, not an assumption about the last visible event:
+for EACH original reauthorization attempt the real Activity adapter must sample its
+current lifecycle/window/selection on its owning thread and return a one-use opaque
+sample bound to that attempt, surface/lifecycle epoch and accepted selection version.
+Host/native broker assigns and enforces a monotonic admission deadline; proposed
+upper bound2s from the actual sample, subject to policy-owner/device review before
+implementation. An expired/missing/reused/version-mismatched sample DENIES issuance;
+no cached visible=true fallback. Stop callbacks advance the local fence immediately
+and Service/native fences on receipt; bounded propagation is not an instantaneous
+physical-visibility attestation. The concrete release must define the clock bridge
+and reject at native transaction tail if freshness expires during work. An activity
+heartbeat or validity check never issues authority or reuses a sample for a new grant.
+
+No model tool, ordinary Messenger JSON or text/card payload can invoke or construct
+
+Bounded local audit records: real session/surface/policy version, exact ref/source/
+scope, selection/frame epochs, original attempt, old+new grant IDs/generations,
+requested readonly operations, native issued/deadline, decision/reason and cleanup
+outcome. Identifiers in audit are non-replayable historical metadata: never restore
+principal, visibility, a live lifecycle capability or current grant authority from
+the log after restart. No content, credentials or model text. Audit commit and grant issuance
+must be one native transaction, not a success log after an uncertain issue. If an
+old record is unknown, do not mark saved/revoked/issued or replay automatically.
+
+Capacity/retention must be part of the fixed policy-port release, not an evicting
+map: max1 issuance in flight per reader intent, no more active reader slots than
+the actual native cap8, and an explicit finite durable audit bound chosen by the
+policy owner. Missing bound/retention semantics block implementation. Admission and
+audit capacity are checked in the same issue transaction; capacity rejects a new
+grant and lets only already-valid authority run to its original deadline. Pending/
+unknown originals and stopped/revoked/poisoned fences are NEVER silently evicted,
+reset or inferred resolved by time/absence. Confirmed terminal outcomes are stable
+for exact lookup; any compaction requires a separately specified auditable retention
+rule that preserves non-replay/terminal fences. No automatic pruning in this proposal.
+
+Required independently executable acceptance vectors AFTER real ports exist:
+
+Android >30s/foreground/page/principal/grant/old-response tests are currently
+NOT_RUN; no actual lifecycle/policy/native coordinator is implemented by this
+contract. Existing short-TTL tests and pure simulations are NOT continuous-reading
+proof. Production verified remains false; no writing/external action is enabled.
+STATIC ONLY: production source unchanged; no behavior/Android tests executed
+Final contract review: freshness and retention release gates explicit; no new Important

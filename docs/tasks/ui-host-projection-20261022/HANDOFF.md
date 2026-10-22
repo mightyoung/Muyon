@@ -166,3 +166,19 @@ sets session_active=false/removes ID. A copied file cannot inherit an active PFD
 lease. Parent core bounded display-retaining API + updated FFI/B real generation,
 policy join and reader-owned explicit annotation read-only gate are required before
 actual Host/PFD factory. No fake FD, grant, permission, safety clearance or save.
+
+## Sustained reading / new authority coordination contract — latest
+
+READER-REAUTHORIZATION-CONTRACT.md and source inventory identify missing genuine
+Activity-visible/selected-reading and current principal/policy atomic issuance
+ports. As parent explicitly allowed when ports are absent, this batch delivers
+CONTRACT ONLY with concrete blocked targets, not a fake allow/coordinator. Effective
+permission change (successive new readonly grants under current visible exact-scope
+consent) is separately assessed and non-author reviewed, no Important. Keep original
+30s cap; check never renews. Fresh per-attempt one-use visibility version/deadline,
+policy revoke+issue+audit atomicity, original unknown retention, capacity rejection
+and pre-core acceptSelection/guarded-open fencing are mandatory. A1 late afterB2 or
+A1->B2->A3 cannot invoke destructive coreopen or clear/close B's frame. No newgrant
+or callback may revive stopped/revoked/poisoned intent or switch source revision.
+Real >30s foreground/background/page/principal/revoke/generation/late-response Android
+acceptance remains NOT_RUN; verifiedfalse, business writes/external ops still closed.
