@@ -1,0 +1,104 @@
+warning: suspicious definition of the runtime `read` symbol used by the standard library
+   --> /workspace/mig20/experiments/redesign/core-agent-lab/core/src/host_session.rs:132:124
+    |
+132 | ...ount: usize, timeout: i32) -> i32; fn read(fd: i32, buffer: *mut u8, count: usize) -> isize; fn write(fd: i32, buffer: *const u8...
+    |                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = note: expected `unsafe extern "C" fn(i32, *mut c_void, usize) -> isize` (for the current target)
+            found    `unsafe extern "C" fn(i32, *mut u8, usize) -> isize`
+    = help: either fix the signature or remove any attributes like `#[unsafe(no_mangle)]`, `#[unsafe(export_name = "read")]`, or `#[link_name = "read"]`
+    = help: allow this lint if the signature is compatible
+    = note: `#[warn(suspicious_runtime_symbol_definitions)]` on by default
+
+warning: suspicious definition of the runtime `write` symbol used by the standard library
+   --> /workspace/mig20/experiments/redesign/core-agent-lab/core/src/host_session.rs:132:182
+    |
+132 | ... *mut u8, count: usize) -> isize; fn write(fd: i32, buffer: *const u8, count: usize) -> isize; }
+    |                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = note: expected `unsafe extern "C" fn(i32, *const c_void, usize) -> isize` (for the current target)
+            found    `unsafe extern "C" fn(i32, *const u8, usize) -> isize`
+    = help: either fix the signature or remove any attributes like `#[unsafe(no_mangle)]`, `#[unsafe(export_name = "write")]`, or `#[link_name = "write"]`
+    = help: allow this lint if the signature is compatible
+
+warning: `muyon-core-agent-lab` (lib) generated 2 warnings
+   Compiling muyon-core v0.1.0 (/workspace/mig20/crates/muyon-core)
+    Finished `test` profile [unoptimized] target(s) in 4.43s
+     Running tests/group_runtime_bridge.rs (/tmp/mig20-target/debug/deps/group_runtime_bridge-38cb17ce8beddf05)
+
+running 25 tests
+test blobs::tests::corrupt_existing_object_and_dangling_symlink_are_never_replaced ... ok
+test blobs::tests::failed_ledger_after_solidification_keeps_staging_and_object_independent ... ok
+test blobs::tests::deleting_rejects_new_read_or_same_digest_upload ... ok
+test blobs::tests::kill_fixture ... ok
+test blobs::tests::file_and_upload_logical_length_quotas_precede_hashing_and_writing ... ok
+test blobs::tests::gc_and_publish_barrier_preserves_either_upload_pin_or_reference ... ok
+test blobs::tests::gc_and_reader_barrier_covers_reader_after_upload_pin_release ... ok
+test blobs::tests::pinned_state_alone_does_not_replace_a_durable_upload_pin ... ok
+test blobs::tests::partial_publication_copy_is_not_reused_and_unknown_uploads_are_not_cleaned ... ok
+test blobs::tests::publication_binds_expected_bytes_project_revision_and_real_transaction ... ok
+test blobs::tests::rename_then_failed_pin_commit_can_retry_existing_target_without_overwrite ... ok
+test blobs::tests::pending_unknown_never_expire_and_lookup_does_not_recover ... ok
+test bridge_json_is_strict_and_cannot_nominate_host_scope_or_authority ... FAILED
+test configure_defaults_are_real_cas_writes_and_running_tasks_keep_mode_and_members ... FAILED
+test configure_rejects_unknown_modes_stale_cas_and_invalid_fixed_leader ... ok
+test blobs::tests::real_paper_effect_receipt_and_blob_reference_survive_or_roll_back_together ... ok
+test configuring_legacy_records_freezes_the_previous_actual_mode_before_defaults_change ... FAILED
+test group_lists_and_get_are_persisted_and_paginated_with_management_separate_from_coordination ... FAILED
+test mode_catalog_and_configuration_prepare_default_only_new_groups_to_host_only ... FAILED
+test live_owner_absence_is_explicit_and_local_intent_receipts_are_actual ... FAILED
+test review_lifecycle::tests::empty_file_from_interrupted_creation_initializes_without_replacement ... ok
+test review_lifecycle::tests::uncommitted_ddl_reopens_and_initializes_the_original_database ... ok
+test review_lifecycle::tests::committed_claims_are_preserved_and_partial_committed_schema_is_refused ... ok
+test blobs::tests::real_sigkill_and_reopen_at_twelve_cross_media_windows ... ok
+test research::resource_tests::real_opaque_uploads_are_not_aggregated_when_sealing_or_importing ... ok
+
+failures:
+
+---- bridge_json_is_strict_and_cannot_nominate_host_scope_or_authority stdout ----
+
+thread 'bridge_json_is_strict_and_cannot_nominate_host_scope_or_authority' (14747) panicked at muyon-core/tests/group_runtime_bridge.rs:115:88:
+called `Result::unwrap()` on an `Err` value: Unsupported
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+---- configure_defaults_are_real_cas_writes_and_running_tasks_keep_mode_and_members stdout ----
+
+thread 'configure_defaults_are_real_cas_writes_and_running_tasks_keep_mode_and_members' (14748) panicked at muyon-core/tests/group_runtime_bridge.rs:118:180:
+assertion `left == right` failed
+  left: Rejected
+ right: Committed
+
+---- configuring_legacy_records_freezes_the_previous_actual_mode_before_defaults_change stdout ----
+
+thread 'configuring_legacy_records_freezes_the_previous_actual_mode_before_defaults_change' (14754) panicked at muyon-core/tests/group_runtime_bridge.rs:120:728:
+assertion `left == right` failed
+  left: Null
+ right: "per_task"
+
+---- group_lists_and_get_are_persisted_and_paginated_with_management_separate_from_coordination stdout ----
+
+thread 'group_lists_and_get_are_persisted_and_paginated_with_management_separate_from_coordination' (14755) panicked at muyon-core/tests/group_runtime_bridge.rs:115:88:
+called `Result::unwrap()` on an `Err` value: Unsupported
+
+---- mode_catalog_and_configuration_prepare_default_only_new_groups_to_host_only stdout ----
+
+thread 'mode_catalog_and_configuration_prepare_default_only_new_groups_to_host_only' (14757) panicked at muyon-core/tests/group_runtime_bridge.rs:115:88:
+called `Result::unwrap()` on an `Err` value: Unsupported
+
+---- live_owner_absence_is_explicit_and_local_intent_receipts_are_actual stdout ----
+
+thread 'live_owner_absence_is_explicit_and_local_intent_receipts_are_actual' (14756) panicked at muyon-core/tests/group_runtime_bridge.rs:115:88:
+called `Result::unwrap()` on an `Err` value: Unsupported
+
+
+failures:
+    bridge_json_is_strict_and_cannot_nominate_host_scope_or_authority
+    configure_defaults_are_real_cas_writes_and_running_tasks_keep_mode_and_members
+    configuring_legacy_records_freezes_the_previous_actual_mode_before_defaults_change
+    group_lists_and_get_are_persisted_and_paginated_with_management_separate_from_coordination
+    live_owner_absence_is_explicit_and_local_intent_receipts_are_actual
+    mode_catalog_and_configuration_prepare_default_only_new_groups_to_host_only
+
+test result: FAILED. 19 passed; 6 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.01s
+
+error: test failed, to rerun pass `-p muyon-core --test group_runtime_bridge`

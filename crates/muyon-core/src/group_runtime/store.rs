@@ -34,6 +34,11 @@ pub struct GroupCommand {
 }
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub enum GroupOperation {
+    Configure {
+        mode: String,
+        fixed_leader: Option<String>,
+        members: BTreeMap<String, Capabilities>,
+    },
     Register {
         owner: String,
         admins: BTreeSet<String>,
@@ -112,6 +117,8 @@ pub struct Registration {
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct StoredRun {
+    #[serde(default)]
+    pub coordination_mode: Option<String>,
     pub members: BTreeMap<String, Capabilities>,
     pub run_id: String,
     pub root_task_id: String,
@@ -362,6 +369,7 @@ impl BusinessStore {
         grant: &GroupGrantWitness,
         receipt: &LocalReceipt,
         group_after_effect: &[Vec<Option<String>>],
+        configured_runs: &Option<Vec<Vec<Option<String>>>>,
     ) -> Result<()> {
         let db = self.database();
         if !tx.belongs_to(db) {
@@ -385,6 +393,15 @@ impl BusinessStore {
         let actual_group=io(db.query("SELECT workspace,project_id,revision,record FROM group_runtime_groups WHERE group_id=?",&[&c.group_id]))?;
         if actual_group != group_after_effect {
             return Err(ContractError::ScopeMismatch);
+        }
+        // Configure must preserve every existing run's captured coordination
+        // facts, including legacy rows frozen before changing future defaults.
+        // Compare the intended complete set after ALL trigger-capable writes.
+        if let Some(expected) = configured_runs {
+            let actual = io(db.query("SELECT run_id,group_id,record FROM group_runtime_runs WHERE group_id=? ORDER BY run_id", &[&c.group_id]))?;
+            if &actual != expected {
+                return Err(ContractError::Storage);
+            }
         }
         self.group_verify_intent_tail(c, binding, "committed", receipt)?;
         let events = io(db.query(
@@ -489,7 +506,8 @@ impl BusinessStore {
             let tx = io(db.transaction())?;
             self.group_check(c)?;
             let original_grant = self.group_authority(c, &binding)?;
-            let result = self.group_effect(c, owner)?;
+            let mut configured_runs = None;
+            let result = self.group_effect(c, owner, &mut configured_runs)?;
             if self.group_authority(c, &binding)? != original_grant {
                 return Err(ContractError::InvalidAuthority);
             }
@@ -517,6 +535,7 @@ impl BusinessStore {
                 &original_grant,
                 &receipt,
                 &group_after_effect,
+                &configured_runs,
             )?;
             io(tx.commit())?;
             Ok(receipt)
@@ -565,15 +584,25 @@ impl BusinessStore {
         Ok(r)
     }
     pub fn group_run(&self, scope: &GroupScope, run: &str) -> Result<StoredRun> {
-        self.group_registration(scope)?;
+        let registration = self.group_registration(scope)?;
         id(run)?;
         let rows = io(self.database().query(
             "SELECT record FROM group_runtime_runs WHERE run_id=? AND group_id=?",
             &[run, &scope.group],
         ))?;
-        decode(cell(rows.first().ok_or(ContractError::NotFound)?, 0)?)
+        let mut run: StoredRun = decode(cell(rows.first().ok_or(ContractError::NotFound)?, 0)?)?;
+        if run.coordination_mode.is_none() {
+            run.coordination_mode = Some(registration.mode);
+        }
+        if !matches!(
+            run.coordination_mode.as_deref(),
+            Some("host_only" | "fixed" | "per_task")
+        ) {
+            return Err(ContractError::StorageCorrupt);
+        }
+        Ok(run)
     }
-    fn group_nodes(&self, scope: &GroupScope, run: &str) -> Result<Vec<StoredNode>> {
+    pub(crate) fn group_nodes(&self, scope: &GroupScope, run: &str) -> Result<Vec<StoredNode>> {
         self.group_run(scope, run)?;
         io(self.database().query(
             "SELECT record FROM group_runtime_nodes WHERE run_id=? ORDER BY node_id",
@@ -687,6 +716,7 @@ impl BusinessStore {
         &self,
         c: &GroupCommand,
         owner: Option<&AgentOwner>,
+        configured_runs: &mut Option<Vec<Vec<Option<String>>>>,
     ) -> Result<serde_json::Value> {
         let db = self.database();
         let new_revision = c.expected_revision.next()?;
@@ -766,7 +796,42 @@ impl BusinessStore {
         if group.revision != c.expected_revision {
             return Err(ContractError::RevisionConflict);
         }
-        if let GroupOperation::Start {
+        if let GroupOperation::Configure {
+            mode,
+            fixed_leader,
+            members,
+        } = &c.operation
+        {
+            if c.expected_epoch.is_some() {
+                return Err(ContractError::InvalidRevision);
+            }
+            validate_configuration(&c.project_id, mode, fixed_leader, members)?;
+            // Legacy runs predate explicit mode capture. Before a default edit,
+            // freeze each from the actual persisted old group in this same tx.
+            let mut expected = io(db.query(
+                "SELECT run_id,group_id,record FROM group_runtime_runs WHERE group_id=? ORDER BY run_id",
+                &[&c.group_id],
+            ))?;
+            for row in &mut expected {
+                let mut run: StoredRun = decode(cell(row, 2)?)?;
+                if run.coordination_mode.is_none() {
+                    run.coordination_mode = Some(group.mode.clone());
+                    let record = encode(&run)?;
+                    if io(db.exec(
+                        "UPDATE group_runtime_runs SET record=? WHERE run_id=? AND group_id=?",
+                        &[&record, cell(row, 0)?, &c.group_id],
+                    ))? != 1
+                    {
+                        return Err(ContractError::RevisionConflict);
+                    }
+                    row[2] = Some(record);
+                }
+            }
+            *configured_runs = Some(expected);
+            group.mode = mode.clone();
+            group.fixed_leader = fixed_leader.clone();
+            group.members = members.clone();
+        } else if let GroupOperation::Start {
             run_id,
             root_task_id,
             leader,
@@ -811,6 +876,7 @@ impl BusinessStore {
                 }
             }
             let r = StoredRun {
+                coordination_mode: Some(group.mode.clone()),
                 members: group.members.clone(),
                 run_id: run_id.clone(),
                 root_task_id: root_task_id.clone(),
@@ -966,7 +1032,7 @@ impl BusinessStore {
                     if closed {
                         return Err(ContractError::Cancelled);
                     }
-                    if group.mode != "per_task"
+                    if run.coordination_mode.as_deref() != Some("per_task")
                         || run.leader.as_deref() == Some(to)
                         || run.handoffs >= run.max_handoffs
                     {
@@ -1088,7 +1154,7 @@ impl BusinessStore {
 }
 fn run_id(op: &GroupOperation) -> Option<&str> {
     match op {
-        GroupOperation::Register { .. } => None,
+        GroupOperation::Register { .. } | GroupOperation::Configure { .. } => None,
         GroupOperation::Start { run_id, .. }
         | GroupOperation::Plan { run_id, .. }
         | GroupOperation::BindOriginal { run_id, .. }
@@ -1117,4 +1183,36 @@ fn original_identity_read_error(error: &'static str) -> ContractError {
         "agent_identity_invalid" => ContractError::InvalidIdentity,
         _ => ContractError::Storage,
     }
+}
+
+pub(crate) fn validate_configuration(
+    project: &str,
+    mode: &str,
+    fixed_leader: &Option<String>,
+    members: &BTreeMap<String, Capabilities>,
+) -> Result<()> {
+    if members.is_empty()
+        || members.len() > 32
+        || !matches!(mode, "host_only" | "fixed" | "per_task")
+    {
+        return Err(ContractError::InvalidPayload);
+    }
+    for (member, grant) in members {
+        id(member)?;
+        if grant.scopes != BTreeSet::from([project.to_string()]) || grant.permissions.is_empty() {
+            return Err(ContractError::ScopeMismatch);
+        }
+        for permission in &grant.permissions {
+            id(permission)?;
+        }
+    }
+    if (mode == "fixed"
+        && fixed_leader
+            .as_ref()
+            .is_none_or(|l| !members.contains_key(l)))
+        || (mode != "fixed" && fixed_leader.is_some())
+    {
+        return Err(ContractError::InvalidPayload);
+    }
+    Ok(())
 }

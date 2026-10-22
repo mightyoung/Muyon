@@ -1,0 +1,46 @@
+COMMAND: cargo test --offline --manifest-path /tmp/mig20-independent-review/Cargo.toml independent_legacy_capture -- --nocapture
+EXIT: 101
+warning: suspicious definition of the runtime `read` symbol used by the standard library
+   --> /workspace/mig20/experiments/redesign/core-agent-lab/core/src/host_session.rs:132:124
+    |
+132 | ...ount: usize, timeout: i32) -> i32; fn read(fd: i32, buffer: *mut u8, count: usize) -> isize; fn write(fd: i32, buffer: *const u8...
+    |                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = note: expected `unsafe extern "C" fn(i32, *mut c_void, usize) -> isize` (for the current target)
+            found    `unsafe extern "C" fn(i32, *mut u8, usize) -> isize`
+    = help: either fix the signature or remove any attributes like `#[unsafe(no_mangle)]`, `#[unsafe(export_name = "read")]`, or `#[link_name = "read"]`
+    = help: allow this lint if the signature is compatible
+    = note: `#[warn(suspicious_runtime_symbol_definitions)]` on by default
+
+warning: suspicious definition of the runtime `write` symbol used by the standard library
+   --> /workspace/mig20/experiments/redesign/core-agent-lab/core/src/host_session.rs:132:182
+    |
+132 | ... *mut u8, count: usize) -> isize; fn write(fd: i32, buffer: *const u8, count: usize) -> isize; }
+    |                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = note: expected `unsafe extern "C" fn(i32, *const c_void, usize) -> isize` (for the current target)
+            found    `unsafe extern "C" fn(i32, *const u8, usize) -> isize`
+    = help: either fix the signature or remove any attributes like `#[unsafe(no_mangle)]`, `#[unsafe(export_name = "write")]`, or `#[link_name = "write"]`
+    = help: allow this lint if the signature is compatible
+
+warning: `muyon-core-agent-lab` (lib) generated 2 warnings
+    Finished `test` profile [unoptimized] target(s) in 0.02s
+     Running review.rs (/tmp/mig20-target/debug/deps/review-9db6cd7b025d4436)
+
+running 1 test
+CONFIGURE_RECEIPT=Committed EXISTING_RUN_MODE=Some("host_only")
+
+thread 'independent_legacy_capture_survives_configuration_tail' (16095) panicked at review.rs:703:2:
+assertion failed: receipt.status != LocalStatus::Committed ||
+    run.coordination_mode.as_deref() == Some("per_task")
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test independent_legacy_capture_survives_configuration_tail ... FAILED
+
+failures:
+
+failures:
+    independent_legacy_capture_survives_configuration_tail
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 36 filtered out; finished in 0.01s
+
+error: test failed, to rerun pass `--test review`

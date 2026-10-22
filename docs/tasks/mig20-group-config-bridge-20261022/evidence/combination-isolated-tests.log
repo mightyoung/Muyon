@@ -1,0 +1,1 @@
+error: package collision in the lockfile: packages muyon-core-agent-lab v0.1.0 (/tmp/mig20-config-combination/experiments/redesign/core-agent-lab/core) and muyon-core-agent-lab v0.1.0 (/workspace/mig20/experiments/redesign/core-agent-lab/core) are different, but only one can be written to lockfile unambiguously

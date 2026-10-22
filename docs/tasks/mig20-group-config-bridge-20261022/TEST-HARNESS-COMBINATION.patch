@@ -1,0 +1,20 @@
+--- a/crates/muyon-core/tests/group_runtime_bridge.rs
++++ b/crates/muyon-core/tests/group_runtime_bridge.rs
+@@ -1,5 +1,7 @@
+ //! Same-crate source harness exercises actual pub(crate) BusinessStore seams.
+ #![allow(dead_code)]
++#[path = "../src/documents/mod.rs"]
++mod documents;
+ #[path = "../src/agent/mod.rs"]
+ mod agent;
+ #[path = "../src/archive.rs"]
+--- a/crates/muyon-core/tests/group_runtime_store.rs
++++ b/crates/muyon-core/tests/group_runtime_store.rs
+@@ -1,5 +1,7 @@
+ //! Same-crate source harness exercises actual pub(crate) BusinessStore seams.
+ #![allow(dead_code)]
++#[path = "../src/documents/mod.rs"]
++mod documents;
+ #[path = "../src/agent/mod.rs"]
+ mod agent;
+ #[path = "../src/archive.rs"]

@@ -1,0 +1,15 @@
+--- a/crates/muyon-core/src/lib.rs
++++ b/crates/muyon-core/src/lib.rs
+@@ -4,6 +4,12 @@
+ pub mod blobs;
+ pub mod business;
+ pub mod contract;
++pub mod group_governance;
++pub mod group_runtime;
++#[path = "group_runtime/store.rs"]
++pub mod group_runtime_store;
++#[path = "group_runtime/bridge.rs"]
++pub mod group_runtime_bridge;
+ pub mod documents;
+ pub mod research;
+ mod review_lifecycle;

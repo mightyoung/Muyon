@@ -1,0 +1,38 @@
+COMMAND: cargo test --offline --manifest-path /tmp/mig20-independent-review/Cargo.toml independent_ -- --nocapture
+EXIT: 0
+warning: suspicious definition of the runtime `read` symbol used by the standard library
+   --> /workspace/mig20/experiments/redesign/core-agent-lab/core/src/host_session.rs:132:124
+    |
+132 | ...ount: usize, timeout: i32) -> i32; fn read(fd: i32, buffer: *mut u8, count: usize) -> isize; fn write(fd: i32, buffer: *const u8...
+    |                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = note: expected `unsafe extern "C" fn(i32, *mut c_void, usize) -> isize` (for the current target)
+            found    `unsafe extern "C" fn(i32, *mut u8, usize) -> isize`
+    = help: either fix the signature or remove any attributes like `#[unsafe(no_mangle)]`, `#[unsafe(export_name = "read")]`, or `#[link_name = "read"]`
+    = help: allow this lint if the signature is compatible
+    = note: `#[warn(suspicious_runtime_symbol_definitions)]` on by default
+
+warning: suspicious definition of the runtime `write` symbol used by the standard library
+   --> /workspace/mig20/experiments/redesign/core-agent-lab/core/src/host_session.rs:132:182
+    |
+132 | ... *mut u8, count: usize) -> isize; fn write(fd: i32, buffer: *const u8, count: usize) -> isize; }
+    |                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = note: expected `unsafe extern "C" fn(i32, *const c_void, usize) -> isize` (for the current target)
+            found    `unsafe extern "C" fn(i32, *const u8, usize) -> isize`
+    = help: either fix the signature or remove any attributes like `#[unsafe(no_mangle)]`, `#[unsafe(export_name = "write")]`, or `#[link_name = "write"]`
+    = help: allow this lint if the signature is compatible
+
+warning: `muyon-core-agent-lab` (lib) generated 2 warnings
+    Finished `test` profile [unoptimized] target(s) in 0.01s
+     Running review.rs (/tmp/mig20-target/debug/deps/review-9db6cd7b025d4436)
+
+running 3 tests
+CONFIGURE_RECEIPT=PendingOriginal EXISTING_RUN_MODE=Some("per_task")
+test independent_legacy_capture_survives_configuration_tail ... ok
+test independent_existing_run_keeps_removed_members_and_handoff_mode ... ok
+OWNER_SETTLED_COST=66 UI_ORIGINAL={"actual_cost_scope":"current_request","actual_micro_cny":"66","actual_usage_known":true,"attempted":true,"cancel_requested":false,"chain":[{"actual_micro_cny":"66","attempted":true,"request_id":"99e82a742b495084c1e68b7a11d15970","reserved_micro_cny_original":"3024","status":"tool_pending"}],"current_request_id":"99e82a742b495084c1e68b7a11d15970","lookup_status":"available","original_chain_resolved":false,"original_request_id":"99e82a742b495084c1e68b7a11d15970","recovery_action":"none","status":"tool_pending"}
+test independent_tool_pending_cost_projection ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 34 filtered out; finished in 0.02s
+

@@ -1,0 +1,13 @@
+docs/tasks/mig20-group-config-bridge-20261022/evidence/03-first-implementation.log:66: new blank line at EOF.
+docs/tasks/mig20-group-config-bridge-20261022/evidence/06-boundaries-green.log:66: new blank line at EOF.
+docs/tasks/mig20-group-config-bridge-20261022/evidence/07-tail-and-store-regression.log:97: new blank line at EOF.
+docs/tasks/mig20-group-config-bridge-20261022/evidence/09-review-regressions-green.log:69: new blank line at EOF.
+docs/tasks/mig20-group-config-bridge-20261022/evidence/combination-isolated-tests-retry.log:251: new blank line at EOF.
+docs/tasks/mig20-group-config-bridge-20261022/evidence/final-bridge.stdout.log:43: new blank line at EOF.
+docs/tasks/mig20-group-config-bridge-20261022/evidence/final-cargo.stdout.log:391: new blank line at EOF.
+docs/tasks/mig20-group-config-bridge-20261022/evidence/final-governance.stdout.log:26: new blank line at EOF.
+docs/tasks/mig20-group-config-bridge-20261022/evidence/final-runtime.stdout.log:25: new blank line at EOF.
+docs/tasks/mig20-group-config-bridge-20261022/evidence/final-store.stdout.log:70: new blank line at EOF.
+docs/tasks/mig20-group-config-bridge-20261022/evidence/independent-final-counterexamples.log:38: new blank line at EOF.
+docs/tasks/mig20-group-config-bridge-20261022/evidence/independent-final-native-tests.log:142: new blank line at EOF.
+docs/tasks/mig20-group-config-bridge-20261022/evidence/independent-original-tests.log:138: new blank line at EOF.

@@ -1,0 +1,8 @@
+{
+  "validator": "jsonschema",
+  "version": "4.26.0",
+  "valid_examples": 9,
+  "invalid_examples": 21,
+  "result": "PASS",
+  "semantic_checks": "Native tests additionally cover duplicate keys, u64 upper bound, project/member/mode/authority context; schema cannot authenticate."
+}

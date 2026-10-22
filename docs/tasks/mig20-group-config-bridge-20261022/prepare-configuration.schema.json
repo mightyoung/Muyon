@@ -1,0 +1,215 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "change": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "operation": {
+              "const": "register"
+            },
+            "intent_id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128,
+              "pattern": "^[A-Za-z0-9_.:-]+$"
+            },
+            "group_id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128,
+              "pattern": "^[A-Za-z0-9_.:-]+$"
+            },
+            "expected_revision": {
+              "const": "0"
+            },
+            "mode": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "host_only",
+                    "fixed",
+                    "per_task"
+                  ]
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "fixed_leader": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 128,
+                  "pattern": "^[A-Za-z0-9_.:-]+$"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "members": {
+              "type": "object",
+              "minProperties": 1,
+              "maxProperties": 32,
+              "propertyNames": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 128,
+                "pattern": "^[A-Za-z0-9_.:-]+$"
+              },
+              "additionalProperties": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "scopes": {
+                    "type": "array",
+                    "minItems": 1,
+                    "maxItems": 1,
+                    "items": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 128,
+                      "pattern": "^[A-Za-z0-9_.:-]+$"
+                    }
+                  },
+                  "permissions": {
+                    "type": "array",
+                    "minItems": 1,
+                    "items": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 128,
+                      "pattern": "^[A-Za-z0-9_.:-]+$"
+                    }
+                  }
+                },
+                "required": [
+                  "scopes",
+                  "permissions"
+                ]
+              }
+            }
+          },
+          "required": [
+            "operation",
+            "intent_id",
+            "group_id",
+            "expected_revision",
+            "members"
+          ]
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "operation": {
+              "const": "configure"
+            },
+            "intent_id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128,
+              "pattern": "^[A-Za-z0-9_.:-]+$"
+            },
+            "group_id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128,
+              "pattern": "^[A-Za-z0-9_.:-]+$"
+            },
+            "expected_revision": {
+              "type": "string",
+              "pattern": "^(0|[1-9][0-9]{0,19})$",
+              "description": "Canonical u64 decimal; values above 18446744073709551615 rejected at runtime."
+            },
+            "mode": {
+              "enum": [
+                "host_only",
+                "fixed",
+                "per_task"
+              ]
+            },
+            "fixed_leader": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 128,
+                  "pattern": "^[A-Za-z0-9_.:-]+$"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "members": {
+              "type": "object",
+              "minProperties": 1,
+              "maxProperties": 32,
+              "propertyNames": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 128,
+                "pattern": "^[A-Za-z0-9_.:-]+$"
+              },
+              "additionalProperties": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "scopes": {
+                    "type": "array",
+                    "minItems": 1,
+                    "maxItems": 1,
+                    "items": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 128,
+                      "pattern": "^[A-Za-z0-9_.:-]+$"
+                    }
+                  },
+                  "permissions": {
+                    "type": "array",
+                    "minItems": 1,
+                    "items": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 128,
+                      "pattern": "^[A-Za-z0-9_.:-]+$"
+                    }
+                  }
+                },
+                "required": [
+                  "scopes",
+                  "permissions"
+                ]
+              }
+            }
+          },
+          "required": [
+            "operation",
+            "intent_id",
+            "group_id",
+            "expected_revision",
+            "mode",
+            "members"
+          ]
+        }
+      ]
+    }
+  },
+  "required": [
+    "schema_version",
+    "change"
+  ],
+  "description": "Max65536 UTF-8 bytes, duplicate keys rejected. Register missing/null mode defaults host_only; configure requires explicit mode. fixed requires leader in members; other modes forbid a leader. Member scopes must exactly equal native selected project. Preparation issues no grant and writes nothing."
+}

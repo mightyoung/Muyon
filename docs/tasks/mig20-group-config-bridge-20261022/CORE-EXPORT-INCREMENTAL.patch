@@ -1,0 +1,11 @@
+--- a/crates/muyon-core/src/lib.rs
++++ b/crates/muyon-core/src/lib.rs
+@@ -8,6 +8,8 @@
+ pub mod group_runtime;
+ #[path = "group_runtime/store.rs"]
+ pub mod group_runtime_store;
++#[path = "group_runtime/bridge.rs"]
++pub mod group_runtime_bridge;
+ pub mod documents;
+ pub mod research;
+ mod review_lifecycle;
