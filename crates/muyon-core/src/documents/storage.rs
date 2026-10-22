@@ -465,7 +465,9 @@ impl BusinessStore {
         format: DocumentFormat,
         finished: &FinishedBlob,
     ) -> Result<DocumentMetadata> {
-        let (metadata, postcondition) = self.document_publish_with_postcondition_in_transaction(tx, base, title, format, finished)?;
+        let (metadata, postcondition) = self.document_publish_with_postcondition_in_transaction(
+            tx, base, title, format, finished,
+        )?;
         self.document_publication_postcondition_in_transaction(tx, postcondition)?;
         Ok(metadata)
     }
@@ -541,10 +543,14 @@ impl BusinessStore {
                 &encode(&metadata)?,
             ],
         ))?;
-        let source_effects = self.finish_document_source_mutation_in_transaction(tx, source_plan)?;
+        let source_effects =
+            self.finish_document_source_mutation_in_transaction(tx, source_plan)?;
         let postcondition = DocumentPublicationPostcondition {
-            transaction: tx, metadata: metadata.clone(), reference_id: reference,
-            upload_id: Some(finished.upload_id.clone()), source_effects,
+            transaction: tx,
+            metadata: metadata.clone(),
+            reference_id: reference,
+            upload_id: Some(finished.upload_id.clone()),
+            source_effects,
         };
         self.verify_document_publication_postcondition(tx, &postcondition)?;
         Ok((metadata, postcondition))
@@ -560,7 +566,8 @@ impl BusinessStore {
         title: &str,
         expected_blob: &BlobRef,
     ) -> Result<DocumentMetadata> {
-        let (metadata, postcondition) = self.document_clone_with_postcondition_in_transaction(tx, base, title, expected_blob)?;
+        let (metadata, postcondition) =
+            self.document_clone_with_postcondition_in_transaction(tx, base, title, expected_blob)?;
         self.document_publication_postcondition_in_transaction(tx, postcondition)?;
         Ok(metadata)
     }
@@ -627,16 +634,22 @@ impl BusinessStore {
                 &encode(&metadata)?,
             ],
         ))?;
-        let source_effects = self.finish_document_source_mutation_in_transaction(tx, source_plan)?;
+        let source_effects =
+            self.finish_document_source_mutation_in_transaction(tx, source_plan)?;
         let postcondition = DocumentPublicationPostcondition {
-            transaction: tx, metadata: metadata.clone(), reference_id: reference,
-            upload_id: None, source_effects,
+            transaction: tx,
+            metadata: metadata.clone(),
+            reference_id: reference,
+            upload_id: None,
+            source_effects,
         };
         self.verify_document_publication_postcondition(tx, &postcondition)?;
         Ok((metadata, postcondition))
     }
     fn verify_document_publication_postcondition(
-        &self, tx: &Transaction<'_>, postcondition: &DocumentPublicationPostcondition<'_, '_>,
+        &self,
+        tx: &Transaction<'_>,
+        postcondition: &DocumentPublicationPostcondition<'_, '_>,
     ) -> Result<()> {
         if !tx.belongs_to(self.database()) || !std::ptr::eq(tx, postcondition.transaction) {
             return Err(ContractError::InvalidAuthority);
@@ -644,15 +657,26 @@ impl BusinessStore {
         self.document_schema()?;
         self.verify_document_source_mutation_in_transaction(tx, &postcondition.source_effects)?;
         let metadata = &postcondition.metadata;
-        self.verify_blob_publication_in_transaction(tx, &postcondition.reference_id, self.document_project(&metadata.document)?, metadata.document.document_id(), &metadata.blob, postcondition.upload_id.as_deref())?;
-        if self.current_document(&metadata.document)? != *metadata { return Err(ContractError::StorageCorrupt); }
+        self.verify_blob_publication_in_transaction(
+            tx,
+            &postcondition.reference_id,
+            self.document_project(&metadata.document)?,
+            metadata.document.document_id(),
+            &metadata.blob,
+            postcondition.upload_id.as_deref(),
+        )?;
+        if self.current_document(&metadata.document)? != *metadata {
+            return Err(ContractError::StorageCorrupt);
+        }
         Ok(())
     }
     /// AFTER the gateway's final receipt/journal write and original grant check,
     /// immediately before COMMIT. Consumes the unforgeable exact-tx effect token.
     /// Propagate failure; no business write may follow this read-only tail.
     pub(crate) fn document_publication_postcondition_in_transaction(
-        &self, tx: &Transaction<'_>, postcondition: DocumentPublicationPostcondition<'_, '_>,
+        &self,
+        tx: &Transaction<'_>,
+        postcondition: DocumentPublicationPostcondition<'_, '_>,
     ) -> Result<()> {
         self.verify_document_publication_postcondition(tx, &postcondition)
     }
@@ -682,7 +706,10 @@ impl BusinessStore {
             return Err(ContractError::InvalidAuthority);
         }
         let old = sql(self.database().query("SELECT CASE WHEN length(CAST(generation AS BLOB))<=20 THEN generation ELSE NULL END,CASE WHEN length(CAST(document_json AS BLOB))<=8192 THEN document_json ELSE NULL END FROM document_grants WHERE grant_id=?", &[&authority.grant_id]))?;
-        let old_document = old.first().map(|row| self.document_grant_target(cell(row, 1)?)).transpose()?;
+        let old_document = old
+            .first()
+            .map(|row| self.document_grant_target(cell(row, 1)?))
+            .transpose()?;
         let expected = if old.is_empty() {
             Revision::new(1)
         } else {
@@ -692,25 +719,54 @@ impl BusinessStore {
             return Err(ContractError::InvalidAuthority);
         }
         let mut changed_documents = vec![document];
-        if let Some(previous) = old_document.as_ref() { changed_documents.push(previous); }
-        let source_plan = self.prepare_document_source_mutation_in_transaction(&tx, &changed_documents)?;
+        if let Some(previous) = old_document.as_ref() {
+            changed_documents.push(previous);
+        }
+        let source_plan =
+            self.prepare_document_source_mutation_in_transaction(&tx, &changed_documents)?;
         sql(self.database().exec("INSERT INTO document_grants VALUES(?,?,?,?,?,?,1) ON CONFLICT(grant_id) DO UPDATE SET generation=excluded.generation,owner_epoch=excluded.owner_epoch,document_json=excluded.document_json,permissions=excluded.permissions,expires_at_ms=excluded.expires_at_ms,active=1", &[&authority.grant_id, authority.generation.as_str(), self.owner_epoch(), &encode(document)?, &encode(&operations)?, &expires_at_ms.to_string()]))?;
         self.finish_document_source_mutation_in_transaction(&tx, source_plan)?;
-        self.document_grant_write_postcondition(authority, &encode(document)?, &encode(&operations)?, &expires_at_ms.to_string(), "1")?;
-        self.document_grant(&DocumentAccess { document: document.clone(), authority: authority.clone() }, operations)?;
-        if self.current_document(document)? != expected_metadata { return Err(ContractError::StorageCorrupt); }
+        self.document_grant_write_postcondition(
+            authority,
+            &encode(document)?,
+            &encode(&operations)?,
+            &expires_at_ms.to_string(),
+            "1",
+        )?;
+        self.document_grant(
+            &DocumentAccess {
+                document: document.clone(),
+                authority: authority.clone(),
+            },
+            operations,
+        )?;
+        if self.current_document(document)? != expected_metadata {
+            return Err(ContractError::StorageCorrupt);
+        }
         sql(tx.commit())
     }
     // Read-only exact write receipt, after all hook/outbox writes. This is not
     // authorization: normal grant expiry/project checks still run for issue.
-    fn document_grant_write_postcondition(&self, authority: &AuthorityBinding, document_json: &str, permissions: &str, expires: &str, active: &str) -> Result<()> {
+    fn document_grant_write_postcondition(
+        &self,
+        authority: &AuthorityBinding,
+        document_json: &str,
+        permissions: &str,
+        expires: &str,
+        active: &str,
+    ) -> Result<()> {
         let rows = sql(self.database().query("SELECT 1 FROM document_grants WHERE grant_id=? AND generation=? AND owner_epoch=? AND document_json=? AND permissions=? AND expires_at_ms=? AND active=?", &[&authority.grant_id, authority.generation.as_str(), self.owner_epoch(), document_json, permissions, expires, active]))?;
-        if rows.len() != 1 { return Err(ContractError::StorageCorrupt); }
+        if rows.len() != 1 {
+            return Err(ContractError::StorageCorrupt);
+        }
         Ok(())
     }
     fn document_grant_target(&self, payload: &str) -> Result<DocumentRef> {
         let document: DocumentRef = decode(payload)?;
-        if document.scope().workspace_id != self.workspace_id() || document.scope().project_id.is_none() || document.revision().value() == 0 {
+        if document.scope().workspace_id != self.workspace_id()
+            || document.scope().project_id.is_none()
+            || document.revision().value() == 0
+        {
             return Err(ContractError::StorageCorrupt);
         }
         Ok(document)
@@ -723,7 +779,10 @@ impl BusinessStore {
             return Err(ContractError::InvalidAuthority);
         }
         let targets = sql(self.database().query("SELECT CASE WHEN length(CAST(document_json AS BLOB))<=8192 THEN document_json ELSE NULL END,CASE WHEN length(CAST(permissions AS BLOB))<=1024 THEN permissions ELSE NULL END,CASE WHEN length(CAST(expires_at_ms AS BLOB))<=20 THEN expires_at_ms ELSE NULL END FROM document_grants WHERE grant_id=? AND generation=? AND owner_epoch=?", &[&authority.grant_id, authority.generation.as_str(), self.owner_epoch()]))?;
-        let target = self.document_grant_target(cell(targets.first().ok_or(ContractError::InvalidAuthority)?, 0)?)?;
+        let target = self.document_grant_target(cell(
+            targets.first().ok_or(ContractError::InvalidAuthority)?,
+            0,
+        )?)?;
         let source_plan = self.prepare_document_source_mutation_in_transaction(&tx, &[&target])?;
         let changed = sql(self.database().exec("UPDATE document_grants SET active=0 WHERE grant_id=? AND generation=? AND owner_epoch=?", &[&authority.grant_id, authority.generation.as_str(), self.owner_epoch()]))?;
         if changed != 1 {
@@ -731,7 +790,13 @@ impl BusinessStore {
         }
         self.finish_document_source_mutation_in_transaction(&tx, source_plan)?;
         let original = targets.first().ok_or(ContractError::InvalidAuthority)?;
-        self.document_grant_write_postcondition(authority, cell(original, 0)?, cell(original, 1)?, cell(original, 2)?, "0")?;
+        self.document_grant_write_postcondition(
+            authority,
+            cell(original, 0)?,
+            cell(original, 1)?,
+            cell(original, 2)?,
+            "0",
+        )?;
         sql(tx.commit())
     }
     pub fn read_document(&self, access: &DocumentAccess) -> Result<DocumentMetadata> {
