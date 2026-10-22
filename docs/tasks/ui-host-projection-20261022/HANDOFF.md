@@ -156,3 +156,13 @@ not this environment's fresh native run. Here native command exit127 (no cargo),
 Android compile command exit2 before Gradle (missing existing8.13); not bypassed.
 verified=false only preserves real Android/Service-native/product acceptance gates.
 Reader FD/annotation bridge still pending; no overall completion or execution claim.
+
+## Reader466 exact intake, after fifth Service delivery
+
+READER-466-INTAKE.md records actual466424b FFI authority/scope/JSON/EOF semantics.
+No source/API is guessed: scope currently requires selected project, grant/ref must
+come from trusted current policy join (not UI/model/latest-grant scan), and EOF
+sets session_active=false/removes ID. A copied file cannot inherit an active PFD
+lease. Parent core bounded display-retaining API + updated FFI/B real generation,
+policy join and reader-owned explicit annotation read-only gate are required before
+actual Host/PFD factory. No fake FD, grant, permission, safety clearance or save.
