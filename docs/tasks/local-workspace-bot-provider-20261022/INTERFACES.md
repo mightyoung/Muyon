@@ -6,19 +6,26 @@ ReadScope::current validates actual selected project inside each transaction.
 Conversation must be the private host's app-issued canonical lowercase UUID.
 No account/credential, arbitrary path, old file import or execution ledger binding.
 
-All arguments String except nullable project and archive Vec<u8>/ByteArray; return
-Result<String,ProductError>. Four original method signatures remain unchanged:
+Original scalar arguments are String except nullable project and archive Vec<u8>/ByteArray;
+the new prepare method takes the typed record below. All return Result<String,ProductError>.
+Four original method signatures remain unchanged:
 
 - local_draft_resolve(conversation, project)
 - local_draft_read(conversation, project, namespace_id, draft_id,
   expected_generation, expected_stored_revision)
-- **local_draft_prepare_save**(conversation, project, namespace_id, draft_id,
-  expected_generation, expected_stored_revision, attempt_id,
-  exported_memory_revision, host_editor_revision, archive)
+- **local_draft_prepare_save**(request: LocalDraftPrepareRequest)
 - local_draft_save(conversation, project, namespace_id, draft_id,
   expected_generation, expected_stored_revision, attempt_id,
   exported_memory_revision, archive)
 - local_draft_lookup_save(conversation, project, namespace_id, draft_id, attempt_id)
+
+LocalDraftPrepareRequest is a public `uniffi::Record` with named fields:
+conversation:String, project:Option<String>, namespace_id:String, draft_id:String,
+expected_generation:String, expected_stored_revision:String, attempt_id:String,
+exported_memory_revision:String, host_editor_revision:String, archive:Vec<u8>.
+This supersedes ONLY the queued098d fifth method's positional request; B has not
+accepted/generated that fifth ABI. Four original methods/Host calls remain unchanged.
+B must generate the actual Kotlin record and fifth method before Host integration.
 
 Descriptor: schema=1, owner_kind=local_workspace, namespace_id, workspace_id,
 conversation_id, project_id (nullable), draft_id, registry_generation,

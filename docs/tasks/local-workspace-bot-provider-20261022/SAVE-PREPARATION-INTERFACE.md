@@ -6,12 +6,23 @@ provider; it is not an account, execution journal, grant or second store.
 
 ## Fixed native signature / host sequence
 
-New private ProductCore method (String arguments except optional project/ByteArray):
+New private ProductCore method takes one owned typed request record:
 
 ```
-local_draft_prepare_save(conversation, project, namespace_id, draft_id,
-  expected_generation, expected_stored_revision, attempt_id,
-  exported_memory_revision, host_editor_revision, archive: Vec<u8>) -> Result<String, ProductError>
+#[derive(uniffi::Record)]
+pub struct LocalDraftPrepareRequest {
+    pub conversation: String,
+    pub project: Option<String>,
+    pub namespace_id: String,
+    pub draft_id: String,
+    pub expected_generation: String,
+    pub expected_stored_revision: String,
+    pub attempt_id: String,
+    pub exported_memory_revision: String,
+    pub host_editor_revision: String,
+    pub archive: Vec<u8>,
+}
+local_draft_prepare_save(request: LocalDraftPrepareRequest) -> Result<String, ProductError>
 ```
 
 Four existing method signatures remain unchanged. prepare receives exactly the
@@ -79,4 +90,7 @@ pass, verified remains false. This document was published interface-first at15c6
 implementation follows on the same owner branch. Source delivery is not runtime
 acceptance. New failures are local_draft_not_prepared, local_draft_pending and
 local_draft_terminal; existing stable failures remain. Core groups export/editor
-arguments in SaveRevisions; the native signature above exposes them separately.
+arguments in SaveRevisions; the native record carries both as named fields.
+The record supersedes the positional fifth method queued at098d9aca before B
+accepted/generated it. Four original methods are ABI-compatible and unchanged.
+Host must consume B's actual generated record, not handwritten bindings.

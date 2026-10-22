@@ -3,7 +3,7 @@
 Priority source: Host9d2c4119d0c66d1748955cee1d86e63deb7ce16f
 SERVICE-BINDING-REPORT.md and parent's confirmation. Interface-first commit
 15c65c7c9c1f0af1e73c8092b2de2ac78939eea7 was pushed before implementation.
-Exact accepted native argument/JSON/status contract: SAVE-PREPARATION-INTERFACE.md.
+Exact owned native source argument/JSON/status contract: SAVE-PREPARATION-INTERFACE.md.
 
 ## Implemented concrete chain
 
@@ -35,8 +35,10 @@ Exact accepted native argument/JSON/status contract: SAVE-PREPARATION-INTERFACE.
 
 ## Host/B next exact integration
 
-Native method adds host_editor_revision between exported_memory_revision and archive.
-Keep four existing signatures. Host must capture reducer instance/scope/export/editor
+The new fifth method takes LocalDraftPrepareRequest, with named exported_memory_revision,
+host_editor_revision and archive fields (see the complete exact Rust record). This
+supersedes the queued098d positional fifth signature before its first accepted B
+generation. Keep four existing signatures. Host must capture reducer instance/scope/export/editor
 from the SAME snapshot, await successful native prepare before dispatching save, and
 retain exact original on unknown. Cold resolve obtains save_attempt then only lookup
 that ID. not_committed_local_storage permits a NEW explicit user save; committed

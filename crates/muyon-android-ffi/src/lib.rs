@@ -19,6 +19,22 @@ use std::{
 
 uniffi::setup_scaffolding!();
 
+/// Private host snapshot for a new, not-yet-released prepare API. Fields are
+/// references/preconditions, never caller-issued authority or a saved assertion.
+#[derive(uniffi::Record)]
+pub struct LocalDraftPrepareRequest {
+    pub conversation: String,
+    pub project: Option<String>,
+    pub namespace_id: String,
+    pub draft_id: String,
+    pub expected_generation: String,
+    pub expected_stored_revision: String,
+    pub attempt_id: String,
+    pub exported_memory_revision: String,
+    pub host_editor_revision: String,
+    pub archive: Vec<u8>,
+}
+
 #[derive(Debug, uniffi::Error)]
 pub enum ProductError {
     Failure { code: String },
@@ -179,17 +195,20 @@ impl ProductCore {
     /// This neither stores the archive nor executes/replays a save after restart.
     pub fn local_draft_prepare_save(
         &self,
-        conversation: String,
-        project: Option<String>,
-        namespace_id: String,
-        draft_id: String,
-        expected_generation: String,
-        expected_stored_revision: String,
-        attempt_id: String,
-        exported_memory_revision: String,
-        host_editor_revision: String,
-        archive: Vec<u8>,
+        request: LocalDraftPrepareRequest,
     ) -> Result<String, ProductError> {
+        let LocalDraftPrepareRequest {
+            conversation,
+            project,
+            namespace_id,
+            draft_id,
+            expected_generation,
+            expected_stored_revision,
+            attempt_id,
+            exported_memory_revision,
+            host_editor_revision,
+            archive,
+        } = request;
         let state = self.state.lock().map_err(|_| ProductError::Failure {
             code: "local_draft_unavailable".into(),
         })?;
@@ -1794,9 +1813,18 @@ mod local_draft_bridge_tests {
         let hex = "4d59424400000001000000000000000100000000000000000000000000000000000000fbd7ab6104f8d45a51a4ae9335d359af13ab91abe8747df7952c7ef571c7cd2c";
         let archive: Vec<u8> = (0..hex.len()).step_by(2)
             .map(|i| u8::from_str_radix(&hex[i..i + 2], 16).unwrap()).collect();
-        core.local_draft_prepare_save(CONVERSATION.into(), None,
-            text("namespace_id"), text("draft_id"), text("registry_generation"),
-            "0".into(), ATTEMPT.into(), "17".into(), "42".into(), archive.clone()).unwrap();
+        core.local_draft_prepare_save(LocalDraftPrepareRequest {
+            conversation: CONVERSATION.into(),
+            project: None,
+            namespace_id: text("namespace_id"),
+            draft_id: text("draft_id"),
+            expected_generation: text("registry_generation"),
+            expected_stored_revision: "0".into(),
+            attempt_id: ATTEMPT.into(),
+            exported_memory_revision: "17".into(),
+            host_editor_revision: "42".into(),
+            archive: archive.clone(),
+        }).unwrap();
         drop(core);
         let core = ProductCore::open(root.to_str().unwrap().into(),
             "workspace".into(), "next-epoch".into(), false).unwrap();
@@ -1852,11 +1880,18 @@ mod local_draft_bridge_tests {
             .step_by(2)
             .map(|i| u8::from_str_radix(&archive_hex[i..i + 2], 16).unwrap())
             .collect();
-        let prepared = parse(core.local_draft_prepare_save(
-            CONVERSATION.into(), None, text("namespace_id"), text("draft_id"),
-            text("registry_generation"), "0".into(), ATTEMPT.into(), "17".into(),
-            "42".into(), archive.clone(),
-        ).unwrap());
+        let prepared = parse(core.local_draft_prepare_save(LocalDraftPrepareRequest {
+            conversation: CONVERSATION.into(),
+            project: None,
+            namespace_id: text("namespace_id"),
+            draft_id: text("draft_id"),
+            expected_generation: text("registry_generation"),
+            expected_stored_revision: "0".into(),
+            attempt_id: ATTEMPT.into(),
+            exported_memory_revision: "17".into(),
+            host_editor_revision: "42".into(),
+            archive: archive.clone(),
+        }).unwrap());
         assert_eq!(prepared["state"], "prepared");
         assert_eq!(prepared["host_editor_revision"], "42");
         let receipt = parse(
