@@ -1,0 +1,57 @@
+[
+  {
+    "utc": "2026-10-22T05:32:27.922463+00:00",
+    "command": [
+      "bash",
+      "apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/ui/documents/run-offline.sh"
+    ],
+    "exit_code": 2,
+    "stdout": "",
+    "stderr": "NOT_RUN: existing Kotlin compiler unavailable; no installation attempted.\n",
+    "status": "NOT_RUN"
+  },
+  {
+    "utc": "2026-10-22T05:32:27.923665+00:00",
+    "command": [
+      "bash",
+      "apps/muyon_android/gradlew",
+      "-p",
+      "apps/muyon_android",
+      ":app:testDebugUnitTest",
+      ":app:compileDebugKotlin",
+      ":app:compileDebugAndroidTestKotlin",
+      "--offline"
+    ],
+    "exit_code": 2,
+    "stdout": "",
+    "stderr": "NOT_RUN: set MUYON_UI_GRADLE to the existing Gradle 8.13 executable.\n",
+    "status": "NOT_RUN"
+  },
+  {
+    "utc": "2026-10-22T05:32:27.925084+00:00",
+    "command": [
+      "bash",
+      "apps/muyon_android/gradlew",
+      "-p",
+      "apps/muyon_android",
+      ":app:connectedDebugAndroidTest",
+      "--offline"
+    ],
+    "exit_code": 2,
+    "stdout": "",
+    "stderr": "NOT_RUN: set MUYON_UI_GRADLE to the existing Gradle 8.13 executable.\n",
+    "status": "NOT_RUN"
+  },
+  {
+    "utc": "2026-10-22T05:32:27.930363+00:00",
+    "command": [
+      "git",
+      "diff",
+      "--check"
+    ],
+    "exit_code": 0,
+    "stdout": "",
+    "stderr": "",
+    "status": "PASS"
+  }
+]

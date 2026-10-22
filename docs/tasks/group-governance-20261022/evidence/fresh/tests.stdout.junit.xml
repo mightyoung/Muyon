@@ -1,0 +1,28 @@
+<?xml version='1.0' encoding='utf-8'?>
+<testsuite name="fresh/tests.stdout.log" tests="21" failures="0" errors="0" skipped="0">
+  <properties>
+    <property name="origin" value="derived from retained raw libtest output; not native JUnit" />
+    <property name="raw_sha256" value="f6b44a03bf666ddf4e71e3612577489ce857bc0c783206a3b8842adcdc945b29" />
+  </properties>
+  <testcase classname="tests.stdout" name="collaborator_cannot_self_authorize_even_as_coordinator" />
+  <testcase classname="tests.stdout" name="budget_overflow_and_exhaustion_never_become_zero_cost" />
+  <testcase classname="tests.stdout" name="all_duplicate_states_only_lookup_and_submitted_blocks_new_dispatch" />
+  <testcase classname="tests.stdout" name="cycles_missing_dependencies_and_duplicate_nodes_are_rejected" />
+  <testcase classname="tests.stdout" name="depth_two_and_foreign_parent_are_rejected" />
+  <testcase classname="tests.stdout" name="duplicate_command_returns_only_original_receipt_even_when_unknown" />
+  <testcase classname="tests.stdout" name="deterministic_ready_order_uses_node_identity_and_dependencies" />
+  <testcase classname="tests.stdout" name="duplicate_request_identity_and_stale_config_are_not_valid_host_views" />
+  <testcase classname="tests.stdout" name="every_authority_layer_and_member_scope_must_allow_the_request" />
+  <testcase classname="tests.stdout" name="eight_lifetime_children_and_two_active_slots_are_hard_caps" />
+  <testcase classname="tests.stdout" name="failed_dependencies_do_not_run_and_cancelled_children_keep_lifetime_slots" />
+  <testcase classname="tests.stdout" name="ledger_corruption_and_unsupported_status_fail_closed" />
+  <testcase classname="tests.stdout" name="human_admin_can_only_narrow_existing_grant" />
+  <testcase classname="tests.stdout" name="modes_roundtrip_by_explicit_name_and_unknown_fails_closed" />
+  <testcase classname="tests.stdout" name="non_member_is_rejected" />
+  <testcase classname="tests.stdout" name="represented_coordinator_modes_never_execute" />
+  <testcase classname="tests.stdout" name="unknown_budget_keeps_reserve_and_blocks_new_command" />
+  <testcase classname="tests.stdout" name="stale_host_epoch_leader_epoch_or_configuration_never_executes" />
+  <testcase classname="tests.stdout" name="unknown_child_blocks_even_when_request_and_budget_projection_omit_it" />
+  <testcase classname="tests.stdout" name="rounds_count_original_dispatch_history_across_restarts_and_stops" />
+  <testcase classname="tests.stdout" name="unsupported_versions_and_ownerless_groups_are_rejected" />
+</testsuite>

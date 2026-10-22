@@ -1,0 +1,22 @@
+[
+  {
+    "name": "null-empty",
+    "sha256": "ec1129944cc6d828f107c1509b7d3d81dfdd699da6c2197c71599cd829f1cbbe"
+  },
+  {
+    "name": "unicode-attributes",
+    "sha256": "a2bdf99fea68ef2724a0d538d8c88221eabcd06109b67fbf0590b1c0668d491e"
+  },
+  {
+    "name": "special-nodes",
+    "sha256": "8e11636f7e214c0c41fa65058a52ef766e4baa0e707e3f42111176ea01e6f591"
+  },
+  {
+    "name": "docx-run",
+    "sha256": "506b05a9810e2b05b1c8be9f79fe471f95e1ab4e9151872ee5d9e8fab46d477a"
+  },
+  {
+    "name": "pptx-run",
+    "sha256": "d3816c7daabaa9e15cd3ee8cd22135f6bafed129175fceb2fec0ec0ce7b770f9"
+  }
+]

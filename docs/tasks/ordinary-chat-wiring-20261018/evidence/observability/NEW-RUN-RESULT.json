@@ -1,0 +1,26 @@
+{
+  "run_id": 39183528428,
+  "job_id": 117841491609,
+  "source_sha": "d9892a75775e507d585f3ddaa712305be30dcfac",
+  "status": "completed",
+  "conclusion": "failure",
+  "phase_evidence_origin": "new job log; not downloaded artifact",
+  "phase_exit_codes": {
+    "sdk": 0,
+    "avd": 0,
+    "boot": 0,
+    "install": 0,
+    "instrumentation": 0,
+    "result": 1
+  },
+  "tests_run": 2,
+  "failures": 1,
+  "owner_contract_test": "PASS",
+  "compose_service_loop_test": "FAIL",
+  "assertion": "send-service-read assertIsEnabled at OrdinaryChatServiceLoopTest.kt:56 after Activity recreate",
+  "button_state": "Disabled",
+  "reason_for_disabled_state": "not established",
+  "old_run_39144821029": "FAILURE; cause and individual outcomes remain unknown",
+  "old_denied_job_logs_or_artifacts_accessed": false,
+  "rerun": false
+}

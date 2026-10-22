@@ -1,0 +1,30 @@
+{
+  "kind": "new_independent_source_registry_tail_repro",
+  "head": "74040cea77af6c5e82857d560ce6cca63f59e38e",
+  "dependency": "098d9aca214e6642c1b3ffde64921ebedbae335d",
+  "dependency_sha256": "6514165380738130e639d4be1ab5440e1bcb09c7d82fd0184b22b986e0d3c678",
+  "extra_test_source": "\n#[test]\nfn independent_tail_source_registry_workspace_must_reject() {\n check_receipt_tail_trigger(\"UPDATE local_bot_draft_meta SET workspace='wrong-workspace'\");\n}\n#[test]\nfn independent_tail_source_registry_schema_must_reject() {\n check_receipt_tail_trigger(\"UPDATE local_bot_draft_meta SET schema_version='2'\");\n}\n",
+  "command": [
+    "/tmp/bot-cargo/bin/cargo",
+    "test",
+    "--manifest-path",
+    "/tmp/bot-tail-independent-qtybqc_n/repo/crates/Cargo.toml",
+    "-p",
+    "muyon-core",
+    "--lib",
+    "independent_tail_source_registry",
+    "--",
+    "--test-threads=1",
+    "--nocapture"
+  ],
+  "cwd": "/workspace/bot-setup-draft",
+  "utc_start": "2026-10-22T06:34:42.546655Z",
+  "utc_end": "2026-10-22T06:34:47.492300Z",
+  "exit_code": 101,
+  "source_sha256": "13db242a4bf907895c7507778d020c84e87f710a22cae0f99be249abda5e3ba0",
+  "modified_test_sha256": "9b993de7f23c53009ca2c78a3dd7c5928cd2d6bc746d4edfaed98163f0f325b2",
+  "logs_sha256": {
+    "source-registry-repro.stdout.log": "17e9c05bbe350438d88df9a653474e1fd3f1595b2816c7f54645d4c492c9dc9f",
+    "source-registry-repro.stderr.log": "ab39b73a6d516ea078c257b70cec94e2406c91ae4cdeb7b9fdf02149247cacd1"
+  }
+}

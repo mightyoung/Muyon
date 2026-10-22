@@ -1,0 +1,13 @@
+{
+  "archive": "/tmp/muyon-document-durable-check.4MrIWpNe",
+  "core": "8802bf555bfce1265296318d83a2f8a1fb2b787e",
+  "tested_core_bridge_sha256": "19ab242f25f62fdc0a88d4c9e2d7ee8bb844de2732f3daeb5a1253d31cbb5dcc",
+  "current_core_bridge_sha256": "99d23874159e2a05aecbf41d8c76190c81b8be59277a64629efdd603e0d5fbb0",
+  "current_delta": "removal of unused CandidateStatus import only",
+  "lib_tests": "49 passed",
+  "direct_bridge_tests": "6 passed",
+  "independent_probes": "4 passed",
+  "cargo_integration": "blocked by upstream business_worker missing documents module, not claimed passed",
+  "repository_edits": false,
+  "archive_note": "Parent synchronized archive after first test run; current snapshot contains only the unused import removal relative to initially reviewed/tested source."
+}

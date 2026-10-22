@@ -1,0 +1,12 @@
+{
+  "at_utc": "2026-10-22T05:37:51.803963+00:00",
+  "engine": "Python sqlite3; diagnostic SQL semantics only, not Rust/FFI acceptance",
+  "sqlite_version": "3.53.1",
+  "query": "SELECT CASE WHEN LENGTH(NULL)<=65536 THEN NULL ELSE 'oversize' END AS projected_archive, NULL AS digest, 0 AS stored_revision",
+  "row": [
+    "oversize",
+    null,
+    0
+  ],
+  "interpretation": "Initial archive_hex=NULL projects to oversize, while digest remains NULL and revision0. This conflicts with record() accepting only (None,None) at revision0. No corrective source edit was applied."
+}

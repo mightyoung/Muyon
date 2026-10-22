@@ -1,0 +1,10 @@
+{
+  "suites_including_zero_doctest": 25,
+  "test_executions_passed": 321,
+  "failed": 0,
+  "ignored": 0,
+  "library_executions": 49,
+  "business_worker_executions": 48,
+  "bridge_cargo_integration_executions": 8,
+  "note": "Execution counts include overlapping library/worker source coverage; they are not unique behaviors."
+}

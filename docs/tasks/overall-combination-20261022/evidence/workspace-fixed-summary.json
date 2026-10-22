@@ -1,0 +1,218 @@
+{
+  "source": "cf26a7bf44c78e3e89d87b70488657db872cb70d",
+  "command": "cargo test --offline --locked --manifest-path crates/Cargo.toml --workspace --all-targets -- --test-threads=1",
+  "exit_code": 0,
+  "groups": [
+    {
+      "target": "Running unittests src/lib.rs (/tmp/muyon-combination-target/debug/deps/muyon_android_product-19750d70153a76d3)",
+      "status": "ok",
+      "passed": 14,
+      "failed": 0,
+      "ignored": 0,
+      "filtered": 0
+    },
+    {
+      "target": "Running unittests src/lib.rs (/tmp/muyon-combination-target/debug/deps/muyon_core-82c919fdc5ac74ce)",
+      "status": "ok",
+      "passed": 65,
+      "failed": 0,
+      "ignored": 0,
+      "filtered": 0
+    },
+    {
+      "target": "Running unittests src/bin/business_worker.rs (/tmp/muyon-combination-target/debug/deps/business_worker-73f32f14a545b200)",
+      "status": "ok",
+      "passed": 18,
+      "failed": 0,
+      "ignored": 0,
+      "filtered": 0
+    },
+    {
+      "target": "Running tests/agent_child_tools.rs (/tmp/muyon-combination-target/debug/deps/agent_child_tools-0b748a38d8d72e65)",
+      "status": "ok",
+      "passed": 3,
+      "failed": 0,
+      "ignored": 0,
+      "filtered": 0
+    },
+    {
+      "target": "Running tests/agent_owner.rs (/tmp/muyon-combination-target/debug/deps/agent_owner-10ba60b715d1df95)",
+      "status": "ok",
+      "passed": 11,
+      "failed": 0,
+      "ignored": 0,
+      "filtered": 0
+    },
+    {
+      "target": "Running tests/agent_product.rs (/tmp/muyon-combination-target/debug/deps/agent_product-57853f833994ee01)",
+      "status": "ok",
+      "passed": 6,
+      "failed": 0,
+      "ignored": 0,
+      "filtered": 0
+    },
+    {
+      "target": "Running tests/agent_tools.rs (/tmp/muyon-combination-target/debug/deps/agent_tools-c99340baaa79769b)",
+      "status": "ok",
+      "passed": 7,
+      "failed": 0,
+      "ignored": 0,
+      "filtered": 0
+    },
+    {
+      "target": "Running tests/agent_workflow.rs (/tmp/muyon-combination-target/debug/deps/agent_workflow-2cbe0a1c019687c2)",
+      "status": "ok",
+      "passed": 16,
+      "failed": 0,
+      "ignored": 0,
+      "filtered": 0
+    },
+    {
+      "target": "Running tests/archive.rs (/tmp/muyon-combination-target/debug/deps/archive-1beb7ce3603f4bcb)",
+      "status": "ok",
+      "passed": 13,
+      "failed": 0,
+      "ignored": 0,
+      "filtered": 0
+    },
+    {
+      "target": "Running tests/blobs.rs (/tmp/muyon-combination-target/debug/deps/blobs-56f32193aab38277)",
+      "status": "ok",
+      "passed": 8,
+      "failed": 0,
+      "ignored": 0,
+      "filtered": 0
+    },
+    {
+      "target": "Running tests/bot_drafts.rs (/tmp/muyon-combination-target/debug/deps/bot_drafts-1f31968d4581ec00)",
+      "status": "ok",
+      "passed": 19,
+      "failed": 0,
+      "ignored": 0,
+      "filtered": 0
+    },
+    {
+      "target": "Running tests/business.rs (/tmp/muyon-combination-target/debug/deps/business-5f4e58f0bad4b596)",
+      "status": "ok",
+      "passed": 14,
+      "failed": 0,
+      "ignored": 0,
+      "filtered": 0
+    },
+    {
+      "target": "Running tests/contract.rs (/tmp/muyon-combination-target/debug/deps/contract-5a0cd4231532db4c)",
+      "status": "ok",
+      "passed": 10,
+      "failed": 0,
+      "ignored": 0,
+      "filtered": 0
+    },
+    {
+      "target": "Running tests/contract_vectors_additional.rs (/tmp/muyon-combination-target/debug/deps/contract_vectors_additional-bbbe9bd88d113c54)",
+      "status": "ok",
+      "passed": 1,
+      "failed": 0,
+      "ignored": 0,
+      "filtered": 0
+    },
+    {
+      "target": "Running tests/document_edit_engine_protocol.rs (/tmp/muyon-combination-target/debug/deps/document_edit_engine_protocol-6556f5ee65c53399)",
+      "status": "ok",
+      "passed": 6,
+      "failed": 0,
+      "ignored": 0,
+      "filtered": 0
+    },
+    {
+      "target": "Running tests/document_edit_gateway.rs (/tmp/muyon-combination-target/debug/deps/document_edit_gateway-ca50ee4260921f7a)",
+      "status": "ok",
+      "passed": 19,
+      "failed": 0,
+      "ignored": 0,
+      "filtered": 0
+    },
+    {
+      "target": "Running tests/document_edit_transactions.rs (/tmp/muyon-combination-target/debug/deps/document_edit_transactions-b1d67077eb1b22a2)",
+      "status": "ok",
+      "passed": 28,
+      "failed": 0,
+      "ignored": 0,
+      "filtered": 0
+    },
+    {
+      "target": "Running tests/document_storage.rs (/tmp/muyon-combination-target/debug/deps/document_storage-40d773d5e7c7488b)",
+      "status": "ok",
+      "passed": 15,
+      "failed": 0,
+      "ignored": 0,
+      "filtered": 0
+    },
+    {
+      "target": "Running tests/documents.rs (/tmp/muyon-combination-target/debug/deps/documents-ce344881c871e187)",
+      "status": "ok",
+      "passed": 18,
+      "failed": 0,
+      "ignored": 0,
+      "filtered": 0
+    },
+    {
+      "target": "Running tests/evidence_local.rs (/tmp/muyon-combination-target/debug/deps/evidence_local-84afd7c2bd18c18e)",
+      "status": "ok",
+      "passed": 16,
+      "failed": 0,
+      "ignored": 0,
+      "filtered": 0
+    },
+    {
+      "target": "Running tests/group_governance.rs (/tmp/muyon-combination-target/debug/deps/group_governance-41de4a201059a35d)",
+      "status": "ok",
+      "passed": 21,
+      "failed": 0,
+      "ignored": 0,
+      "filtered": 0
+    },
+    {
+      "target": "Running tests/group_runtime.rs (/tmp/muyon-combination-target/debug/deps/group_runtime-617e9c753b203837)",
+      "status": "ok",
+      "passed": 20,
+      "failed": 0,
+      "ignored": 0,
+      "filtered": 0
+    },
+    {
+      "target": "Running tests/group_runtime_store.rs (/tmp/muyon-combination-target/debug/deps/group_runtime_store-88ba3defd575b777)",
+      "status": "ok",
+      "passed": 35,
+      "failed": 0,
+      "ignored": 0,
+      "filtered": 0
+    },
+    {
+      "target": "Running tests/research.rs (/tmp/muyon-combination-target/debug/deps/research-1ae15a40a4ef0b83)",
+      "status": "ok",
+      "passed": 16,
+      "failed": 0,
+      "ignored": 0,
+      "filtered": 0
+    },
+    {
+      "target": "Running tests/resource_boundaries_additional.rs (/tmp/muyon-combination-target/debug/deps/resource_boundaries_additional-611d93eb3d3e26f6)",
+      "status": "ok",
+      "passed": 3,
+      "failed": 0,
+      "ignored": 0,
+      "filtered": 0
+    },
+    {
+      "target": "Running tests/store_admission_additional.rs (/tmp/muyon-combination-target/debug/deps/store_admission_additional-21c9bf07c0773e4c)",
+      "status": "ok",
+      "passed": 3,
+      "failed": 0,
+      "ignored": 0,
+      "filtered": 0
+    }
+  ],
+  "executions_passed": 405,
+  "failed": 0,
+  "note": "Execution counts overlap module source-harness cases; group_store35 includes17 dedicated+18 repeated module tests. Do not add targeted runs to405."
+}

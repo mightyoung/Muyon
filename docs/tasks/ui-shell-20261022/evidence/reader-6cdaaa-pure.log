@@ -1,0 +1,7 @@
+source_commit=6cdaaa23ca1c194c0c32599cc1293f6c50907dcd
+compiler=/workspace/ui-shell-tools/kotlin-2.2.20/kotlinc/bin/kotlinc
+flags=-Werror -jvm-target 17 -include-runtime
+extraction=git show of exact models/parser/checks source into new task temp directory
+compile_exit=0
+PASS: reader state, sidecar CAS and bounded native Office text checks
+runner_exit=0

@@ -113,7 +113,9 @@
             "host_session::tests::fresh_admission_excludes_host_work_from_idle_without_resetting_total",
             "host_session::tests::incomplete_entropy_fails_closed_without_a_pid_or_time_fallback",
             "host_session::tests::invocation_identity_distinguishes_attempts_in_the_same_process",
-            "wire_provider::pump_tests::actual_wouldblock_step_cannot_bypass_cancel_or_total_deadline"
+            "wire_provider::pump_tests::actual_wouldblock_step_cannot_bypass_cancel_or_total_deadline",
+            "store::lock_tests::guard_drop_releases_lock_while_same_open_file_description_survives",
+            "store::lock_tests::live_guard_excludes_independent_open_until_explicit_owner_drop"
           ]
         },
         "integration:native_ports": {
@@ -130,6 +132,22 @@
             "registered_protocol_preserves_arguments_and_schema",
             "registered_protocol_rejects_name_collisions",
             "registered_protocol_rejects_unknown_and_incomplete"
+          ]
+        },
+        "integration:http_transport": {
+          "family": "synthetic-http-transport",
+          "names": [
+            "actual_loopback_http_returns_sse_without_changing_exact_reviewed_payload",
+            "ambiguous_framing_redirect_and_response_limit_are_rejected",
+            "cancellation_and_insufficient_budget_send_zero_bytes",
+            "cancellation_and_revocation_after_send_stop_before_response_admission",
+            "existing_agent_unknown_and_evidence_hold_never_enter_http_provider",
+            "final_review_after_connect_prevents_first_request_byte",
+            "idle_and_total_deadlines_bound_an_open_synthetic_stream",
+            "partial_sse_never_becomes_a_tool_event",
+            "remote_addresses_are_rejected_before_any_connection",
+            "response_budget_exhaustion_counts_actual_bytes_without_retry",
+            "truncated_http_response_is_an_error_with_one_send_and_no_retry"
           ]
         }
       },
@@ -155,19 +173,27 @@
           "sha256": "3a8e7c958dcebb4f07e69f91908d6b90780810fd9ac7a5272cb06ba69eb3793e"
         },
         "experiments/redesign/core-agent-lab/core/src/wire_provider.rs": {
-          "commit": "31b9b6fc1f7f8b27952533ca141e901676ba90e8",
-          "sha256": "264341ffc58625760df0e7c01dffe9413a348a1323a2cdc91ab14a4a0b2cebc9"
+          "commit": "6ec4c47c6da6415f7b395f98a43d0d3794a16d60",
+          "sha256": "0544ed45b96667ba169d2b9586962504c6a8beb8249a58ca88a9fefb018a8538"
         },
         "experiments/redesign/core-agent-lab/core/tests/native_ports.rs": {
-          "commit": "9d6b2a15ed35259d01035cdb3a53aa1586503879",
+          "commit": "39148943a9a051b3f896f65fde30d67fd265d7f6",
           "sha256": "464497eee0c6238c9f8d802c23a87a01487d00ad0aeb136934f290e7f0768db2"
         },
         "experiments/redesign/core-agent-lab/core/tests/native_protocol.rs": {
-          "commit": "9d6b2a15ed35259d01035cdb3a53aa1586503879",
+          "commit": "7b1264075fecdd898690ffaf9b40880549834bd5",
           "sha256": "d9d2a8e306bb7b4fc70f9e63121ba9ed8eb83aa32e8ecee7b9972f78c60f9444"
+        },
+        "experiments/redesign/core-agent-lab/core/tests/http_transport.rs": {
+          "commit": "03c1628631a07762ac9961f7162d1e49343ca2b8",
+          "sha256": "98d874da58ba46adbce64688e931b371d3b4694d672b1bec83a4f18461dc04da"
+        },
+        "experiments/redesign/core-agent-lab/core/src/store.rs": {
+          "commit": "c9a31c4cc9538ae7e480fc8920c833ba8966dd58",
+          "sha256": "716e8fb740c947410f08242138bc53d5b0b2a41d52c8ddf53556e8083896b09c"
         }
       },
-      "expected_total": 94
+      "expected_total": 107
     },
     "plugin": {
       "groups": {
@@ -177,6 +203,7 @@
             "atomic_registration_publishes_only_valid_bundle",
             "declaration_labels_cannot_authorize",
             "discovery_filters_current_authority",
+            "foreign_data_admission_requires_the_referenced_schema_closure",
             "namespace_duplicates_and_versions_reject",
             "registration_neither_grants_nor_reads",
             "relation_and_view_refs_must_resolve",
@@ -210,19 +237,19 @@
       },
       "sources": {
         "experiments/redesign/plugin-contract-lab/core/tests/registration.rs": {
-          "commit": "31b9b6fc1f7f8b27952533ca141e901676ba90e8",
-          "sha256": "f2e2b74e5dba306c9cfd4127a96f11a33e5642c7fc1fe8d52cdfdd378fffe75e"
+          "commit": "69a98a8ac9dcc356a2787ca96569fc589bb2d368",
+          "sha256": "8cfcb71a3ad8949e7b40748d4fbef426e660a86890c165ef6c5f82672bf36c4f"
         },
         "experiments/redesign/plugin-contract-lab/core/tests/read_contract.rs": {
           "commit": "31b9b6fc1f7f8b27952533ca141e901676ba90e8",
           "sha256": "f071e733f87c08c41cba752ba133ed43bffdc6c18e5f01cda27e565cd7dc8fad"
         },
         "experiments/redesign/plugin-contract-lab/core/tests/mapping_contract.rs": {
-          "commit": "2c99ea7ceb138d5fd7d83d5aba05cc99f6193d7c",
-          "sha256": "01708d733e83ad4319cf858fb849d020248f4db75df1d9ce12ff0839f57ace34"
+          "commit": "698c40bc607ae111b8fed7707f38bb362207e247",
+          "sha256": "40f801e99eb9fa390329fba8942cf3b366b260e3e7858e94a3f3d7d3d2462c6b"
         }
       },
-      "expected_total": 21
+      "expected_total": 22
     },
     "host": {
       "groups": {
@@ -255,15 +282,101 @@
             "wrong_projection_preserves_raw_receipt",
             "wrong_reference_version_retains_only_original_receipt"
           ]
+        },
+        "integration:service_controller": {
+          "family": "service-controller",
+          "names": [
+            "service_controller_executes_registered_read",
+            "controller_is_send_sync_without_moving_native_session",
+            "build_identity_is_explicit_without_host_build_environment",
+            "zero_client_initialization_retirement_requires_real_settlement"
+          ]
+        },
+        "integration:contract_transport": {
+          "family": "contract-transport",
+          "names": [
+            "persistent_catalog_keeps_generation_and_one_shot_ticket",
+            "tickets_cannot_cross_catalog_instances",
+            "recoverable_schema_rejection_preserves_catalog",
+            "fatal_envelope_replies_latch_transport_closed",
+            "raw_frames_enforce_utf8_duplicates_depth_and_limits",
+            "explicit_transport_close_rejects_future_inspection",
+            "wire_close_retains_child_command_inspection_semantics",
+            "embedded_line_feed_is_fatal_but_crlf_sibling_is_valid"
+          ]
+        },
+        "integration:service_runtime": {
+          "family": "service-runtime",
+          "names": [
+            "all_builtins_read_physical_file_and_journal_two_actual_payloads",
+            "pre_cancelled_worker_never_bootstraps_or_reads"
+          ]
+        },
+        "integration:service_root": {
+          "family": "service-root",
+          "names": [
+            "root_lease_serializes_durable_admission_and_preserves_identity",
+            "root_inventory_refuses_unowned_entries_and_peak_overflow"
+          ]
+        },
+        "integration:service_oracle": {
+          "family": "service-oracle",
+          "names": [
+            "service_controller_observer_correlates_all_builtin_payloads"
+          ]
+        },
+        "integration:service_lifecycle": {
+          "family": "service-lifecycle",
+          "names": [
+            "client_epochs_generations_and_visibility_are_fail_closed",
+            "same_request_is_existing_without_a_second_worker",
+            "close_and_reconnect_preserve_original_durable_outcome",
+            "incomplete_temp_evidence_blocks_ready_without_cleanup"
+          ]
+        },
+        "unit:src/lib.rs": {
+          "family": "service-stop-cause",
+          "names": [
+            "service_runtime::stop_cause_tests::observed_deadline_survives_late_cancel",
+            "service_runtime::stop_cause_tests::observed_cancel_survives_later_deadline"
+          ]
         }
       },
       "sources": {
         "experiments/redesign/rust-agent-host-lab/core/tests/native_read.rs": {
-          "commit": "5fc2b42b33901123e3f832e4458666ef5fecee0c",
+          "commit": "a8e9b93b086e88548524fe43789db5a3172696b8",
           "sha256": "04aed51dd17ab035f6a4210fcf7d4c30c2c9458f64dd44642c974dc22c59e188"
+        },
+        "experiments/redesign/rust-agent-host-lab/core/tests/service_controller.rs": {
+          "commit": "cfe1e73c1e8f400926f7021b97b9d36892a9fac0",
+          "sha256": "6653361134043202b9bf71b4f5fe3e07fb9e019d25b7e48fb50f3ee2cc5ed694"
+        },
+        "experiments/redesign/rust-agent-host-lab/core/tests/contract_transport.rs": {
+          "commit": "f4b0035dabb4a0819f50f0174a53e050fcfc1a16",
+          "sha256": "2fab93189b6615b623185db505f2b61e4bc53d0a4853670a94193d81d13907b3"
+        },
+        "experiments/redesign/rust-agent-host-lab/core/tests/service_runtime.rs": {
+          "commit": "1f5e138f853c4d0a2d962068d3b31b5db71d0d03",
+          "sha256": "165b2e903aac273d5cb4f31deb9974b1c4fe20561735662923644fdafbfa4b8b"
+        },
+        "experiments/redesign/rust-agent-host-lab/core/tests/service_root.rs": {
+          "commit": "ad1cdd0c5040e25cb4583a7d2fa7601dc6b56dbc",
+          "sha256": "e02398223d07ded359e8f64fbb9b1f3f9356a90a0ed1056117e0fbe08c34de68"
+        },
+        "experiments/redesign/rust-agent-host-lab/core/tests/service_oracle.rs": {
+          "commit": "f6bd92f0bf58d7fc4e13ca6b6b7bfb3a8bb90c43",
+          "sha256": "f792140578cc8dbdf130dde0298eda21aca8bcf70afbc52dfa83f3f00e9b5d36"
+        },
+        "experiments/redesign/rust-agent-host-lab/core/tests/service_lifecycle.rs": {
+          "commit": "6e0f1c5752515c2bb8318897832912c57b8d1090",
+          "sha256": "36146445d5db8b8552cac3d3fccc36d7d90b9ef0d1691f6c83b4602c599f6123"
+        },
+        "experiments/redesign/rust-agent-host-lab/core/src/service_runtime.rs": {
+          "commit": "f60f843007869ffd81b1dbe0f222728322eca7d6",
+          "sha256": "915f1b0c21c51471d3533c2970c7ec09da5eb9500d3d5dffc8b2e8f40a1455b2"
         }
       },
-      "expected_total": 25
+      "expected_total": 48
     }
   },
   "python": {

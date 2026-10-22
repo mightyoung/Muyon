@@ -1,0 +1,49 @@
+{
+  "kind": "new_final_independent_local_creation_run",
+  "head": "bdc58460410b4c5b51c52e10516f058a0079092e",
+  "dependency": "15c65c7c9c1f0af1e73c8092b2de2ac78939eea7",
+  "dependency_blob_sha256": "29b9a76a845c9da7b28254640c8aac0941736dd871c99811255dafffef382d9a",
+  "cwd": "/workspace/bot-setup-draft",
+  "command_argv": [
+    "python3",
+    "docs/tasks/bot-setup-draft-20261022/run-creation-checks.py"
+  ],
+  "utc_started_at": "2026-10-22T06:22:09.231679Z",
+  "utc_finished_at": "2026-10-22T06:22:14.852892Z",
+  "exit_code": 0,
+  "versions": {
+    "rustc": {
+      "command": [
+        "/tmp/bot-cargo/bin/rustc",
+        "--version"
+      ],
+      "exit_code": 0
+    },
+    "python": {
+      "command": [
+        "python3",
+        "--version"
+      ],
+      "exit_code": 0
+    }
+  },
+  "source_sha256_before": {
+    "crates/muyon-core/src/bot_definitions.rs": "41843c10a5c9a1848d138bd6cad4bbd5b7005bd3f9c51b694f40750d1ef3a9d2",
+    "crates/muyon-core/src/bot_definitions/tests.rs": "6d73d1ebc8a43350e3c92c05a5667112bb09b1fce361f4961c58284b77cf5d00",
+    "docs/tasks/bot-setup-draft-20261022/run-creation-checks.py": "a1540173a710bf88c551d64d231c56bc4764f093a027d6aa830433187d007d84"
+  },
+  "source_sha256_after": {
+    "crates/muyon-core/src/bot_definitions.rs": "41843c10a5c9a1848d138bd6cad4bbd5b7005bd3f9c51b694f40750d1ef3a9d2",
+    "crates/muyon-core/src/bot_definitions/tests.rs": "6d73d1ebc8a43350e3c92c05a5667112bb09b1fce361f4961c58284b77cf5d00",
+    "docs/tasks/bot-setup-draft-20261022/run-creation-checks.py": "a1540173a710bf88c551d64d231c56bc4764f093a027d6aa830433187d007d84"
+  },
+  "head_after": "bdc58460410b4c5b51c52e10516f058a0079092e",
+  "logs_sha256": {
+    "python-version.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "python-version.stdout.log": "4c3569f5da09975434dd9fd9a91fadbc4367a91d8f3c3fab59e9241ab9ee4bd8",
+    "rustc-version.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "rustc-version.stdout.log": "8dc912acd5bfeafc70b01b1d2a2afb0844afa02f5dba2f1ae8d5c212d005afb6",
+    "stderr.log": "a651a7f69b691d28b055f8f67f9ca29c1d08d1b5182e17bc7d0bf63df32ce9ac",
+    "stdout.log": "77e8f67e0da33e57bccbabcce9da3cc98115130b64ed85ba19634fc24bc758c7"
+  }
+}

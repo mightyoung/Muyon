@@ -11,6 +11,7 @@ on:
       - main
       - 'task/**'
       - 'review/**'
+      - 'lab/pr101-coverage-contract-fix-20261022'
   pull_request:
     branches:
       - develop

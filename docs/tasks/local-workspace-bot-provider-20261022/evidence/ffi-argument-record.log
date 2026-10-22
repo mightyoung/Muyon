@@ -1,0 +1,17 @@
+PASS exact B old4 signature/body preserved: local_draft_resolve
+PASS exact B old4 signature/body preserved: local_draft_read
+PASS exact B old4 signature/body preserved: local_draft_save
+PASS exact B old4 signature/body preserved: local_draft_lookup_save
+PASS new5 prepare body identical after typed-record destructuring
+PASS exact10-field UniFFI record, prepare takes only self+request, no prepare lint exception
+PASS core/state-machine/tests/exports/dependencies unchanged
+$ git diff --check
+exit=0
+
+
+$ cargo clippy --offline --locked --manifest-path crates/Cargo.toml --workspace --all-targets -- -D warnings
+NOT_RUN: cargo absent; no compilation/clippy/generation success claimed
+$ cargo test --offline --locked --manifest-path crates/Cargo.toml -p muyon-android-ffi --lib local_draft_bridge_tests
+NOT_RUN: cargo absent; no compilation/clippy/generation success claimed
+86de57e1bb8191b26291f9dd4b3eb7e0f695e5b6a0f3709e511fe48090840be0  crates/muyon-android-ffi/src/lib.rs
+NOT_RUN actual UniFFI record/method generation and Kotlin/Host/Android consumer; B+Host update required

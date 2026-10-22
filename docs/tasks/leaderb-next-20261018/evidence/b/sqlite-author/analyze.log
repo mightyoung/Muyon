@@ -1,0 +1,18 @@
+Unhandled exception:
+FileSystemException: Creation failed, path = '/home/agent/.dartServer' (OS Error: Read-only file system, errno = 30)
+#0      _Directory.createSync (dart:io/directory_impl.dart:136)
+#1      _Directory.createSync (dart:io/directory_impl.dart:131)
+#2      PhysicalResourceProvider.getStateLocation (package:analyzer/file_system/physical_file_system.dart:80)
+#3      Driver._readUuid (package:analysis_server/src/server/driver.dart:766)
+#4      Driver.start (package:analysis_server/src/server/driver.dart:336)
+<asynchronous suspension>
+Analyzing muyon...                                              
+analysis server exited with code 255 and output:
+[stderr] Unhandled exception:
+[stderr] FileSystemException: Creation failed, path = '/home/agent/.dartServer' (OS Error: Read-only file system, errno = 30)
+[stderr] #0      _Directory.createSync (dart:io/directory_impl.dart:136)
+[stderr] #1      _Directory.createSync (dart:io/directory_impl.dart:131)
+[stderr] #2      PhysicalResourceProvider.getStateLocation (package:analyzer/file_system/physical_file_system.dart:80)
+[stderr] #3      Driver._readUuid (package:analysis_server/src/server/driver.dart:766)
+[stderr] #4      Driver.start (package:analysis_server/src/server/driver.dart:336)
+[stderr] <asynchronous suspension>

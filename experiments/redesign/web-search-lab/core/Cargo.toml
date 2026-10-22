@@ -1,0 +1,10 @@
+[package]
+name = "muyon-web-search-lab"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+[dependencies]
+muyon-core-agent-lab = { path = "../../core-agent-lab/core" }
+muyon-plugin-contract-lab = { path = "../../plugin-contract-lab/core" }
+muyon-rust-agent-host-lab = { path = "../../rust-agent-host-lab/core" }

@@ -1,0 +1,261 @@
+package-device	API26 exact Compose Service Agent ordinary chat	﻿2026-10-19T01:20:48.8478258Z ##[group]Run bash experiments/redesign/android-rust-bridge-lab/checks/ordinary_chat_device.sh
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:20:48.8478826Z [36;1mbash experiments/redesign/android-rust-bridge-lab/checks/ordinary_chat_device.sh[0m
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:20:48.8536106Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:20:48.8536402Z env:
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:20:48.8536661Z   JAVA_HOME: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.20-1/x64
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:20:48.8537078Z   JAVA_HOME_17_X64: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.20-1/x64
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:20:48.8537390Z ##[endgroup]
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:20:48.8658321Z f86804cce3f54888ef0cc42b0540d12fb82e42c7	sdk	START	-
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:20:49.4573436Z Loading package information...                                                  
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:20:49.5341863Z Loading local repository...                                                     
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:20:49.5344922Z [                                       ] 3% Loading local repository...        
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:20:49.7790570Z [                                       ] 3% Fetch remote repository...         
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:20:50.0740720Z [=                                      ] 3% Fetch remote repository...         
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:20:50.1420821Z [=                                      ] 4% Fetch remote repository...         
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:20:50.1597534Z [=                                      ] 5% Fetch remote repository...         
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:20:50.1815805Z [==                                     ] 5% Fetch remote repository...         
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:20:50.2264175Z [==                                     ] 6% Fetch remote repository...         
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:20:50.3502705Z [==                                     ] 7% Fetch remote repository...         
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:20:50.3503348Z [==                                     ] 7% Computing updates...               
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:20:50.3601283Z [===                                    ] 8% Computing updates...               
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:20:50.3904013Z [===                                    ] 10% Computing updates...              
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:20:50.4410568Z [===                                    ] 10% Installing Android Emulator       
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:20:50.5654942Z [===                                    ] 10% Downloading emulator-linux_x64-164
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:20:50.6598202Z [====                                   ] 10% Downloading emulator-linux_x64-164
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:20:50.7790944Z [====                                   ] 11% Downloading emulator-linux_x64-164
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:20:50.8467829Z [====                                   ] 12% Downloading emulator-linux_x64-164
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:20:50.9146265Z [=====                                  ] 13% Downloading emulator-linux_x64-164
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:20:50.9714832Z [=====                                  ] 14% Downloading emulator-linux_x64-164
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:20:51.0049946Z [=====                                  ] 15% Downloading emulator-linux_x64-164
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:20:51.0324215Z [======                                 ] 15% Downloading emulator-linux_x64-164
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:20:51.0966443Z [======                                 ] 16% Downloading emulator-linux_x64-164
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:20:51.1590483Z [======                                 ] 17% Downloading emulator-linux_x64-164
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:20:51.2227761Z [=======                                ] 18% Downloading emulator-linux_x64-164
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:20:51.2838488Z [=======                                ] 19% Downloading emulator-linux_x64-164
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:20:51.3141411Z [=======                                ] 20% Downloading emulator-linux_x64-164
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:20:51.3593144Z [========                               ] 20% Downloading emulator-linux_x64-164
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:20:51.3990487Z [========                               ] 21% Downloading emulator-linux_x64-164
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:20:51.5112190Z [========                               ] 21% Unzipping...                      
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:20:51.5115678Z [========                               ] 21% Unzipping... emulator/            
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:20:51.5116544Z [========                               ] 21% Unzipping... emulator/resources/  
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:20:51.5446203Z [========                               ] 21% Unzipping... emulator/qsn         
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:20:51.5971189Z [========                               ] 21% Unzipping... emulator/emulator    
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:20:51.6174629Z [========                               ] 21% Unzipping... emulator/netsimd     
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:20:51.7015219Z [========                               ] 22% Unzipping... emulator/netsimd     
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:20:51.7015764Z [========                               ] 22% Unzipping... emulator/bin64/      
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:20:51.7020363Z [========                               ] 22% Unzipping... emulator/qemu/       
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:20:51.7028440Z [========                               ] 22% Unzipping... emulator/NOTICE.txt  
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:20:51.7173418Z [========                               ] 22% Unzipping... emulator/crashpad_han
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:20:51.8213086Z [========                               ] 22% Unzipping... emulator/source.prope
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:20:51.8734273Z [========                               ] 22% Unzipping... emulator/nimble_bridg
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:20:51.8736367Z [========                               ] 22% Unzipping... emulator/LICENSE     
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:20:51.8736928Z [========                               ] 22% Unzipping... emulator/lib/        
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:20:51.8805057Z [========                               ] 22% Unzipping... emulator/qemu-img    
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:20:51.8805721Z [========                               ] 22% Unzipping... emulator/include/    
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:20:51.8812492Z [========                               ] 22% Unzipping... emulator/NOTICE.csv  
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:20:51.8813091Z [========                               ] 22% Unzipping... emulator/lib64/      
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:20:51.8960445Z [========                               ] 22% Unzipping... emulator/emulator-che
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:20:51.9126704Z [========                               ] 22% Unzipping... emulator/crashreport 
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:20:51.9129916Z [========                               ] 22% Unzipping... emulator/mksdcard    
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:20:51.9815388Z [========                               ] 22% Unzipping... emulator/resources/To
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:20:51.9871559Z [========                               ] 22% Unzipping... emulator/resources/de
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:20:51.9873108Z [========                               ] 22% Unzipping... emulator/resources/To
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:20:51.9883038Z [========                               ] 22% Unzipping... emulator/resources/de
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:20:51.9991552Z [========                               ] 22% Unzipping... emulator/resources/To
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:20:52.0000550Z [========                               ] 22% Unzipping... emulator/resources/ma
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:20:52.0013926Z [========                               ] 22% Unzipping... emulator/resources/de
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:20:52.0014654Z [========                               ] 22% Unzipping... emulator/resources/sk
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:20:52.0041931Z [========                               ] 22% Unzipping... emulator/resources/de
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:20:52.0042450Z [========                               ] 22% Unzipping... emulator/resources/ma
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:20:52.0055387Z [========                               ] 22% Unzipping... emulator/resources/po
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:20:52.0108540Z [========                               ] 22% Unzipping... emulator/resources/ma
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:20:52.0112718Z [=========                              ] 23% Unzipping... emulator/resources/ma
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:20:52.0158232Z [=========                              ] 23% Unzipping... emulator/resources/sk
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:20:52.0168737Z [=========                              ] 23% Unzipping... emulator/resources/ma
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:20:52.0196536Z [=========                              ] 23% Unzipping... emulator/bin64/e2fsck
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:20:52.0224274Z [=========                              ] 23% Unzipping... emulator/bin64/fsck.e
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:20:52.0241692Z [=========                              ] 23% Unzipping... emulator/bin64/tune2f
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:20:52.0255729Z [=========                              ] 23% Unzipping... emulator/bin64/resize
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:20:52.0274676Z [=========                              ] 23% Unzipping... emulator/bin64/mkfs.e
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:20:52.5625378Z [=========                              ] 23% Unzipping... emulator/qemu/linux-x
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:20:53.0777481Z [=========                              ] 24% Unzipping... emulator/qemu/linux-x
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:20:53.3295268Z [=========                              ] 25% Unzipping... emulator/qemu/linux-x
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:20:53.6035277Z [==========                             ] 25% Unzipping... emulator/qemu/linux-x
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:20:53.6037040Z [==========                             ] 25% Unzipping... emulator/lib/emulator
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:20:53.6039700Z [==========                             ] 25% Unzipping... emulator/lib/rtc_serv
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:20:53.6042967Z [==========                             ] 25% Unzipping... emulator/lib/advanced
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:20:53.6043701Z [==========                             ] 25% Unzipping... emulator/lib/cmake/  
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:20:53.6046159Z [==========                             ] 25% Unzipping... emulator/lib/emulator
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:20:53.6047870Z [==========                             ] 25% Unzipping... emulator/lib/control_
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:20:53.6050478Z [==========                             ] 25% Unzipping... emulator/lib/emulated
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:20:53.7074902Z [==========                             ] 25% Unzipping... emulator/lib/rtc_serv
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:20:53.7079206Z [==========                             ] 25% Unzipping... emulator/lib/emu-orig
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:20:53.7086217Z [==========                             ] 25% Unzipping... emulator/lib/hardware
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:20:53.7086698Z [==========                             ] 25% Unzipping... emulator/lib/pkgconfi
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:20:53.7087025Z [==========                             ] 25% Unzipping... emulator/lib/pc-bios/
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:20:53.7087339Z [==========                             ] 25% Unzipping... emulator/lib/snapshot
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:20:53.7087863Z [==========                             ] 25% Unzipping... emulator/lib/adb_serv
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:20:53.7100156Z [==========                             ] 25% Unzipping... emulator/lib/hostapd.
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:20:53.7100963Z [==========                             ] 25% Unzipping... emulator/lib/grpc_end
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:20:53.7110087Z [==========                             ] 25% Unzipping... emulator/lib/ca-bundl
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:20:53.7112397Z [==========                             ] 25% Unzipping... emulator/lib/ui_contr
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:20:53.7115832Z [==========                             ] 25% Unzipping... emulator/lib/snapshot
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:20:53.7119250Z [==========                             ] 25% Unzipping... emulator/lib/ice_conf
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:20:53.7207728Z [==========                             ] 25% Unzipping... emulator/lib/libflatb
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:20:53.7382008Z [==========                             ] 26% Unzipping... emulator/lib/libflatb
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:20:53.7387911Z [==========                             ] 26% Unzipping... emulator/lib/emulator
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:20:53.7389601Z [==========                             ] 26% Unzipping... emulator/lib/waterfal
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:20:53.7391867Z [==========                             ] 26% Unzipping... emulator/lib/emulated
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:20:53.7400027Z [==========                             ] 26% Unzipping... emulator/lib/cmake/fl
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:20:53.7401974Z [==========                             ] 26% Unzipping... emulator/lib/pkgconfi
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:20:53.7527134Z [==========                             ] 26% Unzipping... emulator/lib/pc-bios/
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:20:53.8026401Z [==========                             ] 26% Unzipping... emulator/include/flat
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:20:53.8085637Z [==========                             ] 26% Unzipping... emulator/lib64/libgli
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:20:53.8188087Z [==========                             ] 26% Unzipping... emulator/lib64/libpro
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:20:53.8189127Z [==========                             ] 26% Unzipping... emulator/lib64/qt/   
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:20:53.8525480Z [==========                             ] 26% Unzipping... emulator/lib64/liband
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:20:53.9117368Z [==========                             ] 26% Unzipping... emulator/lib64/libgfx
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:20:53.9117947Z [==========                             ] 26% Unzipping... emulator/lib64/gles_l
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:20:53.9123996Z [==========                             ] 26% Unzipping... emulator/lib64/liband
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:20:53.9124755Z [==========                             ] 26% Unzipping... emulator/lib64/vulkan
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:20:53.9125218Z [==========                             ] 26% Unzipping... emulator/lib64/gles_s
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:20:53.9128204Z [==========                             ] 26% Unzipping... emulator/lib64/libemu
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:20:53.9230831Z [==========                             ] 26% Unzipping... emulator/lib64/libpro
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:20:54.1670574Z [==========                             ] 26% Unzipping... emulator/lib64/liband
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:20:54.1688091Z [==========                             ] 26% Unzipping... emulator/lib64/libtcm
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:20:54.1690606Z [==========                             ] 26% Unzipping... emulator/lib64/libima
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:20:54.1744515Z [==========                             ] 26% Unzipping... emulator/lib64/libc++
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:20:54.1975222Z [==========                             ] 26% Unzipping... emulator/lib64/liband
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:20:54.2014169Z [==========                             ] 26% Unzipping... emulator/lib64/libabs
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:20:54.2014860Z [==========                             ] 26% Unzipping... emulator/lib64/gles_a
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:20:54.2074692Z [==========                             ] 26% Unzipping... emulator/lib64/libsha
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:20:54.2130727Z [==========                             ] 26% Unzipping... emulator/lib64/libc++
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:20:54.2140387Z [==========                             ] 26% Unzipping... emulator/lib64/qt/res
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:20:54.2140924Z [==========                             ] 26% Unzipping... emulator/lib64/qt/lib
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:20:54.2141407Z [==========                             ] 26% Unzipping... emulator/lib64/qt/tra
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:20:54.2141886Z [==========                             ] 26% Unzipping... emulator/lib64/qt/plu
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:20:54.2160692Z [==========                             ] 26% Unzipping... emulator/lib64/qt/res
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:20:54.3284589Z [==========                             ] 27% Unzipping... emulator/lib64/qt/res
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:20:54.4794477Z [==========                             ] 27% Unzipping... emulator/lib64/qt/lib
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:20:54.8761901Z [===========                            ] 28% Unzipping... emulator/lib64/qt/lib
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:20:55.2297710Z [===========                            ] 29% Unzipping... emulator/lib64/qt/lib
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:20:56.0946539Z [===========                            ] 30% Unzipping... emulator/lib64/qt/lib
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:20:56.1636958Z [============                           ] 30% Unzipping... emulator/lib64/qt/lib
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:20:56.3117419Z [============                           ] 30% Unzipping... emulator/lib64/qt/tra
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:20:56.3557476Z [============                           ] 30% Unzipping... emulator/lib64/qt/plu
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:20:56.3739388Z [============                           ] 30% Unzipping... emulator/lib64/gles_l
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:20:56.4276052Z [============                           ] 31% Unzipping... emulator/lib64/gles_l
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:20:56.7922433Z [============                           ] 31% Unzipping... emulator/lib64/vulkan
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:20:57.5188468Z [============                           ] 32% Unzipping... emulator/lib64/vulkan
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:20:57.5763040Z [============                           ] 32% Unzipping... emulator/lib64/gles_s
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:20:57.6726016Z [============                           ] 32% Unzipping... emulator/lib64/gles_a
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:20:57.7280538Z [=============                          ] 33% Unzipping... emulator/lib64/gles_a
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:20:57.9918994Z [=====================                  ] 55% Unzipping... emulator/lib64/gles_a
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:20:58.0342939Z [=====================                  ] 55% Installing Google APIs Intel x86_6
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:20:58.1691619Z [=====================                  ] 55% Downloading x86_64-26_r16.zip... e
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:20:58.3613663Z [======================                 ] 55% Downloading x86_64-26_r16.zip... e
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:20:58.7889761Z [======================                 ] 56% Downloading x86_64-26_r16.zip... e
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:20:59.1882223Z [======================                 ] 57% Downloading x86_64-26_r16.zip... e
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:20:59.6434933Z [=======================                ] 58% Downloading x86_64-26_r16.zip... e
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:21:00.0129235Z [=======================                ] 59% Downloading x86_64-26_r16.zip... e
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:21:00.2304499Z [=======================                ] 60% Downloading x86_64-26_r16.zip... e
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:21:00.4092355Z [========================               ] 60% Downloading x86_64-26_r16.zip... e
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:21:00.8155785Z [========================               ] 61% Downloading x86_64-26_r16.zip... e
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:21:01.1920332Z [========================               ] 62% Downloading x86_64-26_r16.zip... e
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:21:01.6153793Z [=========================              ] 63% Downloading x86_64-26_r16.zip... e
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:21:01.9936000Z [=========================              ] 64% Downloading x86_64-26_r16.zip... e
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:21:02.2036351Z [=========================              ] 65% Downloading x86_64-26_r16.zip... e
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:21:02.4189998Z [==========================             ] 65% Downloading x86_64-26_r16.zip... e
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:21:02.7107015Z [==========================             ] 66% Downloading x86_64-26_r16.zip... e
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:21:02.7114761Z [==========================             ] 66% Unzipping... emulator/lib64/gles_a
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:21:02.7119066Z [==========================             ] 66% Unzipping... x86_64/              
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:21:02.7119900Z [==========================             ] 66% Unzipping... x86_64/advancedFeatur
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:21:02.7355684Z [==========================             ] 66% Unzipping... x86_64/kernel-ranchu 
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:21:02.7394183Z [==========================             ] 66% Unzipping... x86_64/NOTICE.txt    
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:21:02.7395518Z [==========================             ] 66% Unzipping... x86_64/build.prop    
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:21:06.8875829Z [==========================             ] 66% Unzipping... x86_64/userdata.img  
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:21:06.8876636Z [==========================             ] 67% Unzipping... x86_64/userdata.img  
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:21:06.8878075Z [==========================             ] 67% Unzipping... x86_64/source.propert
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:21:06.8878967Z [==========================             ] 67% Unzipping... x86_64/data/         
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:21:06.8880054Z [==========================             ] 67% Unzipping... x86_64/data/misc/    
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:21:06.8891814Z [==========================             ] 67% Unzipping... x86_64/data/misc/wifi
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:21:06.8932303Z [==========================             ] 67% Unzipping... x86_64/ramdisk.img   
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:21:07.8542300Z [==========================             ] 67% Unzipping... x86_64/system.img    
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:21:08.7048283Z [===========================            ] 68% Unzipping... x86_64/system.img    
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:21:09.4125340Z [===========================            ] 69% Unzipping... x86_64/system.img    
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:21:09.9096354Z [===========================            ] 70% Unzipping... x86_64/system.img    
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:21:10.4063039Z [============================           ] 70% Unzipping... x86_64/system.img    
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:21:11.3218187Z [============================           ] 71% Unzipping... x86_64/system.img    
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:21:12.2433040Z [============================           ] 72% Unzipping... x86_64/system.img    
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:21:13.2054717Z [=============================          ] 73% Unzipping... x86_64/system.img    
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:21:13.9442484Z [=============================          ] 74% Unzipping... x86_64/system.img    
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:21:14.4557002Z [=============================          ] 75% Unzipping... x86_64/system.img    
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:21:14.8776009Z [==============================         ] 75% Unzipping... x86_64/system.img    
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:21:15.6710305Z [==============================         ] 76% Unzipping... x86_64/system.img    
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:21:25.9175340Z [==============================         ] 77% Unzipping... x86_64/system.img    
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:21:26.7319791Z [==============================         ] 77% Unzipping... x86_64/vendor.img    
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:21:26.7403330Z [==============================         ] 77% Unzipping... x86_64/encryptionkey.
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:21:26.8282592Z [==============================         ] 78% Unzipping... x86_64/encryptionkey.
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:21:26.8283186Z [=======================================] 100% Unzipping... x86_64/encryptionkey
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:21:26.8354402Z 
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:21:26.8591962Z f86804cce3f54888ef0cc42b0540d12fb82e42c7	sdk	PASS	0
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:21:26.8603353Z f86804cce3f54888ef0cc42b0540d12fb82e42c7	avd	START	-
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:21:27.4608951Z Loading local repository...                                                     
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:21:27.4609904Z [=========                              ] 25% Loading local repository...       
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:21:27.4610531Z [=========                              ] 25% Fetch remote repository...        
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:21:27.4611080Z [=======================================] 100% Fetch remote repository...       
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:21:27.7361041Z Auto-selecting single ABI x86_64
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:21:27.9332876Z Do you wish to create a custom hardware profile? [no] f86804cce3f54888ef0cc42b0540d12fb82e42c7	avd	PASS	0
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:21:27.9343587Z f86804cce3f54888ef0cc42b0540d12fb82e42c7	boot	START	-
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:21:28.2282388Z * daemon not running; starting now at tcp:5037
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:21:28.3154475Z * daemon started successfully
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:22:04.7460644Z f86804cce3f54888ef0cc42b0540d12fb82e42c7	boot	PASS	0
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:22:04.7521113Z f86804cce3f54888ef0cc42b0540d12fb82e42c7	install	START	-
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:22:31.0807316Z Performing Streamed Install
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:22:31.0829330Z Success
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:22:34.2156238Z Performing Streamed Install
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:22:34.2161179Z Success
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:22:34.2177831Z f86804cce3f54888ef0cc42b0540d12fb82e42c7	install	PASS	0
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:22:34.2200475Z f86804cce3f54888ef0cc42b0540d12fb82e42c7	instrumentation	START	-
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:22:34.6827071Z INSTRUMENTATION_STATUS: numtests=2
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:22:34.6827563Z INSTRUMENTATION_STATUS: stream=
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:22:34.6828033Z com.mightyoung.muyon.androidlab.OrdinaryChatServiceLoopTest:
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:22:34.6828515Z INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:22:34.6829268Z INSTRUMENTATION_STATUS: test=composeSendUsesPrivateServiceSameRustAgentAndDisplaysPlainProviderAnswer
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:22:34.6830344Z INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.androidlab.OrdinaryChatServiceLoopTest
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:22:34.6830923Z INSTRUMENTATION_STATUS: current=1
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:22:34.6831248Z INSTRUMENTATION_STATUS_CODE: 1
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:22:40.8398556Z INSTRUMENTATION_STATUS: numtests=2
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:22:40.8399031Z INSTRUMENTATION_STATUS: stream=.
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:22:40.8399306Z INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:22:40.8400037Z INSTRUMENTATION_STATUS: test=composeSendUsesPrivateServiceSameRustAgentAndDisplaysPlainProviderAnswer
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:22:40.8401018Z INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.androidlab.OrdinaryChatServiceLoopTest
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:22:40.8401410Z INSTRUMENTATION_STATUS: current=1
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:22:40.8401641Z INSTRUMENTATION_STATUS_CODE: 0
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:22:40.8430011Z INSTRUMENTATION_STATUS: numtests=2
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:22:40.8430829Z INSTRUMENTATION_STATUS: stream=
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:22:40.8431477Z com.mightyoung.muyon.androidlab.agentipc.OrdinaryChatOwnerContractTest:
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:22:40.8432060Z INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:22:40.8432717Z INSTRUMENTATION_STATUS: test=pinnedContextGenerationAndOneShotAttemptAreEnforcedBySameOwner
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:22:40.8433641Z INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.androidlab.agentipc.OrdinaryChatOwnerContractTest
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:22:40.8434306Z INSTRUMENTATION_STATUS: current=2
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:22:40.8434586Z INSTRUMENTATION_STATUS_CODE: 1
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:22:41.0614707Z INSTRUMENTATION_STATUS: numtests=2
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:22:41.0615644Z INSTRUMENTATION_STATUS: stream=.
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:22:41.0617226Z INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:22:41.0618402Z INSTRUMENTATION_STATUS: test=pinnedContextGenerationAndOneShotAttemptAreEnforcedBySameOwner
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:22:41.0619448Z INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.androidlab.agentipc.OrdinaryChatOwnerContractTest
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:22:41.0620329Z INSTRUMENTATION_STATUS: current=2
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:22:41.0620753Z INSTRUMENTATION_STATUS_CODE: 0
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:22:41.0780692Z INSTRUMENTATION_RESULT: stream=
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:22:41.0781271Z 
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:22:41.0781554Z Time: 6.387
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:22:41.0781806Z 
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:22:41.0781999Z OK (2 tests)
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:22:41.0782239Z 
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:22:41.0788774Z 
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:22:41.0789394Z INSTRUMENTATION_CODE: -1
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:22:41.0989130Z f86804cce3f54888ef0cc42b0540d12fb82e42c7	instrumentation	PASS	0
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:22:41.1009983Z f86804cce3f54888ef0cc42b0540d12fb82e42c7	result	START	-
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:22:41.1031570Z OK (2 tests)
+package-device	API26 exact Compose Service Agent ordinary chat	2026-10-19T01:22:41.1083374Z f86804cce3f54888ef0cc42b0540d12fb82e42c7	result	PASS	0

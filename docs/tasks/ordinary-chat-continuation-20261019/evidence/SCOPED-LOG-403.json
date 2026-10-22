@@ -1,0 +1,11 @@
+{
+  "run": 39194418472,
+  "source_sha": "2fc9ecab381a4106d7680fbb540aeaaa73465193",
+  "job": 117873964382,
+  "action": "GET repos/mightyoung/Muyon/actions/jobs/117873964382/logs",
+  "outcome": "HTTP 403 after storage redirect",
+  "attempts": 1,
+  "retry_or_alternate_route": false,
+  "job_metadata_conclusion": "success",
+  "boundary": "Scoped raw log unavailable. Metadata success is not raw-log inspection. No old denied resource was accessed."
+}

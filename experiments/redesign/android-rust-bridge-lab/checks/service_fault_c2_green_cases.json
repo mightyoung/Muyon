@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "source_commit": "131fd0d54a57496f40a9e967c963ade218f60f69",
+  "source_sha256": {
+    "service_controller.rs": "294d1f1e95f00f2c609750b8131f2449c5e147f8f57d23c8e65f0d2fdd4329d8",
+    "service_runtime.rs": "0790d6ebd5b04a776036bf2c05a13d19eec90379a120c786056a38f40c39164a",
+    "model_gateway.rs": "18fff57d394562742abb3bb3c3a8fb5e9f9d34ad78dfff070b67a4ead8a78410",
+    "store.rs": "eaec3e50d7ddabfdbfa3250276228d4df395bbe4af8fcbcb872098eed722192e"
+  },
+  "cases": {
+    "c2_worker_panic": {
+      "observed": "OutcomeUnknown receipt=RecordedSuccess opaque_match=true",
+      "expected": "OutcomeUnknown receipt=RecordedSuccess opaque_match=true"
+    }
+  }
+}

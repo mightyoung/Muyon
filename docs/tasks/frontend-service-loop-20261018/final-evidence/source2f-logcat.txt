@@ -1,0 +1,532 @@
+--------- beginning of main
+10-18 07:27:57.554  4547  4547 I dex2oat : dex2oat took 1.416s (661.348ms cpu) (threads: 2) arena alloc=4KB (4648B) java alloc=1309KB (1340424B) native alloc=2MB (3022568B) free=1656KB (1696024B)
+10-18 07:27:57.588  1522  1729 D installd: Applied hard quotas for 10078
+10-18 07:27:57.593  1522  1729 E         : Couldn't opendir /data/app/vmdl134815458.tmp: No such file or directory
+10-18 07:27:57.593  1522  1729 E installd: Failed to delete /data/app/vmdl134815458.tmp: No such file or directory
+10-18 07:27:57.601  1621  1739 I InputReader: Reconfiguring input devices.  changes=0x00000010
+10-18 07:27:57.614  1780  4367 W GCM     : Unexpected forwarded intent: Intent { act=android.intent.action.PACKAGE_ADDED dat=package:com.mightyoung.muyon.androidlab.test flg=0x4000010 cmp=com.google.android.gms/.chimera.PersistentIntentOperationService (has extras) }
+10-18 07:27:57.615  1780  4368 W GCM     : Unexpected forwarded intent: Intent { act=android.intent.action.PACKAGE_ADDED dat=package:com.mightyoung.muyon.androidlab.test flg=0x4000010 cmp=com.google.android.gms/.chimera.PersistentIntentOperationService (has extras) }
+10-18 07:27:57.620  2175  4349 I Auth    : [SupervisedAccountIntentOperation] onHandleIntent(): android.intent.action.PACKAGE_ADDED
+10-18 07:27:57.620  2175  4349 I Auth    : [SupervisedAccountIntentOperation] This operation is disabled
+10-18 07:27:57.621  2175  4346 I ChromeSync: [Sync,SyncIntentOperation] Handling the intent: Intent { act=android.intent.action.PACKAGE_ADDED dat=package:com.mightyoung.muyon.androidlab.test flg=0x4000010 cmp=com.google.android.gms/.chimera.GmsIntentOperationService (has extras) }.
+10-18 07:27:57.622  2175  4349 I FontLog : Package com.mightyoung.muyon.androidlab.test has no metadata [CONTEXT service_id=132 ]
+10-18 07:27:57.631  2175  2665 E GmsClient: unable to connect to service: com.google.android.gms.auth.key.retrieval.service.START on com.google.android.gms
+10-18 07:27:57.634  1957  1957 D CarrierSvcBindHelper: No carrier app for: 0
+10-18 07:27:57.635  1957  1957 D ImsResolver: maybeAddedImsService, packageName: com.mightyoung.muyon.androidlab.test
+10-18 07:27:57.635  1957  1957 D CarrierConfigLoader: mHandler: 9 phoneId: 0
+10-18 07:27:57.663  1536  1643 I Netd    : Destroyed 5 sockets for netId 100 permission=1 in 0.5 ms
+10-18 07:27:57.663  1780  2251 V NativeCrypto: Read error: ssl=0x7bc65eda9c88: I/O error during system call, Software caused connection abort
+10-18 07:27:57.670  1780  4338 V NativeCrypto: Write error: ssl=0x7bc65eda9c88: I/O error during system call, Broken pipe
+10-18 07:27:57.670  1780  4338 V NativeCrypto: SSL shutdown failed: ssl=0x7bc65eda9c88: I/O error during system call, Success
+10-18 07:27:57.673  2267  3345 W faq     : Failed closing connection
+10-18 07:27:57.673  2267  3345 W faq     : javax.net.ssl.SSLException: Write error: ssl=0x7bc66fc35a80: I/O error during system call, Broken pipe
+10-18 07:27:57.673  2267  3345 W faq     : 	at com.android.org.conscrypt.NativeCrypto.SSL_write(Native Method)
+10-18 07:27:57.673  2267  3345 W faq     : 	at com.android.org.conscrypt.OpenSSLSocketImpl$SSLOutputStream.write(OpenSSLSocketImpl.java:807)
+10-18 07:27:57.673  2267  3345 W faq     : 	at fgg.a_(PG:7)
+10-18 07:27:57.673  2267  3345 W faq     : 	at ffy.a_(PG:13)
+10-18 07:27:57.673  2267  3345 W faq     : 	at fgj.close(PG:44)
+10-18 07:27:57.673  2267  3345 W faq     : 	at fbs.close(PG:116)
+10-18 07:27:57.673  2267  3345 W faq     : 	at faa.run(PG:7)
+10-18 07:27:57.673  2267  3345 W faq     : 	at io.grpc.internal.dp.run(PG:19)
+10-18 07:27:57.673  2267  3345 W faq     : 	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1162)
+10-18 07:27:57.673  2267  3345 W faq     : 	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:636)
+10-18 07:27:57.673  2267  3345 W faq     : 	at java.lang.Thread.run(Thread.java:764)
+10-18 07:27:57.688  2175  4346 I ChromeSync: [Persistence,AffiliationManager] One of affiliation or grouping data for android://FQtCbXX8ABglCsPEG28dBXpaHVkG2ZBRKyL2dQmBQZXdYg_ob0GWhl1untaS71_8mdRtr7nj1jlQ5GfUtoo7aw==@com.mightyoung.muyon.androidlab.test/ was not found. Marking affiliation data as stale...
+10-18 07:27:58.660  1621  1658 E memtrack: Couldn't load memtrack module
+10-18 07:27:58.660  1621  1658 W android.os.Debug: failed to get memory consumption info: -1
+10-18 07:27:58.723  1621  1658 E memtrack: Couldn't load memtrack module
+10-18 07:27:58.723  1621  1658 W android.os.Debug: failed to get memory consumption info: -1
+10-18 07:27:58.906  1621  1658 E memtrack: Couldn't load memtrack module
+10-18 07:27:58.906  1621  1658 W android.os.Debug: failed to get memory consumption info: -1
+10-18 07:27:58.960  1621  1658 E memtrack: Couldn't load memtrack module
+10-18 07:27:58.960  1621  1658 W android.os.Debug: failed to get memory consumption info: -1
+10-18 07:27:59.063  2175  2939 I Icing   : updateResources: need to parse acek{com.google.android.gm}
+10-18 07:27:59.081  2175  2939 I Icing   : updateResources: need to parse acek{com.google.android.videos}
+10-18 07:27:59.174  2175  2939 I Icing   : updateResources: need to parse acek{com.google.android.gms}
+10-18 07:27:59.248  2556  2556 I MicroDetectionWorker: #updateMicroDetector [detectionMode: [mDetectionMode: [1]]]
+10-18 07:27:59.248  2556  2556 I MicroDetectionWorker: #startMicroDetector [speakerMode: 0]
+10-18 07:27:59.249  2556  2556 I AudioController: Using mInputStreamFactoryBuilder
+10-18 07:27:59.250  2556  2556 I MicroDetectionWorker: onReady
+10-18 07:27:59.252  2556  2693 I MicroRecognitionRunner: Starting detection.
+10-18 07:27:59.252  2556  2697 I MicrophoneInputStream: mic_starting com.google.android.apps.gsa.staticplugins.aa.c@41ac601
+10-18 07:27:59.254  1519  4580 I AudioFlinger: AudioFlinger's thread 0xe4203140 tid=4580 ready to run
+10-18 07:27:59.255  2556  2697 I MicrophoneInputStream: mic_started com.google.android.apps.gsa.staticplugins.aa.c@41ac601
+--------- beginning of system
+10-18 07:27:59.256  2556  2697 E ActivityThread: Failed to find provider info for com.google.android.apps.gsa.testing.ui.audio.recorded
+10-18 07:27:59.256  2556  2697 I MicrophoneInputStream: mic_close com.google.android.apps.gsa.staticplugins.aa.c@41ac601
+10-18 07:27:59.257  2556  2693 I MicroRecognitionRunner: Detection finished
+10-18 07:27:59.257  2556  2693 W ErrorReporter: reportError [type: 211, code: 524300]: Error reading from input stream
+10-18 07:27:59.257  2556  2883 I MicroRecognitionRunner: Stopping hotword detection.
+10-18 07:27:59.257  2556  2693 W ErrorProcessor: onFatalError, processing error from engine(4)
+10-18 07:27:59.257  2556  2693 W ErrorProcessor: com.google.android.apps.gsa.shared.speech.b.g: Error reading from input stream
+10-18 07:27:59.257  2556  2693 W ErrorProcessor: 	at com.google.android.apps.gsa.staticplugins.recognizer.j.a.a(SourceFile:28)
+10-18 07:27:59.257  2556  2693 W ErrorProcessor: 	at com.google.android.apps.gsa.staticplugins.recognizer.j.b.run(SourceFile:15)
+10-18 07:27:59.257  2556  2693 W ErrorProcessor: 	at java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:457)
+10-18 07:27:59.257  2556  2693 W ErrorProcessor: 	at java.util.concurrent.FutureTask.run(FutureTask.java:266)
+10-18 07:27:59.257  2556  2693 W ErrorProcessor: 	at com.google.android.apps.gsa.shared.util.concurrent.a.ax.run(SourceFile:14)
+10-18 07:27:59.257  2556  2693 W ErrorProcessor: 	at com.google.android.apps.gsa.shared.util.concurrent.a.bl.run(SourceFile:4)
+10-18 07:27:59.257  2556  2693 W ErrorProcessor: 	at com.google.android.apps.gsa.shared.util.concurrent.a.bl.run(SourceFile:4)
+10-18 07:27:59.257  2556  2693 W ErrorProcessor: 	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1162)
+10-18 07:27:59.257  2556  2693 W ErrorProcessor: 	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:636)
+10-18 07:27:59.257  2556  2693 W ErrorProcessor: 	at java.lang.Thread.run(Thread.java:764)
+10-18 07:27:59.257  2556  2693 W ErrorProcessor: 	at com.google.android.apps.gsa.shared.util.concurrent.a.ai.run(SourceFile:6)
+10-18 07:27:59.257  2556  2693 W ErrorProcessor: Caused by: com.google.android.apps.gsa.shared.exception.GsaIOException: Error code: 393238 | Buffer overflow, no available space.
+10-18 07:27:59.257  2556  2693 W ErrorProcessor: 	at com.google.android.apps.gsa.speech.audio.Tee.f(SourceFile:103)
+10-18 07:27:59.257  2556  2693 W ErrorProcessor: 	at com.google.android.apps.gsa.speech.audio.au.read(SourceFile:2)
+10-18 07:27:59.257  2556  2693 W ErrorProcessor: 	at java.io.InputStream.read(InputStream.java:101)
+10-18 07:27:59.257  2556  2693 W ErrorProcessor: 	at com.google.android.apps.gsa.speech.audio.ao.run(SourceFile:18)
+10-18 07:27:59.257  2556  2693 W ErrorProcessor: 	at com.google.android.apps.gsa.speech.audio.an.run(SourceFile:2)
+10-18 07:27:59.257  2556  2693 W ErrorProcessor: 	... 9 more
+10-18 07:27:59.258  2556  2693 I AudioController: internalShutdown
+10-18 07:27:59.268  2556  2556 I MicroDetectionWorker: onReady
+10-18 07:27:59.268  2556  2556 I MicroDetector: Keeping mic open: false
+10-18 07:27:59.268  2556  2556 I MicroDetectionWorker: #onError(false)
+10-18 07:27:59.268  2556  2689 I DeviceStateChecker: DeviceStateChecker cancelled
+10-18 07:27:59.345  1621  1658 E memtrack: Couldn't load memtrack module
+10-18 07:27:59.345  1621  1658 W android.os.Debug: failed to get memory consumption info: -1
+10-18 07:27:59.773  2175  4346 I Vision  : Requesting optional module download of ocr.
+10-18 07:27:59.773  2175  4346 I Vision  : Checking for download completion for 80470 -- ocr
+10-18 07:28:00.368  4484  4498 I zygote64: Waiting for a blocking GC ProfileSaver
+10-18 07:28:00.937  1621  1659 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.DROPBOX_ENTRY_ADDED flg=0x10 (has extras) } to com.google.android.gms/.stats.service.DropBoxEntryAddedReceiver
+10-18 07:28:00.937  1621  1659 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.DROPBOX_ENTRY_ADDED flg=0x10 (has extras) } to com.google.android.gms/.chimera.GmsIntentOperationService$PersistentTrustedReceiver
+10-18 07:28:01.139  1621  1658 E memtrack: Couldn't load memtrack module
+10-18 07:28:01.139  1621  1658 W android.os.Debug: failed to get memory consumption info: -1
+10-18 07:28:01.873  1621  4255 I ActivityManager: Killing 3554:com.google.android.apps.wallpaper/u0a72 (adj 906): empty #17
+10-18 07:28:03.758  4588  4588 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+10-18 07:28:03.791  4588  4588 W app_process: Unexpected CPU variant for X86 using defaults: x86_64
+10-18 07:28:03.813  4588  4588 D AndroidRuntime: Calling main entry com.android.commands.am.Am
+10-18 07:28:03.816  1621  2514 I ActivityManager: Force stopping com.mightyoung.muyon.androidlab appid=10077 user=0: start instr
+10-18 07:28:03.821  4599  4599 I zygote64: Late-enabling -Xcheck:jni
+10-18 07:28:03.826  4599  4599 W zygote64: Unexpected CPU variant for X86 using defaults: x86_64
+10-18 07:28:03.828  1621  2514 I ActivityManager: Start proc 4599:com.mightyoung.muyon.androidlab/u0a77 for added application com.mightyoung.muyon.androidlab
+10-18 07:28:03.844  4599  4599 W System  : ClassLoader referenced unknown path: 
+10-18 07:28:03.850  4599  4599 I AndroidJUnitRunner: newApplication com.mightyoung.muyon.androidlab.MuyonLabApplication
+10-18 07:28:03.857  4599  4599 I AndroidJUnitRunner: onCreate Bundle[mParcelledData.dataSize=140]
+10-18 07:28:03.858  4599  4599 D AndroidJUnitRunner: Use the raw file system for managing file I/O.
+10-18 07:28:03.862  4599  4599 V TestEventClient: No service name argument was given (testDiscoveryService, testRunEventService or orchestratorService)
+10-18 07:28:03.866  4599  4616 D AndroidJUnitRunner: onStart is called.
+10-18 07:28:03.881  4599  4616 I TestRunner: run started: 2 tests
+10-18 07:28:03.882  4599  4616 I TestRunner: started: invalidInputCannotDispatchAndSaveRemainsLocal(com.mightyoung.muyon.androidlab.FrontendServiceLoopTest)
+10-18 07:28:03.926  4599  4616 W FileTestStorage: Output properties is not supported.
+10-18 07:28:03.926  4599  4616 I Tracing : Tracer added: class androidx.test.platform.tracing.AndroidXTracer
+10-18 07:28:03.928  4599  4599 D EventInjectionStrategy: Creating injection strategy with input manager.
+10-18 07:28:03.933  4599  4616 D IdlingRegistry: Registering idling resources: [androidx.compose.ui.test.EspressoLink@fa503fc]
+10-18 07:28:03.941  4599  4616 W Settings: Setting always_finish_activities has moved from android.provider.Settings.System to android.provider.Settings.Global, returning read-only value.
+10-18 07:28:03.945  1621  1633 I ActivityManager: START u0 {act=android.intent.action.MAIN cat=[android.intent.category.LAUNCHER] flg=0x14008000 cmp=com.mightyoung.muyon.androidlab/.MainActivity} from uid 10077
+10-18 07:28:03.961  4599  4599 D LifecycleMonitor: Lifecycle status change: com.mightyoung.muyon.androidlab.MainActivity@83b1e7e in: PRE_ON_CREATE
+10-18 07:28:03.962  4599  4599 V ActivityScenario: Activity lifecycle changed event received but ignored because the reported transition was not ON_CREATE while the last known transition was PRE_ON_CREATE
+10-18 07:28:03.972  4599  4599 D LifecycleMonitor: Lifecycle status change: com.mightyoung.muyon.androidlab.MainActivity@83b1e7e in: CREATED
+10-18 07:28:03.972  4599  4599 V ActivityScenario: Update currentActivityStage to CREATED, currentActivity=com.mightyoung.muyon.androidlab.MainActivity@83b1e7e
+10-18 07:28:03.973  4599  4599 D LifecycleMonitor: Lifecycle status change: com.mightyoung.muyon.androidlab.MainActivity@83b1e7e in: STARTED
+10-18 07:28:03.973  4599  4599 V ActivityScenario: Update currentActivityStage to STARTED, currentActivity=com.mightyoung.muyon.androidlab.MainActivity@83b1e7e
+10-18 07:28:03.974  4599  4599 D LifecycleMonitor: Lifecycle status change: com.mightyoung.muyon.androidlab.MainActivity@83b1e7e in: RESUMED
+10-18 07:28:03.974  4599  4599 V ActivityScenario: Update currentActivityStage to RESUMED, currentActivity=com.mightyoung.muyon.androidlab.MainActivity@83b1e7e
+10-18 07:28:03.978  1402  1430 E SurfaceFlinger: ro.sf.lcd_density must be defined as a build property
+10-18 07:28:03.978  4599  4619 D OpenGLRenderer: HWUI GL Pipeline
+10-18 07:28:03.981  1392  1392 D gralloc_ranchu: gralloc_alloc: Creating ashmem region of size 823296
+10-18 07:28:03.996  2516  2599 D EGL_emulation: eglMakeCurrent: 0x7bc66fc39f00: ver 3 0 (tinfo 0x7bc66fc0da60)
+10-18 07:28:04.005  2556  2769 D EGL_emulation: eglMakeCurrent: 0xe2e71c40: ver 3 0 (tinfo 0xe5548d80)
+10-18 07:28:04.099  2556  2655 E SQLiteLog: (1) no such table: blob_table
+10-18 07:28:04.100  2556  2655 E ContentStoreEUAS: Failed to commit the deferred actions
+10-18 07:28:04.183  2556  2571 I zygote  : Background concurrent copying GC freed 17333(1204KB) AllocSpace objects, 0(0B) LOS objects, 49% free, 6MB/12MB, paused 528us total 154.311ms
+10-18 07:28:04.200  4599  4604 I zygote64: Do partial code cache collection, code=30KB, data=25KB
+10-18 07:28:04.200  4599  4604 I zygote64: After code cache collection, code=30KB, data=25KB
+10-18 07:28:04.200  4599  4604 I zygote64: Increasing code cache capacity to 128KB
+10-18 07:28:04.204  2175  2939 I Icing   : Not indexing corpus from package com.google.android.videos as it has never connected
+10-18 07:28:04.204  2175  2939 E Icing   : Aborting indexing of corpus movies
+10-18 07:28:04.204  2175  2939 I Icing   : Not indexing corpus from package com.google.android.videos as it has never connected
+10-18 07:28:04.204  2175  2939 E Icing   : Aborting indexing of corpus shows
+10-18 07:28:04.354  4599  4604 I zygote64: Do partial code cache collection, code=55KB, data=59KB
+10-18 07:28:04.355  4599  4604 I zygote64: After code cache collection, code=55KB, data=59KB
+10-18 07:28:04.355  4599  4604 I zygote64: Increasing code cache capacity to 256KB
+10-18 07:28:04.410  4599  4604 I zygote64: Do full code cache collection, code=117KB, data=120KB
+10-18 07:28:04.411  4599  4604 I zygote64: After code cache collection, code=108KB, data=76KB
+10-18 07:28:04.496  4599  4604 I zygote64: Do partial code cache collection, code=123KB, data=107KB
+10-18 07:28:04.499  4599  4604 I zygote64: After code cache collection, code=123KB, data=107KB
+10-18 07:28:04.499  4599  4604 I zygote64: Increasing code cache capacity to 512KB
+10-18 07:28:04.521  4599  4619 D         : HostConnection::get() New Host Connection established 0x7bc66fc39300, tid 4619
+10-18 07:28:04.521  1392  1392 D gralloc_ranchu: gralloc_alloc: Creating ashmem region of size 823296
+10-18 07:28:04.522  1392  1392 D gralloc_ranchu: gralloc_alloc: Creating ashmem region of size 823296
+10-18 07:28:04.522  4599  4619 I OpenGLRenderer: Initialized EGL, version 1.4
+10-18 07:28:04.522  4599  4619 D OpenGLRenderer: Swap behavior 1
+10-18 07:28:04.523  4599  4619 D EGL_emulation: eglCreateContext: 0x7bc66fc45120: maj 3 min 0 rcv 3
+10-18 07:28:04.524  1392  1392 D gralloc_ranchu: gralloc_alloc: Creating ashmem region of size 823296
+10-18 07:28:04.524  4599  4619 D EGL_emulation: eglMakeCurrent: 0x7bc66fc45120: ver 3 0 (tinfo 0x7bc66fc0d940)
+10-18 07:28:04.601  4599  4599 I Choreographer: Skipped 35 frames!  The application may be doing too much work on its main thread.
+10-18 07:28:04.620  4599  4619 D EGL_emulation: eglMakeCurrent: 0x7bc66fc45120: ver 3 0 (tinfo 0x7bc66fc0d940)
+10-18 07:28:04.679  4599  4604 I zygote64: Do full code cache collection, code=250KB, data=222KB
+10-18 07:28:04.679  4599  4604 I zygote64: After code cache collection, code=250KB, data=188KB
+10-18 07:28:05.029  1621  1666 I ActivityManager: Displayed com.mightyoung.muyon.androidlab/.MainActivity: +1s74ms
+10-18 07:28:05.056  4599  4604 I zygote64: Do partial code cache collection, code=250KB, data=199KB
+10-18 07:28:05.056  4599  4604 I zygote64: After code cache collection, code=250KB, data=202KB
+10-18 07:28:05.056  4599  4604 I zygote64: Increasing code cache capacity to 1024KB
+10-18 07:28:05.078  1402  1402 W SurfaceFlinger: couldn't log to binary event log: overflow.
+10-18 07:28:05.078  1402  1402 W SurfaceFlinger: couldn't log to binary event log: overflow.
+10-18 07:28:05.128  4599  4604 I zygote64: Compiler allocated 5MB to compile kotlin.Unit com.mightyoung.muyon.androidlab.MuyonLabShellKt.MuyonLabShell$lambda$33$1$2(com.mightyoung.muyon.androidlab.NavigationLayout, com.mightyoung.muyon.androidlab.ShellState, androidx.compose.ui.focus.FocusManager, androidx.compose.runtime.MutableState, androidx.compose.runtime.MutableState, kotlinx.coroutines.CoroutineScope, androidx.compose.material3.DrawerState, androidx.compose.runtime.MutableState, androidx.compose.runtime.MutableState, androidx.compose.foundation.lazy.LazyListState, androidx.compose.foundation.lazy.LazyListState, androidx.compose.ui.focus.FocusRequester, com.mightyoung.muyon.androidlab.LocalInputActions, com.mightyoung.muyon.androidlab.LocalConversation, com.mightyoung.muyon.androidlab.PortAvailability, com.mightyoung.muyon.androidlab.ChatReadPort, androidx.compose.runtime.MutableState, com.mightyoung.muyon.androidlab.conversation.ConversationUiMemory, androidx.compose.foundation.lazy.LazyListState, androidx.compose.foundation.lazy.LazyListState
+10-18 07:28:05.193  2556  2556 W SearchService: Abort, client detached.
+10-18 07:28:05.193  2556  2556 I chatty  : uid=10030(u0_a30) com.google.android.googlequicksearchbox:search identical 3 lines
+10-18 07:28:05.193  2556  2556 W SearchService: Abort, client detached.
+10-18 07:28:05.254  4599  4604 I zygote64: Compiler allocated 10MB to compile void com.mightyoung.muyon.androidlab.conversation.ChatPageKt.ConversationPage(com.mightyoung.muyon.androidlab.LocalUiState, androidx.compose.foundation.lazy.LazyListState, androidx.compose.ui.focus.FocusRequester, com.mightyoung.muyon.androidlab.LocalInputActions, kotlin.jvm.functions.Function1, kotlin.jvm.functions.Function0, kotlin.jvm.functions.Function0, kotlin.jvm.functions.Function1, com.mightyoung.muyon.androidlab.PortAvailability, com.mightyoung.muyon.androidlab.ChatReadConversation, kotlin.jvm.functions.Function0, kotlin.jvm.functions.Function0, kotlin.jvm.functions.Function0, boolean, kotlin.jvm.functions.Function1, java.lang.String, androidx.compose.runtime.Composer, int, int, int)
+10-18 07:28:05.281  4599  4604 I zygote64: Do full code cache collection, code=421KB, data=480KB
+10-18 07:28:05.282  4599  4604 I zygote64: After code cache collection, code=417KB, data=359KB
+10-18 07:28:05.282  4599  4604 I zygote64: Compiler allocated 6MB to compile void com.mightyoung.muyon.androidlab.MuyonLabShellKt.MuyonLabShell(com.mightyoung.muyon.androidlab.RustUiPort, java.lang.Float, com.mightyoung.muyon.androidlab.ShellState, com.mightyoung.muyon.androidlab.RustDiagnosticCoordinator, androidx.compose.runtime.Composer, int, int)
+10-18 07:28:05.448  1621  3254 W Binder  : Outgoing transactions from this process must be FLAG_ONEWAY
+10-18 07:28:05.448  1621  3254 W Binder  : java.lang.Throwable
+10-18 07:28:05.448  1621  3254 W Binder  : 	at android.os.BinderProxy.transact(Binder.java:736)
+10-18 07:28:05.448  1621  3254 W Binder  : 	at android.app.assist.AssistStructure$ParcelTransferReader.fetchData(AssistStructure.java:407)
+10-18 07:28:05.448  1621  3254 W Binder  : 	at android.app.assist.AssistStructure$ParcelTransferReader.go(AssistStructure.java:343)
+10-18 07:28:05.448  1621  3254 W Binder  : 	at android.app.assist.AssistStructure.ensureData(AssistStructure.java:2106)
+10-18 07:28:05.448  1621  3254 W Binder  : 	at com.android.server.autofill.Session$1.send(Session.java:200)
+10-18 07:28:05.448  1621  3254 W Binder  : 	at com.android.server.am.ActivityManagerService.reportAssistContextExtras(ActivityManagerService.java:13139)
+10-18 07:28:05.448  1621  3254 W Binder  : 	at android.app.IActivityManager$Stub.onTransact(IActivityManager.java:2466)
+10-18 07:28:05.448  1621  3254 W Binder  : 	at com.android.server.am.ActivityManagerService.onTransact(ActivityManagerService.java:2935)
+10-18 07:28:05.448  1621  3254 W Binder  : 	at android.os.Binder.execTransact(Binder.java:674)
+10-18 07:28:05.450  4599  4599 I AssistStructure: Flattened final assist data: 1132 bytes, containing 1 windows, 4 views
+10-18 07:28:05.484  1621  4386 I AssistStructure: Flattened final assist data: 956 bytes, containing 1 windows, 4 views
+10-18 07:28:05.497  1780  1780 W ktk     : Pending fill request while another request in the same session was triggered. [CONTEXT service_id=177 ]
+10-18 07:28:05.506  4599  4604 I zygote64: Do partial code cache collection, code=489KB, data=492KB
+10-18 07:28:05.506  4599  4604 I zygote64: After code cache collection, code=489KB, data=492KB
+10-18 07:28:05.506  4599  4604 I zygote64: Increasing code cache capacity to 2MB
+10-18 07:28:05.567  1795  4628 I native  : neural_language_identifier.cc:337 Portable Language Identification module loaded successfully.
+10-18 07:28:05.570  1621  3254 D VoldConnector: SND -> {39 volume mkdirs /storage/emulated/0/Android/data/com.google.android.inputmethod.latin/cache/}
+10-18 07:28:05.571  1621  1742 D VoldConnector: RCV <- {200 39 Command succeeded}
+10-18 07:28:05.576  1795  1795 W InputConnectionWrapper: Fixing selection indices to 0, 0
+10-18 07:28:05.588  1780  1780 I zygote64: Deoptimizing java.lang.Object bpnf.a(java.lang.Object[], int, int, int) due to JIT inline cache
+10-18 07:28:05.672  1795  1795 E AndroidIME: bpw: View is not attached to window yet.
+10-18 07:28:05.678  4599  4599 D Autofill Status: Autofill popup isn't shown because autofill is not available.
+10-18 07:28:05.678  4599  4599 D Autofill Status: 
+10-18 07:28:05.678  4599  4599 D Autofill Status: Did you set up autofill?
+10-18 07:28:05.678  4599  4599 D Autofill Status: 1. Go to Settings > System > Languages&input > Advanced > Autofill Service
+10-18 07:28:05.678  4599  4599 D Autofill Status: 2. Pick a service
+10-18 07:28:05.678  4599  4599 D Autofill Status: 
+10-18 07:28:05.678  4599  4599 D Autofill Status: Did you add an account?
+10-18 07:28:05.678  4599  4599 D Autofill Status: 1. Go to Settings > System > Languages&input > Advanced
+10-18 07:28:05.678  4599  4599 D Autofill Status: 2. Click on the settings icon next to the Autofill Service
+10-18 07:28:05.678  4599  4599 D Autofill Status: 3. Add your account
+10-18 07:28:05.684  1795  1795 I zygote64: Deoptimizing void com.google.android.apps.inputmethod.libs.framework.core.KeyData.<init>(int, com.google.android.apps.inputmethod.libs.framework.core.KeyData$a, java.lang.Object) due to JIT inline cache
+10-18 07:28:05.752  1795  4631 I zygote64: Deoptimizing int cht.a(android.content.Context, android.util.AttributeSet, int, int) due to JIT inline cache
+10-18 07:28:05.754  1795  4631 I zygote64: Deoptimizing int cht.a(android.content.Context, int) due to JIT inline cache
+10-18 07:28:05.759  1402  1430 E SurfaceFlinger: ro.sf.lcd_density must be defined as a build property
+10-18 07:28:05.759  1795  4632 D OpenGLRenderer: HWUI GL Pipeline
+10-18 07:28:05.785  1795  1806 I zygote64: Background concurrent copying GC freed 13057(1132KB) AllocSpace objects, 3(100KB) LOS objects, 50% free, 3MB/6MB, paused 502us total 124.064ms
+10-18 07:28:05.872  1795  4632 D         : HostConnection::get() New Host Connection established 0x7bc66367d920, tid 4632
+10-18 07:28:05.873  1392  1392 D gralloc_ranchu: gralloc_alloc: Creating ashmem region of size 790528
+10-18 07:28:05.873  1795  4632 I OpenGLRenderer: Initialized EGL, version 1.4
+10-18 07:28:05.873  1795  4632 D OpenGLRenderer: Swap behavior 1
+10-18 07:28:05.874  1795  4632 D EGL_emulation: eglCreateContext: 0x7bc663723ac0: maj 3 min 0 rcv 3
+10-18 07:28:05.874  1392  1392 D gralloc_ranchu: gralloc_alloc: Creating ashmem region of size 790528
+10-18 07:28:05.875  1795  4632 D EGL_emulation: eglMakeCurrent: 0x7bc663723ac0: ver 3 0 (tinfo 0x7bc66373bb80)
+10-18 07:28:05.875  1392  1392 D gralloc_ranchu: gralloc_alloc: Creating ashmem region of size 790528
+10-18 07:28:05.959  1795  4632 D EGL_emulation: eglMakeCurrent: 0x7bc663723ac0: ver 3 0 (tinfo 0x7bc66373bb80)
+10-18 07:28:05.989  4599  4604 I zygote64: Compiler allocated 7MB to compile void androidx.compose.foundation.text.CoreTextFieldKt.CoreTextField(androidx.compose.ui.text.input.TextFieldValue, kotlin.jvm.functions.Function1, androidx.compose.ui.Modifier, androidx.compose.ui.text.TextStyle, androidx.compose.ui.text.input.VisualTransformation, kotlin.jvm.functions.Function1, androidx.compose.foundation.interaction.MutableInteractionSource, androidx.compose.ui.graphics.Brush, boolean, int, int, androidx.compose.ui.text.input.ImeOptions, androidx.compose.foundation.text.KeyboardActions, boolean, boolean, kotlin.jvm.functions.Function3, androidx.compose.foundation.text.TextFieldScrollerPosition, androidx.compose.runtime.Composer, int, int, int)
+10-18 07:28:05.992  1621  4386 I ActivityManager: Killing 3633:com.google.android.onetimeinitializer/u0a17 (adj 906): empty #17
+10-18 07:28:06.425  1795  1800 I zygote64: Do full code cache collection, code=252KB, data=149KB
+10-18 07:28:06.426  1795  1800 I zygote64: After code cache collection, code=241KB, data=130KB
+10-18 07:28:06.454  1795  1800 I zygote64: Do partial code cache collection, code=246KB, data=135KB
+10-18 07:28:06.461  1795  4625 I native  : language-utils-delegator.cc:33 Adding en to delegate.
+10-18 07:28:06.461  1795  4625 I native  : language-utils-delegator.cc:37 language en not found, so added it.
+10-18 07:28:06.466  4599  4599 W IInputConnectionWrapper: beginBatchEdit on inactive InputConnection
+10-18 07:28:06.466  4599  4599 W IInputConnectionWrapper: getTextBeforeCursor on inactive InputConnection
+10-18 07:28:06.468  4599  4599 W IInputConnectionWrapper: getTextAfterCursor on inactive InputConnection
+10-18 07:28:06.470  4599  4599 W IInputConnectionWrapper: getSelectedText on inactive InputConnection
+10-18 07:28:06.470  4599  4599 W IInputConnectionWrapper: endBatchEdit on inactive InputConnection
+10-18 07:28:06.482  1795  4625 E native  : keyboard.cc:22 Cannot create a keyboard with 0 valid keys
+10-18 07:28:06.482  1795  4625 W native  : neural_spatial_model.cc:392 Output symbol table doesn't contain symbol: &
+10-18 07:28:06.509  1780  2815 W Nearby  : Failed attempt #3 out of 3 for RestoreDeviceName [CONTEXT service_id=49 ]
+10-18 07:28:06.509  1780  2815 W Nearby  : java.lang.IllegalStateException: BluetoothAdapter not ready yet!
+10-18 07:28:06.509  1780  2815 W Nearby  : 	at ajpy.d(:com.google.android.gms@202414023@20.24.14 (040800-319035315):2)
+10-18 07:28:06.509  1780  2815 W Nearby  : 	at ajpx.run(Unknown Source:0)
+10-18 07:28:06.509  1780  2815 W Nearby  : 	at bwuj.call(Unknown Source:0)
+10-18 07:28:06.509  1780  2815 W Nearby  : 	at bwuo.a(:com.google.android.gms@202414023@20.24.14 (040800-319035315):2)
+10-18 07:28:06.509  1780  2815 W Nearby  : 	at bwuo.a(:com.google.android.gms@202414023@20.24.14 (040800-319035315):9)
+10-18 07:28:06.509  1780  2815 W Nearby  : 	at ajpw.run(Unknown Source:0)
+10-18 07:28:06.509  1780  2815 W Nearby  : 	at java.lang.Thread.run(Thread.java:764)
+10-18 07:28:06.509  1780  2815 W Nearby  : 	at sow.run(Unknown Source:0)
+10-18 07:28:06.509  1780  2815 W Nearby  : 	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1162)
+10-18 07:28:06.509  1780  2815 W Nearby  : 	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:636)
+10-18 07:28:06.509  1780  2815 W Nearby  : 	at sux.run(:com.google.android.gms@202414023@20.24.14 (040800-319035315):0)
+10-18 07:28:06.509  1780  2815 W Nearby  : 	at java.lang.Thread.run(Thread.java:764)
+10-18 07:28:06.612  1795  1800 I zygote64: After code cache collection, code=246KB, data=136KB
+10-18 07:28:06.612  1795  1800 I zygote64: Increasing code cache capacity to 1024KB
+10-18 07:28:06.656  1795  4625 I native  : fst-model.cc:323 Created LM accumulator /data/user/0/com.google.android.inputmethod.latin/files/cache/en_US_d3.dict.20170404.lm.acc
+10-18 07:28:06.667  1795  4625 I native  : proto-store.cc:43 File not found: '/data/user/0/com.google.android.inputmethod.latin/files/personal/adapt_state.en.dat'.
+10-18 07:28:06.667  1795  4625 I native  : (This might be OK for example when a language is being loaded for the first time.)
+10-18 07:28:06.668  1795  4625 I native  : blacklist-assembly.cc:112 LoadBlacklist en
+10-18 07:28:06.668  1795  4625 I native  : blacklist.cc:212 No blacklist file for a language. (This is OK if the language is loaded for the first time.) /data/user/0/com.google.android.inputmethod.latin/files/personal/blacklist.en_us.list
+10-18 07:28:06.668  1795  4625 I native  : input-context-store.cc:103 Ignoring stale client request for FetchSuggestions
+10-18 07:28:06.669  1795  4628 I native  : neural_language_identifier.cc:218 Running NeuralLanguageIdentifier on text with size: 0 bytes.
+10-18 07:28:06.712  1795  1795 I zygote64: Deoptimizing int jf.a(java.lang.Object, int) due to JIT inline cache
+10-18 07:28:06.717  1795  1806 I zygote64: ThreadFlipBegin blocked for 5.484ms
+10-18 07:28:06.720  1795  2657 I zygote64: IncrementDisableThreadFlip blocked for 6.019ms
+10-18 07:28:06.770  1795  4632 D EGL_emulation: eglMakeCurrent: 0x7bc663723ac0: ver 3 0 (tinfo 0x7bc66373bb80)
+10-18 07:28:06.782  1795  1795 W InputContext: Ignore stale [FetchSuggestions] diff id:0 with requestId:4<5
+10-18 07:28:06.842  2175  2843 I Icing   : IndexChimeraService.getServiceInterface callingPackage=com.google.android.inputmethod.latin componentName=null serviceId=66
+10-18 07:28:07.002  1795  4640 W BasicHttpFileDownloader: Failed to download: https://storage.googleapis.com/gboard-emoji/dulcitone/emoji_search_en_us.json
+10-18 07:28:07.002  1795  4640 W JSonCheckUpdateTask: fetchUpdateInfo() : Failed to download https://storage.googleapis.com/gboard-emoji/dulcitone/emoji_search_en_us.json
+10-18 07:28:07.083  4599  4604 I zygote64: Compiler allocated 8MB to compile void androidx.compose.material3.internal.TextFieldImplKt.CommonDecorationBox(androidx.compose.material3.internal.TextFieldType, java.lang.CharSequence, kotlin.jvm.functions.Function2, androidx.compose.material3.TextFieldLabelPosition, kotlin.jvm.functions.Function3, kotlin.jvm.functions.Function2, kotlin.jvm.functions.Function2, kotlin.jvm.functions.Function2, kotlin.jvm.functions.Function2, kotlin.jvm.functions.Function2, kotlin.jvm.functions.Function2, boolean, boolean, boolean, androidx.compose.foundation.interaction.InteractionSource, androidx.compose.foundation.layout.PaddingValues, androidx.compose.material3.TextFieldColors, kotlin.jvm.functions.Function2, androidx.compose.runtime.Composer, int, int)
+10-18 07:28:07.131  4599  4616 I System.out: API26_FRONTEND_INPUT_VALIDATION_PASS no_send_clicked=true model_api_called=false
+10-18 07:28:07.132  4599  4604 I zygote64: Compiler allocated 5MB to compile void androidx.compose.material3.AppBarKt.TopAppBarLayout-lyUyIHI(androidx.compose.ui.Modifier, androidx.compose.material3.internal.FloatProducer, long, long, long, long, kotlin.jvm.functions.Function2, androidx.compose.ui.text.TextStyle, kotlin.jvm.functions.Function2, androidx.compose.ui.text.TextStyle, kotlin.jvm.functions.Function0, androidx.compose.foundation.layout.Arrangement$Vertical, androidx.compose.ui.Alignment$Horizontal, int, boolean, kotlin.jvm.functions.Function2, kotlin.jvm.functions.Function2, float, androidx.compose.runtime.Composer, int, int)
+10-18 07:28:07.132  1621  4313 I ActivityManager: START u0 {act=android.intent.action.MAIN cat=[android.intent.category.LAUNCHER] flg=0x10000000 cmp=com.mightyoung.muyon.androidlab.test/androidx.test.core.app.InstrumentationActivityInvoker$EmptyActivity} from uid 10077
+10-18 07:28:07.137  4599  4599 D LifecycleMonitor: Lifecycle status change: com.mightyoung.muyon.androidlab.MainActivity@83b1e7e in: PAUSED
+10-18 07:28:07.137  4599  4599 V ActivityScenario: Update currentActivityStage to PAUSED, currentActivity=com.mightyoung.muyon.androidlab.MainActivity@83b1e7e
+10-18 07:28:07.143  4644  4644 I zygote64: Late-enabling -Xcheck:jni
+10-18 07:28:07.149  1621  4386 I ActivityManager: Start proc 4644:com.mightyoung.muyon.androidlab.test/u0a78 for activity com.mightyoung.muyon.androidlab.test/androidx.test.core.app.InstrumentationActivityInvoker$EmptyActivity
+10-18 07:28:07.153  4644  4644 W zygote64: Unexpected CPU variant for X86 using defaults: x86_64
+10-18 07:28:07.161  1392  1392 D gralloc_ranchu: gralloc_alloc: Creating ashmem region of size 823296
+10-18 07:28:07.172  1621  1719 I WindowManager: Failed to capture screenshot of Token{58717f1 ActivityRecord{8e75398 u0 com.mightyoung.muyon.androidlab/.MainActivity t6}} appWin=Window{21a58e3 u0 com.mightyoung.muyon.androidlab/com.mightyoung.muyon.androidlab.MainActivity} drawState=4
+10-18 07:28:07.183  4599  4619 D EGL_emulation: eglMakeCurrent: 0x7bc66fc45120: ver 3 0 (tinfo 0x7bc66fc0d940)
+10-18 07:28:07.185  4599  4619 D OpenGLRenderer: endAllActiveAnimators on 0x7bc66d777800 (UnprojectedRipple) with handle 0x7bc66171f240
+10-18 07:28:07.191  4599  4599 D LifecycleMonitor: Lifecycle status change: com.mightyoung.muyon.androidlab.MainActivity@83b1e7e in: STOPPED
+10-18 07:28:07.191  4599  4599 V ActivityScenario: Update currentActivityStage to STOPPED, currentActivity=com.mightyoung.muyon.androidlab.MainActivity@83b1e7e
+10-18 07:28:07.200  1402  1430 E SurfaceFlinger: ro.sf.lcd_density must be defined as a build property
+10-18 07:28:07.200  4644  4661 D OpenGLRenderer: HWUI GL Pipeline
+10-18 07:28:07.215  4644  4661 D         : HostConnection::get() New Host Connection established 0x7bc6794e64c0, tid 4661
+10-18 07:28:07.215  1392  1392 D gralloc_ranchu: gralloc_alloc: Creating ashmem region of size 823296
+10-18 07:28:07.215  4644  4661 I OpenGLRenderer: Initialized EGL, version 1.4
+10-18 07:28:07.215  4644  4661 D OpenGLRenderer: Swap behavior 1
+10-18 07:28:07.216  1392  1392 D gralloc_ranchu: gralloc_alloc: Creating ashmem region of size 823296
+10-18 07:28:07.217  4644  4661 D EGL_emulation: eglCreateContext: 0x7bc6794a6b60: maj 3 min 0 rcv 3
+10-18 07:28:07.217  1392  1392 D gralloc_ranchu: gralloc_alloc: Creating ashmem region of size 823296
+10-18 07:28:07.218  4644  4661 D EGL_emulation: eglMakeCurrent: 0x7bc6794a6b60: ver 3 0 (tinfo 0x7bc66d61dee0)
+10-18 07:28:07.236  1392  1392 D gralloc_ranchu: gralloc_alloc: Creating ashmem region of size 823296
+10-18 07:28:07.237  1392  1392 I chatty  : uid=1000(system) allocator@2.0-s identical 1 line
+10-18 07:28:07.237  1392  1392 D gralloc_ranchu: gralloc_alloc: Creating ashmem region of size 823296
+10-18 07:28:07.239  4644  4661 D EGL_emulation: eglMakeCurrent: 0x7bc6794a6b60: ver 3 0 (tinfo 0x7bc66d61dee0)
+10-18 07:28:07.245  4599  4599 D LifecycleMonitor: Lifecycle status change: com.mightyoung.muyon.androidlab.MainActivity@83b1e7e in: DESTROYED
+10-18 07:28:07.245  4599  4599 V ActivityScenario: Update currentActivityStage to DESTROYED, currentActivity=null
+10-18 07:28:07.278  4599  4604 I zygote64: Compiler allocated 7MB to compile void androidx.compose.material3.OutlinedTextFieldKt.OutlinedTextFieldLayout(androidx.compose.ui.Modifier, kotlin.jvm.functions.Function2, kotlin.jvm.functions.Function3, kotlin.jvm.functions.Function2, kotlin.jvm.functions.Function2, kotlin.jvm.functions.Function2, kotlin.jvm.functions.Function2, kotlin.jvm.functions.Function2, boolean, androidx.compose.material3.TextFieldLabelPosition, androidx.compose.material3.internal.FloatProducer, kotlin.jvm.functions.Function1, kotlin.jvm.functions.Function2, kotlin.jvm.functions.Function2, androidx.compose.foundation.layout.PaddingValues, androidx.compose.runtime.Composer, int, int)
+10-18 07:28:07.281  2556  2769 D EGL_emulation: eglMakeCurrent: 0xe2e71c40: ver 3 0 (tinfo 0xe5548d80)
+10-18 07:28:07.295  4599  4604 I zygote64: Do full code cache collection, code=904KB, data=984KB
+10-18 07:28:07.295  4599  4604 I zygote64: After code cache collection, code=901KB, data=793KB
+10-18 07:28:07.313  1402  1402 D SurfaceFlinger: duplicate layer name: changing com.google.android.apps.nexuslauncher/com.google.android.apps.nexuslauncher.NexusLauncherActivity to com.google.android.apps.nexuslauncher/com.google.android.apps.nexuslauncher.NexusLauncherActivity#1
+10-18 07:28:07.317  1392  1392 D gralloc_ranchu: gralloc_alloc: Creating ashmem region of size 823296
+10-18 07:28:07.318  1392  1392 I chatty  : uid=1000(system) allocator@2.0-s identical 1 line
+10-18 07:28:07.321  1392  1392 D gralloc_ranchu: gralloc_alloc: Creating ashmem region of size 823296
+10-18 07:28:07.324  4599  4616 D IdlingRegistry: Unregistering idling resources: [androidx.compose.ui.test.EspressoLink@fa503fc]
+10-18 07:28:07.325  4599  4616 I TestRunner: finished: invalidInputCannotDispatchAndSaveRemainsLocal(com.mightyoung.muyon.androidlab.FrontendServiceLoopTest)
+10-18 07:28:07.327  4599  4616 I TestRunner: started: realPrivateServiceReadRendersSyntheticProjectionAndOriginalReceipt(com.mightyoung.muyon.androidlab.FrontendServiceLoopTest)
+10-18 07:28:07.330  2516  2599 D EGL_emulation: eglMakeCurrent: 0x7bc66fc39f00: ver 3 0 (tinfo 0x7bc66fc0da60)
+10-18 07:28:07.336  4599  4616 D IdlingRegistry: Registering idling resources: [androidx.compose.ui.test.EspressoLink@f66387f]
+10-18 07:28:07.340  2556  2556 W SessionLifecycleManager: Handover failed. Creating new session controller.
+10-18 07:28:07.341  1621  1719 I WindowManager: Failed to capture screenshot of Token{bd2a37a ActivityRecord{1cd23a5 u0 com.mightyoung.muyon.androidlab.test/androidx.test.core.app.InstrumentationActivityInvoker$EmptyActivity t7 f}} appWin=Window{3fc2982 u0 com.mightyoung.muyon.androidlab.test/androidx.test.core.app.InstrumentationActivityInvoker$EmptyActivity} drawState=4
+10-18 07:28:07.351  4644  4661 D EGL_emulation: eglMakeCurrent: 0x7bc6794a6b60: ver 3 0 (tinfo 0x7bc66d61dee0)
+10-18 07:28:07.353  1621  2805 I ActivityManager: Killing 3628:com.android.chrome/u0a50 (adj 906): empty #17
+10-18 07:28:07.361  2556  2556 I MicroDetectionWorker: #updateMicroDetector [detectionMode: [mDetectionMode: [1]]]
+10-18 07:28:07.361  2556  2556 I MicroDetectionWorker: #startMicroDetector [speakerMode: 0]
+10-18 07:28:07.362  2556  2556 I AudioController: Using mInputStreamFactoryBuilder
+10-18 07:28:07.366  4599  4616 W Settings: Setting always_finish_activities has moved from android.provider.Settings.System to android.provider.Settings.Global, returning read-only value.
+10-18 07:28:07.368  2556  2556 I MicroDetectionWorker: onReady
+10-18 07:28:07.384  1621  4026 I ActivityManager: START u0 {act=android.intent.action.MAIN cat=[android.intent.category.LAUNCHER] flg=0x10008000 cmp=com.mightyoung.muyon.androidlab/.MainActivity} from uid 10077
+10-18 07:28:07.387  2556  2689 I MicroRecognitionRunner: Starting detection.
+10-18 07:28:07.391  2556  2653 I MicrophoneInputStream: mic_starting com.google.android.apps.gsa.staticplugins.aa.c@c8e253e
+10-18 07:28:07.393  4599  4599 D LifecycleMonitor: Lifecycle status change: com.mightyoung.muyon.androidlab.MainActivity@226513 in: PRE_ON_CREATE
+10-18 07:28:07.393  4599  4599 V ActivityScenario: Activity lifecycle changed event received but ignored because the reported transition was not ON_CREATE while the last known transition was PRE_ON_CREATE
+10-18 07:28:07.400  2556  2653 I MicrophoneInputStream: mic_started com.google.android.apps.gsa.staticplugins.aa.c@c8e253e
+10-18 07:28:07.400  1519  4669 I AudioFlinger: AudioFlinger's thread 0xe3f92400 tid=4669 ready to run
+10-18 07:28:07.403  2556  2653 E ActivityThread: Failed to find provider info for com.google.android.apps.gsa.testing.ui.audio.recorded
+10-18 07:28:07.403  4599  4599 D LifecycleMonitor: Lifecycle status change: com.mightyoung.muyon.androidlab.MainActivity@226513 in: CREATED
+10-18 07:28:07.403  4599  4599 V ActivityScenario: Update currentActivityStage to CREATED, currentActivity=com.mightyoung.muyon.androidlab.MainActivity@226513
+10-18 07:28:07.403  4599  4599 D LifecycleMonitor: Lifecycle status change: com.mightyoung.muyon.androidlab.MainActivity@226513 in: STARTED
+10-18 07:28:07.403  4599  4599 V ActivityScenario: Update currentActivityStage to STARTED, currentActivity=com.mightyoung.muyon.androidlab.MainActivity@226513
+10-18 07:28:07.404  2556  2653 I MicrophoneInputStream: mic_close com.google.android.apps.gsa.staticplugins.aa.c@c8e253e
+10-18 07:28:07.404  4599  4599 D LifecycleMonitor: Lifecycle status change: com.mightyoung.muyon.androidlab.MainActivity@226513 in: RESUMED
+10-18 07:28:07.404  4599  4599 V ActivityScenario: Update currentActivityStage to RESUMED, currentActivity=com.mightyoung.muyon.androidlab.MainActivity@226513
+10-18 07:28:07.404  2556  2689 I MicroRecognitionRunner: Detection finished
+10-18 07:28:07.404  2556  2689 W ErrorReporter: reportError [type: 211, code: 524300]: Error reading from input stream
+10-18 07:28:07.405  2556  2689 W ErrorProcessor: onFatalError, processing error from engine(4)
+10-18 07:28:07.405  2556  2689 W ErrorProcessor: com.google.android.apps.gsa.shared.speech.b.g: Error reading from input stream
+10-18 07:28:07.405  2556  2689 W ErrorProcessor: 	at com.google.android.apps.gsa.staticplugins.recognizer.j.a.a(SourceFile:28)
+10-18 07:28:07.405  2556  2689 W ErrorProcessor: 	at com.google.android.apps.gsa.staticplugins.recognizer.j.b.run(SourceFile:15)
+10-18 07:28:07.405  2556  2689 W ErrorProcessor: 	at java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:457)
+10-18 07:28:07.405  2556  2689 W ErrorProcessor: 	at java.util.concurrent.FutureTask.run(FutureTask.java:266)
+10-18 07:28:07.405  2556  2689 W ErrorProcessor: 	at com.google.android.apps.gsa.shared.util.concurrent.a.ax.run(SourceFile:14)
+10-18 07:28:07.405  2556  2689 W ErrorProcessor: 	at com.google.android.apps.gsa.shared.util.concurrent.a.bl.run(SourceFile:4)
+10-18 07:28:07.405  2556  2689 W ErrorProcessor: 	at com.google.android.apps.gsa.shared.util.concurrent.a.bl.run(SourceFile:4)
+10-18 07:28:07.405  2556  2689 W ErrorProcessor: 	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1162)
+10-18 07:28:07.405  2556  2689 W ErrorProcessor: 	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:636)
+10-18 07:28:07.405  2556  2689 W ErrorProcessor: 	at java.lang.Thread.run(Thread.java:764)
+10-18 07:28:07.405  2556  2689 W ErrorProcessor: 	at com.google.android.apps.gsa.shared.util.concurrent.a.ai.run(SourceFile:6)
+10-18 07:28:07.405  2556  2689 W ErrorProcessor: Caused by: com.google.android.apps.gsa.shared.exception.GsaIOException: Error code: 393238 | Buffer overflow, no available space.
+10-18 07:28:07.405  2556  2689 W ErrorProcessor: 	at com.google.android.apps.gsa.speech.audio.Tee.f(SourceFile:103)
+10-18 07:28:07.405  2556  2689 W ErrorProcessor: 	at com.google.android.apps.gsa.speech.audio.au.read(SourceFile:2)
+10-18 07:28:07.405  2556  2689 W ErrorProcessor: 	at java.io.InputStream.read(InputStream.java:101)
+10-18 07:28:07.405  2556  2689 W ErrorProcessor: 	at com.google.android.apps.gsa.speech.audio.ao.run(SourceFile:18)
+10-18 07:28:07.405  2556  2689 W ErrorProcessor: 	at com.google.android.apps.gsa.speech.audio.an.run(SourceFile:2)
+10-18 07:28:07.405  2556  2689 W ErrorProcessor: 	... 9 more
+10-18 07:28:07.405  2556  2689 I AudioController: internalShutdown
+10-18 07:28:07.405  2556  2883 I MicroRecognitionRunner: Stopping hotword detection.
+10-18 07:28:07.411  1621  1631 I zygote64: Background concurrent copying GC freed 33592(2MB) AllocSpace objects, 5(148KB) LOS objects, 40% free, 8MB/14MB, paused 5.421ms total 79.128ms
+10-18 07:28:07.413  1392  1392 D gralloc_ranchu: gralloc_alloc: Creating ashmem region of size 823296
+10-18 07:28:07.417  2556  2556 I MicroDetectionWorker: onReady
+10-18 07:28:07.417  2556  2556 I MicroDetector: Keeping mic open: false
+10-18 07:28:07.417  2556  2556 I MicroDetectionWorker: #onError(false)
+10-18 07:28:07.417  2556  2818 I DeviceStateChecker: DeviceStateChecker cancelled
+10-18 07:28:07.447  2516  2599 D EGL_emulation: eglMakeCurrent: 0x7bc66fc39f00: ver 3 0 (tinfo 0x7bc66fc0da60)
+10-18 07:28:07.461  2556  2769 D EGL_emulation: eglMakeCurrent: 0xe2e71c40: ver 3 0 (tinfo 0xe5548d80)
+10-18 07:28:07.501  2556  2653 E ContentStoreEUAS: Failed to commit the deferred actions
+10-18 07:28:07.582  1392  1392 D gralloc_ranchu: gralloc_alloc: Creating ashmem region of size 823296
+10-18 07:28:07.583  1392  1392 I chatty  : uid=1000(system) allocator@2.0-s identical 1 line
+10-18 07:28:07.583  1392  1392 D gralloc_ranchu: gralloc_alloc: Creating ashmem region of size 823296
+10-18 07:28:07.612  4599  4619 D EGL_emulation: eglMakeCurrent: 0x7bc66fc45120: ver 3 0 (tinfo 0x7bc66fc0d940)
+10-18 07:28:07.633  1621  1666 I ActivityManager: Displayed com.mightyoung.muyon.androidlab/.MainActivity: +243ms
+10-18 07:28:07.687  4599  4604 I zygote64: Do partial code cache collection, code=1008KB, data=944KB
+10-18 07:28:07.688  4599  4604 I zygote64: After code cache collection, code=1005KB, data=943KB
+10-18 07:28:07.688  4599  4604 I zygote64: Increasing code cache capacity to 3MB
+10-18 07:28:07.706  1621  1662 E BatteryStatsService: modem info is invalid: ModemActivityInfo{ mTimestamp=0 mSleepTimeMs=0 mIdleTimeMs=0 mTxTimeMs[]=[0, 0, 0, 0, 0] mRxTimeMs=0 mEnergyUsed=0}
+10-18 07:28:07.958  1621  4313 W Binder  : Outgoing transactions from this process must be FLAG_ONEWAY
+10-18 07:28:07.958  1621  4313 W Binder  : java.lang.Throwable
+10-18 07:28:07.958  1621  4313 W Binder  : 	at android.os.BinderProxy.transact(Binder.java:736)
+10-18 07:28:07.958  1621  4313 W Binder  : 	at android.app.assist.AssistStructure$ParcelTransferReader.fetchData(AssistStructure.java:407)
+10-18 07:28:07.958  1621  4313 W Binder  : 	at android.app.assist.AssistStructure$ParcelTransferReader.go(AssistStructure.java:343)
+10-18 07:28:07.958  1621  4313 W Binder  : 	at android.app.assist.AssistStructure.ensureData(AssistStructure.java:2106)
+10-18 07:28:07.958  1621  4313 W Binder  : 	at com.android.server.autofill.Session$1.send(Session.java:200)
+10-18 07:28:07.958  1621  4313 W Binder  : 	at com.android.server.am.ActivityManagerService.reportAssistContextExtras(ActivityManagerService.java:13139)
+10-18 07:28:07.958  1621  4313 W Binder  : 	at android.app.IActivityManager$Stub.onTransact(IActivityManager.java:2466)
+10-18 07:28:07.958  1621  4313 W Binder  : 	at com.android.server.am.ActivityManagerService.onTransact(ActivityManagerService.java:2935)
+10-18 07:28:07.958  1621  4313 W Binder  : 	at android.os.Binder.execTransact(Binder.java:674)
+10-18 07:28:07.959  4599  4599 I AssistStructure: Flattened final assist data: 1132 bytes, containing 1 windows, 4 views
+10-18 07:28:07.966  1621  2805 I AssistStructure: Flattened final assist data: 956 bytes, containing 1 windows, 4 views
+10-18 07:28:07.967  1780  1780 W ktk     : Pending fill request while another request in the same session was triggered. [CONTEXT service_id=177 ]
+10-18 07:28:07.993  4599  4599 D Autofill Status: Autofill popup isn't shown because autofill is not available.
+10-18 07:28:07.993  4599  4599 D Autofill Status: 
+10-18 07:28:07.993  4599  4599 D Autofill Status: Did you set up autofill?
+10-18 07:28:07.993  4599  4599 D Autofill Status: 1. Go to Settings > System > Languages&input > Advanced > Autofill Service
+10-18 07:28:07.993  4599  4599 D Autofill Status: 2. Pick a service
+10-18 07:28:07.993  4599  4599 D Autofill Status: 
+10-18 07:28:07.993  4599  4599 D Autofill Status: Did you add an account?
+10-18 07:28:07.993  4599  4599 D Autofill Status: 1. Go to Settings > System > Languages&input > Advanced
+10-18 07:28:07.993  4599  4599 D Autofill Status: 2. Click on the settings icon next to the Autofill Service
+10-18 07:28:07.993  4599  4599 D Autofill Status: 3. Add your account
+10-18 07:28:08.001  1795  4628 I native  : neural_language_identifier.cc:337 Portable Language Identification module loaded successfully.
+10-18 07:28:08.002  1795  1795 W InputConnectionWrapper: Fixing selection indices to 0, 0
+10-18 07:28:08.004  1795  1795 I zygote64: Deoptimizing java.lang.Object jf.get(java.lang.Object) due to JIT same target
+10-18 07:28:08.004  1795  4625 I native  : fst-android-decoder.cc:789 Spatial model version: Bikey_0
+10-18 07:28:08.024  1392  1392 D gralloc_ranchu: gralloc_alloc: Creating ashmem region of size 790528
+10-18 07:28:08.025  1392  1392 I chatty  : uid=1000(system) allocator@2.0-s identical 1 line
+10-18 07:28:08.026  1392  1392 D gralloc_ranchu: gralloc_alloc: Creating ashmem region of size 790528
+10-18 07:28:08.045  1795  4632 D EGL_emulation: eglMakeCurrent: 0x7bc663723ac0: ver 3 0 (tinfo 0x7bc66373bb80)
+10-18 07:28:08.186  2516  2599 W OpenGLRenderer: Incorrectly called buildLayer on View: ShortcutAndWidgetContainer, destroying layer...
+10-18 07:28:08.211  1402  1402 W SurfaceFlinger: couldn't log to binary event log: overflow.
+10-18 07:28:08.286  4599  4604 I zygote64: Compiler allocated 4MB to compile void androidx.compose.foundation.lazy.layout.LazyLayoutItemAnimator.onMeasured(int, int, int, java.util.List, androidx.compose.foundation.lazy.layout.LazyLayoutKeyIndexMap, androidx.compose.foundation.lazy.layout.LazyLayoutMeasuredItemProvider, boolean, boolean, int, boolean, int, int, kotlinx.coroutines.CoroutineScope, androidx.compose.ui.graphics.GraphicsContext)
+10-18 07:28:08.296  2556  2556 W SearchService: Abort, client detached.
+10-18 07:28:08.296  2556  2556 I chatty  : uid=10030(u0_a30) com.google.android.googlequicksearchbox:search identical 3 lines
+10-18 07:28:08.296  2556  2556 W SearchService: Abort, client detached.
+10-18 07:28:08.336  4599  4610 I zygote64: Background concurrent copying GC freed 134383(3MB) AllocSpace objects, 0(0B) LOS objects, 49% free, 3MB/7MB, paused 9.529ms total 43.424ms
+10-18 07:28:08.338  4672  4672 I zygote64: Late-enabling -Xcheck:jni
+10-18 07:28:08.341  4672  4672 W zygote64: Unexpected CPU variant for X86 using defaults: x86_64
+10-18 07:28:08.343  1621  4313 I ActivityManager: Start proc 4672:com.mightyoung.muyon.androidlab:agent/u0a77 for service com.mightyoung.muyon.androidlab/.agentipc.AgentRuntimeService
+10-18 07:28:08.351  1795  4628 I native  : neural_language_identifier.cc:218 Running NeuralLanguageIdentifier on text with size: 34 bytes.
+10-18 07:28:08.362  1795  4632 D EGL_emulation: eglMakeCurrent: 0x7bc663723ac0: ver 3 0 (tinfo 0x7bc66373bb80)
+10-18 07:28:08.581  4599  4604 I zygote64: Do full code cache collection, code=1508KB, data=1370KB
+10-18 07:28:08.582  4599  4604 I zygote64: After code cache collection, code=1504KB, data=1249KB
+10-18 07:28:08.970  1621  1777 E TaskPersister: File error accessing recents directory (directory doesn't exist?).
+10-18 07:28:09.156  4599  4604 I zygote64: Do partial code cache collection, code=1512KB, data=1274KB
+10-18 07:28:09.156  4599  4604 I zygote64: After code cache collection, code=1512KB, data=1274KB
+10-18 07:28:09.156  4599  4604 I zygote64: Increasing code cache capacity to 4MB
+10-18 07:28:09.241  2175  2939 I Icing   : Indexing com.google.android.gms-apps from com.google.android.gms
+10-18 07:28:09.430  4599  4616 I System.out: API26_REAL_PRIVATE_READ_PASS ui_pid=4599 agent_pid=4672 receipt_identity=01fb3a3c7b7745a22cf8a810378e3d74 synthetic_schema12=true model_api_called=false
+10-18 07:28:09.430  4599  4616 I Process : Sending signal. PID: 4672 SIG: 9
+10-18 07:28:09.447  2175  2939 I Icing   : Indexing com.google.android.gms-internal.3p:MobileApplication from com.google.android.gms
+10-18 07:28:09.464  1621  4313 I ActivityManager: Process com.mightyoung.muyon.androidlab:agent (pid 4672) has died: vis  TOP 
+10-18 07:28:09.464  1621  4313 W ActivityManager: Scheduling restart of crashed service com.mightyoung.muyon.androidlab/.agentipc.AgentRuntimeService in 1000ms
+10-18 07:28:09.484  1795  4638 E IcingDataProcessor: getCorpusHandlesRegisteredForIME call failed: Status{statusCode=API Disabled, resolution=null}
+10-18 07:28:09.489  2175  2939 W Icing   : No valid account for uploading user actions
+10-18 07:28:09.527  2175  2939 E native  : document-store.cc:1218 Failed to update per-doc-data with usage report
+10-18 07:28:09.528  2175  2939 E native  : document-store.cc:1218 Failed to update per-doc-data with usage report
+10-18 07:28:09.530  2175  2939 I Icing   : Usage reports ok 0, Failed Usage reports 2, indexed 0, rejected 0
+10-18 07:28:09.795  2175  4696 I Vision  : Requesting optional module download of ocr.
+10-18 07:28:09.796  2175  4696 I Vision  : Exceeded maximum feature download tries for ocr
+10-18 07:28:09.796  2175  4696 W Vision  : Request of optional module download of ocr failed.
+10-18 07:28:09.803  2175  4696 I Vision  : Checking for download completion for 90500 -- ocr
+10-18 07:28:09.834  4599  4698 D ProfileInstaller: Installing profile for com.mightyoung.muyon.androidlab
+10-18 07:28:09.888  4699  4699 I zygote64: Late-enabling -Xcheck:jni
+10-18 07:28:09.891  4699  4699 W zygote64: Unexpected CPU variant for X86 using defaults: x86_64
+10-18 07:28:09.892  1621  1962 I ActivityManager: Start proc 4699:com.mightyoung.muyon.androidlab:agent/u0a77 for service com.mightyoung.muyon.androidlab/.agentipc.AgentRuntimeService
+10-18 07:28:10.296  4599  4616 I System.out: API26_REAL_BINDER_RECOVERY_PASS old_agent_pid=4672 new_agent_pid=4699 original_receipt_identity=01fb3a3c7b7745a22cf8a810378e3d74 lookup_only=true model_api_called=false
+10-18 07:28:10.297  1621  2514 I ActivityManager: START u0 {act=android.intent.action.MAIN cat=[android.intent.category.LAUNCHER] flg=0x10000000 cmp=com.mightyoung.muyon.androidlab.test/androidx.test.core.app.InstrumentationActivityInvoker$EmptyActivity} from uid 10077
+10-18 07:28:10.300  4599  4599 D LifecycleMonitor: Lifecycle status change: com.mightyoung.muyon.androidlab.MainActivity@226513 in: PAUSED
+10-18 07:28:10.300  4599  4599 V ActivityScenario: Update currentActivityStage to PAUSED, currentActivity=com.mightyoung.muyon.androidlab.MainActivity@226513
+10-18 07:28:10.315  1392  1392 D gralloc_ranchu: gralloc_alloc: Creating ashmem region of size 823296
+10-18 07:28:10.316  1392  1392 I chatty  : uid=1000(system) allocator@2.0-s identical 2 lines
+10-18 07:28:10.329  1392  1392 D gralloc_ranchu: gralloc_alloc: Creating ashmem region of size 823296
+10-18 07:28:10.329  4644  4661 D EGL_emulation: eglMakeCurrent: 0x7bc6794a6b60: ver 3 0 (tinfo 0x7bc66d61dee0)
+10-18 07:28:10.352  1392  1392 D gralloc_ranchu: gralloc_alloc: Creating ashmem region of size 823296
+10-18 07:28:10.353  1392  1392 I chatty  : uid=1000(system) allocator@2.0-s identical 1 line
+10-18 07:28:10.354  1392  1392 D gralloc_ranchu: gralloc_alloc: Creating ashmem region of size 823296
+10-18 07:28:10.364  2556  2769 D EGL_emulation: eglMakeCurrent: 0xe2e71c40: ver 3 0 (tinfo 0xe5548d80)
+10-18 07:28:10.364  1402  1402 D SurfaceFlinger: duplicate layer name: changing com.google.android.apps.nexuslauncher/com.google.android.apps.nexuslauncher.NexusLauncherActivity to com.google.android.apps.nexuslauncher/com.google.android.apps.nexuslauncher.NexusLauncherActivity#1
+10-18 07:28:10.367  1392  1392 D gralloc_ranchu: gralloc_alloc: Creating ashmem region of size 823296
+10-18 07:28:10.367  2556  2556 W SessionLifecycleManager: Handover failed. Creating new session controller.
+10-18 07:28:10.368  1392  1392 D gralloc_ranchu: gralloc_alloc: Creating ashmem region of size 823296
+10-18 07:28:10.369  1392  1392 D gralloc_ranchu: gralloc_alloc: Creating ashmem region of size 823296
+10-18 07:28:10.379  2516  2599 D EGL_emulation: eglMakeCurrent: 0x7bc66fc39f00: ver 3 0 (tinfo 0x7bc66fc0da60)
+10-18 07:28:10.381  2556  2564 I zygote  : Do full code cache collection, code=504KB, data=346KB
+10-18 07:28:10.384  2556  2556 I MicroDetectionWorker: #updateMicroDetector [detectionMode: [mDetectionMode: [1]]]
+10-18 07:28:10.385  2556  2556 I MicroDetectionWorker: #startMicroDetector [speakerMode: 0]
+10-18 07:28:10.385  2556  2556 I AudioController: Using mInputStreamFactoryBuilder
+10-18 07:28:10.387  2556  2556 I MicroDetectionWorker: onReady
+10-18 07:28:10.388  2556  2818 I MicroRecognitionRunner: Starting detection.
+10-18 07:28:10.388  2556  2564 I zygote  : After code cache collection, code=493KB, data=316KB
+10-18 07:28:10.388  2556  4670 I MicrophoneInputStream: mic_starting com.google.android.apps.gsa.staticplugins.aa.c@70a3ffe
+10-18 07:28:10.390  1519  4723 I AudioFlinger: AudioFlinger's thread 0xe3e28b40 tid=4723 ready to run
+10-18 07:28:10.391  2556  4670 I MicrophoneInputStream: mic_started com.google.android.apps.gsa.staticplugins.aa.c@70a3ffe
+10-18 07:28:10.398  4599  4619 D EGL_emulation: eglMakeCurrent: 0x7bc66fc45120: ver 3 0 (tinfo 0x7bc66fc0d940)
+10-18 07:28:10.399  4644  4661 D EGL_emulation: eglMakeCurrent: 0x7bc6794a6b60: ver 3 0 (tinfo 0x7bc66d61dee0)
+10-18 07:28:10.402  1392  1392 D gralloc_ranchu: gralloc_alloc: Creating ashmem region of size 823296
+10-18 07:28:10.405  1621  1719 I WindowManager: Failed to capture screenshot of Token{6d81d18 ActivityRecord{8c828fb u0 com.mightyoung.muyon.androidlab/.MainActivity t8 f}} appWin=Window{55af41d u0 com.mightyoung.muyon.androidlab/com.mightyoung.muyon.androidlab.MainActivity} drawState=4
+10-18 07:28:10.414  2556  4670 E ActivityThread: Failed to find provider info for com.google.android.apps.gsa.testing.ui.audio.recorded
+10-18 07:28:10.414  2556  2556 I MicroDetectionWorker: onReady
+10-18 07:28:10.415  2556  4670 I MicrophoneInputStream: mic_close com.google.android.apps.gsa.staticplugins.aa.c@70a3ffe
+10-18 07:28:10.416  1821  1870 D         : HostConnection::get() New Host Connection established 0x7bc6795293e0, tid 1870
+10-18 07:28:10.422  4599  4599 D LifecycleMonitor: Lifecycle status change: com.mightyoung.muyon.androidlab.MainActivity@226513 in: STOPPED
+10-18 07:28:10.423  4599  4599 V ActivityScenario: Update currentActivityStage to STOPPED, currentActivity=com.mightyoung.muyon.androidlab.MainActivity@226513
+10-18 07:28:10.427  2556  2818 I MicroRecognitionRunner: Detection finished
+10-18 07:28:10.427  2556  2818 W ErrorReporter: reportError [type: 211, code: 524300]: Error reading from input stream
+10-18 07:28:10.428  2556  2883 I MicroRecognitionRunner: Stopping hotword detection.
+10-18 07:28:10.440  2556  2818 W ErrorProcessor: onFatalError, processing error from engine(4)
+10-18 07:28:10.440  2556  2818 W ErrorProcessor: com.google.android.apps.gsa.shared.speech.b.g: Error reading from input stream
+10-18 07:28:10.440  2556  2818 W ErrorProcessor: 	at com.google.android.apps.gsa.staticplugins.recognizer.j.a.a(SourceFile:28)
+10-18 07:28:10.440  2556  2818 W ErrorProcessor: 	at com.google.android.apps.gsa.staticplugins.recognizer.j.b.run(SourceFile:15)
+10-18 07:28:10.440  2556  2818 W ErrorProcessor: 	at java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:457)
+10-18 07:28:10.440  2556  2818 W ErrorProcessor: 	at java.util.concurrent.FutureTask.run(FutureTask.java:266)
+10-18 07:28:10.440  2556  2818 W ErrorProcessor: 	at com.google.android.apps.gsa.shared.util.concurrent.a.ax.run(SourceFile:14)
+10-18 07:28:10.440  2556  2818 W ErrorProcessor: 	at com.google.android.apps.gsa.shared.util.concurrent.a.bl.run(SourceFile:4)
+10-18 07:28:10.440  2556  2818 W ErrorProcessor: 	at com.google.android.apps.gsa.shared.util.concurrent.a.bl.run(SourceFile:4)
+10-18 07:28:10.440  2556  2818 W ErrorProcessor: 	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1162)
+10-18 07:28:10.440  2556  2818 W ErrorProcessor: 	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:636)
+10-18 07:28:10.440  2556  2818 W ErrorProcessor: 	at java.lang.Thread.run(Thread.java:764)
+10-18 07:28:10.440  2556  2818 W ErrorProcessor: 	at com.google.android.apps.gsa.shared.util.concurrent.a.ai.run(SourceFile:6)
+10-18 07:28:10.440  2556  2818 W ErrorProcessor: Caused by: com.google.android.apps.gsa.shared.exception.GsaIOException: Error code: 393238 | Buffer overflow, no available space.
+10-18 07:28:10.440  2556  2818 W ErrorProcessor: 	at com.google.android.apps.gsa.speech.audio.Tee.f(SourceFile:103)
+10-18 07:28:10.440  2556  2818 W ErrorProcessor: 	at com.google.android.apps.gsa.speech.audio.au.read(SourceFile:2)
+10-18 07:28:10.440  2556  2818 W ErrorProcessor: 	at java.io.InputStream.read(InputStream.java:101)
+10-18 07:28:10.440  2556  2818 W ErrorProcessor: 	at com.google.android.apps.gsa.speech.audio.ao.run(SourceFile:18)
+10-18 07:28:10.440  2556  2818 W ErrorProcessor: 	at com.google.android.apps.gsa.speech.audio.an.run(SourceFile:2)
+10-18 07:28:10.440  2556  2818 W ErrorProcessor: 	... 9 more
+10-18 07:28:10.441  2556  2818 I AudioController: internalShutdown
+10-18 07:28:10.441  2556  2556 I MicroDetector: Keeping mic open: false
+10-18 07:28:10.441  2556  2556 I MicroDetectionWorker: #onError(false)
+10-18 07:28:10.442  2556  2693 I DeviceStateChecker: DeviceStateChecker cancelled
+10-18 07:28:10.444  1621  1773 D OpenGLRenderer: HWUI GL Pipeline
+10-18 07:28:10.447  1402  1428 E SurfaceFlinger: ro.sf.lcd_density must be defined as a build property
+10-18 07:28:10.448  1621  4724 D         : HostConnection::get() New Host Connection established 0x7bc65cedca60, tid 4724
+10-18 07:28:10.450  1621  4724 I OpenGLRenderer: Initialized EGL, version 1.4
+10-18 07:28:10.450  1621  4724 D OpenGLRenderer: Swap behavior 1
+10-18 07:28:10.451  1621  4724 D EGL_emulation: eglCreateContext: 0x7bc6502297e0: maj 3 min 0 rcv 3
+10-18 07:28:10.451  1621  4724 D EGL_emulation: eglMakeCurrent: 0x7bc6502297e0: ver 3 0 (tinfo 0x7bc6553644a0)
+10-18 07:28:10.454  4599  4599 D LifecycleMonitor: Lifecycle status change: com.mightyoung.muyon.androidlab.MainActivity@226513 in: DESTROYED
+10-18 07:28:10.454  4599  4599 V ActivityScenario: Update currentActivityStage to DESTROYED, currentActivity=null
+10-18 07:28:10.456  4599  4616 D IdlingRegistry: Unregistering idling resources: [androidx.compose.ui.test.EspressoLink@f66387f]
+10-18 07:28:10.515  4599  4616 I TestRunner: finished: realPrivateServiceReadRendersSyntheticProjectionAndOriginalReceipt(com.mightyoung.muyon.androidlab.FrontendServiceLoopTest)
+10-18 07:28:10.520  4599  4616 I TestRunner: run finished: 2 tests, 0 failed, 0 ignored
+10-18 07:28:10.523  1621  3844 I ActivityManager: Killing 3671:com.google.android.packageinstaller/u0a19 (adj 906): empty #17
+10-18 07:28:10.527  1621  3844 I ActivityManager: Force stopping com.mightyoung.muyon.androidlab appid=10077 user=0: finished inst
+10-18 07:28:10.527  1621  3844 I ActivityManager: Killing 4599:com.mightyoung.muyon.androidlab/u0a77 (adj 0): stop com.mightyoung.muyon.androidlab
+10-18 07:28:10.529  1621  3844 I ActivityManager: Killing 4699:com.mightyoung.muyon.androidlab:agent/u0a77 (adj 900): stop com.mightyoung.muyon.androidlab
+10-18 07:28:10.539  1621  4727 W Binder  : Outgoing transactions from this process must be FLAG_ONEWAY
+10-18 07:28:10.539  1621  4727 W Binder  : java.lang.Throwable
+10-18 07:28:10.539  1621  4727 W Binder  : 	at android.os.BinderProxy.transact(Binder.java:736)
+10-18 07:28:10.539  1621  4727 W Binder  : 	at android.app.IInstrumentationWatcher$Stub$Proxy.instrumentationFinished(IInstrumentationWatcher.java:160)
+10-18 07:28:10.539  1621  4727 W Binder  : 	at com.android.server.am.InstrumentationReporter$MyThread.run(InstrumentationReporter.java:86)
+10-18 07:28:10.540  4588  4588 D AndroidRuntime: Shutting down VM
+10-18 07:28:10.572  1621  1666 W ActivityManager: setHasOverlayUi called on unknown pid: 4599

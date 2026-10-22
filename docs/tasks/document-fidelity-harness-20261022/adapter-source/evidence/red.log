@@ -1,0 +1,321 @@
+test_bad_hash_precondition_and_unknown_request_field_never_dispatch (tools.document_fidelity.tests.test_adapter.AdapterTests.test_bad_hash_precondition_and_unknown_request_field_never_dispatch) ... 
+  test_bad_hash_precondition_and_unknown_request_field_never_dispatch (tools.document_fidelity.tests.test_adapter.AdapterTests.test_bad_hash_precondition_and_unknown_request_field_never_dispatch) (change='hash') ... FAIL
+  test_bad_hash_precondition_and_unknown_request_field_never_dispatch (tools.document_fidelity.tests.test_adapter.AdapterTests.test_bad_hash_precondition_and_unknown_request_field_never_dispatch) (change='expected') ... FAIL
+  test_bad_hash_precondition_and_unknown_request_field_never_dispatch (tools.document_fidelity.tests.test_adapter.AdapterTests.test_bad_hash_precondition_and_unknown_request_field_never_dispatch) (change='extra') ... FAIL
+  test_bad_hash_precondition_and_unknown_request_field_never_dispatch (tools.document_fidelity.tests.test_adapter.AdapterTests.test_bad_hash_precondition_and_unknown_request_field_never_dispatch) (change='formula') ... FAIL
+  test_bad_hash_precondition_and_unknown_request_field_never_dispatch (tools.document_fidelity.tests.test_adapter.AdapterTests.test_bad_hash_precondition_and_unknown_request_field_never_dispatch) (change='badcell') ... FAIL
+test_cache_other_cell_and_noop_fail (tools.document_fidelity.tests.test_adapter.AdapterTests.test_cache_other_cell_and_noop_fail) ... 
+  test_cache_other_cell_and_noop_fail (tools.document_fidelity.tests.test_adapter.AdapterTests.test_cache_other_cell_and_noop_fail) (mode='cache') ... FAIL
+  test_cache_other_cell_and_noop_fail (tools.document_fidelity.tests.test_adapter.AdapterTests.test_cache_other_cell_and_noop_fail) (mode='wrong_cell') ... FAIL
+  test_cache_other_cell_and_noop_fail (tools.document_fidelity.tests.test_adapter.AdapterTests.test_cache_other_cell_and_noop_fail) (mode='noop') ... FAIL
+test_disabled_worker_entry_does_not_import_engine (tools.document_fidelity.tests.test_adapter.AdapterTests.test_disabled_worker_entry_does_not_import_engine) ... ok
+test_executor_timeout_exit_missing_oversize_logs_symlink_source_and_sidefile_fail (tools.document_fidelity.tests.test_adapter.AdapterTests.test_executor_timeout_exit_missing_oversize_logs_symlink_source_and_sidefile_fail) ... 
+  test_executor_timeout_exit_missing_oversize_logs_symlink_source_and_sidefile_fail (tools.document_fidelity.tests.test_adapter.AdapterTests.test_executor_timeout_exit_missing_oversize_logs_symlink_source_and_sidefile_fail) (mode='timeout') ... FAIL
+  test_executor_timeout_exit_missing_oversize_logs_symlink_source_and_sidefile_fail (tools.document_fidelity.tests.test_adapter.AdapterTests.test_executor_timeout_exit_missing_oversize_logs_symlink_source_and_sidefile_fail) (mode='exit') ... FAIL
+  test_executor_timeout_exit_missing_oversize_logs_symlink_source_and_sidefile_fail (tools.document_fidelity.tests.test_adapter.AdapterTests.test_executor_timeout_exit_missing_oversize_logs_symlink_source_and_sidefile_fail) (mode='missing') ... FAIL
+  test_executor_timeout_exit_missing_oversize_logs_symlink_source_and_sidefile_fail (tools.document_fidelity.tests.test_adapter.AdapterTests.test_executor_timeout_exit_missing_oversize_logs_symlink_source_and_sidefile_fail) (mode='oversize') ... FAIL
+  test_executor_timeout_exit_missing_oversize_logs_symlink_source_and_sidefile_fail (tools.document_fidelity.tests.test_adapter.AdapterTests.test_executor_timeout_exit_missing_oversize_logs_symlink_source_and_sidefile_fail) (mode='stdout') ... FAIL
+  test_executor_timeout_exit_missing_oversize_logs_symlink_source_and_sidefile_fail (tools.document_fidelity.tests.test_adapter.AdapterTests.test_executor_timeout_exit_missing_oversize_logs_symlink_source_and_sidefile_fail) (mode='symlink') ... FAIL
+  test_executor_timeout_exit_missing_oversize_logs_symlink_source_and_sidefile_fail (tools.document_fidelity.tests.test_adapter.AdapterTests.test_executor_timeout_exit_missing_oversize_logs_symlink_source_and_sidefile_fail) (mode='source_changed') ... FAIL
+  test_executor_timeout_exit_missing_oversize_logs_symlink_source_and_sidefile_fail (tools.document_fidelity.tests.test_adapter.AdapterTests.test_executor_timeout_exit_missing_oversize_logs_symlink_source_and_sidefile_fail) (mode='extra_file') ... FAIL
+  test_executor_timeout_exit_missing_oversize_logs_symlink_source_and_sidefile_fail (tools.document_fidelity.tests.test_adapter.AdapterTests.test_executor_timeout_exit_missing_oversize_logs_symlink_source_and_sidefile_fail) (mode='exception') ... FAIL
+test_fixed_launch_and_readonly_distinct_copy_and_simulation_labels (tools.document_fidelity.tests.test_adapter.AdapterTests.test_fixed_launch_and_readonly_distinct_copy_and_simulation_labels) ... FAIL
+test_formula_merged_and_hidden_targets_reject (tools.document_fidelity.tests.test_adapter.AdapterTests.test_formula_merged_and_hidden_targets_reject) ... FAIL
+test_missing_admission_is_hold (tools.document_fidelity.tests.test_adapter.AdapterTests.test_missing_admission_is_hold) ... FAIL
+test_real_runtime_is_always_held_even_forged_pass_flags (tools.document_fidelity.tests.test_adapter.AdapterTests.test_real_runtime_is_always_held_even_forged_pass_flags) ... FAIL
+test_unknown_loss_rewrite_and_added_parts_fail (tools.document_fidelity.tests.test_adapter.AdapterTests.test_unknown_loss_rewrite_and_added_parts_fail) ... 
+  test_unknown_loss_rewrite_and_added_parts_fail (tools.document_fidelity.tests.test_adapter.AdapterTests.test_unknown_loss_rewrite_and_added_parts_fail) (mode='drop') ... FAIL
+  test_unknown_loss_rewrite_and_added_parts_fail (tools.document_fidelity.tests.test_adapter.AdapterTests.test_unknown_loss_rewrite_and_added_parts_fail) (mode='unknown') ... FAIL
+  test_unknown_loss_rewrite_and_added_parts_fail (tools.document_fidelity.tests.test_adapter.AdapterTests.test_unknown_loss_rewrite_and_added_parts_fail) (mode='add') ... FAIL
+
+======================================================================
+FAIL: test_bad_hash_precondition_and_unknown_request_field_never_dispatch (tools.document_fidelity.tests.test_adapter.AdapterTests.test_bad_hash_precondition_and_unknown_request_field_never_dispatch) (change='hash')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/document-fidelity/tools/document_fidelity/tests/test_adapter.py", line 101, in test_bad_hash_precondition_and_unknown_request_field_never_dispatch
+    r,f=self.simulate(req=req);self.assertEqual('rejected',r['status'],r);self.assertFalse(f.calls)
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 'rejected' != 'unsupported'
+- rejected
++ unsupported
+ : {'status': 'unsupported'}
+
+======================================================================
+FAIL: test_bad_hash_precondition_and_unknown_request_field_never_dispatch (tools.document_fidelity.tests.test_adapter.AdapterTests.test_bad_hash_precondition_and_unknown_request_field_never_dispatch) (change='expected')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/document-fidelity/tools/document_fidelity/tests/test_adapter.py", line 101, in test_bad_hash_precondition_and_unknown_request_field_never_dispatch
+    r,f=self.simulate(req=req);self.assertEqual('rejected',r['status'],r);self.assertFalse(f.calls)
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 'rejected' != 'unsupported'
+- rejected
++ unsupported
+ : {'status': 'unsupported'}
+
+======================================================================
+FAIL: test_bad_hash_precondition_and_unknown_request_field_never_dispatch (tools.document_fidelity.tests.test_adapter.AdapterTests.test_bad_hash_precondition_and_unknown_request_field_never_dispatch) (change='extra')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/document-fidelity/tools/document_fidelity/tests/test_adapter.py", line 101, in test_bad_hash_precondition_and_unknown_request_field_never_dispatch
+    r,f=self.simulate(req=req);self.assertEqual('rejected',r['status'],r);self.assertFalse(f.calls)
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 'rejected' != 'unsupported'
+- rejected
++ unsupported
+ : {'status': 'unsupported'}
+
+======================================================================
+FAIL: test_bad_hash_precondition_and_unknown_request_field_never_dispatch (tools.document_fidelity.tests.test_adapter.AdapterTests.test_bad_hash_precondition_and_unknown_request_field_never_dispatch) (change='formula')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/document-fidelity/tools/document_fidelity/tests/test_adapter.py", line 101, in test_bad_hash_precondition_and_unknown_request_field_never_dispatch
+    r,f=self.simulate(req=req);self.assertEqual('rejected',r['status'],r);self.assertFalse(f.calls)
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 'rejected' != 'unsupported'
+- rejected
++ unsupported
+ : {'status': 'unsupported'}
+
+======================================================================
+FAIL: test_bad_hash_precondition_and_unknown_request_field_never_dispatch (tools.document_fidelity.tests.test_adapter.AdapterTests.test_bad_hash_precondition_and_unknown_request_field_never_dispatch) (change='badcell')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/document-fidelity/tools/document_fidelity/tests/test_adapter.py", line 101, in test_bad_hash_precondition_and_unknown_request_field_never_dispatch
+    r,f=self.simulate(req=req);self.assertEqual('rejected',r['status'],r);self.assertFalse(f.calls)
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 'rejected' != 'unsupported'
+- rejected
++ unsupported
+ : {'status': 'unsupported'}
+
+======================================================================
+FAIL: test_cache_other_cell_and_noop_fail (tools.document_fidelity.tests.test_adapter.AdapterTests.test_cache_other_cell_and_noop_fail) (mode='cache')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/document-fidelity/tools/document_fidelity/tests/test_adapter.py", line 110, in test_cache_other_cell_and_noop_fail
+    r,_=self.simulate(mode);self.assertEqual('simulation_failed',r['status'],r)
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 'simulation_failed' != 'unsupported'
+- simulation_failed
++ unsupported
+ : {'status': 'unsupported'}
+
+======================================================================
+FAIL: test_cache_other_cell_and_noop_fail (tools.document_fidelity.tests.test_adapter.AdapterTests.test_cache_other_cell_and_noop_fail) (mode='wrong_cell')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/document-fidelity/tools/document_fidelity/tests/test_adapter.py", line 110, in test_cache_other_cell_and_noop_fail
+    r,_=self.simulate(mode);self.assertEqual('simulation_failed',r['status'],r)
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 'simulation_failed' != 'unsupported'
+- simulation_failed
++ unsupported
+ : {'status': 'unsupported'}
+
+======================================================================
+FAIL: test_cache_other_cell_and_noop_fail (tools.document_fidelity.tests.test_adapter.AdapterTests.test_cache_other_cell_and_noop_fail) (mode='noop')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/document-fidelity/tools/document_fidelity/tests/test_adapter.py", line 110, in test_cache_other_cell_and_noop_fail
+    r,_=self.simulate(mode);self.assertEqual('simulation_failed',r['status'],r)
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 'simulation_failed' != 'unsupported'
+- simulation_failed
++ unsupported
+ : {'status': 'unsupported'}
+
+======================================================================
+FAIL: test_executor_timeout_exit_missing_oversize_logs_symlink_source_and_sidefile_fail (tools.document_fidelity.tests.test_adapter.AdapterTests.test_executor_timeout_exit_missing_oversize_logs_symlink_source_and_sidefile_fail) (mode='timeout')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/document-fidelity/tools/document_fidelity/tests/test_adapter.py", line 115, in test_executor_timeout_exit_missing_oversize_logs_symlink_source_and_sidefile_fail
+    r,_=self.simulate(mode);self.assertEqual('simulation_failed',r['status'],r)
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 'simulation_failed' != 'unsupported'
+- simulation_failed
++ unsupported
+ : {'status': 'unsupported'}
+
+======================================================================
+FAIL: test_executor_timeout_exit_missing_oversize_logs_symlink_source_and_sidefile_fail (tools.document_fidelity.tests.test_adapter.AdapterTests.test_executor_timeout_exit_missing_oversize_logs_symlink_source_and_sidefile_fail) (mode='exit')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/document-fidelity/tools/document_fidelity/tests/test_adapter.py", line 115, in test_executor_timeout_exit_missing_oversize_logs_symlink_source_and_sidefile_fail
+    r,_=self.simulate(mode);self.assertEqual('simulation_failed',r['status'],r)
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 'simulation_failed' != 'unsupported'
+- simulation_failed
++ unsupported
+ : {'status': 'unsupported'}
+
+======================================================================
+FAIL: test_executor_timeout_exit_missing_oversize_logs_symlink_source_and_sidefile_fail (tools.document_fidelity.tests.test_adapter.AdapterTests.test_executor_timeout_exit_missing_oversize_logs_symlink_source_and_sidefile_fail) (mode='missing')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/document-fidelity/tools/document_fidelity/tests/test_adapter.py", line 115, in test_executor_timeout_exit_missing_oversize_logs_symlink_source_and_sidefile_fail
+    r,_=self.simulate(mode);self.assertEqual('simulation_failed',r['status'],r)
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 'simulation_failed' != 'unsupported'
+- simulation_failed
++ unsupported
+ : {'status': 'unsupported'}
+
+======================================================================
+FAIL: test_executor_timeout_exit_missing_oversize_logs_symlink_source_and_sidefile_fail (tools.document_fidelity.tests.test_adapter.AdapterTests.test_executor_timeout_exit_missing_oversize_logs_symlink_source_and_sidefile_fail) (mode='oversize')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/document-fidelity/tools/document_fidelity/tests/test_adapter.py", line 115, in test_executor_timeout_exit_missing_oversize_logs_symlink_source_and_sidefile_fail
+    r,_=self.simulate(mode);self.assertEqual('simulation_failed',r['status'],r)
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 'simulation_failed' != 'unsupported'
+- simulation_failed
++ unsupported
+ : {'status': 'unsupported'}
+
+======================================================================
+FAIL: test_executor_timeout_exit_missing_oversize_logs_symlink_source_and_sidefile_fail (tools.document_fidelity.tests.test_adapter.AdapterTests.test_executor_timeout_exit_missing_oversize_logs_symlink_source_and_sidefile_fail) (mode='stdout')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/document-fidelity/tools/document_fidelity/tests/test_adapter.py", line 115, in test_executor_timeout_exit_missing_oversize_logs_symlink_source_and_sidefile_fail
+    r,_=self.simulate(mode);self.assertEqual('simulation_failed',r['status'],r)
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 'simulation_failed' != 'unsupported'
+- simulation_failed
++ unsupported
+ : {'status': 'unsupported'}
+
+======================================================================
+FAIL: test_executor_timeout_exit_missing_oversize_logs_symlink_source_and_sidefile_fail (tools.document_fidelity.tests.test_adapter.AdapterTests.test_executor_timeout_exit_missing_oversize_logs_symlink_source_and_sidefile_fail) (mode='symlink')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/document-fidelity/tools/document_fidelity/tests/test_adapter.py", line 115, in test_executor_timeout_exit_missing_oversize_logs_symlink_source_and_sidefile_fail
+    r,_=self.simulate(mode);self.assertEqual('simulation_failed',r['status'],r)
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 'simulation_failed' != 'unsupported'
+- simulation_failed
++ unsupported
+ : {'status': 'unsupported'}
+
+======================================================================
+FAIL: test_executor_timeout_exit_missing_oversize_logs_symlink_source_and_sidefile_fail (tools.document_fidelity.tests.test_adapter.AdapterTests.test_executor_timeout_exit_missing_oversize_logs_symlink_source_and_sidefile_fail) (mode='source_changed')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/document-fidelity/tools/document_fidelity/tests/test_adapter.py", line 115, in test_executor_timeout_exit_missing_oversize_logs_symlink_source_and_sidefile_fail
+    r,_=self.simulate(mode);self.assertEqual('simulation_failed',r['status'],r)
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 'simulation_failed' != 'unsupported'
+- simulation_failed
++ unsupported
+ : {'status': 'unsupported'}
+
+======================================================================
+FAIL: test_executor_timeout_exit_missing_oversize_logs_symlink_source_and_sidefile_fail (tools.document_fidelity.tests.test_adapter.AdapterTests.test_executor_timeout_exit_missing_oversize_logs_symlink_source_and_sidefile_fail) (mode='extra_file')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/document-fidelity/tools/document_fidelity/tests/test_adapter.py", line 115, in test_executor_timeout_exit_missing_oversize_logs_symlink_source_and_sidefile_fail
+    r,_=self.simulate(mode);self.assertEqual('simulation_failed',r['status'],r)
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 'simulation_failed' != 'unsupported'
+- simulation_failed
++ unsupported
+ : {'status': 'unsupported'}
+
+======================================================================
+FAIL: test_executor_timeout_exit_missing_oversize_logs_symlink_source_and_sidefile_fail (tools.document_fidelity.tests.test_adapter.AdapterTests.test_executor_timeout_exit_missing_oversize_logs_symlink_source_and_sidefile_fail) (mode='exception')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/document-fidelity/tools/document_fidelity/tests/test_adapter.py", line 115, in test_executor_timeout_exit_missing_oversize_logs_symlink_source_and_sidefile_fail
+    r,_=self.simulate(mode);self.assertEqual('simulation_failed',r['status'],r)
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 'simulation_failed' != 'unsupported'
+- simulation_failed
++ unsupported
+ : {'status': 'unsupported'}
+
+======================================================================
+FAIL: test_fixed_launch_and_readonly_distinct_copy_and_simulation_labels (tools.document_fidelity.tests.test_adapter.AdapterTests.test_fixed_launch_and_readonly_distinct_copy_and_simulation_labels)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/document-fidelity/tools/document_fidelity/tests/test_adapter.py", line 78, in test_fixed_launch_and_readonly_distinct_copy_and_simulation_labels
+    self.assertEqual('simulated_validated',r['status'],r)
+AssertionError: 'simulated_validated' != 'unsupported'
+- simulated_validated
++ unsupported
+ : {'status': 'unsupported'}
+
+======================================================================
+FAIL: test_formula_merged_and_hidden_targets_reject (tools.document_fidelity.tests.test_adapter.AdapterTests.test_formula_merged_and_hidden_targets_reject)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/document-fidelity/tools/document_fidelity/tests/test_adapter.py", line 120, in test_formula_merged_and_hidden_targets_reject
+    r,f=self.simulate(req=req);self.assertEqual('rejected',r['status'],r);self.assertFalse(f.calls)
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 'rejected' != 'unsupported'
+- rejected
++ unsupported
+ : {'status': 'unsupported'}
+
+======================================================================
+FAIL: test_missing_admission_is_hold (tools.document_fidelity.tests.test_adapter.AdapterTests.test_missing_admission_is_hold)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/document-fidelity/tools/document_fidelity/tests/test_adapter.py", line 91, in test_missing_admission_is_hold
+    self.assertEqual('held',r['status']);self.assertIn('admission_missing',r['reasons'])
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 'held' != 'unsupported'
+- held
++ unsupported
+
+
+======================================================================
+FAIL: test_real_runtime_is_always_held_even_forged_pass_flags (tools.document_fidelity.tests.test_adapter.AdapterTests.test_real_runtime_is_always_held_even_forged_pass_flags)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/document-fidelity/tools/document_fidelity/tests/test_adapter.py", line 73, in test_real_runtime_is_always_held_even_forged_pass_flags
+    self.assertEqual('held',r['status']);self.assertEqual('not_run',r['engine_execution'])
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 'held' != 'unsupported'
+- held
++ unsupported
+
+
+======================================================================
+FAIL: test_unknown_loss_rewrite_and_added_parts_fail (tools.document_fidelity.tests.test_adapter.AdapterTests.test_unknown_loss_rewrite_and_added_parts_fail) (mode='drop')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/document-fidelity/tools/document_fidelity/tests/test_adapter.py", line 105, in test_unknown_loss_rewrite_and_added_parts_fail
+    r,_=self.simulate(mode);self.assertEqual('simulation_failed',r['status'],r)
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 'simulation_failed' != 'unsupported'
+- simulation_failed
++ unsupported
+ : {'status': 'unsupported'}
+
+======================================================================
+FAIL: test_unknown_loss_rewrite_and_added_parts_fail (tools.document_fidelity.tests.test_adapter.AdapterTests.test_unknown_loss_rewrite_and_added_parts_fail) (mode='unknown')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/document-fidelity/tools/document_fidelity/tests/test_adapter.py", line 105, in test_unknown_loss_rewrite_and_added_parts_fail
+    r,_=self.simulate(mode);self.assertEqual('simulation_failed',r['status'],r)
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 'simulation_failed' != 'unsupported'
+- simulation_failed
++ unsupported
+ : {'status': 'unsupported'}
+
+======================================================================
+FAIL: test_unknown_loss_rewrite_and_added_parts_fail (tools.document_fidelity.tests.test_adapter.AdapterTests.test_unknown_loss_rewrite_and_added_parts_fail) (mode='add')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/document-fidelity/tools/document_fidelity/tests/test_adapter.py", line 105, in test_unknown_loss_rewrite_and_added_parts_fail
+    r,_=self.simulate(mode);self.assertEqual('simulation_failed',r['status'],r)
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 'simulation_failed' != 'unsupported'
+- simulation_failed
++ unsupported
+ : {'status': 'unsupported'}
+
+----------------------------------------------------------------------
+Ran 9 tests in 0.009s
+
+FAILED (failures=24)

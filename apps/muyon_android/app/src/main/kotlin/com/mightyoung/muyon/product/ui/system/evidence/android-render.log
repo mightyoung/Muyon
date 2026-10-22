@@ -1,0 +1,4 @@
+$ bash apps/muyon_android/gradlew -p apps/muyon_android :app:connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=com.mightyoung.muyon.product.ui.system.FoundationComponentsTest,com.mightyoung.muyon.product.ui.system.FoundationRenderingTest
+NOT_RUN: set MUYON_UI_GRADLE to the existing Gradle 8.13 executable.
+
+exit_code=2

@@ -1,0 +1,304 @@
+test_cli_stdout_and_original_untouched (test_harness.HarnessTests.test_cli_stdout_and_original_untouched) ... FAIL
+test_compare_unknown_loss_and_changes_fail (test_harness.HarnessTests.test_compare_unknown_loss_and_changes_fail) ... FAIL
+test_duplicate_symlink_and_encryption (test_harness.HarnessTests.test_duplicate_symlink_and_encryption) ... FAIL
+test_invalid_archive_and_plaintext_not_ooxml (test_harness.HarnessTests.test_invalid_archive_and_plaintext_not_ooxml) ... FAIL
+test_macro_external_and_embedded_recorded (test_harness.HarnessTests.test_macro_external_and_embedded_recorded) ... 
+  test_macro_external_and_embedded_recorded (test_harness.HarnessTests.test_macro_external_and_embedded_recorded) (code='macro') ... FAIL
+  test_macro_external_and_embedded_recorded (test_harness.HarnessTests.test_macro_external_and_embedded_recorded) (code='embedded_object') ... FAIL
+  test_macro_external_and_embedded_recorded (test_harness.HarnessTests.test_macro_external_and_embedded_recorded) (code='external_relationship') ... FAIL
+test_masquerade (test_harness.HarnessTests.test_masquerade) ... FAIL
+test_missing_main_and_root_relationship (test_harness.HarnessTests.test_missing_main_and_root_relationship) ... FAIL
+test_pdf_preflight_never_certifies_safety (test_harness.HarnessTests.test_pdf_preflight_never_certifies_safety) ... FAIL
+test_three_formats_and_honest_dimensions (test_harness.HarnessTests.test_three_formats_and_honest_dimensions) ... 
+  test_three_formats_and_honest_dimensions (test_harness.HarnessTests.test_three_formats_and_honest_dimensions) (kind='docx') ... FAIL
+  test_three_formats_and_honest_dimensions (test_harness.HarnessTests.test_three_formats_and_honest_dimensions) (kind='xlsx') ... FAIL
+  test_three_formats_and_honest_dimensions (test_harness.HarnessTests.test_three_formats_and_honest_dimensions) (kind='pptx') ... FAIL
+test_unsafe_archive_paths (test_harness.HarnessTests.test_unsafe_archive_paths) ... 
+  test_unsafe_archive_paths (test_harness.HarnessTests.test_unsafe_archive_paths) (name='../escape') ... FAIL
+  test_unsafe_archive_paths (test_harness.HarnessTests.test_unsafe_archive_paths) (name='/absolute') ... FAIL
+  test_unsafe_archive_paths (test_harness.HarnessTests.test_unsafe_archive_paths) (name='C:/drive') ... FAIL
+  test_unsafe_archive_paths (test_harness.HarnessTests.test_unsafe_archive_paths) (name='a\\b') ... FAIL
+  test_unsafe_archive_paths (test_harness.HarnessTests.test_unsafe_archive_paths) (name='a/../b') ... FAIL
+  test_unsafe_archive_paths (test_harness.HarnessTests.test_unsafe_archive_paths) (name='a/%2e%2e/b') ... FAIL
+test_wrong_content_type_and_root (test_harness.HarnessTests.test_wrong_content_type_and_root) ... FAIL
+test_xml_entities_utf16_and_malformed (test_harness.HarnessTests.test_xml_entities_utf16_and_malformed) ... FAIL
+test_zip_bomb_ratio_and_member_limit (test_harness.HarnessTests.test_zip_bomb_ratio_and_member_limit) ... FAIL
+
+======================================================================
+FAIL: test_cli_stdout_and_original_untouched (test_harness.HarnessTests.test_cli_stdout_and_original_untouched)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/document-fidelity/tools/document_fidelity/tests/test_harness.py", line 153, in test_cli_stdout_and_original_untouched
+    self.assertEqual('docx', json.loads(r.stdout)['format'])
+AssertionError: 'docx' != 'unknown'
+- docx
++ unknown
+
+
+======================================================================
+FAIL: test_compare_unknown_loss_and_changes_fail (test_harness.HarnessTests.test_compare_unknown_loss_and_changes_fail)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/document-fidelity/tools/document_fidelity/tests/test_harness.py", line 129, in test_compare_unknown_loss_and_changes_fail
+    self.assertEqual('fail', r['preservation']['status'])
+AssertionError: 'fail' != 'not_run'
+- fail
++ not_run
+
+
+======================================================================
+FAIL: test_duplicate_symlink_and_encryption (test_harness.HarnessTests.test_duplicate_symlink_and_encryption)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/document-fidelity/tools/document_fidelity/tests/test_harness.py", line 112, in test_duplicate_symlink_and_encryption
+    self.reject(p, 'symlink')
+  File "/workspace/document-fidelity/tools/document_fidelity/tests/test_harness.py", line 48, in reject
+    self.assertEqual('reject', r['decision'], r)
+AssertionError: 'reject' != 'unsupported'
+- reject
++ unsupported
+ : {'decision': 'unsupported', 'format': 'unknown', 'findings': [], 'dimensions': {}}
+
+======================================================================
+FAIL: test_invalid_archive_and_plaintext_not_ooxml (test_harness.HarnessTests.test_invalid_archive_and_plaintext_not_ooxml)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/document-fidelity/tools/document_fidelity/tests/test_harness.py", line 122, in test_invalid_archive_and_plaintext_not_ooxml
+    self.reject(p, 'invalid_zip')
+  File "/workspace/document-fidelity/tools/document_fidelity/tests/test_harness.py", line 48, in reject
+    self.assertEqual('reject', r['decision'], r)
+AssertionError: 'reject' != 'unsupported'
+- reject
++ unsupported
+ : {'decision': 'unsupported', 'format': 'unknown', 'findings': [], 'dimensions': {}}
+
+======================================================================
+FAIL: test_macro_external_and_embedded_recorded (test_harness.HarnessTests.test_macro_external_and_embedded_recorded) (code='macro')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/document-fidelity/tools/document_fidelity/tests/test_harness.py", line 93, in test_macro_external_and_embedded_recorded
+    self.reject(self.sample(members=p), code)
+  File "/workspace/document-fidelity/tools/document_fidelity/tests/test_harness.py", line 48, in reject
+    self.assertEqual('reject', r['decision'], r)
+AssertionError: 'reject' != 'unsupported'
+- reject
++ unsupported
+ : {'decision': 'unsupported', 'format': 'unknown', 'findings': [], 'dimensions': {}}
+
+======================================================================
+FAIL: test_macro_external_and_embedded_recorded (test_harness.HarnessTests.test_macro_external_and_embedded_recorded) (code='embedded_object')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/document-fidelity/tools/document_fidelity/tests/test_harness.py", line 93, in test_macro_external_and_embedded_recorded
+    self.reject(self.sample(members=p), code)
+  File "/workspace/document-fidelity/tools/document_fidelity/tests/test_harness.py", line 48, in reject
+    self.assertEqual('reject', r['decision'], r)
+AssertionError: 'reject' != 'unsupported'
+- reject
++ unsupported
+ : {'decision': 'unsupported', 'format': 'unknown', 'findings': [], 'dimensions': {}}
+
+======================================================================
+FAIL: test_macro_external_and_embedded_recorded (test_harness.HarnessTests.test_macro_external_and_embedded_recorded) (code='external_relationship')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/document-fidelity/tools/document_fidelity/tests/test_harness.py", line 93, in test_macro_external_and_embedded_recorded
+    self.reject(self.sample(members=p), code)
+  File "/workspace/document-fidelity/tools/document_fidelity/tests/test_harness.py", line 48, in reject
+    self.assertEqual('reject', r['decision'], r)
+AssertionError: 'reject' != 'unsupported'
+- reject
++ unsupported
+ : {'decision': 'unsupported', 'format': 'unknown', 'findings': [], 'dimensions': {}}
+
+======================================================================
+FAIL: test_masquerade (test_harness.HarnessTests.test_masquerade)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/document-fidelity/tools/document_fidelity/tests/test_harness.py", line 68, in test_masquerade
+    self.reject(self.sample('xlsx', name='fake.docx'), 'extension_mismatch')
+  File "/workspace/document-fidelity/tools/document_fidelity/tests/test_harness.py", line 48, in reject
+    self.assertEqual('reject', r['decision'], r)
+AssertionError: 'reject' != 'unsupported'
+- reject
++ unsupported
+ : {'decision': 'unsupported', 'format': 'unknown', 'findings': [], 'dimensions': {}}
+
+======================================================================
+FAIL: test_missing_main_and_root_relationship (test_harness.HarnessTests.test_missing_main_and_root_relationship)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/document-fidelity/tools/document_fidelity/tests/test_harness.py", line 79, in test_missing_main_and_root_relationship
+    self.reject(self.sample(members=p), 'missing_main')
+  File "/workspace/document-fidelity/tools/document_fidelity/tests/test_harness.py", line 48, in reject
+    self.assertEqual('reject', r['decision'], r)
+AssertionError: 'reject' != 'unsupported'
+- reject
++ unsupported
+ : {'decision': 'unsupported', 'format': 'unknown', 'findings': [], 'dimensions': {}}
+
+======================================================================
+FAIL: test_pdf_preflight_never_certifies_safety (test_harness.HarnessTests.test_pdf_preflight_never_certifies_safety)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/document-fidelity/tools/document_fidelity/tests/test_harness.py", line 141, in test_pdf_preflight_never_certifies_safety
+    self.assertEqual('pdf', r['format'])
+AssertionError: 'pdf' != 'unknown'
+- pdf
++ unknown
+
+
+======================================================================
+FAIL: test_three_formats_and_honest_dimensions (test_harness.HarnessTests.test_three_formats_and_honest_dimensions) (kind='docx')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/document-fidelity/tools/document_fidelity/tests/test_harness.py", line 58, in test_three_formats_and_honest_dimensions
+    self.assertEqual(kind, r['format'])
+AssertionError: 'docx' != 'unknown'
+- docx
++ unknown
+
+
+======================================================================
+FAIL: test_three_formats_and_honest_dimensions (test_harness.HarnessTests.test_three_formats_and_honest_dimensions) (kind='xlsx')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/document-fidelity/tools/document_fidelity/tests/test_harness.py", line 58, in test_three_formats_and_honest_dimensions
+    self.assertEqual(kind, r['format'])
+AssertionError: 'xlsx' != 'unknown'
+- xlsx
++ unknown
+
+
+======================================================================
+FAIL: test_three_formats_and_honest_dimensions (test_harness.HarnessTests.test_three_formats_and_honest_dimensions) (kind='pptx')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/document-fidelity/tools/document_fidelity/tests/test_harness.py", line 58, in test_three_formats_and_honest_dimensions
+    self.assertEqual(kind, r['format'])
+AssertionError: 'pptx' != 'unknown'
+- pptx
++ unknown
+
+
+======================================================================
+FAIL: test_unsafe_archive_paths (test_harness.HarnessTests.test_unsafe_archive_paths) (name='../escape')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/document-fidelity/tools/document_fidelity/tests/test_harness.py", line 87, in test_unsafe_archive_paths
+    self.reject(self.sample(members=p), 'unsafe_path')
+  File "/workspace/document-fidelity/tools/document_fidelity/tests/test_harness.py", line 48, in reject
+    self.assertEqual('reject', r['decision'], r)
+AssertionError: 'reject' != 'unsupported'
+- reject
++ unsupported
+ : {'decision': 'unsupported', 'format': 'unknown', 'findings': [], 'dimensions': {}}
+
+======================================================================
+FAIL: test_unsafe_archive_paths (test_harness.HarnessTests.test_unsafe_archive_paths) (name='/absolute')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/document-fidelity/tools/document_fidelity/tests/test_harness.py", line 87, in test_unsafe_archive_paths
+    self.reject(self.sample(members=p), 'unsafe_path')
+  File "/workspace/document-fidelity/tools/document_fidelity/tests/test_harness.py", line 48, in reject
+    self.assertEqual('reject', r['decision'], r)
+AssertionError: 'reject' != 'unsupported'
+- reject
++ unsupported
+ : {'decision': 'unsupported', 'format': 'unknown', 'findings': [], 'dimensions': {}}
+
+======================================================================
+FAIL: test_unsafe_archive_paths (test_harness.HarnessTests.test_unsafe_archive_paths) (name='C:/drive')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/document-fidelity/tools/document_fidelity/tests/test_harness.py", line 87, in test_unsafe_archive_paths
+    self.reject(self.sample(members=p), 'unsafe_path')
+  File "/workspace/document-fidelity/tools/document_fidelity/tests/test_harness.py", line 48, in reject
+    self.assertEqual('reject', r['decision'], r)
+AssertionError: 'reject' != 'unsupported'
+- reject
++ unsupported
+ : {'decision': 'unsupported', 'format': 'unknown', 'findings': [], 'dimensions': {}}
+
+======================================================================
+FAIL: test_unsafe_archive_paths (test_harness.HarnessTests.test_unsafe_archive_paths) (name='a\\b')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/document-fidelity/tools/document_fidelity/tests/test_harness.py", line 87, in test_unsafe_archive_paths
+    self.reject(self.sample(members=p), 'unsafe_path')
+  File "/workspace/document-fidelity/tools/document_fidelity/tests/test_harness.py", line 48, in reject
+    self.assertEqual('reject', r['decision'], r)
+AssertionError: 'reject' != 'unsupported'
+- reject
++ unsupported
+ : {'decision': 'unsupported', 'format': 'unknown', 'findings': [], 'dimensions': {}}
+
+======================================================================
+FAIL: test_unsafe_archive_paths (test_harness.HarnessTests.test_unsafe_archive_paths) (name='a/../b')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/document-fidelity/tools/document_fidelity/tests/test_harness.py", line 87, in test_unsafe_archive_paths
+    self.reject(self.sample(members=p), 'unsafe_path')
+  File "/workspace/document-fidelity/tools/document_fidelity/tests/test_harness.py", line 48, in reject
+    self.assertEqual('reject', r['decision'], r)
+AssertionError: 'reject' != 'unsupported'
+- reject
++ unsupported
+ : {'decision': 'unsupported', 'format': 'unknown', 'findings': [], 'dimensions': {}}
+
+======================================================================
+FAIL: test_unsafe_archive_paths (test_harness.HarnessTests.test_unsafe_archive_paths) (name='a/%2e%2e/b')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/document-fidelity/tools/document_fidelity/tests/test_harness.py", line 87, in test_unsafe_archive_paths
+    self.reject(self.sample(members=p), 'unsafe_path')
+  File "/workspace/document-fidelity/tools/document_fidelity/tests/test_harness.py", line 48, in reject
+    self.assertEqual('reject', r['decision'], r)
+AssertionError: 'reject' != 'unsupported'
+- reject
++ unsupported
+ : {'decision': 'unsupported', 'format': 'unknown', 'findings': [], 'dimensions': {}}
+
+======================================================================
+FAIL: test_wrong_content_type_and_root (test_harness.HarnessTests.test_wrong_content_type_and_root)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/document-fidelity/tools/document_fidelity/tests/test_harness.py", line 73, in test_wrong_content_type_and_root
+    self.reject(self.sample(members=p), 'unsupported_main_type')
+  File "/workspace/document-fidelity/tools/document_fidelity/tests/test_harness.py", line 48, in reject
+    self.assertEqual('reject', r['decision'], r)
+AssertionError: 'reject' != 'unsupported'
+- reject
++ unsupported
+ : {'decision': 'unsupported', 'format': 'unknown', 'findings': [], 'dimensions': {}}
+
+======================================================================
+FAIL: test_xml_entities_utf16_and_malformed (test_harness.HarnessTests.test_xml_entities_utf16_and_malformed)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/document-fidelity/tools/document_fidelity/tests/test_harness.py", line 98, in test_xml_entities_utf16_and_malformed
+    self.reject(self.sample(members=p), 'unsafe_or_invalid_xml')
+  File "/workspace/document-fidelity/tools/document_fidelity/tests/test_harness.py", line 48, in reject
+    self.assertEqual('reject', r['decision'], r)
+AssertionError: 'reject' != 'unsupported'
+- reject
++ unsupported
+ : {'decision': 'unsupported', 'format': 'unknown', 'findings': [], 'dimensions': {}}
+
+======================================================================
+FAIL: test_zip_bomb_ratio_and_member_limit (test_harness.HarnessTests.test_zip_bomb_ratio_and_member_limit)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/document-fidelity/tools/document_fidelity/tests/test_harness.py", line 102, in test_zip_bomb_ratio_and_member_limit
+    self.reject(self.sample(members=p), 'archive_limits')
+  File "/workspace/document-fidelity/tools/document_fidelity/tests/test_harness.py", line 48, in reject
+    self.assertEqual('reject', r['decision'], r)
+AssertionError: 'reject' != 'unsupported'
+- reject
++ unsupported
+ : {'decision': 'unsupported', 'format': 'unknown', 'findings': [], 'dimensions': {}}
+
+----------------------------------------------------------------------
+Ran 13 tests in 0.039s
+
+FAILED (failures=22)

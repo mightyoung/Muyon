@@ -1,0 +1,39 @@
+   Compiling muyon-core-agent-lab v0.1.0 (/tmp/bot-tail-independent-qtybqc_n/repo/experiments/redesign/core-agent-lab/core)
+warning: suspicious definition of the runtime `read` symbol used by the standard library
+   --> /tmp/bot-tail-independent-qtybqc_n/repo/experiments/redesign/core-agent-lab/core/src/host_session.rs:132:124
+    |
+132 | ...ount: usize, timeout: i32) -> i32; fn read(fd: i32, buffer: *mut u8, count: usize) -> isize; fn write(fd: i32, buffer: *const u8...
+    |                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = note: expected `unsafe extern "C" fn(i32, *mut c_void, usize) -> isize` (for the current target)
+            found    `unsafe extern "C" fn(i32, *mut u8, usize) -> isize`
+    = help: either fix the signature or remove any attributes like `#[unsafe(no_mangle)]`, `#[unsafe(export_name = "read")]`, or `#[link_name = "read"]`
+    = help: allow this lint if the signature is compatible
+    = note: `#[warn(suspicious_runtime_symbol_definitions)]` on by default
+
+warning: suspicious definition of the runtime `write` symbol used by the standard library
+   --> /tmp/bot-tail-independent-qtybqc_n/repo/experiments/redesign/core-agent-lab/core/src/host_session.rs:132:182
+    |
+132 | ... *mut u8, count: usize) -> isize; fn write(fd: i32, buffer: *const u8, count: usize) -> isize; }
+    |                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = note: expected `unsafe extern "C" fn(i32, *const c_void, usize) -> isize` (for the current target)
+            found    `unsafe extern "C" fn(i32, *const u8, usize) -> isize`
+    = help: either fix the signature or remove any attributes like `#[unsafe(no_mangle)]`, `#[unsafe(export_name = "write")]`, or `#[link_name = "write"]`
+    = help: allow this lint if the signature is compatible
+
+   Compiling muyon-plugin-contract-lab v0.1.0 (/tmp/bot-tail-independent-qtybqc_n/repo/experiments/redesign/plugin-contract-lab/core)
+   Compiling muyon-rust-agent-host-lab v0.1.0 (/tmp/bot-tail-independent-qtybqc_n/repo/experiments/redesign/rust-agent-host-lab/core)
+warning: `muyon-core-agent-lab` (lib) generated 2 warnings
+   Compiling muyon-web-search-lab v0.1.0 (/tmp/bot-tail-independent-qtybqc_n/repo/experiments/redesign/web-search-lab/core)
+   Compiling muyon-core v0.1.0 (/tmp/bot-tail-independent-qtybqc_n/repo/crates/muyon-core)
+    Finished `test` profile [unoptimized] target(s) in 4.91s
+     Running unittests src/lib.rs (/tmp/bot-definitions-target/debug/deps/muyon_core-f815c6751d2c0327)
+
+thread 'bot_definitions::tests::independent_tail_source_registry_schema_must_reject' (8582) panicked at muyon-core/src/bot_definitions/tests.rs:438:16:
+called `Result::unwrap_err()` on an `Ok` value: CreateReceipt { intent_id: "22222222-2222-4222-8222-222222222222", review_digest: "b343fef4769b8b8f30d298d470668a09fd0bb6b52332ade425679f99c0e71242", status: Committed, definition: Some(BotDefinition { id: "bot-9c71dac907305efcb3f0c65b01babf467c3983dcc33de248542da4c9ac633929", name: "论文助手", purpose: "整理文献", role: "研究员", runnable: false, unavailable_reason: "provider_not_configured" }) }
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+thread 'bot_definitions::tests::independent_tail_source_registry_workspace_must_reject' (8583) panicked at muyon-core/src/bot_definitions/tests.rs:438:16:
+called `Result::unwrap_err()` on an `Ok` value: CreateReceipt { intent_id: "22222222-2222-4222-8222-222222222222", review_digest: "ddbe7fca2d3098a196923f8c314516c919c406847a7e3719c18d9f4ce949f403", status: Committed, definition: Some(BotDefinition { id: "bot-2938a913a0e09e882424881c93a0ea62d0f801a393d43aa39d4bf62964a7e6db", name: "论文助手", purpose: "整理文献", role: "研究员", runnable: false, unavailable_reason: "provider_not_configured" }) }
+error: test failed, to rerun pass `-p muyon-core --lib`

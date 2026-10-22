@@ -1,0 +1,2 @@
+# Preserve exact UniFFI producer bytes; package_gate.py checks byte equality.
+/app/src/main/kotlin/com/mightyoung/muyon/productbridge/muyon_android_product.kt whitespace=-blank-at-eol,-blank-at-eof linguist-generated=true

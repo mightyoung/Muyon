@@ -1,0 +1,42 @@
+test_docx_duplicate_text_field_and_whitespace_inputs_unsupported (tools.document_fidelity.tests.test_text_subsets.ExtraBoundaryTests.test_docx_duplicate_text_field_and_whitespace_inputs_unsupported) ... ok
+test_missing_shape_identity_and_duplicate_ids_are_unsupported (tools.document_fidelity.tests.test_text_subsets.ExtraBoundaryTests.test_missing_shape_identity_and_duplicate_ids_are_unsupported) ... ERROR
+test_preview_invalid_dimensions_and_formula_is_unsupported (tools.document_fidelity.tests.test_text_subsets.ExtraBoundaryTests.test_preview_invalid_dimensions_and_formula_is_unsupported) ... FAIL
+test_wrong_slide_rels_and_wrong_local_hash_reject (tools.document_fidelity.tests.test_text_subsets.ExtraBoundaryTests.test_wrong_slide_rels_and_wrong_local_hash_reject) ... ok
+
+======================================================================
+ERROR: test_missing_shape_identity_and_duplicate_ids_are_unsupported (tools.document_fidelity.tests.test_text_subsets.ExtraBoundaryTests.test_missing_shape_identity_and_duplicate_ids_are_unsupported)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/document-fidelity/tools/document_fidelity/tests/test_text_subsets.py", line 159, in test_missing_shape_identity_and_duplicate_ids_are_unsupported
+    out=runtime.simulate_for_tests(source,text_request(source,'pptx'),f)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/document-fidelity/tools/document_fidelity/adapters/runtime.py", line 84, in simulate_for_tests
+    result['preview'] = module.preview(source,raw)
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/document-fidelity/tools/document_fidelity/adapters/pptx.py", line 56, in preview
+    def preview(source,raw):return common.preview(prepare,source,raw)
+                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/document-fidelity/tools/document_fidelity/adapters/text_common.py", line 56, in preview
+    try:return prepare(source,raw)['preview']
+               ^^^^^^^^^^^^^^^^^^^
+  File "/workspace/document-fidelity/tools/document_fidelity/adapters/pptx.py", line 34, in prepare
+    if len(shapes)!=1 or shapes[0].find(f'{{{P}}}nvSpPr/{{{P}}}cNvPr').get('id') != str(op['shape_id']):raise ValueError('shape_identity_or_complex_slide')
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'NoneType' object has no attribute 'get'
+
+======================================================================
+FAIL: test_preview_invalid_dimensions_and_formula_is_unsupported (tools.document_fidelity.tests.test_text_subsets.ExtraBoundaryTests.test_preview_invalid_dimensions_and_formula_is_unsupported)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/document-fidelity/tools/document_fidelity/tests/test_text_subsets.py", line 152, in test_preview_invalid_dimensions_and_formula_is_unsupported
+    self.assertEqual('unsupported',xlsx.preview(source,request(source))['status'])
+AssertionError: 'unsupported' != 'supported'
+- unsupported
+? --
++ supported
+
+
+----------------------------------------------------------------------
+Ran 4 tests in 0.022s
+
+FAILED (failures=1, errors=1)

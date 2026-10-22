@@ -1,0 +1,33 @@
+cargo: NOT_FOUND
+rustc: NOT_FOUND
+rustfmt: NOT_FOUND
+kotlinc: NOT_FOUND
+$ cargo test --manifest-path crates/Cargo.toml -p muyon-core --test bot_drafts
+NOT_RUN: cargo executable absent; no software installed
+$ cargo test --manifest-path crates/Cargo.toml -p muyon-android-ffi local_draft_bridge_tests
+NOT_RUN: cargo executable absent; no software installed
+$ cargo fmt --manifest-path crates/Cargo.toml -- --check
+NOT_RUN: cargo executable absent; no software installed
+$ python3 docs/tasks/local-workspace-bot-provider-20261022/evidence/sql_smoke.py
+exit=0
+PASS actual DDL + initial NULL archive + registry fact
+PASS all extracted production SQL parses and parameter counts
+PASS unique structured scope
+PASS injected receipt failure rolls back archive/revision/attempt
+PASS save commit + stale editor CAS refuses
+PASS restart stable registry and exact original receipt after callback loss
+PASS original receipt is not replaced with latest head
+PASS SQL CAS also checks editing_only lifecycle
+PASS bounded archive and receipt SQL projections
+PASS two original unknowns and reservation untouched
+NOT_RUN Rust behavior, FFI compilation/bindings, canonical Kotlin roundtrip, Android: absent toolchain/export integration
+
+$ git apply --check docs/tasks/local-workspace-bot-provider-20261022/CORE-EXPORT.patch
+exit=0
+
+$ git diff --check
+exit=0
+
+PASS static no write statements target existing unknown/grant/request ledgers
+PASS FFI synthetic archive header/version/revision/length/checksum
+NOT_RUN: native Rust behavior, UniFFI generation, canonical Kotlin roundtrip, late-callback host UI and Android integration

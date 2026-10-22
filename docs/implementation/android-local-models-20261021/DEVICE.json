@@ -1,0 +1,12 @@
+{
+  "device": "emulator-5556",
+  "api": "26",
+  "abi": "arm64-v8a",
+  "kernel_page_sizes_kib": [
+    4
+  ],
+  "display": "Physical size: 320x640",
+  "density": "Physical density: 160",
+  "font_scale": "1.0",
+  "boundary": "Emulator runtime only; no physical device, x86 runtime, or 16KiB-kernel execution claim."
+}

@@ -1,9 +1,19 @@
 //! Private Linux-only native read composition. Uses the existing Agent drive;
 //! the child admits contracts/tickets, while host-installed Rust handlers read.
 pub mod model_gateway;
+pub mod ordinary_chat;
+mod chat_history;
 pub mod plugin_process;
 pub mod read_registry;
+pub mod supplier_store;
+pub mod supplier_scope_bridge;
+pub mod service_provider;
+pub mod service_host;
+pub mod service_tools;
+pub mod supplier_lab_source;
+mod supplier_business;
 pub mod store;
+use contract_transport::{ContractTransport, InProcessCatalog};
 use muyon_core_agent_lab::{
     agent::{Agent, State},
     agent_ports::AgentPorts,
@@ -12,6 +22,8 @@ use muyon_core_agent_lab::{
 };
 use muyon_plugin_contract_lab::{object, string, Json};
 use plugin_process::PluginProcess;
+use service_runtime::RunControl;
+use std::sync::Arc;
 use std::{cell::RefCell, collections::BTreeMap, io::Read, path::Path, rc::Rc, time::Duration};
 use store::NativeStore;
 pub const STUB_REACHED: &str = "NATIVE_HOST_STUB_REACHED";
@@ -99,7 +111,8 @@ struct Projection {
 }
 pub struct NativeSession {
     pub store: NativeStore,
-    process: PluginProcess,
+    process: Box<dyn ContractTransport>,
+    service_control: Option<Arc<RunControl>>,
     authority: Rc<dyn AuthoritySource>,
     review: Rc<dyn PurposeReview>,
     installed: BTreeMap<String, Installed>,
@@ -127,9 +140,25 @@ impl NativeSession {
         }
         let store = NativeStore::create(dir)?;
         let process = PluginProcess::spawn(plugin, Duration::from_secs(5))?;
-        Ok(Rc::new(RefCell::new(Self {
+        Ok(Self::from_parts(
+            store,
+            Box::new(process),
+            authority,
+            review,
+            input,
+        ))
+    }
+    fn from_parts(
+        store: NativeStore,
+        process: Box<dyn ContractTransport>,
+        authority: Rc<dyn AuthoritySource>,
+        review: Rc<dyn PurposeReview>,
+        input: &str,
+    ) -> SharedSession {
+        Rc::new(RefCell::new(Self {
             store,
             process,
+            service_control: None,
             authority,
             review,
             installed: BTreeMap::new(),
@@ -145,7 +174,35 @@ impl NativeSession {
             advertised: Vec::new(),
             call_ids: std::collections::BTreeSet::new(),
             catalog_sealed: false,
-        })))
+        }))
+    }
+    pub fn service_in_process(
+        dir: &Path,
+        authority: Rc<dyn AuthoritySource>,
+        review: Rc<dyn PurposeReview>,
+        input: &str,
+        control: Arc<RunControl>,
+    ) -> Result<SharedSession> {
+        if input.len() > 8192 {
+            return Err("input_limit".into());
+        }
+        control.poll()?;
+        let store = NativeStore::initialize_private(dir)?;
+        let session = Self::from_parts(
+            store,
+            Box::new(InProcessCatalog::new()),
+            authority,
+            review,
+            input,
+        );
+        session.borrow_mut().service_control = Some(control);
+        Ok(session)
+    }
+    pub(crate) fn poll_service_control(&self) -> Result<()> {
+        if let Some(control) = &self.service_control {
+            control.poll()?;
+        }
+        Ok(())
     }
     pub fn register(&mut self, enrollment: Enrollment) -> Result<()> {
         if self.catalog_sealed {
@@ -229,7 +286,9 @@ impl NativeSession {
         self.process.close();
     }
     pub fn child_pid(&self) -> u32 {
-        self.process.pid()
+        self.process
+            .child_pid()
+            .expect("child_pid requires the legacy child-backed session")
     }
     pub fn definitions(&self) -> Vec<muyon_core_agent_lab::model::ToolDefinition> {
         self.installed
@@ -246,6 +305,7 @@ impl NativeSession {
         Json::Array(self.history.clone())
     }
     pub fn review_payload(&self, payload: &[u8]) -> Result<()> {
+        self.poll_service_control()?;
         if self.cancelled {
             return Err("native_cancelled".into());
         }
@@ -279,6 +339,12 @@ impl NativeSession {
         Ok(())
     }
     fn check_agent_cancel(&self, agent: &mut Agent) -> Result<()> {
+        if let Err(reason) = self.poll_service_control() {
+            if reason == "native_cancelled" {
+                agent.state.cancelled = true;
+            }
+            return Err(reason);
+        }
         let path = agent.dir.join("cancel.request");
         match std::fs::symlink_metadata(&path) {
             Ok(_) => {
@@ -308,6 +374,10 @@ impl NativeSession {
         }
         if !self.advertised.contains(&name) {
             return Err("tool_not_advertised".into());
+        }
+        self.poll_service_control()?;
+        if self.service_control.is_some() && self.handler_calls >= 1 {
+            return Err("service_read_budget".into());
         }
         if !muyon_core_agent_lab::identifier(&call_ref) || !self.call_ids.insert(call_ref.clone()) {
             return Err("duplicate_model_call".into());
@@ -399,6 +469,7 @@ impl NativeSession {
             return Err("read_authority_changed".into());
         }
         require_scope(&scope_refs, &fresh.read)?;
+        self.poll_service_control()?;
         self.handler_calls += 1;
         let outcome = self
             .installed
@@ -484,9 +555,14 @@ pub struct RuntimePorts {
     pub session: SharedSession,
 }
 impl AgentPorts for RuntimePorts {
-    fn advertised_tools(&self, _state: &State) -> Result<Vec<String>> {
+    fn advertised_tools(&self, state: &State) -> Result<Vec<String>> {
         let mut s = self.session.borrow_mut();
+        s.poll_service_control()?;
         s.catalog_sealed = true;
+        if s.service_control.is_some() && (s.handler_calls >= 1 || state.counters.steps > 1) {
+            s.advertised.clear();
+            return Ok(Vec::new());
+        }
         let d = s.discover()?;
         let mut tools = Vec::new();
         for row in field(&d, "operations")?.array()? {
@@ -498,13 +574,14 @@ impl AgentPorts for RuntimePorts {
         Ok(tools)
     }
     fn persist(&self, agent: &Agent) -> Result<()> {
-        muyon_core_agent_lab::store::atomic(
-            &self.session.borrow().store.dir,
-            "task.db",
-            &agent.state.encode(),
-        )
+        let encoded = agent.state.encode();
+        if self.session.borrow().service_control.is_some() && encoded.len() > 131072 {
+            return Err("service_task_budget".into());
+        }
+        muyon_core_agent_lab::store::atomic(&self.session.borrow().store.dir, "task.db", &encoded)
     }
     fn check_control(&mut self) -> Result<()> {
+        self.session.borrow().poll_service_control()?;
         if self.session.borrow().cancelled {
             Err("native_cancelled".into())
         } else {
@@ -530,6 +607,29 @@ impl AgentPorts for RuntimePorts {
         Ok(())
     }
     fn failure(&mut self, state: &mut State, _reason: &str) {
+        if matches!(_reason, "model_ledger_failed" | "wire_journal") {
+            state.status = "outcome_unknown".into();
+            state.reason = _reason.into();
+            return;
+        }
+        if _reason == "wire_total_limit" {
+            state.status = "budget_exhausted".into();
+            state.reason = _reason.into();
+            return;
+        }
+        if self.session.borrow().service_control.is_some() {
+            if _reason == "native_cancelled" {
+                state.cancelled = true;
+                state.status = "cancelled".into();
+                state.reason = "native_cancelled".into();
+                return;
+            }
+            if _reason == "native_deadline" {
+                state.status = "budget_exhausted".into();
+                state.reason = "native_deadline".into();
+                return;
+            }
+        }
         state.status = "failed".into();
         state.reason = if _reason == "tool_not_advertised" {
             "tool_not_advertised".into()
@@ -565,3 +665,16 @@ fn require_scope(required: &[Json], authority: &Json) -> Result<()> {
     }
     Ok(())
 }
+
+// Private Android Service composition; legacy child-backed API is unchanged.
+pub mod contract_transport;
+pub mod service_controller;
+pub mod service_runtime;
+pub mod service_types;
+
+pub mod service_root;
+
+mod service_evidence;
+
+#[cfg(test)]
+mod http_recovery_tests;

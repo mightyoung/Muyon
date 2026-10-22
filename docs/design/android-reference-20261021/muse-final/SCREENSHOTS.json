@@ -1,0 +1,194 @@
+[
+  {
+    "path": "font2/00-chat-home.png",
+    "sha256": "536178dfc0c53008a28490f6c69b854d1c7963eb463a58699459cd66232634a4",
+    "pixels": [
+      320,
+      640
+    ]
+  },
+  {
+    "path": "font2/01-agent-library.png",
+    "sha256": "23c174557a86f327f03f004613366f02cb187d68b0c21c27f3ab918ff959c7cb",
+    "pixels": [
+      320,
+      640
+    ]
+  },
+  {
+    "path": "font2/02-agent-detail.png",
+    "sha256": "9de36a9b767895c61407ae7c71ecfa57a6a8ec0a56bdd05d600f684545cc884b",
+    "pixels": [
+      320,
+      640
+    ]
+  },
+  {
+    "path": "font2/02b-agent-editor.png",
+    "sha256": "856c89428b4844769d1168c75893a498d3dd8967ba3add40510126d4fceb5282",
+    "pixels": [
+      320,
+      640
+    ]
+  },
+  {
+    "path": "font2/02c-agent-review.png",
+    "sha256": "923da218cda68c426ce7c3a59f1c73878d0207e997e57da5ca3a46381d348bbe",
+    "pixels": [
+      320,
+      640
+    ]
+  },
+  {
+    "path": "font2/03-group-detail.png",
+    "sha256": "a5d2ee75c25201539e8b01f5bd5fcdb9040a7d1a2fd109e1f95a8eb6a93c4307",
+    "pixels": [
+      320,
+      640
+    ]
+  },
+  {
+    "path": "font2/04-group-chat.png",
+    "sha256": "2f4919cec3a1cc4032c754c0a73a9bce6666c6fad16635720d711eb28d1c843d",
+    "pixels": [
+      320,
+      640
+    ]
+  },
+  {
+    "path": "font2/05-chat-ime.png",
+    "sha256": "11dfd2821214ecaf15ac0619edea74965a02eea7a0ff018de3828bd99ae8571c",
+    "pixels": [
+      320,
+      640
+    ]
+  },
+  {
+    "path": "screens/00-chat-home.png",
+    "sha256": "94c031861e566e151f9a30220933b88c49478f8496c2ac5a346a6e40d045399d",
+    "pixels": [
+      320,
+      640
+    ]
+  },
+  {
+    "path": "screens/01-agent-library.png",
+    "sha256": "c323f58077b40234f4f4a4c5312f932af5a06ae847037ea27c865c39fc0c3d9f",
+    "pixels": [
+      320,
+      640
+    ]
+  },
+  {
+    "path": "screens/02-agent-detail.png",
+    "sha256": "a70425b2f912777d532c5994b282278d1925dcd8cc068036d1632883bb0f3e32",
+    "pixels": [
+      320,
+      640
+    ]
+  },
+  {
+    "path": "screens/02b-agent-editor.png",
+    "sha256": "70a0203a919b19cdaf65ba4d99e0367267f58a9eacfda2c72514916588b31d7d",
+    "pixels": [
+      320,
+      640
+    ]
+  },
+  {
+    "path": "screens/02c-agent-review.png",
+    "sha256": "a1132fad02cc7b09a231cb54f163f7277ec33bb218a95a68299164b32e11b67a",
+    "pixels": [
+      320,
+      640
+    ]
+  },
+  {
+    "path": "screens/03-group-detail.png",
+    "sha256": "40428c7f1b0f7aab67fc16719a3830e7d2c718352101a00b8aa9739a57ec7f1f",
+    "pixels": [
+      320,
+      640
+    ]
+  },
+  {
+    "path": "screens/04-group-chat.png",
+    "sha256": "b8e1a86994ca67b455e8f62adb831bf2efe7defe4bd97192ebd09df18d66892c",
+    "pixels": [
+      320,
+      640
+    ]
+  },
+  {
+    "path": "screens/05-chat-ime.png",
+    "sha256": "436cbc0a563f03e9d3996d5b4632660d133335fc5e6dcc625e9ecf010ac0c636",
+    "pixels": [
+      320,
+      640
+    ]
+  },
+  {
+    "path": "wide-dark/00-chat-home.png",
+    "sha256": "bd0cde0e0bc3755be1adef1aa8d6dfa8dc1279cfadca461244d2575e1d6b0460",
+    "pixels": [
+      1280,
+      960
+    ]
+  },
+  {
+    "path": "wide-dark/01-agent-library.png",
+    "sha256": "e32a99c8a3b812961611d4826f2081c89f25863586963d86185b03f8fd78ebd8",
+    "pixels": [
+      1280,
+      960
+    ]
+  },
+  {
+    "path": "wide-dark/02-agent-detail.png",
+    "sha256": "1921036143d28d4c810d6125a2fac8d3f4ba9463b9110e388e7bfe208ac16d3f",
+    "pixels": [
+      1280,
+      960
+    ]
+  },
+  {
+    "path": "wide-dark/02b-agent-editor.png",
+    "sha256": "0749efd55c8cf9be956e5d3c08f03f8050a37943f07be5be344c6ca42ae7a026",
+    "pixels": [
+      1280,
+      960
+    ]
+  },
+  {
+    "path": "wide-dark/02c-agent-review.png",
+    "sha256": "899a251459bf21eab55a20e14b6fe6581d2d7e208397892f383ea3eface7ffb2",
+    "pixels": [
+      1280,
+      960
+    ]
+  },
+  {
+    "path": "wide-dark/03-group-detail.png",
+    "sha256": "d0a0ed39bc636e790cdc6d071abb38c134dd641ae2869ff7fe13807be4befe98",
+    "pixels": [
+      1280,
+      960
+    ]
+  },
+  {
+    "path": "wide-dark/04-group-chat.png",
+    "sha256": "7c1776f3acd2480419b540936332b66d15126e5364e643d19e328a2568f715bf",
+    "pixels": [
+      1280,
+      960
+    ]
+  },
+  {
+    "path": "wide-dark/05-chat-ime.png",
+    "sha256": "3ec8d960158ea5256b277d87ff0d95278d8a1d781ec93da3549924b2e0e6482e",
+    "pixels": [
+      1280,
+      960
+    ]
+  }
+]

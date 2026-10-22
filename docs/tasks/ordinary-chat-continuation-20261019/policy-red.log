@@ -1,0 +1,42 @@
+experiments/redesign/android-compose-lab/state/src/test/kotlin/com/mightyoung/muyon/androidlab/ChatReadChecks.kt:22:59: error: unresolved reference 'preserveTerminalLookup'.
+    val lookup=failed.copy(status="events",reason="none").preserveTerminalLookup(failed,true,0,1)
+                                                          ^^^^^^^^^^^^^^^^^^^^^^
+experiments/redesign/android-compose-lab/state/src/test/kotlin/com/mightyoung/muyon/androidlab/ChatReadChecks.kt:24:84: error: unresolved reference 'preserveTerminalLookup'.
+    val deniedLookup=failed.copy(status="unknown",reason="DISCLOSURE_UNAVAILABLE").preserveTerminalLookup(failed,true,0,1)
+                                                                                   ^^^^^^^^^^^^^^^^^^^^^^
+experiments/redesign/android-compose-lab/state/src/test/kotlin/com/mightyoung/muyon/androidlab/ChatReadChecks.kt:26:11: error: cannot infer type for type parameter 'R'. Specify it explicitly.
+    check(runCatching{lookup.copy(status="events").preserveTerminalLookup(failed,false,0,1)}.isFailure)
+          ^^^^^^^^^^^
+experiments/redesign/android-compose-lab/state/src/test/kotlin/com/mightyoung/muyon/androidlab/ChatReadChecks.kt:26:52: error: unresolved reference 'preserveTerminalLookup'.
+    check(runCatching{lookup.copy(status="events").preserveTerminalLookup(failed,false,0,1)}.isFailure)
+                                                   ^^^^^^^^^^^^^^^^^^^^^^
+experiments/redesign/android-compose-lab/state/src/test/kotlin/com/mightyoung/muyon/androidlab/ChatReadChecks.kt:27:11: error: cannot infer type for type parameter 'R'. Specify it explicitly.
+    check(runCatching{lookup.copy(status="events").preserveTerminalLookup(failed,true,1,1)}.isFailure)
+          ^^^^^^^^^^^
+experiments/redesign/android-compose-lab/state/src/test/kotlin/com/mightyoung/muyon/androidlab/ChatReadChecks.kt:27:52: error: unresolved reference 'preserveTerminalLookup'.
+    check(runCatching{lookup.copy(status="events").preserveTerminalLookup(failed,true,1,1)}.isFailure)
+                                                   ^^^^^^^^^^^^^^^^^^^^^^
+experiments/redesign/android-compose-lab/state/src/test/kotlin/com/mightyoung/muyon/androidlab/ChatReadChecks.kt:28:11: error: cannot infer type for type parameter 'R'. Specify it explicitly.
+    check(runCatching{lookup.copy(status="events").preserveTerminalLookup(failed,true,0,2)}.isFailure)
+          ^^^^^^^^^^^
+experiments/redesign/android-compose-lab/state/src/test/kotlin/com/mightyoung/muyon/androidlab/ChatReadChecks.kt:28:52: error: unresolved reference 'preserveTerminalLookup'.
+    check(runCatching{lookup.copy(status="events").preserveTerminalLookup(failed,true,0,2)}.isFailure)
+                                                   ^^^^^^^^^^^^^^^^^^^^^^
+experiments/redesign/android-compose-lab/state/src/test/kotlin/com/mightyoung/muyon/androidlab/FrontendChatChecks.kt:20:41: error: too many arguments for 'fun frontendStatusLabel(status: String): String'.
+    check(frontendStatusLabel("failed", "provider_budget_reservation_failed")=="预算不足 · 未发送到 provider")
+                                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+experiments/redesign/android-compose-lab/state/src/test/kotlin/com/mightyoung/muyon/androidlab/FrontendChatChecks.kt:21:44: error: too many arguments for 'fun frontendNeedsReconcile(status: String): Boolean'.
+    check(frontendNeedsReconcile("failed", "provider_budget_reservation_failed"))
+                                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+experiments/redesign/android-compose-lab/state/src/test/kotlin/com/mightyoung/muyon/androidlab/FrontendChatChecks.kt:22:45: error: too many arguments for 'fun frontendNeedsReconcile(status: String): Boolean'.
+    check(!frontendNeedsReconcile("failed", "chat_authority_denied"))
+                                            ^^^^^^^^^^^^^^^^^^^^^^^
+experiments/redesign/android-compose-lab/state/src/test/kotlin/com/mightyoung/muyon/androidlab/FrontendChatChecks.kt:23:11: error: unresolved reference 'frontendBudgetGuidance'.
+    check(frontendBudgetGuidance("failed", "provider_budget_reservation_failed")?.contains("保存") == true)
+          ^^^^^^^^^^^^^^^^^^^^^^
+experiments/redesign/android-compose-lab/state/src/test/kotlin/com/mightyoung/muyon/androidlab/FrontendChatChecks.kt:24:11: error: unresolved reference 'frontendBudgetGuidance'.
+    check(frontendBudgetGuidance("failed", "provider_budget_reservation_failed")?.contains("手动发送") == true)
+          ^^^^^^^^^^^^^^^^^^^^^^
+experiments/redesign/android-compose-lab/state/src/test/kotlin/com/mightyoung/muyon/androidlab/FrontendChatChecks.kt:25:11: error: unresolved reference 'frontendBudgetGuidance'.
+    check(frontendBudgetGuidance("unknown", "provider_budget_reservation_failed") == null)
+          ^^^^^^^^^^^^^^^^^^^^^^

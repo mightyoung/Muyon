@@ -1,0 +1,44 @@
+warning: suspicious definition of the runtime `read` symbol used by the standard library
+   --> /workspace/Muyon-frontend-loop/experiments/redesign/core-agent-lab/core/src/host_session.rs:132:124
+    |
+132 | ...ount: usize, timeout: i32) -> i32; fn read(fd: i32, buffer: *mut u8, count: usize) -> isize; fn write(fd: i32, buffer: *const u8...
+    |                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = note: expected `unsafe extern "C" fn(i32, *mut c_void, usize) -> isize` (for the current target)
+            found    `unsafe extern "C" fn(i32, *mut u8, usize) -> isize`
+    = help: either fix the signature or remove any attributes like `#[unsafe(no_mangle)]`, `#[unsafe(export_name = "read")]`, or `#[link_name = "read"]`
+    = help: allow this lint if the signature is compatible
+    = note: `#[warn(suspicious_runtime_symbol_definitions)]` on by default
+
+warning: suspicious definition of the runtime `write` symbol used by the standard library
+   --> /workspace/Muyon-frontend-loop/experiments/redesign/core-agent-lab/core/src/host_session.rs:132:182
+    |
+132 | ... *mut u8, count: usize) -> isize; fn write(fd: i32, buffer: *const u8, count: usize) -> isize; }
+    |                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = note: expected `unsafe extern "C" fn(i32, *const c_void, usize) -> isize` (for the current target)
+            found    `unsafe extern "C" fn(i32, *const u8, usize) -> isize`
+    = help: either fix the signature or remove any attributes like `#[unsafe(no_mangle)]`, `#[unsafe(export_name = "write")]`, or `#[link_name = "write"]`
+    = help: allow this lint if the signature is compatible
+
+warning: `muyon-core-agent-lab` (lib) generated 2 warnings
+   Compiling muyon-rust-agent-host-lab v0.1.0 (/workspace/Muyon-frontend-loop/experiments/redesign/rust-agent-host-lab/core)
+error[E0425]: cannot find function `run_lab_supplier_read_admitted` in module `crate::supplier_lab_source`
+   --> src/supplier_business.rs:573:48
+    |
+573 | ...   let result=crate::supplier_lab_source::run_lab_supplier_read_admitted(&dir,"original chat text",LAB_SUPPLIER_KEY,LAB_SUPPLIER...
+    |                                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+   ::: src/supplier_lab_source.rs:78:1
+    |
+ 78 | pub fn run_lab_supplier_read(dir:&Path,text:&str,key:&str,revision:&str,control:Arc<RunControl>)->Result<SupplierReadResult> {
+    | ---------------------------------------------------------------------------------------------------------------------------- similarly named function `run_lab_supplier_read` defined here
+    |
+help: a function with a similar name exists
+    |
+573 -         let result=crate::supplier_lab_source::run_lab_supplier_read_admitted(&dir,"original chat text",LAB_SUPPLIER_KEY,LAB_SUPPLIER_REVISION,Arc::new(RunControl::new()),|state| {
+573 +         let result=crate::supplier_lab_source::run_lab_supplier_read(&dir,"original chat text",LAB_SUPPLIER_KEY,LAB_SUPPLIER_REVISION,Arc::new(RunControl::new()),|state| {
+    |
+
+For more information about this error, try `rustc --explain E0425`.
+error: could not compile `muyon-rust-agent-host-lab` (lib test) due to 1 previous error

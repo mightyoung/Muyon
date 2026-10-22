@@ -1,0 +1,31 @@
+{
+  "gate": "PASS",
+  "apk_sha256": "4007f227f0cb17c3bba0b7ef5c7115ed7901efd24883390354d5c07198a23720",
+  "build_id": "79dca05ba6ff84dbc8a60d0838951aec6720227a:cbc8b291d425d3a291ddb30bfe8c3baa81d33c6a385b06bdc626216bc00b1f11",
+  "generated_bridge_sha256": "92f3930ab4c5ce8d0abdf0c684aae44a3bf449722c9549bb87d6ba5affd80e96",
+  "libraries": [
+    {
+      "abi": "arm64-v8a",
+      "sha256": "3fa0aa20c3d91f67c3afe224abdb63cdcd650b8f01bb506f0fe558fbc1c6f8cd",
+      "load_alignments": [
+        16384,
+        16384,
+        16384,
+        16384
+      ],
+      "apk_data_offset": 417005568
+    },
+    {
+      "abi": "x86_64",
+      "sha256": "861d5f0e4601fff5178804e02a555a293923fa484bf0e7cb4c9909738f93f418",
+      "load_alignments": [
+        16384,
+        16384,
+        16384,
+        16384
+      ],
+      "apk_data_offset": 426409984
+    }
+  ],
+  "boundary": "packaging only; runtime identity is separately asserted on API26"
+}

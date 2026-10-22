@@ -4,6 +4,14 @@ const MAX_FILE: u64=1_048_576;
 static SERIAL: AtomicU64=AtomicU64::new(0);
 unsafe extern "C" { fn flock(fd:i32, operation:i32)->i32; fn geteuid()->u32; }
 pub struct DirectoryLock { _file: File }
+impl Drop for DirectoryLock {
+    fn drop(&mut self) {
+        // Closing only our FD can leave flock held by a duplicate/inherited
+        // reference to the same open-file-description during another spawn.
+        // Ownership ends with this guard, before its File is closed.
+        let _ = self._file.unlock();
+    }
+}
 pub fn validate_dir(dir:&Path)->Result<()> {
     let m=fs::symlink_metadata(dir).map_err(|e|e.to_string())?;
     if !m.is_dir() || m.file_type().is_symlink() || m.permissions().mode() & 0o777 != 0o700 || m.uid()!=unsafe{geteuid()} {return Err("private_directory_required".into());}
@@ -83,5 +91,55 @@ impl ToolPort for FixtureTool {
         if state.receipts.len()>=128{return Err("effect_limit".into());}
         let r=Receipt{binding:b.clone(),id:format!("r-{}",b.invocation)};
         state.value=b.value.clone();state.receipts.push(r.clone());atomic(&self.dir,"effects.db",&state.encode())?;Ok(r)
+    }
+}
+
+#[cfg(test)]
+mod lock_tests {
+    use super::*;
+
+    struct PrivateDirectory(PathBuf);
+    impl PrivateDirectory {
+        fn new() -> Self {
+            let path = std::env::temp_dir().join(format!("muyon-directory-lock-unit-{}-{}",
+                std::process::id(), SERIAL.fetch_add(1, Ordering::SeqCst)));
+            create_dir(&path).unwrap();
+            Self(path)
+        }
+    }
+    impl Drop for PrivateDirectory {
+        fn drop(&mut self) { let _ = fs::remove_dir_all(&self.0); }
+    }
+
+    #[test]
+    fn guard_drop_releases_lock_while_same_open_file_description_survives() {
+        let dir = PrivateDirectory::new();
+        let owner = lock(&dir.0).unwrap();
+        // dup shares the kernel open-file-description, exactly as an inherited
+        // descriptor does during the concurrent spawn-to-exec interval.
+        let inherited = owner._file.try_clone().unwrap();
+        assert!(matches!(lock(&dir.0), Err(e) if e == "directory_locked"));
+        drop(owner);
+        let successor = lock(&dir.0).unwrap_or_else(|e|
+            panic!("GUARD_DROP_OFD_RED: surviving duplicate must not retain ownership: {e}"));
+        // Keep the original OFD alive until after the successor obtained its
+        // independent lock; merely closing this old duplicate cannot unlock it.
+        assert!(inherited.metadata().unwrap().is_file());
+        drop(inherited);
+        assert!(matches!(lock(&dir.0), Err(e) if e == "directory_locked"));
+        drop(successor);
+        assert!(lock(&dir.0).is_ok());
+    }
+
+    #[test]
+    fn live_guard_excludes_independent_open_until_explicit_owner_drop() {
+        let dir = PrivateDirectory::new();
+        let owner = lock(&dir.0).unwrap();
+        assert!(matches!(lock(&dir.0), Err(e) if e == "directory_locked"));
+        drop(owner);
+        let successor = lock(&dir.0).unwrap();
+        assert!(matches!(lock(&dir.0), Err(e) if e == "directory_locked"));
+        drop(successor);
+        assert!(lock(&dir.0).is_ok());
     }
 }

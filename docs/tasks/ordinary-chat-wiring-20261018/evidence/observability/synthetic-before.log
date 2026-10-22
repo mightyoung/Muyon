@@ -1,0 +1,75 @@
+FFFFFFF
+======================================================================
+FAIL: test_each_failure_and_success_records_its_own_terminal_evidence (__main__.DeviceEvidenceTest.test_each_failure_and_success_records_its_own_terminal_evidence) (failure='sdk')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/Muyon/experiments/redesign/android-rust-bridge-lab/checks/test_ordinary_chat_device_evidence.py", line 93, in test_each_failure_and_success_records_its_own_terminal_evidence
+    self.run_case(failure)
+  File "/workspace/Muyon/experiments/redesign/android-rust-bridge-lab/checks/test_ordinary_chat_device_evidence.py", line 66, in run_case
+    self.assertTrue(phases_file.exists(), 'missing phase evidence after device command')
+AssertionError: False is not true : missing phase evidence after device command
+
+======================================================================
+FAIL: test_each_failure_and_success_records_its_own_terminal_evidence (__main__.DeviceEvidenceTest.test_each_failure_and_success_records_its_own_terminal_evidence) (failure='avd')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/Muyon/experiments/redesign/android-rust-bridge-lab/checks/test_ordinary_chat_device_evidence.py", line 93, in test_each_failure_and_success_records_its_own_terminal_evidence
+    self.run_case(failure)
+  File "/workspace/Muyon/experiments/redesign/android-rust-bridge-lab/checks/test_ordinary_chat_device_evidence.py", line 66, in run_case
+    self.assertTrue(phases_file.exists(), 'missing phase evidence after device command')
+AssertionError: False is not true : missing phase evidence after device command
+
+======================================================================
+FAIL: test_each_failure_and_success_records_its_own_terminal_evidence (__main__.DeviceEvidenceTest.test_each_failure_and_success_records_its_own_terminal_evidence) (failure='boot')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/Muyon/experiments/redesign/android-rust-bridge-lab/checks/test_ordinary_chat_device_evidence.py", line 93, in test_each_failure_and_success_records_its_own_terminal_evidence
+    self.run_case(failure)
+  File "/workspace/Muyon/experiments/redesign/android-rust-bridge-lab/checks/test_ordinary_chat_device_evidence.py", line 66, in run_case
+    self.assertTrue(phases_file.exists(), 'missing phase evidence after device command')
+AssertionError: False is not true : missing phase evidence after device command
+
+======================================================================
+FAIL: test_each_failure_and_success_records_its_own_terminal_evidence (__main__.DeviceEvidenceTest.test_each_failure_and_success_records_its_own_terminal_evidence) (failure='install')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/Muyon/experiments/redesign/android-rust-bridge-lab/checks/test_ordinary_chat_device_evidence.py", line 93, in test_each_failure_and_success_records_its_own_terminal_evidence
+    self.run_case(failure)
+  File "/workspace/Muyon/experiments/redesign/android-rust-bridge-lab/checks/test_ordinary_chat_device_evidence.py", line 66, in run_case
+    self.assertTrue(phases_file.exists(), 'missing phase evidence after device command')
+AssertionError: False is not true : missing phase evidence after device command
+
+======================================================================
+FAIL: test_each_failure_and_success_records_its_own_terminal_evidence (__main__.DeviceEvidenceTest.test_each_failure_and_success_records_its_own_terminal_evidence) (failure='instrumentation')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/Muyon/experiments/redesign/android-rust-bridge-lab/checks/test_ordinary_chat_device_evidence.py", line 93, in test_each_failure_and_success_records_its_own_terminal_evidence
+    self.run_case(failure)
+  File "/workspace/Muyon/experiments/redesign/android-rust-bridge-lab/checks/test_ordinary_chat_device_evidence.py", line 66, in run_case
+    self.assertTrue(phases_file.exists(), 'missing phase evidence after device command')
+AssertionError: False is not true : missing phase evidence after device command
+
+======================================================================
+FAIL: test_each_failure_and_success_records_its_own_terminal_evidence (__main__.DeviceEvidenceTest.test_each_failure_and_success_records_its_own_terminal_evidence) (failure='result')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/Muyon/experiments/redesign/android-rust-bridge-lab/checks/test_ordinary_chat_device_evidence.py", line 93, in test_each_failure_and_success_records_its_own_terminal_evidence
+    self.run_case(failure)
+  File "/workspace/Muyon/experiments/redesign/android-rust-bridge-lab/checks/test_ordinary_chat_device_evidence.py", line 66, in run_case
+    self.assertTrue(phases_file.exists(), 'missing phase evidence after device command')
+AssertionError: False is not true : missing phase evidence after device command
+
+======================================================================
+FAIL: test_each_failure_and_success_records_its_own_terminal_evidence (__main__.DeviceEvidenceTest.test_each_failure_and_success_records_its_own_terminal_evidence) (failure=None)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/Muyon/experiments/redesign/android-rust-bridge-lab/checks/test_ordinary_chat_device_evidence.py", line 93, in test_each_failure_and_success_records_its_own_terminal_evidence
+    self.run_case(failure)
+  File "/workspace/Muyon/experiments/redesign/android-rust-bridge-lab/checks/test_ordinary_chat_device_evidence.py", line 66, in run_case
+    self.assertTrue(phases_file.exists(), 'missing phase evidence after device command')
+AssertionError: False is not true : missing phase evidence after device command
+
+----------------------------------------------------------------------
+Ran 1 test in 1.101s
+
+FAILED (failures=7)

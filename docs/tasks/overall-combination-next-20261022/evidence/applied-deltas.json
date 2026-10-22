@@ -1,0 +1,80 @@
+[
+  {
+    "slice": "core",
+    "base": "aec085fafef8aa02f86f2fc60626f168b10f4caa",
+    "pin": "faeef3aec3a9407d7c15490dcdb33866413e7453",
+    "paths": [
+      "crates/muyon-core/src/documents",
+      "crates/muyon-core/src/blobs.rs",
+      "crates/muyon-core/src/bin/business_worker.rs",
+      "docs/tasks/document-core-contracts-20261022"
+    ],
+    "commit": "ca7aba9c83ec038a272bc8d6c83fca8f10638d90"
+  },
+  {
+    "slice": "bridge",
+    "base": "90b7a35a49f4acb09ff73a2b088df4c1d1a037a6",
+    "pin": "721077297ba77471ede80b653274cec4a8224655",
+    "paths": [
+      "crates/muyon-core/src/document_edit",
+      "crates/muyon-core/tests/document_edit_candidates.rs",
+      "crates/muyon-core/tests/document_edit_core_bridge.rs",
+      "crates/muyon-core/tests/document_edit_policy_epoch.rs",
+      "crates/muyon-core/tests/document_edit_schema2.rs",
+      "crates/muyon-core/tests/document_edit_tree_goldens.json",
+      "docs/tasks/document-edit-transactions-20261022"
+    ],
+    "commit": "24c7fb7ec522e622a2bcf8f771ac5d104a902fda"
+  },
+  {
+    "slice": "provider",
+    "base": "8b2d7783a0bfe5c5207edb7cf37a83631f1cfb0f",
+    "pin": "7bb89a713c0ce5678a8c4cae7fc5e24612d88362",
+    "paths": [
+      "crates/muyon-core/src/bot_drafts.rs",
+      "crates/muyon-core/tests/bot_drafts.rs",
+      "crates/muyon-android-ffi/src/lib.rs",
+      "docs/tasks/local-workspace-bot-provider-20261022"
+    ],
+    "commit": "ca887ef2a2319773b33b4e1d0c7b2750de57bd5b"
+  },
+  {
+    "slice": "host",
+    "base": "6f35eb837d88d15f50c073d7e541408e9159f758",
+    "pin": "f7072ca2b46d629a7fd8b85e19717261a7dd3af4",
+    "paths": [
+      "apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/agentipc/ProductService.kt",
+      "apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/chat/ProductChatRuntime.kt",
+      "apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/chat/persistence/HostDraftSaveState.kt",
+      "apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/chat/persistence/HostLocalDraftSession.kt",
+      "apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/chat/persistence/NativeLocalDraftCodec.kt",
+      "apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/chat/persistence/HostDraftSaveStateChecks.kt",
+      "apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/chat/persistence/HostLocalDraftSessionChecks.kt",
+      "apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/chat/persistence/NativeLocalDraftCodecChecks.kt",
+      "apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/chat/persistence/run-native-codec.sh",
+      "apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/chat/persistence/run-native-session.sh",
+      "apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/chat/persistence/run-save-state.sh",
+      "apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/chat/projection/run-offline.sh",
+      "docs/tasks/ui-host-projection-20261022"
+    ],
+    "commit": "5f32d3d735ce715afabe75535a09eeb5b577cab0"
+  },
+  {
+    "slice": "bot-definitions",
+    "base": "53b9b597e190db6b6619a18e8746f2985f488fbc",
+    "pin": "4d81ae670646962a50847fb351507f3c8539abf7",
+    "paths": [
+      "crates/muyon-core/src/bot_definitions.rs",
+      "crates/muyon-core/src/bot_definitions",
+      "docs/tasks/bot-setup-draft-20261022"
+    ],
+    "commit": "9b6051eff8c27c27b4098d8948b15a220bf1c819"
+  },
+  {
+    "slice": "shell",
+    "base": "5186917c49a6d4772ac97643430ff14c9fdabc16",
+    "pin": "f04f4ef237a386b250deb903b9373229febd62ce",
+    "commit": "9c008692",
+    "note": "shell-only paths; runner source-list conflict resolved to exact offered source, preserves archive codec. Do not import its earlier Host1b Runtime/Service."
+  }
+]

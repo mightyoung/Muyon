@@ -1,0 +1,26 @@
+2026-10-22T05:57:36.557468+00:00
+Linux-6.18.55-x86_64-with-glibc2.41
+Fixed source HEAD; no production delta since 10d3aa83.
+
+$ git rev-parse HEAD
+02db15524dc4f3a1eccbd6571fe68c56e4ab62a7
+exit=0
+
+$ cargo test -p muyon-core --offline documents::candidate_tests::candidate_gc_crosses_page_boundary_preserving_exact_objects_and_project_quotas
+[Errno 2] No such file or directory: 'cargo'
+exit=127 NOT_RUN: tool unavailable; neither pass nor failing test.
+
+$ cargo test -p muyon-core --offline documents::candidate_tests
+[Errno 2] No such file or directory: 'cargo'
+exit=127 NOT_RUN: tool unavailable; neither pass nor failing test.
+
+$ cargo test -p muyon-core --offline
+[Errno 2] No such file or directory: 'cargo'
+exit=127 NOT_RUN: tool unavailable; neither pass nor failing test.
+
+$ rustfmt --check --edition 2021 crates/muyon-core/src/documents/candidate_tests.rs
+[Errno 2] No such file or directory: 'rustfmt'
+exit=127 NOT_RUN: tool unavailable; neither pass nor failing test.
+
+$ git diff --check
+exit=0

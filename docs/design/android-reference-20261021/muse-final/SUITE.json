@@ -1,0 +1,43 @@
+{
+  "gate": "PASS",
+  "build_id": "07fd4509fb4653a67435957c4ba021a2c142af00:8f4ecd44b0d5b1b2c9a1f31abc82fbfcdc32693b43aec81b722bde2292e7ab93",
+  "required_methods": 26,
+  "runs": [
+    {
+      "log": "/private/tmp/muyon-android-refactor-20261020/docs/design/android-reference-20261021/muse-final/UI.log",
+      "passed": 5,
+      "gate": "PASS"
+    },
+    {
+      "log": "/private/tmp/muyon-android-refactor-20261020/docs/design/android-reference-20261021/muse-final/CORE.log",
+      "passed": 16,
+      "gate": "PASS"
+    },
+    {
+      "log": "/private/tmp/muyon-android-refactor-20261020/docs/design/android-reference-20261021/muse-final/PICKER-GENERATE.log",
+      "passed": 1,
+      "gate": "PASS"
+    },
+    {
+      "log": "/private/tmp/muyon-android-refactor-20261020/docs/design/android-reference-20261021/muse-final/PICKER-PDF.log",
+      "passed": 1,
+      "gate": "PASS"
+    },
+    {
+      "log": "/private/tmp/muyon-android-refactor-20261020/docs/design/android-reference-20261021/muse-final/PICKER-ZIP.log",
+      "passed": 1,
+      "gate": "PASS"
+    },
+    {
+      "log": "/private/tmp/muyon-android-refactor-20261020/docs/design/android-reference-20261021/muse-final/PICKER-DIRECTORY.log",
+      "passed": 1,
+      "gate": "PASS"
+    },
+    {
+      "log": "/private/tmp/muyon-android-refactor-20261020/docs/design/android-reference-20261021/muse-final/PICKER-PRIVATE.log",
+      "passed": 1,
+      "gate": "PASS"
+    }
+  ],
+  "boundary": "product instrumentation only; I04, production pricing proof and real provider/tool-loop remain separate gates"
+}

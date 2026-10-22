@@ -16,7 +16,7 @@ args.evidence_dir.mkdir(parents=True, exist_ok=True)
 source = Path(__file__).resolve().parent
 mutations = [
     ('wire_stale_reported_usage', 'src/agent.rs',
-     'if self.state.wire.is_some(){self.state.wire_counters.usage=crate::wire_sse::Usage::default();}',
+     'if self.state.wire_counters.inflight{self.state.wire_counters.usage=crate::wire_sse::Usage::default();}',
      ''),
     ('wire_private_history_bound', 'src/wire_provider.rs',
      'wire_json::parse_bounded(raw.as_bytes(),1_048_576)?',

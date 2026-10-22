@@ -1,0 +1,174 @@
+<?xml version='1.0' encoding='utf-8'?>
+<testsuite name="historical/cargo.log" tests="167" failures="0" errors="0" skipped="0">
+  <properties>
+    <property name="origin" value="derived from retained raw libtest output; not native JUnit" />
+    <property name="raw_sha256" value="7f9951e4d6201f63c6bc59d91b7d313aaa3f6ef7eb57b4fc2c5331da36e9c862" />
+  </properties>
+  <testcase classname="Running unittests src/lib.rs (/tmp/muyon-cargo-target/debug/deps/muyon_core-36d5b85d6a5d6189)" name="blobs::tests::file_and_upload_logical_length_quotas_precede_hashing_and_writing" />
+  <testcase classname="Running unittests src/lib.rs (/tmp/muyon-cargo-target/debug/deps/muyon_core-36d5b85d6a5d6189)" name="blobs::tests::deleting_rejects_new_read_or_same_digest_upload" />
+  <testcase classname="Running unittests src/lib.rs (/tmp/muyon-cargo-target/debug/deps/muyon_core-36d5b85d6a5d6189)" name="blobs::tests::failed_ledger_after_solidification_keeps_staging_and_object_independent" />
+  <testcase classname="Running unittests src/lib.rs (/tmp/muyon-cargo-target/debug/deps/muyon_core-36d5b85d6a5d6189)" name="blobs::tests::kill_fixture" />
+  <testcase classname="Running unittests src/lib.rs (/tmp/muyon-cargo-target/debug/deps/muyon_core-36d5b85d6a5d6189)" name="blobs::tests::corrupt_existing_object_and_dangling_symlink_are_never_replaced" />
+  <testcase classname="Running unittests src/lib.rs (/tmp/muyon-cargo-target/debug/deps/muyon_core-36d5b85d6a5d6189)" name="blobs::tests::gc_and_publish_barrier_preserves_either_upload_pin_or_reference" />
+  <testcase classname="Running unittests src/lib.rs (/tmp/muyon-cargo-target/debug/deps/muyon_core-36d5b85d6a5d6189)" name="blobs::tests::gc_and_reader_barrier_covers_reader_after_upload_pin_release" />
+  <testcase classname="Running unittests src/lib.rs (/tmp/muyon-cargo-target/debug/deps/muyon_core-36d5b85d6a5d6189)" name="blobs::tests::pinned_state_alone_does_not_replace_a_durable_upload_pin" />
+  <testcase classname="Running unittests src/lib.rs (/tmp/muyon-cargo-target/debug/deps/muyon_core-36d5b85d6a5d6189)" name="blobs::tests::publication_binds_expected_bytes_project_revision_and_real_transaction" />
+  <testcase classname="Running unittests src/lib.rs (/tmp/muyon-cargo-target/debug/deps/muyon_core-36d5b85d6a5d6189)" name="blobs::tests::pending_unknown_never_expire_and_lookup_does_not_recover" />
+  <testcase classname="Running unittests src/lib.rs (/tmp/muyon-cargo-target/debug/deps/muyon_core-36d5b85d6a5d6189)" name="blobs::tests::partial_publication_copy_is_not_reused_and_unknown_uploads_are_not_cleaned" />
+  <testcase classname="Running unittests src/lib.rs (/tmp/muyon-cargo-target/debug/deps/muyon_core-36d5b85d6a5d6189)" name="blobs::tests::rename_then_failed_pin_commit_can_retry_existing_target_without_overwrite" />
+  <testcase classname="Running unittests src/lib.rs (/tmp/muyon-cargo-target/debug/deps/muyon_core-36d5b85d6a5d6189)" name="review_lifecycle::tests::committed_claims_are_preserved_and_partial_committed_schema_is_refused" />
+  <testcase classname="Running unittests src/lib.rs (/tmp/muyon-cargo-target/debug/deps/muyon_core-36d5b85d6a5d6189)" name="review_lifecycle::tests::empty_file_from_interrupted_creation_initializes_without_replacement" />
+  <testcase classname="Running unittests src/lib.rs (/tmp/muyon-cargo-target/debug/deps/muyon_core-36d5b85d6a5d6189)" name="review_lifecycle::tests::uncommitted_ddl_reopens_and_initializes_the_original_database" />
+  <testcase classname="Running unittests src/lib.rs (/tmp/muyon-cargo-target/debug/deps/muyon_core-36d5b85d6a5d6189)" name="blobs::tests::real_paper_effect_receipt_and_blob_reference_survive_or_roll_back_together" />
+  <testcase classname="Running unittests src/lib.rs (/tmp/muyon-cargo-target/debug/deps/muyon_core-36d5b85d6a5d6189)" name="blobs::tests::real_sigkill_and_reopen_at_twelve_cross_media_windows" />
+  <testcase classname="Running unittests src/lib.rs (/tmp/muyon-cargo-target/debug/deps/muyon_core-36d5b85d6a5d6189)" name="research::resource_tests::real_opaque_uploads_are_not_aggregated_when_sealing_or_importing" />
+  <testcase classname="Running unittests src/bin/business_worker.rs (/tmp/muyon-cargo-target/debug/deps/business_worker-01518624380d8dd6)" name="blobs::tests::file_and_upload_logical_length_quotas_precede_hashing_and_writing" />
+  <testcase classname="Running unittests src/bin/business_worker.rs (/tmp/muyon-cargo-target/debug/deps/business_worker-01518624380d8dd6)" name="blobs::tests::deleting_rejects_new_read_or_same_digest_upload" />
+  <testcase classname="Running unittests src/bin/business_worker.rs (/tmp/muyon-cargo-target/debug/deps/business_worker-01518624380d8dd6)" name="blobs::tests::failed_ledger_after_solidification_keeps_staging_and_object_independent" />
+  <testcase classname="Running unittests src/bin/business_worker.rs (/tmp/muyon-cargo-target/debug/deps/business_worker-01518624380d8dd6)" name="blobs::tests::kill_fixture" />
+  <testcase classname="Running unittests src/bin/business_worker.rs (/tmp/muyon-cargo-target/debug/deps/business_worker-01518624380d8dd6)" name="blobs::tests::gc_and_publish_barrier_preserves_either_upload_pin_or_reference" />
+  <testcase classname="Running unittests src/bin/business_worker.rs (/tmp/muyon-cargo-target/debug/deps/business_worker-01518624380d8dd6)" name="blobs::tests::corrupt_existing_object_and_dangling_symlink_are_never_replaced" />
+  <testcase classname="Running unittests src/bin/business_worker.rs (/tmp/muyon-cargo-target/debug/deps/business_worker-01518624380d8dd6)" name="blobs::tests::gc_and_reader_barrier_covers_reader_after_upload_pin_release" />
+  <testcase classname="Running unittests src/bin/business_worker.rs (/tmp/muyon-cargo-target/debug/deps/business_worker-01518624380d8dd6)" name="blobs::tests::publication_binds_expected_bytes_project_revision_and_real_transaction" />
+  <testcase classname="Running unittests src/bin/business_worker.rs (/tmp/muyon-cargo-target/debug/deps/business_worker-01518624380d8dd6)" name="blobs::tests::pinned_state_alone_does_not_replace_a_durable_upload_pin" />
+  <testcase classname="Running unittests src/bin/business_worker.rs (/tmp/muyon-cargo-target/debug/deps/business_worker-01518624380d8dd6)" name="blobs::tests::partial_publication_copy_is_not_reused_and_unknown_uploads_are_not_cleaned" />
+  <testcase classname="Running unittests src/bin/business_worker.rs (/tmp/muyon-cargo-target/debug/deps/business_worker-01518624380d8dd6)" name="blobs::tests::pending_unknown_never_expire_and_lookup_does_not_recover" />
+  <testcase classname="Running unittests src/bin/business_worker.rs (/tmp/muyon-cargo-target/debug/deps/business_worker-01518624380d8dd6)" name="blobs::tests::rename_then_failed_pin_commit_can_retry_existing_target_without_overwrite" />
+  <testcase classname="Running unittests src/bin/business_worker.rs (/tmp/muyon-cargo-target/debug/deps/business_worker-01518624380d8dd6)" name="review_lifecycle::tests::committed_claims_are_preserved_and_partial_committed_schema_is_refused" />
+  <testcase classname="Running unittests src/bin/business_worker.rs (/tmp/muyon-cargo-target/debug/deps/business_worker-01518624380d8dd6)" name="review_lifecycle::tests::empty_file_from_interrupted_creation_initializes_without_replacement" />
+  <testcase classname="Running unittests src/bin/business_worker.rs (/tmp/muyon-cargo-target/debug/deps/business_worker-01518624380d8dd6)" name="review_lifecycle::tests::uncommitted_ddl_reopens_and_initializes_the_original_database" />
+  <testcase classname="Running unittests src/bin/business_worker.rs (/tmp/muyon-cargo-target/debug/deps/business_worker-01518624380d8dd6)" name="blobs::tests::real_paper_effect_receipt_and_blob_reference_survive_or_roll_back_together" />
+  <testcase classname="Running unittests src/bin/business_worker.rs (/tmp/muyon-cargo-target/debug/deps/business_worker-01518624380d8dd6)" name="blobs::tests::real_sigkill_and_reopen_at_twelve_cross_media_windows" />
+  <testcase classname="Running unittests src/bin/business_worker.rs (/tmp/muyon-cargo-target/debug/deps/business_worker-01518624380d8dd6)" name="research::resource_tests::real_opaque_uploads_are_not_aggregated_when_sealing_or_importing" />
+  <testcase classname="Running tests/agent_child_tools.rs (/tmp/muyon-cargo-target/debug/deps/agent_child_tools-f2b5b30db6d878a0)" name="preprepared_plan_cannot_bypass_a_later_unknown_request" />
+  <testcase classname="Running tests/agent_child_tools.rs (/tmp/muyon-cargo-target/debug/deps/agent_child_tools-f2b5b30db6d878a0)" name="child_tool_subset_is_priced_and_enforced_on_the_actual_model_response" />
+  <testcase classname="Running tests/agent_child_tools.rs (/tmp/muyon-cargo-target/debug/deps/agent_child_tools-f2b5b30db6d878a0)" name="confirmation_preview_contains_the_exact_prior_history_and_wire_fields" />
+  <testcase classname="Running tests/agent_owner.rs (/tmp/muyon-cargo-target/debug/deps/agent_owner-7eb555cbd8410b0e)" name="cancel_before_attempt_releases_only_held_identity_and_is_not_replayable" />
+  <testcase classname="Running tests/agent_owner.rs (/tmp/muyon-cargo-target/debug/deps/agent_owner-7eb555cbd8410b0e)" name="cancelled_claim_with_empty_response_never_refunds_attempt_count_after_restart" />
+  <testcase classname="Running tests/agent_owner.rs (/tmp/muyon-cargo-target/debug/deps/agent_owner-7eb555cbd8410b0e)" name="config_or_credential_changes_deny_dispatch_and_suppress_revoked_disclosure" />
+  <testcase classname="Running tests/agent_owner.rs (/tmp/muyon-cargo-target/debug/deps/agent_owner-7eb555cbd8410b0e)" name="complete_chat_usage_settles_once_and_restores_bounded_conversation_history" />
+  <testcase classname="Running tests/agent_owner.rs (/tmp/muyon-cargo-target/debug/deps/agent_owner-7eb555cbd8410b0e)" name="fresh_product_settings_and_blocked_chat_plan_do_not_inherit_canary_authority" />
+  <testcase classname="Running tests/agent_owner.rs (/tmp/muyon-cargo-target/debug/deps/agent_owner-7eb555cbd8410b0e)" name="cumulative_budget_survives_reconfiguration_and_unknown_is_not_refunded" />
+  <testcase classname="Running tests/agent_owner.rs (/tmp/muyon-cargo-target/debug/deps/agent_owner-7eb555cbd8410b0e)" name="fixed_transport_diagnostic_survives_reopen_without_settlement_or_raw_text" />
+  <testcase classname="Running tests/agent_owner.rs (/tmp/muyon-cargo-target/debug/deps/agent_owner-7eb555cbd8410b0e)" name="reserve_claim_exactly_once_and_unknown_never_resends_after_reopen" />
+  <testcase classname="Running tests/agent_owner.rs (/tmp/muyon-cargo-target/debug/deps/agent_owner-7eb555cbd8410b0e)" name="malformed_or_over_bound_usage_keeps_unknown_hold_without_answer" />
+  <testcase classname="Running tests/agent_owner.rs (/tmp/muyon-cargo-target/debug/deps/agent_owner-7eb555cbd8410b0e)" name="validated_search_sources_and_empty_result_follow_existing_settlement_contract" />
+  <testcase classname="Running tests/agent_owner.rs (/tmp/muyon-cargo-target/debug/deps/agent_owner-7eb555cbd8410b0e)" name="process_death_after_reservation_or_claim_keeps_original_hold_without_replay" />
+  <testcase classname="Running tests/agent_product.rs (/tmp/muyon-cargo-target/debug/deps/agent_product-e55020ffe84bbbb2)" name="missing_live_owners_are_explicitly_unavailable_without_synthetic_fallback" />
+  <testcase classname="Running tests/agent_product.rs (/tmp/muyon-cargo-target/debug/deps/agent_product-e55020ffe84bbbb2)" name="response_requires_full_terminal_answer_and_usage_not_http_success" />
+  <testcase classname="Running tests/agent_product.rs (/tmp/muyon-cargo-target/debug/deps/agent_product-e55020ffe84bbbb2)" name="old_epoch_read_scope_cannot_be_reused_after_service_restart" />
+  <testcase classname="Running tests/agent_product.rs (/tmp/muyon-cargo-target/debug/deps/agent_product-e55020ffe84bbbb2)" name="tools_reject_writes_scope_injection_duplicate_keys_and_unbounded_pages" />
+  <testcase classname="Running tests/agent_product.rs (/tmp/muyon-cargo-target/debug/deps/agent_product-e55020ffe84bbbb2)" name="suppliers_are_current_database_reads_and_deleted_records_are_not_context" />
+  <testcase classname="Running tests/agent_product.rs (/tmp/muyon-cargo-target/debug/deps/agent_product-e55020ffe84bbbb2)" name="newly_added_paper_is_read_from_selected_project_without_raw_json_or_blob_path" />
+  <testcase classname="Running tests/agent_tools.rs (/tmp/muyon-cargo-target/debug/deps/agent_tools-f7bfcda079c32bba)" name="cancellation_restart_and_unknown_never_resume_or_approve_tool_disclosure" />
+  <testcase classname="Running tests/agent_tools.rs (/tmp/muyon-cargo-target/debug/deps/agent_tools-f7bfcda079c32bba)" name="disclosure_is_not_inferred_from_budget_or_copied_to_new_scope_or_generation" />
+  <testcase classname="Running tests/agent_tools.rs (/tmp/muyon-cargo-target/debug/deps/agent_tools-f7bfcda079c32bba)" name="production_unbound_proof_never_auto_sends_approved_tool_followup" />
+  <testcase classname="Running tests/agent_tools.rs (/tmp/muyon-cargo-target/debug/deps/agent_tools-f7bfcda079c32bba)" name="read_call_requires_exact_visible_disclosure_then_new_followup_identity_and_budget" />
+  <testcase classname="Running tests/agent_tools.rs (/tmp/muyon-cargo-target/debug/deps/agent_tools-f7bfcda079c32bba)" name="cancelled_or_changed_suggestion_is_revalidated_before_any_business_commit" />
+  <testcase classname="Running tests/agent_tools.rs (/tmp/muyon-cargo-target/debug/deps/agent_tools-f7bfcda079c32bba)" name="malformed_function_calls_remain_unknown_and_have_no_business_effect" />
+  <testcase classname="Running tests/agent_tools.rs (/tmp/muyon-cargo-target/debug/deps/agent_tools-f7bfcda079c32bba)" name="suggestion_only_prepares_then_requires_original_committed_receipt_and_disclosure" />
+  <testcase classname="Running tests/agent_workflow.rs (/tmp/muyon-cargo-target/debug/deps/agent_workflow-4a23a0ae67a359ee)" name="disabled_skill_blocks_existing_queued_work_and_invalid_arguments_do_not_create_children" />
+  <testcase classname="Running tests/agent_workflow.rs (/tmp/muyon-cargo-target/debug/deps/agent_workflow-4a23a0ae67a359ee)" name="actual_owner_settlement_completes_remote_child_without_accepted_answer_shortcut" />
+  <testcase classname="Running tests/agent_workflow.rs (/tmp/muyon-cargo-target/debug/deps/agent_workflow-4a23a0ae67a359ee)" name="disabling_a_skill_permanently_revokes_its_prepared_remote_plan" />
+  <testcase classname="Running tests/agent_workflow.rs (/tmp/muyon-cargo-target/debug/deps/agent_workflow-4a23a0ae67a359ee)" name="cancellation_after_settlement_preserves_answers_and_releases_active_child_slots" />
+  <testcase classname="Running tests/agent_workflow.rs (/tmp/muyon-cargo-target/debug/deps/agent_workflow-4a23a0ae67a359ee)" name="local_child_reads_actual_supplier_and_emits_only_host_activity" />
+  <testcase classname="Running tests/agent_workflow.rs (/tmp/muyon-cargo-target/debug/deps/agent_workflow-4a23a0ae67a359ee)" name="attempted_unknown_retains_owner_hold_and_late_cancelled_response_is_not_published" />
+  <testcase classname="Running tests/agent_workflow.rs (/tmp/muyon-cargo-target/debug/deps/agent_workflow-4a23a0ae67a359ee)" name="paper_skill_reads_selected_project_and_skill_settings_do_not_leak_between_projects" />
+  <testcase classname="Running tests/agent_workflow.rs (/tmp/muyon-cargo-target/debug/deps/agent_workflow-4a23a0ae67a359ee)" name="prepared_child_and_normal_chat_are_rechecked_after_another_child_becomes_unknown" />
+  <testcase classname="Running tests/agent_workflow.rs (/tmp/muyon-cargo-target/debug/deps/agent_workflow-4a23a0ae67a359ee)" name="recovery_is_read_only_and_never_replays_and_owner_is_exclusive" />
+  <testcase classname="Running tests/agent_workflow.rs (/tmp/muyon-cargo-target/debug/deps/agent_workflow-4a23a0ae67a359ee)" name="remote_tool_allowlist_is_compiled_skill_metadata_and_not_instructions_in_task" />
+  <testcase classname="Running tests/agent_workflow.rs (/tmp/muyon-cargo-target/debug/deps/agent_workflow-4a23a0ae67a359ee)" name="scope_forgery_unknown_actions_and_fields_are_rejected" />
+  <testcase classname="Running tests/agent_workflow.rs (/tmp/muyon-cargo-target/debug/deps/agent_workflow-4a23a0ae67a359ee)" name="real_owner_followup_chain_tracks_leaf_unknown_and_cancels_every_known_request" />
+  <testcase classname="Running tests/agent_workflow.rs (/tmp/muyon-cargo-target/debug/deps/agent_workflow-4a23a0ae67a359ee)" name="skill_toggle_digest_and_child_budgets_are_real" />
+  <testcase classname="Running tests/agent_workflow.rs (/tmp/muyon-cargo-target/debug/deps/agent_workflow-4a23a0ae67a359ee)" name="real_owner_blocked_plan_binds_unique_child_and_cancellation_is_not_fake_completion" />
+  <testcase classname="Running tests/agent_workflow.rs (/tmp/muyon-cargo-target/debug/deps/agent_workflow-4a23a0ae67a359ee)" name="unproven_tool_followup_is_blocked_not_confirmable_and_polling_keeps_original_budget" />
+  <testcase classname="Running tests/agent_workflow.rs (/tmp/muyon-cargo-target/debug/deps/agent_workflow-4a23a0ae67a359ee)" name="large_real_local_results_keep_complete_storage_but_project_bounded_honest_previews" />
+  <testcase classname="Running tests/archive.rs (/tmp/muyon-cargo-target/debug/deps/archive-b18ddca6aa2cc6dc)" name="accepts_unsigned_descriptor" />
+  <testcase classname="Running tests/archive.rs (/tmp/muyon-cargo-target/debug/deps/archive-b18ddca6aa2cc6dc)" name="actual_archive409_encoder_round_trip_fixture" />
+  <testcase classname="Running tests/archive.rs (/tmp/muyon-cargo-target/debug/deps/archive-b18ddca6aa2cc6dc)" name="contract_entries_bind_exact_snapshot_digest_and_length" />
+  <testcase classname="Running tests/archive.rs (/tmp/muyon-cargo-target/debug/deps/archive-b18ddca6aa2cc6dc)" name="overlap_guard" />
+  <testcase classname="Running tests/archive.rs (/tmp/muyon-cargo-target/debug/deps/archive-b18ddca6aa2cc6dc)" name="descriptor_and_decoded_content_are_independent_checks" />
+  <testcase classname="Running tests/archive.rs (/tmp/muyon-cargo-target/debug/deps/archive-b18ddca6aa2cc6dc)" name="refuses_overlapping_ranges_and_unknown_extra_fields" />
+  <testcase classname="Running tests/archive.rs (/tmp/muyon-cargo-target/debug/deps/archive-b18ddca6aa2cc6dc)" name="directories_validated_but_not_exposed" />
+  <testcase classname="Running tests/archive.rs (/tmp/muyon-cargo-target/debug/deps/archive-b18ddca6aa2cc6dc)" name="rejects_offsets_local_conflicts_flags_zip64_and_quotas" />
+  <testcase classname="Running tests/archive.rs (/tmp/muyon-cargo-target/debug/deps/archive-b18ddca6aa2cc6dc)" name="rejects_path_aliases_links_and_special_files" />
+  <testcase classname="Running tests/archive.rs (/tmp/muyon-cargo-target/debug/deps/archive-b18ddca6aa2cc6dc)" name="symlink_guard" />
+  <testcase classname="Running tests/archive.rs (/tmp/muyon-cargo-target/debug/deps/archive-b18ddca6aa2cc6dc)" name="traversal_guard" />
+  <testcase classname="Running tests/archive.rs (/tmp/muyon-cargo-target/debug/deps/archive-b18ddca6aa2cc6dc)" name="stored_deflated_and_signed_descriptor_metadata" />
+  <testcase classname="Running tests/archive.rs (/tmp/muyon-cargo-target/debug/deps/archive-b18ddca6aa2cc6dc)" name="all_truncations_fail_without_panicking" />
+  <testcase classname="Running tests/blobs.rs (/tmp/muyon-cargo-target/debug/deps/blobs-8adbd7372e15cfa0)" name="durable_upload_and_repeatable_lease_reads" />
+  <testcase classname="Running tests/blobs.rs (/tmp/muyon-cargo-target/debug/deps/blobs-8adbd7372e15cfa0)" name="archive_upload_uses_actual_archive409_metadata_reader" />
+  <testcase classname="Running tests/blobs.rs (/tmp/muyon-cargo-target/debug/deps/blobs-8adbd7372e15cfa0)" name="equal_content_reuses_verified_object_but_retains_independent_upload_pins" />
+  <testcase classname="Running tests/blobs.rs (/tmp/muyon-cargo-target/debug/deps/blobs-8adbd7372e15cfa0)" name="input_is_opaque_and_chunks_and_kinds_are_bounded" />
+  <testcase classname="Running tests/blobs.rs (/tmp/muyon-cargo-target/debug/deps/blobs-8adbd7372e15cfa0)" name="controlled_paths_refuse_symlinks_and_preserve_outside_files" />
+  <testcase classname="Running tests/blobs.rs (/tmp/muyon-cargo-target/debug/deps/blobs-8adbd7372e15cfa0)" name="lookup_is_read_only_and_restart_reconciliation_is_explicit" />
+  <testcase classname="Running tests/blobs.rs (/tmp/muyon-cargo-target/debug/deps/blobs-8adbd7372e15cfa0)" name="private_snapshot_survives_source_removal_and_does_not_overwrite_corruption" />
+  <testcase classname="Running tests/blobs.rs (/tmp/muyon-cargo-target/debug/deps/blobs-8adbd7372e15cfa0)" name="persistent_reader_pin_outlives_upload_pin_until_explicit_close" />
+  <testcase classname="Running tests/business.rs (/tmp/muyon-cargo-target/debug/deps/business-26b415b04fb2660a)" name="cross_process_owner_lock_is_released_only_after_process_exit" />
+  <testcase classname="Running tests/business.rs (/tmp/muyon-cargo-target/debug/deps/business-26b415b04fb2660a)" name="corrupt_receipt_tail_rolls_back_all_effects_and_never_reexecutes_pending" />
+  <testcase classname="Running tests/business.rs (/tmp/muyon-cargo-target/debug/deps/business-26b415b04fb2660a)" name="initialize_is_explicit_and_never_truncates_or_migrates" />
+  <testcase classname="Running tests/business.rs (/tmp/muyon-cargo-target/debug/deps/business-26b415b04fb2660a)" name="grant_expiring_during_actual_sql_rejects_and_rolls_back_the_effect" />
+  <testcase classname="Running tests/business.rs (/tmp/muyon-cargo-target/debug/deps/business-26b415b04fb2660a)" name="duplicate_binding_conflict_cas_and_same_name_new_intent" />
+  <testcase classname="Running tests/business.rs (/tmp/muyon-cargo-target/debug/deps/business-26b415b04fb2660a)" name="current_schema_label_does_not_authorize_a_missing_required_table_or_column" />
+  <testcase classname="Running tests/business.rs (/tmp/muyon-cargo-target/debug/deps/business-26b415b04fb2660a)" name="old_schema_v1_missing_tail_table_is_refused_without_changing_pending_identity" />
+  <testcase classname="Running tests/business.rs (/tmp/muyon-cargo-target/debug/deps/business-26b415b04fb2660a)" name="project_create_and_reads_are_persistent_workspace_bound_operations" />
+  <testcase classname="Running tests/business.rs (/tmp/muyon-cargo-target/debug/deps/business-26b415b04fb2660a)" name="real_grants_expiry_revoke_generation_scope_and_epoch_are_required" />
+  <testcase classname="Running tests/business.rs (/tmp/muyon-cargo-target/debug/deps/business-26b415b04fb2660a)" name="sigkill_after_actual_sql_rolls_back_and_original_pending_cannot_redispatch" />
+  <testcase classname="Running tests/business.rs (/tmp/muyon-cargo-target/debug/deps/business-26b415b04fb2660a)" name="sigkill_after_commit_before_reply_recovers_exact_original_receipt" />
+  <testcase classname="Running tests/business.rs (/tmp/muyon-cargo-target/debug/deps/business-26b415b04fb2660a)" name="sqlite_constraints_and_corrupt_files_have_fixed_typed_errors" />
+  <testcase classname="Running tests/business.rs (/tmp/muyon-cargo-target/debug/deps/business-26b415b04fb2660a)" name="supplier_full_payload_update_soft_delete_restore_and_original_receipt" />
+  <testcase classname="Running tests/business.rs (/tmp/muyon-cargo-target/debug/deps/business-26b415b04fb2660a)" name="sqlite_revocation_transaction_barrier_precedes_business_admission" />
+  <testcase classname="Running tests/contract.rs (/tmp/muyon-cargo-target/debug/deps/contract-e399654854b642ac)" name="ct02_file_metadata_bounds_and_binding_are_checked" />
+  <testcase classname="Running tests/contract.rs (/tmp/muyon-cargo-target/debug/deps/contract-e399654854b642ac)" name="ct01_revisions_are_lossless_canonical_text" />
+  <testcase classname="Running tests/contract.rs (/tmp/muyon-cargo-target/debug/deps/contract-e399654854b642ac)" name="ct01_eight_fields_normalize_with_dart_rules" />
+  <testcase classname="Running tests/contract.rs (/tmp/muyon-cargo-target/debug/deps/contract-e399654854b642ac)" name="ct01_reuses_supplier_name_boundary_vectors" />
+  <testcase classname="Running tests/contract.rs (/tmp/muyon-cargo-target/debug/deps/contract-e399654854b642ac)" name="ct03_receipt_and_unknown_states_have_distinct_invariants" />
+  <testcase classname="Running tests/contract.rs (/tmp/muyon-cargo-target/debug/deps/contract-e399654854b642ac)" name="ct02_manual_paper_requires_project_title_and_blob" />
+  <testcase classname="Running tests/contract.rs (/tmp/muyon-cargo-target/debug/deps/contract-e399654854b642ac)" name="ct03_every_security_fact_changes_retry_binding" />
+  <testcase classname="Running tests/contract.rs (/tmp/muyon-cargo-target/debug/deps/contract-e399654854b642ac)" name="ct04_strict_decode_rejects_duplicates_unknown_and_versions" />
+  <testcase classname="Running tests/contract.rs (/tmp/muyon-cargo-target/debug/deps/contract-e399654854b642ac)" name="ct04_digest_order_and_fixture_round_trip" />
+  <testcase classname="Running tests/contract.rs (/tmp/muyon-cargo-target/debug/deps/contract-e399654854b642ac)" name="ct02_import_is_opaque_metadata_not_manual_paper" />
+  <testcase classname="Running tests/contract_vectors_additional.rs (/tmp/muyon-cargo-target/debug/deps/contract_vectors_additional-4080fa4f450b9cc4)" name="ct01_ct04_shared_codec_vectors_use_real_contract_and_lossless_wire_text" />
+  <testcase classname="Running tests/group_governance.rs (/tmp/muyon-cargo-target/debug/deps/group_governance-537c4cb4eac2d270)" name="collaborator_cannot_self_authorize_even_as_coordinator" />
+  <testcase classname="Running tests/group_governance.rs (/tmp/muyon-cargo-target/debug/deps/group_governance-537c4cb4eac2d270)" name="budget_overflow_and_exhaustion_never_become_zero_cost" />
+  <testcase classname="Running tests/group_governance.rs (/tmp/muyon-cargo-target/debug/deps/group_governance-537c4cb4eac2d270)" name="all_duplicate_states_only_lookup_and_submitted_blocks_new_dispatch" />
+  <testcase classname="Running tests/group_governance.rs (/tmp/muyon-cargo-target/debug/deps/group_governance-537c4cb4eac2d270)" name="cycles_missing_dependencies_and_duplicate_nodes_are_rejected" />
+  <testcase classname="Running tests/group_governance.rs (/tmp/muyon-cargo-target/debug/deps/group_governance-537c4cb4eac2d270)" name="depth_two_and_foreign_parent_are_rejected" />
+  <testcase classname="Running tests/group_governance.rs (/tmp/muyon-cargo-target/debug/deps/group_governance-537c4cb4eac2d270)" name="duplicate_request_identity_and_stale_config_are_not_valid_host_views" />
+  <testcase classname="Running tests/group_governance.rs (/tmp/muyon-cargo-target/debug/deps/group_governance-537c4cb4eac2d270)" name="duplicate_command_returns_only_original_receipt_even_when_unknown" />
+  <testcase classname="Running tests/group_governance.rs (/tmp/muyon-cargo-target/debug/deps/group_governance-537c4cb4eac2d270)" name="deterministic_ready_order_uses_node_identity_and_dependencies" />
+  <testcase classname="Running tests/group_governance.rs (/tmp/muyon-cargo-target/debug/deps/group_governance-537c4cb4eac2d270)" name="eight_lifetime_children_and_two_active_slots_are_hard_caps" />
+  <testcase classname="Running tests/group_governance.rs (/tmp/muyon-cargo-target/debug/deps/group_governance-537c4cb4eac2d270)" name="failed_dependencies_do_not_run_and_cancelled_children_keep_lifetime_slots" />
+  <testcase classname="Running tests/group_governance.rs (/tmp/muyon-cargo-target/debug/deps/group_governance-537c4cb4eac2d270)" name="every_authority_layer_and_member_scope_must_allow_the_request" />
+  <testcase classname="Running tests/group_governance.rs (/tmp/muyon-cargo-target/debug/deps/group_governance-537c4cb4eac2d270)" name="human_admin_can_only_narrow_existing_grant" />
+  <testcase classname="Running tests/group_governance.rs (/tmp/muyon-cargo-target/debug/deps/group_governance-537c4cb4eac2d270)" name="ledger_corruption_and_unsupported_status_fail_closed" />
+  <testcase classname="Running tests/group_governance.rs (/tmp/muyon-cargo-target/debug/deps/group_governance-537c4cb4eac2d270)" name="modes_roundtrip_by_explicit_name_and_unknown_fails_closed" />
+  <testcase classname="Running tests/group_governance.rs (/tmp/muyon-cargo-target/debug/deps/group_governance-537c4cb4eac2d270)" name="represented_coordinator_modes_never_execute" />
+  <testcase classname="Running tests/group_governance.rs (/tmp/muyon-cargo-target/debug/deps/group_governance-537c4cb4eac2d270)" name="non_member_is_rejected" />
+  <testcase classname="Running tests/group_governance.rs (/tmp/muyon-cargo-target/debug/deps/group_governance-537c4cb4eac2d270)" name="unknown_budget_keeps_reserve_and_blocks_new_command" />
+  <testcase classname="Running tests/group_governance.rs (/tmp/muyon-cargo-target/debug/deps/group_governance-537c4cb4eac2d270)" name="rounds_count_original_dispatch_history_across_restarts_and_stops" />
+  <testcase classname="Running tests/group_governance.rs (/tmp/muyon-cargo-target/debug/deps/group_governance-537c4cb4eac2d270)" name="unsupported_versions_and_ownerless_groups_are_rejected" />
+  <testcase classname="Running tests/group_governance.rs (/tmp/muyon-cargo-target/debug/deps/group_governance-537c4cb4eac2d270)" name="stale_host_epoch_leader_epoch_or_configuration_never_executes" />
+  <testcase classname="Running tests/research.rs (/tmp/muyon-cargo-target/debug/deps/research-adc622c1e7dae347)" name="committed_paper_after_process_kill_recovers_original_receipt_and_private_pdf" />
+  <testcase classname="Running tests/research.rs (/tmp/muyon-cargo-target/debug/deps/research-adc622c1e7dae347)" name="directory_and_real_stored_zip_produce_equivalent_records_and_bad_decoded_crc_fails" />
+  <testcase classname="Running tests/research.rs (/tmp/muyon-cargo-target/debug/deps/research-adc622c1e7dae347)" name="api26_eleven_record_deflated_import_with_three_identical_empty_logs_commits" />
+  <testcase classname="Running tests/research.rs (/tmp/muyon-cargo-target/debug/deps/research-adc622c1e7dae347)" name="cited_same_revision_changes_reject_atomically_and_next_revision_is_retained" />
+  <testcase classname="Running tests/research.rs (/tmp/muyon-cargo-target/debug/deps/research-adc622c1e7dae347)" name="explicit_ambiguous_binding_choice_survives_refresh" />
+  <testcase classname="Running tests/research.rs (/tmp/muyon-cargo-target/debug/deps/research-adc622c1e7dae347)" name="forged_wire_records_and_snapshot_project_changes_do_not_become_imports" />
+  <testcase classname="Running tests/research.rs (/tmp/muyon-cargo-target/debug/deps/research-adc622c1e7dae347)" name="import_domain_tail_tampering_rolls_back_records_source_and_publication" />
+  <testcase classname="Running tests/research.rs (/tmp/muyon-cargo-target/debug/deps/research-adc622c1e7dae347)" name="malformed_jsonl_paths_and_no_recognized_material_are_rejected_before_publication" />
+  <testcase classname="Running tests/research.rs (/tmp/muyon-cargo-target/debug/deps/research-adc622c1e7dae347)" name="imported_raw_json_duplicate_revisions_and_material_binding_are_preserved" />
+  <testcase classname="Running tests/research.rs (/tmp/muyon-cargo-target/debug/deps/research-adc622c1e7dae347)" name="loose_imported_metadata_uses_fallback_title_and_does_not_apply_manual_constraints" />
+  <testcase classname="Running tests/research.rs (/tmp/muyon-cargo-target/debug/deps/research-adc622c1e7dae347)" name="manual_kind_project_and_exact_upload_binding_cannot_be_forged" />
+  <testcase classname="Running tests/research.rs (/tmp/muyon-cargo-target/debug/deps/research-adc622c1e7dae347)" name="receipt_fault_rolls_back_paper_publication_and_cancel_blocks_original_retry" />
+  <testcase classname="Running tests/research.rs (/tmp/muyon-cargo-target/debug/deps/research-adc622c1e7dae347)" name="prefixed_skill_root_arxiv_manifest_binds_verified_pdf_hash" />
+  <testcase classname="Running tests/research.rs (/tmp/muyon-cargo-target/debug/deps/research-adc622c1e7dae347)" name="manual_pdf_is_real_private_persistent_and_shares_catalog_with_import" />
+  <testcase classname="Running tests/research.rs (/tmp/muyon-cargo-target/debug/deps/research-adc622c1e7dae347)" name="refresh_only_removes_missing_uncited_entries_and_keeps_cited_document_bytes" />
+  <testcase classname="Running tests/research.rs (/tmp/muyon-cargo-target/debug/deps/research-adc622c1e7dae347)" name="jsonl_larger_than_wire_limit_uses_small_verified_source_ref_command" />
+  <testcase classname="Running tests/resource_boundaries_additional.rs (/tmp/muyon-cargo-target/debug/deps/resource_boundaries_additional-302b9130436d8986)" name="zip_metadata_exact_expansion_and_member_count_and_one_over" />
+  <testcase classname="Running tests/resource_boundaries_additional.rs (/tmp/muyon-cargo-target/debug/deps/resource_boundaries_additional-302b9130436d8986)" name="actual_pdf_and_document_exact_thirty_mib_and_one_extra_byte" />
+  <testcase classname="Running tests/resource_boundaries_additional.rs (/tmp/muyon-cargo-target/debug/deps/resource_boundaries_additional-302b9130436d8986)" name="seal_actual_total_exact_one_fifty_mib_then_one_byte_and_member_count_refuse_without_effects" />
+  <testcase classname="Running tests/store_admission_additional.rs (/tmp/muyon-cargo-target/debug/deps/store_admission_additional-34d3f40b15f211a7)" name="real_os_file_size_write_failure_has_no_business_or_receipt_effect" />
+  <testcase classname="Running tests/store_admission_additional.rs (/tmp/muyon-cargo-target/debug/deps/store_admission_additional-34d3f40b15f211a7)" name="os_process_races_preserve_original_intent_and_reject_stale_cas_after_owner_exit" />
+  <testcase classname="Running tests/store_admission_additional.rs (/tmp/muyon-cargo-target/debug/deps/store_admission_additional-34d3f40b15f211a7)" name="sqlite_rejects_pending_domain_history_business_history_and_receipt_writes_atomically" />
+</testsuite>

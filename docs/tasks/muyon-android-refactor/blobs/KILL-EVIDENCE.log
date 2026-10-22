@@ -1,0 +1,23 @@
+Command: cargo test --offline --locked -p muyon-core --lib blobs::tests -- --nocapture
+SIGKILL upload-intent: independent SQLite state copying, recovery preserved publication invariants
+SIGKILL chunk-synced: independent SQLite state copying, recovery preserved publication invariants
+SIGKILL blob-solidified: independent SQLite state copying, recovery preserved publication invariants
+SIGKILL blob-pinned: independent SQLite state pinned, recovery preserved publication invariants
+SIGKILL publication-applied: independent SQLite state pinned, recovery preserved publication invariants
+SIGKILL publication-committed: independent SQLite state committed, recovery preserved publication invariants
+SIGKILL gc-marked: independent SQLite state aborted, recovery preserved publication invariants
+SIGKILL gc-unlinked: independent SQLite state aborted, recovery preserved publication invariants
+SIGKILL actual PaperCreate publication-applied: effect/history/receipt/reference=0 and protected blob retained
+SIGKILL actual PaperCreate publication-committed: effect/history/receipt/reference=1 and protected blob retained
+Result: 11 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out.
+Exit: 0
+
+API26 copy/rename repair rerun:
+Command: cargo test --offline --locked -p muyon-core --lib blobs::tests -- --nocapture
+SIGKILL temp-copy-created: independent SQLite state copying, recovery preserved publication invariants
+SIGKILL temp-copy-chunk-synced: independent SQLite state copying, recovery preserved publication invariants
+SIGKILL temp-copy-durable: independent SQLite state copying, recovery preserved publication invariants
+SIGKILL renamed-before-dir-sync: independent SQLite state copying, recovery preserved publication invariants
+The original eight storage/publication windows and two actual PaperCreate windows also passed.
+Result: 14 passed; 0 failed; 0 ignored; 0 measured; 1 filtered out.
+Exit: 0

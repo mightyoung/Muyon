@@ -1,0 +1,3 @@
+PASS name remains a draft; stable identity and duplicate labels
+PASS rename and intervening edit invalidate late suggestions
+PASS same revision superseded request cannot publish; cancel discards late results

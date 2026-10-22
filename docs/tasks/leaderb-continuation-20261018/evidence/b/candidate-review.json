@@ -1,0 +1,244 @@
+{
+  "sha": "379b1a6d8d5a5830fb3a74924fd5c41cfb234e1c",
+  "utc": "2026-10-18T05:10:54.741336+00:00",
+  "status_before": "",
+  "trees": {
+    "experiments/redesign/hy-memory-governance-lab": {
+      "candidate": "3ae05bff435b20d320570a021702b72fc7dd9201",
+      "original": "3ae05bff435b20d320570a021702b72fc7dd9201"
+    },
+    "experiments/redesign/hy-memory-experiment-fixtures": {
+      "candidate": "de87f264180a4ec3d3a4acd49c9912a62317fcc6",
+      "original": "de87f264180a4ec3d3a4acd49c9912a62317fcc6"
+    }
+  },
+  "source_sha256": {
+    "experiments/redesign/hy-memory-experiment-fixtures/build_fixtures.py": "3e187ca322bf51bdd0ef1f5e1b4704781cb3fe18095dba58685a5b1ea5c0ad03",
+    "experiments/redesign/hy-memory-experiment-fixtures/diff-index.json": "2e466179678318637349011f4cbf7bd633c8e51d0c8836c36f32e142c2c22ead",
+    "experiments/redesign/hy-memory-experiment-fixtures/validate_fixtures.py": "6be3b099d002440e42d0e7259cc2cbd488c6c6ab3fd365eedd43369ef99fa7c7",
+    "experiments/redesign/hy-memory-experiment-fixtures/writer.json": "05c3b5fc755ede3f2794b283558ab65b10fbd0246c5e07fdb53fdd257c49e10b",
+    "experiments/redesign/hy-memory-governance-lab/.gitignore": "306fd52e74fca6746e12acc750f232de15e71da917756a1270d74c91f5eb7368",
+    "experiments/redesign/hy-memory-governance-lab/Cargo.lock": "a44c7d0a40dce72cd228c55dfa0b202b2f0f991f58a3cc43e6dedd1cd43b7152",
+    "experiments/redesign/hy-memory-governance-lab/Cargo.toml": "4e44a2b2c0d3a86fd3d9b59e484502825f322b6785cabfdd25f961c36abfdf02",
+    "experiments/redesign/hy-memory-governance-lab/README.md": "21ba2ba5a7a86362157995e7bdaa86317b98e39badc2cea1af1de0f6870fe596",
+    "experiments/redesign/hy-memory-governance-lab/src/bin/crash-worker.rs": "d732cb87c8e37da6796864b34744cf26e322bf5c10f82d5684db6b045568ffc6",
+    "experiments/redesign/hy-memory-governance-lab/src/lib.rs": "4a3865a558ff2d3335adc4c08ffd0a2a3b9e3e5ac4d47dc7bdc721070feac435",
+    "experiments/redesign/hy-memory-governance-lab/tests/governance.rs": "c8f28c28f06ffb51f783e48ca4a5db63f079cdc68082b429e99063e93ea124be"
+  },
+  "runs": [
+    {
+      "command": [
+        "rustc",
+        "--version"
+      ],
+      "exit": 0,
+      "log": "/workspace/leaderb-evidence/b/candidate-review-0.log",
+      "sha256": "55cd0529c005d3f62869ea6e2271bfa9d5196f56dc65a8be00a371af114a4a98"
+    },
+    {
+      "command": [
+        "cargo",
+        "--version"
+      ],
+      "exit": 0,
+      "log": "/workspace/leaderb-evidence/b/candidate-review-1.log",
+      "sha256": "c35608815f43d0b8788a9b826fad2bb17384f49fb328dc4fe64da9db5f5ef4d6"
+    },
+    {
+      "command": [
+        "cc",
+        "--version"
+      ],
+      "exit": 0,
+      "log": "/workspace/leaderb-evidence/b/candidate-review-2.log",
+      "sha256": "78fc11ae2c3ff7c235eb18ed90989d18f6cc864fb27027f839368cd0888deebc"
+    },
+    {
+      "command": [
+        "cargo",
+        "fetch",
+        "--locked",
+        "--manifest-path",
+        "experiments/redesign/hy-memory-governance-lab/Cargo.toml"
+      ],
+      "exit": 0,
+      "log": "/workspace/leaderb-evidence/b/candidate-review-3.log",
+      "sha256": "59e9b213a8a27ab1dbf7ca807d807abdbfb033362a835bad24b9781b102e1111"
+    },
+    {
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "--manifest-path",
+        "experiments/redesign/hy-memory-governance-lab/Cargo.toml"
+      ],
+      "exit": 0,
+      "log": "/workspace/leaderb-evidence/b/candidate-review-4.log",
+      "sha256": "8eee3ea4697c2d1d2f8fbbbc68e68b4b3f637546286fceac9345e81c30e95543"
+    },
+    {
+      "command": [
+        "cargo",
+        "fmt",
+        "--check",
+        "--manifest-path",
+        "experiments/redesign/hy-memory-governance-lab/Cargo.toml"
+      ],
+      "exit": 0,
+      "log": "/workspace/leaderb-evidence/b/candidate-review-5.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": [
+        "python3",
+        "docs/tasks/hy-memory-governance-20261018/verify-fixtures.py"
+      ],
+      "exit": 0,
+      "log": "/workspace/leaderb-evidence/b/candidate-review-6.log",
+      "sha256": "d302b0c06db623625834fb0d7dd891af3afc8b202097c664de970f9bc9ac1aff"
+    },
+    {
+      "command": [
+        "git",
+        "diff",
+        "--check",
+        "3f1be180bb009a91e659c113ba5b1916e5360332",
+        "HEAD",
+        "--",
+        ".",
+        ":(exclude)docs/tasks/hy-memory-governance-20261018/evidence/*.log"
+      ],
+      "exit": 0,
+      "log": "/workspace/leaderb-evidence/b/candidate-review-7.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "changed_paths": [
+    "docs/design/hy-memory-bounded-experiments-20261018.md",
+    "docs/design/hy-memory-governance-20261018.md",
+    "docs/design/redesign-v1.3.2-20261014/Muyon-Page-Design-Handbook-v1.3.2-2026-10-14.md",
+    "docs/design/redesign-v1.3.2-20261014/Muyon-Redesign-Plan-v1.3.2-2026-10-14.md",
+    "docs/design/redesign-v1.3.2-20261014/README.md",
+    "docs/tasks/HY-MEMORY-GOVERNANCE-20261018.md",
+    "docs/tasks/README.md",
+    "docs/tasks/hy-memory-governance-20261018/DESIGN-REVIEW.md",
+    "docs/tasks/hy-memory-governance-20261018/EXPERIMENT-REVIEW.md",
+    "docs/tasks/hy-memory-governance-20261018/HANDOFF.md",
+    "docs/tasks/hy-memory-governance-20261018/evidence/EVIDENCE-MANIFEST.json",
+    "docs/tasks/hy-memory-governance-20261018/evidence/archive-raw-whitespace.log",
+    "docs/tasks/hy-memory-governance-20261018/evidence/archive-raw-whitespace.md",
+    "docs/tasks/hy-memory-governance-20261018/evidence/exact-e85bc003-0.log",
+    "docs/tasks/hy-memory-governance-20261018/evidence/exact-e85bc003-1.log",
+    "docs/tasks/hy-memory-governance-20261018/evidence/exact-e85bc003-2.log",
+    "docs/tasks/hy-memory-governance-20261018/evidence/exact-e85bc003-3.log",
+    "docs/tasks/hy-memory-governance-20261018/evidence/exact-e85bc003-4.log",
+    "docs/tasks/hy-memory-governance-20261018/evidence/exact-e85bc003-5.log",
+    "docs/tasks/hy-memory-governance-20261018/evidence/exact-e85bc003.json",
+    "docs/tasks/hy-memory-governance-20261018/evidence/fixtures-independent.log",
+    "docs/tasks/hy-memory-governance-20261018/evidence/preflight.json",
+    "docs/tasks/hy-memory-governance-20261018/evidence/review-final-fmt.exit",
+    "docs/tasks/hy-memory-governance-20261018/evidence/review-final-fmt.log",
+    "docs/tasks/hy-memory-governance-20261018/evidence/review-final-v2-0.log",
+    "docs/tasks/hy-memory-governance-20261018/evidence/review-final-v2-1.log",
+    "docs/tasks/hy-memory-governance-20261018/evidence/review-final-v2-2.log",
+    "docs/tasks/hy-memory-governance-20261018/evidence/review-final-v2-3.log",
+    "docs/tasks/hy-memory-governance-20261018/evidence/review-final-v2-4.log",
+    "docs/tasks/hy-memory-governance-20261018/evidence/review-final-v2-5.log",
+    "docs/tasks/hy-memory-governance-20261018/evidence/review-final-v2-fmt.exit",
+    "docs/tasks/hy-memory-governance-20261018/evidence/review-final-v2-fmt.log",
+    "docs/tasks/hy-memory-governance-20261018/evidence/review-final-v2-report.md",
+    "docs/tasks/hy-memory-governance-20261018/evidence/review-final-v2.json",
+    "docs/tasks/hy-memory-governance-20261018/evidence/review-inflight-attempt.md",
+    "docs/tasks/hy-memory-governance-20261018/evidence/review-initial-findings.md",
+    "docs/tasks/hy-memory-governance-20261018/evidence/review-source-02.sha256",
+    "docs/tasks/hy-memory-governance-20261018/evidence/review-suite-01.exit",
+    "docs/tasks/hy-memory-governance-20261018/evidence/review-suite-01.log",
+    "docs/tasks/hy-memory-governance-20261018/evidence/review-suite-02.exit",
+    "docs/tasks/hy-memory-governance-20261018/evidence/review-suite-02.log",
+    "docs/tasks/hy-memory-governance-20261018/evidence/rust-evidence.md",
+    "docs/tasks/hy-memory-governance-20261018/evidence/rust-green-01.exit",
+    "docs/tasks/hy-memory-governance-20261018/evidence/rust-green-01.log",
+    "docs/tasks/hy-memory-governance-20261018/evidence/rust-green-02-source.sha256",
+    "docs/tasks/hy-memory-governance-20261018/evidence/rust-green-02-source.tar.gz",
+    "docs/tasks/hy-memory-governance-20261018/evidence/rust-green-02.exit",
+    "docs/tasks/hy-memory-governance-20261018/evidence/rust-green-02.log",
+    "docs/tasks/hy-memory-governance-20261018/evidence/rust-green-03-source.sha256",
+    "docs/tasks/hy-memory-governance-20261018/evidence/rust-green-03-source.tar.gz",
+    "docs/tasks/hy-memory-governance-20261018/evidence/rust-green-03.exit",
+    "docs/tasks/hy-memory-governance-20261018/evidence/rust-green-03.log",
+    "docs/tasks/hy-memory-governance-20261018/evidence/rust-green-04-source.sha256",
+    "docs/tasks/hy-memory-governance-20261018/evidence/rust-green-04-source.tar.gz",
+    "docs/tasks/hy-memory-governance-20261018/evidence/rust-green-04.exit",
+    "docs/tasks/hy-memory-governance-20261018/evidence/rust-green-04.log",
+    "docs/tasks/hy-memory-governance-20261018/evidence/rust-initial-red-observation.md",
+    "docs/tasks/hy-memory-governance-20261018/evidence/rust-pre-review-fix-source.sha256",
+    "docs/tasks/hy-memory-governance-20261018/evidence/rust-pre-review-fix-source.tar.gz",
+    "docs/tasks/hy-memory-governance-20261018/evidence/rust-red-body-fork-source.sha256",
+    "docs/tasks/hy-memory-governance-20261018/evidence/rust-red-body-fork-source.tar.gz",
+    "docs/tasks/hy-memory-governance-20261018/evidence/rust-red-body-fork.exit",
+    "docs/tasks/hy-memory-governance-20261018/evidence/rust-red-body-fork.log",
+    "docs/tasks/hy-memory-governance-20261018/evidence/rust-red-current-tombstone-source.sha256",
+    "docs/tasks/hy-memory-governance-20261018/evidence/rust-red-current-tombstone-source.tar.gz",
+    "docs/tasks/hy-memory-governance-20261018/evidence/rust-red-current-tombstone.exit",
+    "docs/tasks/hy-memory-governance-20261018/evidence/rust-red-current-tombstone.log",
+    "docs/tasks/hy-memory-governance-20261018/evidence/rust-red-marker-fence-source.sha256",
+    "docs/tasks/hy-memory-governance-20261018/evidence/rust-red-marker-fence-source.tar.gz",
+    "docs/tasks/hy-memory-governance-20261018/evidence/rust-red-marker-fence.exit",
+    "docs/tasks/hy-memory-governance-20261018/evidence/rust-red-marker-fence.log",
+    "docs/tasks/hy-memory-governance-20261018/evidence/rust-red-review-fixes-source.sha256",
+    "docs/tasks/hy-memory-governance-20261018/evidence/rust-red-review-fixes-source.tar.gz",
+    "docs/tasks/hy-memory-governance-20261018/evidence/rust-red-review-fixes.exit",
+    "docs/tasks/hy-memory-governance-20261018/evidence/rust-red-review-fixes.log",
+    "docs/tasks/hy-memory-governance-20261018/evidence/rust-red-source.sha256",
+    "docs/tasks/hy-memory-governance-20261018/evidence/rust-red-source.tar.gz",
+    "docs/tasks/hy-memory-governance-20261018/evidence/rust-red-structured-claims-source.sha256",
+    "docs/tasks/hy-memory-governance-20261018/evidence/rust-red-structured-claims-source.tar.gz",
+    "docs/tasks/hy-memory-governance-20261018/evidence/rust-red-structured-claims.exit",
+    "docs/tasks/hy-memory-governance-20261018/evidence/rust-red-structured-claims.log",
+    "docs/tasks/hy-memory-governance-20261018/evidence/rust-red-targeted-source.sha256",
+    "docs/tasks/hy-memory-governance-20261018/evidence/rust-red-targeted-source.tar.gz",
+    "docs/tasks/hy-memory-governance-20261018/evidence/rust-red-targeted.exit",
+    "docs/tasks/hy-memory-governance-20261018/evidence/rust-red-targeted.log",
+    "docs/tasks/hy-memory-governance-20261018/evidence/rust-red.exit",
+    "docs/tasks/hy-memory-governance-20261018/evidence/rust-red.log",
+    "docs/tasks/hy-memory-governance-20261018/evidence/scope-check.json",
+    "docs/tasks/hy-memory-governance-20261018/evidence/upstream-static.json",
+    "docs/tasks/hy-memory-governance-20261018/verify-exact.py",
+    "docs/tasks/hy-memory-governance-20261018/verify-fixtures.py",
+    "experiments/redesign/hy-memory-experiment-fixtures/build_fixtures.py",
+    "experiments/redesign/hy-memory-experiment-fixtures/diff-index.json",
+    "experiments/redesign/hy-memory-experiment-fixtures/validate_fixtures.py",
+    "experiments/redesign/hy-memory-experiment-fixtures/writer.json",
+    "experiments/redesign/hy-memory-governance-lab/.gitignore",
+    "experiments/redesign/hy-memory-governance-lab/Cargo.lock",
+    "experiments/redesign/hy-memory-governance-lab/Cargo.toml",
+    "experiments/redesign/hy-memory-governance-lab/README.md",
+    "experiments/redesign/hy-memory-governance-lab/src/bin/crash-worker.rs",
+    "experiments/redesign/hy-memory-governance-lab/src/lib.rs",
+    "experiments/redesign/hy-memory-governance-lab/tests/governance.rs"
+  ],
+  "source_sha256_after": {
+    "experiments/redesign/hy-memory-experiment-fixtures/build_fixtures.py": "3e187ca322bf51bdd0ef1f5e1b4704781cb3fe18095dba58685a5b1ea5c0ad03",
+    "experiments/redesign/hy-memory-experiment-fixtures/diff-index.json": "2e466179678318637349011f4cbf7bd633c8e51d0c8836c36f32e142c2c22ead",
+    "experiments/redesign/hy-memory-experiment-fixtures/validate_fixtures.py": "6be3b099d002440e42d0e7259cc2cbd488c6c6ab3fd365eedd43369ef99fa7c7",
+    "experiments/redesign/hy-memory-experiment-fixtures/writer.json": "05c3b5fc755ede3f2794b283558ab65b10fbd0246c5e07fdb53fdd257c49e10b",
+    "experiments/redesign/hy-memory-governance-lab/.gitignore": "306fd52e74fca6746e12acc750f232de15e71da917756a1270d74c91f5eb7368",
+    "experiments/redesign/hy-memory-governance-lab/Cargo.lock": "a44c7d0a40dce72cd228c55dfa0b202b2f0f991f58a3cc43e6dedd1cd43b7152",
+    "experiments/redesign/hy-memory-governance-lab/Cargo.toml": "4e44a2b2c0d3a86fd3d9b59e484502825f322b6785cabfdd25f961c36abfdf02",
+    "experiments/redesign/hy-memory-governance-lab/README.md": "21ba2ba5a7a86362157995e7bdaa86317b98e39badc2cea1af1de0f6870fe596",
+    "experiments/redesign/hy-memory-governance-lab/src/bin/crash-worker.rs": "d732cb87c8e37da6796864b34744cf26e322bf5c10f82d5684db6b045568ffc6",
+    "experiments/redesign/hy-memory-governance-lab/src/lib.rs": "4a3865a558ff2d3335adc4c08ffd0a2a3b9e3e5ac4d47dc7bdc721070feac435",
+    "experiments/redesign/hy-memory-governance-lab/tests/governance.rs": "c8f28c28f06ffb51f783e48ca4a5db63f079cdc68082b429e99063e93ea124be"
+  },
+  "head_after": "379b1a6d8d5a5830fb3a74924fd5c41cfb234e1c",
+  "status_after": "",
+  "source_unchanged_after": true,
+  "all_102_changed_path_blobs_equal_archive": true,
+  "raw_whitespace": {
+    "exit": 2,
+    "log": "/workspace/leaderb-evidence/b/candidate-archive-raw-whitespace.log",
+    "sha256": "691501556358563aefc5ffef90afbdd39786d8bf0a628aa1f24aabe06adbc791"
+  }
+}

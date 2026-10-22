@@ -1,0 +1,5 @@
+Traceback (most recent call last):
+  File "/workspace/Muyon/crates/muyon-core/src/evidence/run-store-tests.py", line 30, in <module>
+    value = dict(workspace['workspace']['dependencies'][name])
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ValueError: dictionary update sequence element #0 has length 1; 2 is required

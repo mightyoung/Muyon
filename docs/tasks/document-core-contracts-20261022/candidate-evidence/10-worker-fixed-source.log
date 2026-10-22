@@ -1,0 +1,23 @@
+2026-10-22T06:10:49.207670+00:00
+Linux-6.18.55-x86_64-with-glibc2.41
+Original failure 263dfe4067612ba0206afa5ba4ad77dcf2d59744:docs/tasks/document-core-contracts-20261022/independent-verification/candidate-20261022/original/core-full.stderr.log
+Raw SHA256 fdb018f602e399e92cdb6700dda4da956e6ff81cf243e7947c6e23278fd056c7
+
+$ git rev-parse HEAD
+cab23b69b2aa56f55f3b44e0fe248f026da9c08d
+exit=0
+
+$ cargo check --offline --locked --manifest-path crates/Cargo.toml -p muyon-core --bin business_worker
+[Errno 2] No such file or directory: 'cargo'
+exit=127 NOT_RUN tool unavailable; not compiler/test failure or success.
+
+$ cargo test --offline --locked --manifest-path crates/Cargo.toml -p muyon-core
+[Errno 2] No such file or directory: 'cargo'
+exit=127 NOT_RUN tool unavailable; not compiler/test failure or success.
+
+$ rustfmt --check --edition 2021 crates/muyon-core/src/bin/business_worker.rs crates/muyon-core/src/blobs.rs crates/muyon-core/src/documents/mod.rs
+[Errno 2] No such file or directory: 'rustfmt'
+exit=127 NOT_RUN tool unavailable; not compiler/test failure or success.
+
+$ git diff --check
+exit=0

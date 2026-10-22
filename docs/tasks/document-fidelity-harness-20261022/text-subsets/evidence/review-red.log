@@ -1,0 +1,85 @@
+test_ambiguous_xlsx_visibility_declarations_never_dispatch (tools.document_fidelity.tests.test_text_subsets.ReviewRegressionTests.test_ambiguous_xlsx_visibility_declarations_never_dispatch) ... 
+  test_ambiguous_xlsx_visibility_declarations_never_dispatch (tools.document_fidelity.tests.test_text_subsets.ReviewRegressionTests.test_ambiguous_xlsx_visibility_declarations_never_dispatch) (transform=<function ReviewRegressionTests.test_ambiguous_xlsx_visibility_declarations_never_dispatch.<locals>.<lambda> at 0x7f1df4cf82c0>) ... FAIL
+  test_ambiguous_xlsx_visibility_declarations_never_dispatch (tools.document_fidelity.tests.test_text_subsets.ReviewRegressionTests.test_ambiguous_xlsx_visibility_declarations_never_dispatch) (transform=<function ReviewRegressionTests.test_ambiguous_xlsx_visibility_declarations_never_dispatch.<locals>.<lambda> at 0x7f1df4ee47c0>) ... FAIL
+test_non_target_docx_text_is_always_leaf (tools.document_fidelity.tests.test_text_subsets.ReviewRegressionTests.test_non_target_docx_text_is_always_leaf) ... FAIL
+test_presentation_size_grammar_is_complete (tools.document_fidelity.tests.test_text_subsets.ReviewRegressionTests.test_presentation_size_grammar_is_complete) ... 
+  test_presentation_size_grammar_is_complete (tools.document_fidelity.tests.test_text_subsets.ReviewRegressionTests.test_presentation_size_grammar_is_complete) (transform=<function ReviewRegressionTests.test_presentation_size_grammar_is_complete.<locals>.<lambda> at 0x7f1df4ae3420>) ... FAIL
+  test_presentation_size_grammar_is_complete (tools.document_fidelity.tests.test_text_subsets.ReviewRegressionTests.test_presentation_size_grammar_is_complete) (transform=<function ReviewRegressionTests.test_presentation_size_grammar_is_complete.<locals>.<lambda> at 0x7f1df4ae32e0>) ... FAIL
+  test_presentation_size_grammar_is_complete (tools.document_fidelity.tests.test_text_subsets.ReviewRegressionTests.test_presentation_size_grammar_is_complete) (transform=<function ReviewRegressionTests.test_presentation_size_grammar_is_complete.<locals>.<lambda> at 0x7f1df4ae3240>) ... FAIL
+
+======================================================================
+FAIL: test_ambiguous_xlsx_visibility_declarations_never_dispatch (tools.document_fidelity.tests.test_text_subsets.ReviewRegressionTests.test_ambiguous_xlsx_visibility_declarations_never_dispatch) (transform=<function ReviewRegressionTests.test_ambiguous_xlsx_visibility_declarations_never_dispatch.<locals>.<lambda> at 0x7f1df4cf82c0>)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/document-fidelity/tools/document_fidelity/tests/test_text_subsets.py", line 191, in test_ambiguous_xlsx_visibility_declarations_never_dispatch
+    self.assertEqual('unsupported',runtime.preview_target(source,r)['status'])
+AssertionError: 'unsupported' != 'supported'
+- unsupported
+? --
++ supported
+
+
+======================================================================
+FAIL: test_ambiguous_xlsx_visibility_declarations_never_dispatch (tools.document_fidelity.tests.test_text_subsets.ReviewRegressionTests.test_ambiguous_xlsx_visibility_declarations_never_dispatch) (transform=<function ReviewRegressionTests.test_ambiguous_xlsx_visibility_declarations_never_dispatch.<locals>.<lambda> at 0x7f1df4ee47c0>)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/document-fidelity/tools/document_fidelity/tests/test_text_subsets.py", line 191, in test_ambiguous_xlsx_visibility_declarations_never_dispatch
+    self.assertEqual('unsupported',runtime.preview_target(source,r)['status'])
+AssertionError: 'unsupported' != 'supported'
+- unsupported
+? --
++ supported
+
+
+======================================================================
+FAIL: test_non_target_docx_text_is_always_leaf (tools.document_fidelity.tests.test_text_subsets.ReviewRegressionTests.test_non_target_docx_text_is_always_leaf)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/document-fidelity/tools/document_fidelity/tests/test_text_subsets.py", line 197, in test_non_target_docx_text_is_always_leaf
+    self.assertEqual('unsupported',runtime.preview_target(source,r)['status'])
+AssertionError: 'unsupported' != 'supported'
+- unsupported
+? --
++ supported
+
+
+======================================================================
+FAIL: test_presentation_size_grammar_is_complete (tools.document_fidelity.tests.test_text_subsets.ReviewRegressionTests.test_presentation_size_grammar_is_complete) (transform=<function ReviewRegressionTests.test_presentation_size_grammar_is_complete.<locals>.<lambda> at 0x7f1df4ae3420>)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/document-fidelity/tools/document_fidelity/tests/test_text_subsets.py", line 207, in test_presentation_size_grammar_is_complete
+    self.assertEqual('unsupported',runtime.preview_target(source,r)['status'])
+AssertionError: 'unsupported' != 'supported'
+- unsupported
+? --
++ supported
+
+
+======================================================================
+FAIL: test_presentation_size_grammar_is_complete (tools.document_fidelity.tests.test_text_subsets.ReviewRegressionTests.test_presentation_size_grammar_is_complete) (transform=<function ReviewRegressionTests.test_presentation_size_grammar_is_complete.<locals>.<lambda> at 0x7f1df4ae32e0>)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/document-fidelity/tools/document_fidelity/tests/test_text_subsets.py", line 207, in test_presentation_size_grammar_is_complete
+    self.assertEqual('unsupported',runtime.preview_target(source,r)['status'])
+AssertionError: 'unsupported' != 'supported'
+- unsupported
+? --
++ supported
+
+
+======================================================================
+FAIL: test_presentation_size_grammar_is_complete (tools.document_fidelity.tests.test_text_subsets.ReviewRegressionTests.test_presentation_size_grammar_is_complete) (transform=<function ReviewRegressionTests.test_presentation_size_grammar_is_complete.<locals>.<lambda> at 0x7f1df4ae3240>)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/document-fidelity/tools/document_fidelity/tests/test_text_subsets.py", line 207, in test_presentation_size_grammar_is_complete
+    self.assertEqual('unsupported',runtime.preview_target(source,r)['status'])
+AssertionError: 'unsupported' != 'supported'
+- unsupported
+? --
++ supported
+
+
+----------------------------------------------------------------------
+Ran 3 tests in 0.017s
+
+FAILED (failures=6)

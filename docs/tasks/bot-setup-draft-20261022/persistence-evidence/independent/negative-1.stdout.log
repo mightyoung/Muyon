@@ -1,0 +1,12 @@
+PASS independent semantic negative: known template wrong role
+PASS independent semantic negative: unknown template id
+PASS independent semantic negative: unknown template version
+PASS independent semantic negative: template role illegally locked
+PASS independent semantic negative: user role with template provenance
+PASS independent semantic negative: template role missing provenance
+PASS independent semantic negative: user role improperly unlocked
+PASS independent semantic negative: empty user name locked
+PASS independent semantic negative: decoded UTF16 name bound
+PASS independent semantic negative: decoded forbidden format character
+PASS independent semantic negative: 94 resealed payload truncations
+PASS 10 semantic cases plus 94 resealed truncations; one valid control

@@ -1,0 +1,4 @@
+FAILED: git apply --check CORE-EXPORT.patch (exit1)
+error: patch failed: crates/muyon-core/src/lib.rs:2
+error: crates/muyon-core/src/lib.rs: patch does not apply
+Cause: hand-written hunk omitted following context; corrected using a generated unified diff. Owner file not edited.

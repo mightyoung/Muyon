@@ -1,0 +1,22 @@
+   Compiling muyon-core v0.1.0 (/workspace/document-edit-durable-combination/crates/muyon-core)
+    Finished `test` profile [unoptimized] target(s) in 0.31s
+     Running tests/document_edit_gateway.rs (/workspace/document-edit-combination/crates/target/debug/deps/document_edit_gateway-9524898dbf45656f)
+
+running 1 test
+test persisted_receipt_title_must_match_frozen_reviewed_source ... FAILED
+
+failures:
+
+---- persisted_receipt_title_must_match_frozen_reviewed_source stdout ----
+
+thread 'persisted_receipt_title_must_match_frozen_reviewed_source' panicked at muyon-core/tests/document_edit_gateway.rs:796:48:
+called `Result::unwrap_err()` on an `Ok` value: DurableIntent { binding: Binding { document: DocumentRef { scope: Scope { workspace_id: "workspace", project_id: Some("project") }, document_id: "document", revision: Revision("1"), format: Unknown }, patch_digest: [144, 198, 226, 240, 66, 214, 192, 122, 68, 47, 37, 159, 9, 231, 156, 60, 20, 148, 145, 3, 47, 188, 106, 174, 65, 72, 90, 188, 28, 126, 11, 114], intent_id: "receipt-title", rollback_target: None }, state: Committed, cancel_requested: false, candidate: Some(BlobRef { digest: "0fa7c5f34eddec1d4c9bc45edf02b85baeb9a2bc18ceab5d131d52de97d7c1b1", byte_length: Revision("58") }), receipt: Some(CopyReceipt { operation: ByteIdenticalCopy, intent_id: "receipt-title", binding_digest: "d95ce2948687ac85e09f13341459925b20303219e4f64481930c23aaf86b80d5", result: DocumentMetadata { document: DocumentRef { scope: Scope { workspace_id: "workspace", project_id: Some("project") }, document_id: "document", revision: Revision("2"), format: Unknown }, title: "unreviewed-forged-title", blob: BlobRef { digest: "0fa7c5f34eddec1d4c9bc45edf02b85baeb9a2bc18ceab5d131d52de97d7c1b1", byte_length: Revision("58") } } }) }
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    persisted_receipt_title_must_match_frozen_reviewed_source
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 18 filtered out; finished in 0.02s
+
+error: test failed, to rerun pass `-p muyon-core --test document_edit_gateway`

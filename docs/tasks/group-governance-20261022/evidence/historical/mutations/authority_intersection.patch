@@ -1,0 +1,11 @@
+--- baseline-module.rs
++++ authority_intersection-module.rs
+@@ -363,7 +363,7 @@
+             || node.grant.scopes.is_empty()
+             || node.grant.permissions.is_empty()
+             || !subset(&node.grant, member_grant)
+-            || authority_layers.iter().any(|g| !subset(&node.grant, g))
++            || false
+         {
+             return Err(Error::ScopeDenied);
+         }

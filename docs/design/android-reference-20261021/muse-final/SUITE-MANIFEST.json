@@ -1,0 +1,116 @@
+{
+  "source_commit": "07fd4509fb4653a67435957c4ba021a2c142af00",
+  "build_id": "07fd4509fb4653a67435957c4ba021a2c142af00:8f4ecd44b0d5b1b2c9a1f31abc82fbfcdc32693b43aec81b722bde2292e7ab93",
+  "apk": "/private/tmp/muyon-muse-07fd4509.apk",
+  "test_apk": "/private/tmp/muyon-muse-07fd4509-androidTest.apk",
+  "device": {
+    "serial": "emulator-5556",
+    "sdk": 26,
+    "abi": "arm64-v8a",
+    "pixels": [
+      320,
+      640
+    ],
+    "density": 160
+  },
+  "runs": [
+    {
+      "log": "/private/tmp/muyon-android-refactor-20261020/docs/design/android-reference-20261021/muse-final/UI.log",
+      "log_sha256": "10e2da909aa9ba480d9516645f7f8eba8be5aab69f272a330923e977d957b820",
+      "build_id": "07fd4509fb4653a67435957c4ba021a2c142af00:8f4ecd44b0d5b1b2c9a1f31abc82fbfcdc32693b43aec81b722bde2292e7ab93",
+      "apk_sha256": "ded73c00ab079a2475e85091c86b498e0eb111412f6c59c759511a7076170ab1",
+      "test_apk_sha256": "823d8265338660c9bc91b3d41d7e17f65950b8423e83745e93b3b9534b370af4",
+      "adb_exit": 0,
+      "required": [
+        "com.mightyoung.muyon.product.agents.AgentCatalogTest#escapedInstructionsCannotCommitAnUnreadableExpandedDirectory",
+        "com.mightyoung.muyon.product.agents.AgentCatalogTest#reopenedCatalogPreservesEditsAndGroupArchiveNeverDeletesAgents",
+        "com.mightyoung.muyon.product.agents.AgentCatalogTest#invalidMembersAndCorruptDataCannotOverwritePersistedDirectory",
+        "com.mightyoung.muyon.product.ChatOriginPresentationTest#oldRequestRecoveryShowsOriginalIdentityInsideAnotherGroup",
+        "com.mightyoung.muyon.product.WorkbenchNavigationTest#agentAndGroupNavigationPreservesSeparateConversationsAndGlobalReceiptMarkers"
+      ]
+    },
+    {
+      "log": "/private/tmp/muyon-android-refactor-20261020/docs/design/android-reference-20261021/muse-final/CORE.log",
+      "log_sha256": "f01987a97855e9ecf948c921d46637f060e5679ade0b2663b8b9b81d5ceacb18",
+      "build_id": "07fd4509fb4653a67435957c4ba021a2c142af00:8f4ecd44b0d5b1b2c9a1f31abc82fbfcdc32693b43aec81b722bde2292e7ab93",
+      "apk_sha256": "ded73c00ab079a2475e85091c86b498e0eb111412f6c59c759511a7076170ab1",
+      "test_apk_sha256": "823d8265338660c9bc91b3d41d7e17f65950b8423e83745e93b3b9534b370af4",
+      "adb_exit": 0,
+      "required": [
+        "com.mightyoung.muyon.product.ContractCodecProductTest#actualKotlinToRustCodecPreservesPairsAndUsesTheSameNfcRule",
+        "com.mightyoung.muyon.product.ContractCodecProductTest#malformedUtf16AndRawLimitCannotTurnIntoAValidReviewedPlan",
+        "com.mightyoung.muyon.product.ContractVectorsProductTest#sharedVectorsRejectWithoutPlansAndOneEightFieldReceiptSurvivesServiceReopen",
+        "com.mightyoung.muyon.product.ProductChatBoundaryTest#explicitConfigurationCannotTurnMissingPriceProofIntoOutboundAuthority",
+        "com.mightyoung.muyon.product.ProductLifecycleTest#closingLeaseBeforePrepareReplyCannotReportStaleSuccessOrPublishSupplier",
+        "com.mightyoung.muyon.product.ProductLifecycleTest#backFromReviewThenRealRotationDiscardsUnconfirmedDraftWithoutWriting",
+        "com.mightyoung.muyon.product.ProductRecoveryTest#actualServiceDeathChangesEpochAndOnlyOriginalReceiptRecovers",
+        "com.mightyoung.muyon.product.ProductRecoveryTest#rapidCloseAndRebindWaitsForPriorOwnersWithoutKillingTheProcess",
+        "com.mightyoung.muyon.product.ProductRecoveryTest#closingWithAllRequestSlotsBusyStillRevokesTheLiveBinderLease",
+        "com.mightyoung.muyon.product.ProductUnknownRecoveryTest#committedWriteWithLostClientReplyRecoversOnlyOriginalReceiptInUi",
+        "com.mightyoung.muyon.product.research.ResearchProductTest#corruptStoredMemberCannotPublishSnapshotOrPaper",
+        "com.mightyoung.muyon.product.research.ResearchProductTest#projectVisibleReviewThenActualPdfHostAndDetail",
+        "com.mightyoung.muyon.product.research.ResearchProductTest#deflatedZipUsesFrozenArchiveAndSealsActualImport",
+        "com.mightyoung.muyon.product.supplier.SupplierProductTest#dismissingReviewKeepsDraftAndDoesNotWrite",
+        "com.mightyoung.muyon.product.supplier.SupplierProductTest#visibleReviewCrudUsesActualReceipts",
+        "com.mightyoung.muyon.product.supplier.SupplierProductTest#elevenRealSuppliersAreReachableThroughNextPage"
+      ]
+    },
+    {
+      "log": "/private/tmp/muyon-android-refactor-20261020/docs/design/android-reference-20261021/muse-final/PICKER-GENERATE.log",
+      "log_sha256": "566b61a2485230ac30d2f58c073eef987d6dda850268a4c72f3b78fb3b66f167",
+      "build_id": "07fd4509fb4653a67435957c4ba021a2c142af00:8f4ecd44b0d5b1b2c9a1f31abc82fbfcdc32693b43aec81b722bde2292e7ab93",
+      "apk_sha256": "ded73c00ab079a2475e85091c86b498e0eb111412f6c59c759511a7076170ab1",
+      "test_apk_sha256": "823d8265338660c9bc91b3d41d7e17f65950b8423e83745e93b3b9534b370af4",
+      "adb_exit": 0,
+      "required": [
+        "com.mightyoung.muyon.product.SystemPickerProductTest#generatePickerInputs"
+      ]
+    },
+    {
+      "log": "/private/tmp/muyon-android-refactor-20261020/docs/design/android-reference-20261021/muse-final/PICKER-PDF.log",
+      "log_sha256": "ba8f45a96e05211891e4a742256d83d8c5b4215277f2fb0ec14f3b1650769358",
+      "build_id": "07fd4509fb4653a67435957c4ba021a2c142af00:8f4ecd44b0d5b1b2c9a1f31abc82fbfcdc32693b43aec81b722bde2292e7ab93",
+      "apk_sha256": "ded73c00ab079a2475e85091c86b498e0eb111412f6c59c759511a7076170ab1",
+      "test_apk_sha256": "823d8265338660c9bc91b3d41d7e17f65950b8423e83745e93b3b9534b370af4",
+      "adb_exit": 0,
+      "required": [
+        "com.mightyoung.muyon.product.SystemPickerProductTest#pdfSystemPickerManualReviewAndPrivateAttachment"
+      ]
+    },
+    {
+      "log": "/private/tmp/muyon-android-refactor-20261020/docs/design/android-reference-20261021/muse-final/PICKER-ZIP.log",
+      "log_sha256": "516d021041643a4f4e16ecb7621c25b376d2c9fb6d8fa0aa8fe20f57fc5a3bfc",
+      "build_id": "07fd4509fb4653a67435957c4ba021a2c142af00:8f4ecd44b0d5b1b2c9a1f31abc82fbfcdc32693b43aec81b722bde2292e7ab93",
+      "apk_sha256": "ded73c00ab079a2475e85091c86b498e0eb111412f6c59c759511a7076170ab1",
+      "test_apk_sha256": "823d8265338660c9bc91b3d41d7e17f65950b8423e83745e93b3b9534b370af4",
+      "adb_exit": 0,
+      "required": [
+        "com.mightyoung.muyon.product.SystemPickerProductTest#zipSystemPickerReviewAndImport"
+      ]
+    },
+    {
+      "log": "/private/tmp/muyon-android-refactor-20261020/docs/design/android-reference-20261021/muse-final/PICKER-DIRECTORY.log",
+      "log_sha256": "9b35daa81200b6c606220a54cfb7b385357211fdae7127d0e61c2bf817ac75fa",
+      "build_id": "07fd4509fb4653a67435957c4ba021a2c142af00:8f4ecd44b0d5b1b2c9a1f31abc82fbfcdc32693b43aec81b722bde2292e7ab93",
+      "apk_sha256": "ded73c00ab079a2475e85091c86b498e0eb111412f6c59c759511a7076170ab1",
+      "test_apk_sha256": "823d8265338660c9bc91b3d41d7e17f65950b8423e83745e93b3b9534b370af4",
+      "adb_exit": 0,
+      "required": [
+        "com.mightyoung.muyon.product.SystemPickerProductTest#directorySystemPickerReviewAndImport"
+      ]
+    },
+    {
+      "log": "/private/tmp/muyon-android-refactor-20261020/docs/design/android-reference-20261021/muse-final/PICKER-PRIVATE.log",
+      "log_sha256": "507e2be1cebe8f2cf56a6b69b730ddf05dc828e71ad946cbb01e3c70891a163a",
+      "build_id": "07fd4509fb4653a67435957c4ba021a2c142af00:8f4ecd44b0d5b1b2c9a1f31abc82fbfcdc32693b43aec81b722bde2292e7ab93",
+      "apk_sha256": "ded73c00ab079a2475e85091c86b498e0eb111412f6c59c759511a7076170ab1",
+      "test_apk_sha256": "823d8265338660c9bc91b3d41d7e17f65950b8423e83745e93b3b9534b370af4",
+      "adb_exit": 0,
+      "required": [
+        "com.mightyoung.muyon.product.SystemPickerProductTest#reopenPrivatePdfAfterOriginalRemoved"
+      ]
+    }
+  ],
+  "apk_sha256": "ded73c00ab079a2475e85091c86b498e0eb111412f6c59c759511a7076170ab1",
+  "test_apk_sha256": "823d8265338660c9bc91b3d41d7e17f65950b8423e83745e93b3b9534b370af4"
+}

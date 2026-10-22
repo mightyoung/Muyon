@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+set -euo pipefail
+gradle_bin=${MUYON_UI_GRADLE:-gradle}
+if ! command -v "$gradle_bin" >/dev/null 2>&1; then
+  printf '%s\n' 'NOT_RUN: set MUYON_UI_GRADLE to the existing Gradle 8.13 executable.' >&2
+  exit 2
+fi
+exec "$gradle_bin" "$@"

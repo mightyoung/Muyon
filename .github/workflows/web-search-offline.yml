@@ -1,0 +1,32 @@
+name: Independent WebSearch offline
+on:
+  push:
+    branches: ['feat/deepseek-web-search']
+    paths:
+      - 'experiments/redesign/web-search-lab/**'
+      - '.github/workflows/web-search-offline.yml'
+permissions:
+  contents: read
+concurrency:
+  group: web-search-offline-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  registered-agent-fixtures:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with: {persist-credentials: false}
+      - name: Build-only catalog and exact socket-free search targets
+        shell: bash
+        run: |
+          set -euo pipefail
+          rustup toolchain install 1.99.0 --profile minimal
+          rustup default 1.99.0
+          export CARGO_TARGET_DIR="$RUNNER_TEMP/web-search-target"
+          # Compile dependency metadata; never execute inherited aggregate/I04 targets.
+          cargo build --locked --manifest-path experiments/redesign/plugin-contract-lab/core/Cargo.toml --bin muyon-plugin-contract-lab
+          export MUYON_PLUGIN_CONTRACT_BIN="$CARGO_TARGET_DIR/debug/muyon-plugin-contract-lab"
+          # Exact new integration targets: no sockets, real accounts or secrets.
+          cargo test --locked --manifest-path experiments/redesign/web-search-lab/core/Cargo.toml --test contract --test agent_search -- --test-threads=1
+          git diff --exit-code

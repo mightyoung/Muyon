@@ -94,7 +94,14 @@ fun main() {
         catch (error: Throwable) { failed++; println("FAIL $name: ${error.message}") }
     }
     check(failed == 0) { "$failed/${checks.size} state checks failed" }
+    runPendingChatActionChecks()
+    runChatReadChecks()
+    runFrontendChatChecks()
     runLocalUiChecks()
+    runConversationCandidateChecks()
     runDiagnosticChecks()
+    runAgentServiceChecks()
+    runAgentServiceWireChecks()
+    runAgentLivenessRegistryChecks()
     println("${checks.size}/${checks.size} pure JVM state checks passed; Compose/Android runtime NOT_RUN")
 }

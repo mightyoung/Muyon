@@ -1,0 +1,52 @@
+PDFium download failed (ClientException with SocketException: Connection refused (OS Error: Connection refused, errno = 111), address = github.com, port = 56286, uri=https://github.com/bblanchon/pdfium-binaries/releases/download/chromium%2F7811/pdfium-linux-x64.tgz); retrying in 1s.
+
+PDFium download failed (ClientException with SocketException: Connection refused (OS Error: Connection refused, errno = 111), address = github.com, port = 40330, uri=https://github.com/bblanchon/pdfium-binaries/releases/download/chromium%2F7811/pdfium-linux-x64.tgz); retrying in 2s.
+
+PDFium download failed (ClientException with SocketException: Connection refused (OS Error: Connection refused, errno = 111), address = github.com, port = 37678, uri=https://github.com/bblanchon/pdfium-binaries/releases/download/chromium%2F7811/pdfium-linux-x64.tgz); retrying in 4s.
+
+Unhandled exception:
+ClientException with SocketException: Connection refused (OS Error: Connection refused, errno = 111), address = github.com, port = 47882, uri=https://github.com/bblanchon/pdfium-binaries/releases/download/chromium%2F7811/pdfium-linux-x64.tgz
+#0      IOClient.send (package:http/src/io_client.dart:227:7)
+<asynchronous suspension>
+#1      BaseClient._sendUnstreamed (package:http/src/base_client.dart:93:32)
+<asynchronous suspension>
+#2      getWithRetries (file:///workspace/toolchains/pub-bootstrap/hosted/pub.dev/pdfium_dart-0.3.1/lib/src/proxy_http_client.dart:72:24)
+<asynchronous suspension>
+#3      _downloadPdfium (file:///workspace/toolchains/pub-bootstrap/hosted/pub.dev/pdfium_dart-0.3.1/hook/build.dart:53:20)
+<asynchronous suspension>
+#4      main.<anonymous closure> (file:///workspace/toolchains/pub-bootstrap/hosted/pub.dev/pdfium_dart-0.3.1/hook/build.dart:23:5)
+<asynchronous suspension>
+#5      build (package:hooks/src/api/build_and_link.dart:250:5)
+<asynchronous suspension>
+#6      main (file:///workspace/toolchains/pub-bootstrap/hosted/pub.dev/pdfium_dart-0.3.1/hook/build.dart:13:3)
+<asynchronous suspension>
+
+  Building assets for package:pdfium_dart failed.
+  build.dart returned with exit code: 255.
+  To reproduce run:
+  (cd /workspace/toolchains/pub-bootstrap/hosted/pub.dev/pdfium_dart-0.3.1/; /workspace/toolchains/flutter-3.47.5/bin/cache/dart-sdk/bin/dart --packages=/workspace/leaderb-sqlite/.dart_tool/package_config.json /workspace/leaderb-sqlite/.dart_tool/hooks_runner/pdfium_dart/6b4ebf10e7/hook.dill --config=/workspace/leaderb-sqlite/.dart_tool/hooks_runner/pdfium_dart/6b4ebf10e7/input.json )
+  stderr:
+  PDFium download failed (ClientException with SocketException: Connection refused (OS Error: Connection refused, errno = 111), address = github.com, port = 56286, uri=https://github.com/bblanchon/pdfium-binaries/releases/download/chromium%2F7811/pdfium-linux-x64.tgz); retrying in 1s.
+PDFium download failed (ClientException with SocketException: Connection refused (OS Error: Connection refused, errno = 111), address = github.com, port = 40330, uri=https://github.com/bblanchon/pdfium-binaries/releases/download/chromium%2F7811/pdfium-linux-x64.tgz); retrying in 2s.
+PDFium download failed (ClientException with SocketException: Connection refused (OS Error: Connection refused, errno = 111), address = github.com, port = 37678, uri=https://github.com/bblanchon/pdfium-binaries/releases/download/chromium%2F7811/pdfium-linux-x64.tgz); retrying in 4s.
+Unhandled exception:
+ClientException with SocketException: Connection refused (OS Error: Connection refused, errno = 111), address = github.com, port = 47882, uri=https://github.com/bblanchon/pdfium-binaries/releases/download/chromium%2F7811/pdfium-linux-x64.tgz
+#0      IOClient.send (package:http/src/io_client.dart:227:7)
+<asynchronous suspension>
+#1      BaseClient._sendUnstreamed (package:http/src/base_client.dart:93:32)
+<asynchronous suspension>
+#2      getWithRetries (file:///workspace/toolchains/pub-bootstrap/hosted/pub.dev/pdfium_dart-0.3.1/lib/src/proxy_http_client.dart:72:24)
+<asynchronous suspension>
+#3      _downloadPdfium (file:///workspace/toolchains/pub-bootstrap/hosted/pub.dev/pdfium_dart-0.3.1/hook/build.dart:53:20)
+<asynchronous suspension>
+#4      main.<anonymous closure> (file:///workspace/toolchains/pub-bootstrap/hosted/pub.dev/pdfium_dart-0.3.1/hook/build.dart:23:5)
+<asynchronous suspension>
+#5      build (package:hooks/src/api/build_and_link.dart:250:5)
+<asynchronous suspension>
+#6      main (file:///workspace/toolchains/pub-bootstrap/hosted/pub.dev/pdfium_dart-0.3.1/hook/build.dart:13:3)
+<asynchronous suspension>
+
+  stdout:
+
+
+Building native assets failed. See the logs for more details.

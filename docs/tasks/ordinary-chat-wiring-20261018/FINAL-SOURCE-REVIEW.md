@@ -1,0 +1,31 @@
+# Final independent source and wiring review
+
+Reviewed baseline `2e3ecb8d231998ba9e097b9c65ac81e32060880d` through immutable `69668bdf`, then the four-file final delta at immutable `3750334c`. This is source inspection only. No test, build, generation, network, emulator, credential operation or historical state reopen was performed by this reviewer. Only this report was written.
+
+## Ruling
+
+No concrete source blocker remains for the explicitly fresh-session/new-schema, synthetic no-network acceptance path at `3750334c`. The source supports proceeding with the separately reviewed dedicated lab-branch workflow and named offline tests. This ruling does not remove HOLDs, approve a merge/deployment, permit real provider traffic or prove Android runtime success. The earlier SOURCE-REVIEW.md findings and SOURCE-REPAIR-REVIEW.md repair limits remain traceable.
+
+## Checked interfaces and execution path
+
+- Committed generated Kotlin contains submitOrdinaryChat and all four new owner callbacks with matching Rust bridge/Kotlin forwarding signatures and byte-array/capability types. ChatAuthority, CredentialCapability and ChatResponse record fields/order agree with their Rust records. ServiceHostBindings is the concrete Kotlin callback implementation and implements the new abstract generated methods. Rust callback defaults deny and preserve existing native callback implementations. Source inspection alone is not an independent reproduction/hash or ABI execution check; dedicated CI still compares genuinely regenerated output and exact-source native artifacts.
+- ServiceAdmissionAuthority.State retains the seven-field primary constructor and now has an explicit four-argument secondary constructor whose last argument is budgetProof. Existing named payloadReview plus trailing budget-proof lambda call sites therefore keep the intended binding. Fixture seven-argument calls and snapshot copies select the new primary constructor without reinterpreting the trailing lambda.
+- Compose captures the displayed conversation and draft through frontendSubmit, AgentChatReadSession submits the explicit ordinary intent through bounded Binder/private Service and generated controller, and the existing Service worker invokes the same core Agent loop. No second driver, UI-granted supplier permission or separate authority was found. The decoder accepts provider_receipt and completed ordinary answer without a supplier projection.
+- Root inventory now recognizes ordinary-agent-v1.db and ordinary-send-v1.db, matching the dedicated persistence names used by the new ports/provider. This resolves the prior fresh-run inventory failure without executing an old task database or adding replay. Earlier failure logs remain retained.
+- The same durable owner pins context and generation before commit, verifies exact committed context/payload/capability at exchange, records attempted handoff uniquely before the fake lambda, and preserves consumed quota. The new OrdinaryChatOwnerContractTest directly constructs that concrete owner with a unique new v2 file and tests missing pin, immutable context, task/attempt/input_ref/conversation mutation, payload/capability drift, duplicate attempt and generation rotation. It contains no network, subprocess, historical root or old database reopen.
+
+## Final Compose and packaging delta
+
+At `3750334c`, the ordinary chat result heading no longer calls the operation a supplier read. FrontendChatPolicy and the test agree on execution failure label `执行失败`. The test hides the keyboard and clears focus after each send using the existing Activity/IME technique, then waits for the existing service status node, observes the fake answer in the same conversation, checks separate Service PID/UID and attempt count, recreates Activity, and sends a second explicit request to observe durable quota exhaustion. The referenced conversation, draft, Send, status and lazy-list tags exist in the normal Compose path; no special test-only send driver is inserted. API26 layout/process behavior still requires the instrumentation result.
+
+Packaging metadata now reports ordinary text synthetic composition only when --ordinary-chat is selected. Dedicated instrumentation explicitly selects OrdinaryChatServiceLoopTest and OrdinaryChatOwnerContractTest and requires two successful tests. Older instrumentation is compiled but not selected. No new test/runner entry was added to the final four-file delta.
+
+Correction to an intermediate reviewer message: that message compared the working-tree updated status label with the immutable `69668bdf` test and incorrectly reported a mismatch at that SHA. Immutable `69668bdf` had `读取失败` in both policy and test. Immutable `3750334c` changes both to `执行失败`; there is no remaining mismatch. This correction does not retract either prior substantive source finding or their repairs.
+
+## Evidence and remaining limits
+
+The retained NATIVE-SIX-PASS.log records six native cases passing; the parent identifies that execution source as `61e25a59`. BINDING-BUILD-PASS.log records successful bridge build. Those are inspected existing evidence, not tests rerun by this reviewer, and they do not by themselves establish final Android runtime success. Dedicated CI must reproduce the binding, build/package exact-source native inputs and complete the two named classes before claiming the Compose-to-Service-to-Agent-to-provider-response loop actually passed.
+
+The earlier v2-journal initializer limitation remains: this is not a credential-scrubbing migration claim for existing records. Process death/restart, all authority drift permutations, persistence failures, seven physical-device items and real foreign constructor/destructor exceptions must not be inferred from these specific tests. Preserve failed attempts and NOT_RUN distinctions.
+
+Production transport remains unavailable, and real model ID, currency, fee ceiling, price/usage proof and controlled real credential provisioning remain pending outside this offline authorization. No real DeepSeek success is claimed. No I04 path/implicit suite, old 403 download, PR90/Dart8 change, HOLD removal, merge, force push, deployment or paid call was performed. Reviewer writer stopped after this report.

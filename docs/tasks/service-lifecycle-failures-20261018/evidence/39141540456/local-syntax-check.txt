@@ -1,0 +1,3 @@
+Executable CI source: c1f57af047671ec3c3f2b2d73d20ac6ece4bcc32
+Local Python ast.parse(lifecycle_package.py) PASS after eighth-variant change; no import/helper main executed.
+Local Rust/Kotlin compilation NOT_RUN (cargo/kotlinc unavailable); CI required.

@@ -1,0 +1,5 @@
+0ab2c4f667681b9aacb017f8cd2eea6f576cf78e	refs/heads/develop
+4b609602f76996ec69e9f51da8bc4261d6a2d94a	refs/heads/lab/service-admission-bindings-20261018
+d28e8d3ed08d2185198284794dd116e3d6eb3290	refs/heads/lab/service-durable-owner-20261018
+cc7c8d14d30e3d3c4c7c6cb2bf2059a99e46e003	refs/heads/main
+060e46f1359915e267f849f3807ec1999b29dd8d	refs/heads/research/memory-isolated-candidate-20261018

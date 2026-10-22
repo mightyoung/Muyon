@@ -31,12 +31,12 @@ cargo test --offline --locked --no-fail-fast --manifest-path "$manifest" 2>&1 | 
 command_statuses=("${PIPESTATUS[@]}")
 set -e
 if (( command_statuses[1] != 0 )); then exit "${command_statuses[1]}"; fi
-python3 -B "$checks/full.py" rust --name "$component" --log "$EVIDENCE_DIR/behavior.log" --status "${command_statuses[0]}" --output "$EVIDENCE_DIR/behavior-verdict.json"
+python3 -B "$checks/full.py" rust --contract combined --name "$component" --log "$EVIDENCE_DIR/behavior.log" --status "${command_statuses[0]}" --output "$EVIDENCE_DIR/behavior-verdict.json"
 if (( command_statuses[0] != 0 )); then exit "${command_statuses[0]}"; fi
 if [[ "$component" != core ]]; then exit 0; fi
 
-# Existing core88 is counted separately from six new native cases. These are
-# independent physical process44 and harness13 gates, not additional Rust cases.
+# Core115 preserves legacy90/native6/HTTP11 plus eight durable HTTP cases. The following
+# physical process44 and harness13 gates are separate obligations, not Rust cases.
 for suite in test_harness test_wire_harness process wire_process; do
   arguments=()
   if [[ "$suite" == process || "$suite" == wire_process ]]; then
@@ -59,3 +59,6 @@ set -e
 if (( command_statuses[1] != 0 )); then exit "${command_statuses[1]}"; fi
 python3 -B "$checks/full.py" mutants --name legacy17 --log "$EVIDENCE_DIR/mutations/summary.json" --status "${command_statuses[0]}" --output "$EVIDENCE_DIR/mutations-verdict.json"
 if (( command_statuses[0] != 0 )); then exit "${command_statuses[0]}"; fi
+
+# Precise target/source-line semantics supplement every historical broad Rust inverse.
+python3 -B "$checks/legacy_precise.py" --source-root "$PWD" --evidence-dir "$EVIDENCE_DIR/legacy-precise" --work-dir "$EVIDENCE_DIR/legacy-precise-work"

@@ -1,0 +1,306 @@
+warning: methods `historical_grant` and `document_history_access_in_transaction` are never used
+   --> muyon-core/src/documents/storage.rs:117:8
+    |
+ 88 | impl BusinessStore {
+    | ------------------ methods in this implementation
+...
+117 |     fn historical_grant(&self, current: &DocumentAccess, historical: &DocumentRef, required: &[DocumentOperation]) -> Result<()> {
+    |        ^^^^^^^^^^^^^^^^
+...
+162 |     pub(crate) fn document_history_access_in_transaction(&self, tx: &Transaction<'_>, current: &DocumentAccess, historical: &DocumentRef,...
+    |                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: `muyon-core` (lib) generated 1 warning
+    Finished `test` profile [unoptimized] target(s) in 0.04s
+     Running unittests src/lib.rs (/tmp/muyon-combination-target/debug/deps/muyon_core-570c1dcad7530a3a)
+
+running 42 tests
+test artifacts::tests::exact_scope_and_write_permission_are_required ... ok
+test artifacts::tests::failed_publication_rolls_back_artifact_and_document_heads ... ok
+test artifacts::tests::human_revision_is_atomic_and_generated_cannot_overwrite_it ... ok
+test artifacts::tests::invalid_sources_schema_and_oversized_rows_fail_closed ... ok
+test artifacts::tests::restart_restores_exact_snapshot_and_source_advance_fails_closed ... ok
+test artifacts::tests::revocation_deletion_wrong_project_and_missing_source_deny_history ... ok
+test blobs::tests::corrupt_existing_object_and_dangling_symlink_are_never_replaced ... ok
+test blobs::tests::deleting_rejects_new_read_or_same_digest_upload ... ok
+test blobs::tests::failed_ledger_after_solidification_keeps_staging_and_object_independent ... ok
+test blobs::tests::file_and_upload_logical_length_quotas_precede_hashing_and_writing ... ok
+test blobs::tests::gc_and_publish_barrier_preserves_either_upload_pin_or_reference ... ok
+test blobs::tests::gc_and_reader_barrier_covers_reader_after_upload_pin_release ... ok
+test blobs::tests::kill_fixture ... ok
+test blobs::tests::partial_publication_copy_is_not_reused_and_unknown_uploads_are_not_cleaned ... ok
+test blobs::tests::pending_unknown_never_expire_and_lookup_does_not_recover ... ok
+test blobs::tests::pinned_state_alone_does_not_replace_a_durable_upload_pin ... ok
+test blobs::tests::publication_binds_expected_bytes_project_revision_and_real_transaction ... ok
+test blobs::tests::real_paper_effect_receipt_and_blob_reference_survive_or_roll_back_together ... ok
+test blobs::tests::real_sigkill_and_reopen_at_twelve_cross_media_windows ... ok
+test blobs::tests::rename_then_failed_pin_commit_can_retry_existing_target_without_overwrite ... ok
+test document_edit::engine_protocol::tests::expired_host_preparation_is_rejected_without_sleep_or_clock_override_api ... ok
+test documents::history_tests::advancing_parent_head_does_not_reuse_old_history_policy ... ok
+test documents::history_tests::canonical_history_corruption_and_missing_revision_are_not_substituted ... ok
+test documents::history_tests::historical_and_parent_revocation_expiry_generation_and_project_are_current ... ok
+test documents::history_tests::historical_identity_scope_schema_and_read_only_policy_fail_closed ... ok
+test documents::history_tests::history_denies_without_explicit_target_policy_and_then_reads_exact_snapshot ... ok
+test documents::history_tests::old_policy_is_not_inherited_by_a_new_parent_grant_generation ... ok
+test documents::history_tests::text_label_roundtrips_without_default_utf8_or_reader_capability ... ok
+test documents::history_tests::wrong_history_schema_is_rejected_without_changing_document_store ... ok
+test documents::storage_tests::clone_and_late_receipt_failure_roll_back_together ... ok
+test documents::storage_tests::clone_late_metadata_failure_and_revision_overflow_leave_original_intact ... ok
+test documents::storage_tests::clone_reference_requires_same_project_ready_source_and_unique_reference ... ok
+test documents::storage_tests::clone_rejects_changed_source_stale_base_and_foreign_transaction ... ok
+test documents::storage_tests::clone_verifies_real_source_file_hash_and_missing_file ... ok
+test documents::storage_tests::copy_clone_commits_same_bytes_and_revision_without_upload_or_staging ... ok
+test documents::storage_tests::tail_grant_rechecks_revocation_expiry_generation_epoch_and_project ... ok
+test documents::storage_tests::tail_grant_rejects_foreign_transaction_and_mismatched_document_binding ... ok
+test documents::storage_tests::tail_grant_survives_own_cas_without_authorizing_old_revision_reads ... ok
+test research::resource_tests::real_opaque_uploads_are_not_aggregated_when_sealing_or_importing ... ok
+test review_lifecycle::tests::committed_claims_are_preserved_and_partial_committed_schema_is_refused ... ok
+test review_lifecycle::tests::empty_file_from_interrupted_creation_initializes_without_replacement ... ok
+test review_lifecycle::tests::uncommitted_ddl_reopens_and_initializes_the_original_database ... ok
+
+test result: ok. 42 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.30s
+
+     Running unittests src/bin/business_worker.rs (/tmp/muyon-combination-target/debug/deps/business_worker-6dad93ec6717d982)
+
+running 18 tests
+test blobs::tests::corrupt_existing_object_and_dangling_symlink_are_never_replaced ... ok
+test blobs::tests::deleting_rejects_new_read_or_same_digest_upload ... ok
+test blobs::tests::failed_ledger_after_solidification_keeps_staging_and_object_independent ... ok
+test blobs::tests::file_and_upload_logical_length_quotas_precede_hashing_and_writing ... ok
+test blobs::tests::gc_and_publish_barrier_preserves_either_upload_pin_or_reference ... ok
+test blobs::tests::gc_and_reader_barrier_covers_reader_after_upload_pin_release ... ok
+test blobs::tests::kill_fixture ... ok
+test blobs::tests::partial_publication_copy_is_not_reused_and_unknown_uploads_are_not_cleaned ... ok
+test blobs::tests::pending_unknown_never_expire_and_lookup_does_not_recover ... ok
+test blobs::tests::pinned_state_alone_does_not_replace_a_durable_upload_pin ... ok
+test blobs::tests::publication_binds_expected_bytes_project_revision_and_real_transaction ... ok
+test blobs::tests::real_paper_effect_receipt_and_blob_reference_survive_or_roll_back_together ... ok
+test blobs::tests::real_sigkill_and_reopen_at_twelve_cross_media_windows ... ok
+test blobs::tests::rename_then_failed_pin_commit_can_retry_existing_target_without_overwrite ... ok
+test research::resource_tests::real_opaque_uploads_are_not_aggregated_when_sealing_or_importing ... ok
+test review_lifecycle::tests::committed_claims_are_preserved_and_partial_committed_schema_is_refused ... ok
+test review_lifecycle::tests::empty_file_from_interrupted_creation_initializes_without_replacement ... ok
+test review_lifecycle::tests::uncommitted_ddl_reopens_and_initializes_the_original_database ... ok
+
+test result: ok. 18 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.17s
+
+     Running tests/agent_child_tools.rs (/tmp/muyon-combination-target/debug/deps/agent_child_tools-39a559c546ad44c0)
+
+running 3 tests
+test child_tool_subset_is_priced_and_enforced_on_the_actual_model_response ... ok
+test confirmation_preview_contains_the_exact_prior_history_and_wire_fields ... ok
+test preprepared_plan_cannot_bypass_a_later_unknown_request ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/agent_owner.rs (/tmp/muyon-combination-target/debug/deps/agent_owner-4af23bbaba27c52b)
+
+running 11 tests
+test cancel_before_attempt_releases_only_held_identity_and_is_not_replayable ... ok
+test cancelled_claim_with_empty_response_never_refunds_attempt_count_after_restart ... ok
+test complete_chat_usage_settles_once_and_restores_bounded_conversation_history ... ok
+test config_or_credential_changes_deny_dispatch_and_suppress_revoked_disclosure ... ok
+test cumulative_budget_survives_reconfiguration_and_unknown_is_not_refunded ... ok
+test fixed_transport_diagnostic_survives_reopen_without_settlement_or_raw_text ... ok
+test fresh_product_settings_and_blocked_chat_plan_do_not_inherit_canary_authority ... ok
+test malformed_or_over_bound_usage_keeps_unknown_hold_without_answer ... ok
+test process_death_after_reservation_or_claim_keeps_original_hold_without_replay ... ok
+test reserve_claim_exactly_once_and_unknown_never_resends_after_reopen ... ok
+test validated_search_sources_and_empty_result_follow_existing_settlement_contract ... ok
+
+test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+     Running tests/agent_product.rs (/tmp/muyon-combination-target/debug/deps/agent_product-2de5c16094e624b7)
+
+running 6 tests
+test missing_live_owners_are_explicitly_unavailable_without_synthetic_fallback ... ok
+test newly_added_paper_is_read_from_selected_project_without_raw_json_or_blob_path ... ok
+test old_epoch_read_scope_cannot_be_reused_after_service_restart ... ok
+test response_requires_full_terminal_answer_and_usage_not_http_success ... ok
+test suppliers_are_current_database_reads_and_deleted_records_are_not_context ... ok
+test tools_reject_writes_scope_injection_duplicate_keys_and_unbounded_pages ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+     Running tests/agent_tools.rs (/tmp/muyon-combination-target/debug/deps/agent_tools-711a0996d9dc9aba)
+
+running 7 tests
+test cancellation_restart_and_unknown_never_resume_or_approve_tool_disclosure ... ok
+test cancelled_or_changed_suggestion_is_revalidated_before_any_business_commit ... ok
+test disclosure_is_not_inferred_from_budget_or_copied_to_new_scope_or_generation ... ok
+test malformed_function_calls_remain_unknown_and_have_no_business_effect ... ok
+test production_unbound_proof_never_auto_sends_approved_tool_followup ... ok
+test read_call_requires_exact_visible_disclosure_then_new_followup_identity_and_budget ... ok
+test suggestion_only_prepares_then_requires_original_committed_receipt_and_disclosure ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.08s
+
+     Running tests/agent_workflow.rs (/tmp/muyon-combination-target/debug/deps/agent_workflow-c926099f5fa732bc)
+
+running 16 tests
+test actual_owner_settlement_completes_remote_child_without_accepted_answer_shortcut ... ok
+test attempted_unknown_retains_owner_hold_and_late_cancelled_response_is_not_published ... ok
+test cancellation_after_settlement_preserves_answers_and_releases_active_child_slots ... ok
+test disabled_skill_blocks_existing_queued_work_and_invalid_arguments_do_not_create_children ... ok
+test disabling_a_skill_permanently_revokes_its_prepared_remote_plan ... ok
+test large_real_local_results_keep_complete_storage_but_project_bounded_honest_previews ... ok
+test local_child_reads_actual_supplier_and_emits_only_host_activity ... ok
+test paper_skill_reads_selected_project_and_skill_settings_do_not_leak_between_projects ... ok
+test prepared_child_and_normal_chat_are_rechecked_after_another_child_becomes_unknown ... ok
+test real_owner_blocked_plan_binds_unique_child_and_cancellation_is_not_fake_completion ... ok
+test real_owner_followup_chain_tracks_leaf_unknown_and_cancels_every_known_request ... ok
+test recovery_is_read_only_and_never_replays_and_owner_is_exclusive ... ok
+test remote_tool_allowlist_is_compiled_skill_metadata_and_not_instructions_in_task ... ok
+test scope_forgery_unknown_actions_and_fields_are_rejected ... ok
+test skill_toggle_digest_and_child_budgets_are_real ... ok
+test unproven_tool_followup_is_blocked_not_confirmable_and_polling_keeps_original_budget ... ok
+
+test result: ok. 16 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.31s
+
+     Running tests/archive.rs (/tmp/muyon-combination-target/debug/deps/archive-168f3768c277fe33)
+
+running 13 tests
+test accepts_unsigned_descriptor ... ok
+test actual_archive409_encoder_round_trip_fixture ... ok
+test all_truncations_fail_without_panicking ... ok
+test contract_entries_bind_exact_snapshot_digest_and_length ... ok
+test descriptor_and_decoded_content_are_independent_checks ... ok
+test directories_validated_but_not_exposed ... ok
+test overlap_guard ... ok
+test refuses_overlapping_ranges_and_unknown_extra_fields ... ok
+test rejects_offsets_local_conflicts_flags_zip64_and_quotas ... ok
+test rejects_path_aliases_links_and_special_files ... ok
+test stored_deflated_and_signed_descriptor_metadata ... ok
+test symlink_guard ... ok
+test traversal_guard ... ok
+
+test result: ok. 13 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/blobs.rs (/tmp/muyon-combination-target/debug/deps/blobs-f8d0be43409909b3)
+
+running 8 tests
+test archive_upload_uses_actual_archive409_metadata_reader ... ok
+test controlled_paths_refuse_symlinks_and_preserve_outside_files ... ok
+test durable_upload_and_repeatable_lease_reads ... ok
+test equal_content_reuses_verified_object_but_retains_independent_upload_pins ... ok
+test input_is_opaque_and_chunks_and_kinds_are_bounded ... ok
+test lookup_is_read_only_and_restart_reconciliation_is_explicit ... ok
+test persistent_reader_pin_outlives_upload_pin_until_explicit_close ... ok
+test private_snapshot_survives_source_removal_and_does_not_overwrite_corruption ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
+
+     Running tests/bot_drafts.rs (/tmp/muyon-combination-target/debug/deps/bot_drafts-7daf0d49bf8ef876)
+
+running 15 tests
+test altered_schema_workspace_and_signed_long_overflow_refuse ... FAILED
+test canonical_envelope_tamper_limit_revision_and_trailing_data_refuse ... FAILED
+test draft_capacity_preserves_existing_records_and_receipts ... FAILED
+test exclusive_owner_and_competing_editors_do_not_lose_updates ... FAILED
+test failed_receipt_insert_rolls_back_archive_revision_and_attempt ... FAILED
+test live_project_revocation_is_checked_even_for_original_receipts ... FAILED
+test original_receipt_is_atomic_idempotent_and_survives_callback_loss ... FAILED
+test original_unknown_and_reserved_ledgers_are_untouched ... FAILED
+test partial_schema_never_resets_or_imports ... ok
+test project_query_storage_fault_is_unknown_not_scope_denial ... FAILED
+test receipt_capacity_does_not_evict_originals ... FAILED
+test restart_and_null_project_are_real_registry_facts ... FAILED
+test stored_archive_and_receipt_tamper_refuse ... FAILED
+test structurally_invalid_rehashed_archive_cannot_add_fields ... FAILED
+test wrong_scope_binding_generation_lifecycle_and_missing_attempt_refuse ... FAILED
+
+failures:
+
+---- altered_schema_workspace_and_signed_long_overflow_refuse stdout ----
+
+thread 'altered_schema_workspace_and_signed_long_overflow_refuse' (2785) panicked at muyon-core/tests/bot_drafts.rs:154:77:
+called `Result::unwrap()` on an `Err` value: "local_draft_corrupt"
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+---- canonical_envelope_tamper_limit_revision_and_trailing_data_refuse stdout ----
+
+thread 'canonical_envelope_tamper_limit_revision_and_trailing_data_refuse' (2786) panicked at muyon-core/tests/bot_drafts.rs:66:77:
+called `Result::unwrap()` on an `Err` value: "local_draft_corrupt"
+
+---- draft_capacity_preserves_existing_records_and_receipts stdout ----
+
+thread 'draft_capacity_preserves_existing_records_and_receipts' (2787) panicked at muyon-core/tests/bot_drafts.rs:137:72:
+called `Result::unwrap()` on an `Err` value: "local_draft_corrupt"
+
+---- exclusive_owner_and_competing_editors_do_not_lose_updates stdout ----
+
+thread 'exclusive_owner_and_competing_editors_do_not_lose_updates' (2788) panicked at muyon-core/tests/bot_drafts.rs:126:39:
+called `Result::unwrap()` on an `Err` value: "local_draft_corrupt"
+
+---- failed_receipt_insert_rolls_back_archive_revision_and_attempt stdout ----
+
+thread 'failed_receipt_insert_rolls_back_archive_revision_and_attempt' (2789) panicked at muyon-core/tests/bot_drafts.rs:76:77:
+called `Result::unwrap()` on an `Err` value: "local_draft_corrupt"
+
+---- live_project_revocation_is_checked_even_for_original_receipts stdout ----
+
+thread 'live_project_revocation_is_checked_even_for_original_receipts' (2790) panicked at muyon-core/tests/bot_drafts.rs:105:35:
+called `Result::unwrap()` on an `Err` value: "local_draft_corrupt"
+
+---- original_receipt_is_atomic_idempotent_and_survives_callback_loss stdout ----
+
+thread 'original_receipt_is_atomic_idempotent_and_survives_callback_loss' (2791) panicked at muyon-core/tests/bot_drafts.rs:41:68:
+called `Result::unwrap()` on an `Err` value: "local_draft_corrupt"
+
+---- original_unknown_and_reserved_ledgers_are_untouched stdout ----
+
+thread 'original_unknown_and_reserved_ledgers_are_untouched' (2792) panicked at muyon-core/tests/bot_drafts.rs:119:39:
+called `Result::unwrap()` on an `Err` value: "local_draft_corrupt"
+
+---- project_query_storage_fault_is_unknown_not_scope_denial stdout ----
+
+thread 'project_query_storage_fault_is_unknown_not_scope_denial' (2794) panicked at muyon-core/tests/bot_drafts.rs:169:62:
+called `Result::unwrap()` on an `Err` value: "local_draft_corrupt"
+
+---- receipt_capacity_does_not_evict_originals stdout ----
+
+thread 'receipt_capacity_does_not_evict_originals' (2795) panicked at muyon-core/tests/bot_drafts.rs:145:77:
+called `Result::unwrap()` on an `Err` value: "local_draft_corrupt"
+
+---- restart_and_null_project_are_real_registry_facts stdout ----
+
+thread 'restart_and_null_project_are_real_registry_facts' (2796) panicked at muyon-core/tests/bot_drafts.rs:33:68:
+called `Result::unwrap()` on an `Err` value: "local_draft_corrupt"
+
+---- stored_archive_and_receipt_tamper_refuse stdout ----
+
+thread 'stored_archive_and_receipt_tamper_refuse' (2797) panicked at muyon-core/tests/bot_drafts.rs:91:77:
+called `Result::unwrap()` on an `Err` value: "local_draft_corrupt"
+
+---- structurally_invalid_rehashed_archive_cannot_add_fields stdout ----
+
+thread 'structurally_invalid_rehashed_archive_cannot_add_fields' (2798) panicked at muyon-core/tests/bot_drafts.rs:163:77:
+called `Result::unwrap()` on an `Err` value: "local_draft_corrupt"
+
+---- wrong_scope_binding_generation_lifecycle_and_missing_attempt_refuse stdout ----
+
+thread 'wrong_scope_binding_generation_lifecycle_and_missing_attempt_refuse' (2799) panicked at muyon-core/tests/bot_drafts.rs:56:68:
+called `Result::unwrap()` on an `Err` value: "local_draft_corrupt"
+
+
+failures:
+    altered_schema_workspace_and_signed_long_overflow_refuse
+    canonical_envelope_tamper_limit_revision_and_trailing_data_refuse
+    draft_capacity_preserves_existing_records_and_receipts
+    exclusive_owner_and_competing_editors_do_not_lose_updates
+    failed_receipt_insert_rolls_back_archive_revision_and_attempt
+    live_project_revocation_is_checked_even_for_original_receipts
+    original_receipt_is_atomic_idempotent_and_survives_callback_loss
+    original_unknown_and_reserved_ledgers_are_untouched
+    project_query_storage_fault_is_unknown_not_scope_denial
+    receipt_capacity_does_not_evict_originals
+    restart_and_null_project_are_real_registry_facts
+    stored_archive_and_receipt_tamper_refuse
+    structurally_invalid_rehashed_archive_cannot_add_fields
+    wrong_scope_binding_generation_lifecycle_and_missing_attempt_refuse
+
+test result: FAILED. 1 passed; 14 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
+
+error: test failed, to rerun pass `-p muyon-core --test bot_drafts`

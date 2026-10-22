@@ -1,0 +1,52 @@
+test_docx_split_runs_comment_bookmark_header (tools.document_fidelity.tests.test_engine_evaluation.ComplexFixtureTests.test_docx_split_runs_comment_bookmark_header) ... FAIL
+test_two_deterministic_packages_and_operation_contracts (tools.document_fidelity.tests.test_engine_evaluation.ComplexFixtureTests.test_two_deterministic_packages_and_operation_contracts) ... FAIL
+test_xlsx_stale_formula_cache_and_hidden_date_merge_comment (tools.document_fidelity.tests.test_engine_evaluation.ComplexFixtureTests.test_xlsx_stale_formula_cache_and_hidden_date_merge_comment) ... FAIL
+test_installed_metadata_or_explicit_absence (tools.document_fidelity.tests.test_engine_evaluation.InventoryTests.test_installed_metadata_or_explicit_absence) ... FAIL
+test_local_license_hash_and_missing_origin (tools.document_fidelity.tests.test_engine_evaluation.InventoryTests.test_local_license_hash_and_missing_origin) ... FAIL
+
+======================================================================
+FAIL: test_docx_split_runs_comment_bookmark_header (tools.document_fidelity.tests.test_engine_evaluation.ComplexFixtureTests.test_docx_split_runs_comment_bookmark_header)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/document-fidelity/tools/document_fidelity/tests/test_engine_evaluation.py", line 68, in test_docx_split_runs_comment_bookmark_header
+    self.assertIn('complex.docx', samples)
+AssertionError: 'complex.docx' not found in {}
+
+======================================================================
+FAIL: test_two_deterministic_packages_and_operation_contracts (tools.document_fidelity.tests.test_engine_evaluation.ComplexFixtureTests.test_two_deterministic_packages_and_operation_contracts)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/document-fidelity/tools/document_fidelity/tests/test_engine_evaluation.py", line 49, in test_two_deterministic_packages_and_operation_contracts
+    self.assertEqual({'complex.docx','complex.xlsx'}, set(samples))
+AssertionError: Items in the first set but not the second:
+'complex.xlsx'
+'complex.docx'
+
+======================================================================
+FAIL: test_xlsx_stale_formula_cache_and_hidden_date_merge_comment (tools.document_fidelity.tests.test_engine_evaluation.ComplexFixtureTests.test_xlsx_stale_formula_cache_and_hidden_date_merge_comment)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/document-fidelity/tools/document_fidelity/tests/test_engine_evaluation.py", line 81, in test_xlsx_stale_formula_cache_and_hidden_date_merge_comment
+    self.assertIn('complex.xlsx', samples)
+AssertionError: 'complex.xlsx' not found in {}
+
+======================================================================
+FAIL: test_installed_metadata_or_explicit_absence (tools.document_fidelity.tests.test_engine_evaluation.InventoryTests.test_installed_metadata_or_explicit_absence)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/document-fidelity/tools/document_fidelity/tests/test_engine_evaluation.py", line 17, in test_installed_metadata_or_explicit_absence
+    self.assertIn('engine_execution', r)
+AssertionError: 'engine_execution' not found in {}
+
+======================================================================
+FAIL: test_local_license_hash_and_missing_origin (tools.document_fidelity.tests.test_engine_evaluation.InventoryTests.test_local_license_hash_and_missing_origin)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/document-fidelity/tools/document_fidelity/tests/test_engine_evaluation.py", line 38, in test_local_license_hash_and_missing_origin
+    self.assertIn('evidence', value)
+AssertionError: 'evidence' not found in {}
+
+----------------------------------------------------------------------
+Ran 5 tests in 0.014s
+
+FAILED (failures=5)

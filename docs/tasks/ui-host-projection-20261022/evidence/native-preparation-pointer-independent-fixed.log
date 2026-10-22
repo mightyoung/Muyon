@@ -1,0 +1,4 @@
+read_pointer_query_original_only=true
+read_pointer_can_save=false
+held_exact_discovered_pointer=true
+native_saves=0; explicit_lookups=0

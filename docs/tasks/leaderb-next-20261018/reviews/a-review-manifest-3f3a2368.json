@@ -1,0 +1,9 @@
+{
+  "source_sha": "3f3a2368648db5e9767f11adcae4548ac5da2527",
+  "status_after": "",
+  "command": "python3 -B -m unittest discover -s experiments/redesign/android-rust-bridge-lab/checks -p 'test_*.py'",
+  "exit": 0,
+  "passed": 71,
+  "log_sha256": "512b86d83a7736802486696ea31704c66badbb9f9a158de3260b3d47a32ec141",
+  "note": "Current exact workflow-only source; full Android build result pending separately."
+}

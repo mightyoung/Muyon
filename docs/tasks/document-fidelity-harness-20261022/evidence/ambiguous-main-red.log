@@ -1,0 +1,19 @@
+test_second_unsupported_office_main_is_ambiguous (tools.document_fidelity.tests.test_harness.AdditionalBoundaryTests.test_second_unsupported_office_main_is_ambiguous) ... FAIL
+
+======================================================================
+FAIL: test_second_unsupported_office_main_is_ambiguous (tools.document_fidelity.tests.test_harness.AdditionalBoundaryTests.test_second_unsupported_office_main_is_ambiguous)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/document-fidelity/tools/document_fidelity/tests/test_harness.py", line 185, in test_second_unsupported_office_main_is_ambiguous
+    self.reject(self.sample(members=members), 'unsupported_main_type')
+  File "/workspace/document-fidelity/tools/document_fidelity/tests/test_harness.py", line 48, in reject
+    self.assertEqual('reject', r['decision'], r)
+AssertionError: 'reject' != 'inspect_only'
+- reject
++ inspect_only
+ : {'schema_version': 1, 'format': 'docx', 'sha256': 'f89792b3c90cd651c5ee4e39039b29a55833f1e74b0bbc42877d69795387af91', 'size': 1126, 'decision': 'inspect_only', 'safety': 'unknown', 'fidelity': 'unknown', 'parts': [{'name': '[Content_Types].xml', 'size': 570, 'sha256': 'a18a1187a39ed94409ea3d19af95f0c3d8c34f31a3f64c9cc6b1dbcff16674e2'}, {'name': '_rels/.rels', 'size': 242, 'sha256': '22c01d12e912dc45bdf191c382dd5b80cdeca1a9e95af86a477798a9f7e541e9'}, {'name': 'word/document.xml', 'size': 80, 'sha256': '8d955cb02b64b6d4602c8d12b39b2b248a36828d51a411433b91029a160792ab'}, {'name': 'custom/original.bin', 'size': 32, 'sha256': '67f8770ac3dd1bef1d1335f3d65c6c0e62cbd153ea026beb36db97174d66ae43'}, {'name': 'xl/workbook.xml', 'size': 77, 'sha256': '114a06d503116c5e9c44666e17f0b4163b593fabf4c6ef12b86499c52164c6e6'}], 'findings': [], 'limits': {'max_file': 16777216, 'max_members': 2048, 'max_member': 8388608, 'max_total': 33554432, 'max_ratio': 100, 'max_xml_depth': 128}, 'dimensions': {'structure': {'status': 'pass', 'reason': 'Bounded container/XML/main-part/relationship checks only; no OOXML schema or semantic validation'}, 'visual': {'status': 'not_run', 'reason': 'No engine installed or invoked'}, 'formula': {'status': 'not_run', 'reason': 'No engine installed or invoked'}, 'annotation': {'status': 'not_run', 'reason': 'No engine installed or invoked'}, 'render': {'status': 'not_run', 'reason': 'No engine installed or invoked'}, 'recalc': {'status': 'not_run', 'reason': 'No engine installed or invoked'}}, 'limitations': ['No complete OOXML schema validation or malware detection', 'Unknown parts inventoried; no editing/rendering/semantic preservation proven']}
+
+----------------------------------------------------------------------
+Ran 1 test in 0.002s
+
+FAILED (failures=1)

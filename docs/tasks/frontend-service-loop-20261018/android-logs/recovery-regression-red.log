@@ -1,0 +1,4 @@
+Exception in thread "main" java.lang.IllegalStateException: Check failed.
+	at com.mightyoung.muyon.androidlab.ChatReadChecksKt.runChatReadChecks(ChatReadChecks.kt:14)
+	at ChatReadCheckRunnerKt.main(ChatReadCheckRunner.kt:1)
+	at ChatReadCheckRunnerKt.main(ChatReadCheckRunner.kt)

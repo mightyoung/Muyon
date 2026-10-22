@@ -1,0 +1,61 @@
+   Compiling proc-macro2 v1.0.107
+   Compiling typenum v1.20.1
+   Compiling quote v1.0.47
+   Compiling unicode-ident v1.0.27
+   Compiling serde_core v1.0.229
+   Compiling zmij v1.0.23
+   Compiling muyon-core-agent-lab v0.1.0 (/workspace/mig20/experiments/redesign/core-agent-lab/core)
+warning: suspicious definition of the runtime `read` symbol used by the standard library
+   --> /workspace/mig20/experiments/redesign/core-agent-lab/core/src/host_session.rs:132:124
+    |
+132 | ...ount: usize, timeout: i32) -> i32; fn read(fd: i32, buffer: *mut u8, count: usize) -> isize; fn write(fd: i32, buffer: *const u8...
+    |                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = note: expected `unsafe extern "C" fn(i32, *mut c_void, usize) -> isize` (for the current target)
+            found    `unsafe extern "C" fn(i32, *mut u8, usize) -> isize`
+    = help: either fix the signature or remove any attributes like `#[unsafe(no_mangle)]`, `#[unsafe(export_name = "read")]`, or `#[link_name = "read"]`
+    = help: allow this lint if the signature is compatible
+    = note: `#[warn(suspicious_runtime_symbol_definitions)]` on by default
+
+warning: suspicious definition of the runtime `write` symbol used by the standard library
+   --> /workspace/mig20/experiments/redesign/core-agent-lab/core/src/host_session.rs:132:182
+    |
+132 | ... *mut u8, count: usize) -> isize; fn write(fd: i32, buffer: *const u8, count: usize) -> isize; }
+    |                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = note: expected `unsafe extern "C" fn(i32, *const c_void, usize) -> isize` (for the current target)
+            found    `unsafe extern "C" fn(i32, *const u8, usize) -> isize`
+    = help: either fix the signature or remove any attributes like `#[unsafe(no_mangle)]`, `#[unsafe(export_name = "write")]`, or `#[link_name = "write"]`
+    = help: allow this lint if the signature is compatible
+
+   Compiling hybrid-array v0.4.15
+   Compiling syn v3.0.9
+   Compiling block-buffer v0.12.1
+   Compiling crypto-common v0.2.2
+warning: `muyon-core-agent-lab` (lib) generated 2 warnings
+   Compiling muyon-plugin-contract-lab v0.1.0 (/workspace/mig20/experiments/redesign/plugin-contract-lab/core)
+   Compiling const-oid v0.10.2
+   Compiling serde v1.0.229
+   Compiling serde_json v1.0.154
+   Compiling digest v0.11.3
+   Compiling muyon-rust-agent-host-lab v0.1.0 (/workspace/mig20/experiments/redesign/rust-agent-host-lab/core)
+   Compiling memchr v2.8.3
+   Compiling itoa v1.0.18
+   Compiling cpufeatures v0.3.1
+   Compiling serde_derive v1.0.229
+   Compiling cfg-if v1.0.5
+   Compiling tinyvec v1.13.3
+   Compiling unicode-normalization v0.1.25
+   Compiling sha2 v0.11.1
+   Compiling muyon-web-search-lab v0.1.0 (/workspace/mig20/experiments/redesign/web-search-lab/core)
+   Compiling muyon-core v0.1.0 (/workspace/mig20/crates/muyon-core)
+error: linking with `cc` failed: exit status: 1
+  |
+  = note:  "cc" "-m64" "/tmp/mig20-target/debug/deps/rustcB17yLu/symbols.o" "<17 object files omitted>" "-Wl,--as-needed" "-Wl,-Bdynamic" "-lsqlite3" "-Wl,-Bstatic" "<sysroot>/lib/rustlib/x86_64-unknown-linux-gnu/lib/{libtest-*,libgetopts-*,librustc_std_workspace_std-*}.rlib" "/tmp/mig20-target/debug/deps/{libunicode_normalization-373c213d46309dad,libtinyvec-dfeccbff741778e3,libsha2-dfe3d1c0bdd803e5,libcpufeatures-af7577f9ebf771f9,libcfg_if-1ce4055b24bcfc3f,libdigest-b4fcedf601c11083,libconst_oid-7a00b91f519a9d94,libcrypto_common-54291ccb754d8766,libblock_buffer-d85f1c7023a6bc28,libhybrid_array-3cba2f038b699331,libtypenum-93a72c4aeed06219,libserde_json-286ba13dfe6c7f22,libmemchr-48baebea031d4a80,libitoa-82c82173a96fdb4c,libzmij-1372b56bbb7fbbe9,libserde-6514dac8965e27ed,libserde_core-bf8cd9cf50bee81c,libmuyon_web_search_lab-26cca19a8729e574,libmuyon_rust_agent_host_lab-c3d2998a5dd2e072,libmuyon_plugin_contract_lab-41bfe4ce7720461b,libmuyon_core_agent_lab-8f0ed0a7af89f519}.rlib" "<sysroot>/lib/rustlib/x86_64-unknown-linux-gnu/lib/{libstd-*,libpanic_unwind-*,libobject-*,libmemchr-*,libaddr2line-*,libgimli-*,libcfg_if-*,librustc_demangle-*,libstd_detect-*,libhashbrown-*,librustc_std_workspace_alloc-*,libminiz_oxide-*,libadler2-*,libunwind-*,liblibc-*,librustc_std_workspace_core-*,liballoc-*,libcore-*,libcompiler_builtins-*}.rlib" "-Wl,-Bdynamic" "-l:libsqlite3.so.0" "-lgcc_s" "-lutil" "-lrt" "-lpthread" "-lm" "-ldl" "-lc" "-L" "/tmp/mig20-target/debug/deps/rustcB17yLu/raw-dylibs" "-B<sysroot>/lib/rustlib/x86_64-unknown-linux-gnu/bin/gcc-ld" "-fuse-ld=lld" "-Wl,--eh-frame-hdr" "-Wl,-z,noexecstack" "-L" "<sysroot>/lib/rustlib/x86_64-unknown-linux-gnu/lib" "-o" "/tmp/mig20-target/debug/deps/muyon_core-b16e7420586a5c6b" "-Wl,--gc-sections" "-pie" "-Wl,-z,relro,-z,now" "-Wl,--strip-debug" "-nodefaultlibs"
+  = note: some arguments are omitted. use `--verbose` to show all linker arguments
+  = note: rust-lld: error: unable to find library -lsqlite3
+          collect2: error: ld returned 1 exit status
+          
+
+error: could not compile `muyon-core` (lib test) due to 1 previous error
+warning: build failed, waiting for other jobs to finish...

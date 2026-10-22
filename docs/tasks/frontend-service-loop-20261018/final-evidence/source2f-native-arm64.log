@@ -1,0 +1,184 @@
+﻿2026-10-18T07:21:45.1385535Z Current runner version: '2.337.0'
+2026-10-18T07:21:45.1413677Z ##[group]Runner Image Provisioner
+2026-10-18T07:21:45.1414598Z Hosted Compute Agent
+2026-10-18T07:21:45.1415397Z Version: 20261012.601
+2026-10-18T07:21:45.1416022Z Commit: f3dc54e1fb89da6852db922499a0233137369e1d
+2026-10-18T07:21:45.1416743Z Build Date: 2026-10-12T17:48:21Z
+2026-10-18T07:21:45.1417420Z Worker ID: {50eccbc3-cfc7-4bd2-b898-81d3cb805b01}
+2026-10-18T07:21:45.1418375Z Region: centralus
+2026-10-18T07:21:45.1419041Z Cloud: Azure
+2026-10-18T07:21:45.1419575Z ##[endgroup]
+2026-10-18T07:21:45.1421035Z ##[group]Operating System
+2026-10-18T07:21:45.1421682Z Ubuntu
+2026-10-18T07:21:45.1422192Z 24.04.5
+2026-10-18T07:21:45.1422775Z LTS
+2026-10-18T07:21:45.1423283Z ##[endgroup]
+2026-10-18T07:21:45.1423808Z ##[group]Runner Image
+2026-10-18T07:21:45.1424430Z Image: ubuntu-24.04
+2026-10-18T07:21:45.1424993Z Version: 20261012.334.1
+2026-10-18T07:21:45.1426359Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20261012.334/images/ubuntu/Ubuntu2404-Readme.md
+2026-10-18T07:21:45.1427797Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20261012.334
+2026-10-18T07:21:45.1429395Z ##[endgroup]
+2026-10-18T07:21:45.1430464Z ##[group]GITHUB_TOKEN Permissions
+2026-10-18T07:21:45.1433005Z Contents: read
+2026-10-18T07:21:45.1433643Z Metadata: read
+2026-10-18T07:21:45.1434189Z ##[endgroup]
+2026-10-18T07:21:45.1436195Z Secret source: Actions
+2026-10-18T07:21:45.1437115Z Cache mode: write
+2026-10-18T07:21:45.1437982Z Prepare workflow directory
+2026-10-18T07:21:45.1760747Z Prepare all required actions
+2026-10-18T07:21:45.1813239Z Getting action download info
+2026-10-18T07:21:45.4301105Z Download action repository 'actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683' (SHA:11bd71901bbe5b1630ceea73d27597364c9af683)
+2026-10-18T07:21:45.5673321Z Download action repository 'actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02' (SHA:ea165f8d65b6e75b540449e92b4886f43607fa02)
+2026-10-18T07:21:45.8188909Z Complete job name: native (arm64-v8a)
+2026-10-18T07:21:45.8867539Z ##[group]Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+2026-10-18T07:21:45.8868981Z with:
+2026-10-18T07:21:45.8869572Z   persist-credentials: false
+2026-10-18T07:21:45.8870177Z   repository: mightyoung/Muyon
+2026-10-18T07:21:45.8874149Z   token: ***
+2026-10-18T07:21:45.8874715Z   ssh-strict: true
+2026-10-18T07:21:45.8875202Z   ssh-user: git
+2026-10-18T07:21:45.8875705Z   clean: true
+2026-10-18T07:21:45.8876224Z   sparse-checkout-cone-mode: true
+2026-10-18T07:21:45.8876814Z   fetch-depth: 1
+2026-10-18T07:21:45.8877374Z   fetch-tags: false
+2026-10-18T07:21:45.8877881Z   show-progress: true
+2026-10-18T07:21:45.8878826Z   lfs: false
+2026-10-18T07:21:45.8879327Z   submodules: false
+2026-10-18T07:21:45.8879840Z   set-safe-directory: true
+2026-10-18T07:21:45.8880647Z ##[endgroup]
+2026-10-18T07:21:45.9889178Z Syncing repository: mightyoung/Muyon
+2026-10-18T07:21:45.9891967Z ##[group]Getting Git version info
+2026-10-18T07:21:45.9893282Z Working directory is '/home/runner/work/Muyon/Muyon'
+2026-10-18T07:21:45.9894440Z [command]/usr/bin/git version
+2026-10-18T07:21:45.9963978Z git version 2.55.0
+2026-10-18T07:21:45.9980525Z ##[endgroup]
+2026-10-18T07:21:45.9999255Z Temporarily overriding HOME='/home/runner/work/_temp/d66edad9-a1ce-421a-ad92-2a7fc94bd588' before making global git config changes
+2026-10-18T07:21:46.0001292Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-18T07:21:46.0002768Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/Muyon/Muyon
+2026-10-18T07:21:46.0049078Z Deleting the contents of '/home/runner/work/Muyon/Muyon'
+2026-10-18T07:21:46.0052346Z ##[group]Initializing the repository
+2026-10-18T07:21:46.0057628Z [command]/usr/bin/git init /home/runner/work/Muyon/Muyon
+2026-10-18T07:21:46.0144557Z hint: Using 'master' as the name for the initial branch. This default branch name
+2026-10-18T07:21:46.0147649Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+2026-10-18T07:21:46.0149678Z hint: to use in all of your new repositories, which will suppress this warning,
+2026-10-18T07:21:46.0150900Z hint: call:
+2026-10-18T07:21:46.0151620Z hint:
+2026-10-18T07:21:46.0152741Z hint: 	git config --global init.defaultBranch <name>
+2026-10-18T07:21:46.0153817Z hint:
+2026-10-18T07:21:46.0154712Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+2026-10-18T07:21:46.0156235Z hint: 'development'. The just-created branch can be renamed via this command:
+2026-10-18T07:21:46.0157404Z hint:
+2026-10-18T07:21:46.0158193Z hint: 	git branch -m <name>
+2026-10-18T07:21:46.0158949Z hint:
+2026-10-18T07:21:46.0160001Z hint: Disable this message with "git config set advice.defaultBranchName false"
+2026-10-18T07:21:46.0161326Z Initialized empty Git repository in /home/runner/work/Muyon/Muyon/.git/
+2026-10-18T07:21:46.0164203Z [command]/usr/bin/git remote add origin https://github.com/mightyoung/Muyon
+2026-10-18T07:21:46.0209730Z ##[endgroup]
+2026-10-18T07:21:46.0211037Z ##[group]Disabling automatic garbage collection
+2026-10-18T07:21:46.0212061Z [command]/usr/bin/git config --local gc.auto 0
+2026-10-18T07:21:46.0242434Z ##[endgroup]
+2026-10-18T07:21:46.0243634Z ##[group]Setting up auth
+2026-10-18T07:21:46.0248128Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-18T07:21:46.0275687Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-18T07:21:46.0608670Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-18T07:21:46.0647046Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-18T07:21:46.0851835Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+2026-10-18T07:21:46.0891050Z ##[endgroup]
+2026-10-18T07:21:46.0892202Z ##[group]Fetching the repository
+2026-10-18T07:21:46.0901152Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +2f8f4da674e871708880dcc792a1c9dafb3a17f3:refs/remotes/origin/lab/android-compose-frontend-loop-20261018
+2026-10-18T07:21:49.2522906Z From https://github.com/mightyoung/Muyon
+2026-10-18T07:21:49.2524880Z  * [new ref]         2f8f4da674e871708880dcc792a1c9dafb3a17f3 -> origin/lab/android-compose-frontend-loop-20261018
+2026-10-18T07:21:49.2540446Z ##[endgroup]
+2026-10-18T07:21:49.2542017Z ##[group]Determining the checkout info
+2026-10-18T07:21:49.2543844Z ##[endgroup]
+2026-10-18T07:21:49.2544758Z [command]/usr/bin/git sparse-checkout disable
+2026-10-18T07:21:49.2588770Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+2026-10-18T07:21:49.2624090Z ##[group]Checking out the ref
+2026-10-18T07:21:49.2628424Z [command]/usr/bin/git checkout --progress --force -B lab/android-compose-frontend-loop-20261018 refs/remotes/origin/lab/android-compose-frontend-loop-20261018
+2026-10-18T07:21:49.7960248Z Switched to a new branch 'lab/android-compose-frontend-loop-20261018'
+2026-10-18T07:21:49.7965322Z branch 'lab/android-compose-frontend-loop-20261018' set up to track 'origin/lab/android-compose-frontend-loop-20261018'.
+2026-10-18T07:21:49.7980823Z ##[endgroup]
+2026-10-18T07:21:49.8026110Z [command]/usr/bin/git log -1 --format=%H
+2026-10-18T07:21:49.8054580Z 2f8f4da674e871708880dcc792a1c9dafb3a17f3
+2026-10-18T07:21:49.8062614Z ##[group]Removing auth
+2026-10-18T07:21:49.8065657Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-18T07:21:49.8095535Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-18T07:21:49.8281557Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-18T07:21:49.8307105Z http.https://github.com/.extraheader
+2026-10-18T07:21:49.8313603Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+2026-10-18T07:21:49.8344362Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-18T07:21:49.8520207Z ##[endgroup]
+2026-10-18T07:21:49.8724602Z ##[group]Run set -euo pipefail
+2026-10-18T07:21:49.8725173Z [36;1mset -euo pipefail[0m
+2026-10-18T07:21:49.8725808Z [36;1mrustup toolchain install 1.99.0 --profile minimal --target aarch64-linux-android,x86_64-linux-android[0m
+2026-10-18T07:21:49.8726817Z [36;1mrustup default 1.99.0[0m
+2026-10-18T07:21:49.8727708Z [36;1mpython3 experiments/redesign/android-rust-bridge-lab/checks/android_gate.py --abi 'arm64-v8a' --evidence-dir "$RUNNER_TEMP/loop-native" --work-dir "$RUNNER_TEMP/loop-native-work"[0m
+2026-10-18T07:21:49.8905499Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2026-10-18T07:21:49.8906052Z ##[endgroup]
+2026-10-18T07:21:49.9370982Z info: syncing channel updates for 1.99.0-x86_64-unknown-linux-gnu
+2026-10-18T07:21:50.2266657Z info: latest update on 2026-10-01 for version 1.99.0 (b940084d7 2026-09-28)
+2026-10-18T07:21:50.2267621Z info: downloading 5 components
+2026-10-18T07:22:03.1459673Z 
+2026-10-18T07:22:03.1525777Z   1.99.0-x86_64-unknown-linux-gnu installed - rustc 1.99.0 (b940084d7 2026-09-28)
+2026-10-18T07:22:03.1526286Z 
+2026-10-18T07:22:03.1598466Z info: using existing install for 1.99.0-x86_64-unknown-linux-gnu
+2026-10-18T07:22:03.1807421Z info: default toolchain set to 1.99.0-x86_64-unknown-linux-gnu
+2026-10-18T07:22:03.1808146Z 
+2026-10-18T07:22:03.1873032Z   1.99.0-x86_64-unknown-linux-gnu unchanged - rustc 1.99.0 (b940084d7 2026-09-28)
+2026-10-18T07:22:03.1873655Z 
+2026-10-18T07:22:33.9674081Z sdk-packages.log: exit=0 timeout=False forced_cleanup=False
+2026-10-18T07:22:34.0128984Z rustc.log: exit=0 timeout=False forced_cleanup=False
+2026-10-18T07:22:34.0582627Z clang.log: exit=0 timeout=False forced_cleanup=False
+2026-10-18T07:22:35.0596067Z fetch.log: exit=0 timeout=False forced_cleanup=False
+2026-10-18T07:23:20.4468885Z link.log: exit=0 timeout=False forced_cleanup=False
+2026-10-18T07:23:20.4873205Z rust-file-header.log: exit=0 timeout=False forced_cleanup=False
+2026-10-18T07:23:20.5194785Z rust-program-headers.log: exit=0 timeout=False forced_cleanup=False
+2026-10-18T07:23:20.5514673Z rust-dynamic.log: exit=0 timeout=False forced_cleanup=False
+2026-10-18T07:23:20.5832306Z rust-notes.log: exit=0 timeout=False forced_cleanup=False
+2026-10-18T07:23:20.6155662Z rust-dyn-syms.log: exit=0 timeout=False forced_cleanup=False
+2026-10-18T07:23:20.6478500Z rust-stub-libdl.so.log: exit=0 timeout=False forced_cleanup=False
+2026-10-18T07:23:20.6802159Z rust-stub-libm.so.log: exit=0 timeout=False forced_cleanup=False
+2026-10-18T07:23:20.7167831Z rust-stub-libc.so.log: exit=0 timeout=False forced_cleanup=False
+2026-10-18T07:23:20.7507317Z rust-dynsym.log: exit=0 timeout=False forced_cleanup=False
+2026-10-18T07:23:20.8998771Z jna-stub-libc.so.log: exit=0 timeout=False forced_cleanup=False
+2026-10-18T07:23:20.9341552Z jna-stub-libdl.so.log: exit=0 timeout=False forced_cleanup=False
+2026-10-18T07:23:20.9664378Z jna-stub-libm.so.log: exit=0 timeout=False forced_cleanup=False
+2026-10-18T07:23:20.9989136Z jna-dynsym.log: exit=0 timeout=False forced_cleanup=False
+2026-10-18T07:23:21.0261213Z ANDROID_BRIDGE_ABI_MANIFEST {"Android_runtime": "NOT_RUN", "abi": "arm64-v8a", "android_config_sha256": "543bab24b017d782b38aff958254db5bd185c3688eada2e6a96a5753dc98ab11", "build_identity": "2f8f4da674e871708880dcc792a1c9dafb3a17f3", "cargo_lock_sha256": "8070cdf19277826ea87368b11feccb2735c24d2d9bdaf8ee818dbe902835524d", "clang_sha256": "c9ec0ccdc82aede75e6724738b833603707c0990061e05a1484860249f7520d5", "classification": "GREEN", "jna_aar_sha256": "b57125cb7d16253f0d65a80f7d3a4c3664effa711b8bdbb7f87fb572ce1624ed", "jna_elf": {"abi": "arm64-v8a", "api26_import_compatibility": {"api26_stub_hashes": {"libc.so": "abfc3e17c2babb61a88aa4a5f399505dffe19a24d7a57d8460406413e1c77edf", "libdl.so": "25eefefafd831de263619071cf85bc0cad8f77efcd741e071acc0ad264eedaa5", "libm.so": "e38489e92d995f77ceef18918ca27183ac81115979ec295d3c8e74f41949328c"}, "evidence": "named strong imports resolve against exact API26 NDK stubs; Android runtime NOT_RUN", "missing": [], "strong_imports": ["__errno", "__sF", "abort", "calloc", "close", "dlclose", "dlerror", "dlopen", "dlsym", "fclose", "feof", "fgets", "fopen", "fprintf", "free", "ftruncate", "fwrite", "getenv", "getpagesize", "getpid", "malloc", "memcpy", "memset", "mkstemp", "mmap", "munmap", "open", "pthread_getspecific", "pthread_key_create", "pthread_key_delete", "pthread_mutex_init", "pthread_mutex_lock", "pthread_mutex_unlock", "pthread_once", "pthread_setspecific", "snprintf", "sscanf", "strdup", "strerror_r", "strlen", "sysconf", "unlink", "wcslen", "write"]}, "bind_now": true, "declared_android_api": null, "elf_class": 64, "exported_symbol_count": 151, "load_alignments": [16384, 16384], "machine": 183, "needed": ["libc.so", "libdl.so", "libm.so"], "relro": true, "stack_executable": false}, "jna_jni_sha256": "abc26e994517bcaa3309acdb0a27373864086c7569c89d3087b8626fada9ef06", "library_sha256": "f0380259af27d3ae4d646258ced33033eef8da51cde30f23d4c777ec84e99141", "min_api": 26, "namespace": "muyon_android_contract_bridge", "ndk_properties_sha256": "c00aa236fdb205e9be9edd9e2169763e48aca52735efff4e16f34205d49783b5", "ndk_version": "28.2.13676358", "protocol": 1, "readelf_sha256": "2a28d786027488ebd0e260efe59d15c5dedb939eacbae34a6a9065a3a2f6d054", "rust_elf": {"abi": "arm64-v8a", "api26_import_compatibility": {"api26_stub_hashes": {"libc.so": "abfc3e17c2babb61a88aa4a5f399505dffe19a24d7a57d8460406413e1c77edf", "libdl.so": "25eefefafd831de263619071cf85bc0cad8f77efcd741e071acc0ad264eedaa5", "libm.so": "e38489e92d995f77ceef18918ca27183ac81115979ec295d3c8e74f41949328c"}, "evidence": "named strong imports resolve against exact API26 NDK stubs; Android runtime NOT_RUN", "missing": [], "strong_imports": ["__cxa_atexit", "__cxa_finalize", "__errno", "__register_atfork", "__sF", "abort", "access", "calloc", "chmod", "clock_gettime", "close", "closedir", "dirfd", "dl_iterate_phdr", "dlclose", "dlerror", "dlopen", "dlsym", "fchmod", "fchown", "fcntl", "fflush", "flock", "fprintf", "free", "fstat", "fsync", "ftruncate", "fwrite", "getcwd", "getenv", "geteuid", "getpid", "gettimeofday", "localtime_r", "log", "lseek64", "lstat", "malloc", "memchr", "memcmp", "memcpy", "memmove", "memset", "mkdir", "mmap", "mremap", "munmap", "nanosleep", "open", "opendir", "posix_memalign", "prctl", "pread", "pthread_attr_destroy", "pthread_attr_init", "pthread_attr_setstacksize", "pthread_create", "pthread_detach", "pthread_getspecific", "pthread_join", "pthread_key_create", "pthread_key_delete", "pthread_mutex_destroy", "pthread_mutex_init", "pthread_mutex_lock", "pthread_mutex_trylock", "pthread_mutex_unlock", "pthread_mutexattr_destroy", "pthread_mutexattr_init", "pthread_mutexattr_settype", "pthread_rwlock_rdlock", "pthread_rwlock_unlock", "pthread_rwlock_wrlock", "pthread_setspecific", "pwrite", "qsort", "read", "readdir", "readlink", "realloc", "realpath", "rename", "rmdir", "stat", "strchr", "strcmp", "strcspn", "strerror_r", "strlen", "strncmp", "strrchr", "strspn", "syscall", "sysconf", "time", "unlink", "utimes", "write", "writev"]}, "bind_now": true, "declared_android_api": 26, "elf_class": 64, "exported_symbol_count": 154, "load_alignments": [16384, 16384, 16384, 16384], "machine": 183, "needed": ["libdl.so", "libm.so", "libc.so"], "relro": true, "stack_executable": false}, "rust_target": "aarch64-linux-android", "shipping_features": [], "source_inputs_unchanged": true, "source_sha": "2f8f4da674e871708880dcc792a1c9dafb3a17f3"}
+2026-10-18T07:23:21.0426325Z ##[group]Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+2026-10-18T07:23:21.0426920Z with:
+2026-10-18T07:23:21.0427249Z   name: loop-arm64-v8a
+2026-10-18T07:23:21.0427604Z   path: /home/runner/work/_temp/loop-native
+2026-10-18T07:23:21.0427965Z   if-no-files-found: warn
+2026-10-18T07:23:21.0428456Z   compression-level: 6
+2026-10-18T07:23:21.0428750Z   overwrite: false
+2026-10-18T07:23:21.0429066Z   include-hidden-files: false
+2026-10-18T07:23:21.0429401Z ##[endgroup]
+2026-10-18T07:23:21.1974203Z (node:3838) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-18T07:23:21.1975502Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-18T07:23:21.2084495Z With the provided path, there will be 39 files uploaded
+2026-10-18T07:23:21.2089930Z Artifact name is valid!
+2026-10-18T07:23:21.2090906Z Root directory input is valid!
+2026-10-18T07:23:21.4608359Z Beginning upload of artifact content to blob storage
+2026-10-18T07:23:21.6359970Z (node:3838) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+2026-10-18T07:23:21.9979831Z Uploaded bytes 1796411
+2026-10-18T07:23:22.0454627Z Finished uploading artifact content to blob storage!
+2026-10-18T07:23:22.0456079Z SHA256 digest of uploaded artifact zip is 165c4752a05445acdd3bc0234be16767d9d7e88d70c2fbce5efe2934119e7498
+2026-10-18T07:23:22.0457850Z Finalizing artifact upload
+2026-10-18T07:23:22.2690556Z Artifact loop-arm64-v8a.zip successfully finalized. Artifact ID 12128129289
+2026-10-18T07:23:22.2691664Z Artifact loop-arm64-v8a has been successfully uploaded! Final size is 1796411 bytes. Artifact ID is 12128129289
+2026-10-18T07:23:22.2697364Z Artifact download URL: https://github.com/mightyoung/Muyon/actions/runs/39107347147/artifacts/12128129289
+2026-10-18T07:23:22.2896110Z Post job cleanup.
+2026-10-18T07:23:22.3698483Z [command]/usr/bin/git version
+2026-10-18T07:23:22.3740064Z git version 2.55.0
+2026-10-18T07:23:22.3780022Z Temporarily overriding HOME='/home/runner/work/_temp/0eb6d44a-5fd4-4785-b9ca-658af4127d83' before making global git config changes
+2026-10-18T07:23:22.3781031Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-18T07:23:22.3785913Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/Muyon/Muyon
+2026-10-18T07:23:22.3825006Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-18T07:23:22.3857058Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-18T07:23:22.4065306Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-18T07:23:22.4095612Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-18T07:23:22.4506913Z Cleaning up orphan processes
+2026-10-18T07:23:22.4747611Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683, actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+

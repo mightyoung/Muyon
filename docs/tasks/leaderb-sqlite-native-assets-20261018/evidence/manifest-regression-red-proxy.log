@@ -1,0 +1,15 @@
+00:00 +0: loading /workspace/leaderb-sqlite/apps/muyon/test/le06_recovery_independent_test.dart
+00:00 +0: child Flutter runner leaves parent native asset manifest untouched
+00:02 +0 -1: child Flutter runner leaves parent native asset manifest untouched [E]
+  Expected: DateTime:<2026-10-18 05:48:13.253720>
+    Actual: DateTime:<2026-10-18 05:48:21.905699>
+  nested Flutter builders must not rewrite assets used by other tests
+  
+  package:matcher                                     expect
+  package:flutter_test/src/widget_tester.dart 473:18  expect
+  test/le06_recovery_independent_test.dart 343:5      main.<fn>
+  
+00:02 +0 -1: Some tests failed.
+
+Failing tests:
+  /workspace/leaderb-sqlite/apps/muyon/test/le06_recovery_independent_test.dart: child Flutter runner leaves parent native asset manifest untouched

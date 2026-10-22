@@ -1,0 +1,29 @@
+{
+  "kind": "new_independent_tail_recheck",
+  "head": "74040cea77af6c5e82857d560ce6cca63f59e38e",
+  "head_after": "74040cea77af6c5e82857d560ce6cca63f59e38e",
+  "dependency": "098d9aca214e6642c1b3ffde64921ebedbae335d",
+  "dependency_sha256": "6514165380738130e639d4be1ab5440e1bcb09c7d82fd0184b22b986e0d3c678",
+  "command": [
+    "python3",
+    "docs/tasks/bot-setup-draft-20261022/run-creation-checks.py"
+  ],
+  "cwd": "/workspace/bot-setup-draft",
+  "utc_start": "2026-10-22T06:34:16.807389Z",
+  "utc_end": "2026-10-22T06:34:22.536197Z",
+  "exit_code": 0,
+  "source_sha256_before": {
+    "crates/muyon-core/src/bot_definitions.rs": "13db242a4bf907895c7507778d020c84e87f710a22cae0f99be249abda5e3ba0",
+    "crates/muyon-core/src/bot_definitions/tests.rs": "ad9d29ad46caf8abae42e7d1be80fa20dccb351334afd6c5c16c02f4f1841c65",
+    "docs/tasks/bot-setup-draft-20261022/run-creation-checks.py": "ebba19d7e67093b2a80436adecea5d4be54b4c42c050b5de10763d3513327ba4"
+  },
+  "source_sha256_after": {
+    "crates/muyon-core/src/bot_definitions.rs": "13db242a4bf907895c7507778d020c84e87f710a22cae0f99be249abda5e3ba0",
+    "crates/muyon-core/src/bot_definitions/tests.rs": "ad9d29ad46caf8abae42e7d1be80fa20dccb351334afd6c5c16c02f4f1841c65",
+    "docs/tasks/bot-setup-draft-20261022/run-creation-checks.py": "ebba19d7e67093b2a80436adecea5d4be54b4c42c050b5de10763d3513327ba4"
+  },
+  "logs_sha256": {
+    "stderr.log": "4ce19de6cb51c9003c5be78896ca3d4e0fa663749525a3edc08c22cd53fd5688",
+    "stdout.log": "26c99eb61d484f39fb8351fe1cd8e6cf18cf8676dcfcbc7cd6fa5dcdf88d943a"
+  }
+}

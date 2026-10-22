@@ -1,0 +1,530 @@
+compile	API26 named durable admission owner tests only	﻿2026-10-18T12:38:06.9298390Z ##[group]Run set -euo pipefail
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:06.9298772Z [36;1mset -euo pipefail[0m
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:06.9299103Z [36;1mexport ANDROID_AVD_HOME="$RUNNER_TEMP/muyon-owner-avds"[0m
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:06.9299463Z [36;1mmkdir -p "$ANDROID_AVD_HOME"[0m
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:06.9299833Z [36;1mmanager="$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager"[0m
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:06.9300263Z [36;1m# Existing runner licenses only; never accepts a license.[0m
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:06.9300954Z [36;1m"$manager" --install 'platform-tools' 'emulator' 'system-images;android-26;google_apis;x86_64' 2>&1 | tee "$LOG_DIRECTORY/emulator-setup.log"[0m
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:06.9301629Z [36;1mexport PATH="$ANDROID_HOME/platform-tools:$PATH"[0m
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:06.9301953Z [36;1msudo chmod a+rw /dev/kvm[0m
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:06.9302583Z [36;1mprintf 'no\n' | "$ANDROID_HOME/cmdline-tools/latest/bin/avdmanager" create avd -n muyon-owner-api26 -k 'system-images;android-26;google_apis;x86_64'[0m
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:06.9303702Z [36;1m"$ANDROID_HOME/emulator/emulator" -avd muyon-owner-api26 -no-window -no-audio -no-boot-anim -no-snapshot -gpu swiftshader_indirect > "$LOG_DIRECTORY/emulator.log" 2>&1 &[0m
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:06.9304522Z [36;1mtimeout 300 adb wait-for-device[0m
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:06.9305055Z [36;1mfor attempt in $(seq 1 120); do if [[ "$(adb shell getprop sys.boot_completed | tr -d '\r')" == 1 ]]; then break; fi; sleep 2; done[0m
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:06.9305660Z [36;1mtest "$(adb shell getprop sys.boot_completed | tr -d '\r')" = 1[0m
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:06.9306473Z [36;1mtest "$(adb shell getprop ro.build.version.sdk | tr -d '\r')" = 26[0m
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:06.9307240Z [36;1madb install -r "$LAB_DIRECTORY/app/build/outputs/apk/debug/app-debug.apk"[0m
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:06.9307851Z [36;1madb install -r "$LAB_DIRECTORY/app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk"[0m
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:06.9309102Z [36;1mtimeout 240 adb shell am instrument -w -r -e class com.mightyoung.muyon.androidlab.agentipc.DurableServiceHostOwnerTest com.mightyoung.muyon.androidlab.test/androidx.test.runner.AndroidJUnitRunner | tee "$LOG_DIRECTORY/instrumentation.log"[0m
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:06.9310773Z [36;1mexpected_tests=$(grep -c '@Test fun' "$LAB_DIRECTORY/app/src/androidTest/kotlin/com/mightyoung/muyon/androidlab/agentipc/DurableServiceHostOwnerTest.kt")[0m
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:06.9311459Z [36;1mtest "$expected_tests" -gt 0[0m
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:06.9311829Z [36;1mgrep -F "OK ($expected_tests tests)" "$LOG_DIRECTORY/instrumentation.log"[0m
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:06.9312488Z [36;1mif grep -E 'FAILURES|INSTRUMENTATION_FAILED|Process crashed' "$LOG_DIRECTORY/instrumentation.log"; then exit 1; fi[0m
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:06.9313383Z [36;1mprintf '%s\n' 'Named durable ledger tests only; no legacy task database, HTTP, native controller or model API.' > "$LOG_DIRECTORY/device-boundary.txt"[0m
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:06.9376691Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:06.9377068Z env:
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:06.9377325Z   LAB_DIRECTORY: experiments/redesign/android-compose-lab
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:06.9377654Z   GRADLE_VERSION: 8.13
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:06.9377991Z   GRADLE_SHA256: 20f1b1176237254a6fc204d8434196fa11a4cfb387567519c61556e8710aed78
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:06.9378492Z   GRADLE_USER_HOME: /home/runner/work/_temp/muyon-compose-gradle-cache
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:06.9378940Z   ANDROID_USER_HOME: /home/runner/work/_temp/muyon-compose-android-user
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:06.9379685Z   LOG_DIRECTORY: /home/runner/work/_temp/muyon-compose-evidence
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:06.9380396Z   JAVA_HOME: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.20-1/x64
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:06.9380875Z   JAVA_HOME_17_X64: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.20-1/x64
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:06.9381399Z   ANDROID_HOME: /usr/local/lib/android/sdk
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:06.9381685Z ##[endgroup]
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:07.7718439Z Loading package information...                                                  
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:07.8797572Z Loading local repository...                                                     
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:07.8799160Z [                                       ] 3% Loading local repository...        
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:07.8890592Z [                                       ] 3% Fetch remote repository...         
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:08.2408059Z [=                                      ] 3% Fetch remote repository...         
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:08.3224616Z [=                                      ] 4% Fetch remote repository...         
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:08.3702844Z [=                                      ] 5% Fetch remote repository...         
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:08.4347366Z [==                                     ] 5% Fetch remote repository...         
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:08.4940852Z [==                                     ] 6% Fetch remote repository...         
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:08.5818394Z [==                                     ] 7% Fetch remote repository...         
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:08.5832219Z [==                                     ] 7% Computing updates...               
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:08.5963598Z [===                                    ] 8% Computing updates...               
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:08.6306433Z [===                                    ] 10% Computing updates...              
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:09.0141740Z [===                                    ] 10% Installing Android Emulator       
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:09.2404740Z [===                                    ] 10% Downloading emulator-linux_x64-164
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:09.5744511Z [====                                   ] 10% Downloading emulator-linux_x64-164
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:09.7957854Z [====                                   ] 11% Downloading emulator-linux_x64-164
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:10.0114450Z [====                                   ] 12% Downloading emulator-linux_x64-164
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:10.1452911Z [=====                                  ] 13% Downloading emulator-linux_x64-164
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:10.2499348Z [=====                                  ] 14% Downloading emulator-linux_x64-164
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:10.3113622Z [=====                                  ] 15% Downloading emulator-linux_x64-164
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:10.3553748Z [======                                 ] 15% Downloading emulator-linux_x64-164
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:10.4715715Z [======                                 ] 16% Downloading emulator-linux_x64-164
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:10.5813701Z [======                                 ] 17% Downloading emulator-linux_x64-164
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:10.6961025Z [=======                                ] 18% Downloading emulator-linux_x64-164
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:10.8059408Z [=======                                ] 19% Downloading emulator-linux_x64-164
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:10.8602368Z [=======                                ] 20% Downloading emulator-linux_x64-164
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:10.9303280Z [========                               ] 20% Downloading emulator-linux_x64-164
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:11.0066021Z [========                               ] 21% Downloading emulator-linux_x64-164
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:11.1405968Z [========                               ] 21% Unzipping...                      
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:11.1411318Z [========                               ] 21% Unzipping... emulator/            
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:11.1412267Z [========                               ] 21% Unzipping... emulator/resources/  
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:11.1868144Z [========                               ] 21% Unzipping... emulator/qsn         
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:11.2714038Z [========                               ] 21% Unzipping... emulator/emulator    
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:11.3047711Z [========                               ] 21% Unzipping... emulator/netsimd     
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:11.4393057Z [========                               ] 22% Unzipping... emulator/netsimd     
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:11.4394215Z [========                               ] 22% Unzipping... emulator/bin64/      
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:11.4395401Z [========                               ] 22% Unzipping... emulator/qemu/       
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:11.4447271Z [========                               ] 22% Unzipping... emulator/NOTICE.txt  
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:11.4674628Z [========                               ] 22% Unzipping... emulator/crashpad_han
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:11.4678560Z [========                               ] 22% Unzipping... emulator/source.prope
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:11.5461338Z [========                               ] 22% Unzipping... emulator/nimble_bridg
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:11.5465417Z [========                               ] 22% Unzipping... emulator/LICENSE     
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:11.5496841Z [========                               ] 22% Unzipping... emulator/lib/        
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:11.5596840Z [========                               ] 22% Unzipping... emulator/qemu-img    
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:11.5597783Z [========                               ] 22% Unzipping... emulator/include/    
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:11.5607615Z [========                               ] 22% Unzipping... emulator/NOTICE.csv  
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:11.5608610Z [========                               ] 22% Unzipping... emulator/lib64/      
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:11.5817772Z [========                               ] 22% Unzipping... emulator/emulator-che
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:11.6026747Z [========                               ] 22% Unzipping... emulator/crashreport 
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:11.6037571Z [========                               ] 22% Unzipping... emulator/mksdcard    
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:11.6223733Z [========                               ] 22% Unzipping... emulator/resources/To
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:11.6293908Z [========                               ] 22% Unzipping... emulator/resources/de
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:11.6297202Z [========                               ] 22% Unzipping... emulator/resources/To
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:11.6312357Z [========                               ] 22% Unzipping... emulator/resources/de
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:11.6448897Z [========                               ] 22% Unzipping... emulator/resources/To
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:11.6450380Z [========                               ] 22% Unzipping... emulator/resources/ma
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:11.6479200Z [========                               ] 22% Unzipping... emulator/resources/de
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:11.6480553Z [========                               ] 22% Unzipping... emulator/resources/sk
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:11.6516449Z [========                               ] 22% Unzipping... emulator/resources/de
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:11.6517958Z [========                               ] 22% Unzipping... emulator/resources/ma
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:11.6531568Z [========                               ] 22% Unzipping... emulator/resources/po
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:11.6608778Z [========                               ] 22% Unzipping... emulator/resources/ma
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:11.6616609Z [=========                              ] 23% Unzipping... emulator/resources/ma
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:11.6698632Z [=========                              ] 23% Unzipping... emulator/resources/sk
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:11.6715530Z [=========                              ] 23% Unzipping... emulator/resources/ma
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:11.6751359Z [=========                              ] 23% Unzipping... emulator/bin64/e2fsck
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:11.6792146Z [=========                              ] 23% Unzipping... emulator/bin64/fsck.e
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:11.6822793Z [=========                              ] 23% Unzipping... emulator/bin64/tune2f
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:11.6837397Z [=========                              ] 23% Unzipping... emulator/bin64/resize
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:11.6864583Z [=========                              ] 23% Unzipping... emulator/bin64/mkfs.e
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:12.0433892Z [=========                              ] 23% Unzipping... emulator/qemu/linux-x
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:12.3851631Z [=========                              ] 24% Unzipping... emulator/qemu/linux-x
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:12.5536681Z [=========                              ] 25% Unzipping... emulator/qemu/linux-x
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:12.7350749Z [==========                             ] 25% Unzipping... emulator/qemu/linux-x
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:12.7353677Z [==========                             ] 25% Unzipping... emulator/lib/emulator
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:12.7357489Z [==========                             ] 25% Unzipping... emulator/lib/rtc_serv
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:12.7363214Z [==========                             ] 25% Unzipping... emulator/lib/advanced
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:12.7366899Z [==========                             ] 25% Unzipping... emulator/lib/cmake/  
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:12.7367805Z [==========                             ] 25% Unzipping... emulator/lib/emulator
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:12.7371110Z [==========                             ] 25% Unzipping... emulator/lib/control_
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:12.7373626Z [==========                             ] 25% Unzipping... emulator/lib/emulated
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:12.7376357Z [==========                             ] 25% Unzipping... emulator/lib/rtc_serv
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:12.7379626Z [==========                             ] 25% Unzipping... emulator/lib/emu-orig
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:12.7384652Z [==========                             ] 25% Unzipping... emulator/lib/hardware
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:12.7389369Z [==========                             ] 25% Unzipping... emulator/lib/pkgconfi
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:12.7389981Z [==========                             ] 25% Unzipping... emulator/lib/pc-bios/
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:12.7390547Z [==========                             ] 25% Unzipping... emulator/lib/snapshot
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:12.7394742Z [==========                             ] 25% Unzipping... emulator/lib/adb_serv
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:12.7402822Z [==========                             ] 25% Unzipping... emulator/lib/hostapd.
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:12.7417367Z [==========                             ] 25% Unzipping... emulator/lib/grpc_end
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:12.7424379Z [==========                             ] 25% Unzipping... emulator/lib/ca-bundl
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:12.7430059Z [==========                             ] 25% Unzipping... emulator/lib/ui_contr
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:12.7437150Z [==========                             ] 25% Unzipping... emulator/lib/snapshot
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:12.7438408Z [==========                             ] 25% Unzipping... emulator/lib/ice_conf
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:12.7539986Z [==========                             ] 25% Unzipping... emulator/lib/libflatb
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:12.7744794Z [==========                             ] 26% Unzipping... emulator/lib/libflatb
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:12.7752655Z [==========                             ] 26% Unzipping... emulator/lib/emulator
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:12.7755124Z [==========                             ] 26% Unzipping... emulator/lib/waterfal
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:12.7758816Z [==========                             ] 26% Unzipping... emulator/lib/emulated
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:12.7772489Z [==========                             ] 26% Unzipping... emulator/lib/cmake/fl
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:12.7776946Z [==========                             ] 26% Unzipping... emulator/lib/pkgconfi
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:12.7951404Z [==========                             ] 26% Unzipping... emulator/lib/pc-bios/
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:12.8034017Z [==========                             ] 26% Unzipping... emulator/include/flat
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:12.8103974Z [==========                             ] 26% Unzipping... emulator/lib64/libgli
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:12.8223280Z [==========                             ] 26% Unzipping... emulator/lib64/libpro
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:12.8224025Z [==========                             ] 26% Unzipping... emulator/lib64/qt/   
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:12.8617740Z [==========                             ] 26% Unzipping... emulator/lib64/liband
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:12.9307324Z [==========                             ] 26% Unzipping... emulator/lib64/libgfx
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:12.9317413Z [==========                             ] 26% Unzipping... emulator/lib64/gles_l
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:12.9318124Z [==========                             ] 26% Unzipping... emulator/lib64/liband
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:12.9318779Z [==========                             ] 26% Unzipping... emulator/lib64/vulkan
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:12.9319431Z [==========                             ] 26% Unzipping... emulator/lib64/gles_s
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:12.9322697Z [==========                             ] 26% Unzipping... emulator/lib64/libemu
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:12.9442088Z [==========                             ] 26% Unzipping... emulator/lib64/libpro
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:13.0952970Z [==========                             ] 26% Unzipping... emulator/lib64/liband
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:13.0970890Z [==========                             ] 26% Unzipping... emulator/lib64/libtcm
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:13.0975418Z [==========                             ] 26% Unzipping... emulator/lib64/libima
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:13.1037833Z [==========                             ] 26% Unzipping... emulator/lib64/libc++
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:13.1317195Z [==========                             ] 26% Unzipping... emulator/lib64/liband
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:13.1372394Z [==========                             ] 26% Unzipping... emulator/lib64/libabs
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:13.1374661Z [==========                             ] 26% Unzipping... emulator/lib64/gles_a
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:13.1478301Z [==========                             ] 26% Unzipping... emulator/lib64/libsha
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:13.1542248Z [==========                             ] 26% Unzipping... emulator/lib64/libc++
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:13.1543887Z [==========                             ] 26% Unzipping... emulator/lib64/qt/res
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:13.1544524Z [==========                             ] 26% Unzipping... emulator/lib64/qt/lib
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:13.1545217Z [==========                             ] 26% Unzipping... emulator/lib64/qt/tra
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:13.1545874Z [==========                             ] 26% Unzipping... emulator/lib64/qt/plu
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:13.1577292Z [==========                             ] 26% Unzipping... emulator/lib64/qt/res
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:13.2280062Z [==========                             ] 27% Unzipping... emulator/lib64/qt/res
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:13.3347892Z [==========                             ] 27% Unzipping... emulator/lib64/qt/lib
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:13.7223324Z [===========                            ] 28% Unzipping... emulator/lib64/qt/lib
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:14.1177932Z [===========                            ] 29% Unzipping... emulator/lib64/qt/lib
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:14.3127093Z [===========                            ] 30% Unzipping... emulator/lib64/qt/lib
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:14.3936954Z [============                           ] 30% Unzipping... emulator/lib64/qt/lib
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:14.5100563Z [============                           ] 30% Unzipping... emulator/lib64/qt/tra
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:14.5218116Z [============                           ] 30% Unzipping... emulator/lib64/qt/plu
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:14.5431779Z [============                           ] 30% Unzipping... emulator/lib64/gles_l
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:14.6059041Z [============                           ] 31% Unzipping... emulator/lib64/gles_l
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:14.9537583Z [============                           ] 31% Unzipping... emulator/lib64/vulkan
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:15.2749558Z [============                           ] 32% Unzipping... emulator/lib64/vulkan
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:15.3421731Z [============                           ] 32% Unzipping... emulator/lib64/gles_s
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:15.4004127Z [============                           ] 32% Unzipping... emulator/lib64/gles_a
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:15.4652012Z [=============                          ] 33% Unzipping... emulator/lib64/gles_a
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:15.9948418Z [=====================                  ] 55% Unzipping... emulator/lib64/gles_a
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:16.0412243Z [=====================                  ] 55% Installing Google APIs Intel x86_6
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:16.0847464Z [=====================                  ] 55% Downloading x86_64-26_r16.zip... e
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:16.2557918Z [======================                 ] 55% Downloading x86_64-26_r16.zip... e
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:16.6138686Z [======================                 ] 56% Downloading x86_64-26_r16.zip... e
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:16.9989084Z [======================                 ] 57% Downloading x86_64-26_r16.zip... e
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:17.3947981Z [=======================                ] 58% Downloading x86_64-26_r16.zip... e
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:17.7206791Z [=======================                ] 59% Downloading x86_64-26_r16.zip... e
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:17.9267237Z [=======================                ] 60% Downloading x86_64-26_r16.zip... e
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:18.0881094Z [========================               ] 60% Downloading x86_64-26_r16.zip... e
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:18.4656606Z [========================               ] 61% Downloading x86_64-26_r16.zip... e
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:18.8420410Z [========================               ] 62% Downloading x86_64-26_r16.zip... e
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:19.2440432Z [=========================              ] 63% Downloading x86_64-26_r16.zip... e
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:19.6098273Z [=========================              ] 64% Downloading x86_64-26_r16.zip... e
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:19.7653589Z [=========================              ] 65% Downloading x86_64-26_r16.zip... e
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:19.9825907Z [==========================             ] 65% Downloading x86_64-26_r16.zip... e
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:20.2448682Z [==========================             ] 66% Downloading x86_64-26_r16.zip... e
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:20.2460864Z [==========================             ] 66% Unzipping... emulator/lib64/gles_a
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:20.2461696Z [==========================             ] 66% Unzipping... x86_64/              
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:20.2464830Z [==========================             ] 66% Unzipping... x86_64/advancedFeatur
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:20.2584146Z [==========================             ] 66% Unzipping... x86_64/kernel-ranchu 
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:20.2628526Z [==========================             ] 66% Unzipping... x86_64/NOTICE.txt    
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:20.2630048Z [==========================             ] 66% Unzipping... x86_64/build.prop    
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:22.5469270Z [==========================             ] 66% Unzipping... x86_64/userdata.img  
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:22.5469964Z [==========================             ] 67% Unzipping... x86_64/userdata.img  
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:22.5472062Z [==========================             ] 67% Unzipping... x86_64/source.propert
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:22.5473130Z [==========================             ] 67% Unzipping... x86_64/data/         
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:22.5474001Z [==========================             ] 67% Unzipping... x86_64/data/misc/    
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:22.5476609Z [==========================             ] 67% Unzipping... x86_64/data/misc/wifi
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:22.5537573Z [==========================             ] 67% Unzipping... x86_64/ramdisk.img   
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:23.6641590Z [==========================             ] 67% Unzipping... x86_64/system.img    
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:24.6614028Z [===========================            ] 68% Unzipping... x86_64/system.img    
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:25.4832281Z [===========================            ] 69% Unzipping... x86_64/system.img    
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:26.0579960Z [===========================            ] 70% Unzipping... x86_64/system.img    
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:26.6295498Z [============================           ] 70% Unzipping... x86_64/system.img    
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:27.6822372Z [============================           ] 71% Unzipping... x86_64/system.img    
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:28.7341907Z [============================           ] 72% Unzipping... x86_64/system.img    
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:29.8553874Z [=============================          ] 73% Unzipping... x86_64/system.img    
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:30.7269560Z [=============================          ] 74% Unzipping... x86_64/system.img    
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:31.3165310Z [=============================          ] 75% Unzipping... x86_64/system.img    
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:31.8025700Z [==============================         ] 75% Unzipping... x86_64/system.img    
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:32.7331812Z [==============================         ] 76% Unzipping... x86_64/system.img    
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:36.0878853Z [==============================         ] 77% Unzipping... x86_64/system.img    
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:36.4923507Z [==============================         ] 77% Unzipping... x86_64/vendor.img    
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:36.4958462Z [==============================         ] 77% Unzipping... x86_64/encryptionkey.
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:36.6453760Z [==============================         ] 78% Unzipping... x86_64/encryptionkey.
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:36.6454513Z [=======================================] 100% Unzipping... x86_64/encryptionkey
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:36.6518187Z 
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:37.5805115Z Loading local repository...                                                     
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:37.5805925Z [=========                              ] 25% Loading local repository...       
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:37.5806835Z [=========                              ] 25% Fetch remote repository...        
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:37.5807546Z [=======================================] 100% Fetch remote repository...       
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:37.7604354Z Auto-selecting single ABI x86_64
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:38.2135327Z * daemon not running; starting now at tcp:5037
+compile	API26 named durable admission owner tests only	2026-10-18T12:38:38.2904201Z * daemon started successfully
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:52.3369682Z Do you wish to create a custom hardware profile? [no] Performing Streamed Install
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:52.3374658Z Success
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:55.2483184Z Performing Streamed Install
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:55.2483966Z Success
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:55.7112329Z INSTRUMENTATION_STATUS: numtests=16
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:55.7112722Z INSTRUMENTATION_STATUS: stream=
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:55.7113128Z com.mightyoung.muyon.androidlab.agentipc.DurableServiceHostOwnerTest:
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:55.7113599Z INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:55.7114479Z INSTRUMENTATION_STATUS: test=competing_connections_admit_once_and_reject_duplicate_requests_and_replay
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:55.7115214Z INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.androidlab.agentipc.DurableServiceHostOwnerTest
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:55.7115740Z INSTRUMENTATION_STATUS: current=1
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:55.7116009Z INSTRUMENTATION_STATUS_CODE: 1
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:55.8377571Z INSTRUMENTATION_STATUS: numtests=16
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:55.8378420Z INSTRUMENTATION_STATUS: stream=.
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:55.8379205Z INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:55.8380296Z INSTRUMENTATION_STATUS: test=competing_connections_admit_once_and_reject_duplicate_requests_and_replay
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:55.8381905Z INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.androidlab.agentipc.DurableServiceHostOwnerTest
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:55.8383079Z INSTRUMENTATION_STATUS: current=1
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:55.8383669Z INSTRUMENTATION_STATUS_CODE: 0
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:55.8391635Z INSTRUMENTATION_STATUS: numtests=16
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:55.8392405Z INSTRUMENTATION_STATUS: stream=
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:55.8393230Z INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:55.8394425Z INSTRUMENTATION_STATUS: test=expiry_and_clock_rollback_never_resurrect_and_requests_stay_unique
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:55.8395813Z INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.androidlab.agentipc.DurableServiceHostOwnerTest
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:55.8397072Z INSTRUMENTATION_STATUS: current=2
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:55.8397604Z INSTRUMENTATION_STATUS_CODE: 1
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:55.9196295Z INSTRUMENTATION_STATUS: numtests=16
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:55.9197318Z INSTRUMENTATION_STATUS: stream=.
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:55.9198125Z INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:55.9199078Z INSTRUMENTATION_STATUS: test=expiry_and_clock_rollback_never_resurrect_and_requests_stay_unique
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:55.9200405Z INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.androidlab.agentipc.DurableServiceHostOwnerTest
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:55.9201331Z INSTRUMENTATION_STATUS: current=2
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:55.9201810Z INSTRUMENTATION_STATUS_CODE: 0
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:55.9212078Z INSTRUMENTATION_STATUS: numtests=16
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:55.9212878Z INSTRUMENTATION_STATUS: stream=
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:55.9213712Z INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:55.9214832Z INSTRUMENTATION_STATUS: test=stale_authority_and_credential_revocation_deny
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:55.9216756Z INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.androidlab.agentipc.DurableServiceHostOwnerTest
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:55.9218525Z INSTRUMENTATION_STATUS: current=3
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:55.9219174Z INSTRUMENTATION_STATUS_CODE: 1
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:55.9864226Z INSTRUMENTATION_STATUS: numtests=16
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:55.9865732Z INSTRUMENTATION_STATUS: stream=.
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:55.9867126Z INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:55.9868313Z INSTRUMENTATION_STATUS: test=stale_authority_and_credential_revocation_deny
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:55.9869808Z INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.androidlab.agentipc.DurableServiceHostOwnerTest
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:55.9871147Z INSTRUMENTATION_STATUS: current=3
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:55.9872083Z INSTRUMENTATION_STATUS_CODE: 0
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:55.9878899Z INSTRUMENTATION_STATUS: numtests=16
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:55.9879939Z INSTRUMENTATION_STATUS: stream=
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:55.9880761Z INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:55.9882322Z INSTRUMENTATION_STATUS: test=duplicate_failure_after_expiry_cannot_resurrect_on_rollback_and_reconstruction
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:55.9883691Z INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.androidlab.agentipc.DurableServiceHostOwnerTest
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:55.9884626Z INSTRUMENTATION_STATUS: current=4
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:55.9885090Z INSTRUMENTATION_STATUS_CODE: 1
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.0472734Z INSTRUMENTATION_STATUS: numtests=16
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.0473437Z INSTRUMENTATION_STATUS: stream=
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.0474736Z Error in duplicate_failure_after_expiry_cannot_resurrect_on_rollback_and_reconstruction(com.mightyoung.muyon.androidlab.agentipc.DurableServiceHostOwnerTest):
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.0476607Z java.lang.AssertionError: expected null, but was:<9cbe0525-4023-4da2-a176-ef7770290283>
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.0477491Z 	at org.junit.Assert.fail(Assert.java:89)
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.0478127Z 	at org.junit.Assert.failNotNull(Assert.java:756)
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.0478782Z 	at org.junit.Assert.assertNull(Assert.java:738)
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.0479769Z 	at org.junit.Assert.assertNull(Assert.java:748)
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.0481446Z 	at com.mightyoung.muyon.androidlab.agentipc.DurableServiceHostOwnerTest.duplicate_failure_after_expiry_cannot_resurrect_on_rollback_and_reconstruction(DurableServiceHostOwnerTest.kt:218)
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.0482973Z 
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.0483270Z INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.0484235Z INSTRUMENTATION_STATUS: test=duplicate_failure_after_expiry_cannot_resurrect_on_rollback_and_reconstruction
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.0485510Z INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.androidlab.agentipc.DurableServiceHostOwnerTest
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.0487150Z INSTRUMENTATION_STATUS: stack=java.lang.AssertionError: expected null, but was:<9cbe0525-4023-4da2-a176-ef7770290283>
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.0488115Z 	at org.junit.Assert.fail(Assert.java:89)
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.0488664Z 	at org.junit.Assert.failNotNull(Assert.java:756)
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.0489257Z 	at org.junit.Assert.assertNull(Assert.java:738)
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.0489818Z 	at org.junit.Assert.assertNull(Assert.java:748)
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.0491362Z 	at com.mightyoung.muyon.androidlab.agentipc.DurableServiceHostOwnerTest.duplicate_failure_after_expiry_cannot_resurrect_on_rollback_and_reconstruction(DurableServiceHostOwnerTest.kt:218)
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.0492692Z 
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.0492889Z INSTRUMENTATION_STATUS: current=4
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.0493351Z INSTRUMENTATION_STATUS_CODE: -2
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.0493816Z INSTRUMENTATION_STATUS: numtests=16
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.0494277Z INSTRUMENTATION_STATUS: stream=
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.0494736Z INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.0495489Z INSTRUMENTATION_STATUS: test=mutation_waits_until_guarded_commit_finishes
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.0497060Z INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.androidlab.agentipc.DurableServiceHostOwnerTest
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.0498042Z INSTRUMENTATION_STATUS: current=5
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.0498530Z INSTRUMENTATION_STATUS_CODE: 1
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.2480907Z INSTRUMENTATION_STATUS: numtests=16
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.2482075Z INSTRUMENTATION_STATUS: stream=.
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.2483324Z INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.2484475Z INSTRUMENTATION_STATUS: test=mutation_waits_until_guarded_commit_finishes
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.2485698Z INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.androidlab.agentipc.DurableServiceHostOwnerTest
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.2486878Z INSTRUMENTATION_STATUS: current=5
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.2487423Z INSTRUMENTATION_STATUS_CODE: 0
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.2496079Z INSTRUMENTATION_STATUS: numtests=16
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.2497559Z INSTRUMENTATION_STATUS: stream=
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.2498401Z INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.2499506Z INSTRUMENTATION_STATUS: test=exact_full_budget_survives_close_and_commit_is_one_shot
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.2500687Z INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.androidlab.agentipc.DurableServiceHostOwnerTest
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.2501663Z INSTRUMENTATION_STATUS: current=6
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.2502116Z INSTRUMENTATION_STATUS_CODE: 1
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.3423671Z INSTRUMENTATION_STATUS: numtests=16
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.3424826Z INSTRUMENTATION_STATUS: stream=.
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.3426024Z INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.3426851Z INSTRUMENTATION_STATUS: test=exact_full_budget_survives_close_and_commit_is_one_shot
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.3427677Z INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.androidlab.agentipc.DurableServiceHostOwnerTest
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.3428713Z INSTRUMENTATION_STATUS: current=6
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.3429220Z INSTRUMENTATION_STATUS_CODE: 0
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.3441271Z INSTRUMENTATION_STATUS: numtests=16
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.3441804Z INSTRUMENTATION_STATUS: stream=
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.3445035Z INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.3445837Z INSTRUMENTATION_STATUS: test=independent_authority_is_denied_while_database_is_owned
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.3447470Z INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.androidlab.agentipc.DurableServiceHostOwnerTest
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.3448933Z INSTRUMENTATION_STATUS: current=7
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.3449558Z INSTRUMENTATION_STATUS_CODE: 1
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.3853314Z INSTRUMENTATION_STATUS: numtests=16
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.3853992Z INSTRUMENTATION_STATUS: stream=.
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.3854538Z INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.3855414Z INSTRUMENTATION_STATUS: test=independent_authority_is_denied_while_database_is_owned
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.3856916Z INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.androidlab.agentipc.DurableServiceHostOwnerTest
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.3857948Z INSTRUMENTATION_STATUS: current=7
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.3858470Z INSTRUMENTATION_STATUS_CODE: 0
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.3891399Z INSTRUMENTATION_STATUS: numtests=16
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.3892302Z INSTRUMENTATION_STATUS: stream=
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.3892907Z INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.3893772Z INSTRUMENTATION_STATUS: test=scope_and_proof_changes_invalidate_a_stored_hold
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.3895009Z INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.androidlab.agentipc.DurableServiceHostOwnerTest
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.3896664Z INSTRUMENTATION_STATUS: current=8
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.3897168Z INSTRUMENTATION_STATUS_CODE: 1
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.4508661Z INSTRUMENTATION_STATUS: numtests=16
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.4510442Z INSTRUMENTATION_STATUS: stream=.
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.4511269Z INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.4512152Z INSTRUMENTATION_STATUS: test=scope_and_proof_changes_invalidate_a_stored_hold
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.4513431Z INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.androidlab.agentipc.DurableServiceHostOwnerTest
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.4514434Z INSTRUMENTATION_STATUS: current=8
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.4514973Z INSTRUMENTATION_STATUS_CODE: 0
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.4537745Z INSTRUMENTATION_STATUS: numtests=16
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.4538634Z INSTRUMENTATION_STATUS: stream=
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.4539896Z INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.4541065Z INSTRUMENTATION_STATUS: test=missing_request_unique_in_otherwise_v1_schema_is_rejected_without_repair
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.4542931Z INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.androidlab.agentipc.DurableServiceHostOwnerTest
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.4544055Z INSTRUMENTATION_STATUS: current=9
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.4544829Z INSTRUMENTATION_STATUS_CODE: 1
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.5058302Z INSTRUMENTATION_STATUS: numtests=16
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.5059947Z INSTRUMENTATION_STATUS: stream=
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.5061605Z Error in missing_request_unique_in_otherwise_v1_schema_is_rejected_without_repair(com.mightyoung.muyon.androidlab.agentipc.DurableServiceHostOwnerTest):
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.5063668Z android.database.sqlite.SQLiteException: table android_metadata already exists (code 1): , while compiling: CREATE TABLE android_metadata (locale TEXT)
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.5065332Z 	at android.database.sqlite.SQLiteConnection.nativePrepareStatement(Native Method)
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.5066953Z 	at android.database.sqlite.SQLiteConnection.acquirePreparedStatement(SQLiteConnection.java:889)
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.5068220Z 	at android.database.sqlite.SQLiteConnection.prepare(SQLiteConnection.java:500)
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.5069320Z 	at android.database.sqlite.SQLiteSession.prepare(SQLiteSession.java:588)
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.5070295Z 	at android.database.sqlite.SQLiteProgram.<init>(SQLiteProgram.java:58)
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.5071178Z 	at android.database.sqlite.SQLiteStatement.<init>(SQLiteStatement.java:31)
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.5072221Z 	at android.database.sqlite.SQLiteDatabase.executeSql(SQLiteDatabase.java:1677)
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.5073288Z 	at android.database.sqlite.SQLiteDatabase.execSQL(SQLiteDatabase.java:1608)
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.5075086Z 	at com.mightyoung.muyon.androidlab.agentipc.DurableServiceHostOwnerTest.missing_request_unique_in_otherwise_v1_schema_is_rejected_without_repair(DurableServiceHostOwnerTest.kt:241)
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.5076808Z 
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.5077074Z INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.5078320Z INSTRUMENTATION_STATUS: test=missing_request_unique_in_otherwise_v1_schema_is_rejected_without_repair
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.5079678Z INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.androidlab.agentipc.DurableServiceHostOwnerTest
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.5081777Z INSTRUMENTATION_STATUS: stack=android.database.sqlite.SQLiteException: table android_metadata already exists (code 1): , while compiling: CREATE TABLE android_metadata (locale TEXT)
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.5083448Z 	at android.database.sqlite.SQLiteConnection.nativePrepareStatement(Native Method)
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.5084783Z 	at android.database.sqlite.SQLiteConnection.acquirePreparedStatement(SQLiteConnection.java:889)
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.5087943Z 	at android.database.sqlite.SQLiteConnection.prepare(SQLiteConnection.java:500)
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.5089136Z 	at android.database.sqlite.SQLiteSession.prepare(SQLiteSession.java:588)
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.5090138Z 	at android.database.sqlite.SQLiteProgram.<init>(SQLiteProgram.java:58)
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.5091047Z 	at android.database.sqlite.SQLiteStatement.<init>(SQLiteStatement.java:31)
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.5092087Z 	at android.database.sqlite.SQLiteDatabase.executeSql(SQLiteDatabase.java:1677)
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.5093203Z 	at android.database.sqlite.SQLiteDatabase.execSQL(SQLiteDatabase.java:1608)
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.5095100Z 	at com.mightyoung.muyon.androidlab.agentipc.DurableServiceHostOwnerTest.missing_request_unique_in_otherwise_v1_schema_is_rejected_without_repair(DurableServiceHostOwnerTest.kt:241)
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.5096869Z 
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.5097098Z INSTRUMENTATION_STATUS: current=9
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.5097637Z INSTRUMENTATION_STATUS_CODE: -2
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.5098101Z INSTRUMENTATION_STATUS: numtests=16
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.5098615Z INSTRUMENTATION_STATUS: stream=
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.5099148Z INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.5100011Z INSTRUMENTATION_STATUS: test=two_connections_share_holds_consumed_quota_and_immutable_ceiling
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.5101396Z INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.androidlab.agentipc.DurableServiceHostOwnerTest
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.5102745Z INSTRUMENTATION_STATUS: current=10
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.5103266Z INSTRUMENTATION_STATUS_CODE: 1
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.6025578Z INSTRUMENTATION_STATUS: numtests=16
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.6026462Z INSTRUMENTATION_STATUS: stream=.
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.6027036Z INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.6027979Z INSTRUMENTATION_STATUS: test=two_connections_share_holds_consumed_quota_and_immutable_ceiling
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.6029210Z INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.androidlab.agentipc.DurableServiceHostOwnerTest
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.6030218Z INSTRUMENTATION_STATUS: current=10
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.6030741Z INSTRUMENTATION_STATUS_CODE: 0
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.6037792Z INSTRUMENTATION_STATUS: numtests=16
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.6038338Z INSTRUMENTATION_STATUS: stream=
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.6038876Z INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.6039813Z INSTRUMENTATION_STATUS: test=exact_tuple_and_original_bytes_are_required_without_consuming_hold
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.6041187Z INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.androidlab.agentipc.DurableServiceHostOwnerTest
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.6042134Z INSTRUMENTATION_STATUS: current=11
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.6042627Z INSTRUMENTATION_STATUS_CODE: 1
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.6923704Z INSTRUMENTATION_STATUS: numtests=16
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.6924671Z INSTRUMENTATION_STATUS: stream=.
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.6925561Z INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.6927190Z INSTRUMENTATION_STATUS: test=exact_tuple_and_original_bytes_are_required_without_consuming_hold
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.6928742Z INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.androidlab.agentipc.DurableServiceHostOwnerTest
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.6929916Z INSTRUMENTATION_STATUS: current=11
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.6930594Z INSTRUMENTATION_STATUS_CODE: 0
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.6938421Z INSTRUMENTATION_STATUS: numtests=16
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.6939250Z INSTRUMENTATION_STATUS: stream=
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.6939704Z INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.6940443Z INSTRUMENTATION_STATUS: test=complete_call_budget_requires_exact_trusted_proof
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.6941722Z INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.androidlab.agentipc.DurableServiceHostOwnerTest
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.6942783Z INSTRUMENTATION_STATUS: current=12
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.6943332Z INSTRUMENTATION_STATUS_CODE: 1
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.7577418Z INSTRUMENTATION_STATUS: numtests=16
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.7578428Z INSTRUMENTATION_STATUS: stream=.
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.7579460Z INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.7580767Z INSTRUMENTATION_STATUS: test=complete_call_budget_requires_exact_trusted_proof
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.7582269Z INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.androidlab.agentipc.DurableServiceHostOwnerTest
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.7583516Z INSTRUMENTATION_STATUS: current=12
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.7584371Z INSTRUMENTATION_STATUS_CODE: 0
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.7591758Z INSTRUMENTATION_STATUS: numtests=16
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.7592327Z INSTRUMENTATION_STATUS: stream=
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.7592860Z INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.7593887Z INSTRUMENTATION_STATUS: test=each_quota_dimension_independently_limits_consumed_calls_after_reopen_and_refresh
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.7595351Z INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.androidlab.agentipc.DurableServiceHostOwnerTest
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.7596636Z INSTRUMENTATION_STATUS: current=13
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.7597157Z INSTRUMENTATION_STATUS_CODE: 1
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.9657183Z INSTRUMENTATION_STATUS: numtests=16
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.9657888Z INSTRUMENTATION_STATUS: stream=.
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.9658415Z INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.9659488Z INSTRUMENTATION_STATUS: test=each_quota_dimension_independently_limits_consumed_calls_after_reopen_and_refresh
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.9661027Z INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.androidlab.agentipc.DurableServiceHostOwnerTest
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.9662585Z INSTRUMENTATION_STATUS: current=13
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.9663089Z INSTRUMENTATION_STATUS_CODE: 0
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.9675070Z INSTRUMENTATION_STATUS: numtests=16
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.9676350Z INSTRUMENTATION_STATUS: stream=
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.9676893Z INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.9677662Z INSTRUMENTATION_STATUS: test=exact_expiry_boundary_denies_and_releases_only_the_hold
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.9678725Z INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.androidlab.agentipc.DurableServiceHostOwnerTest
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.9679681Z INSTRUMENTATION_STATUS: current=14
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:56.9680209Z INSTRUMENTATION_STATUS_CODE: 1
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:57.0238807Z INSTRUMENTATION_STATUS: numtests=16
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:57.0239875Z INSTRUMENTATION_STATUS: stream=.
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:57.0240636Z INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:57.0241725Z INSTRUMENTATION_STATUS: test=exact_expiry_boundary_denies_and_releases_only_the_hold
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:57.0243254Z INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.androidlab.agentipc.DurableServiceHostOwnerTest
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:57.0244418Z INSTRUMENTATION_STATUS: current=14
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:57.0245057Z INSTRUMENTATION_STATUS_CODE: 0
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:57.0254839Z INSTRUMENTATION_STATUS: numtests=16
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:57.0255640Z INSTRUMENTATION_STATUS: stream=
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:57.0256590Z INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:57.0257708Z INSTRUMENTATION_STATUS: test=missing_authority_bad_schema_corruption_and_unsigned_overflow_fail_closed
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:57.0259246Z INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.androidlab.agentipc.DurableServiceHostOwnerTest
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:57.0260453Z INSTRUMENTATION_STATUS: current=15
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:57.0261090Z INSTRUMENTATION_STATUS_CODE: 1
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:57.0809400Z INSTRUMENTATION_STATUS: numtests=16
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:57.0810485Z INSTRUMENTATION_STATUS: stream=.
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:57.0811638Z INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:57.0812921Z INSTRUMENTATION_STATUS: test=missing_authority_bad_schema_corruption_and_unsigned_overflow_fail_closed
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:57.0814401Z INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.androidlab.agentipc.DurableServiceHostOwnerTest
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:57.0815543Z INSTRUMENTATION_STATUS: current=15
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:57.0816374Z INSTRUMENTATION_STATUS_CODE: 0
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:57.0828033Z INSTRUMENTATION_STATUS: numtests=16
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:57.0828899Z INSTRUMENTATION_STATUS: stream=
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:57.0829629Z INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:57.0830564Z INSTRUMENTATION_STATUS: test=transaction_failure_rolls_back_consumption_and_admission
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:57.0831979Z INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.androidlab.agentipc.DurableServiceHostOwnerTest
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:57.0832948Z INSTRUMENTATION_STATUS: current=16
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:57.0833575Z INSTRUMENTATION_STATUS_CODE: 1
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:57.1512704Z INSTRUMENTATION_STATUS: numtests=16
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:57.1513143Z INSTRUMENTATION_STATUS: stream=.
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:57.1513442Z INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:57.1513912Z INSTRUMENTATION_STATUS: test=transaction_failure_rolls_back_consumption_and_admission
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:57.1514593Z INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.androidlab.agentipc.DurableServiceHostOwnerTest
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:57.1515126Z INSTRUMENTATION_STATUS: current=16
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:57.1515391Z INSTRUMENTATION_STATUS_CODE: 0
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:57.1710595Z INSTRUMENTATION_RESULT: stream=
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:57.1711111Z 
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:57.1711284Z Time: 1.446
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:57.1711602Z There were 2 failures:
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:57.1712769Z 1) duplicate_failure_after_expiry_cannot_resurrect_on_rollback_and_reconstruction(com.mightyoung.muyon.androidlab.agentipc.DurableServiceHostOwnerTest)
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:57.1714430Z java.lang.AssertionError: expected null, but was:<9cbe0525-4023-4da2-a176-ef7770290283>
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:57.1715252Z 	at org.junit.Assert.fail(Assert.java:89)
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:57.1716483Z 	at org.junit.Assert.failNotNull(Assert.java:756)
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:57.1717101Z 	at org.junit.Assert.assertNull(Assert.java:738)
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:57.1717714Z 	at org.junit.Assert.assertNull(Assert.java:748)
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:57.1719354Z 	at com.mightyoung.muyon.androidlab.agentipc.DurableServiceHostOwnerTest.duplicate_failure_after_expiry_cannot_resurrect_on_rollback_and_reconstruction(DurableServiceHostOwnerTest.kt:218)
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:57.1721456Z 2) missing_request_unique_in_otherwise_v1_schema_is_rejected_without_repair(com.mightyoung.muyon.androidlab.agentipc.DurableServiceHostOwnerTest)
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:57.1723230Z android.database.sqlite.SQLiteException: table android_metadata already exists (code 1): , while compiling: CREATE TABLE android_metadata (locale TEXT)
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:57.1724061Z 	at android.database.sqlite.SQLiteConnection.nativePrepareStatement(Native Method)
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:57.1724752Z 	at android.database.sqlite.SQLiteConnection.acquirePreparedStatement(SQLiteConnection.java:889)
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:57.1726021Z 	at android.database.sqlite.SQLiteConnection.prepare(SQLiteConnection.java:500)
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:57.1727217Z 	at android.database.sqlite.SQLiteSession.prepare(SQLiteSession.java:588)
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:57.1728140Z 	at android.database.sqlite.SQLiteProgram.<init>(SQLiteProgram.java:58)
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:57.1728690Z 	at android.database.sqlite.SQLiteStatement.<init>(SQLiteStatement.java:31)
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:57.1729258Z 	at android.database.sqlite.SQLiteDatabase.executeSql(SQLiteDatabase.java:1677)
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:57.1729821Z 	at android.database.sqlite.SQLiteDatabase.execSQL(SQLiteDatabase.java:1608)
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:57.1730768Z 	at com.mightyoung.muyon.androidlab.agentipc.DurableServiceHostOwnerTest.missing_request_unique_in_otherwise_v1_schema_is_rejected_without_repair(DurableServiceHostOwnerTest.kt:241)
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:57.1731504Z 
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:57.1731831Z FAILURES!!!
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:57.1732031Z Tests run: 16,  Failures: 2
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:57.1732191Z 
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:57.1732197Z 
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:57.1732289Z INSTRUMENTATION_CODE: -1
+compile	API26 named durable admission owner tests only	2026-10-18T12:39:57.1899569Z ##[error]Process completed with exit code 1.

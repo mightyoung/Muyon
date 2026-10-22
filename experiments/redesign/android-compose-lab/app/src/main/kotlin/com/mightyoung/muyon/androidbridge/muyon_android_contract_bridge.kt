@@ -30,6 +30,9 @@ import java.nio.CharBuffer
 import java.nio.charset.CodingErrorAction
 import java.util.concurrent.atomic.AtomicLong
 import java.util.concurrent.ConcurrentHashMap
+import android.os.Build
+import androidx.annotation.RequiresApi
+import java.util.concurrent.atomic.AtomicBoolean
 
 // This is a helper for safely working with byte buffers returned from the Rust code.
 // A rust-owned buffer is represented by its capacity, its current length, and a
@@ -649,6 +652,122 @@ internal open class UniffiForeignFutureResultVoid(
 internal interface UniffiForeignFutureCompleteVoid : com.sun.jna.Callback {
     fun callback(`callbackData`: Long,`result`: UniffiForeignFutureResultVoid.UniffiByValue,)
 }
+internal interface UniffiCallbackInterfaceRegisteredToolSettingsMethod0 : com.sun.jna.Callback {
+    fun callback(`uniffiHandle`: Long,`uniffiOutReturn`: RustBuffer,uniffiCallStatus: UniffiRustCallStatus,)
+}
+internal interface UniffiCallbackInterfaceServiceHostOwnerCallbackMethod0 : com.sun.jna.Callback {
+    fun callback(`uniffiHandle`: Long,`conversation`: RustBuffer.ByValue,`text`: RustBuffer.ByValue,`uniffiOutReturn`: RustBuffer,uniffiCallStatus: UniffiRustCallStatus,)
+}
+internal interface UniffiCallbackInterfaceServiceHostOwnerCallbackMethod1 : com.sun.jna.Callback {
+    fun callback(`uniffiHandle`: Long,`profile`: RustBuffer.ByValue,`reference`: RustBuffer.ByValue,`uniffiOutReturn`: RustBuffer,uniffiCallStatus: UniffiRustCallStatus,)
+}
+internal interface UniffiCallbackInterfaceServiceHostOwnerCallbackMethod2 : com.sun.jna.Callback {
+    fun callback(`uniffiHandle`: Long,`reservation`: RustBuffer.ByValue,`binding`: RustBuffer.ByValue,`requestId`: RustBuffer.ByValue,`payload`: RustBuffer.ByValue,`context`: RustBuffer.ByValue,`capability`: RustBuffer.ByValue,`uniffiOutReturn`: ByteByReference,uniffiCallStatus: UniffiRustCallStatus,)
+}
+internal interface UniffiCallbackInterfaceServiceHostOwnerCallbackMethod3 : com.sun.jna.Callback {
+    fun callback(`uniffiHandle`: Long,`admission`: RustBuffer.ByValue,`binding`: RustBuffer.ByValue,`context`: RustBuffer.ByValue,`payload`: RustBuffer.ByValue,`capability`: RustBuffer.ByValue,`uniffiOutReturn`: RustBuffer,uniffiCallStatus: UniffiRustCallStatus,)
+}
+internal interface UniffiCallbackInterfaceServiceHostOwnerCallbackMethod4 : com.sun.jna.Callback {
+    fun callback(`uniffiHandle`: Long,`admission`: RustBuffer.ByValue,`binding`: RustBuffer.ByValue,`context`: RustBuffer.ByValue,`payload`: RustBuffer.ByValue,`capability`: RustBuffer.ByValue,`control`: Long,`uniffiOutReturn`: RustBuffer,uniffiCallStatus: UniffiRustCallStatus,)
+}
+internal interface UniffiCallbackInterfaceServiceHostOwnerCallbackMethod5 : com.sun.jna.Callback {
+    fun callback(`uniffiHandle`: Long,`admission`: RustBuffer.ByValue,`accepted`: Byte,`uniffiOutReturn`: ByteByReference,uniffiCallStatus: UniffiRustCallStatus,)
+}
+internal interface UniffiCallbackInterfaceServiceHostOwnerCallbackMethod6 : com.sun.jna.Callback {
+    fun callback(`uniffiHandle`: Long,`admission`: RustBuffer.ByValue,`uniffiOutReturn`: RustBuffer,uniffiCallStatus: UniffiRustCallStatus,)
+}
+internal interface UniffiCallbackInterfaceServiceHostOwnerCallbackMethod7 : com.sun.jna.Callback {
+    fun callback(`uniffiHandle`: Long,`uniffiOutReturn`: RustBuffer,uniffiCallStatus: UniffiRustCallStatus,)
+}
+internal interface UniffiCallbackInterfaceServiceHostOwnerCallbackMethod8 : com.sun.jna.Callback {
+    fun callback(`uniffiHandle`: Long,`uniffiOutReturn`: RustBuffer,uniffiCallStatus: UniffiRustCallStatus,)
+}
+internal interface UniffiCallbackInterfaceServiceHostOwnerCallbackMethod9 : com.sun.jna.Callback {
+    fun callback(`uniffiHandle`: Long,`binding`: RustBuffer.ByValue,`payload`: RustBuffer.ByValue,`uniffiOutReturn`: ByteByReference,uniffiCallStatus: UniffiRustCallStatus,)
+}
+internal interface UniffiCallbackInterfaceServiceHostOwnerCallbackMethod10 : com.sun.jna.Callback {
+    fun callback(`uniffiHandle`: Long,`binding`: RustBuffer.ByValue,`requestId`: RustBuffer.ByValue,`payload`: RustBuffer.ByValue,`budget`: RustBuffer.ByValue,`uniffiOutReturn`: RustBuffer,uniffiCallStatus: UniffiRustCallStatus,)
+}
+internal interface UniffiCallbackInterfaceServiceHostOwnerCallbackMethod11 : com.sun.jna.Callback {
+    fun callback(`uniffiHandle`: Long,`reservation`: RustBuffer.ByValue,`uniffiOutReturn`: ByteByReference,uniffiCallStatus: UniffiRustCallStatus,)
+}
+internal interface UniffiCallbackInterfaceServiceHostOwnerCallbackMethod12 : com.sun.jna.Callback {
+    fun callback(`uniffiHandle`: Long,`reservation`: RustBuffer.ByValue,`binding`: RustBuffer.ByValue,`requestId`: RustBuffer.ByValue,`payload`: RustBuffer.ByValue,`credentialProfileId`: RustBuffer.ByValue,`credentialRef`: RustBuffer.ByValue,`uniffiOutReturn`: RustBuffer,uniffiCallStatus: UniffiRustCallStatus,)
+}
+@Structure.FieldOrder("uniffiFree", "uniffiClone", "snapshot")
+internal open class UniffiVTableCallbackInterfaceRegisteredToolSettings(
+    @JvmField internal var `uniffiFree`: UniffiCallbackInterfaceFree? = null,
+    @JvmField internal var `uniffiClone`: UniffiCallbackInterfaceClone? = null,
+    @JvmField internal var `snapshot`: UniffiCallbackInterfaceRegisteredToolSettingsMethod0? = null,
+) : Structure() {
+    class UniffiByValue(
+        `uniffiFree`: UniffiCallbackInterfaceFree? = null,
+        `uniffiClone`: UniffiCallbackInterfaceClone? = null,
+        `snapshot`: UniffiCallbackInterfaceRegisteredToolSettingsMethod0? = null,
+    ): UniffiVTableCallbackInterfaceRegisteredToolSettings(`uniffiFree`,`uniffiClone`,`snapshot`,), Structure.ByValue
+
+   internal fun uniffiSetValue(other: UniffiVTableCallbackInterfaceRegisteredToolSettings) {
+        `uniffiFree` = other.`uniffiFree`
+        `uniffiClone` = other.`uniffiClone`
+        `snapshot` = other.`snapshot`
+    }
+
+}
+@Structure.FieldOrder("uniffiFree", "uniffiClone", "currentChatAuthority", "credentialCapability", "bindChatContext", "exchangeChat", "exchangeLiveChat", "settleChat", "chatSettlement", "currentScope", "currentProvider", "reviewPayload", "reserveBudget", "releaseReservation", "commitAdmission")
+internal open class UniffiVTableCallbackInterfaceServiceHostOwnerCallback(
+    @JvmField internal var `uniffiFree`: UniffiCallbackInterfaceFree? = null,
+    @JvmField internal var `uniffiClone`: UniffiCallbackInterfaceClone? = null,
+    @JvmField internal var `currentChatAuthority`: UniffiCallbackInterfaceServiceHostOwnerCallbackMethod0? = null,
+    @JvmField internal var `credentialCapability`: UniffiCallbackInterfaceServiceHostOwnerCallbackMethod1? = null,
+    @JvmField internal var `bindChatContext`: UniffiCallbackInterfaceServiceHostOwnerCallbackMethod2? = null,
+    @JvmField internal var `exchangeChat`: UniffiCallbackInterfaceServiceHostOwnerCallbackMethod3? = null,
+    @JvmField internal var `exchangeLiveChat`: UniffiCallbackInterfaceServiceHostOwnerCallbackMethod4? = null,
+    @JvmField internal var `settleChat`: UniffiCallbackInterfaceServiceHostOwnerCallbackMethod5? = null,
+    @JvmField internal var `chatSettlement`: UniffiCallbackInterfaceServiceHostOwnerCallbackMethod6? = null,
+    @JvmField internal var `currentScope`: UniffiCallbackInterfaceServiceHostOwnerCallbackMethod7? = null,
+    @JvmField internal var `currentProvider`: UniffiCallbackInterfaceServiceHostOwnerCallbackMethod8? = null,
+    @JvmField internal var `reviewPayload`: UniffiCallbackInterfaceServiceHostOwnerCallbackMethod9? = null,
+    @JvmField internal var `reserveBudget`: UniffiCallbackInterfaceServiceHostOwnerCallbackMethod10? = null,
+    @JvmField internal var `releaseReservation`: UniffiCallbackInterfaceServiceHostOwnerCallbackMethod11? = null,
+    @JvmField internal var `commitAdmission`: UniffiCallbackInterfaceServiceHostOwnerCallbackMethod12? = null,
+) : Structure() {
+    class UniffiByValue(
+        `uniffiFree`: UniffiCallbackInterfaceFree? = null,
+        `uniffiClone`: UniffiCallbackInterfaceClone? = null,
+        `currentChatAuthority`: UniffiCallbackInterfaceServiceHostOwnerCallbackMethod0? = null,
+        `credentialCapability`: UniffiCallbackInterfaceServiceHostOwnerCallbackMethod1? = null,
+        `bindChatContext`: UniffiCallbackInterfaceServiceHostOwnerCallbackMethod2? = null,
+        `exchangeChat`: UniffiCallbackInterfaceServiceHostOwnerCallbackMethod3? = null,
+        `exchangeLiveChat`: UniffiCallbackInterfaceServiceHostOwnerCallbackMethod4? = null,
+        `settleChat`: UniffiCallbackInterfaceServiceHostOwnerCallbackMethod5? = null,
+        `chatSettlement`: UniffiCallbackInterfaceServiceHostOwnerCallbackMethod6? = null,
+        `currentScope`: UniffiCallbackInterfaceServiceHostOwnerCallbackMethod7? = null,
+        `currentProvider`: UniffiCallbackInterfaceServiceHostOwnerCallbackMethod8? = null,
+        `reviewPayload`: UniffiCallbackInterfaceServiceHostOwnerCallbackMethod9? = null,
+        `reserveBudget`: UniffiCallbackInterfaceServiceHostOwnerCallbackMethod10? = null,
+        `releaseReservation`: UniffiCallbackInterfaceServiceHostOwnerCallbackMethod11? = null,
+        `commitAdmission`: UniffiCallbackInterfaceServiceHostOwnerCallbackMethod12? = null,
+    ): UniffiVTableCallbackInterfaceServiceHostOwnerCallback(`uniffiFree`,`uniffiClone`,`currentChatAuthority`,`credentialCapability`,`bindChatContext`,`exchangeChat`,`exchangeLiveChat`,`settleChat`,`chatSettlement`,`currentScope`,`currentProvider`,`reviewPayload`,`reserveBudget`,`releaseReservation`,`commitAdmission`,), Structure.ByValue
+
+   internal fun uniffiSetValue(other: UniffiVTableCallbackInterfaceServiceHostOwnerCallback) {
+        `uniffiFree` = other.`uniffiFree`
+        `uniffiClone` = other.`uniffiClone`
+        `currentChatAuthority` = other.`currentChatAuthority`
+        `credentialCapability` = other.`credentialCapability`
+        `bindChatContext` = other.`bindChatContext`
+        `exchangeChat` = other.`exchangeChat`
+        `exchangeLiveChat` = other.`exchangeLiveChat`
+        `settleChat` = other.`settleChat`
+        `chatSettlement` = other.`chatSettlement`
+        `currentScope` = other.`currentScope`
+        `currentProvider` = other.`currentProvider`
+        `reviewPayload` = other.`reviewPayload`
+        `reserveBudget` = other.`reserveBudget`
+        `releaseReservation` = other.`releaseReservation`
+        `commitAdmission` = other.`commitAdmission`
+    }
+
+}
 
 // A JNA Library to expose the extern-C FFI definitions.
 // This is an implementation detail which will be called internally by the public API.
@@ -678,6 +797,74 @@ internal object IntegrityCheckingUniffiLib {
     ): Int
     external fun uniffi_muyon_android_contract_bridge_checksum_func_validate_bundled_contract(
     ): Int
+    external fun uniffi_muyon_android_contract_bridge_checksum_method_agentservicecontroller_await_settled(
+    ): Int
+    external fun uniffi_muyon_android_contract_bridge_checksum_method_agentservicecontroller_cancel(
+    ): Int
+    external fun uniffi_muyon_android_contract_bridge_checksum_method_agentservicecontroller_client_gone(
+    ): Int
+    external fun uniffi_muyon_android_contract_bridge_checksum_method_agentservicecontroller_close(
+    ): Int
+    external fun uniffi_muyon_android_contract_bridge_checksum_method_agentservicecontroller_connect(
+    ): Int
+    external fun uniffi_muyon_android_contract_bridge_checksum_method_agentservicecontroller_current(
+    ): Int
+    external fun uniffi_muyon_android_contract_bridge_checksum_method_agentservicecontroller_lookup(
+    ): Int
+    external fun uniffi_muyon_android_contract_bridge_checksum_method_agentservicecontroller_release_client(
+    ): Int
+    external fun uniffi_muyon_android_contract_bridge_checksum_method_agentservicecontroller_retire_service(
+    ): Int
+    external fun uniffi_muyon_android_contract_bridge_checksum_method_agentservicecontroller_service_admission_probe(
+    ): Int
+    external fun uniffi_muyon_android_contract_bridge_checksum_method_agentservicecontroller_set_visibility(
+    ): Int
+    external fun uniffi_muyon_android_contract_bridge_checksum_method_agentservicecontroller_start_run(
+    ): Int
+    external fun uniffi_muyon_android_contract_bridge_checksum_method_agentservicecontroller_status(
+    ): Int
+    external fun uniffi_muyon_android_contract_bridge_checksum_method_agentservicecontroller_submit_ordinary_chat(
+    ): Int
+    external fun uniffi_muyon_android_contract_bridge_checksum_method_agentservicecontroller_submit_supplier_read(
+    ): Int
+    external fun uniffi_muyon_android_contract_bridge_checksum_method_agentservicecontroller_supplier_read_events(
+    ): Int
+    external fun uniffi_muyon_android_contract_bridge_checksum_method_registeredtoolsettings_snapshot(
+    ): Int
+    external fun uniffi_muyon_android_contract_bridge_checksum_method_servicehostownercallback_current_chat_authority(
+    ): Int
+    external fun uniffi_muyon_android_contract_bridge_checksum_method_servicehostownercallback_credential_capability(
+    ): Int
+    external fun uniffi_muyon_android_contract_bridge_checksum_method_servicehostownercallback_bind_chat_context(
+    ): Int
+    external fun uniffi_muyon_android_contract_bridge_checksum_method_servicehostownercallback_exchange_chat(
+    ): Int
+    external fun uniffi_muyon_android_contract_bridge_checksum_method_servicehostownercallback_exchange_live_chat(
+    ): Int
+    external fun uniffi_muyon_android_contract_bridge_checksum_method_servicehostownercallback_settle_chat(
+    ): Int
+    external fun uniffi_muyon_android_contract_bridge_checksum_method_servicehostownercallback_chat_settlement(
+    ): Int
+    external fun uniffi_muyon_android_contract_bridge_checksum_method_servicehostownercallback_current_scope(
+    ): Int
+    external fun uniffi_muyon_android_contract_bridge_checksum_method_servicehostownercallback_current_provider(
+    ): Int
+    external fun uniffi_muyon_android_contract_bridge_checksum_method_servicehostownercallback_review_payload(
+    ): Int
+    external fun uniffi_muyon_android_contract_bridge_checksum_method_servicehostownercallback_reserve_budget(
+    ): Int
+    external fun uniffi_muyon_android_contract_bridge_checksum_method_servicehostownercallback_release_reservation(
+    ): Int
+    external fun uniffi_muyon_android_contract_bridge_checksum_method_servicehostownercallback_commit_admission(
+    ): Int
+    external fun uniffi_muyon_android_contract_bridge_checksum_method_serviceownerruncontrol_allowed(
+    ): Int
+    external fun uniffi_muyon_android_contract_bridge_checksum_constructor_agentservicecontroller_new(
+    ): Int
+    external fun uniffi_muyon_android_contract_bridge_checksum_constructor_agentservicecontroller_with_host(
+    ): Int
+    external fun uniffi_muyon_android_contract_bridge_checksum_constructor_agentservicecontroller_with_registered_tools(
+    ): Int
     external fun ffi_muyon_android_contract_bridge_uniffi_contract_version(
     ): Int
 
@@ -686,13 +873,108 @@ internal object IntegrityCheckingUniffiLib {
 
 internal object UniffiLib {
     
+    // The Cleaner for the whole library
+    internal val CLEANER: UniffiCleaner by lazy {
+        UniffiCleaner.create()
+    }
+    
 
     init {
         Native.register(UniffiLib::class.java, findLibraryName(componentName = "muyon_android_contract_bridge"))
+        uniffiCallbackInterfaceRegisteredToolSettings.register(this)
+        uniffiCallbackInterfaceServiceHostOwnerCallback.register(this)
         
     }
 
     internal fun ensureInitialized() = Unit
+    external fun uniffi_muyon_android_contract_bridge_fn_clone_agentservicecontroller(`handle`: Long,uniffi_out_err: UniffiRustCallStatus, 
+    ): Long
+    external fun uniffi_muyon_android_contract_bridge_fn_free_agentservicecontroller(`handle`: Long,uniffi_out_err: UniffiRustCallStatus, 
+    ): Unit
+    external fun uniffi_muyon_android_contract_bridge_fn_constructor_agentservicecontroller_new(`config`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): Long
+    external fun uniffi_muyon_android_contract_bridge_fn_constructor_agentservicecontroller_with_host(`config`: RustBuffer.ByValue,`owner`: Long,`mode`: RustBuffer.ByValue,`budget`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): Long
+    external fun uniffi_muyon_android_contract_bridge_fn_constructor_agentservicecontroller_with_registered_tools(`config`: RustBuffer.ByValue,`owner`: Long,`mode`: RustBuffer.ByValue,`budget`: RustBuffer.ByValue,`settings`: Long,`syntheticTools`: Byte,uniffi_out_err: UniffiRustCallStatus, 
+    ): Long
+    external fun uniffi_muyon_android_contract_bridge_fn_method_agentservicecontroller_await_settled(`ptr`: Long,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    external fun uniffi_muyon_android_contract_bridge_fn_method_agentservicecontroller_cancel(`ptr`: Long,`req`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    external fun uniffi_muyon_android_contract_bridge_fn_method_agentservicecontroller_client_gone(`ptr`: Long,`platformClientKey`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    external fun uniffi_muyon_android_contract_bridge_fn_method_agentservicecontroller_close(`ptr`: Long,`req`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    external fun uniffi_muyon_android_contract_bridge_fn_method_agentservicecontroller_connect(`ptr`: Long,`req`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    external fun uniffi_muyon_android_contract_bridge_fn_method_agentservicecontroller_current(`ptr`: Long,`req`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    external fun uniffi_muyon_android_contract_bridge_fn_method_agentservicecontroller_lookup(`ptr`: Long,`req`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    external fun uniffi_muyon_android_contract_bridge_fn_method_agentservicecontroller_release_client(`ptr`: Long,`req`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    external fun uniffi_muyon_android_contract_bridge_fn_method_agentservicecontroller_retire_service(`ptr`: Long,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    external fun uniffi_muyon_android_contract_bridge_fn_method_agentservicecontroller_service_admission_probe(`ptr`: Long,`operation`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    external fun uniffi_muyon_android_contract_bridge_fn_method_agentservicecontroller_set_visibility(`ptr`: Long,`req`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    external fun uniffi_muyon_android_contract_bridge_fn_method_agentservicecontroller_start_run(`ptr`: Long,`req`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    external fun uniffi_muyon_android_contract_bridge_fn_method_agentservicecontroller_status(`ptr`: Long,`req`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    external fun uniffi_muyon_android_contract_bridge_fn_method_agentservicecontroller_submit_ordinary_chat(`ptr`: Long,`client`: RustBuffer.ByValue,`requestId`: RustBuffer.ByValue,`conversation`: RustBuffer.ByValue,`text`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    external fun uniffi_muyon_android_contract_bridge_fn_method_agentservicecontroller_submit_supplier_read(`ptr`: Long,`client`: RustBuffer.ByValue,`requestId`: RustBuffer.ByValue,`text`: RustBuffer.ByValue,`key`: RustBuffer.ByValue,`revision`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    external fun uniffi_muyon_android_contract_bridge_fn_method_agentservicecontroller_supplier_read_events(`ptr`: Long,`client`: RustBuffer.ByValue,`requestId`: RustBuffer.ByValue,`after`: Long,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    external fun uniffi_muyon_android_contract_bridge_fn_clone_registeredtoolsettings(`handle`: Long,uniffi_out_err: UniffiRustCallStatus, 
+    ): Long
+    external fun uniffi_muyon_android_contract_bridge_fn_free_registeredtoolsettings(`handle`: Long,uniffi_out_err: UniffiRustCallStatus, 
+    ): Unit
+    external fun uniffi_muyon_android_contract_bridge_fn_init_callback_vtable_registeredtoolsettings(`vtable`: UniffiVTableCallbackInterfaceRegisteredToolSettings,
+    ): Unit
+    external fun uniffi_muyon_android_contract_bridge_fn_method_registeredtoolsettings_snapshot(`ptr`: Long,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    external fun uniffi_muyon_android_contract_bridge_fn_clone_servicehostownercallback(`handle`: Long,uniffi_out_err: UniffiRustCallStatus, 
+    ): Long
+    external fun uniffi_muyon_android_contract_bridge_fn_free_servicehostownercallback(`handle`: Long,uniffi_out_err: UniffiRustCallStatus, 
+    ): Unit
+    external fun uniffi_muyon_android_contract_bridge_fn_init_callback_vtable_servicehostownercallback(`vtable`: UniffiVTableCallbackInterfaceServiceHostOwnerCallback,
+    ): Unit
+    external fun uniffi_muyon_android_contract_bridge_fn_method_servicehostownercallback_current_chat_authority(`ptr`: Long,`conversation`: RustBuffer.ByValue,`text`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    external fun uniffi_muyon_android_contract_bridge_fn_method_servicehostownercallback_credential_capability(`ptr`: Long,`profile`: RustBuffer.ByValue,`reference`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    external fun uniffi_muyon_android_contract_bridge_fn_method_servicehostownercallback_bind_chat_context(`ptr`: Long,`reservation`: RustBuffer.ByValue,`binding`: RustBuffer.ByValue,`requestId`: RustBuffer.ByValue,`payload`: RustBuffer.ByValue,`context`: RustBuffer.ByValue,`capability`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): Byte
+    external fun uniffi_muyon_android_contract_bridge_fn_method_servicehostownercallback_exchange_chat(`ptr`: Long,`admission`: RustBuffer.ByValue,`binding`: RustBuffer.ByValue,`context`: RustBuffer.ByValue,`payload`: RustBuffer.ByValue,`capability`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    external fun uniffi_muyon_android_contract_bridge_fn_method_servicehostownercallback_exchange_live_chat(`ptr`: Long,`admission`: RustBuffer.ByValue,`binding`: RustBuffer.ByValue,`context`: RustBuffer.ByValue,`payload`: RustBuffer.ByValue,`capability`: RustBuffer.ByValue,`control`: Long,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    external fun uniffi_muyon_android_contract_bridge_fn_method_servicehostownercallback_settle_chat(`ptr`: Long,`admission`: RustBuffer.ByValue,`accepted`: Byte,uniffi_out_err: UniffiRustCallStatus, 
+    ): Byte
+    external fun uniffi_muyon_android_contract_bridge_fn_method_servicehostownercallback_chat_settlement(`ptr`: Long,`admission`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    external fun uniffi_muyon_android_contract_bridge_fn_method_servicehostownercallback_current_scope(`ptr`: Long,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    external fun uniffi_muyon_android_contract_bridge_fn_method_servicehostownercallback_current_provider(`ptr`: Long,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    external fun uniffi_muyon_android_contract_bridge_fn_method_servicehostownercallback_review_payload(`ptr`: Long,`binding`: RustBuffer.ByValue,`payload`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): Byte
+    external fun uniffi_muyon_android_contract_bridge_fn_method_servicehostownercallback_reserve_budget(`ptr`: Long,`binding`: RustBuffer.ByValue,`requestId`: RustBuffer.ByValue,`payload`: RustBuffer.ByValue,`budget`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    external fun uniffi_muyon_android_contract_bridge_fn_method_servicehostownercallback_release_reservation(`ptr`: Long,`reservation`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): Byte
+    external fun uniffi_muyon_android_contract_bridge_fn_method_servicehostownercallback_commit_admission(`ptr`: Long,`reservation`: RustBuffer.ByValue,`binding`: RustBuffer.ByValue,`requestId`: RustBuffer.ByValue,`payload`: RustBuffer.ByValue,`credentialProfileId`: RustBuffer.ByValue,`credentialRef`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    external fun uniffi_muyon_android_contract_bridge_fn_clone_serviceownerruncontrol(`handle`: Long,uniffi_out_err: UniffiRustCallStatus, 
+    ): Long
+    external fun uniffi_muyon_android_contract_bridge_fn_free_serviceownerruncontrol(`handle`: Long,uniffi_out_err: UniffiRustCallStatus, 
+    ): Unit
+    external fun uniffi_muyon_android_contract_bridge_fn_method_serviceownerruncontrol_allowed(`ptr`: Long,uniffi_out_err: UniffiRustCallStatus, 
+    ): Byte
     external fun uniffi_muyon_android_contract_bridge_fn_func_bridge_info(uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
     external fun uniffi_muyon_android_contract_bridge_fn_func_validate_bundled_contract(`request`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
@@ -822,6 +1104,108 @@ private fun uniffiCheckApiChecksums(lib: IntegrityCheckingUniffiLib) {
     if ((lib.uniffi_muyon_android_contract_bridge_checksum_func_validate_bundled_contract() and 0xFFFF) != 15921) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
+    if ((lib.uniffi_muyon_android_contract_bridge_checksum_method_agentservicecontroller_await_settled() and 0xFFFF) != 32451) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if ((lib.uniffi_muyon_android_contract_bridge_checksum_method_agentservicecontroller_cancel() and 0xFFFF) != 48549) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if ((lib.uniffi_muyon_android_contract_bridge_checksum_method_agentservicecontroller_client_gone() and 0xFFFF) != 51774) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if ((lib.uniffi_muyon_android_contract_bridge_checksum_method_agentservicecontroller_close() and 0xFFFF) != 51782) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if ((lib.uniffi_muyon_android_contract_bridge_checksum_method_agentservicecontroller_connect() and 0xFFFF) != 59090) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if ((lib.uniffi_muyon_android_contract_bridge_checksum_method_agentservicecontroller_current() and 0xFFFF) != 2515) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if ((lib.uniffi_muyon_android_contract_bridge_checksum_method_agentservicecontroller_lookup() and 0xFFFF) != 24075) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if ((lib.uniffi_muyon_android_contract_bridge_checksum_method_agentservicecontroller_release_client() and 0xFFFF) != 35501) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if ((lib.uniffi_muyon_android_contract_bridge_checksum_method_agentservicecontroller_retire_service() and 0xFFFF) != 33792) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if ((lib.uniffi_muyon_android_contract_bridge_checksum_method_agentservicecontroller_service_admission_probe() and 0xFFFF) != 25842) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if ((lib.uniffi_muyon_android_contract_bridge_checksum_method_agentservicecontroller_set_visibility() and 0xFFFF) != 437) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if ((lib.uniffi_muyon_android_contract_bridge_checksum_method_agentservicecontroller_start_run() and 0xFFFF) != 20303) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if ((lib.uniffi_muyon_android_contract_bridge_checksum_method_agentservicecontroller_status() and 0xFFFF) != 7957) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if ((lib.uniffi_muyon_android_contract_bridge_checksum_method_agentservicecontroller_submit_ordinary_chat() and 0xFFFF) != 19128) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if ((lib.uniffi_muyon_android_contract_bridge_checksum_method_agentservicecontroller_submit_supplier_read() and 0xFFFF) != 60051) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if ((lib.uniffi_muyon_android_contract_bridge_checksum_method_agentservicecontroller_supplier_read_events() and 0xFFFF) != 43074) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if ((lib.uniffi_muyon_android_contract_bridge_checksum_method_registeredtoolsettings_snapshot() and 0xFFFF) != 35628) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if ((lib.uniffi_muyon_android_contract_bridge_checksum_method_servicehostownercallback_current_chat_authority() and 0xFFFF) != 44909) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if ((lib.uniffi_muyon_android_contract_bridge_checksum_method_servicehostownercallback_credential_capability() and 0xFFFF) != 37752) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if ((lib.uniffi_muyon_android_contract_bridge_checksum_method_servicehostownercallback_bind_chat_context() and 0xFFFF) != 59684) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if ((lib.uniffi_muyon_android_contract_bridge_checksum_method_servicehostownercallback_exchange_chat() and 0xFFFF) != 60751) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if ((lib.uniffi_muyon_android_contract_bridge_checksum_method_servicehostownercallback_exchange_live_chat() and 0xFFFF) != 16759) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if ((lib.uniffi_muyon_android_contract_bridge_checksum_method_servicehostownercallback_settle_chat() and 0xFFFF) != 9200) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if ((lib.uniffi_muyon_android_contract_bridge_checksum_method_servicehostownercallback_chat_settlement() and 0xFFFF) != 43767) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if ((lib.uniffi_muyon_android_contract_bridge_checksum_method_servicehostownercallback_current_scope() and 0xFFFF) != 59559) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if ((lib.uniffi_muyon_android_contract_bridge_checksum_method_servicehostownercallback_current_provider() and 0xFFFF) != 685) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if ((lib.uniffi_muyon_android_contract_bridge_checksum_method_servicehostownercallback_review_payload() and 0xFFFF) != 8492) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if ((lib.uniffi_muyon_android_contract_bridge_checksum_method_servicehostownercallback_reserve_budget() and 0xFFFF) != 42326) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if ((lib.uniffi_muyon_android_contract_bridge_checksum_method_servicehostownercallback_release_reservation() and 0xFFFF) != 20068) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if ((lib.uniffi_muyon_android_contract_bridge_checksum_method_servicehostownercallback_commit_admission() and 0xFFFF) != 51162) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if ((lib.uniffi_muyon_android_contract_bridge_checksum_method_serviceownerruncontrol_allowed() and 0xFFFF) != 12931) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if ((lib.uniffi_muyon_android_contract_bridge_checksum_constructor_agentservicecontroller_new() and 0xFFFF) != 1391) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if ((lib.uniffi_muyon_android_contract_bridge_checksum_constructor_agentservicecontroller_with_host() and 0xFFFF) != 538) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if ((lib.uniffi_muyon_android_contract_bridge_checksum_constructor_agentservicecontroller_with_registered_tools() and 0xFFFF) != 54418) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
 }
 
 /**
@@ -913,7 +1297,102 @@ object UniffiWithHandle
  *
  * @suppress
  * */
-object NoHandle
+object NoHandle// Magic number for the Rust proxy to call using the same mechanism as every other method,
+// to free the callback once it's dropped by Rust.
+internal const val IDX_CALLBACK_FREE = 0
+// Callback return codes
+internal const val UNIFFI_CALLBACK_SUCCESS = 0
+internal const val UNIFFI_CALLBACK_ERROR = 1
+internal const val UNIFFI_CALLBACK_UNEXPECTED_ERROR = 2
+
+/**
+ * @suppress
+ */
+public abstract class FfiConverterCallbackInterface<CallbackInterface: Any>: FfiConverter<CallbackInterface, Long> {
+    internal val handleMap = UniffiHandleMap<CallbackInterface>()
+
+    internal fun drop(handle: Long) {
+        handleMap.remove(handle)
+    }
+
+    override fun lift(value: Long): CallbackInterface {
+        return handleMap.get(value)
+    }
+
+    override fun read(buf: ByteBuffer) = lift(buf.getLong())
+
+    override fun lower(value: CallbackInterface) = handleMap.insert(value)
+
+    override fun allocationSize(value: CallbackInterface) = 8UL
+
+    override fun write(value: CallbackInterface, buf: ByteBuffer) {
+        buf.putLong(lower(value))
+    }
+}
+/**
+ * The cleaner interface for Object finalization code to run.
+ * This is the entry point to any implementation that we're using.
+ *
+ * The cleaner registers objects and returns cleanables, so now we are
+ * defining a `UniffiCleaner` with a `UniffiClenaer.Cleanable` to abstract the
+ * different implmentations available at compile time.
+ *
+ * @suppress
+ */
+interface UniffiCleaner {
+    interface Cleanable {
+        fun clean()
+    }
+
+    fun register(value: Any, cleanUpTask: Runnable): UniffiCleaner.Cleanable
+
+    companion object
+}
+
+// The fallback Jna cleaner, which is available for both Android, and the JVM.
+private class UniffiJnaCleaner : UniffiCleaner {
+    private val cleaner = com.sun.jna.internal.Cleaner.getCleaner()
+
+    override fun register(value: Any, cleanUpTask: Runnable): UniffiCleaner.Cleanable =
+        UniffiJnaCleanable(cleaner.register(value, cleanUpTask))
+}
+
+private class UniffiJnaCleanable(
+    private val cleanable: com.sun.jna.internal.Cleaner.Cleanable,
+) : UniffiCleaner.Cleanable {
+    override fun clean() = cleanable.clean()
+}
+
+
+// We decide at uniffi binding generation time whether we were
+// using Android or not.
+// There are further runtime checks to chose the correct implementation
+// of the cleaner.
+
+
+private fun UniffiCleaner.Companion.create(): UniffiCleaner =
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+        AndroidSystemCleaner()
+    } else {
+        UniffiJnaCleaner()
+    }
+
+// The SystemCleaner, available from API Level 33.
+// Some API Level 33 OSes do not support using it, so we require API Level 34.
+@RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+private class AndroidSystemCleaner : UniffiCleaner {
+    val cleaner = android.system.SystemCleaner.cleaner()
+
+    override fun register(value: Any, cleanUpTask: Runnable): UniffiCleaner.Cleanable =
+        AndroidSystemCleanable(cleaner.register(value, cleanUpTask))
+}
+
+@RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+private class AndroidSystemCleanable(
+    private val cleanable: java.lang.ref.Cleaner.Cleanable,
+) : UniffiCleaner.Cleanable {
+    override fun clean() = cleanable.clean()
+}
 
 /**
  * @suppress
@@ -958,6 +1437,29 @@ public object FfiConverterULong: FfiConverter<ULong, Long> {
 
     override fun write(value: ULong, buf: ByteBuffer) {
         buf.putLong(value.toLong())
+    }
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterLong: FfiConverter<Long, Long> {
+    override fun lift(value: Long): Long {
+        return value
+    }
+
+    override fun read(buf: ByteBuffer): Long {
+        return buf.getLong()
+    }
+
+    override fun lower(value: Long): Long {
+        return value
+    }
+
+    override fun allocationSize(value: Long) = 8UL
+
+    override fun write(value: Long, buf: ByteBuffer) {
+        buf.putLong(value)
     }
 }
 
@@ -1038,6 +1540,2915 @@ public object FfiConverterString: FfiConverter<String, RustBuffer.ByValue> {
         val byteBuf = toUtf8(value)
         buf.putInt(byteBuf.limit())
         buf.put(byteBuf)
+    }
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterByteArray: FfiConverterRustBuffer<ByteArray> {
+    override fun read(buf: ByteBuffer): ByteArray {
+        val len = buf.getInt()
+        val byteArr = ByteArray(len)
+        buf.get(byteArr)
+        return byteArr
+    }
+    override fun allocationSize(value: ByteArray): ULong {
+        return 4UL + value.size.toULong()
+    }
+    override fun write(value: ByteArray, buf: ByteBuffer) {
+        buf.putInt(value.size)
+        buf.put(value)
+    }
+}
+
+
+// This template implements a class for working with a Rust struct via a handle
+// to the live Rust struct on the other side of the FFI.
+//
+// There's some subtlety here, because we have to be careful not to operate on a Rust
+// struct after it has been dropped, and because we must expose a public API for freeing
+// theq Kotlin wrapper object in lieu of reliable finalizers. The core requirements are:
+//
+//   * Each instance holds an opaque handle to the underlying Rust struct.
+//     Method calls need to read this handle from the object's state and pass it in to
+//     the Rust FFI.
+//
+//   * When an instance is no longer needed, its handle should be passed to a
+//     special destructor function provided by the Rust FFI, which will drop the
+//     underlying Rust struct.
+//
+//   * Given an instance, calling code is expected to call the special
+//     `destroy` method in order to free it after use, either by calling it explicitly
+//     or by using a higher-level helper like the `use` method. Failing to do so risks
+//     leaking the underlying Rust struct.
+//
+//   * We can't assume that calling code will do the right thing, and must be prepared
+//     to handle Kotlin method calls executing concurrently with or even after a call to
+//     `destroy`, and to handle multiple (possibly concurrent!) calls to `destroy`.
+//
+//   * We must never allow Rust code to operate on the underlying Rust struct after
+//     the destructor has been called, and must never call the destructor more than once.
+//     Doing so may trigger memory unsafety.
+//
+//   * To mitigate many of the risks of leaking memory and use-after-free unsafety, a `Cleaner`
+//     is implemented to call the destructor when the Kotlin object becomes unreachable.
+//     This is done in a background thread. This is not a panacea, and client code should be aware that
+//      1. the thread may starve if some there are objects that have poorly performing
+//     `drop` methods or do significant work in their `drop` methods.
+//      2. the thread is shared across the whole library. This can be tuned by using `android_cleaner = true`,
+//         or `android = true` in the [`kotlin` section of the `uniffi.toml` file](https://mozilla.github.io/uniffi-rs/kotlin/configuration.html).
+//
+// If we try to implement this with mutual exclusion on access to the handle, there is the
+// possibility of a race between a method call and a concurrent call to `destroy`:
+//
+//    * Thread A starts a method call, reads the value of the handle, but is interrupted
+//      before it can pass the handle over the FFI to Rust.
+//    * Thread B calls `destroy` and frees the underlying Rust struct.
+//    * Thread A resumes, passing the already-read handle value to Rust and triggering
+//      a use-after-free.
+//
+// One possible solution would be to use a `ReadWriteLock`, with each method call taking
+// a read lock (and thus allowed to run concurrently) and the special `destroy` method
+// taking a write lock (and thus blocking on live method calls). However, we aim not to
+// generate methods with any hidden blocking semantics, and a `destroy` method that might
+// block if called incorrectly seems to meet that bar.
+//
+// So, we achieve our goals by giving each instance an associated `AtomicLong` counter to track
+// the number of in-flight method calls, and an `AtomicBoolean` flag to indicate whether `destroy`
+// has been called. These are updated according to the following rules:
+//
+//    * The initial value of the counter is 1, indicating a live object with no in-flight calls.
+//      The initial value for the flag is false.
+//
+//    * At the start of each method call, we atomically check the counter.
+//      If it is 0 then the underlying Rust struct has already been destroyed and the call is aborted.
+//      If it is nonzero them we atomically increment it by 1 and proceed with the method call.
+//
+//    * At the end of each method call, we atomically decrement and check the counter.
+//      If it has reached zero then we destroy the underlying Rust struct.
+//
+//    * When `destroy` is called, we atomically flip the flag from false to true.
+//      If the flag was already true we silently fail.
+//      Otherwise we atomically decrement and check the counter.
+//      If it has reached zero then we destroy the underlying Rust struct.
+//
+// Astute readers may observe that this all sounds very similar to the way that Rust's `Arc<T>` works,
+// and indeed it is, with the addition of a flag to guard against multiple calls to `destroy`.
+//
+// The overall effect is that the underlying Rust struct is destroyed only when `destroy` has been
+// called *and* all in-flight method calls have completed, avoiding violating any of the expectations
+// of the underlying Rust code.
+//
+// This makes a cleaner a better alternative to _not_ calling `destroy()` as
+// and when the object is finished with, but the abstraction is not perfect: if the Rust object's `drop`
+// method is slow, and/or there are many objects to cleanup, and it's on a low end Android device, then the cleaner
+// thread may be starved, and the app will leak memory.
+//
+// In this case, `destroy`ing manually may be a better solution.
+//
+// The cleaner can live side by side with the manual calling of `destroy`. In the order of responsiveness, uniffi objects
+// with Rust peers are reclaimed:
+//
+// 1. By calling the `destroy` method of the object, which calls `rustObject.free()`. If that doesn't happen:
+// 2. When the object becomes unreachable, AND the Cleaner thread gets to call `rustObject.free()`. If the thread is starved then:
+// 3. The memory is reclaimed when the process terminates.
+//
+// [1] https://stackoverflow.com/questions/24376768/can-java-finalize-an-object-when-it-is-still-in-scope/24380219
+//
+
+
+public interface AgentServiceControllerInterface {
+    
+    fun `awaitSettled`(): AgentSnapshotReply
+    
+    fun `cancel`(`req`: AgentCancelRequest): AgentControlReply
+    
+    fun `clientGone`(`platformClientKey`: kotlin.String): AgentControlReply
+    
+    fun `close`(`req`: AgentClientRef): AgentCloseReply
+    
+    fun `connect`(`req`: AgentConnectRequest): AgentConnectReply
+    
+    fun `current`(`req`: AgentClientRef): AgentSnapshotReply
+    
+    fun `lookup`(`req`: AgentLookupRequest): AgentSnapshotReply
+    
+    fun `releaseClient`(`req`: AgentReleaseRequest): AgentControlReply
+    
+    fun `retireService`(): AgentCloseReply
+    
+    fun `serviceAdmissionProbe`(`operation`: ServiceAdmissionProbeOperation): ServiceAdmissionProbeReply
+    
+    fun `setVisibility`(`req`: AgentVisibilityRequest): AgentControlReply
+    
+    fun `startRun`(`req`: AgentStartRequest): AgentStartReply
+    
+    fun `status`(`req`: AgentStatusRequest): AgentSnapshotReply
+    
+    fun `submitOrdinaryChat`(`client`: AgentClientRef, `requestId`: kotlin.String, `conversation`: kotlin.String, `text`: kotlin.String): kotlin.String
+    
+    fun `submitSupplierRead`(`client`: AgentClientRef, `requestId`: kotlin.String, `text`: kotlin.String, `key`: kotlin.String, `revision`: kotlin.String): kotlin.String
+    
+    fun `supplierReadEvents`(`client`: AgentClientRef, `requestId`: kotlin.String, `after`: kotlin.Long): kotlin.String
+    
+    companion object
+}
+
+open class AgentServiceController: Disposable, AutoCloseable, AgentServiceControllerInterface
+{
+
+    @Suppress("UNUSED_PARAMETER")
+    /**
+     * @suppress
+     */
+    constructor(withHandle: UniffiWithHandle, handle: Long) {
+        this.handle = handle
+        this.cleanable = UniffiLib.CLEANER.register(this, UniffiCleanAction(handle))
+    }
+
+    /**
+     * @suppress
+     *
+     * This constructor can be used to instantiate a fake object. Only used for tests. Any
+     * attempt to actually use an object constructed this way will fail as there is no
+     * connected Rust object.
+     */
+    @Suppress("UNUSED_PARAMETER")
+    constructor(noHandle: NoHandle) {
+        this.handle = 0
+        this.cleanable = null
+    }
+    constructor(`config`: AgentServiceConfig) :
+        this(UniffiWithHandle, 
+    uniffiRustCallWithError(AgentServiceSetupException) { _status ->
+    UniffiLib.uniffi_muyon_android_contract_bridge_fn_constructor_agentservicecontroller_new(
+    
+        
+        FfiConverterTypeAgentServiceConfig.lower(`config`),_status)
+}
+    )
+
+    protected val handle: Long
+    protected val cleanable: UniffiCleaner.Cleanable?
+
+    private val wasDestroyed = AtomicBoolean(false)
+    private val callCounter = AtomicLong(1)
+
+    /**
+     * Whether the current object has been destroyed and its reference is gone in the Rust side.
+     */
+    val uniffiIsDestroyed: Boolean get() = wasDestroyed.get()
+
+    override fun destroy() {
+        // Only allow a single call to this method.
+        // TODO: maybe we should log a warning if called more than once?
+        if (this.wasDestroyed.compareAndSet(false, true)) {
+            // This decrement always matches the initial count of 1 given at creation time.
+            if (this.callCounter.decrementAndGet() == 0L) {
+                cleanable?.clean()
+            }
+        }
+    }
+
+    @Synchronized
+    override fun close() {
+        this.destroy()
+    }
+
+    internal inline fun <R> callWithHandle(block: (handle: Long) -> R): R {
+        // Check and increment the call counter, to keep the object alive.
+        // This needs a compare-and-set retry loop in case of concurrent updates.
+        do {
+            val c = this.callCounter.get()
+            if (c == 0L) {
+                throw IllegalStateException("${this.javaClass.simpleName} object has already been destroyed")
+            }
+            if (c == Long.MAX_VALUE) {
+                throw IllegalStateException("${this.javaClass.simpleName} call counter would overflow")
+            }
+        } while (! this.callCounter.compareAndSet(c, c + 1L))
+        // Now we can safely do the method call without the handle being freed concurrently.
+        try {
+            return block(this.uniffiCloneHandle())
+        } finally {
+            // This decrement always matches the increment we performed above.
+            if (this.callCounter.decrementAndGet() == 0L) {
+                cleanable?.clean()
+            }
+        }
+    }
+
+    // Use a static inner class instead of a closure so as not to accidentally
+    // capture `this` as part of the cleanable's action.
+    private class UniffiCleanAction(private val handle: Long) : Runnable {
+        override fun run() {
+            if (handle == 0.toLong()) {
+                // Fake object created with `NoHandle`, don't try to free.
+                return;
+            }
+            uniffiRustCall { status ->
+                UniffiLib.uniffi_muyon_android_contract_bridge_fn_free_agentservicecontroller(handle, status)
+            }
+        }
+    }
+
+    /**
+     * @suppress
+     */
+    fun uniffiCloneHandle(): Long {
+        if (handle == 0.toLong()) {
+            throw InternalException("uniffiCloneHandle() called on NoHandle object");
+        }
+        return uniffiRustCall() { status ->
+            UniffiLib.uniffi_muyon_android_contract_bridge_fn_clone_agentservicecontroller(handle, status)
+        }
+    }
+
+    override fun `awaitSettled`(): AgentSnapshotReply {
+            return FfiConverterTypeAgentSnapshotReply.lift(
+    callWithHandle {
+    uniffiRustCall() { _status ->
+    UniffiLib.uniffi_muyon_android_contract_bridge_fn_method_agentservicecontroller_await_settled(
+        it,
+        _status)
+}
+    }
+    )
+    }
+    
+
+    override fun `cancel`(`req`: AgentCancelRequest): AgentControlReply {
+            return FfiConverterTypeAgentControlReply.lift(
+    callWithHandle {
+    uniffiRustCall() { _status ->
+    UniffiLib.uniffi_muyon_android_contract_bridge_fn_method_agentservicecontroller_cancel(
+        it,
+        
+        FfiConverterTypeAgentCancelRequest.lower(`req`),_status)
+}
+    }
+    )
+    }
+    
+
+    override fun `clientGone`(`platformClientKey`: kotlin.String): AgentControlReply {
+            return FfiConverterTypeAgentControlReply.lift(
+    callWithHandle {
+    uniffiRustCall() { _status ->
+    UniffiLib.uniffi_muyon_android_contract_bridge_fn_method_agentservicecontroller_client_gone(
+        it,
+        
+        FfiConverterString.lower(`platformClientKey`),_status)
+}
+    }
+    )
+    }
+    
+
+    override fun `close`(`req`: AgentClientRef): AgentCloseReply {
+            return FfiConverterTypeAgentCloseReply.lift(
+    callWithHandle {
+    uniffiRustCall() { _status ->
+    UniffiLib.uniffi_muyon_android_contract_bridge_fn_method_agentservicecontroller_close(
+        it,
+        
+        FfiConverterTypeAgentClientRef.lower(`req`),_status)
+}
+    }
+    )
+    }
+    
+
+    override fun `connect`(`req`: AgentConnectRequest): AgentConnectReply {
+            return FfiConverterTypeAgentConnectReply.lift(
+    callWithHandle {
+    uniffiRustCall() { _status ->
+    UniffiLib.uniffi_muyon_android_contract_bridge_fn_method_agentservicecontroller_connect(
+        it,
+        
+        FfiConverterTypeAgentConnectRequest.lower(`req`),_status)
+}
+    }
+    )
+    }
+    
+
+    override fun `current`(`req`: AgentClientRef): AgentSnapshotReply {
+            return FfiConverterTypeAgentSnapshotReply.lift(
+    callWithHandle {
+    uniffiRustCall() { _status ->
+    UniffiLib.uniffi_muyon_android_contract_bridge_fn_method_agentservicecontroller_current(
+        it,
+        
+        FfiConverterTypeAgentClientRef.lower(`req`),_status)
+}
+    }
+    )
+    }
+    
+
+    override fun `lookup`(`req`: AgentLookupRequest): AgentSnapshotReply {
+            return FfiConverterTypeAgentSnapshotReply.lift(
+    callWithHandle {
+    uniffiRustCall() { _status ->
+    UniffiLib.uniffi_muyon_android_contract_bridge_fn_method_agentservicecontroller_lookup(
+        it,
+        
+        FfiConverterTypeAgentLookupRequest.lower(`req`),_status)
+}
+    }
+    )
+    }
+    
+
+    override fun `releaseClient`(`req`: AgentReleaseRequest): AgentControlReply {
+            return FfiConverterTypeAgentControlReply.lift(
+    callWithHandle {
+    uniffiRustCall() { _status ->
+    UniffiLib.uniffi_muyon_android_contract_bridge_fn_method_agentservicecontroller_release_client(
+        it,
+        
+        FfiConverterTypeAgentReleaseRequest.lower(`req`),_status)
+}
+    }
+    )
+    }
+    
+
+    override fun `retireService`(): AgentCloseReply {
+            return FfiConverterTypeAgentCloseReply.lift(
+    callWithHandle {
+    uniffiRustCall() { _status ->
+    UniffiLib.uniffi_muyon_android_contract_bridge_fn_method_agentservicecontroller_retire_service(
+        it,
+        _status)
+}
+    }
+    )
+    }
+    
+
+    override fun `serviceAdmissionProbe`(`operation`: ServiceAdmissionProbeOperation): ServiceAdmissionProbeReply {
+            return FfiConverterTypeServiceAdmissionProbeReply.lift(
+    callWithHandle {
+    uniffiRustCall() { _status ->
+    UniffiLib.uniffi_muyon_android_contract_bridge_fn_method_agentservicecontroller_service_admission_probe(
+        it,
+        
+        FfiConverterTypeServiceAdmissionProbeOperation.lower(`operation`),_status)
+}
+    }
+    )
+    }
+    
+
+    override fun `setVisibility`(`req`: AgentVisibilityRequest): AgentControlReply {
+            return FfiConverterTypeAgentControlReply.lift(
+    callWithHandle {
+    uniffiRustCall() { _status ->
+    UniffiLib.uniffi_muyon_android_contract_bridge_fn_method_agentservicecontroller_set_visibility(
+        it,
+        
+        FfiConverterTypeAgentVisibilityRequest.lower(`req`),_status)
+}
+    }
+    )
+    }
+    
+
+    override fun `startRun`(`req`: AgentStartRequest): AgentStartReply {
+            return FfiConverterTypeAgentStartReply.lift(
+    callWithHandle {
+    uniffiRustCall() { _status ->
+    UniffiLib.uniffi_muyon_android_contract_bridge_fn_method_agentservicecontroller_start_run(
+        it,
+        
+        FfiConverterTypeAgentStartRequest.lower(`req`),_status)
+}
+    }
+    )
+    }
+    
+
+    override fun `status`(`req`: AgentStatusRequest): AgentSnapshotReply {
+            return FfiConverterTypeAgentSnapshotReply.lift(
+    callWithHandle {
+    uniffiRustCall() { _status ->
+    UniffiLib.uniffi_muyon_android_contract_bridge_fn_method_agentservicecontroller_status(
+        it,
+        
+        FfiConverterTypeAgentStatusRequest.lower(`req`),_status)
+}
+    }
+    )
+    }
+    
+
+    override fun `submitOrdinaryChat`(`client`: AgentClientRef, `requestId`: kotlin.String, `conversation`: kotlin.String, `text`: kotlin.String): kotlin.String {
+            return FfiConverterString.lift(
+    callWithHandle {
+    uniffiRustCall() { _status ->
+    UniffiLib.uniffi_muyon_android_contract_bridge_fn_method_agentservicecontroller_submit_ordinary_chat(
+        it,
+        
+        FfiConverterTypeAgentClientRef.lower(`client`),
+        FfiConverterString.lower(`requestId`),
+        FfiConverterString.lower(`conversation`),
+        FfiConverterString.lower(`text`),_status)
+}
+    }
+    )
+    }
+    
+
+    override fun `submitSupplierRead`(`client`: AgentClientRef, `requestId`: kotlin.String, `text`: kotlin.String, `key`: kotlin.String, `revision`: kotlin.String): kotlin.String {
+            return FfiConverterString.lift(
+    callWithHandle {
+    uniffiRustCall() { _status ->
+    UniffiLib.uniffi_muyon_android_contract_bridge_fn_method_agentservicecontroller_submit_supplier_read(
+        it,
+        
+        FfiConverterTypeAgentClientRef.lower(`client`),
+        FfiConverterString.lower(`requestId`),
+        FfiConverterString.lower(`text`),
+        FfiConverterString.lower(`key`),
+        FfiConverterString.lower(`revision`),_status)
+}
+    }
+    )
+    }
+    
+
+    override fun `supplierReadEvents`(`client`: AgentClientRef, `requestId`: kotlin.String, `after`: kotlin.Long): kotlin.String {
+            return FfiConverterString.lift(
+    callWithHandle {
+    uniffiRustCall() { _status ->
+    UniffiLib.uniffi_muyon_android_contract_bridge_fn_method_agentservicecontroller_supplier_read_events(
+        it,
+        
+        FfiConverterTypeAgentClientRef.lower(`client`),
+        FfiConverterString.lower(`requestId`),
+        FfiConverterLong.lower(`after`),_status)
+}
+    }
+    )
+    }
+    
+
+    
+
+    
+
+
+    
+    companion object {
+        
+    /**
+     * Private Service bootstrap injection. Never populated from UI or Binder request fields.
+     */
+    @Throws(AgentServiceSetupException::class) fun `withHost`(`config`: AgentServiceConfig, `owner`: ServiceHostOwnerCallback, `mode`: ServiceOwnerMode, `budget`: ServiceOwnerCallBudget): AgentServiceController {
+            return FfiConverterTypeAgentServiceController.lift(
+    uniffiRustCallWithError(AgentServiceSetupException) { _status ->
+    UniffiLib.uniffi_muyon_android_contract_bridge_fn_constructor_agentservicecontroller_with_host(
+    
+        
+        FfiConverterTypeAgentServiceConfig.lower(`config`),
+        FfiConverterTypeServiceHostOwnerCallback.lower(`owner`),
+        FfiConverterTypeServiceOwnerMode.lower(`mode`),
+        FfiConverterTypeServiceOwnerCallBudget.lower(`budget`),_status)
+}
+    )
+    }
+    
+
+        
+    /**
+     * Additive Service-bootstrap tool route; UI/Binder cannot select installation.
+     */
+    @Throws(AgentServiceSetupException::class) fun `withRegisteredTools`(`config`: AgentServiceConfig, `owner`: ServiceHostOwnerCallback, `mode`: ServiceOwnerMode, `budget`: ServiceOwnerCallBudget, `settings`: RegisteredToolSettings, `syntheticTools`: kotlin.Boolean): AgentServiceController {
+            return FfiConverterTypeAgentServiceController.lift(
+    uniffiRustCallWithError(AgentServiceSetupException) { _status ->
+    UniffiLib.uniffi_muyon_android_contract_bridge_fn_constructor_agentservicecontroller_with_registered_tools(
+    
+        
+        FfiConverterTypeAgentServiceConfig.lower(`config`),
+        FfiConverterTypeServiceHostOwnerCallback.lower(`owner`),
+        FfiConverterTypeServiceOwnerMode.lower(`mode`),
+        FfiConverterTypeServiceOwnerCallBudget.lower(`budget`),
+        FfiConverterTypeRegisteredToolSettings.lower(`settings`),
+        FfiConverterBoolean.lower(`syntheticTools`),_status)
+}
+    )
+    }
+    
+
+        
+    }
+    
+}
+
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeAgentServiceController: FfiConverter<AgentServiceController, Long> {
+    override fun lower(value: AgentServiceController): Long {
+        return value.uniffiCloneHandle()
+    }
+
+    override fun lift(value: Long): AgentServiceController {
+        return AgentServiceController(UniffiWithHandle, value)
+    }
+
+    override fun read(buf: ByteBuffer): AgentServiceController {
+        return lift(buf.getLong())
+    }
+
+    override fun allocationSize(value: AgentServiceController) = 8UL
+
+    override fun write(value: AgentServiceController, buf: ByteBuffer) {
+        buf.putLong(lower(value))
+    }
+}
+
+
+// This template implements a class for working with a Rust struct via a handle
+// to the live Rust struct on the other side of the FFI.
+//
+// There's some subtlety here, because we have to be careful not to operate on a Rust
+// struct after it has been dropped, and because we must expose a public API for freeing
+// theq Kotlin wrapper object in lieu of reliable finalizers. The core requirements are:
+//
+//   * Each instance holds an opaque handle to the underlying Rust struct.
+//     Method calls need to read this handle from the object's state and pass it in to
+//     the Rust FFI.
+//
+//   * When an instance is no longer needed, its handle should be passed to a
+//     special destructor function provided by the Rust FFI, which will drop the
+//     underlying Rust struct.
+//
+//   * Given an instance, calling code is expected to call the special
+//     `destroy` method in order to free it after use, either by calling it explicitly
+//     or by using a higher-level helper like the `use` method. Failing to do so risks
+//     leaking the underlying Rust struct.
+//
+//   * We can't assume that calling code will do the right thing, and must be prepared
+//     to handle Kotlin method calls executing concurrently with or even after a call to
+//     `destroy`, and to handle multiple (possibly concurrent!) calls to `destroy`.
+//
+//   * We must never allow Rust code to operate on the underlying Rust struct after
+//     the destructor has been called, and must never call the destructor more than once.
+//     Doing so may trigger memory unsafety.
+//
+//   * To mitigate many of the risks of leaking memory and use-after-free unsafety, a `Cleaner`
+//     is implemented to call the destructor when the Kotlin object becomes unreachable.
+//     This is done in a background thread. This is not a panacea, and client code should be aware that
+//      1. the thread may starve if some there are objects that have poorly performing
+//     `drop` methods or do significant work in their `drop` methods.
+//      2. the thread is shared across the whole library. This can be tuned by using `android_cleaner = true`,
+//         or `android = true` in the [`kotlin` section of the `uniffi.toml` file](https://mozilla.github.io/uniffi-rs/kotlin/configuration.html).
+//
+// If we try to implement this with mutual exclusion on access to the handle, there is the
+// possibility of a race between a method call and a concurrent call to `destroy`:
+//
+//    * Thread A starts a method call, reads the value of the handle, but is interrupted
+//      before it can pass the handle over the FFI to Rust.
+//    * Thread B calls `destroy` and frees the underlying Rust struct.
+//    * Thread A resumes, passing the already-read handle value to Rust and triggering
+//      a use-after-free.
+//
+// One possible solution would be to use a `ReadWriteLock`, with each method call taking
+// a read lock (and thus allowed to run concurrently) and the special `destroy` method
+// taking a write lock (and thus blocking on live method calls). However, we aim not to
+// generate methods with any hidden blocking semantics, and a `destroy` method that might
+// block if called incorrectly seems to meet that bar.
+//
+// So, we achieve our goals by giving each instance an associated `AtomicLong` counter to track
+// the number of in-flight method calls, and an `AtomicBoolean` flag to indicate whether `destroy`
+// has been called. These are updated according to the following rules:
+//
+//    * The initial value of the counter is 1, indicating a live object with no in-flight calls.
+//      The initial value for the flag is false.
+//
+//    * At the start of each method call, we atomically check the counter.
+//      If it is 0 then the underlying Rust struct has already been destroyed and the call is aborted.
+//      If it is nonzero them we atomically increment it by 1 and proceed with the method call.
+//
+//    * At the end of each method call, we atomically decrement and check the counter.
+//      If it has reached zero then we destroy the underlying Rust struct.
+//
+//    * When `destroy` is called, we atomically flip the flag from false to true.
+//      If the flag was already true we silently fail.
+//      Otherwise we atomically decrement and check the counter.
+//      If it has reached zero then we destroy the underlying Rust struct.
+//
+// Astute readers may observe that this all sounds very similar to the way that Rust's `Arc<T>` works,
+// and indeed it is, with the addition of a flag to guard against multiple calls to `destroy`.
+//
+// The overall effect is that the underlying Rust struct is destroyed only when `destroy` has been
+// called *and* all in-flight method calls have completed, avoiding violating any of the expectations
+// of the underlying Rust code.
+//
+// This makes a cleaner a better alternative to _not_ calling `destroy()` as
+// and when the object is finished with, but the abstraction is not perfect: if the Rust object's `drop`
+// method is slow, and/or there are many objects to cleanup, and it's on a low end Android device, then the cleaner
+// thread may be starved, and the app will leak memory.
+//
+// In this case, `destroy`ing manually may be a better solution.
+//
+// The cleaner can live side by side with the manual calling of `destroy`. In the order of responsiveness, uniffi objects
+// with Rust peers are reclaimed:
+//
+// 1. By calling the `destroy` method of the object, which calls `rustObject.free()`. If that doesn't happen:
+// 2. When the object becomes unreachable, AND the Cleaner thread gets to call `rustObject.free()`. If the thread is starved then:
+// 3. The memory is reclaimed when the process terminates.
+//
+// [1] https://stackoverflow.com/questions/24376768/can-java-finalize-an-object-when-it-is-still-in-scope/24380219
+//
+
+
+public interface RegisteredToolSettings {
+    
+    fun `snapshot`(): kotlin.String
+    
+    companion object
+}
+
+open class RegisteredToolSettingsImpl: Disposable, AutoCloseable, RegisteredToolSettings
+{
+
+    @Suppress("UNUSED_PARAMETER")
+    /**
+     * @suppress
+     */
+    constructor(withHandle: UniffiWithHandle, handle: Long) {
+        this.handle = handle
+        this.cleanable = UniffiLib.CLEANER.register(this, UniffiCleanAction(handle))
+    }
+
+    /**
+     * @suppress
+     *
+     * This constructor can be used to instantiate a fake object. Only used for tests. Any
+     * attempt to actually use an object constructed this way will fail as there is no
+     * connected Rust object.
+     */
+    @Suppress("UNUSED_PARAMETER")
+    constructor(noHandle: NoHandle) {
+        this.handle = 0
+        this.cleanable = null
+    }
+
+    protected val handle: Long
+    protected val cleanable: UniffiCleaner.Cleanable?
+
+    private val wasDestroyed = AtomicBoolean(false)
+    private val callCounter = AtomicLong(1)
+
+    /**
+     * Whether the current object has been destroyed and its reference is gone in the Rust side.
+     */
+    val uniffiIsDestroyed: Boolean get() = wasDestroyed.get()
+
+    override fun destroy() {
+        // Only allow a single call to this method.
+        // TODO: maybe we should log a warning if called more than once?
+        if (this.wasDestroyed.compareAndSet(false, true)) {
+            // This decrement always matches the initial count of 1 given at creation time.
+            if (this.callCounter.decrementAndGet() == 0L) {
+                cleanable?.clean()
+            }
+        }
+    }
+
+    @Synchronized
+    override fun close() {
+        this.destroy()
+    }
+
+    internal inline fun <R> callWithHandle(block: (handle: Long) -> R): R {
+        // Check and increment the call counter, to keep the object alive.
+        // This needs a compare-and-set retry loop in case of concurrent updates.
+        do {
+            val c = this.callCounter.get()
+            if (c == 0L) {
+                throw IllegalStateException("${this.javaClass.simpleName} object has already been destroyed")
+            }
+            if (c == Long.MAX_VALUE) {
+                throw IllegalStateException("${this.javaClass.simpleName} call counter would overflow")
+            }
+        } while (! this.callCounter.compareAndSet(c, c + 1L))
+        // Now we can safely do the method call without the handle being freed concurrently.
+        try {
+            return block(this.uniffiCloneHandle())
+        } finally {
+            // This decrement always matches the increment we performed above.
+            if (this.callCounter.decrementAndGet() == 0L) {
+                cleanable?.clean()
+            }
+        }
+    }
+
+    // Use a static inner class instead of a closure so as not to accidentally
+    // capture `this` as part of the cleanable's action.
+    private class UniffiCleanAction(private val handle: Long) : Runnable {
+        override fun run() {
+            if (handle == 0.toLong()) {
+                // Fake object created with `NoHandle`, don't try to free.
+                return;
+            }
+            uniffiRustCall { status ->
+                UniffiLib.uniffi_muyon_android_contract_bridge_fn_free_registeredtoolsettings(handle, status)
+            }
+        }
+    }
+
+    /**
+     * @suppress
+     */
+    fun uniffiCloneHandle(): Long {
+        if (handle == 0.toLong()) {
+            throw InternalException("uniffiCloneHandle() called on NoHandle object");
+        }
+        return uniffiRustCall() { status ->
+            UniffiLib.uniffi_muyon_android_contract_bridge_fn_clone_registeredtoolsettings(handle, status)
+        }
+    }
+
+    override fun `snapshot`(): kotlin.String {
+            return FfiConverterString.lift(
+    callWithHandle {
+    uniffiRustCall() { _status ->
+    UniffiLib.uniffi_muyon_android_contract_bridge_fn_method_registeredtoolsettings_snapshot(
+        it,
+        _status)
+}
+    }
+    )
+    }
+    
+
+    
+
+    
+
+
+    
+    
+    /**
+     * @suppress
+     */
+    companion object
+    
+}
+
+
+
+// Put the implementation in an object so we don't pollute the top-level namespace
+internal object uniffiCallbackInterfaceRegisteredToolSettings {
+    internal object `snapshot`: UniffiCallbackInterfaceRegisteredToolSettingsMethod0 {
+        override fun callback(`uniffiHandle`: Long,`uniffiOutReturn`: RustBuffer,uniffiCallStatus: UniffiRustCallStatus,) {
+            val uniffiObj = FfiConverterTypeRegisteredToolSettings.handleMap.get(uniffiHandle)
+            val makeCall = { ->
+                uniffiObj.`snapshot`(
+                )
+            }
+            val writeReturn = { value: kotlin.String -> uniffiOutReturn.setValue(FfiConverterString.lower(value)) }
+            uniffiTraitInterfaceCall(uniffiCallStatus, makeCall, writeReturn)
+        }
+    }
+
+    internal object uniffiFree: UniffiCallbackInterfaceFree {
+        override fun callback(handle: Long) {
+            FfiConverterTypeRegisteredToolSettings.handleMap.remove(handle)
+        }
+    }
+
+    internal object uniffiClone: UniffiCallbackInterfaceClone {
+        override fun callback(handle: Long): Long {
+            return FfiConverterTypeRegisteredToolSettings.handleMap.clone(handle)
+        }
+    }
+
+    internal var vtable = UniffiVTableCallbackInterfaceRegisteredToolSettings.UniffiByValue(
+        uniffiFree,
+        uniffiClone,
+        `snapshot`,
+    )
+
+    // Registers the foreign callback with the Rust side.
+    // This method is generated for each callback interface.
+    internal fun register(lib: UniffiLib) {
+        lib.uniffi_muyon_android_contract_bridge_fn_init_callback_vtable_registeredtoolsettings(vtable)
+    }
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeRegisteredToolSettings: FfiConverter<RegisteredToolSettings, Long> {
+    internal val handleMap = UniffiHandleMap<RegisteredToolSettings>()
+
+    override fun lower(value: RegisteredToolSettings): Long {
+        if (value is RegisteredToolSettingsImpl) {
+             // Rust-implemented object.  Clone the handle and return it
+            return value.uniffiCloneHandle()
+         } else {
+            // Kotlin object, generate a new vtable handle and return that.
+            return handleMap.insert(value)
+         }
+    }
+
+    override fun lift(value: Long): RegisteredToolSettings {
+        if ((value and 1.toLong()) == 0.toLong()) {
+            // Rust-generated handle, construct a new class that uses the handle to implement the
+            // interface
+            return RegisteredToolSettingsImpl(UniffiWithHandle, value)
+        } else {
+            // Kotlin-generated handle, get the object from the handle map
+            return handleMap.remove(value)
+        }
+    }
+
+    override fun read(buf: ByteBuffer): RegisteredToolSettings {
+        return lift(buf.getLong())
+    }
+
+    override fun allocationSize(value: RegisteredToolSettings) = 8UL
+
+    override fun write(value: RegisteredToolSettings, buf: ByteBuffer) {
+        buf.putLong(lower(value))
+    }
+}
+
+
+// This template implements a class for working with a Rust struct via a handle
+// to the live Rust struct on the other side of the FFI.
+//
+// There's some subtlety here, because we have to be careful not to operate on a Rust
+// struct after it has been dropped, and because we must expose a public API for freeing
+// theq Kotlin wrapper object in lieu of reliable finalizers. The core requirements are:
+//
+//   * Each instance holds an opaque handle to the underlying Rust struct.
+//     Method calls need to read this handle from the object's state and pass it in to
+//     the Rust FFI.
+//
+//   * When an instance is no longer needed, its handle should be passed to a
+//     special destructor function provided by the Rust FFI, which will drop the
+//     underlying Rust struct.
+//
+//   * Given an instance, calling code is expected to call the special
+//     `destroy` method in order to free it after use, either by calling it explicitly
+//     or by using a higher-level helper like the `use` method. Failing to do so risks
+//     leaking the underlying Rust struct.
+//
+//   * We can't assume that calling code will do the right thing, and must be prepared
+//     to handle Kotlin method calls executing concurrently with or even after a call to
+//     `destroy`, and to handle multiple (possibly concurrent!) calls to `destroy`.
+//
+//   * We must never allow Rust code to operate on the underlying Rust struct after
+//     the destructor has been called, and must never call the destructor more than once.
+//     Doing so may trigger memory unsafety.
+//
+//   * To mitigate many of the risks of leaking memory and use-after-free unsafety, a `Cleaner`
+//     is implemented to call the destructor when the Kotlin object becomes unreachable.
+//     This is done in a background thread. This is not a panacea, and client code should be aware that
+//      1. the thread may starve if some there are objects that have poorly performing
+//     `drop` methods or do significant work in their `drop` methods.
+//      2. the thread is shared across the whole library. This can be tuned by using `android_cleaner = true`,
+//         or `android = true` in the [`kotlin` section of the `uniffi.toml` file](https://mozilla.github.io/uniffi-rs/kotlin/configuration.html).
+//
+// If we try to implement this with mutual exclusion on access to the handle, there is the
+// possibility of a race between a method call and a concurrent call to `destroy`:
+//
+//    * Thread A starts a method call, reads the value of the handle, but is interrupted
+//      before it can pass the handle over the FFI to Rust.
+//    * Thread B calls `destroy` and frees the underlying Rust struct.
+//    * Thread A resumes, passing the already-read handle value to Rust and triggering
+//      a use-after-free.
+//
+// One possible solution would be to use a `ReadWriteLock`, with each method call taking
+// a read lock (and thus allowed to run concurrently) and the special `destroy` method
+// taking a write lock (and thus blocking on live method calls). However, we aim not to
+// generate methods with any hidden blocking semantics, and a `destroy` method that might
+// block if called incorrectly seems to meet that bar.
+//
+// So, we achieve our goals by giving each instance an associated `AtomicLong` counter to track
+// the number of in-flight method calls, and an `AtomicBoolean` flag to indicate whether `destroy`
+// has been called. These are updated according to the following rules:
+//
+//    * The initial value of the counter is 1, indicating a live object with no in-flight calls.
+//      The initial value for the flag is false.
+//
+//    * At the start of each method call, we atomically check the counter.
+//      If it is 0 then the underlying Rust struct has already been destroyed and the call is aborted.
+//      If it is nonzero them we atomically increment it by 1 and proceed with the method call.
+//
+//    * At the end of each method call, we atomically decrement and check the counter.
+//      If it has reached zero then we destroy the underlying Rust struct.
+//
+//    * When `destroy` is called, we atomically flip the flag from false to true.
+//      If the flag was already true we silently fail.
+//      Otherwise we atomically decrement and check the counter.
+//      If it has reached zero then we destroy the underlying Rust struct.
+//
+// Astute readers may observe that this all sounds very similar to the way that Rust's `Arc<T>` works,
+// and indeed it is, with the addition of a flag to guard against multiple calls to `destroy`.
+//
+// The overall effect is that the underlying Rust struct is destroyed only when `destroy` has been
+// called *and* all in-flight method calls have completed, avoiding violating any of the expectations
+// of the underlying Rust code.
+//
+// This makes a cleaner a better alternative to _not_ calling `destroy()` as
+// and when the object is finished with, but the abstraction is not perfect: if the Rust object's `drop`
+// method is slow, and/or there are many objects to cleanup, and it's on a low end Android device, then the cleaner
+// thread may be starved, and the app will leak memory.
+//
+// In this case, `destroy`ing manually may be a better solution.
+//
+// The cleaner can live side by side with the manual calling of `destroy`. In the order of responsiveness, uniffi objects
+// with Rust peers are reclaimed:
+//
+// 1. By calling the `destroy` method of the object, which calls `rustObject.free()`. If that doesn't happen:
+// 2. When the object becomes unreachable, AND the Cleaner thread gets to call `rustObject.free()`. If the thread is starved then:
+// 3. The memory is reclaimed when the process terminates.
+//
+// [1] https://stackoverflow.com/questions/24376768/can-java-finalize-an-object-when-it-is-still-in-scope/24380219
+//
+
+
+public interface ServiceHostOwnerCallback {
+    
+    fun `currentChatAuthority`(`conversation`: kotlin.String, `text`: kotlin.String): ServiceOwnerChatAuthority?
+    
+    fun `credentialCapability`(`profile`: kotlin.String, `reference`: kotlin.String): ServiceOwnerCredentialCapability?
+    
+    fun `bindChatContext`(`reservation`: kotlin.String, `binding`: ServiceOwnerAdmissionBinding, `requestId`: kotlin.String, `payload`: kotlin.ByteArray, `context`: kotlin.ByteArray, `capability`: ServiceOwnerCredentialCapability): kotlin.Boolean
+    
+    fun `exchangeChat`(`admission`: kotlin.String, `binding`: ServiceOwnerAdmissionBinding, `context`: kotlin.ByteArray, `payload`: kotlin.ByteArray, `capability`: ServiceOwnerCredentialCapability): ServiceOwnerChatResponse?
+    
+    fun `exchangeLiveChat`(`admission`: kotlin.String, `binding`: ServiceOwnerAdmissionBinding, `context`: kotlin.ByteArray, `payload`: kotlin.ByteArray, `capability`: ServiceOwnerCredentialCapability, `control`: ServiceOwnerRunControl): ServiceOwnerChatResponse?
+    
+    /**
+     * Pure local, durable acceptance. true is irrevocable success only after Rust's final poll.
+     */
+    fun `settleChat`(`admission`: kotlin.String, `accepted`: kotlin.Boolean): kotlin.Boolean
+    
+    fun `chatSettlement`(`admission`: kotlin.String): kotlin.String?
+    
+    fun `currentScope`(): ServiceOwnerScope?
+    
+    fun `currentProvider`(): ServiceOwnerProvider?
+    
+    /**
+     * Trusted current-policy review of exactly these bytes. Absence must deny.
+     */
+    fun `reviewPayload`(`binding`: ServiceOwnerAdmissionBinding, `payload`: kotlin.ByteArray): kotlin.Boolean
+    
+    /**
+     * Durable owner must bind the full budget/request/payload/current owner and
+     * conservatively bound total input+output tokens, one call/choice and spend.
+     * Exposed binding drift fails closed; owner owns stranded hold release/expiry.
+     */
+    fun `reserveBudget`(`binding`: ServiceOwnerAdmissionBinding, `requestId`: kotlin.String, `payload`: kotlin.ByteArray, `budget`: ServiceOwnerCallBudget): kotlin.String?
+    
+    /**
+     * Atomically expire held state only; keep tombstone and never refund consumed quota.
+     */
+    fun `releaseReservation`(`reservation`: kotlin.String): kotlin.Boolean
+    
+    /**
+     * Owner must atomically consume its exact reservation, including the full
+     * CallBudget captured at reserve. No credential value or send capability.
+     */
+    fun `commitAdmission`(`reservation`: kotlin.String, `binding`: ServiceOwnerAdmissionBinding, `requestId`: kotlin.String, `payload`: kotlin.ByteArray, `credentialProfileId`: kotlin.String, `credentialRef`: kotlin.String): kotlin.String?
+    
+    companion object
+}
+
+open class ServiceHostOwnerCallbackImpl: Disposable, AutoCloseable, ServiceHostOwnerCallback
+{
+
+    @Suppress("UNUSED_PARAMETER")
+    /**
+     * @suppress
+     */
+    constructor(withHandle: UniffiWithHandle, handle: Long) {
+        this.handle = handle
+        this.cleanable = UniffiLib.CLEANER.register(this, UniffiCleanAction(handle))
+    }
+
+    /**
+     * @suppress
+     *
+     * This constructor can be used to instantiate a fake object. Only used for tests. Any
+     * attempt to actually use an object constructed this way will fail as there is no
+     * connected Rust object.
+     */
+    @Suppress("UNUSED_PARAMETER")
+    constructor(noHandle: NoHandle) {
+        this.handle = 0
+        this.cleanable = null
+    }
+
+    protected val handle: Long
+    protected val cleanable: UniffiCleaner.Cleanable?
+
+    private val wasDestroyed = AtomicBoolean(false)
+    private val callCounter = AtomicLong(1)
+
+    /**
+     * Whether the current object has been destroyed and its reference is gone in the Rust side.
+     */
+    val uniffiIsDestroyed: Boolean get() = wasDestroyed.get()
+
+    override fun destroy() {
+        // Only allow a single call to this method.
+        // TODO: maybe we should log a warning if called more than once?
+        if (this.wasDestroyed.compareAndSet(false, true)) {
+            // This decrement always matches the initial count of 1 given at creation time.
+            if (this.callCounter.decrementAndGet() == 0L) {
+                cleanable?.clean()
+            }
+        }
+    }
+
+    @Synchronized
+    override fun close() {
+        this.destroy()
+    }
+
+    internal inline fun <R> callWithHandle(block: (handle: Long) -> R): R {
+        // Check and increment the call counter, to keep the object alive.
+        // This needs a compare-and-set retry loop in case of concurrent updates.
+        do {
+            val c = this.callCounter.get()
+            if (c == 0L) {
+                throw IllegalStateException("${this.javaClass.simpleName} object has already been destroyed")
+            }
+            if (c == Long.MAX_VALUE) {
+                throw IllegalStateException("${this.javaClass.simpleName} call counter would overflow")
+            }
+        } while (! this.callCounter.compareAndSet(c, c + 1L))
+        // Now we can safely do the method call without the handle being freed concurrently.
+        try {
+            return block(this.uniffiCloneHandle())
+        } finally {
+            // This decrement always matches the increment we performed above.
+            if (this.callCounter.decrementAndGet() == 0L) {
+                cleanable?.clean()
+            }
+        }
+    }
+
+    // Use a static inner class instead of a closure so as not to accidentally
+    // capture `this` as part of the cleanable's action.
+    private class UniffiCleanAction(private val handle: Long) : Runnable {
+        override fun run() {
+            if (handle == 0.toLong()) {
+                // Fake object created with `NoHandle`, don't try to free.
+                return;
+            }
+            uniffiRustCall { status ->
+                UniffiLib.uniffi_muyon_android_contract_bridge_fn_free_servicehostownercallback(handle, status)
+            }
+        }
+    }
+
+    /**
+     * @suppress
+     */
+    fun uniffiCloneHandle(): Long {
+        if (handle == 0.toLong()) {
+            throw InternalException("uniffiCloneHandle() called on NoHandle object");
+        }
+        return uniffiRustCall() { status ->
+            UniffiLib.uniffi_muyon_android_contract_bridge_fn_clone_servicehostownercallback(handle, status)
+        }
+    }
+
+    override fun `currentChatAuthority`(`conversation`: kotlin.String, `text`: kotlin.String): ServiceOwnerChatAuthority? {
+            return FfiConverterOptionalTypeServiceOwnerChatAuthority.lift(
+    callWithHandle {
+    uniffiRustCall() { _status ->
+    UniffiLib.uniffi_muyon_android_contract_bridge_fn_method_servicehostownercallback_current_chat_authority(
+        it,
+        
+        FfiConverterString.lower(`conversation`),
+        FfiConverterString.lower(`text`),_status)
+}
+    }
+    )
+    }
+    
+
+    override fun `credentialCapability`(`profile`: kotlin.String, `reference`: kotlin.String): ServiceOwnerCredentialCapability? {
+            return FfiConverterOptionalTypeServiceOwnerCredentialCapability.lift(
+    callWithHandle {
+    uniffiRustCall() { _status ->
+    UniffiLib.uniffi_muyon_android_contract_bridge_fn_method_servicehostownercallback_credential_capability(
+        it,
+        
+        FfiConverterString.lower(`profile`),
+        FfiConverterString.lower(`reference`),_status)
+}
+    }
+    )
+    }
+    
+
+    override fun `bindChatContext`(`reservation`: kotlin.String, `binding`: ServiceOwnerAdmissionBinding, `requestId`: kotlin.String, `payload`: kotlin.ByteArray, `context`: kotlin.ByteArray, `capability`: ServiceOwnerCredentialCapability): kotlin.Boolean {
+            return FfiConverterBoolean.lift(
+    callWithHandle {
+    uniffiRustCall() { _status ->
+    UniffiLib.uniffi_muyon_android_contract_bridge_fn_method_servicehostownercallback_bind_chat_context(
+        it,
+        
+        FfiConverterString.lower(`reservation`),
+        FfiConverterTypeServiceOwnerAdmissionBinding.lower(`binding`),
+        FfiConverterString.lower(`requestId`),
+        FfiConverterByteArray.lower(`payload`),
+        FfiConverterByteArray.lower(`context`),
+        FfiConverterTypeServiceOwnerCredentialCapability.lower(`capability`),_status)
+}
+    }
+    )
+    }
+    
+
+    override fun `exchangeChat`(`admission`: kotlin.String, `binding`: ServiceOwnerAdmissionBinding, `context`: kotlin.ByteArray, `payload`: kotlin.ByteArray, `capability`: ServiceOwnerCredentialCapability): ServiceOwnerChatResponse? {
+            return FfiConverterOptionalTypeServiceOwnerChatResponse.lift(
+    callWithHandle {
+    uniffiRustCall() { _status ->
+    UniffiLib.uniffi_muyon_android_contract_bridge_fn_method_servicehostownercallback_exchange_chat(
+        it,
+        
+        FfiConverterString.lower(`admission`),
+        FfiConverterTypeServiceOwnerAdmissionBinding.lower(`binding`),
+        FfiConverterByteArray.lower(`context`),
+        FfiConverterByteArray.lower(`payload`),
+        FfiConverterTypeServiceOwnerCredentialCapability.lower(`capability`),_status)
+}
+    }
+    )
+    }
+    
+
+    override fun `exchangeLiveChat`(`admission`: kotlin.String, `binding`: ServiceOwnerAdmissionBinding, `context`: kotlin.ByteArray, `payload`: kotlin.ByteArray, `capability`: ServiceOwnerCredentialCapability, `control`: ServiceOwnerRunControl): ServiceOwnerChatResponse? {
+            return FfiConverterOptionalTypeServiceOwnerChatResponse.lift(
+    callWithHandle {
+    uniffiRustCall() { _status ->
+    UniffiLib.uniffi_muyon_android_contract_bridge_fn_method_servicehostownercallback_exchange_live_chat(
+        it,
+        
+        FfiConverterString.lower(`admission`),
+        FfiConverterTypeServiceOwnerAdmissionBinding.lower(`binding`),
+        FfiConverterByteArray.lower(`context`),
+        FfiConverterByteArray.lower(`payload`),
+        FfiConverterTypeServiceOwnerCredentialCapability.lower(`capability`),
+        FfiConverterTypeServiceOwnerRunControl.lower(`control`),_status)
+}
+    }
+    )
+    }
+    
+
+    
+    /**
+     * Pure local, durable acceptance. true is irrevocable success only after Rust's final poll.
+     */override fun `settleChat`(`admission`: kotlin.String, `accepted`: kotlin.Boolean): kotlin.Boolean {
+            return FfiConverterBoolean.lift(
+    callWithHandle {
+    uniffiRustCall() { _status ->
+    UniffiLib.uniffi_muyon_android_contract_bridge_fn_method_servicehostownercallback_settle_chat(
+        it,
+        
+        FfiConverterString.lower(`admission`),
+        FfiConverterBoolean.lower(`accepted`),_status)
+}
+    }
+    )
+    }
+    
+
+    override fun `chatSettlement`(`admission`: kotlin.String): kotlin.String? {
+            return FfiConverterOptionalString.lift(
+    callWithHandle {
+    uniffiRustCall() { _status ->
+    UniffiLib.uniffi_muyon_android_contract_bridge_fn_method_servicehostownercallback_chat_settlement(
+        it,
+        
+        FfiConverterString.lower(`admission`),_status)
+}
+    }
+    )
+    }
+    
+
+    override fun `currentScope`(): ServiceOwnerScope? {
+            return FfiConverterOptionalTypeServiceOwnerScope.lift(
+    callWithHandle {
+    uniffiRustCall() { _status ->
+    UniffiLib.uniffi_muyon_android_contract_bridge_fn_method_servicehostownercallback_current_scope(
+        it,
+        _status)
+}
+    }
+    )
+    }
+    
+
+    override fun `currentProvider`(): ServiceOwnerProvider? {
+            return FfiConverterOptionalTypeServiceOwnerProvider.lift(
+    callWithHandle {
+    uniffiRustCall() { _status ->
+    UniffiLib.uniffi_muyon_android_contract_bridge_fn_method_servicehostownercallback_current_provider(
+        it,
+        _status)
+}
+    }
+    )
+    }
+    
+
+    
+    /**
+     * Trusted current-policy review of exactly these bytes. Absence must deny.
+     */override fun `reviewPayload`(`binding`: ServiceOwnerAdmissionBinding, `payload`: kotlin.ByteArray): kotlin.Boolean {
+            return FfiConverterBoolean.lift(
+    callWithHandle {
+    uniffiRustCall() { _status ->
+    UniffiLib.uniffi_muyon_android_contract_bridge_fn_method_servicehostownercallback_review_payload(
+        it,
+        
+        FfiConverterTypeServiceOwnerAdmissionBinding.lower(`binding`),
+        FfiConverterByteArray.lower(`payload`),_status)
+}
+    }
+    )
+    }
+    
+
+    
+    /**
+     * Durable owner must bind the full budget/request/payload/current owner and
+     * conservatively bound total input+output tokens, one call/choice and spend.
+     * Exposed binding drift fails closed; owner owns stranded hold release/expiry.
+     */override fun `reserveBudget`(`binding`: ServiceOwnerAdmissionBinding, `requestId`: kotlin.String, `payload`: kotlin.ByteArray, `budget`: ServiceOwnerCallBudget): kotlin.String? {
+            return FfiConverterOptionalString.lift(
+    callWithHandle {
+    uniffiRustCall() { _status ->
+    UniffiLib.uniffi_muyon_android_contract_bridge_fn_method_servicehostownercallback_reserve_budget(
+        it,
+        
+        FfiConverterTypeServiceOwnerAdmissionBinding.lower(`binding`),
+        FfiConverterString.lower(`requestId`),
+        FfiConverterByteArray.lower(`payload`),
+        FfiConverterTypeServiceOwnerCallBudget.lower(`budget`),_status)
+}
+    }
+    )
+    }
+    
+
+    
+    /**
+     * Atomically expire held state only; keep tombstone and never refund consumed quota.
+     */override fun `releaseReservation`(`reservation`: kotlin.String): kotlin.Boolean {
+            return FfiConverterBoolean.lift(
+    callWithHandle {
+    uniffiRustCall() { _status ->
+    UniffiLib.uniffi_muyon_android_contract_bridge_fn_method_servicehostownercallback_release_reservation(
+        it,
+        
+        FfiConverterString.lower(`reservation`),_status)
+}
+    }
+    )
+    }
+    
+
+    
+    /**
+     * Owner must atomically consume its exact reservation, including the full
+     * CallBudget captured at reserve. No credential value or send capability.
+     */override fun `commitAdmission`(`reservation`: kotlin.String, `binding`: ServiceOwnerAdmissionBinding, `requestId`: kotlin.String, `payload`: kotlin.ByteArray, `credentialProfileId`: kotlin.String, `credentialRef`: kotlin.String): kotlin.String? {
+            return FfiConverterOptionalString.lift(
+    callWithHandle {
+    uniffiRustCall() { _status ->
+    UniffiLib.uniffi_muyon_android_contract_bridge_fn_method_servicehostownercallback_commit_admission(
+        it,
+        
+        FfiConverterString.lower(`reservation`),
+        FfiConverterTypeServiceOwnerAdmissionBinding.lower(`binding`),
+        FfiConverterString.lower(`requestId`),
+        FfiConverterByteArray.lower(`payload`),
+        FfiConverterString.lower(`credentialProfileId`),
+        FfiConverterString.lower(`credentialRef`),_status)
+}
+    }
+    )
+    }
+    
+
+    
+
+    
+
+
+    
+    
+    /**
+     * @suppress
+     */
+    companion object
+    
+}
+
+
+
+// Put the implementation in an object so we don't pollute the top-level namespace
+internal object uniffiCallbackInterfaceServiceHostOwnerCallback {
+    internal object `currentChatAuthority`: UniffiCallbackInterfaceServiceHostOwnerCallbackMethod0 {
+        override fun callback(`uniffiHandle`: Long,`conversation`: RustBuffer.ByValue,`text`: RustBuffer.ByValue,`uniffiOutReturn`: RustBuffer,uniffiCallStatus: UniffiRustCallStatus,) {
+            val uniffiObj = FfiConverterTypeServiceHostOwnerCallback.handleMap.get(uniffiHandle)
+            val makeCall = { ->
+                uniffiObj.`currentChatAuthority`(
+                    FfiConverterString.lift(`conversation`),
+                    FfiConverterString.lift(`text`),
+                )
+            }
+            val writeReturn = { value: ServiceOwnerChatAuthority? -> uniffiOutReturn.setValue(FfiConverterOptionalTypeServiceOwnerChatAuthority.lower(value)) }
+            uniffiTraitInterfaceCall(uniffiCallStatus, makeCall, writeReturn)
+        }
+    }
+    internal object `credentialCapability`: UniffiCallbackInterfaceServiceHostOwnerCallbackMethod1 {
+        override fun callback(`uniffiHandle`: Long,`profile`: RustBuffer.ByValue,`reference`: RustBuffer.ByValue,`uniffiOutReturn`: RustBuffer,uniffiCallStatus: UniffiRustCallStatus,) {
+            val uniffiObj = FfiConverterTypeServiceHostOwnerCallback.handleMap.get(uniffiHandle)
+            val makeCall = { ->
+                uniffiObj.`credentialCapability`(
+                    FfiConverterString.lift(`profile`),
+                    FfiConverterString.lift(`reference`),
+                )
+            }
+            val writeReturn = { value: ServiceOwnerCredentialCapability? -> uniffiOutReturn.setValue(FfiConverterOptionalTypeServiceOwnerCredentialCapability.lower(value)) }
+            uniffiTraitInterfaceCall(uniffiCallStatus, makeCall, writeReturn)
+        }
+    }
+    internal object `bindChatContext`: UniffiCallbackInterfaceServiceHostOwnerCallbackMethod2 {
+        override fun callback(`uniffiHandle`: Long,`reservation`: RustBuffer.ByValue,`binding`: RustBuffer.ByValue,`requestId`: RustBuffer.ByValue,`payload`: RustBuffer.ByValue,`context`: RustBuffer.ByValue,`capability`: RustBuffer.ByValue,`uniffiOutReturn`: ByteByReference,uniffiCallStatus: UniffiRustCallStatus,) {
+            val uniffiObj = FfiConverterTypeServiceHostOwnerCallback.handleMap.get(uniffiHandle)
+            val makeCall = { ->
+                uniffiObj.`bindChatContext`(
+                    FfiConverterString.lift(`reservation`),
+                    FfiConverterTypeServiceOwnerAdmissionBinding.lift(`binding`),
+                    FfiConverterString.lift(`requestId`),
+                    FfiConverterByteArray.lift(`payload`),
+                    FfiConverterByteArray.lift(`context`),
+                    FfiConverterTypeServiceOwnerCredentialCapability.lift(`capability`),
+                )
+            }
+            val writeReturn = { value: kotlin.Boolean -> uniffiOutReturn.setValue(FfiConverterBoolean.lower(value)) }
+            uniffiTraitInterfaceCall(uniffiCallStatus, makeCall, writeReturn)
+        }
+    }
+    internal object `exchangeChat`: UniffiCallbackInterfaceServiceHostOwnerCallbackMethod3 {
+        override fun callback(`uniffiHandle`: Long,`admission`: RustBuffer.ByValue,`binding`: RustBuffer.ByValue,`context`: RustBuffer.ByValue,`payload`: RustBuffer.ByValue,`capability`: RustBuffer.ByValue,`uniffiOutReturn`: RustBuffer,uniffiCallStatus: UniffiRustCallStatus,) {
+            val uniffiObj = FfiConverterTypeServiceHostOwnerCallback.handleMap.get(uniffiHandle)
+            val makeCall = { ->
+                uniffiObj.`exchangeChat`(
+                    FfiConverterString.lift(`admission`),
+                    FfiConverterTypeServiceOwnerAdmissionBinding.lift(`binding`),
+                    FfiConverterByteArray.lift(`context`),
+                    FfiConverterByteArray.lift(`payload`),
+                    FfiConverterTypeServiceOwnerCredentialCapability.lift(`capability`),
+                )
+            }
+            val writeReturn = { value: ServiceOwnerChatResponse? -> uniffiOutReturn.setValue(FfiConverterOptionalTypeServiceOwnerChatResponse.lower(value)) }
+            uniffiTraitInterfaceCall(uniffiCallStatus, makeCall, writeReturn)
+        }
+    }
+    internal object `exchangeLiveChat`: UniffiCallbackInterfaceServiceHostOwnerCallbackMethod4 {
+        override fun callback(`uniffiHandle`: Long,`admission`: RustBuffer.ByValue,`binding`: RustBuffer.ByValue,`context`: RustBuffer.ByValue,`payload`: RustBuffer.ByValue,`capability`: RustBuffer.ByValue,`control`: Long,`uniffiOutReturn`: RustBuffer,uniffiCallStatus: UniffiRustCallStatus,) {
+            val uniffiObj = FfiConverterTypeServiceHostOwnerCallback.handleMap.get(uniffiHandle)
+            val makeCall = { ->
+                uniffiObj.`exchangeLiveChat`(
+                    FfiConverterString.lift(`admission`),
+                    FfiConverterTypeServiceOwnerAdmissionBinding.lift(`binding`),
+                    FfiConverterByteArray.lift(`context`),
+                    FfiConverterByteArray.lift(`payload`),
+                    FfiConverterTypeServiceOwnerCredentialCapability.lift(`capability`),
+                    FfiConverterTypeServiceOwnerRunControl.lift(`control`),
+                )
+            }
+            val writeReturn = { value: ServiceOwnerChatResponse? -> uniffiOutReturn.setValue(FfiConverterOptionalTypeServiceOwnerChatResponse.lower(value)) }
+            uniffiTraitInterfaceCall(uniffiCallStatus, makeCall, writeReturn)
+        }
+    }
+    internal object `settleChat`: UniffiCallbackInterfaceServiceHostOwnerCallbackMethod5 {
+        override fun callback(`uniffiHandle`: Long,`admission`: RustBuffer.ByValue,`accepted`: Byte,`uniffiOutReturn`: ByteByReference,uniffiCallStatus: UniffiRustCallStatus,) {
+            val uniffiObj = FfiConverterTypeServiceHostOwnerCallback.handleMap.get(uniffiHandle)
+            val makeCall = { ->
+                uniffiObj.`settleChat`(
+                    FfiConverterString.lift(`admission`),
+                    FfiConverterBoolean.lift(`accepted`),
+                )
+            }
+            val writeReturn = { value: kotlin.Boolean -> uniffiOutReturn.setValue(FfiConverterBoolean.lower(value)) }
+            uniffiTraitInterfaceCall(uniffiCallStatus, makeCall, writeReturn)
+        }
+    }
+    internal object `chatSettlement`: UniffiCallbackInterfaceServiceHostOwnerCallbackMethod6 {
+        override fun callback(`uniffiHandle`: Long,`admission`: RustBuffer.ByValue,`uniffiOutReturn`: RustBuffer,uniffiCallStatus: UniffiRustCallStatus,) {
+            val uniffiObj = FfiConverterTypeServiceHostOwnerCallback.handleMap.get(uniffiHandle)
+            val makeCall = { ->
+                uniffiObj.`chatSettlement`(
+                    FfiConverterString.lift(`admission`),
+                )
+            }
+            val writeReturn = { value: kotlin.String? -> uniffiOutReturn.setValue(FfiConverterOptionalString.lower(value)) }
+            uniffiTraitInterfaceCall(uniffiCallStatus, makeCall, writeReturn)
+        }
+    }
+    internal object `currentScope`: UniffiCallbackInterfaceServiceHostOwnerCallbackMethod7 {
+        override fun callback(`uniffiHandle`: Long,`uniffiOutReturn`: RustBuffer,uniffiCallStatus: UniffiRustCallStatus,) {
+            val uniffiObj = FfiConverterTypeServiceHostOwnerCallback.handleMap.get(uniffiHandle)
+            val makeCall = { ->
+                uniffiObj.`currentScope`(
+                )
+            }
+            val writeReturn = { value: ServiceOwnerScope? -> uniffiOutReturn.setValue(FfiConverterOptionalTypeServiceOwnerScope.lower(value)) }
+            uniffiTraitInterfaceCall(uniffiCallStatus, makeCall, writeReturn)
+        }
+    }
+    internal object `currentProvider`: UniffiCallbackInterfaceServiceHostOwnerCallbackMethod8 {
+        override fun callback(`uniffiHandle`: Long,`uniffiOutReturn`: RustBuffer,uniffiCallStatus: UniffiRustCallStatus,) {
+            val uniffiObj = FfiConverterTypeServiceHostOwnerCallback.handleMap.get(uniffiHandle)
+            val makeCall = { ->
+                uniffiObj.`currentProvider`(
+                )
+            }
+            val writeReturn = { value: ServiceOwnerProvider? -> uniffiOutReturn.setValue(FfiConverterOptionalTypeServiceOwnerProvider.lower(value)) }
+            uniffiTraitInterfaceCall(uniffiCallStatus, makeCall, writeReturn)
+        }
+    }
+    internal object `reviewPayload`: UniffiCallbackInterfaceServiceHostOwnerCallbackMethod9 {
+        override fun callback(`uniffiHandle`: Long,`binding`: RustBuffer.ByValue,`payload`: RustBuffer.ByValue,`uniffiOutReturn`: ByteByReference,uniffiCallStatus: UniffiRustCallStatus,) {
+            val uniffiObj = FfiConverterTypeServiceHostOwnerCallback.handleMap.get(uniffiHandle)
+            val makeCall = { ->
+                uniffiObj.`reviewPayload`(
+                    FfiConverterTypeServiceOwnerAdmissionBinding.lift(`binding`),
+                    FfiConverterByteArray.lift(`payload`),
+                )
+            }
+            val writeReturn = { value: kotlin.Boolean -> uniffiOutReturn.setValue(FfiConverterBoolean.lower(value)) }
+            uniffiTraitInterfaceCall(uniffiCallStatus, makeCall, writeReturn)
+        }
+    }
+    internal object `reserveBudget`: UniffiCallbackInterfaceServiceHostOwnerCallbackMethod10 {
+        override fun callback(`uniffiHandle`: Long,`binding`: RustBuffer.ByValue,`requestId`: RustBuffer.ByValue,`payload`: RustBuffer.ByValue,`budget`: RustBuffer.ByValue,`uniffiOutReturn`: RustBuffer,uniffiCallStatus: UniffiRustCallStatus,) {
+            val uniffiObj = FfiConverterTypeServiceHostOwnerCallback.handleMap.get(uniffiHandle)
+            val makeCall = { ->
+                uniffiObj.`reserveBudget`(
+                    FfiConverterTypeServiceOwnerAdmissionBinding.lift(`binding`),
+                    FfiConverterString.lift(`requestId`),
+                    FfiConverterByteArray.lift(`payload`),
+                    FfiConverterTypeServiceOwnerCallBudget.lift(`budget`),
+                )
+            }
+            val writeReturn = { value: kotlin.String? -> uniffiOutReturn.setValue(FfiConverterOptionalString.lower(value)) }
+            uniffiTraitInterfaceCall(uniffiCallStatus, makeCall, writeReturn)
+        }
+    }
+    internal object `releaseReservation`: UniffiCallbackInterfaceServiceHostOwnerCallbackMethod11 {
+        override fun callback(`uniffiHandle`: Long,`reservation`: RustBuffer.ByValue,`uniffiOutReturn`: ByteByReference,uniffiCallStatus: UniffiRustCallStatus,) {
+            val uniffiObj = FfiConverterTypeServiceHostOwnerCallback.handleMap.get(uniffiHandle)
+            val makeCall = { ->
+                uniffiObj.`releaseReservation`(
+                    FfiConverterString.lift(`reservation`),
+                )
+            }
+            val writeReturn = { value: kotlin.Boolean -> uniffiOutReturn.setValue(FfiConverterBoolean.lower(value)) }
+            uniffiTraitInterfaceCall(uniffiCallStatus, makeCall, writeReturn)
+        }
+    }
+    internal object `commitAdmission`: UniffiCallbackInterfaceServiceHostOwnerCallbackMethod12 {
+        override fun callback(`uniffiHandle`: Long,`reservation`: RustBuffer.ByValue,`binding`: RustBuffer.ByValue,`requestId`: RustBuffer.ByValue,`payload`: RustBuffer.ByValue,`credentialProfileId`: RustBuffer.ByValue,`credentialRef`: RustBuffer.ByValue,`uniffiOutReturn`: RustBuffer,uniffiCallStatus: UniffiRustCallStatus,) {
+            val uniffiObj = FfiConverterTypeServiceHostOwnerCallback.handleMap.get(uniffiHandle)
+            val makeCall = { ->
+                uniffiObj.`commitAdmission`(
+                    FfiConverterString.lift(`reservation`),
+                    FfiConverterTypeServiceOwnerAdmissionBinding.lift(`binding`),
+                    FfiConverterString.lift(`requestId`),
+                    FfiConverterByteArray.lift(`payload`),
+                    FfiConverterString.lift(`credentialProfileId`),
+                    FfiConverterString.lift(`credentialRef`),
+                )
+            }
+            val writeReturn = { value: kotlin.String? -> uniffiOutReturn.setValue(FfiConverterOptionalString.lower(value)) }
+            uniffiTraitInterfaceCall(uniffiCallStatus, makeCall, writeReturn)
+        }
+    }
+
+    internal object uniffiFree: UniffiCallbackInterfaceFree {
+        override fun callback(handle: Long) {
+            FfiConverterTypeServiceHostOwnerCallback.handleMap.remove(handle)
+        }
+    }
+
+    internal object uniffiClone: UniffiCallbackInterfaceClone {
+        override fun callback(handle: Long): Long {
+            return FfiConverterTypeServiceHostOwnerCallback.handleMap.clone(handle)
+        }
+    }
+
+    internal var vtable = UniffiVTableCallbackInterfaceServiceHostOwnerCallback.UniffiByValue(
+        uniffiFree,
+        uniffiClone,
+        `currentChatAuthority`,
+        `credentialCapability`,
+        `bindChatContext`,
+        `exchangeChat`,
+        `exchangeLiveChat`,
+        `settleChat`,
+        `chatSettlement`,
+        `currentScope`,
+        `currentProvider`,
+        `reviewPayload`,
+        `reserveBudget`,
+        `releaseReservation`,
+        `commitAdmission`,
+    )
+
+    // Registers the foreign callback with the Rust side.
+    // This method is generated for each callback interface.
+    internal fun register(lib: UniffiLib) {
+        lib.uniffi_muyon_android_contract_bridge_fn_init_callback_vtable_servicehostownercallback(vtable)
+    }
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeServiceHostOwnerCallback: FfiConverter<ServiceHostOwnerCallback, Long> {
+    internal val handleMap = UniffiHandleMap<ServiceHostOwnerCallback>()
+
+    override fun lower(value: ServiceHostOwnerCallback): Long {
+        if (value is ServiceHostOwnerCallbackImpl) {
+             // Rust-implemented object.  Clone the handle and return it
+            return value.uniffiCloneHandle()
+         } else {
+            // Kotlin object, generate a new vtable handle and return that.
+            return handleMap.insert(value)
+         }
+    }
+
+    override fun lift(value: Long): ServiceHostOwnerCallback {
+        if ((value and 1.toLong()) == 0.toLong()) {
+            // Rust-generated handle, construct a new class that uses the handle to implement the
+            // interface
+            return ServiceHostOwnerCallbackImpl(UniffiWithHandle, value)
+        } else {
+            // Kotlin-generated handle, get the object from the handle map
+            return handleMap.remove(value)
+        }
+    }
+
+    override fun read(buf: ByteBuffer): ServiceHostOwnerCallback {
+        return lift(buf.getLong())
+    }
+
+    override fun allocationSize(value: ServiceHostOwnerCallback) = 8UL
+
+    override fun write(value: ServiceHostOwnerCallback, buf: ByteBuffer) {
+        buf.putLong(lower(value))
+    }
+}
+
+
+// This template implements a class for working with a Rust struct via a handle
+// to the live Rust struct on the other side of the FFI.
+//
+// There's some subtlety here, because we have to be careful not to operate on a Rust
+// struct after it has been dropped, and because we must expose a public API for freeing
+// theq Kotlin wrapper object in lieu of reliable finalizers. The core requirements are:
+//
+//   * Each instance holds an opaque handle to the underlying Rust struct.
+//     Method calls need to read this handle from the object's state and pass it in to
+//     the Rust FFI.
+//
+//   * When an instance is no longer needed, its handle should be passed to a
+//     special destructor function provided by the Rust FFI, which will drop the
+//     underlying Rust struct.
+//
+//   * Given an instance, calling code is expected to call the special
+//     `destroy` method in order to free it after use, either by calling it explicitly
+//     or by using a higher-level helper like the `use` method. Failing to do so risks
+//     leaking the underlying Rust struct.
+//
+//   * We can't assume that calling code will do the right thing, and must be prepared
+//     to handle Kotlin method calls executing concurrently with or even after a call to
+//     `destroy`, and to handle multiple (possibly concurrent!) calls to `destroy`.
+//
+//   * We must never allow Rust code to operate on the underlying Rust struct after
+//     the destructor has been called, and must never call the destructor more than once.
+//     Doing so may trigger memory unsafety.
+//
+//   * To mitigate many of the risks of leaking memory and use-after-free unsafety, a `Cleaner`
+//     is implemented to call the destructor when the Kotlin object becomes unreachable.
+//     This is done in a background thread. This is not a panacea, and client code should be aware that
+//      1. the thread may starve if some there are objects that have poorly performing
+//     `drop` methods or do significant work in their `drop` methods.
+//      2. the thread is shared across the whole library. This can be tuned by using `android_cleaner = true`,
+//         or `android = true` in the [`kotlin` section of the `uniffi.toml` file](https://mozilla.github.io/uniffi-rs/kotlin/configuration.html).
+//
+// If we try to implement this with mutual exclusion on access to the handle, there is the
+// possibility of a race between a method call and a concurrent call to `destroy`:
+//
+//    * Thread A starts a method call, reads the value of the handle, but is interrupted
+//      before it can pass the handle over the FFI to Rust.
+//    * Thread B calls `destroy` and frees the underlying Rust struct.
+//    * Thread A resumes, passing the already-read handle value to Rust and triggering
+//      a use-after-free.
+//
+// One possible solution would be to use a `ReadWriteLock`, with each method call taking
+// a read lock (and thus allowed to run concurrently) and the special `destroy` method
+// taking a write lock (and thus blocking on live method calls). However, we aim not to
+// generate methods with any hidden blocking semantics, and a `destroy` method that might
+// block if called incorrectly seems to meet that bar.
+//
+// So, we achieve our goals by giving each instance an associated `AtomicLong` counter to track
+// the number of in-flight method calls, and an `AtomicBoolean` flag to indicate whether `destroy`
+// has been called. These are updated according to the following rules:
+//
+//    * The initial value of the counter is 1, indicating a live object with no in-flight calls.
+//      The initial value for the flag is false.
+//
+//    * At the start of each method call, we atomically check the counter.
+//      If it is 0 then the underlying Rust struct has already been destroyed and the call is aborted.
+//      If it is nonzero them we atomically increment it by 1 and proceed with the method call.
+//
+//    * At the end of each method call, we atomically decrement and check the counter.
+//      If it has reached zero then we destroy the underlying Rust struct.
+//
+//    * When `destroy` is called, we atomically flip the flag from false to true.
+//      If the flag was already true we silently fail.
+//      Otherwise we atomically decrement and check the counter.
+//      If it has reached zero then we destroy the underlying Rust struct.
+//
+// Astute readers may observe that this all sounds very similar to the way that Rust's `Arc<T>` works,
+// and indeed it is, with the addition of a flag to guard against multiple calls to `destroy`.
+//
+// The overall effect is that the underlying Rust struct is destroyed only when `destroy` has been
+// called *and* all in-flight method calls have completed, avoiding violating any of the expectations
+// of the underlying Rust code.
+//
+// This makes a cleaner a better alternative to _not_ calling `destroy()` as
+// and when the object is finished with, but the abstraction is not perfect: if the Rust object's `drop`
+// method is slow, and/or there are many objects to cleanup, and it's on a low end Android device, then the cleaner
+// thread may be starved, and the app will leak memory.
+//
+// In this case, `destroy`ing manually may be a better solution.
+//
+// The cleaner can live side by side with the manual calling of `destroy`. In the order of responsiveness, uniffi objects
+// with Rust peers are reclaimed:
+//
+// 1. By calling the `destroy` method of the object, which calls `rustObject.free()`. If that doesn't happen:
+// 2. When the object becomes unreachable, AND the Cleaner thread gets to call `rustObject.free()`. If the thread is starved then:
+// 3. The memory is reclaimed when the process terminates.
+//
+// [1] https://stackoverflow.com/questions/24376768/can-java-finalize-an-object-when-it-is-still-in-scope/24380219
+//
+
+
+/**
+ * Rust-created capability for the exact controller run. No UI constructor.
+ */
+public interface ServiceOwnerRunControlInterface {
+    
+    fun `allowed`(): kotlin.Boolean
+    
+    companion object
+}
+
+/**
+ * Rust-created capability for the exact controller run. No UI constructor.
+ */
+open class ServiceOwnerRunControl: Disposable, AutoCloseable, ServiceOwnerRunControlInterface
+{
+
+    @Suppress("UNUSED_PARAMETER")
+    /**
+     * @suppress
+     */
+    constructor(withHandle: UniffiWithHandle, handle: Long) {
+        this.handle = handle
+        this.cleanable = UniffiLib.CLEANER.register(this, UniffiCleanAction(handle))
+    }
+
+    /**
+     * @suppress
+     *
+     * This constructor can be used to instantiate a fake object. Only used for tests. Any
+     * attempt to actually use an object constructed this way will fail as there is no
+     * connected Rust object.
+     */
+    @Suppress("UNUSED_PARAMETER")
+    constructor(noHandle: NoHandle) {
+        this.handle = 0
+        this.cleanable = null
+    }
+
+    protected val handle: Long
+    protected val cleanable: UniffiCleaner.Cleanable?
+
+    private val wasDestroyed = AtomicBoolean(false)
+    private val callCounter = AtomicLong(1)
+
+    /**
+     * Whether the current object has been destroyed and its reference is gone in the Rust side.
+     */
+    val uniffiIsDestroyed: Boolean get() = wasDestroyed.get()
+
+    override fun destroy() {
+        // Only allow a single call to this method.
+        // TODO: maybe we should log a warning if called more than once?
+        if (this.wasDestroyed.compareAndSet(false, true)) {
+            // This decrement always matches the initial count of 1 given at creation time.
+            if (this.callCounter.decrementAndGet() == 0L) {
+                cleanable?.clean()
+            }
+        }
+    }
+
+    @Synchronized
+    override fun close() {
+        this.destroy()
+    }
+
+    internal inline fun <R> callWithHandle(block: (handle: Long) -> R): R {
+        // Check and increment the call counter, to keep the object alive.
+        // This needs a compare-and-set retry loop in case of concurrent updates.
+        do {
+            val c = this.callCounter.get()
+            if (c == 0L) {
+                throw IllegalStateException("${this.javaClass.simpleName} object has already been destroyed")
+            }
+            if (c == Long.MAX_VALUE) {
+                throw IllegalStateException("${this.javaClass.simpleName} call counter would overflow")
+            }
+        } while (! this.callCounter.compareAndSet(c, c + 1L))
+        // Now we can safely do the method call without the handle being freed concurrently.
+        try {
+            return block(this.uniffiCloneHandle())
+        } finally {
+            // This decrement always matches the increment we performed above.
+            if (this.callCounter.decrementAndGet() == 0L) {
+                cleanable?.clean()
+            }
+        }
+    }
+
+    // Use a static inner class instead of a closure so as not to accidentally
+    // capture `this` as part of the cleanable's action.
+    private class UniffiCleanAction(private val handle: Long) : Runnable {
+        override fun run() {
+            if (handle == 0.toLong()) {
+                // Fake object created with `NoHandle`, don't try to free.
+                return;
+            }
+            uniffiRustCall { status ->
+                UniffiLib.uniffi_muyon_android_contract_bridge_fn_free_serviceownerruncontrol(handle, status)
+            }
+        }
+    }
+
+    /**
+     * @suppress
+     */
+    fun uniffiCloneHandle(): Long {
+        if (handle == 0.toLong()) {
+            throw InternalException("uniffiCloneHandle() called on NoHandle object");
+        }
+        return uniffiRustCall() { status ->
+            UniffiLib.uniffi_muyon_android_contract_bridge_fn_clone_serviceownerruncontrol(handle, status)
+        }
+    }
+
+    override fun `allowed`(): kotlin.Boolean {
+            return FfiConverterBoolean.lift(
+    callWithHandle {
+    uniffiRustCall() { _status ->
+    UniffiLib.uniffi_muyon_android_contract_bridge_fn_method_serviceownerruncontrol_allowed(
+        it,
+        _status)
+}
+    }
+    )
+    }
+    
+
+    
+
+    
+
+
+    
+    
+    /**
+     * @suppress
+     */
+    companion object
+    
+}
+
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeServiceOwnerRunControl: FfiConverter<ServiceOwnerRunControl, Long> {
+    override fun lower(value: ServiceOwnerRunControl): Long {
+        return value.uniffiCloneHandle()
+    }
+
+    override fun lift(value: Long): ServiceOwnerRunControl {
+        return ServiceOwnerRunControl(UniffiWithHandle, value)
+    }
+
+    override fun read(buf: ByteBuffer): ServiceOwnerRunControl {
+        return lift(buf.getLong())
+    }
+
+    override fun allocationSize(value: ServiceOwnerRunControl) = 8UL
+
+    override fun write(value: ServiceOwnerRunControl, buf: ByteBuffer) {
+        buf.putLong(lower(value))
+    }
+}
+
+
+
+data class AgentCancelRequest (
+    val `client`: AgentClientRef
+    , 
+    val `run`: AgentRunRef
+    
+){
+    
+
+    
+
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeAgentCancelRequest: FfiConverterRustBuffer<AgentCancelRequest> {
+    override fun read(buf: ByteBuffer): AgentCancelRequest {
+        return AgentCancelRequest(
+            FfiConverterTypeAgentClientRef.read(buf),
+            FfiConverterTypeAgentRunRef.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: AgentCancelRequest) = (
+            FfiConverterTypeAgentClientRef.allocationSize(value.`client`) +
+            FfiConverterTypeAgentRunRef.allocationSize(value.`run`)
+    )
+
+    override fun write(value: AgentCancelRequest, buf: ByteBuffer) {
+            FfiConverterTypeAgentClientRef.write(value.`client`, buf)
+            FfiConverterTypeAgentRunRef.write(value.`run`, buf)
+    }
+}
+
+
+
+data class AgentClientRef (
+    val `protocol`: kotlin.UInt
+    , 
+    val `expectedServiceEpoch`: kotlin.String
+    , 
+    val `clientLease`: kotlin.String
+    
+){
+    
+
+    
+
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeAgentClientRef: FfiConverterRustBuffer<AgentClientRef> {
+    override fun read(buf: ByteBuffer): AgentClientRef {
+        return AgentClientRef(
+            FfiConverterUInt.read(buf),
+            FfiConverterString.read(buf),
+            FfiConverterString.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: AgentClientRef) = (
+            FfiConverterUInt.allocationSize(value.`protocol`) +
+            FfiConverterString.allocationSize(value.`expectedServiceEpoch`) +
+            FfiConverterString.allocationSize(value.`clientLease`)
+    )
+
+    override fun write(value: AgentClientRef, buf: ByteBuffer) {
+            FfiConverterUInt.write(value.`protocol`, buf)
+            FfiConverterString.write(value.`expectedServiceEpoch`, buf)
+            FfiConverterString.write(value.`clientLease`, buf)
+    }
+}
+
+
+
+data class AgentCloseReply (
+    val `meta`: AgentReplyMeta
+    , 
+    val `outcome`: AgentCloseOutcome
+    
+){
+    
+
+    
+
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeAgentCloseReply: FfiConverterRustBuffer<AgentCloseReply> {
+    override fun read(buf: ByteBuffer): AgentCloseReply {
+        return AgentCloseReply(
+            FfiConverterTypeAgentReplyMeta.read(buf),
+            FfiConverterTypeAgentCloseOutcome.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: AgentCloseReply) = (
+            FfiConverterTypeAgentReplyMeta.allocationSize(value.`meta`) +
+            FfiConverterTypeAgentCloseOutcome.allocationSize(value.`outcome`)
+    )
+
+    override fun write(value: AgentCloseReply, buf: ByteBuffer) {
+            FfiConverterTypeAgentReplyMeta.write(value.`meta`, buf)
+            FfiConverterTypeAgentCloseOutcome.write(value.`outcome`, buf)
+    }
+}
+
+
+
+data class AgentConnectReply (
+    val `meta`: AgentReplyMeta
+    , 
+    val `outcome`: AgentConnectOutcome
+    
+){
+    
+
+    
+
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeAgentConnectReply: FfiConverterRustBuffer<AgentConnectReply> {
+    override fun read(buf: ByteBuffer): AgentConnectReply {
+        return AgentConnectReply(
+            FfiConverterTypeAgentReplyMeta.read(buf),
+            FfiConverterTypeAgentConnectOutcome.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: AgentConnectReply) = (
+            FfiConverterTypeAgentReplyMeta.allocationSize(value.`meta`) +
+            FfiConverterTypeAgentConnectOutcome.allocationSize(value.`outcome`)
+    )
+
+    override fun write(value: AgentConnectReply, buf: ByteBuffer) {
+            FfiConverterTypeAgentReplyMeta.write(value.`meta`, buf)
+            FfiConverterTypeAgentConnectOutcome.write(value.`outcome`, buf)
+    }
+}
+
+
+
+data class AgentConnectRequest (
+    val `protocol`: kotlin.UInt
+    , 
+    val `platformClientKey`: kotlin.String
+    
+){
+    
+
+    
+
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeAgentConnectRequest: FfiConverterRustBuffer<AgentConnectRequest> {
+    override fun read(buf: ByteBuffer): AgentConnectRequest {
+        return AgentConnectRequest(
+            FfiConverterUInt.read(buf),
+            FfiConverterString.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: AgentConnectRequest) = (
+            FfiConverterUInt.allocationSize(value.`protocol`) +
+            FfiConverterString.allocationSize(value.`platformClientKey`)
+    )
+
+    override fun write(value: AgentConnectRequest, buf: ByteBuffer) {
+            FfiConverterUInt.write(value.`protocol`, buf)
+            FfiConverterString.write(value.`platformClientKey`, buf)
+    }
+}
+
+
+
+data class AgentControlReply (
+    val `meta`: AgentReplyMeta
+    , 
+    val `outcome`: AgentControlOutcome
+    
+){
+    
+
+    
+
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeAgentControlReply: FfiConverterRustBuffer<AgentControlReply> {
+    override fun read(buf: ByteBuffer): AgentControlReply {
+        return AgentControlReply(
+            FfiConverterTypeAgentReplyMeta.read(buf),
+            FfiConverterTypeAgentControlOutcome.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: AgentControlReply) = (
+            FfiConverterTypeAgentReplyMeta.allocationSize(value.`meta`) +
+            FfiConverterTypeAgentControlOutcome.allocationSize(value.`outcome`)
+    )
+
+    override fun write(value: AgentControlReply, buf: ByteBuffer) {
+            FfiConverterTypeAgentReplyMeta.write(value.`meta`, buf)
+            FfiConverterTypeAgentControlOutcome.write(value.`outcome`, buf)
+    }
+}
+
+
+
+data class AgentDurableRun (
+    val `intent`: AgentIntentBinding
+    , 
+    val `identity`: AgentRunIdentity
+    
+){
+    
+
+    
+
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeAgentDurableRun: FfiConverterRustBuffer<AgentDurableRun> {
+    override fun read(buf: ByteBuffer): AgentDurableRun {
+        return AgentDurableRun(
+            FfiConverterTypeAgentIntentBinding.read(buf),
+            FfiConverterTypeAgentRunIdentity.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: AgentDurableRun) = (
+            FfiConverterTypeAgentIntentBinding.allocationSize(value.`intent`) +
+            FfiConverterTypeAgentRunIdentity.allocationSize(value.`identity`)
+    )
+
+    override fun write(value: AgentDurableRun, buf: ByteBuffer) {
+            FfiConverterTypeAgentIntentBinding.write(value.`intent`, buf)
+            FfiConverterTypeAgentRunIdentity.write(value.`identity`, buf)
+    }
+}
+
+
+
+data class AgentIntentBinding (
+    val `requestId`: kotlin.String
+    , 
+    val `variant`: AgentReadVariant
+    , 
+    val `sourceBuildIdentity`: kotlin.String
+    
+){
+    
+
+    
+
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeAgentIntentBinding: FfiConverterRustBuffer<AgentIntentBinding> {
+    override fun read(buf: ByteBuffer): AgentIntentBinding {
+        return AgentIntentBinding(
+            FfiConverterString.read(buf),
+            FfiConverterTypeAgentReadVariant.read(buf),
+            FfiConverterString.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: AgentIntentBinding) = (
+            FfiConverterString.allocationSize(value.`requestId`) +
+            FfiConverterTypeAgentReadVariant.allocationSize(value.`variant`) +
+            FfiConverterString.allocationSize(value.`sourceBuildIdentity`)
+    )
+
+    override fun write(value: AgentIntentBinding, buf: ByteBuffer) {
+            FfiConverterString.write(value.`requestId`, buf)
+            FfiConverterTypeAgentReadVariant.write(value.`variant`, buf)
+            FfiConverterString.write(value.`sourceBuildIdentity`, buf)
+    }
+}
+
+
+
+data class AgentLookupRequest (
+    val `client`: AgentClientRef
+    , 
+    val `key`: AgentLookupKey
+    
+){
+    
+
+    
+
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeAgentLookupRequest: FfiConverterRustBuffer<AgentLookupRequest> {
+    override fun read(buf: ByteBuffer): AgentLookupRequest {
+        return AgentLookupRequest(
+            FfiConverterTypeAgentClientRef.read(buf),
+            FfiConverterTypeAgentLookupKey.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: AgentLookupRequest) = (
+            FfiConverterTypeAgentClientRef.allocationSize(value.`client`) +
+            FfiConverterTypeAgentLookupKey.allocationSize(value.`key`)
+    )
+
+    override fun write(value: AgentLookupRequest, buf: ByteBuffer) {
+            FfiConverterTypeAgentClientRef.write(value.`client`, buf)
+            FfiConverterTypeAgentLookupKey.write(value.`key`, buf)
+    }
+}
+
+
+
+data class AgentNoAdmissionSettlement (
+    val `intent`: AgentIntentBinding
+    , 
+    val `reason`: AgentNoAdmissionReason
+    
+){
+    
+
+    
+
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeAgentNoAdmissionSettlement: FfiConverterRustBuffer<AgentNoAdmissionSettlement> {
+    override fun read(buf: ByteBuffer): AgentNoAdmissionSettlement {
+        return AgentNoAdmissionSettlement(
+            FfiConverterTypeAgentIntentBinding.read(buf),
+            FfiConverterTypeAgentNoAdmissionReason.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: AgentNoAdmissionSettlement) = (
+            FfiConverterTypeAgentIntentBinding.allocationSize(value.`intent`) +
+            FfiConverterTypeAgentNoAdmissionReason.allocationSize(value.`reason`)
+    )
+
+    override fun write(value: AgentNoAdmissionSettlement, buf: ByteBuffer) {
+            FfiConverterTypeAgentIntentBinding.write(value.`intent`, buf)
+            FfiConverterTypeAgentNoAdmissionReason.write(value.`reason`, buf)
+    }
+}
+
+
+
+data class AgentReceiptSummary (
+    val `opaqueId`: kotlin.String?
+    , 
+    val `outcome`: AgentReceiptOutcome
+    
+){
+    
+
+    
+
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeAgentReceiptSummary: FfiConverterRustBuffer<AgentReceiptSummary> {
+    override fun read(buf: ByteBuffer): AgentReceiptSummary {
+        return AgentReceiptSummary(
+            FfiConverterOptionalString.read(buf),
+            FfiConverterTypeAgentReceiptOutcome.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: AgentReceiptSummary) = (
+            FfiConverterOptionalString.allocationSize(value.`opaqueId`) +
+            FfiConverterTypeAgentReceiptOutcome.allocationSize(value.`outcome`)
+    )
+
+    override fun write(value: AgentReceiptSummary, buf: ByteBuffer) {
+            FfiConverterOptionalString.write(value.`opaqueId`, buf)
+            FfiConverterTypeAgentReceiptOutcome.write(value.`outcome`, buf)
+    }
+}
+
+
+
+data class AgentReleaseRequest (
+    val `client`: AgentClientRef
+    , 
+    val `observationGeneration`: kotlin.Long
+    
+){
+    
+
+    
+
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeAgentReleaseRequest: FfiConverterRustBuffer<AgentReleaseRequest> {
+    override fun read(buf: ByteBuffer): AgentReleaseRequest {
+        return AgentReleaseRequest(
+            FfiConverterTypeAgentClientRef.read(buf),
+            FfiConverterLong.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: AgentReleaseRequest) = (
+            FfiConverterTypeAgentClientRef.allocationSize(value.`client`) +
+            FfiConverterLong.allocationSize(value.`observationGeneration`)
+    )
+
+    override fun write(value: AgentReleaseRequest, buf: ByteBuffer) {
+            FfiConverterTypeAgentClientRef.write(value.`client`, buf)
+            FfiConverterLong.write(value.`observationGeneration`, buf)
+    }
+}
+
+
+
+data class AgentReplyMeta (
+    val `protocol`: kotlin.UInt
+    , 
+    val `buildIdentity`: kotlin.String
+    , 
+    val `serviceEpoch`: kotlin.String
+    , 
+    val `serverSnapshotRevision`: kotlin.Long
+    
+){
+    
+
+    
+
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeAgentReplyMeta: FfiConverterRustBuffer<AgentReplyMeta> {
+    override fun read(buf: ByteBuffer): AgentReplyMeta {
+        return AgentReplyMeta(
+            FfiConverterUInt.read(buf),
+            FfiConverterString.read(buf),
+            FfiConverterString.read(buf),
+            FfiConverterLong.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: AgentReplyMeta) = (
+            FfiConverterUInt.allocationSize(value.`protocol`) +
+            FfiConverterString.allocationSize(value.`buildIdentity`) +
+            FfiConverterString.allocationSize(value.`serviceEpoch`) +
+            FfiConverterLong.allocationSize(value.`serverSnapshotRevision`)
+    )
+
+    override fun write(value: AgentReplyMeta, buf: ByteBuffer) {
+            FfiConverterUInt.write(value.`protocol`, buf)
+            FfiConverterString.write(value.`buildIdentity`, buf)
+            FfiConverterString.write(value.`serviceEpoch`, buf)
+            FfiConverterLong.write(value.`serverSnapshotRevision`, buf)
+    }
+}
+
+
+
+data class AgentRunIdentity (
+    val `runId`: kotlin.String
+    , 
+    val `admittedServiceEpoch`: kotlin.String
+    , 
+    val `actualTask`: AgentTaskIdentity?
+    
+){
+    
+
+    
+
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeAgentRunIdentity: FfiConverterRustBuffer<AgentRunIdentity> {
+    override fun read(buf: ByteBuffer): AgentRunIdentity {
+        return AgentRunIdentity(
+            FfiConverterString.read(buf),
+            FfiConverterString.read(buf),
+            FfiConverterOptionalTypeAgentTaskIdentity.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: AgentRunIdentity) = (
+            FfiConverterString.allocationSize(value.`runId`) +
+            FfiConverterString.allocationSize(value.`admittedServiceEpoch`) +
+            FfiConverterOptionalTypeAgentTaskIdentity.allocationSize(value.`actualTask`)
+    )
+
+    override fun write(value: AgentRunIdentity, buf: ByteBuffer) {
+            FfiConverterString.write(value.`runId`, buf)
+            FfiConverterString.write(value.`admittedServiceEpoch`, buf)
+            FfiConverterOptionalTypeAgentTaskIdentity.write(value.`actualTask`, buf)
+    }
+}
+
+
+
+data class AgentRunRef (
+    val `requestId`: kotlin.String
+    , 
+    val `variant`: AgentReadVariant
+    , 
+    val `runId`: kotlin.String?
+    
+){
+    
+
+    
+
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeAgentRunRef: FfiConverterRustBuffer<AgentRunRef> {
+    override fun read(buf: ByteBuffer): AgentRunRef {
+        return AgentRunRef(
+            FfiConverterString.read(buf),
+            FfiConverterTypeAgentReadVariant.read(buf),
+            FfiConverterOptionalString.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: AgentRunRef) = (
+            FfiConverterString.allocationSize(value.`requestId`) +
+            FfiConverterTypeAgentReadVariant.allocationSize(value.`variant`) +
+            FfiConverterOptionalString.allocationSize(value.`runId`)
+    )
+
+    override fun write(value: AgentRunRef, buf: ByteBuffer) {
+            FfiConverterString.write(value.`requestId`, buf)
+            FfiConverterTypeAgentReadVariant.write(value.`variant`, buf)
+            FfiConverterOptionalString.write(value.`runId`, buf)
+    }
+}
+
+
+
+data class AgentRunSummary (
+    val `requestId`: kotlin.String
+    , 
+    val `variant`: AgentReadVariant
+    , 
+    val `sourceBuildIdentity`: kotlin.String
+    , 
+    val `identity`: AgentRunIdentity
+    , 
+    val `terminal`: AgentTerminal
+    , 
+    val `reason`: AgentReason
+    , 
+    val `receipt`: AgentReceiptSummary
+    
+){
+    
+
+    
+
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeAgentRunSummary: FfiConverterRustBuffer<AgentRunSummary> {
+    override fun read(buf: ByteBuffer): AgentRunSummary {
+        return AgentRunSummary(
+            FfiConverterString.read(buf),
+            FfiConverterTypeAgentReadVariant.read(buf),
+            FfiConverterString.read(buf),
+            FfiConverterTypeAgentRunIdentity.read(buf),
+            FfiConverterTypeAgentTerminal.read(buf),
+            FfiConverterTypeAgentReason.read(buf),
+            FfiConverterTypeAgentReceiptSummary.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: AgentRunSummary) = (
+            FfiConverterString.allocationSize(value.`requestId`) +
+            FfiConverterTypeAgentReadVariant.allocationSize(value.`variant`) +
+            FfiConverterString.allocationSize(value.`sourceBuildIdentity`) +
+            FfiConverterTypeAgentRunIdentity.allocationSize(value.`identity`) +
+            FfiConverterTypeAgentTerminal.allocationSize(value.`terminal`) +
+            FfiConverterTypeAgentReason.allocationSize(value.`reason`) +
+            FfiConverterTypeAgentReceiptSummary.allocationSize(value.`receipt`)
+    )
+
+    override fun write(value: AgentRunSummary, buf: ByteBuffer) {
+            FfiConverterString.write(value.`requestId`, buf)
+            FfiConverterTypeAgentReadVariant.write(value.`variant`, buf)
+            FfiConverterString.write(value.`sourceBuildIdentity`, buf)
+            FfiConverterTypeAgentRunIdentity.write(value.`identity`, buf)
+            FfiConverterTypeAgentTerminal.write(value.`terminal`, buf)
+            FfiConverterTypeAgentReason.write(value.`reason`, buf)
+            FfiConverterTypeAgentReceiptSummary.write(value.`receipt`, buf)
+    }
+}
+
+
+
+data class AgentServiceConfig (
+    val `protocol`: kotlin.UInt
+    , 
+    val `privateRoot`: kotlin.String
+    
+){
+    
+
+    
+
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeAgentServiceConfig: FfiConverterRustBuffer<AgentServiceConfig> {
+    override fun read(buf: ByteBuffer): AgentServiceConfig {
+        return AgentServiceConfig(
+            FfiConverterUInt.read(buf),
+            FfiConverterString.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: AgentServiceConfig) = (
+            FfiConverterUInt.allocationSize(value.`protocol`) +
+            FfiConverterString.allocationSize(value.`privateRoot`)
+    )
+
+    override fun write(value: AgentServiceConfig, buf: ByteBuffer) {
+            FfiConverterUInt.write(value.`protocol`, buf)
+            FfiConverterString.write(value.`privateRoot`, buf)
+    }
+}
+
+
+
+data class AgentSnapshot (
+    val `meta`: AgentReplyMeta
+    , 
+    val `serviceState`: AgentServiceState
+    , 
+    val `run`: AgentRunSnapshot?
+    
+){
+    
+
+    
+
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeAgentSnapshot: FfiConverterRustBuffer<AgentSnapshot> {
+    override fun read(buf: ByteBuffer): AgentSnapshot {
+        return AgentSnapshot(
+            FfiConverterTypeAgentReplyMeta.read(buf),
+            FfiConverterTypeAgentServiceState.read(buf),
+            FfiConverterOptionalTypeAgentRunSnapshot.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: AgentSnapshot) = (
+            FfiConverterTypeAgentReplyMeta.allocationSize(value.`meta`) +
+            FfiConverterTypeAgentServiceState.allocationSize(value.`serviceState`) +
+            FfiConverterOptionalTypeAgentRunSnapshot.allocationSize(value.`run`)
+    )
+
+    override fun write(value: AgentSnapshot, buf: ByteBuffer) {
+            FfiConverterTypeAgentReplyMeta.write(value.`meta`, buf)
+            FfiConverterTypeAgentServiceState.write(value.`serviceState`, buf)
+            FfiConverterOptionalTypeAgentRunSnapshot.write(value.`run`, buf)
+    }
+}
+
+
+
+data class AgentSnapshotReply (
+    val `meta`: AgentReplyMeta
+    , 
+    val `outcome`: AgentSnapshotOutcome
+    
+){
+    
+
+    
+
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeAgentSnapshotReply: FfiConverterRustBuffer<AgentSnapshotReply> {
+    override fun read(buf: ByteBuffer): AgentSnapshotReply {
+        return AgentSnapshotReply(
+            FfiConverterTypeAgentReplyMeta.read(buf),
+            FfiConverterTypeAgentSnapshotOutcome.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: AgentSnapshotReply) = (
+            FfiConverterTypeAgentReplyMeta.allocationSize(value.`meta`) +
+            FfiConverterTypeAgentSnapshotOutcome.allocationSize(value.`outcome`)
+    )
+
+    override fun write(value: AgentSnapshotReply, buf: ByteBuffer) {
+            FfiConverterTypeAgentReplyMeta.write(value.`meta`, buf)
+            FfiConverterTypeAgentSnapshotOutcome.write(value.`outcome`, buf)
+    }
+}
+
+
+
+data class AgentStartReply (
+    val `meta`: AgentReplyMeta
+    , 
+    val `outcome`: AgentStartOutcome
+    
+){
+    
+
+    
+
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeAgentStartReply: FfiConverterRustBuffer<AgentStartReply> {
+    override fun read(buf: ByteBuffer): AgentStartReply {
+        return AgentStartReply(
+            FfiConverterTypeAgentReplyMeta.read(buf),
+            FfiConverterTypeAgentStartOutcome.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: AgentStartReply) = (
+            FfiConverterTypeAgentReplyMeta.allocationSize(value.`meta`) +
+            FfiConverterTypeAgentStartOutcome.allocationSize(value.`outcome`)
+    )
+
+    override fun write(value: AgentStartReply, buf: ByteBuffer) {
+            FfiConverterTypeAgentReplyMeta.write(value.`meta`, buf)
+            FfiConverterTypeAgentStartOutcome.write(value.`outcome`, buf)
+    }
+}
+
+
+
+data class AgentStartRequest (
+    val `client`: AgentClientRef
+    , 
+    val `requestId`: kotlin.String
+    , 
+    val `variant`: AgentReadVariant
+    
+){
+    
+
+    
+
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeAgentStartRequest: FfiConverterRustBuffer<AgentStartRequest> {
+    override fun read(buf: ByteBuffer): AgentStartRequest {
+        return AgentStartRequest(
+            FfiConverterTypeAgentClientRef.read(buf),
+            FfiConverterString.read(buf),
+            FfiConverterTypeAgentReadVariant.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: AgentStartRequest) = (
+            FfiConverterTypeAgentClientRef.allocationSize(value.`client`) +
+            FfiConverterString.allocationSize(value.`requestId`) +
+            FfiConverterTypeAgentReadVariant.allocationSize(value.`variant`)
+    )
+
+    override fun write(value: AgentStartRequest, buf: ByteBuffer) {
+            FfiConverterTypeAgentClientRef.write(value.`client`, buf)
+            FfiConverterString.write(value.`requestId`, buf)
+            FfiConverterTypeAgentReadVariant.write(value.`variant`, buf)
+    }
+}
+
+
+
+data class AgentStatusRequest (
+    val `client`: AgentClientRef
+    , 
+    val `run`: AgentRunRef
+    
+){
+    
+
+    
+
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeAgentStatusRequest: FfiConverterRustBuffer<AgentStatusRequest> {
+    override fun read(buf: ByteBuffer): AgentStatusRequest {
+        return AgentStatusRequest(
+            FfiConverterTypeAgentClientRef.read(buf),
+            FfiConverterTypeAgentRunRef.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: AgentStatusRequest) = (
+            FfiConverterTypeAgentClientRef.allocationSize(value.`client`) +
+            FfiConverterTypeAgentRunRef.allocationSize(value.`run`)
+    )
+
+    override fun write(value: AgentStatusRequest, buf: ByteBuffer) {
+            FfiConverterTypeAgentClientRef.write(value.`client`, buf)
+            FfiConverterTypeAgentRunRef.write(value.`run`, buf)
+    }
+}
+
+
+
+data class AgentTaskIdentity (
+    val `taskId`: kotlin.String
+    , 
+    val `attemptId`: kotlin.String
+    
+){
+    
+
+    
+
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeAgentTaskIdentity: FfiConverterRustBuffer<AgentTaskIdentity> {
+    override fun read(buf: ByteBuffer): AgentTaskIdentity {
+        return AgentTaskIdentity(
+            FfiConverterString.read(buf),
+            FfiConverterString.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: AgentTaskIdentity) = (
+            FfiConverterString.allocationSize(value.`taskId`) +
+            FfiConverterString.allocationSize(value.`attemptId`)
+    )
+
+    override fun write(value: AgentTaskIdentity, buf: ByteBuffer) {
+            FfiConverterString.write(value.`taskId`, buf)
+            FfiConverterString.write(value.`attemptId`, buf)
+    }
+}
+
+
+
+data class AgentUnresolvedObservation (
+    val `intent`: AgentIntentBinding
+    , 
+    val `identity`: AgentRunIdentity?
+    , 
+    val `receipt`: AgentReceiptSummary
+    
+){
+    
+
+    
+
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeAgentUnresolvedObservation: FfiConverterRustBuffer<AgentUnresolvedObservation> {
+    override fun read(buf: ByteBuffer): AgentUnresolvedObservation {
+        return AgentUnresolvedObservation(
+            FfiConverterTypeAgentIntentBinding.read(buf),
+            FfiConverterOptionalTypeAgentRunIdentity.read(buf),
+            FfiConverterTypeAgentReceiptSummary.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: AgentUnresolvedObservation) = (
+            FfiConverterTypeAgentIntentBinding.allocationSize(value.`intent`) +
+            FfiConverterOptionalTypeAgentRunIdentity.allocationSize(value.`identity`) +
+            FfiConverterTypeAgentReceiptSummary.allocationSize(value.`receipt`)
+    )
+
+    override fun write(value: AgentUnresolvedObservation, buf: ByteBuffer) {
+            FfiConverterTypeAgentIntentBinding.write(value.`intent`, buf)
+            FfiConverterOptionalTypeAgentRunIdentity.write(value.`identity`, buf)
+            FfiConverterTypeAgentReceiptSummary.write(value.`receipt`, buf)
+    }
+}
+
+
+
+data class AgentVisibilityRequest (
+    val `client`: AgentClientRef
+    , 
+    val `observationGeneration`: kotlin.Long
+    , 
+    val `visible`: kotlin.Boolean
+    
+){
+    
+
+    
+
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeAgentVisibilityRequest: FfiConverterRustBuffer<AgentVisibilityRequest> {
+    override fun read(buf: ByteBuffer): AgentVisibilityRequest {
+        return AgentVisibilityRequest(
+            FfiConverterTypeAgentClientRef.read(buf),
+            FfiConverterLong.read(buf),
+            FfiConverterBoolean.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: AgentVisibilityRequest) = (
+            FfiConverterTypeAgentClientRef.allocationSize(value.`client`) +
+            FfiConverterLong.allocationSize(value.`observationGeneration`) +
+            FfiConverterBoolean.allocationSize(value.`visible`)
+    )
+
+    override fun write(value: AgentVisibilityRequest, buf: ByteBuffer) {
+            FfiConverterTypeAgentClientRef.write(value.`client`, buf)
+            FfiConverterLong.write(value.`observationGeneration`, buf)
+            FfiConverterBoolean.write(value.`visible`, buf)
     }
 }
 
@@ -1232,6 +4643,1980 @@ public object FfiConverterTypeDiagnosticRequest: FfiConverterRustBuffer<Diagnost
 
 
 
+data class ServiceAdmissionProbeReply (
+    val `admitted`: kotlin.Boolean
+    , 
+    val `recordId`: kotlin.String
+    , 
+    val `code`: kotlin.String
+    
+){
+    
+
+    
+
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeServiceAdmissionProbeReply: FfiConverterRustBuffer<ServiceAdmissionProbeReply> {
+    override fun read(buf: ByteBuffer): ServiceAdmissionProbeReply {
+        return ServiceAdmissionProbeReply(
+            FfiConverterBoolean.read(buf),
+            FfiConverterString.read(buf),
+            FfiConverterString.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: ServiceAdmissionProbeReply) = (
+            FfiConverterBoolean.allocationSize(value.`admitted`) +
+            FfiConverterString.allocationSize(value.`recordId`) +
+            FfiConverterString.allocationSize(value.`code`)
+    )
+
+    override fun write(value: ServiceAdmissionProbeReply, buf: ByteBuffer) {
+            FfiConverterBoolean.write(value.`admitted`, buf)
+            FfiConverterString.write(value.`recordId`, buf)
+            FfiConverterString.write(value.`code`, buf)
+    }
+}
+
+
+
+/**
+ * Exact owner snapshot for admission. Availability-only handle sentinels are excluded.
+ */
+data class ServiceOwnerAdmissionBinding (
+    val `profile`: ServiceOwnerProfile
+    , 
+    val `profileRevision`: kotlin.String
+    , 
+    val `policyRevision`: kotlin.String
+    , 
+    val `grantRevision`: kotlin.String
+    , 
+    val `authorizationOwner`: kotlin.String
+    , 
+    val `modelAllowed`: kotlin.Boolean
+    , 
+    val `outboundAllowed`: kotlin.Boolean
+    , 
+    val `budget`: ServiceOwnerBudget
+    
+){
+    
+
+    
+
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeServiceOwnerAdmissionBinding: FfiConverterRustBuffer<ServiceOwnerAdmissionBinding> {
+    override fun read(buf: ByteBuffer): ServiceOwnerAdmissionBinding {
+        return ServiceOwnerAdmissionBinding(
+            FfiConverterTypeServiceOwnerProfile.read(buf),
+            FfiConverterString.read(buf),
+            FfiConverterString.read(buf),
+            FfiConverterString.read(buf),
+            FfiConverterString.read(buf),
+            FfiConverterBoolean.read(buf),
+            FfiConverterBoolean.read(buf),
+            FfiConverterTypeServiceOwnerBudget.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: ServiceOwnerAdmissionBinding) = (
+            FfiConverterTypeServiceOwnerProfile.allocationSize(value.`profile`) +
+            FfiConverterString.allocationSize(value.`profileRevision`) +
+            FfiConverterString.allocationSize(value.`policyRevision`) +
+            FfiConverterString.allocationSize(value.`grantRevision`) +
+            FfiConverterString.allocationSize(value.`authorizationOwner`) +
+            FfiConverterBoolean.allocationSize(value.`modelAllowed`) +
+            FfiConverterBoolean.allocationSize(value.`outboundAllowed`) +
+            FfiConverterTypeServiceOwnerBudget.allocationSize(value.`budget`)
+    )
+
+    override fun write(value: ServiceOwnerAdmissionBinding, buf: ByteBuffer) {
+            FfiConverterTypeServiceOwnerProfile.write(value.`profile`, buf)
+            FfiConverterString.write(value.`profileRevision`, buf)
+            FfiConverterString.write(value.`policyRevision`, buf)
+            FfiConverterString.write(value.`grantRevision`, buf)
+            FfiConverterString.write(value.`authorizationOwner`, buf)
+            FfiConverterBoolean.write(value.`modelAllowed`, buf)
+            FfiConverterBoolean.write(value.`outboundAllowed`, buf)
+            FfiConverterTypeServiceOwnerBudget.write(value.`budget`, buf)
+    }
+}
+
+
+
+data class ServiceOwnerBudget (
+    val `revision`: kotlin.String
+    , 
+    val `quotaProof`: kotlin.String
+    , 
+    val `remainingCalls`: kotlin.ULong
+    , 
+    val `remainingTokens`: kotlin.ULong
+    , 
+    val `remainingMicros`: kotlin.ULong
+    
+){
+    
+
+    
+
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeServiceOwnerBudget: FfiConverterRustBuffer<ServiceOwnerBudget> {
+    override fun read(buf: ByteBuffer): ServiceOwnerBudget {
+        return ServiceOwnerBudget(
+            FfiConverterString.read(buf),
+            FfiConverterString.read(buf),
+            FfiConverterULong.read(buf),
+            FfiConverterULong.read(buf),
+            FfiConverterULong.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: ServiceOwnerBudget) = (
+            FfiConverterString.allocationSize(value.`revision`) +
+            FfiConverterString.allocationSize(value.`quotaProof`) +
+            FfiConverterULong.allocationSize(value.`remainingCalls`) +
+            FfiConverterULong.allocationSize(value.`remainingTokens`) +
+            FfiConverterULong.allocationSize(value.`remainingMicros`)
+    )
+
+    override fun write(value: ServiceOwnerBudget, buf: ByteBuffer) {
+            FfiConverterString.write(value.`revision`, buf)
+            FfiConverterString.write(value.`quotaProof`, buf)
+            FfiConverterULong.write(value.`remainingCalls`, buf)
+            FfiConverterULong.write(value.`remainingTokens`, buf)
+            FfiConverterULong.write(value.`remainingMicros`, buf)
+    }
+}
+
+
+
+data class ServiceOwnerCallBudget (
+    val `maxTokens`: kotlin.ULong
+    , 
+    val `maxMicros`: kotlin.ULong
+    , 
+    val `requiresTools`: kotlin.Boolean
+    , 
+    val `requiresStreaming`: kotlin.Boolean
+    
+){
+    
+
+    
+
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeServiceOwnerCallBudget: FfiConverterRustBuffer<ServiceOwnerCallBudget> {
+    override fun read(buf: ByteBuffer): ServiceOwnerCallBudget {
+        return ServiceOwnerCallBudget(
+            FfiConverterULong.read(buf),
+            FfiConverterULong.read(buf),
+            FfiConverterBoolean.read(buf),
+            FfiConverterBoolean.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: ServiceOwnerCallBudget) = (
+            FfiConverterULong.allocationSize(value.`maxTokens`) +
+            FfiConverterULong.allocationSize(value.`maxMicros`) +
+            FfiConverterBoolean.allocationSize(value.`requiresTools`) +
+            FfiConverterBoolean.allocationSize(value.`requiresStreaming`)
+    )
+
+    override fun write(value: ServiceOwnerCallBudget, buf: ByteBuffer) {
+            FfiConverterULong.write(value.`maxTokens`, buf)
+            FfiConverterULong.write(value.`maxMicros`, buf)
+            FfiConverterBoolean.write(value.`requiresTools`, buf)
+            FfiConverterBoolean.write(value.`requiresStreaming`, buf)
+    }
+}
+
+
+
+data class ServiceOwnerCapabilities (
+    val `toolCalls`: kotlin.Boolean
+    , 
+    val `streaming`: kotlin.Boolean
+    
+){
+    
+
+    
+
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeServiceOwnerCapabilities: FfiConverterRustBuffer<ServiceOwnerCapabilities> {
+    override fun read(buf: ByteBuffer): ServiceOwnerCapabilities {
+        return ServiceOwnerCapabilities(
+            FfiConverterBoolean.read(buf),
+            FfiConverterBoolean.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: ServiceOwnerCapabilities) = (
+            FfiConverterBoolean.allocationSize(value.`toolCalls`) +
+            FfiConverterBoolean.allocationSize(value.`streaming`)
+    )
+
+    override fun write(value: ServiceOwnerCapabilities, buf: ByteBuffer) {
+            FfiConverterBoolean.write(value.`toolCalls`, buf)
+            FfiConverterBoolean.write(value.`streaming`, buf)
+    }
+}
+
+
+
+data class ServiceOwnerChatAuthority (
+    val `workspace`: kotlin.String
+    , 
+    val `conversation`: kotlin.String
+    , 
+    val `owner`: kotlin.String
+    , 
+    val `mode`: kotlin.String
+    , 
+    val `policyRevision`: kotlin.String
+    , 
+    val `grantRevision`: kotlin.String
+    , 
+    val `ruleRevision`: kotlin.String
+    , 
+    val `restrictionRevision`: kotlin.String
+    , 
+    val `sensitivity`: kotlin.String
+    , 
+    val `active`: kotlin.Boolean
+    , 
+    val `modelAllowed`: kotlin.Boolean
+    , 
+    val `outboundAllowed`: kotlin.Boolean
+    , 
+    val `inheritedAllowed`: kotlin.Boolean
+    , 
+    val `synthetic`: kotlin.Boolean
+    
+){
+    
+
+    
+
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeServiceOwnerChatAuthority: FfiConverterRustBuffer<ServiceOwnerChatAuthority> {
+    override fun read(buf: ByteBuffer): ServiceOwnerChatAuthority {
+        return ServiceOwnerChatAuthority(
+            FfiConverterString.read(buf),
+            FfiConverterString.read(buf),
+            FfiConverterString.read(buf),
+            FfiConverterString.read(buf),
+            FfiConverterString.read(buf),
+            FfiConverterString.read(buf),
+            FfiConverterString.read(buf),
+            FfiConverterString.read(buf),
+            FfiConverterString.read(buf),
+            FfiConverterBoolean.read(buf),
+            FfiConverterBoolean.read(buf),
+            FfiConverterBoolean.read(buf),
+            FfiConverterBoolean.read(buf),
+            FfiConverterBoolean.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: ServiceOwnerChatAuthority) = (
+            FfiConverterString.allocationSize(value.`workspace`) +
+            FfiConverterString.allocationSize(value.`conversation`) +
+            FfiConverterString.allocationSize(value.`owner`) +
+            FfiConverterString.allocationSize(value.`mode`) +
+            FfiConverterString.allocationSize(value.`policyRevision`) +
+            FfiConverterString.allocationSize(value.`grantRevision`) +
+            FfiConverterString.allocationSize(value.`ruleRevision`) +
+            FfiConverterString.allocationSize(value.`restrictionRevision`) +
+            FfiConverterString.allocationSize(value.`sensitivity`) +
+            FfiConverterBoolean.allocationSize(value.`active`) +
+            FfiConverterBoolean.allocationSize(value.`modelAllowed`) +
+            FfiConverterBoolean.allocationSize(value.`outboundAllowed`) +
+            FfiConverterBoolean.allocationSize(value.`inheritedAllowed`) +
+            FfiConverterBoolean.allocationSize(value.`synthetic`)
+    )
+
+    override fun write(value: ServiceOwnerChatAuthority, buf: ByteBuffer) {
+            FfiConverterString.write(value.`workspace`, buf)
+            FfiConverterString.write(value.`conversation`, buf)
+            FfiConverterString.write(value.`owner`, buf)
+            FfiConverterString.write(value.`mode`, buf)
+            FfiConverterString.write(value.`policyRevision`, buf)
+            FfiConverterString.write(value.`grantRevision`, buf)
+            FfiConverterString.write(value.`ruleRevision`, buf)
+            FfiConverterString.write(value.`restrictionRevision`, buf)
+            FfiConverterString.write(value.`sensitivity`, buf)
+            FfiConverterBoolean.write(value.`active`, buf)
+            FfiConverterBoolean.write(value.`modelAllowed`, buf)
+            FfiConverterBoolean.write(value.`outboundAllowed`, buf)
+            FfiConverterBoolean.write(value.`inheritedAllowed`, buf)
+            FfiConverterBoolean.write(value.`synthetic`, buf)
+    }
+}
+
+
+
+data class ServiceOwnerChatResponse (
+    val `answer`: kotlin.String
+    , 
+    val `inputTokens`: kotlin.ULong
+    , 
+    val `outputTokens`: kotlin.ULong
+    , 
+    val `synthetic`: kotlin.Boolean
+    
+){
+    
+
+    
+
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeServiceOwnerChatResponse: FfiConverterRustBuffer<ServiceOwnerChatResponse> {
+    override fun read(buf: ByteBuffer): ServiceOwnerChatResponse {
+        return ServiceOwnerChatResponse(
+            FfiConverterString.read(buf),
+            FfiConverterULong.read(buf),
+            FfiConverterULong.read(buf),
+            FfiConverterBoolean.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: ServiceOwnerChatResponse) = (
+            FfiConverterString.allocationSize(value.`answer`) +
+            FfiConverterULong.allocationSize(value.`inputTokens`) +
+            FfiConverterULong.allocationSize(value.`outputTokens`) +
+            FfiConverterBoolean.allocationSize(value.`synthetic`)
+    )
+
+    override fun write(value: ServiceOwnerChatResponse, buf: ByteBuffer) {
+            FfiConverterString.write(value.`answer`, buf)
+            FfiConverterULong.write(value.`inputTokens`, buf)
+            FfiConverterULong.write(value.`outputTokens`, buf)
+            FfiConverterBoolean.write(value.`synthetic`, buf)
+    }
+}
+
+
+
+data class ServiceOwnerCredentialCapability (
+    val `identity`: kotlin.String
+    , 
+    val `generation`: kotlin.ULong
+    
+){
+    
+
+    
+
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeServiceOwnerCredentialCapability: FfiConverterRustBuffer<ServiceOwnerCredentialCapability> {
+    override fun read(buf: ByteBuffer): ServiceOwnerCredentialCapability {
+        return ServiceOwnerCredentialCapability(
+            FfiConverterString.read(buf),
+            FfiConverterULong.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: ServiceOwnerCredentialCapability) = (
+            FfiConverterString.allocationSize(value.`identity`) +
+            FfiConverterULong.allocationSize(value.`generation`)
+    )
+
+    override fun write(value: ServiceOwnerCredentialCapability, buf: ByteBuffer) {
+            FfiConverterString.write(value.`identity`, buf)
+            FfiConverterULong.write(value.`generation`, buf)
+    }
+}
+
+
+
+data class ServiceOwnerDecision (
+    val `sourceIdentity`: kotlin.String
+    , 
+    val `namespace`: kotlin.String
+    , 
+    val `allowed`: kotlin.Boolean
+    , 
+    val `available`: kotlin.Boolean
+    , 
+    val `scopeAllowed`: kotlin.Boolean
+    , 
+    val `bindings`: List<kotlin.String>
+    , 
+    val `revision`: kotlin.String
+    , 
+    val `bindingRevision`: kotlin.String
+    , 
+    val `sourceRevision`: kotlin.String
+    , 
+    val `ruleRevision`: kotlin.String
+    , 
+    val `scope`: kotlin.String
+    , 
+    val `selected`: List<ServiceOwnerSelection>
+    
+){
+    
+
+    
+
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeServiceOwnerDecision: FfiConverterRustBuffer<ServiceOwnerDecision> {
+    override fun read(buf: ByteBuffer): ServiceOwnerDecision {
+        return ServiceOwnerDecision(
+            FfiConverterString.read(buf),
+            FfiConverterString.read(buf),
+            FfiConverterBoolean.read(buf),
+            FfiConverterBoolean.read(buf),
+            FfiConverterBoolean.read(buf),
+            FfiConverterSequenceString.read(buf),
+            FfiConverterString.read(buf),
+            FfiConverterString.read(buf),
+            FfiConverterString.read(buf),
+            FfiConverterString.read(buf),
+            FfiConverterString.read(buf),
+            FfiConverterSequenceTypeServiceOwnerSelection.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: ServiceOwnerDecision) = (
+            FfiConverterString.allocationSize(value.`sourceIdentity`) +
+            FfiConverterString.allocationSize(value.`namespace`) +
+            FfiConverterBoolean.allocationSize(value.`allowed`) +
+            FfiConverterBoolean.allocationSize(value.`available`) +
+            FfiConverterBoolean.allocationSize(value.`scopeAllowed`) +
+            FfiConverterSequenceString.allocationSize(value.`bindings`) +
+            FfiConverterString.allocationSize(value.`revision`) +
+            FfiConverterString.allocationSize(value.`bindingRevision`) +
+            FfiConverterString.allocationSize(value.`sourceRevision`) +
+            FfiConverterString.allocationSize(value.`ruleRevision`) +
+            FfiConverterString.allocationSize(value.`scope`) +
+            FfiConverterSequenceTypeServiceOwnerSelection.allocationSize(value.`selected`)
+    )
+
+    override fun write(value: ServiceOwnerDecision, buf: ByteBuffer) {
+            FfiConverterString.write(value.`sourceIdentity`, buf)
+            FfiConverterString.write(value.`namespace`, buf)
+            FfiConverterBoolean.write(value.`allowed`, buf)
+            FfiConverterBoolean.write(value.`available`, buf)
+            FfiConverterBoolean.write(value.`scopeAllowed`, buf)
+            FfiConverterSequenceString.write(value.`bindings`, buf)
+            FfiConverterString.write(value.`revision`, buf)
+            FfiConverterString.write(value.`bindingRevision`, buf)
+            FfiConverterString.write(value.`sourceRevision`, buf)
+            FfiConverterString.write(value.`ruleRevision`, buf)
+            FfiConverterString.write(value.`scope`, buf)
+            FfiConverterSequenceTypeServiceOwnerSelection.write(value.`selected`, buf)
+    }
+}
+
+
+
+data class ServiceOwnerProfile (
+    val `id`: kotlin.String
+    , 
+    val `endpoint`: kotlin.String
+    , 
+    val `endpointIdentity`: kotlin.String
+    , 
+    val `provider`: kotlin.String
+    , 
+    val `model`: kotlin.String
+    , 
+    val `location`: ServiceOwnerLocation
+    , 
+    val `purpose`: ServiceOwnerPurpose
+    , 
+    val `credentialRef`: kotlin.String
+    , 
+    val `declared`: ServiceOwnerCapabilities
+    , 
+    val `tested`: ServiceOwnerCapabilities
+    
+){
+    
+
+    
+
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeServiceOwnerProfile: FfiConverterRustBuffer<ServiceOwnerProfile> {
+    override fun read(buf: ByteBuffer): ServiceOwnerProfile {
+        return ServiceOwnerProfile(
+            FfiConverterString.read(buf),
+            FfiConverterString.read(buf),
+            FfiConverterString.read(buf),
+            FfiConverterString.read(buf),
+            FfiConverterString.read(buf),
+            FfiConverterTypeServiceOwnerLocation.read(buf),
+            FfiConverterTypeServiceOwnerPurpose.read(buf),
+            FfiConverterString.read(buf),
+            FfiConverterTypeServiceOwnerCapabilities.read(buf),
+            FfiConverterTypeServiceOwnerCapabilities.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: ServiceOwnerProfile) = (
+            FfiConverterString.allocationSize(value.`id`) +
+            FfiConverterString.allocationSize(value.`endpoint`) +
+            FfiConverterString.allocationSize(value.`endpointIdentity`) +
+            FfiConverterString.allocationSize(value.`provider`) +
+            FfiConverterString.allocationSize(value.`model`) +
+            FfiConverterTypeServiceOwnerLocation.allocationSize(value.`location`) +
+            FfiConverterTypeServiceOwnerPurpose.allocationSize(value.`purpose`) +
+            FfiConverterString.allocationSize(value.`credentialRef`) +
+            FfiConverterTypeServiceOwnerCapabilities.allocationSize(value.`declared`) +
+            FfiConverterTypeServiceOwnerCapabilities.allocationSize(value.`tested`)
+    )
+
+    override fun write(value: ServiceOwnerProfile, buf: ByteBuffer) {
+            FfiConverterString.write(value.`id`, buf)
+            FfiConverterString.write(value.`endpoint`, buf)
+            FfiConverterString.write(value.`endpointIdentity`, buf)
+            FfiConverterString.write(value.`provider`, buf)
+            FfiConverterString.write(value.`model`, buf)
+            FfiConverterTypeServiceOwnerLocation.write(value.`location`, buf)
+            FfiConverterTypeServiceOwnerPurpose.write(value.`purpose`, buf)
+            FfiConverterString.write(value.`credentialRef`, buf)
+            FfiConverterTypeServiceOwnerCapabilities.write(value.`declared`, buf)
+            FfiConverterTypeServiceOwnerCapabilities.write(value.`tested`, buf)
+    }
+}
+
+
+
+data class ServiceOwnerProvider (
+    val `profile`: ServiceOwnerProfile
+    , 
+    val `profileRevision`: kotlin.String
+    , 
+    val `policyRevision`: kotlin.String
+    , 
+    val `grantRevision`: kotlin.String
+    , 
+    val `authorizationOwner`: kotlin.String
+    , 
+    val `modelAllowed`: kotlin.Boolean
+    , 
+    val `outboundAllowed`: kotlin.Boolean
+    , 
+    val `budget`: ServiceOwnerBudget
+    , 
+    /**
+     * Existence of an owner-held opaque handle, never a credential value.
+     */
+    val `credentialHandleAvailable`: kotlin.Boolean
+    
+){
+    
+
+    
+
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeServiceOwnerProvider: FfiConverterRustBuffer<ServiceOwnerProvider> {
+    override fun read(buf: ByteBuffer): ServiceOwnerProvider {
+        return ServiceOwnerProvider(
+            FfiConverterTypeServiceOwnerProfile.read(buf),
+            FfiConverterString.read(buf),
+            FfiConverterString.read(buf),
+            FfiConverterString.read(buf),
+            FfiConverterString.read(buf),
+            FfiConverterBoolean.read(buf),
+            FfiConverterBoolean.read(buf),
+            FfiConverterTypeServiceOwnerBudget.read(buf),
+            FfiConverterBoolean.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: ServiceOwnerProvider) = (
+            FfiConverterTypeServiceOwnerProfile.allocationSize(value.`profile`) +
+            FfiConverterString.allocationSize(value.`profileRevision`) +
+            FfiConverterString.allocationSize(value.`policyRevision`) +
+            FfiConverterString.allocationSize(value.`grantRevision`) +
+            FfiConverterString.allocationSize(value.`authorizationOwner`) +
+            FfiConverterBoolean.allocationSize(value.`modelAllowed`) +
+            FfiConverterBoolean.allocationSize(value.`outboundAllowed`) +
+            FfiConverterTypeServiceOwnerBudget.allocationSize(value.`budget`) +
+            FfiConverterBoolean.allocationSize(value.`credentialHandleAvailable`)
+    )
+
+    override fun write(value: ServiceOwnerProvider, buf: ByteBuffer) {
+            FfiConverterTypeServiceOwnerProfile.write(value.`profile`, buf)
+            FfiConverterString.write(value.`profileRevision`, buf)
+            FfiConverterString.write(value.`policyRevision`, buf)
+            FfiConverterString.write(value.`grantRevision`, buf)
+            FfiConverterString.write(value.`authorizationOwner`, buf)
+            FfiConverterBoolean.write(value.`modelAllowed`, buf)
+            FfiConverterBoolean.write(value.`outboundAllowed`, buf)
+            FfiConverterTypeServiceOwnerBudget.write(value.`budget`, buf)
+            FfiConverterBoolean.write(value.`credentialHandleAvailable`, buf)
+    }
+}
+
+
+
+data class ServiceOwnerScope (
+    val `sourceIdentity`: kotlin.String
+    , 
+    val `namespace`: kotlin.String
+    , 
+    val `managedRoot`: kotlin.String
+    , 
+    val `database`: kotlin.String
+    , 
+    val `decision`: ServiceOwnerDecision
+    
+){
+    
+
+    
+
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeServiceOwnerScope: FfiConverterRustBuffer<ServiceOwnerScope> {
+    override fun read(buf: ByteBuffer): ServiceOwnerScope {
+        return ServiceOwnerScope(
+            FfiConverterString.read(buf),
+            FfiConverterString.read(buf),
+            FfiConverterString.read(buf),
+            FfiConverterString.read(buf),
+            FfiConverterTypeServiceOwnerDecision.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: ServiceOwnerScope) = (
+            FfiConverterString.allocationSize(value.`sourceIdentity`) +
+            FfiConverterString.allocationSize(value.`namespace`) +
+            FfiConverterString.allocationSize(value.`managedRoot`) +
+            FfiConverterString.allocationSize(value.`database`) +
+            FfiConverterTypeServiceOwnerDecision.allocationSize(value.`decision`)
+    )
+
+    override fun write(value: ServiceOwnerScope, buf: ByteBuffer) {
+            FfiConverterString.write(value.`sourceIdentity`, buf)
+            FfiConverterString.write(value.`namespace`, buf)
+            FfiConverterString.write(value.`managedRoot`, buf)
+            FfiConverterString.write(value.`database`, buf)
+            FfiConverterTypeServiceOwnerDecision.write(value.`decision`, buf)
+    }
+}
+
+
+
+data class ServiceOwnerSelection (
+    val `key`: kotlin.String
+    , 
+    val `revision`: kotlin.String
+    
+){
+    
+
+    
+
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeServiceOwnerSelection: FfiConverterRustBuffer<ServiceOwnerSelection> {
+    override fun read(buf: ByteBuffer): ServiceOwnerSelection {
+        return ServiceOwnerSelection(
+            FfiConverterString.read(buf),
+            FfiConverterString.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: ServiceOwnerSelection) = (
+            FfiConverterString.allocationSize(value.`key`) +
+            FfiConverterString.allocationSize(value.`revision`)
+    )
+
+    override fun write(value: ServiceOwnerSelection, buf: ByteBuffer) {
+            FfiConverterString.write(value.`key`, buf)
+            FfiConverterString.write(value.`revision`, buf)
+    }
+}
+
+
+
+sealed class AgentCloseOutcome {
+    
+    object Closing : AgentCloseOutcome()
+    
+    
+    object Closed : AgentCloseOutcome()
+    
+    
+    data class Rejected(
+        val `error`: com.mightyoung.muyon.androidbridge.AgentServiceError) : AgentCloseOutcome()
+        
+    {
+        
+
+        companion object
+    }
+    
+
+    
+
+    
+    
+
+
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeAgentCloseOutcome : FfiConverterRustBuffer<AgentCloseOutcome>{
+    override fun read(buf: ByteBuffer): AgentCloseOutcome {
+        return when(buf.getInt()) {
+            1 -> AgentCloseOutcome.Closing
+            2 -> AgentCloseOutcome.Closed
+            3 -> AgentCloseOutcome.Rejected(
+                FfiConverterTypeAgentServiceError.read(buf),
+                )
+            else -> throw RuntimeException("invalid enum value, something is very wrong!!")
+        }
+    }
+
+    override fun allocationSize(value: AgentCloseOutcome): ULong = when(value) {
+        is AgentCloseOutcome.Closing -> {
+            // Add the size for the Int that specifies the variant plus the size needed for all fields
+            (
+                4UL
+            )
+        }
+        is AgentCloseOutcome.Closed -> {
+            // Add the size for the Int that specifies the variant plus the size needed for all fields
+            (
+                4UL
+            )
+        }
+        is AgentCloseOutcome.Rejected -> {
+            // Add the size for the Int that specifies the variant plus the size needed for all fields
+            (
+                4UL
+                + FfiConverterTypeAgentServiceError.allocationSize(value.`error`)
+            )
+        }
+    }
+
+    override fun write(value: AgentCloseOutcome, buf: ByteBuffer) {
+        when(value) {
+            is AgentCloseOutcome.Closing -> {
+                buf.putInt(1)
+                Unit
+            }
+            is AgentCloseOutcome.Closed -> {
+                buf.putInt(2)
+                Unit
+            }
+            is AgentCloseOutcome.Rejected -> {
+                buf.putInt(3)
+                FfiConverterTypeAgentServiceError.write(value.`error`, buf)
+                Unit
+            }
+        }.let { /* this makes the `when` an expression, which ensures it is exhaustive */ }
+    }
+}
+
+
+
+
+
+sealed class AgentConnectOutcome {
+    
+    data class Connected(
+        val `clientLease`: kotlin.String, 
+        val `serviceState`: com.mightyoung.muyon.androidbridge.AgentServiceState) : AgentConnectOutcome()
+        
+    {
+        
+
+        companion object
+    }
+    
+    object Busy : AgentConnectOutcome()
+    
+    
+    data class Rejected(
+        val `error`: com.mightyoung.muyon.androidbridge.AgentServiceError) : AgentConnectOutcome()
+        
+    {
+        
+
+        companion object
+    }
+    
+
+    
+
+    
+    
+
+
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeAgentConnectOutcome : FfiConverterRustBuffer<AgentConnectOutcome>{
+    override fun read(buf: ByteBuffer): AgentConnectOutcome {
+        return when(buf.getInt()) {
+            1 -> AgentConnectOutcome.Connected(
+                FfiConverterString.read(buf),
+                FfiConverterTypeAgentServiceState.read(buf),
+                )
+            2 -> AgentConnectOutcome.Busy
+            3 -> AgentConnectOutcome.Rejected(
+                FfiConverterTypeAgentServiceError.read(buf),
+                )
+            else -> throw RuntimeException("invalid enum value, something is very wrong!!")
+        }
+    }
+
+    override fun allocationSize(value: AgentConnectOutcome): ULong = when(value) {
+        is AgentConnectOutcome.Connected -> {
+            // Add the size for the Int that specifies the variant plus the size needed for all fields
+            (
+                4UL
+                + FfiConverterString.allocationSize(value.`clientLease`)
+                + FfiConverterTypeAgentServiceState.allocationSize(value.`serviceState`)
+            )
+        }
+        is AgentConnectOutcome.Busy -> {
+            // Add the size for the Int that specifies the variant plus the size needed for all fields
+            (
+                4UL
+            )
+        }
+        is AgentConnectOutcome.Rejected -> {
+            // Add the size for the Int that specifies the variant plus the size needed for all fields
+            (
+                4UL
+                + FfiConverterTypeAgentServiceError.allocationSize(value.`error`)
+            )
+        }
+    }
+
+    override fun write(value: AgentConnectOutcome, buf: ByteBuffer) {
+        when(value) {
+            is AgentConnectOutcome.Connected -> {
+                buf.putInt(1)
+                FfiConverterString.write(value.`clientLease`, buf)
+                FfiConverterTypeAgentServiceState.write(value.`serviceState`, buf)
+                Unit
+            }
+            is AgentConnectOutcome.Busy -> {
+                buf.putInt(2)
+                Unit
+            }
+            is AgentConnectOutcome.Rejected -> {
+                buf.putInt(3)
+                FfiConverterTypeAgentServiceError.write(value.`error`, buf)
+                Unit
+            }
+        }.let { /* this makes the `when` an expression, which ensures it is exhaustive */ }
+    }
+}
+
+
+
+
+
+sealed class AgentControlOutcome {
+    
+    object Applied : AgentControlOutcome()
+    
+    
+    object Requested : AgentControlOutcome()
+    
+    
+    object AlreadyTerminal : AgentControlOutcome()
+    
+    
+    object NotRunning : AgentControlOutcome()
+    
+    
+    object NotActive : AgentControlOutcome()
+    
+    
+    data class Rejected(
+        val `error`: com.mightyoung.muyon.androidbridge.AgentServiceError) : AgentControlOutcome()
+        
+    {
+        
+
+        companion object
+    }
+    
+
+    
+
+    
+    
+
+
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeAgentControlOutcome : FfiConverterRustBuffer<AgentControlOutcome>{
+    override fun read(buf: ByteBuffer): AgentControlOutcome {
+        return when(buf.getInt()) {
+            1 -> AgentControlOutcome.Applied
+            2 -> AgentControlOutcome.Requested
+            3 -> AgentControlOutcome.AlreadyTerminal
+            4 -> AgentControlOutcome.NotRunning
+            5 -> AgentControlOutcome.NotActive
+            6 -> AgentControlOutcome.Rejected(
+                FfiConverterTypeAgentServiceError.read(buf),
+                )
+            else -> throw RuntimeException("invalid enum value, something is very wrong!!")
+        }
+    }
+
+    override fun allocationSize(value: AgentControlOutcome): ULong = when(value) {
+        is AgentControlOutcome.Applied -> {
+            // Add the size for the Int that specifies the variant plus the size needed for all fields
+            (
+                4UL
+            )
+        }
+        is AgentControlOutcome.Requested -> {
+            // Add the size for the Int that specifies the variant plus the size needed for all fields
+            (
+                4UL
+            )
+        }
+        is AgentControlOutcome.AlreadyTerminal -> {
+            // Add the size for the Int that specifies the variant plus the size needed for all fields
+            (
+                4UL
+            )
+        }
+        is AgentControlOutcome.NotRunning -> {
+            // Add the size for the Int that specifies the variant plus the size needed for all fields
+            (
+                4UL
+            )
+        }
+        is AgentControlOutcome.NotActive -> {
+            // Add the size for the Int that specifies the variant plus the size needed for all fields
+            (
+                4UL
+            )
+        }
+        is AgentControlOutcome.Rejected -> {
+            // Add the size for the Int that specifies the variant plus the size needed for all fields
+            (
+                4UL
+                + FfiConverterTypeAgentServiceError.allocationSize(value.`error`)
+            )
+        }
+    }
+
+    override fun write(value: AgentControlOutcome, buf: ByteBuffer) {
+        when(value) {
+            is AgentControlOutcome.Applied -> {
+                buf.putInt(1)
+                Unit
+            }
+            is AgentControlOutcome.Requested -> {
+                buf.putInt(2)
+                Unit
+            }
+            is AgentControlOutcome.AlreadyTerminal -> {
+                buf.putInt(3)
+                Unit
+            }
+            is AgentControlOutcome.NotRunning -> {
+                buf.putInt(4)
+                Unit
+            }
+            is AgentControlOutcome.NotActive -> {
+                buf.putInt(5)
+                Unit
+            }
+            is AgentControlOutcome.Rejected -> {
+                buf.putInt(6)
+                FfiConverterTypeAgentServiceError.write(value.`error`, buf)
+                Unit
+            }
+        }.let { /* this makes the `when` an expression, which ensures it is exhaustive */ }
+    }
+}
+
+
+
+
+
+sealed class AgentLookupKey {
+    
+    data class RequestId(
+        val `requestId`: kotlin.String) : AgentLookupKey()
+        
+    {
+        
+
+        companion object
+    }
+    
+    data class RunId(
+        val `runId`: kotlin.String) : AgentLookupKey()
+        
+    {
+        
+
+        companion object
+    }
+    
+
+    
+
+    
+    
+
+
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeAgentLookupKey : FfiConverterRustBuffer<AgentLookupKey>{
+    override fun read(buf: ByteBuffer): AgentLookupKey {
+        return when(buf.getInt()) {
+            1 -> AgentLookupKey.RequestId(
+                FfiConverterString.read(buf),
+                )
+            2 -> AgentLookupKey.RunId(
+                FfiConverterString.read(buf),
+                )
+            else -> throw RuntimeException("invalid enum value, something is very wrong!!")
+        }
+    }
+
+    override fun allocationSize(value: AgentLookupKey): ULong = when(value) {
+        is AgentLookupKey.RequestId -> {
+            // Add the size for the Int that specifies the variant plus the size needed for all fields
+            (
+                4UL
+                + FfiConverterString.allocationSize(value.`requestId`)
+            )
+        }
+        is AgentLookupKey.RunId -> {
+            // Add the size for the Int that specifies the variant plus the size needed for all fields
+            (
+                4UL
+                + FfiConverterString.allocationSize(value.`runId`)
+            )
+        }
+    }
+
+    override fun write(value: AgentLookupKey, buf: ByteBuffer) {
+        when(value) {
+            is AgentLookupKey.RequestId -> {
+                buf.putInt(1)
+                FfiConverterString.write(value.`requestId`, buf)
+                Unit
+            }
+            is AgentLookupKey.RunId -> {
+                buf.putInt(2)
+                FfiConverterString.write(value.`runId`, buf)
+                Unit
+            }
+        }.let { /* this makes the `when` an expression, which ensures it is exhaustive */ }
+    }
+}
+
+
+
+
+
+
+enum class AgentNoAdmissionReason {
+    
+    CANCELLED_BEFORE_ADMISSION,
+    QUOTA_EXCEEDED,
+    DIRECTORY_REJECTED,
+    INDEX_VALIDATION_REJECTED,
+    STORAGE_REJECTED_BEFORE_ADMISSION;
+
+    
+
+
+    companion object
+}
+
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeAgentNoAdmissionReason: FfiConverterRustBuffer<AgentNoAdmissionReason> {
+    override fun read(buf: ByteBuffer) = try {
+        
+        AgentNoAdmissionReason.entries[buf.getInt() - 1]
+        
+    } catch (e: IndexOutOfBoundsException) {
+        throw RuntimeException("invalid enum value, something is very wrong!!", e)
+    }
+
+    override fun allocationSize(value: AgentNoAdmissionReason) = 4UL
+
+    override fun write(value: AgentNoAdmissionReason, buf: ByteBuffer) {
+        buf.putInt(value.ordinal + 1)
+    }
+}
+
+
+
+
+
+
+enum class AgentReadVariant {
+    
+    EQUIPMENT,
+    RESEARCH,
+    INQUIRY,
+    SEEDED_EQUIPMENT;
+
+    
+
+
+    companion object
+}
+
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeAgentReadVariant: FfiConverterRustBuffer<AgentReadVariant> {
+    override fun read(buf: ByteBuffer) = try {
+        
+        AgentReadVariant.entries[buf.getInt() - 1]
+        
+    } catch (e: IndexOutOfBoundsException) {
+        throw RuntimeException("invalid enum value, something is very wrong!!", e)
+    }
+
+    override fun allocationSize(value: AgentReadVariant) = 4UL
+
+    override fun write(value: AgentReadVariant, buf: ByteBuffer) {
+        buf.putInt(value.ordinal + 1)
+    }
+}
+
+
+
+
+
+
+enum class AgentReason {
+    
+    NONE,
+    CANCELLED,
+    AUTHORITY_DENIED,
+    PURPOSE_DENIED,
+    CONTRACT_REJECTED,
+    STORAGE_FAILURE,
+    PROVIDER_FAILURE,
+    DEADLINE_EXCEEDED,
+    BUDGET_EXCEEDED,
+    INTERRUPTED,
+    INTERNAL_FAILURE;
+
+    
+
+
+    companion object
+}
+
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeAgentReason: FfiConverterRustBuffer<AgentReason> {
+    override fun read(buf: ByteBuffer) = try {
+        
+        AgentReason.entries[buf.getInt() - 1]
+        
+    } catch (e: IndexOutOfBoundsException) {
+        throw RuntimeException("invalid enum value, something is very wrong!!", e)
+    }
+
+    override fun allocationSize(value: AgentReason) = 4UL
+
+    override fun write(value: AgentReason, buf: ByteBuffer) {
+        buf.putInt(value.ordinal + 1)
+    }
+}
+
+
+
+
+
+
+enum class AgentReceiptOutcome {
+    
+    NOT_STARTED,
+    UNKNOWN,
+    RECORDED_SUCCESS,
+    RECORDED_FAILURE;
+
+    
+
+
+    companion object
+}
+
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeAgentReceiptOutcome: FfiConverterRustBuffer<AgentReceiptOutcome> {
+    override fun read(buf: ByteBuffer) = try {
+        
+        AgentReceiptOutcome.entries[buf.getInt() - 1]
+        
+    } catch (e: IndexOutOfBoundsException) {
+        throw RuntimeException("invalid enum value, something is very wrong!!", e)
+    }
+
+    override fun allocationSize(value: AgentReceiptOutcome) = 4UL
+
+    override fun write(value: AgentReceiptOutcome, buf: ByteBuffer) {
+        buf.putInt(value.ordinal + 1)
+    }
+}
+
+
+
+
+
+sealed class AgentRunSnapshot {
+    
+    data class QueuedVolatile(
+        val `intent`: com.mightyoung.muyon.androidbridge.AgentIntentBinding) : AgentRunSnapshot()
+        
+    {
+        
+
+        companion object
+    }
+    
+    data class DurablyAdmitted(
+        val `run`: com.mightyoung.muyon.androidbridge.AgentDurableRun) : AgentRunSnapshot()
+        
+    {
+        
+
+        companion object
+    }
+    
+    data class Running(
+        val `run`: com.mightyoung.muyon.androidbridge.AgentDurableRun) : AgentRunSnapshot()
+        
+    {
+        
+
+        companion object
+    }
+    
+    data class Terminal(
+        val `summary`: com.mightyoung.muyon.androidbridge.AgentRunSummary) : AgentRunSnapshot()
+        
+    {
+        
+
+        companion object
+    }
+    
+    data class SettledNoAdmission(
+        val `settlement`: com.mightyoung.muyon.androidbridge.AgentNoAdmissionSettlement) : AgentRunSnapshot()
+        
+    {
+        
+
+        companion object
+    }
+    
+    data class Unresolved(
+        val `observation`: com.mightyoung.muyon.androidbridge.AgentUnresolvedObservation) : AgentRunSnapshot()
+        
+    {
+        
+
+        companion object
+    }
+    
+
+    
+
+    
+    
+
+
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeAgentRunSnapshot : FfiConverterRustBuffer<AgentRunSnapshot>{
+    override fun read(buf: ByteBuffer): AgentRunSnapshot {
+        return when(buf.getInt()) {
+            1 -> AgentRunSnapshot.QueuedVolatile(
+                FfiConverterTypeAgentIntentBinding.read(buf),
+                )
+            2 -> AgentRunSnapshot.DurablyAdmitted(
+                FfiConverterTypeAgentDurableRun.read(buf),
+                )
+            3 -> AgentRunSnapshot.Running(
+                FfiConverterTypeAgentDurableRun.read(buf),
+                )
+            4 -> AgentRunSnapshot.Terminal(
+                FfiConverterTypeAgentRunSummary.read(buf),
+                )
+            5 -> AgentRunSnapshot.SettledNoAdmission(
+                FfiConverterTypeAgentNoAdmissionSettlement.read(buf),
+                )
+            6 -> AgentRunSnapshot.Unresolved(
+                FfiConverterTypeAgentUnresolvedObservation.read(buf),
+                )
+            else -> throw RuntimeException("invalid enum value, something is very wrong!!")
+        }
+    }
+
+    override fun allocationSize(value: AgentRunSnapshot): ULong = when(value) {
+        is AgentRunSnapshot.QueuedVolatile -> {
+            // Add the size for the Int that specifies the variant plus the size needed for all fields
+            (
+                4UL
+                + FfiConverterTypeAgentIntentBinding.allocationSize(value.`intent`)
+            )
+        }
+        is AgentRunSnapshot.DurablyAdmitted -> {
+            // Add the size for the Int that specifies the variant plus the size needed for all fields
+            (
+                4UL
+                + FfiConverterTypeAgentDurableRun.allocationSize(value.`run`)
+            )
+        }
+        is AgentRunSnapshot.Running -> {
+            // Add the size for the Int that specifies the variant plus the size needed for all fields
+            (
+                4UL
+                + FfiConverterTypeAgentDurableRun.allocationSize(value.`run`)
+            )
+        }
+        is AgentRunSnapshot.Terminal -> {
+            // Add the size for the Int that specifies the variant plus the size needed for all fields
+            (
+                4UL
+                + FfiConverterTypeAgentRunSummary.allocationSize(value.`summary`)
+            )
+        }
+        is AgentRunSnapshot.SettledNoAdmission -> {
+            // Add the size for the Int that specifies the variant plus the size needed for all fields
+            (
+                4UL
+                + FfiConverterTypeAgentNoAdmissionSettlement.allocationSize(value.`settlement`)
+            )
+        }
+        is AgentRunSnapshot.Unresolved -> {
+            // Add the size for the Int that specifies the variant plus the size needed for all fields
+            (
+                4UL
+                + FfiConverterTypeAgentUnresolvedObservation.allocationSize(value.`observation`)
+            )
+        }
+    }
+
+    override fun write(value: AgentRunSnapshot, buf: ByteBuffer) {
+        when(value) {
+            is AgentRunSnapshot.QueuedVolatile -> {
+                buf.putInt(1)
+                FfiConverterTypeAgentIntentBinding.write(value.`intent`, buf)
+                Unit
+            }
+            is AgentRunSnapshot.DurablyAdmitted -> {
+                buf.putInt(2)
+                FfiConverterTypeAgentDurableRun.write(value.`run`, buf)
+                Unit
+            }
+            is AgentRunSnapshot.Running -> {
+                buf.putInt(3)
+                FfiConverterTypeAgentDurableRun.write(value.`run`, buf)
+                Unit
+            }
+            is AgentRunSnapshot.Terminal -> {
+                buf.putInt(4)
+                FfiConverterTypeAgentRunSummary.write(value.`summary`, buf)
+                Unit
+            }
+            is AgentRunSnapshot.SettledNoAdmission -> {
+                buf.putInt(5)
+                FfiConverterTypeAgentNoAdmissionSettlement.write(value.`settlement`, buf)
+                Unit
+            }
+            is AgentRunSnapshot.Unresolved -> {
+                buf.putInt(6)
+                FfiConverterTypeAgentUnresolvedObservation.write(value.`observation`, buf)
+                Unit
+            }
+        }.let { /* this makes the `when` an expression, which ensures it is exhaustive */ }
+    }
+}
+
+
+
+
+
+
+enum class AgentServiceError {
+    
+    UNSUPPORTED_PROTOCOL,
+    INVALID_ROOT,
+    INVALID_REQUEST_ID,
+    INVALID_IDENTITY,
+    INVALID_GENERATION,
+    EPOCH_MISMATCH,
+    CLIENT_UNAVAILABLE,
+    CLIENT_NOT_VISIBLE,
+    REQUEST_CONFLICT,
+    BUSY,
+    CLOSED,
+    TARGET_UNAVAILABLE,
+    RECOVERY_REQUIRED,
+    BUDGET_EXCEEDED,
+    INTERNAL_FAILURE;
+
+    
+
+
+    companion object
+}
+
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeAgentServiceError: FfiConverterRustBuffer<AgentServiceError> {
+    override fun read(buf: ByteBuffer) = try {
+        
+        AgentServiceError.entries[buf.getInt() - 1]
+        
+    } catch (e: IndexOutOfBoundsException) {
+        throw RuntimeException("invalid enum value, something is very wrong!!", e)
+    }
+
+    override fun allocationSize(value: AgentServiceError) = 4UL
+
+    override fun write(value: AgentServiceError, buf: ByteBuffer) {
+        buf.putInt(value.ordinal + 1)
+    }
+}
+
+
+
+
+
+
+
+sealed class AgentServiceSetupException: kotlin.Exception() {
+    
+    class UnsupportedProtocol(
+        ) : AgentServiceSetupException() {
+        override val message
+            get() = ""
+    }
+    
+    class InvalidRoot(
+        ) : AgentServiceSetupException() {
+        override val message
+            get() = ""
+    }
+    
+    class Busy(
+        ) : AgentServiceSetupException() {
+        override val message
+            get() = ""
+    }
+    
+    class RecoveryRequired(
+        ) : AgentServiceSetupException() {
+        override val message
+            get() = ""
+    }
+    
+    class InternalFailure(
+        ) : AgentServiceSetupException() {
+        override val message
+            get() = ""
+    }
+    
+
+    
+
+
+    companion object ErrorHandler : UniffiRustCallStatusErrorHandler<AgentServiceSetupException> {
+        override fun lift(error_buf: RustBuffer.ByValue): AgentServiceSetupException = FfiConverterTypeAgentServiceSetupError.lift(error_buf)
+    }
+
+    
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeAgentServiceSetupError : FfiConverterRustBuffer<AgentServiceSetupException> {
+    override fun read(buf: ByteBuffer): AgentServiceSetupException {
+        
+
+        return when(buf.getInt()) {
+            1 -> AgentServiceSetupException.UnsupportedProtocol()
+            2 -> AgentServiceSetupException.InvalidRoot()
+            3 -> AgentServiceSetupException.Busy()
+            4 -> AgentServiceSetupException.RecoveryRequired()
+            5 -> AgentServiceSetupException.InternalFailure()
+            else -> throw RuntimeException("invalid error enum value, something is very wrong!!")
+        }
+    }
+
+    override fun allocationSize(value: AgentServiceSetupException): ULong {
+        return when(value) {
+            is AgentServiceSetupException.UnsupportedProtocol -> (
+                // Add the size for the Int that specifies the variant plus the size needed for all fields
+                4UL
+            )
+            is AgentServiceSetupException.InvalidRoot -> (
+                // Add the size for the Int that specifies the variant plus the size needed for all fields
+                4UL
+            )
+            is AgentServiceSetupException.Busy -> (
+                // Add the size for the Int that specifies the variant plus the size needed for all fields
+                4UL
+            )
+            is AgentServiceSetupException.RecoveryRequired -> (
+                // Add the size for the Int that specifies the variant plus the size needed for all fields
+                4UL
+            )
+            is AgentServiceSetupException.InternalFailure -> (
+                // Add the size for the Int that specifies the variant plus the size needed for all fields
+                4UL
+            )
+        }
+    }
+
+    override fun write(value: AgentServiceSetupException, buf: ByteBuffer) {
+        when(value) {
+            is AgentServiceSetupException.UnsupportedProtocol -> {
+                buf.putInt(1)
+                Unit
+            }
+            is AgentServiceSetupException.InvalidRoot -> {
+                buf.putInt(2)
+                Unit
+            }
+            is AgentServiceSetupException.Busy -> {
+                buf.putInt(3)
+                Unit
+            }
+            is AgentServiceSetupException.RecoveryRequired -> {
+                buf.putInt(4)
+                Unit
+            }
+            is AgentServiceSetupException.InternalFailure -> {
+                buf.putInt(5)
+                Unit
+            }
+        }.let { /* this makes the `when` an expression, which ensures it is exhaustive */ }
+    }
+
+}
+
+
+
+
+enum class AgentServiceState {
+    
+    INITIALIZING,
+    READY,
+    RECOVERY_REQUIRED,
+    CLOSING,
+    CLOSED;
+
+    
+
+
+    companion object
+}
+
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeAgentServiceState: FfiConverterRustBuffer<AgentServiceState> {
+    override fun read(buf: ByteBuffer) = try {
+        
+        AgentServiceState.entries[buf.getInt() - 1]
+        
+    } catch (e: IndexOutOfBoundsException) {
+        throw RuntimeException("invalid enum value, something is very wrong!!", e)
+    }
+
+    override fun allocationSize(value: AgentServiceState) = 4UL
+
+    override fun write(value: AgentServiceState, buf: ByteBuffer) {
+        buf.putInt(value.ordinal + 1)
+    }
+}
+
+
+
+
+
+sealed class AgentSnapshotOutcome {
+    
+    data class Snapshot(
+        val `serviceState`: com.mightyoung.muyon.androidbridge.AgentServiceState, 
+        val `run`: com.mightyoung.muyon.androidbridge.AgentRunSnapshot?) : AgentSnapshotOutcome()
+        
+    {
+        
+
+        companion object
+    }
+    
+    object Unresolved : AgentSnapshotOutcome()
+    
+    
+    data class Rejected(
+        val `error`: com.mightyoung.muyon.androidbridge.AgentServiceError) : AgentSnapshotOutcome()
+        
+    {
+        
+
+        companion object
+    }
+    
+
+    
+
+    
+    
+
+
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeAgentSnapshotOutcome : FfiConverterRustBuffer<AgentSnapshotOutcome>{
+    override fun read(buf: ByteBuffer): AgentSnapshotOutcome {
+        return when(buf.getInt()) {
+            1 -> AgentSnapshotOutcome.Snapshot(
+                FfiConverterTypeAgentServiceState.read(buf),
+                FfiConverterOptionalTypeAgentRunSnapshot.read(buf),
+                )
+            2 -> AgentSnapshotOutcome.Unresolved
+            3 -> AgentSnapshotOutcome.Rejected(
+                FfiConverterTypeAgentServiceError.read(buf),
+                )
+            else -> throw RuntimeException("invalid enum value, something is very wrong!!")
+        }
+    }
+
+    override fun allocationSize(value: AgentSnapshotOutcome): ULong = when(value) {
+        is AgentSnapshotOutcome.Snapshot -> {
+            // Add the size for the Int that specifies the variant plus the size needed for all fields
+            (
+                4UL
+                + FfiConverterTypeAgentServiceState.allocationSize(value.`serviceState`)
+                + FfiConverterOptionalTypeAgentRunSnapshot.allocationSize(value.`run`)
+            )
+        }
+        is AgentSnapshotOutcome.Unresolved -> {
+            // Add the size for the Int that specifies the variant plus the size needed for all fields
+            (
+                4UL
+            )
+        }
+        is AgentSnapshotOutcome.Rejected -> {
+            // Add the size for the Int that specifies the variant plus the size needed for all fields
+            (
+                4UL
+                + FfiConverterTypeAgentServiceError.allocationSize(value.`error`)
+            )
+        }
+    }
+
+    override fun write(value: AgentSnapshotOutcome, buf: ByteBuffer) {
+        when(value) {
+            is AgentSnapshotOutcome.Snapshot -> {
+                buf.putInt(1)
+                FfiConverterTypeAgentServiceState.write(value.`serviceState`, buf)
+                FfiConverterOptionalTypeAgentRunSnapshot.write(value.`run`, buf)
+                Unit
+            }
+            is AgentSnapshotOutcome.Unresolved -> {
+                buf.putInt(2)
+                Unit
+            }
+            is AgentSnapshotOutcome.Rejected -> {
+                buf.putInt(3)
+                FfiConverterTypeAgentServiceError.write(value.`error`, buf)
+                Unit
+            }
+        }.let { /* this makes the `when` an expression, which ensures it is exhaustive */ }
+    }
+}
+
+
+
+
+
+sealed class AgentStartOutcome {
+    
+    data class QueuedVolatile(
+        val `snapshot`: com.mightyoung.muyon.androidbridge.AgentRunSnapshot) : AgentStartOutcome()
+        
+    {
+        
+
+        companion object
+    }
+    
+    data class Existing(
+        val `snapshot`: com.mightyoung.muyon.androidbridge.AgentRunSnapshot) : AgentStartOutcome()
+        
+    {
+        
+
+        companion object
+    }
+    
+    object Busy : AgentStartOutcome()
+    
+    
+    data class Rejected(
+        val `error`: com.mightyoung.muyon.androidbridge.AgentServiceError) : AgentStartOutcome()
+        
+    {
+        
+
+        companion object
+    }
+    
+
+    
+
+    
+    
+
+
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeAgentStartOutcome : FfiConverterRustBuffer<AgentStartOutcome>{
+    override fun read(buf: ByteBuffer): AgentStartOutcome {
+        return when(buf.getInt()) {
+            1 -> AgentStartOutcome.QueuedVolatile(
+                FfiConverterTypeAgentRunSnapshot.read(buf),
+                )
+            2 -> AgentStartOutcome.Existing(
+                FfiConverterTypeAgentRunSnapshot.read(buf),
+                )
+            3 -> AgentStartOutcome.Busy
+            4 -> AgentStartOutcome.Rejected(
+                FfiConverterTypeAgentServiceError.read(buf),
+                )
+            else -> throw RuntimeException("invalid enum value, something is very wrong!!")
+        }
+    }
+
+    override fun allocationSize(value: AgentStartOutcome): ULong = when(value) {
+        is AgentStartOutcome.QueuedVolatile -> {
+            // Add the size for the Int that specifies the variant plus the size needed for all fields
+            (
+                4UL
+                + FfiConverterTypeAgentRunSnapshot.allocationSize(value.`snapshot`)
+            )
+        }
+        is AgentStartOutcome.Existing -> {
+            // Add the size for the Int that specifies the variant plus the size needed for all fields
+            (
+                4UL
+                + FfiConverterTypeAgentRunSnapshot.allocationSize(value.`snapshot`)
+            )
+        }
+        is AgentStartOutcome.Busy -> {
+            // Add the size for the Int that specifies the variant plus the size needed for all fields
+            (
+                4UL
+            )
+        }
+        is AgentStartOutcome.Rejected -> {
+            // Add the size for the Int that specifies the variant plus the size needed for all fields
+            (
+                4UL
+                + FfiConverterTypeAgentServiceError.allocationSize(value.`error`)
+            )
+        }
+    }
+
+    override fun write(value: AgentStartOutcome, buf: ByteBuffer) {
+        when(value) {
+            is AgentStartOutcome.QueuedVolatile -> {
+                buf.putInt(1)
+                FfiConverterTypeAgentRunSnapshot.write(value.`snapshot`, buf)
+                Unit
+            }
+            is AgentStartOutcome.Existing -> {
+                buf.putInt(2)
+                FfiConverterTypeAgentRunSnapshot.write(value.`snapshot`, buf)
+                Unit
+            }
+            is AgentStartOutcome.Busy -> {
+                buf.putInt(3)
+                Unit
+            }
+            is AgentStartOutcome.Rejected -> {
+                buf.putInt(4)
+                FfiConverterTypeAgentServiceError.write(value.`error`, buf)
+                Unit
+            }
+        }.let { /* this makes the `when` an expression, which ensures it is exhaustive */ }
+    }
+}
+
+
+
+
+
+
+enum class AgentTerminal {
+    
+    COMPLETED,
+    CANCELLED,
+    FAILED,
+    BUDGET_EXHAUSTED,
+    OUTCOME_UNKNOWN;
+
+    
+
+
+    companion object
+}
+
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeAgentTerminal: FfiConverterRustBuffer<AgentTerminal> {
+    override fun read(buf: ByteBuffer) = try {
+        
+        AgentTerminal.entries[buf.getInt() - 1]
+        
+    } catch (e: IndexOutOfBoundsException) {
+        throw RuntimeException("invalid enum value, something is very wrong!!", e)
+    }
+
+    override fun allocationSize(value: AgentTerminal) = 4UL
+
+    override fun write(value: AgentTerminal, buf: ByteBuffer) {
+        buf.putInt(value.ordinal + 1)
+    }
+}
+
+
+
+
+
 
 
 sealed class BridgeException: kotlin.Exception() {
@@ -1402,7 +6787,501 @@ public object FfiConverterTypeDiagnosticVariant: FfiConverterRustBuffer<Diagnost
     }
 }
 
- fun `bridgeInfo`(): BridgeInfo {
+
+
+
+
+/**
+ * Trusted Service bootstrap only. No Binder command selects this operation.
+ */
+
+enum class ServiceAdmissionProbeOperation {
+    
+    PRIMARY_COMMIT,
+    PRIMARY_CANCEL,
+    SECONDARY_COMMIT,
+    SECONDARY_CANCEL,
+    TERTIARY_COMMIT;
+
+    
+
+
+    companion object
+}
+
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeServiceAdmissionProbeOperation: FfiConverterRustBuffer<ServiceAdmissionProbeOperation> {
+    override fun read(buf: ByteBuffer) = try {
+        
+        ServiceAdmissionProbeOperation.entries[buf.getInt() - 1]
+        
+    } catch (e: IndexOutOfBoundsException) {
+        throw RuntimeException("invalid enum value, something is very wrong!!", e)
+    }
+
+    override fun allocationSize(value: ServiceAdmissionProbeOperation) = 4UL
+
+    override fun write(value: ServiceAdmissionProbeOperation, buf: ByteBuffer) {
+        buf.putInt(value.ordinal + 1)
+    }
+}
+
+
+
+
+
+
+enum class ServiceOwnerLocation {
+    
+    REMOTE,
+    OWN_DEVICE;
+
+    
+
+
+    companion object
+}
+
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeServiceOwnerLocation: FfiConverterRustBuffer<ServiceOwnerLocation> {
+    override fun read(buf: ByteBuffer) = try {
+        
+        ServiceOwnerLocation.entries[buf.getInt() - 1]
+        
+    } catch (e: IndexOutOfBoundsException) {
+        throw RuntimeException("invalid enum value, something is very wrong!!", e)
+    }
+
+    override fun allocationSize(value: ServiceOwnerLocation) = 4UL
+
+    override fun write(value: ServiceOwnerLocation, buf: ByteBuffer) {
+        buf.putInt(value.ordinal + 1)
+    }
+}
+
+
+
+
+
+
+enum class ServiceOwnerMode {
+    
+    LOCAL_READ,
+    CONFIGURED_CHAT;
+
+    
+
+
+    companion object
+}
+
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeServiceOwnerMode: FfiConverterRustBuffer<ServiceOwnerMode> {
+    override fun read(buf: ByteBuffer) = try {
+        
+        ServiceOwnerMode.entries[buf.getInt() - 1]
+        
+    } catch (e: IndexOutOfBoundsException) {
+        throw RuntimeException("invalid enum value, something is very wrong!!", e)
+    }
+
+    override fun allocationSize(value: ServiceOwnerMode) = 4UL
+
+    override fun write(value: ServiceOwnerMode, buf: ByteBuffer) {
+        buf.putInt(value.ordinal + 1)
+    }
+}
+
+
+
+
+
+
+enum class ServiceOwnerPurpose {
+    
+    CHAT,
+    EMBEDDING;
+
+    
+
+
+    companion object
+}
+
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeServiceOwnerPurpose: FfiConverterRustBuffer<ServiceOwnerPurpose> {
+    override fun read(buf: ByteBuffer) = try {
+        
+        ServiceOwnerPurpose.entries[buf.getInt() - 1]
+        
+    } catch (e: IndexOutOfBoundsException) {
+        throw RuntimeException("invalid enum value, something is very wrong!!", e)
+    }
+
+    override fun allocationSize(value: ServiceOwnerPurpose) = 4UL
+
+    override fun write(value: ServiceOwnerPurpose, buf: ByteBuffer) {
+        buf.putInt(value.ordinal + 1)
+    }
+}
+
+
+
+
+
+
+/**
+ * @suppress
+ */
+public object FfiConverterOptionalString: FfiConverterRustBuffer<kotlin.String?> {
+    override fun read(buf: ByteBuffer): kotlin.String? {
+        if (buf.get().toInt() == 0) {
+            return null
+        }
+        return FfiConverterString.read(buf)
+    }
+
+    override fun allocationSize(value: kotlin.String?): ULong {
+        if (value == null) {
+            return 1UL
+        } else {
+            return 1UL + FfiConverterString.allocationSize(value)
+        }
+    }
+
+    override fun write(value: kotlin.String?, buf: ByteBuffer) {
+        if (value == null) {
+            buf.put(0)
+        } else {
+            buf.put(1)
+            FfiConverterString.write(value, buf)
+        }
+    }
+}
+
+
+
+
+/**
+ * @suppress
+ */
+public object FfiConverterOptionalTypeAgentRunIdentity: FfiConverterRustBuffer<AgentRunIdentity?> {
+    override fun read(buf: ByteBuffer): AgentRunIdentity? {
+        if (buf.get().toInt() == 0) {
+            return null
+        }
+        return FfiConverterTypeAgentRunIdentity.read(buf)
+    }
+
+    override fun allocationSize(value: AgentRunIdentity?): ULong {
+        if (value == null) {
+            return 1UL
+        } else {
+            return 1UL + FfiConverterTypeAgentRunIdentity.allocationSize(value)
+        }
+    }
+
+    override fun write(value: AgentRunIdentity?, buf: ByteBuffer) {
+        if (value == null) {
+            buf.put(0)
+        } else {
+            buf.put(1)
+            FfiConverterTypeAgentRunIdentity.write(value, buf)
+        }
+    }
+}
+
+
+
+
+/**
+ * @suppress
+ */
+public object FfiConverterOptionalTypeAgentTaskIdentity: FfiConverterRustBuffer<AgentTaskIdentity?> {
+    override fun read(buf: ByteBuffer): AgentTaskIdentity? {
+        if (buf.get().toInt() == 0) {
+            return null
+        }
+        return FfiConverterTypeAgentTaskIdentity.read(buf)
+    }
+
+    override fun allocationSize(value: AgentTaskIdentity?): ULong {
+        if (value == null) {
+            return 1UL
+        } else {
+            return 1UL + FfiConverterTypeAgentTaskIdentity.allocationSize(value)
+        }
+    }
+
+    override fun write(value: AgentTaskIdentity?, buf: ByteBuffer) {
+        if (value == null) {
+            buf.put(0)
+        } else {
+            buf.put(1)
+            FfiConverterTypeAgentTaskIdentity.write(value, buf)
+        }
+    }
+}
+
+
+
+
+/**
+ * @suppress
+ */
+public object FfiConverterOptionalTypeServiceOwnerChatAuthority: FfiConverterRustBuffer<ServiceOwnerChatAuthority?> {
+    override fun read(buf: ByteBuffer): ServiceOwnerChatAuthority? {
+        if (buf.get().toInt() == 0) {
+            return null
+        }
+        return FfiConverterTypeServiceOwnerChatAuthority.read(buf)
+    }
+
+    override fun allocationSize(value: ServiceOwnerChatAuthority?): ULong {
+        if (value == null) {
+            return 1UL
+        } else {
+            return 1UL + FfiConverterTypeServiceOwnerChatAuthority.allocationSize(value)
+        }
+    }
+
+    override fun write(value: ServiceOwnerChatAuthority?, buf: ByteBuffer) {
+        if (value == null) {
+            buf.put(0)
+        } else {
+            buf.put(1)
+            FfiConverterTypeServiceOwnerChatAuthority.write(value, buf)
+        }
+    }
+}
+
+
+
+
+/**
+ * @suppress
+ */
+public object FfiConverterOptionalTypeServiceOwnerChatResponse: FfiConverterRustBuffer<ServiceOwnerChatResponse?> {
+    override fun read(buf: ByteBuffer): ServiceOwnerChatResponse? {
+        if (buf.get().toInt() == 0) {
+            return null
+        }
+        return FfiConverterTypeServiceOwnerChatResponse.read(buf)
+    }
+
+    override fun allocationSize(value: ServiceOwnerChatResponse?): ULong {
+        if (value == null) {
+            return 1UL
+        } else {
+            return 1UL + FfiConverterTypeServiceOwnerChatResponse.allocationSize(value)
+        }
+    }
+
+    override fun write(value: ServiceOwnerChatResponse?, buf: ByteBuffer) {
+        if (value == null) {
+            buf.put(0)
+        } else {
+            buf.put(1)
+            FfiConverterTypeServiceOwnerChatResponse.write(value, buf)
+        }
+    }
+}
+
+
+
+
+/**
+ * @suppress
+ */
+public object FfiConverterOptionalTypeServiceOwnerCredentialCapability: FfiConverterRustBuffer<ServiceOwnerCredentialCapability?> {
+    override fun read(buf: ByteBuffer): ServiceOwnerCredentialCapability? {
+        if (buf.get().toInt() == 0) {
+            return null
+        }
+        return FfiConverterTypeServiceOwnerCredentialCapability.read(buf)
+    }
+
+    override fun allocationSize(value: ServiceOwnerCredentialCapability?): ULong {
+        if (value == null) {
+            return 1UL
+        } else {
+            return 1UL + FfiConverterTypeServiceOwnerCredentialCapability.allocationSize(value)
+        }
+    }
+
+    override fun write(value: ServiceOwnerCredentialCapability?, buf: ByteBuffer) {
+        if (value == null) {
+            buf.put(0)
+        } else {
+            buf.put(1)
+            FfiConverterTypeServiceOwnerCredentialCapability.write(value, buf)
+        }
+    }
+}
+
+
+
+
+/**
+ * @suppress
+ */
+public object FfiConverterOptionalTypeServiceOwnerProvider: FfiConverterRustBuffer<ServiceOwnerProvider?> {
+    override fun read(buf: ByteBuffer): ServiceOwnerProvider? {
+        if (buf.get().toInt() == 0) {
+            return null
+        }
+        return FfiConverterTypeServiceOwnerProvider.read(buf)
+    }
+
+    override fun allocationSize(value: ServiceOwnerProvider?): ULong {
+        if (value == null) {
+            return 1UL
+        } else {
+            return 1UL + FfiConverterTypeServiceOwnerProvider.allocationSize(value)
+        }
+    }
+
+    override fun write(value: ServiceOwnerProvider?, buf: ByteBuffer) {
+        if (value == null) {
+            buf.put(0)
+        } else {
+            buf.put(1)
+            FfiConverterTypeServiceOwnerProvider.write(value, buf)
+        }
+    }
+}
+
+
+
+
+/**
+ * @suppress
+ */
+public object FfiConverterOptionalTypeServiceOwnerScope: FfiConverterRustBuffer<ServiceOwnerScope?> {
+    override fun read(buf: ByteBuffer): ServiceOwnerScope? {
+        if (buf.get().toInt() == 0) {
+            return null
+        }
+        return FfiConverterTypeServiceOwnerScope.read(buf)
+    }
+
+    override fun allocationSize(value: ServiceOwnerScope?): ULong {
+        if (value == null) {
+            return 1UL
+        } else {
+            return 1UL + FfiConverterTypeServiceOwnerScope.allocationSize(value)
+        }
+    }
+
+    override fun write(value: ServiceOwnerScope?, buf: ByteBuffer) {
+        if (value == null) {
+            buf.put(0)
+        } else {
+            buf.put(1)
+            FfiConverterTypeServiceOwnerScope.write(value, buf)
+        }
+    }
+}
+
+
+
+
+/**
+ * @suppress
+ */
+public object FfiConverterOptionalTypeAgentRunSnapshot: FfiConverterRustBuffer<AgentRunSnapshot?> {
+    override fun read(buf: ByteBuffer): AgentRunSnapshot? {
+        if (buf.get().toInt() == 0) {
+            return null
+        }
+        return FfiConverterTypeAgentRunSnapshot.read(buf)
+    }
+
+    override fun allocationSize(value: AgentRunSnapshot?): ULong {
+        if (value == null) {
+            return 1UL
+        } else {
+            return 1UL + FfiConverterTypeAgentRunSnapshot.allocationSize(value)
+        }
+    }
+
+    override fun write(value: AgentRunSnapshot?, buf: ByteBuffer) {
+        if (value == null) {
+            buf.put(0)
+        } else {
+            buf.put(1)
+            FfiConverterTypeAgentRunSnapshot.write(value, buf)
+        }
+    }
+}
+
+
+
+
+/**
+ * @suppress
+ */
+public object FfiConverterSequenceString: FfiConverterRustBuffer<List<kotlin.String>> {
+    override fun read(buf: ByteBuffer): List<kotlin.String> {
+        val len = buf.getInt()
+        return List<kotlin.String>(len) {
+            FfiConverterString.read(buf)
+        }
+    }
+
+    override fun allocationSize(value: List<kotlin.String>): ULong {
+        val sizeForLength = 4UL
+        val sizeForItems = value.map { FfiConverterString.allocationSize(it) }.sum()
+        return sizeForLength + sizeForItems
+    }
+
+    override fun write(value: List<kotlin.String>, buf: ByteBuffer) {
+        buf.putInt(value.size)
+        value.iterator().forEach {
+            FfiConverterString.write(it, buf)
+        }
+    }
+}
+
+
+
+
+/**
+ * @suppress
+ */
+public object FfiConverterSequenceTypeServiceOwnerSelection: FfiConverterRustBuffer<List<ServiceOwnerSelection>> {
+    override fun read(buf: ByteBuffer): List<ServiceOwnerSelection> {
+        val len = buf.getInt()
+        return List<ServiceOwnerSelection>(len) {
+            FfiConverterTypeServiceOwnerSelection.read(buf)
+        }
+    }
+
+    override fun allocationSize(value: List<ServiceOwnerSelection>): ULong {
+        val sizeForLength = 4UL
+        val sizeForItems = value.map { FfiConverterTypeServiceOwnerSelection.allocationSize(it) }.sum()
+        return sizeForLength + sizeForItems
+    }
+
+    override fun write(value: List<ServiceOwnerSelection>, buf: ByteBuffer) {
+        buf.putInt(value.size)
+        value.iterator().forEach {
+            FfiConverterTypeServiceOwnerSelection.write(it, buf)
+        }
+    }
+} fun `bridgeInfo`(): BridgeInfo {
             return FfiConverterTypeBridgeInfo.lift(
     uniffiRustCall() { _status ->
     UniffiLib.uniffi_muyon_android_contract_bridge_fn_func_bridge_info(

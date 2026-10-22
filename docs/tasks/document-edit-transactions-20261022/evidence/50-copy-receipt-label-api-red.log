@@ -1,0 +1,21 @@
+   Compiling muyon-core v0.1.0 (/workspace/document-edit-durable-combination/crates/muyon-core)
+error[E0609]: no field `operation` on type `CopyReceipt`
+   --> muyon-core/tests/document_edit_gateway.rs:183:24
+    |
+183 |     assert_eq!(receipt.operation, CopyOperation::ByteIdenticalCopy);
+    |                        ^^^^^^^^^ unknown field
+    |
+    = note: available fields are: `intent_id`, `binding_digest`, `result`
+
+error[E0433]: failed to resolve: use of undeclared type `CopyOperation`
+   --> muyon-core/tests/document_edit_gateway.rs:183:35
+    |
+183 |     assert_eq!(receipt.operation, CopyOperation::ByteIdenticalCopy);
+    |                                   ^^^^^^^^^^^^^
+    |                                   |
+    |                                   use of undeclared type `CopyOperation`
+    |                                   help: an enum with a similar name exists: `Operation`
+
+Some errors have detailed explanations: E0433, E0609.
+For more information about an error, try `rustc --explain E0433`.
+error: could not compile `muyon-core` (test "document_edit_gateway") due to 2 previous errors

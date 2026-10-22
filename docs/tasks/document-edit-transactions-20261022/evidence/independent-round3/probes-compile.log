@@ -1,0 +1,27 @@
+warning: variants `Recalculated`, `Unknown`, and `Failed` are never constructed
+  --> /workspace/Muyon/crates/muyon-core/src/document_edit/mod.rs:69:5
+   |
+67 | pub enum FormulaStatus {
+   |          ------------- variants in this enum
+68 |     NotApplicable,
+69 |     Recalculated,
+   |     ^^^^^^^^^^^^
+70 |     Unknown,
+   |     ^^^^^^^
+71 |     Failed,
+   |     ^^^^^^
+   |
+   = note: `FormulaStatus` has derived impls for the traits `Debug` and `Clone`, but these are intentionally ignored during dead code analysis
+   = note: `#[warn(dead_code)]` on by default
+
+warning: method `rollback` is never used
+   --> /workspace/Muyon/crates/muyon-core/src/document_edit/mod.rs:471:12
+    |
+163 | impl Transaction {
+    | ---------------- method in this implementation
+...
+471 |     pub fn rollback(&self, next: Binding) -> Result<Self, Error> {
+    |            ^^^^^^^^
+
+warning: 2 warnings emitted
+

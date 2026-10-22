@@ -1,0 +1,21 @@
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/8.13/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+> Task :agent-observation:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :agent-observation:processResources NO-SOURCE
+> Task :agent-observation:processTestResources NO-SOURCE
+> Task :agent-observation:compileKotlin
+> Task :agent-observation:compileJava NO-SOURCE
+> Task :agent-observation:classes UP-TO-DATE
+> Task :agent-observation:jar
+> Task :agent-observation:compileTestKotlin
+> Task :agent-observation:compileTestJava NO-SOURCE
+> Task :agent-observation:testClasses UP-TO-DATE
+
+> Task :agent-observation:checkObservation
+RECEIPT_OBSERVER_CHECKS_PASS
+
+> Task :agent-observation:test SKIPPED
+> Task :agent-observation:check
+
+BUILD SUCCESSFUL in 21s
+4 actionable tasks: 4 executed

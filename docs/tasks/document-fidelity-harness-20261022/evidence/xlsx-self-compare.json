@@ -1,0 +1,197 @@
+{
+  "candidate": {
+    "decision": "inspect_only",
+    "dimensions": {
+      "annotation": {
+        "reason": "No engine installed or invoked",
+        "status": "not_run"
+      },
+      "formula": {
+        "reason": "No engine installed or invoked",
+        "status": "not_run"
+      },
+      "recalc": {
+        "reason": "No engine installed or invoked",
+        "status": "not_run"
+      },
+      "render": {
+        "reason": "No engine installed or invoked",
+        "status": "not_run"
+      },
+      "structure": {
+        "reason": "Bounded container/XML/main-part/relationship checks only; no OOXML schema or semantic validation",
+        "status": "pass"
+      },
+      "visual": {
+        "reason": "No engine installed or invoked",
+        "status": "not_run"
+      }
+    },
+    "fidelity": "unknown",
+    "findings": [],
+    "format": "xlsx",
+    "limitations": [
+      "No complete OOXML schema validation or malware detection",
+      "Unknown parts inventoried; no editing/rendering/semantic preservation proven"
+    ],
+    "limits": {
+      "max_file": 16777216,
+      "max_member": 8388608,
+      "max_members": 2048,
+      "max_ratio": 100,
+      "max_total": 33554432,
+      "max_xml_depth": 128
+    },
+    "parts": [
+      {
+        "name": "[Content_Types].xml",
+        "sha256": "5e7aa4d125efc0f37ac3fc9330ac851a3210b3ba67db117cf96159802f6f5470",
+        "size": 567
+      },
+      {
+        "name": "_rels/.rels",
+        "sha256": "fc5715a86467973c771fed6cf49203ed48734dcbd0f24088be6bbb6e290cd7b5",
+        "size": 240
+      },
+      {
+        "name": "custom/original.bin",
+        "sha256": "d6fdff43e49c2841433bca98eadba1beeb7cb768144cec4446eb30cf6659fbac",
+        "size": 33
+      },
+      {
+        "name": "xl/_rels/workbook.xml.rels",
+        "sha256": "cd08e5907cb6dac158f533d606c8654824bf1f22b42b22122d3722d25413bfdf",
+        "size": 241
+      },
+      {
+        "name": "xl/workbook.xml",
+        "sha256": "6aef3b376916317db508abc38e19c84194960a4c3091d46fbc93e1ee5b1b9df3",
+        "size": 269
+      },
+      {
+        "name": "xl/worksheets/sheet1.xml",
+        "sha256": "d9652c4c1f63f56b19940719b429153af8e604c36491a6754c16ce8e88a0bdc5",
+        "size": 184
+      }
+    ],
+    "safety": "unknown",
+    "schema_version": 1,
+    "sha256": "546c5390f410064f74ac7f6c206f838d267261b79e7f34d6421d1660c8336363",
+    "size": 1553
+  },
+  "dimensions": {
+    "annotation": {
+      "reason": "No engine installed or invoked",
+      "status": "not_run"
+    },
+    "formula": {
+      "reason": "No engine installed or invoked",
+      "status": "not_run"
+    },
+    "recalc": {
+      "reason": "No engine installed or invoked",
+      "status": "not_run"
+    },
+    "render": {
+      "reason": "No engine installed or invoked",
+      "status": "not_run"
+    },
+    "structure": {
+      "reason": "Bounded container/XML/main-part/relationship checks only; no OOXML schema or semantic validation",
+      "status": "pass"
+    },
+    "visual": {
+      "reason": "No engine installed or invoked",
+      "status": "not_run"
+    }
+  },
+  "fidelity": "unknown",
+  "original": {
+    "decision": "inspect_only",
+    "dimensions": {
+      "annotation": {
+        "reason": "No engine installed or invoked",
+        "status": "not_run"
+      },
+      "formula": {
+        "reason": "No engine installed or invoked",
+        "status": "not_run"
+      },
+      "recalc": {
+        "reason": "No engine installed or invoked",
+        "status": "not_run"
+      },
+      "render": {
+        "reason": "No engine installed or invoked",
+        "status": "not_run"
+      },
+      "structure": {
+        "reason": "Bounded container/XML/main-part/relationship checks only; no OOXML schema or semantic validation",
+        "status": "pass"
+      },
+      "visual": {
+        "reason": "No engine installed or invoked",
+        "status": "not_run"
+      }
+    },
+    "fidelity": "unknown",
+    "findings": [],
+    "format": "xlsx",
+    "limitations": [
+      "No complete OOXML schema validation or malware detection",
+      "Unknown parts inventoried; no editing/rendering/semantic preservation proven"
+    ],
+    "limits": {
+      "max_file": 16777216,
+      "max_member": 8388608,
+      "max_members": 2048,
+      "max_ratio": 100,
+      "max_total": 33554432,
+      "max_xml_depth": 128
+    },
+    "parts": [
+      {
+        "name": "[Content_Types].xml",
+        "sha256": "5e7aa4d125efc0f37ac3fc9330ac851a3210b3ba67db117cf96159802f6f5470",
+        "size": 567
+      },
+      {
+        "name": "_rels/.rels",
+        "sha256": "fc5715a86467973c771fed6cf49203ed48734dcbd0f24088be6bbb6e290cd7b5",
+        "size": 240
+      },
+      {
+        "name": "custom/original.bin",
+        "sha256": "d6fdff43e49c2841433bca98eadba1beeb7cb768144cec4446eb30cf6659fbac",
+        "size": 33
+      },
+      {
+        "name": "xl/_rels/workbook.xml.rels",
+        "sha256": "cd08e5907cb6dac158f533d606c8654824bf1f22b42b22122d3722d25413bfdf",
+        "size": 241
+      },
+      {
+        "name": "xl/workbook.xml",
+        "sha256": "6aef3b376916317db508abc38e19c84194960a4c3091d46fbc93e1ee5b1b9df3",
+        "size": 269
+      },
+      {
+        "name": "xl/worksheets/sheet1.xml",
+        "sha256": "d9652c4c1f63f56b19940719b429153af8e604c36491a6754c16ce8e88a0bdc5",
+        "size": 184
+      }
+    ],
+    "safety": "unknown",
+    "schema_version": 1,
+    "sha256": "546c5390f410064f74ac7f6c206f838d267261b79e7f34d6421d1660c8336363",
+    "size": 1553
+  },
+  "preservation": {
+    "added": [],
+    "changed": [],
+    "missing": [],
+    "reason": "Exact part bytes only; any intentional edit needs future semantic validator",
+    "status": "pass"
+  },
+  "schema_version": 1
+}

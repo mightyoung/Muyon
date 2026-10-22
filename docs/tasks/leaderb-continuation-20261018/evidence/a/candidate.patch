@@ -1,0 +1,357 @@
+diff --git a/apps/muyon/android/agent-observation/README.md b/apps/muyon/android/agent-observation/README.md
+new file mode 100644
+index 00000000..6def03ec
+--- /dev/null
++++ b/apps/muyon/android/agent-observation/README.md
+@@ -0,0 +1,58 @@
++# Private receipt observation dependency slice
++
++This module adds a default-disabled production-host consumer of the existing private
++Agent Service run/receipt summary protocol. It is an independently testable dependency,
++not a connected production capability. No production UI route or Android transport
++adapter constructs it yet. It cannot submit/start a run or make a lease visible.
++
++`ReceiptObserver` serializes explicit connect/current/lookup reconciliation on a
++caller-owned background worker. It reuses `AgentServiceClientState` and
++`AgentServiceWire` validation without copying or replacing their rules. Unknown,
++stale/conflicting snapshots, and failed release/unbind retain the original receipt
++and mark observation uncertainty. An unbind failure retains the port owner until
++explicit same-port cleanup succeeds. Each port must own a stable liveness identity;
++its disconnect must retire/unbind that identity. No automatic retry is scheduled.
++
++The module compiles the three original private state/protocol files in place under
++`experiments/redesign/android-compose-lab/state`. Their package names and bytes stay
++unchanged because existing checker manifests pin them. This is an explicit temporary
++source dependency. A later shared-source extraction must migrate those checker and
++lab-build references together; this fragment does not duplicate those implementations.
++
++Run the module checks using Kotlin 2.2.20 and a JVM supporting target 17:
++
++```sh
++MUYON_UI_KOTLINC=/path/to/kotlinc ./check-observation.sh
++```
++
++The fixture transport tests real shared presentation/identity policy. They do not
++exercise Android, Binder, generated FFI, a physical business read, or ART. Existing
++Rust `service_controller` and `service_oracle` integration targets corroborate the
++underlying controller/physical synthetic read/original receipt without new Rust code
++or a changed formal test inventory. This is not a Kotlin-to-Rust integration test.
++
++## Remaining production dependencies
++
++- The shipping Android host is still `apps/muyon/android/app/.../MainActivity.kt`,
++  a FlutterActivity with only its secrets MethodChannel. No agent UI route is enabled.
++- Service, AIDL, bounded proxy/Parcel adapter, generated controller, liveness registry
++  and settlement ownership remain under `experiments/redesign/android-compose-lab`.
++  A real production adapter must preserve the private ordinary `:agent` process;
++  the UI cannot construct the native Agent controller or bypass it with a subprocess.
++- The shipping app does not package verified native inputs/JNA/generated bindings or
++  implement the Service bootstrap/root owner. Flutter/Android SDK and full app build,
++  API24/ABI/native-package and device runtime verification remain pending work.
++- `rust-agent-host-lab/core/src/service_runtime.rs::run_builtin_admitted` writes a
++  synthetic `source.db`, installs `BuiltinAuthority`/`BuiltinReview`, and uses an
++  offline `BuiltinEndpoint`. It is not a real production store/authority adapter.
++  A current trusted business-store selection, permission/revision source, and physical
++  domain read registration are still needed for the originally requested real-store loop.
++- `B-SERVICE-ABI.md` forbids answer/current-business-projection/sourcefacts/history
++  payloads. Its `current` and `lookup` return original run/receipt summaries. A business
++  value projection cannot be added under the guise of this existing private ABI.
++  The v1.3.2 recovery contract keeps original receipt and currently permitted values
++  separate; their production projection dependency remains unresolved here.
++
++No INTERNET permission was added or removed (the shipping app already requests it).
++No live model, business write, new runtime, budget/permission change, replay or ABI
++expansion was introduced. This fragment does not retry the separately blocked I04 action.
+diff --git a/apps/muyon/android/agent-observation/build.gradle.kts b/apps/muyon/android/agent-observation/build.gradle.kts
+new file mode 100644
+index 00000000..ac028808
+--- /dev/null
++++ b/apps/muyon/android/agent-observation/build.gradle.kts
+@@ -0,0 +1,19 @@
++import org.jetbrains.kotlin.gradle.dsl.JvmTarget
++
++plugins { id("org.jetbrains.kotlin.jvm") }
++kotlin {
++    compilerOptions { jvmTarget.set(JvmTarget.JVM_17) }
++    sourceSets.main {
++        // Reuse the single existing private protocol/state implementation unchanged.
++        // Extraction is a separate checker migration; never copy its authority/validation here.
++        kotlin.srcDir(projectDir.resolve("../../../../experiments/redesign/android-compose-lab/state/src/main/kotlin"))
++        kotlin.include("com/mightyoung/muyon/agent/**", "**/AgentServiceContract.kt", "**/AgentServiceClientState.kt", "**/AgentServiceWire.kt")
++    }
++}
++val checkObservation by tasks.registering(JavaExec::class) {
++    dependsOn(tasks.testClasses)
++    classpath = sourceSets["test"].runtimeClasspath
++    mainClass.set("com.mightyoung.muyon.agent.ReceiptObserverChecksKt")
++}
++tasks.named<Test>("test") { enabled = false }
++tasks.named("check") { dependsOn(checkObservation) }
+diff --git a/apps/muyon/android/agent-observation/check-observation.sh b/apps/muyon/android/agent-observation/check-observation.sh
+new file mode 100755
+index 00000000..258d8342
+--- /dev/null
++++ b/apps/muyon/android/agent-observation/check-observation.sh
+@@ -0,0 +1,12 @@
++#!/usr/bin/env bash
++set -euo pipefail
++module=$(cd "$(dirname "$0")" && pwd)
++repo=$(cd "$module/../../../.." && pwd)
++state="$repo/experiments/redesign/android-compose-lab/state/src/main/kotlin/com/mightyoung/muyon/androidlab"
++output=${MUYON_OBSERVATION_OUTPUT:-/tmp/muyon-receipt-observation-checks}
++mkdir -p "$output"
++"${MUYON_UI_KOTLINC:-kotlinc}" "$state/AgentServiceContract.kt" "$state/AgentServiceClientState.kt" "$state/AgentServiceWire.kt" \
++  "$module/src/main/kotlin/com/mightyoung/muyon/agent/ReceiptObserver.kt" \
++  "$module/src/test/kotlin/com/mightyoung/muyon/agent/ReceiptObserverChecks.kt" \
++  -jvm-target 17 -include-runtime -d "$output/checks.jar"
++"${MUYON_UI_JAVA:-java}" -jar "$output/checks.jar"
+diff --git a/apps/muyon/android/agent-observation/src/main/kotlin/com/mightyoung/muyon/agent/ReceiptObserver.kt b/apps/muyon/android/agent-observation/src/main/kotlin/com/mightyoung/muyon/agent/ReceiptObserver.kt
+new file mode 100644
+index 00000000..67229ad3
+--- /dev/null
++++ b/apps/muyon/android/agent-observation/src/main/kotlin/com/mightyoung/muyon/agent/ReceiptObserver.kt
+@@ -0,0 +1,103 @@
++package com.mightyoung.muyon.agent
++
++import com.mightyoung.muyon.androidlab.*
++
++/** Private transport boundary for original run/receipt summaries; no execution operation. */
++interface ReceiptObservationPort {
++    fun connect(): UiAgentWireReply
++    fun current(client: UiAgentClientRef): UiAgentWireReply
++    fun lookup(client: UiAgentClientRef, requestId: String): UiAgentWireReply
++    fun release(client: UiAgentClientRef, generation: Long)
++    /** Retire/unbind the port-owned liveness identity even when a reply lost the lease. */
++    fun disconnect()
++}
++
++enum class ReceiptObservation { DISABLED, APPLIED, UNKNOWN, REJECTED }
++
++/**
++ * Optional production-host consumer of the existing private Service summary ABI.
++ * All methods must be serialized on one caller-owned background worker: ports may block.
++ * Android binding and UI delivery are intentionally outside this dependency slice.
++ * This consumer never makes a lease visible or submits work, including after reconnect.
++ */
++class ReceiptObserver(private val expectedBuild: String, private val enabled: Boolean = false) {
++    private val state = AgentServiceClientState(expectedBuild)
++    private var connection: UiAgentConnectionTicket? = null
++    private var activePort: ReceiptObservationPort? = null
++    val snapshot get() = state.snapshot
++    val historical get() = state.historical
++    val observationUnknown get() = state.observationUnknown
++
++    fun reconcile(port: ReceiptObservationPort): ReceiptObservation {
++        if (!enabled) return ReceiptObservation.DISABLED
++        if (activePort != null && activePort !== port) return ReceiptObservation.REJECTED
++        if (state.client == null) {
++            val ticket = state.beginBinding()
++            connection = ticket
++            activePort = port
++            val reply = receive { port.connect() }
++            if (reply !is UiAgentWireReply.Connected || reply.client.epoch != reply.meta.serviceEpoch ||
++                state.connected(ticket, reply.meta, reply.client.lease, reply.phase) != UiAgentApply.APPLIED) {
++                lost()
++                return if (rejected(reply)) ReceiptObservation.REJECTED else ReceiptObservation.UNKNOWN
++            }
++        }
++        val ticket = state.capture() ?: return ReceiptObservation.UNKNOWN
++        return apply(ticket, receive { port.current(ticket.client) })
++    }
++
++    fun lookupOriginal(port: ReceiptObservationPort, intent: UiAgentIntent): ReceiptObservation {
++        if (!enabled) return ReceiptObservation.DISABLED
++        if (activePort !== port) return ReceiptObservation.REJECTED
++        val ticket = state.captureLookup(intent) ?: return ReceiptObservation.REJECTED
++        return apply(ticket, receive { port.lookup(ticket.client, intent.requestId) })
++    }
++
++    /** Release only this consumer's current lease. A failed reply leaves observation uncertain. */
++    fun disconnect(port: ReceiptObservationPort) {
++        if (!enabled || activePort !== port) return
++        val ticket = connection
++        val release = state.release()
++        activePort = null
++        connection = null
++        var failed = false
++        try {
++            if (release != null) port.release(release.client, release.generation)
++        } catch (_: Exception) {
++            failed = true
++        } finally {
++            try { port.disconnect() } catch (_: Exception) {
++                failed = true
++                // Keep the original owner until explicit cleanup succeeds; no port replacement.
++                activePort = port
++                connection = ticket
++            }
++        }
++        if (failed) ticket?.let(state::transportLost)
++    }
++
++    private fun receive(read: () -> UiAgentWireReply): UiAgentWireReply? = try {
++        // Reuse exact existing field/identity/size validation even for a typed transport port.
++        val reply = read()
++        if (AgentServiceWire.encode(reply, expectedBuild) != null) reply
++        else UiAgentWireReply.Local(UiAgentLocalStatus.INVALID_REQUEST)
++    } catch (_: Exception) { null }
++
++    private fun apply(ticket: UiAgentObservationTicket, reply: UiAgentWireReply?): ReceiptObservation {
++        if (reply is UiAgentWireReply.Snapshot) {
++            return if (state.apply(ticket, reply.value) == UiAgentApply.APPLIED) ReceiptObservation.APPLIED
++            else { lost(); ReceiptObservation.REJECTED }
++        }
++        lost()
++        return if (rejected(reply)) ReceiptObservation.REJECTED else ReceiptObservation.UNKNOWN
++    }
++
++    private fun rejected(reply: UiAgentWireReply?) = reply is UiAgentWireReply.Rejected ||
++        reply == UiAgentWireReply.Local(UiAgentLocalStatus.INVALID_REQUEST)
++
++    private fun lost() {
++        connection?.let(state::transportLost)
++        // Keep the port owner until explicit disconnect: an uncertain connect may have a lease.
++        // Reconcile with the same port may establish/read it again; never swap Binder identity.
++    }
++}
+diff --git a/apps/muyon/android/agent-observation/src/test/kotlin/com/mightyoung/muyon/agent/ReceiptObserverChecks.kt b/apps/muyon/android/agent-observation/src/test/kotlin/com/mightyoung/muyon/agent/ReceiptObserverChecks.kt
+new file mode 100644
+index 00000000..09abbd18
+--- /dev/null
++++ b/apps/muyon/android/agent-observation/src/test/kotlin/com/mightyoung/muyon/agent/ReceiptObserverChecks.kt
+@@ -0,0 +1,111 @@
++package com.mightyoung.muyon.agent
++
++import com.mightyoung.muyon.androidlab.*
++
++private const val BUILD = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
++private val meta = UiAgentMeta(1u, BUILD, "b".repeat(32), 5)
++private val client = UiAgentClientRef(meta.serviceEpoch, "c".repeat(32))
++private val intent = UiAgentIntent("original_read", UiAgentVariant.EQUIPMENT, BUILD)
++private val original = UiAgentSnapshot(meta, UiAgentServicePhase.CLOSED, UiAgentRun.Terminal(UiAgentSummary(
++    intent, UiAgentRunIdentity("d".repeat(32), "e".repeat(32), UiAgentTask("task1", "attempt1")),
++    UiAgentTerminal.COMPLETED, UiAgentReason.NONE, UiAgentReceipt("receipt1", UiAgentReceiptOutcome.RECORDED_SUCCESS))))
++
++// A transport fixture is necessary here: no Android/FFI runtime is claimed by these checks.
++// The regression oracle is the real shared state and retained original receipt, not call counts alone.
++private class Port : ReceiptObservationPort {
++    val events = mutableListOf<String>()
++    var connectReply: UiAgentWireReply = UiAgentWireReply.Connected(meta, client, UiAgentServicePhase.CLOSED)
++    var failRead = false
++    var failRelease = false
++    var failDisconnect = false
++    var reply: UiAgentWireReply = UiAgentWireReply.Snapshot(original)
++    override fun connect(): UiAgentWireReply { events += "connect"; return connectReply }
++    override fun current(client: UiAgentClientRef): UiAgentWireReply { events += "current"; check(client == com.mightyoung.muyon.agent.client); if (failRead) error("transport unavailable"); return reply }
++    override fun lookup(client: UiAgentClientRef, requestId: String): UiAgentWireReply { events += "lookup:$requestId"; return reply }
++    override fun disconnect() { events += "disconnect"; if (failDisconnect) error("unbind unavailable") }
++    override fun release(client: UiAgentClientRef, generation: Long) { events += "release"; check(generation > 0); if (failRelease) error("release unavailable") }
++}
++fun main() {
++    val disabledPort = Port()
++    val disabled = ReceiptObserver(BUILD)
++    check(disabled.reconcile(disabledPort) == ReceiptObservation.DISABLED)
++    check(disabledPort.events.isEmpty())
++    val port = Port()
++    val observer = ReceiptObserver(BUILD, enabled = true)
++    check(observer.reconcile(port) == ReceiptObservation.APPLIED) { "PRODUCTION_RECEIPT_RED: explicit reconciliation must apply the original native receipt" }
++    check(observer.snapshot == original)
++    check(port.events == listOf("connect", "current"))
++    check(observer.lookupOriginal(port, intent) == ReceiptObservation.APPLIED)
++    check(observer.historical == original)
++    port.reply = UiAgentWireReply.Unresolved(meta)
++    check(observer.reconcile(port) == ReceiptObservation.UNKNOWN)
++    check(observer.snapshot == original) { "Unresolved cannot erase a known receipt or prove not started" }
++    port.reply = UiAgentWireReply.Snapshot(original.copy(meta = meta.copy(buildIdentity = "f".repeat(40))))
++    check(observer.reconcile(port) == ReceiptObservation.REJECTED)
++    check(observer.snapshot == original)
++    port.reply = UiAgentWireReply.Snapshot(original)
++    check(observer.reconcile(port) == ReceiptObservation.APPLIED)
++    check(observer.snapshot == original)
++    check(observer.lookupOriginal(port, intent.copy(requestId = "wrong")) == ReceiptObservation.REJECTED)
++    check(observer.historical == original)
++    observer.disconnect(port)
++    check(observer.snapshot == original)
++    check(port.events.last() == "disconnect")
++    val lost = Port()
++    val retained = ReceiptObserver(BUILD, enabled = true)
++    check(retained.reconcile(lost) == ReceiptObservation.APPLIED)
++    lost.failRead = true
++    check(retained.reconcile(lost) == ReceiptObservation.UNKNOWN)
++    check(retained.observationUnknown && retained.snapshot == original)
++    retained.disconnect(lost)
++    check(lost.events.last() == "disconnect") { "Lost reply must not leak the port liveness identity" }
++    val badConnect = Port().apply { connectReply = UiAgentWireReply.Connected(meta, client.copy(epoch = "f".repeat(32)), UiAgentServicePhase.CLOSED) }
++    val rejected = ReceiptObserver(BUILD, enabled = true)
++    check(rejected.reconcile(badConnect) == ReceiptObservation.REJECTED)
++    check(rejected.snapshot == null)
++    rejected.disconnect(badConnect)
++    check(badConnect.events == listOf("connect", "disconnect"))
++    val owned = Port()
++    val onePort = ReceiptObserver(BUILD, enabled = true)
++    check(onePort.reconcile(owned) == ReceiptObservation.APPLIED)
++    val stranger = Port()
++    check(onePort.reconcile(stranger) == ReceiptObservation.REJECTED)
++    onePort.disconnect(stranger)
++    check(stranger.events.isEmpty())
++    onePort.disconnect(owned)
++    for (rejectedSnapshot in listOf(
++        original.copy(meta = meta.copy(revision = 4)),
++        original.copy(meta = meta.copy(serviceEpoch = "f".repeat(32))),
++        original.copy(run = UiAgentRun.Unresolved(intent, null, UiAgentReceipt(null, UiAgentReceiptOutcome.UNKNOWN)))
++    )) {
++        val conflictPort = Port()
++        val conflict = ReceiptObserver(BUILD, enabled = true)
++        check(conflict.reconcile(conflictPort) == ReceiptObservation.APPLIED)
++        conflictPort.reply = UiAgentWireReply.Snapshot(rejectedSnapshot)
++        check(conflict.reconcile(conflictPort) == ReceiptObservation.REJECTED)
++        check(conflict.observationUnknown) { "REJECTED_SNAPSHOT_RED: failed current observation must remain uncertain" }
++        check(conflict.snapshot == original)
++        conflict.disconnect(conflictPort)
++    }
++    for (duringRelease in listOf(true, false)) {
++        val failing = Port()
++        val closing = ReceiptObserver(BUILD, enabled = true)
++        check(closing.reconcile(failing) == ReceiptObservation.APPLIED)
++        if (duringRelease) failing.failRelease = true else failing.failDisconnect = true
++        closing.disconnect(failing)
++        check(closing.observationUnknown) { "FAILED_RELEASE_RED: failed lifecycle delivery must remain uncertain" }
++        check(closing.snapshot == original)
++        check(failing.events.takeLast(2) == listOf("release", "disconnect"))
++        if (!duringRelease) {
++            val replacement = Port()
++            check(closing.reconcile(replacement) == ReceiptObservation.REJECTED) { "UNBIND_OWNER_RED: failed unbind must retain cleanup ownership" }
++            check(replacement.events.isEmpty())
++            failing.failDisconnect = false
++            closing.disconnect(failing)
++            check(failing.events.takeLast(2) == listOf("disconnect", "disconnect"))
++            check(closing.reconcile(replacement) == ReceiptObservation.APPLIED)
++            closing.disconnect(replacement)
++        }
++    }
++    println("RECEIPT_OBSERVER_CHECKS_PASS")
++}
+diff --git a/apps/muyon/android/app/build.gradle.kts b/apps/muyon/android/app/build.gradle.kts
+index b6ec51a5..325aad3e 100644
+--- a/apps/muyon/android/app/build.gradle.kts
++++ b/apps/muyon/android/app/build.gradle.kts
+@@ -48,3 +48,6 @@ kotlin {
+ flutter {
+     source = "../.."
+ }
++
++// Private summary consumer only; no Service/native package or enabled UI route yet.
++dependencies { implementation(project(":agent-observation")) }
+diff --git a/apps/muyon/android/settings.gradle.kts b/apps/muyon/android/settings.gradle.kts
+index ca7fe065..a6c55b9e 100644
+--- a/apps/muyon/android/settings.gradle.kts
++++ b/apps/muyon/android/settings.gradle.kts
+@@ -21,6 +21,7 @@ plugins {
+     id("dev.flutter.flutter-plugin-loader") version "1.0.0"
+     id("com.android.application") version "8.11.1" apply false
+     id("org.jetbrains.kotlin.android") version "2.2.20" apply false
++    id("org.jetbrains.kotlin.jvm") version "2.2.20" apply false
+ }
+ 
+-include(":app")
++include(":app", ":agent-observation")

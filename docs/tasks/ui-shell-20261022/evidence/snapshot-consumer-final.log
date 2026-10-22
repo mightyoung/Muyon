@@ -1,0 +1,1 @@
+PASS shell read-only snapshot: exact scope/request, child identity, null/unsigned costs, unavailable binding, status coherence; no client/network code
