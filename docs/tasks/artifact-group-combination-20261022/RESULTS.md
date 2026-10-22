@@ -32,3 +32,6 @@ Remaining product hooks: Artifact invalidation events/core mutation hook, Messag
 canonical identity/source guard, FFI/UI forms; Group canonical context/gateway/
 AgentOwner admission/FFI/Host. Local form submissions are durable local records,
 never business tool execution. Reader raw EOF closes lease; no display/PFD feature.
+
+Subsequent authorized mechanical follow-up: see MECHANICAL-QUALITY-RECHECK.md.
+New fixed8bcc fresh763PASS, productfmtPASS, GroupstrictFAIL/fullfmtlabsFAIL retained.

@@ -37,3 +37,12 @@ config/form receipts do not execute tools or grant Agent authority. Publication
 continues hard refusal. No main/develop merge or real engine/model/search/cost/
 credentials/I04/historical Unknown mutation/old403 retrieval. No CI dispatched.
 Writers stop after sealing this result; parent coordinates source-quality fixes.
+
+Latest mechanical follow-up supersedes old product-fmt/core_bridge drop blockers:
+code8bccaaed2801365f8dba4b9de7d7bddeb23c8e1b; independent review PASS.
+Fourthdrop minimalcommit55fddbbc3bc87f4cadc46033aa2d29e3d9ea13c2; purefmt12files
+commit8bccaaed. Fresh full763 PASS; product2packagefmt PASS; fullworkspacefmt still
+FAIL only untouchedexperiments. Strict FAIL Group two8/7functions; worker reexports
+retained due real library/test consumers. Artifact allow nowline192, lint
+clippy::too_many_arguments, no writtenreason; read MECHANICAL-QUALITY-RECHECK.md.
+No new functional input or productbehavior changed; sourcebranches untouched.

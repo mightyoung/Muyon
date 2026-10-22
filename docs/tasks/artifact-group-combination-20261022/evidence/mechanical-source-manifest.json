@@ -1,0 +1,18 @@
+{
+  "code": "8bccaaed2801365f8dba4b9de7d7bddeb23c8e1b",
+  "files": {
+    "crates/muyon-core/src/artifacts/catalog.rs": "0ba3273817f9132014d787c6a0e68a6ed29a8591123b05f16b9c6dd45d58adf5",
+    "crates/muyon-core/src/artifacts/local_interactions.rs": "6a4d7204574b5ace1b4ca1fcef47131e35323be1d47115fec0d78196a26d051a",
+    "crates/muyon-core/src/artifacts/local_interactions/tests.rs": "a1f1a55ec511c01365e94e4fe50b320d425626bb1a7f7dd7cfde0037e2e20754",
+    "crates/muyon-core/src/artifacts/mod.rs": "37cd99d9e55229ff0494984a98934b1f9b6d4c8330cce61f2d098a7eb88e4368",
+    "crates/muyon-core/src/artifacts/project_access.rs": "26ebe6d54d077ce70fca8beacdb1ad0a189871eae4a32586acb7b9be5e11aa72",
+    "crates/muyon-core/src/artifacts/save_journal.rs": "5b22c37db8db3dd407bba78d69871c2a745d9f373f833651668a19b9332962ee",
+    "crates/muyon-core/src/artifacts/tests.rs": "6551247b01f728f6706fc2d1ab3358e0c11bb85259f7712dd8d81e9719e61260",
+    "crates/muyon-core/src/artifacts/workflow_tests.rs": "6c781d7839065f7687645f9ad6d88db63612866270582aec109274a549b84700",
+    "crates/muyon-core/src/lib.rs": "519d6920779e8645702ea1992705d60e2148538c263ba0f707dfa3386db125db",
+    "crates/muyon-core/tests/agent_child_tools.rs": "9a8f594ec76b2a9d816961fad5985351f6bd3768c4b4d4b216ce119d32915a42",
+    "crates/muyon-core/tests/document_edit_core_bridge.rs": "c168af2b756ff1066bb5c99303430280004d1aa271c6938d7efaa535442495b9",
+    "crates/muyon-core/tests/group_runtime_bridge.rs": "c8eeccc96c6a52454167ff397f2452823ccbade40527cc0a54d8465d475adebd",
+    "crates/muyon-core/tests/group_runtime_store.rs": "91e13ae7bc180c90da2ec31259bbe42eb6fdd1ff2ec5e969f65b133b4fdd94e7"
+  }
+}
