@@ -53,3 +53,11 @@ and persistence_status unavailable; saved/can_save remain false. Do not wire a s
 button from standalone store tests. Stable owner join, trusted rollback anchor and
 unresolved creation/stop guard are still required and cannot be made from session/
 generation, checksum, an archive or a fabricated installation/account ID.
+
+## Save-consumer preparation
+
+HostDraftSaveState.kt is backend-independent, executable-tested receipt/export
+consumer logic only. SAVE-CONSUMER-REPORT.md gives exact late/unknown/repeat/lease
+semantics. No private native wire schema or RPC is guessed; no production save flag
+is enabled. The assigned Rust owner supplies fixed SQLite descriptor/save/load/
+original-receipt API next, then Runtime/Service adaptation can use this consumer.
