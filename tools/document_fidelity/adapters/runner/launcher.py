@@ -176,7 +176,7 @@ def _run(source,raw,executor,authority,cancel):
         receipt['status']='failed';receipt['reasons'].append('executor_or_validation_error:'+type(error).__name__)
     close_workers()
     # Resolve uncertain stage/spawn ownership by attempt identity, never retry.
-    if os_touched and (workspace is None or (spawn_attempted and process is None)):
+    if os_touched and process is None:
         try:
             state=executor.reconcile(attempt);record('reconciled')
             if type(state) is not model.Reconciliation or state.known is not True:raise Stop('outcome_unknown','reconciliation_unknown')

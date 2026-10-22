@@ -1,0 +1,23 @@
+test_concrete_backend_default_hold_before_process_and_fake_never_qualifies (tools.document_fidelity.adapters.runner.linux.tests.test_backend.BackendTests.test_concrete_backend_default_hold_before_process_and_fake_never_qualifies) ... ok
+test_full_fake_backend_release_and_normal_candidate_validation (tools.document_fidelity.adapters.runner.linux.tests.test_backend.BackendTests.test_full_fake_backend_release_and_normal_candidate_validation) ... ok
+test_kernel_text_parsers_reject_false_isolation_and_unlimited_limits (tools.document_fidelity.adapters.runner.linux.tests.test_backend.BackendTests.test_kernel_text_parsers_reject_false_isolation_and_unlimited_limits) ... ok
+test_pre_spawn_supervisor_owned_reconciled_and_reaped_on_ready_failure (tools.document_fidelity.adapters.runner.linux.tests.test_backend.BackendTests.test_pre_spawn_supervisor_owned_reconciled_and_reaped_on_ready_failure) ... ok
+test_pre_spawn_unreaped_supervisor_is_quarantined_not_cleaned (tools.document_fidelity.adapters.runner.linux.tests.test_backend.BackendTests.test_pre_spawn_unreaped_supervisor_is_quarantined_not_cleaned) ... ok
+test_reserve_uncertain_launch_has_attempt_ownership_and_no_retry (tools.document_fidelity.adapters.runner.linux.tests.test_backend.BackendTests.test_reserve_uncertain_launch_has_attempt_ownership_and_no_retry) ... ok
+test_same_lock_dispatch_cannot_serialize_or_replay_capability (tools.document_fidelity.adapters.runner.linux.tests.test_backend.BackendTests.test_same_lock_dispatch_cannot_serialize_or_replay_capability) ... ok
+test_sanitized_environment_is_observed_not_inferred_from_argv (tools.document_fidelity.adapters.runner.linux.tests.test_backend.BackendTests.test_sanitized_environment_is_observed_not_inferred_from_argv) ... ERROR
+test_snapshot_and_cleanup_cannot_precede_tree_reap (tools.document_fidelity.adapters.runner.linux.tests.test_backend.BackendTests.test_snapshot_and_cleanup_cannot_precede_tree_reap) ... ok
+
+======================================================================
+ERROR: test_sanitized_environment_is_observed_not_inferred_from_argv (tools.document_fidelity.adapters.runner.linux.tests.test_backend.BackendTests.test_sanitized_environment_is_observed_not_inferred_from_argv)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/document-fidelity/tools/document_fidelity/adapters/runner/linux/tests/test_backend.py", line 102, in test_sanitized_environment_is_observed_not_inferred_from_argv
+    self.assertEqual({'LC_CTYPE':'C.UTF-8'},kernel.check_environment(b'LC_CTYPE=C.UTF-8\0'))
+                                            ^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'tools.document_fidelity.adapters.runner.linux.kernel' has no attribute 'check_environment'
+
+----------------------------------------------------------------------
+Ran 9 tests in 0.023s
+
+FAILED (errors=1)

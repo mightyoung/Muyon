@@ -6,6 +6,7 @@ def edit_copy(job,source_path,candidate_path,*,permit=None):
     admitted=require_worker_permit(permit,job,source_path,candidate_path,'python-docx')
     job=admitted.request
     from docx import Document
+    admitted.engine_entered()
     document=Document(source_path)
     op=job['operation'];run=document.paragraphs[op['paragraph_index']].runs[op['run_index']]
     if run.text != op['expected']:raise ValueError('expected_value_conflict')

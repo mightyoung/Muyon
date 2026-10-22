@@ -13,12 +13,21 @@ from ..protocol import parse_request
 class WorkerAdmission:
     request:dict
     engine:model.EngineIdentity
+    on_entry:object=None
+    def engine_entered(self):
+        if self.on_entry is not None:self.on_entry()
 
 
 def require_worker_permit(permit,job,source,candidate,engine_id):
     try:
-        if type(permit) is not Capability:raise ValueError('not_capability')
+        from .linux.worker_permit import RemoteWorkerPermit
         request=parse_request(job)
+        if type(permit) is RemoteWorkerPermit:
+            engine,policy,binding=permit.consume(request,source,candidate,engine_id)
+            from ..runtime import read_regular
+            if model.sha(read_regular(source,policy.max_input_bytes))!=binding.source_sha256 or metadata.version(engine.engine_id)!=engine.version:raise ValueError('source_or_engine_changed')
+            return WorkerAdmission(request,engine,permit.engine_entered)
+        if type(permit) is not Capability:raise ValueError('not_capability')
         issuer=permit._issuer
         if issuer.assurance!='host_verified':raise ValueError('simulation_not_worker_authority')
         result=issuer.consume_worker_permit(permit,request,os.fspath(source),os.fspath(candidate),engine_id,time.monotonic()*1000)

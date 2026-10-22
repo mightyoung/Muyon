@@ -33,6 +33,26 @@ class IPCTests(unittest.TestCase):
         with self.assertRaises(ipc.ProtocolError):b.receive(100)
         for payload in (b'{"v":1,"v":1}',b'{"x":NaN}'):
             with self.assertRaises(ipc.ProtocolError):ipc.decode(payload)
+    def test_bad_frame_poisoned_channel_never_accepts_retry(self):
+        a,b=self.pair();a.send('paused',{},100);b.receive(100)
+        a.socket.sendall(ipc.encode('paused','attempt_1','a'*64,0,{}))
+        with self.assertRaises(ipc.ProtocolError):b.receive(100)
+        # No new send on a peer that should already be closed is necessary:
+        # absence of a terminal local state itself is the regression.
+        self.assertTrue(b.closed)
+        with self.assertRaises(ipc.ProtocolError):b.receive(100)
+    def test_ancillary_fd_transfer_and_backpressure_timeout_poison_connection(self):
+        import array
+        a,b=self.pair()
+        a.socket.sendmsg([ipc.encode('paused','attempt_1','a'*64,0,{})],[(socket.SOL_SOCKET,socket.SCM_RIGHTS,array.array('i',[a.socket.fileno()]))])
+        with self.assertRaises(ipc.ProtocolError):b.receive(100)
+        self.assertTrue(b.closed)
+        a,b=self.pair()
+        for _ in range(1024):
+            try:a.socket.send(b'x'*1024)
+            except BlockingIOError:break
+        with self.assertRaises(ipc.ProtocolError):a.send('paused',{},5)
+        self.assertTrue(a.closed)
     def test_send_is_bounded_and_unknown_fields_refused(self):
         a,b=self.pair(max_frame=64)
         with self.assertRaises(ipc.ProtocolError):a.send('paused',{'large':'x'*1000},10)

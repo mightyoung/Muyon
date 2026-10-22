@@ -15,13 +15,18 @@ def _shape(value,depth=0,budget=None):
         budget[1]-=len(json.dumps(value).encode())
         if budget[1]<0:raise ProtocolError('encoded_budget')
         return
-    if value is None or type(value) in (bool,int):return
+    if type(value) is int:
+        if not -(1<<63)<=value<(1<<63):raise ProtocolError('integer_limit')
+        return
+    if value is None or type(value) is bool:return
     if type(value) is float and math.isfinite(value):return
     if type(value) in (list,tuple):
         for child in value:_shape(child,depth+1,budget)
     elif type(value) is dict:
         for key,child in value.items():
             if type(key) is not str or len(key)>128:raise ProtocolError('json_key')
+            budget[1]-=len(json.dumps(key).encode())+3
+            if budget[1]<0:raise ProtocolError('encoded_budget')
             _shape(child,depth+1,budget)
     else:raise ProtocolError('json_type')
 
@@ -68,9 +73,9 @@ class Channel:
         if type(max_frame) is not int or not 1<=max_frame<=MAX_FRAME:raise ProtocolError('frame_cap')
         self.socket=sock;self.attempt=attempt;self.request=request
         self.expected_pid=expected_pid;self.expected_uid=expected_uid;self.max_frame=max_frame;self.allow_pid_zero=allow_pid_zero
-        self.sent=self.received=0;self._peer=None
+        self.sent=self.received=0;self._peer=None;self.closed=False
         sock.setsockopt(socket.SOL_SOCKET,socket.SO_PASSCRED,1);sock.setblocking(False)
-    def close(self):self.socket.close()
+    def close(self):self.closed=True;self.socket.close()
     def _deadline(self,timeout_ms):
         if type(timeout_ms) is not int or not 0<timeout_ms<=30000:raise ProtocolError('timeout')
         return time.monotonic()+timeout_ms/1000
@@ -79,7 +84,7 @@ class Channel:
         if remaining<=0:raise ProtocolError('ipc_timeout')
         read,writable,_=select.select([] if write else [self.socket],[self.socket] if write else [],[],remaining)
         if not (writable if write else read):raise ProtocolError('ipc_timeout')
-    def send(self,kind,payload,timeout_ms):
+    def _send(self,kind,payload,timeout_ms):
         data=encode(kind,self.attempt,self.request,self.sent,payload)
         if len(data)-4>self.max_frame:raise ProtocolError('frame_limit')
         deadline=self._deadline(timeout_ms);offset=0
@@ -112,10 +117,25 @@ class Channel:
                     or (self.expected_uid is not None and peer[1]!=self.expected_uid) or peer[0]<0 or (peer[0]==0 and not self.allow_pid_zero)):raise ProtocolError('peer_mismatch')
             self._peer=peer;result.extend(data)
         return bytes(result)
-    def receive(self,timeout_ms):
+    def _receive(self,timeout_ms):
         deadline=self._deadline(timeout_ms);length=struct.unpack('!I',self._read(4,deadline))[0]
         if not 0<length<=self.max_frame:raise ProtocolError('frame_limit')
         value=decode(self._read(length,deadline))
         if value['attempt']!=self.attempt or value['request']!=self.request or value['seq']!=self.received:raise ProtocolError('binding_or_replay')
         self.received+=1
         return Frame(value['kind'],value['payload'],value['seq'],*self._peer)
+
+    def send(self,kind,payload,timeout_ms):
+        if self.closed:raise ProtocolError('channel_closed')
+        try:return self._send(kind,payload,timeout_ms)
+        except Exception as error:
+            self.close()
+            if isinstance(error,ProtocolError):raise
+            raise ProtocolError('ipc_send_failed') from error
+    def receive(self,timeout_ms):
+        if self.closed:raise ProtocolError('channel_closed')
+        try:return self._receive(timeout_ms)
+        except Exception as error:
+            self.close()
+            if isinstance(error,ProtocolError):raise
+            raise ProtocolError('ipc_receive_failed') from error

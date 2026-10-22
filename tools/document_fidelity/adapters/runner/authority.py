@@ -122,6 +122,21 @@ class Authority:
                                     parent=lease,expiry=record['expiry'],source='/input/source.'+format,
                                     candidate='/output/candidate.'+format,used=False)
             return cap
+    def dispatch_worker(self,lease,raw,executor,now,format,release):
+        """Consume this issuer's worker grant and release under the same lock.
+
+        release is trusted broker code, never request code. An IPC failure does
+        not restore the consumed permit or automatically retry worker start.
+        """
+        with self._lock:
+            if self.assurance!='host_verified' or not callable(release):return False
+            permit=self.issue_worker_permit(lease,raw,executor,now,format)
+            if permit is None:return False
+            accepted=self.consume_worker_permit(permit,raw,'/input/source.'+format,'/output/candidate.'+format,self.engine.engine_id,now)
+            if accepted is None:return False
+            release(*accepted,self._record(lease)['expiry'])
+            return True
+
     def consume_worker_permit(self,cap,raw,source,candidate,engine_id,now):
         with self._lock:
             record=self._record(cap)

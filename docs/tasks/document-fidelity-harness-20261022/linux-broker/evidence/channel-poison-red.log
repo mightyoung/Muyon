@@ -1,0 +1,21 @@
+test_bad_frame_poisoned_channel_never_accepts_retry (tools.document_fidelity.adapters.runner.linux.tests.test_primitives.IPCTests.test_bad_frame_poisoned_channel_never_accepts_retry) ... ERROR
+test_limit_duplicate_json_wrong_peer_and_truncation (tools.document_fidelity.adapters.runner.linux.tests.test_primitives.IPCTests.test_limit_duplicate_json_wrong_peer_and_truncation) ... ok
+test_partial_io_and_replay_wrong_binding_timeout (tools.document_fidelity.adapters.runner.linux.tests.test_primitives.IPCTests.test_partial_io_and_replay_wrong_binding_timeout) ... ok
+test_real_socketpair_credentials_sequence_binding_and_eof (tools.document_fidelity.adapters.runner.linux.tests.test_primitives.IPCTests.test_real_socketpair_credentials_sequence_binding_and_eof) ... ok
+test_send_is_bounded_and_unknown_fields_refused (tools.document_fidelity.adapters.runner.linux.tests.test_primitives.IPCTests.test_send_is_bounded_and_unknown_fields_refused) ... ok
+test_changed_links_extras_and_path_escape_refused (tools.document_fidelity.adapters.runner.linux.tests.test_primitives.SnapshotTests.test_changed_links_extras_and_path_escape_refused) ... ok
+test_reaped_required_before_open_and_stable_regular_bytes (tools.document_fidelity.adapters.runner.linux.tests.test_primitives.SnapshotTests.test_reaped_required_before_open_and_stable_regular_bytes) ... ok
+
+======================================================================
+ERROR: test_bad_frame_poisoned_channel_never_accepts_retry (tools.document_fidelity.adapters.runner.linux.tests.test_primitives.IPCTests.test_bad_frame_poisoned_channel_never_accepts_retry)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/document-fidelity/tools/document_fidelity/adapters/runner/linux/tests/test_primitives.py", line 42, in test_bad_frame_poisoned_channel_never_accepts_retry
+    self.assertTrue(b.closed)
+                    ^^^^^^^^
+AttributeError: 'Channel' object has no attribute 'closed'. Did you mean: 'close'?
+
+----------------------------------------------------------------------
+Ran 7 tests in 0.007s
+
+FAILED (errors=1)

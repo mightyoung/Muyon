@@ -6,6 +6,7 @@ def edit_copy(job,source_path,candidate_path,*,permit=None):
     admitted=require_worker_permit(permit,job,source_path,candidate_path,'python-pptx')
     job=admitted.request
     from pptx import Presentation
+    admitted.engine_entered()
     document=Presentation(source_path);op=job['operation']
     slides=[s for s in document.slides if s.slide_id == op['slide_id']]
     if len(slides)!=1:raise ValueError('slide_identity_conflict')

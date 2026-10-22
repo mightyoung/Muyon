@@ -7,6 +7,7 @@ def edit_copy(job, source_path, candidate_path, *, permit=None):
     admitted=require_worker_permit(permit,job,source_path,candidate_path,'openpyxl')
     job=admitted.request
     from openpyxl import load_workbook
+    admitted.engine_entered()
     workbook = load_workbook(source_path, read_only=False, data_only=False, keep_links=False)
     try:
         op = job['operation']
