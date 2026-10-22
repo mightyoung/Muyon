@@ -1,0 +1,31 @@
+{
+  "at_utc": "2026-10-22T05:54:27.637270+00:00",
+  "raw_output_bytes_preserved": true,
+  "results": [
+    {
+      "argv": [
+        "git",
+        "diff",
+        "--cached",
+        "--check"
+      ],
+      "exit_status": 2,
+      "stdout": "docs/tasks/local-workspace-bot-provider-20261022/independent-verification/null-fix-20261022/original/core-full.stdout.log:297: new blank line at EOF.\ndocs/tasks/local-workspace-bot-provider-20261022/independent-verification/null-fix-20261022/original/provider-targeted.stdout.log:24: new blank line at EOF.\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "git",
+        "diff",
+        "--cached",
+        "--check",
+        "--",
+        ".",
+        ":(exclude)docs/tasks/local-workspace-bot-provider-20261022/independent-verification/null-fix-20261022/**/*.log"
+      ],
+      "exit_status": 0,
+      "stdout": "",
+      "stderr": ""
+    }
+  ]
+}

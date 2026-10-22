@@ -1,0 +1,102 @@
+{
+  "at_utc": "2026-10-22T05:53:55.855852+00:00",
+  "only_code_difference_from_owner_source_is_verification_export": true,
+  "results": [
+    {
+      "argv": [
+        "git",
+        "rev-parse",
+        "HEAD"
+      ],
+      "exit_status": 0,
+      "stdout": "f0ef760ba7253f38be8e26989ca99b82a76acf8b\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "git",
+        "log",
+        "-1",
+        "--format=%H %P"
+      ],
+      "exit_status": 0,
+      "stdout": "f0ef760ba7253f38be8e26989ca99b82a76acf8b fda22f1876393b390e73591ffbf5991e686c8ef6 3160208247c5257b6382106d69f2028f5ad8ccab\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "git",
+        "diff",
+        "3160208247c5257b6382106d69f2028f5ad8ccab",
+        "HEAD",
+        "--",
+        "crates"
+      ],
+      "exit_status": 0,
+      "stdout": "diff --git a/crates/muyon-core/src/lib.rs b/crates/muyon-core/src/lib.rs\nindex 8c792866..bd6eaa0f 100644\n--- a/crates/muyon-core/src/lib.rs\n+++ b/crates/muyon-core/src/lib.rs\n@@ -2,6 +2,7 @@\n pub mod agent;\n pub mod archive;\n pub mod blobs;\n+pub mod bot_drafts;\n pub mod business;\n pub mod contract;\n pub mod documents;\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/workspace/Muyon-group",
+        "rev-parse",
+        "HEAD"
+      ],
+      "exit_status": 0,
+      "stdout": "7fde617bab8f45644820590529def5b2f2193454\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/workspace/Muyon-group",
+        "status",
+        "--short"
+      ],
+      "exit_status": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/workspace/Muyon-document-verification",
+        "rev-parse",
+        "HEAD"
+      ],
+      "exit_status": 0,
+      "stdout": "d4b6af74644ac8f1abe8ab343ccf3cf6e6d696c5\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/workspace/Muyon-document-verification",
+        "status",
+        "--short"
+      ],
+      "exit_status": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "git",
+        "ls-remote",
+        "origin",
+        "refs/heads/task/local-workspace-bot-provider-20261022",
+        "refs/heads/task/local-workspace-bot-provider-verification-20261022",
+        "refs/heads/main",
+        "refs/heads/develop"
+      ],
+      "exit_status": 0,
+      "stdout": "0ab2c4f667681b9aacb017f8cd2eea6f576cf78e\trefs/heads/develop\ncc7c8d14d30e3d3c4c7c6cb2bf2059a99e46e003\trefs/heads/main\n3160208247c5257b6382106d69f2028f5ad8ccab\trefs/heads/task/local-workspace-bot-provider-20261022\nfda22f1876393b390e73591ffbf5991e686c8ef6\trefs/heads/task/local-workspace-bot-provider-verification-20261022\n",
+      "stderr": ""
+    }
+  ]
+}

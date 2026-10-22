@@ -1,0 +1,24 @@
+
+running 19 tests
+test canonical_envelope_tamper_limit_revision_and_trailing_data_refuse ... ok
+test altered_schema_workspace_and_signed_long_overflow_refuse ... ok
+test empty_archive_null_projection_survives_read_and_restart ... ok
+test exclusive_owner_and_competing_editors_do_not_lose_updates ... ok
+test archive_storage_null_oversize_blob_and_invalid_text_refuse ... ok
+test draft_capacity_preserves_existing_records_and_receipts ... ok
+test failed_receipt_insert_rolls_back_archive_revision_and_attempt ... ok
+test live_project_revocation_is_checked_even_for_original_receipts ... ok
+test original_receipt_blob_or_oversize_storage_refuses ... ok
+test original_unknown_and_reserved_ledgers_are_untouched ... ok
+test large_valid_canonical_archive_roundtrips_without_projection_truncation ... ok
+test original_receipt_is_atomic_idempotent_and_survives_callback_loss ... ok
+test partial_schema_never_resets_or_imports ... ok
+test project_query_storage_fault_is_unknown_not_scope_denial ... ok
+test structurally_invalid_rehashed_archive_cannot_add_fields ... ok
+test restart_and_null_project_are_real_registry_facts ... ok
+test stored_archive_and_receipt_tamper_refuse ... ok
+test wrong_scope_binding_generation_lifecycle_and_missing_attempt_refuse ... ok
+test receipt_capacity_does_not_evict_originals ... ok
+
+test result: ok. 19 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.80s
+
