@@ -1,0 +1,55 @@
+{
+  "evidence_kind": "new_independent_rerun",
+  "notice": "New independent offline rerun; not a restoration or reconstruction of prior stdout/stderr.",
+  "cwd": "/workspace/bot-setup-draft",
+  "command_argv": [
+    "env",
+    "KOTLINC=/tmp/bot-setup-tools/kotlinc/bin/kotlinc",
+    "apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/run-offline-checks.sh"
+  ],
+  "command_shell_display": "KOTLINC=/tmp/bot-setup-tools/kotlinc/bin/kotlinc apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/run-offline-checks.sh",
+  "utc_started_at": "2026-10-22T03:55:08.577016Z",
+  "utc_finished_at": "2026-10-22T03:55:16.421678Z",
+  "exit_code": 0,
+  "head": "79cf88974f6a44cb8e30df0e81d827a9376303b1",
+  "head_after": "79cf88974f6a44cb8e30df0e81d827a9376303b1",
+  "source_commit": "f9920c75b05904ab54250c2c65cc6dca3db27390",
+  "source_file_sha256": {
+    "apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupDraft.kt": "4715e21b685599f4b6fb993a89d241b97304de3def997e87c84f654a98773550",
+    "apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupDraftChecks.kt": "9e87bda0a17f52bef483b24c8c22f1f6cae8dee63a019e0c0fd954b536fe711b",
+    "apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/run-offline-checks.sh": "86742bdcefb59e3cd564da435269af0ec15cf1f62f8c7e9e7a24080acb4f5b52"
+  },
+  "compiler_zip": {
+    "path": "/tmp/bot-setup-tools/kotlin.zip",
+    "sha256": "302d1d8e671e5c3207e6ed62ff11fb555462a628e22a1158254dcaaf7e7394bc"
+  },
+  "versions": {
+    "java": {
+      "command": [
+        "java",
+        "-version"
+      ],
+      "exit_code": 0,
+      "stdout": "java-version.stdout.log",
+      "stderr": "java-version.stderr.log"
+    },
+    "kotlin": {
+      "command": [
+        "/tmp/bot-setup-tools/kotlinc/bin/kotlinc",
+        "-version"
+      ],
+      "exit_code": 0,
+      "stdout": "kotlin-version.stdout.log",
+      "stderr": "kotlin-version.stderr.log"
+    }
+  },
+  "log_sha256": {
+    "java-version.stderr.log": "bf61371a588e139353579c26bedbc9693004380fe8e053aa012cb6f7d2c43f20",
+    "java-version.stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "kotlin-version.stderr.log": "66a17105b1a6dfa2764b499aaf01107c29f15e848196c82aed2cc00d41d52458",
+    "kotlin-version.stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "started-at-utc.txt": "ea184751c635987ca15bac349c362e0d0211122353f4761c7c7ed71be6107589",
+    "stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout.log": "3917e3e515a15c3ed7f6ee46bdadfa63d7e5cf7e90ef25cc14e369394b544098"
+  }
+}
