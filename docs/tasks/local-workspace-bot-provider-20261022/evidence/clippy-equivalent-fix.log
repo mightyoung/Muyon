@@ -1,0 +1,9 @@
+PASS exact one-line parity predicate replacement; tests/FFI/core export unchanged
+$ git diff --check
+exit=0
+
+
+$ cargo clippy --offline --locked --manifest-path crates/Cargo.toml --workspace --all-targets -- -D warnings
+NOT_RUN: cargo absent; original-source PASS remains historical, not new-source PASS
+$ cargo test --offline --locked --manifest-path crates/Cargo.toml -p muyon-core --test bot_drafts
+NOT_RUN: cargo absent; original-source PASS remains historical, not new-source PASS
