@@ -8,9 +8,9 @@ use std::{
     time::{SystemTime, UNIX_EPOCH},
 };
 static NEXT: AtomicU64 = AtomicU64::new(0);
-struct Fixture(PathBuf);
+pub(super) struct Fixture(PathBuf);
 impl Fixture {
-    fn new() -> Self {
+    pub(super) fn new() -> Self {
         let root = std::env::temp_dir().join(format!(
             "muyon-document-grant-tail-{}-{}",
             std::process::id(),
@@ -22,7 +22,7 @@ impl Fixture {
     fn path(&self) -> PathBuf {
         self.0.join("store.sqlite")
     }
-    fn setup(&self) -> (BusinessStore, DocumentAccess) {
+    pub(super) fn setup(&self) -> (BusinessStore, DocumentAccess) {
         BusinessStore::initialize(&self.path(), "workspace").unwrap();
         let store = BusinessStore::open_existing(&self.path(), "workspace", "epoch").unwrap();
         store

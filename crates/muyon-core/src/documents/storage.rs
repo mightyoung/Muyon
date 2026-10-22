@@ -12,6 +12,7 @@ use std::time::{SystemTime, UNIX_EPOCH};
 
 type Result<T> = std::result::Result<T, ContractError>;
 const MAX_ANNOTATIONS: usize = 1000;
+const HISTORY_SCHEMA: &str = "CREATE TABLE document_history_grants_v1(grant_id TEXT NOT NULL REFERENCES document_grants(grant_id),generation TEXT NOT NULL,owner_epoch TEXT NOT NULL,current_document_json TEXT NOT NULL,historical_document_json TEXT NOT NULL,permissions TEXT NOT NULL,expires_at_ms TEXT NOT NULL,active INTEGER NOT NULL CHECK(active IN(0,1)),PRIMARY KEY(grant_id,generation,historical_document_json))";
 const SCHEMA: &[(&str, &str)] = &[
     ("document_store_meta", "CREATE TABLE document_store_meta(key TEXT PRIMARY KEY,value TEXT NOT NULL)"),
     ("document_heads", "CREATE TABLE document_heads(project_id TEXT NOT NULL REFERENCES projects(id),document_id TEXT NOT NULL,revision TEXT NOT NULL,PRIMARY KEY(project_id,document_id))"),
@@ -71,8 +72,107 @@ fn binding_shape(binding: &AuthorityBinding) -> Result<()> {
     }
     Ok(())
 }
+fn historical_operations(required: &[DocumentOperation]) -> Result<()> {
+    if required.is_empty() || required.len() > 3 || required.iter().any(|op| !op.is_read()) {
+        return Err(ContractError::UnsupportedOperation);
+    }
+    Ok(())
+}
+fn historical_target(current: &DocumentRef, historical: &DocumentRef) -> Result<()> {
+    if current.scope() != historical.scope() { return Err(ContractError::ScopeMismatch); }
+    if current.document_id() != historical.document_id() { return Err(ContractError::BindingMismatch); }
+    if historical.revision() >= current.revision() { return Err(ContractError::RevisionConflict); }
+    Ok(())
+}
 
 impl BusinessStore {
+    /// Separate explicit policy initialization: existing document tables/data are
+    /// not migrated. A missing historical policy table never permits old reads.
+    pub fn initialize_document_history_trusted(&self) -> Result<()> {
+        let tx = sql(self.database().transaction())?;
+        self.document_schema()?;
+        let rows = sql(self.database().query("SELECT name FROM sqlite_master WHERE type='table' AND name='document_history_grants_v1'", &[]))?;
+        if rows.is_empty() { sql(self.database().exec(HISTORY_SCHEMA, &[]))?; }
+        self.document_history_schema()?;
+        sql(tx.commit())
+    }
+    fn document_history_schema(&self) -> Result<()> {
+        let rows = sql(self.database().query("SELECT CASE WHEN length(CAST(sql AS BLOB))<=2048 THEN sql ELSE NULL END FROM sqlite_master WHERE type='table' AND name='document_history_grants_v1'", &[]))?;
+        if rows.is_empty() { return Err(ContractError::InvalidAuthority); }
+        if rows.len() != 1 || cell(&rows[0], 0)? != HISTORY_SCHEMA { return Err(ContractError::InvalidVersion); }
+        Ok(())
+    }
+    fn historical_metadata(&self, current: &DocumentRef, historical: &DocumentRef) -> Result<DocumentMetadata> {
+        historical_target(current, historical)?;
+        let project = self.document_project(current)?;
+        let rows = sql(self.database().query("SELECT CASE WHEN length(CAST(revision AS BLOB))<=20 THEN revision ELSE NULL END,CASE WHEN length(CAST(payload AS BLOB))<=8192 THEN payload ELSE NULL END FROM document_revisions WHERE project_id=? AND document_id=? AND revision=?", &[project, historical.document_id(), historical.revision().as_str()]))?;
+        let row = rows.first().ok_or(ContractError::NotFound)?;
+        let metadata: DocumentMetadata = decode(cell(row, 1)?)?;
+        if metadata.document != *historical || metadata.document.revision().as_str() != cell(row, 0)? {
+            return Err(ContractError::StorageCorrupt);
+        }
+        metadata.blob.validate().map_err(|_| ContractError::StorageCorrupt)?;
+        Ok(metadata)
+    }
+    fn historical_grant(&self, current: &DocumentAccess, historical: &DocumentRef, required: &[DocumentOperation]) -> Result<()> {
+        historical_operations(required)?;
+        historical_target(&current.document, historical)?;
+        self.document_history_schema()?;
+        let rows = sql(self.database().query("SELECT CASE WHEN length(CAST(current_document_json AS BLOB))<=8192 THEN current_document_json ELSE NULL END,CASE WHEN length(CAST(permissions AS BLOB))<=1024 THEN permissions ELSE NULL END,CASE WHEN length(CAST(expires_at_ms AS BLOB))<=20 THEN expires_at_ms ELSE NULL END FROM document_history_grants_v1 WHERE grant_id=? AND generation=? AND owner_epoch=? AND historical_document_json=? AND active=1", &[&current.authority.grant_id, current.authority.generation.as_str(), &current.authority.owner_epoch, &encode(historical)?]))?;
+        let row = rows.first().ok_or(ContractError::InvalidAuthority)?;
+        let bound: DocumentRef = decode(cell(row, 0)?)?;
+        let permissions: Vec<DocumentOperation> = decode(cell(row, 1)?)?;
+        let expires = cell(row, 2)?.parse::<u64>().map_err(|_| ContractError::StorageCorrupt)?;
+        if bound != current.document || expires <= now_ms()? || required.iter().any(|op| !permissions.contains(op)) {
+            return Err(ContractError::InvalidAuthority);
+        }
+        Ok(())
+    }
+    /// HOST ONLY: invoke only after a real explicit historical-target policy
+    /// decision. Current-read permission or a model request is not that decision.
+    /// No model/JSON dispatcher is provided. Membership/provenance stays host-owned.
+    pub fn issue_document_history_grant_trusted(&self, current: &DocumentAccess, historical: &DocumentRef, operations: &[DocumentOperation], expires_at_ms: u64) -> Result<()> {
+        historical_operations(operations)?;
+        let tx = sql(self.database().transaction())?;
+        self.document_access(current, operations)?;
+        self.document_history_schema()?;
+        self.historical_metadata(&current.document, historical)?;
+        let now = now_ms()?;
+        if expires_at_ms <= now || expires_at_ms > now.checked_add(30_000).ok_or(ContractError::InvalidAuthority)? {
+            return Err(ContractError::InvalidAuthority);
+        }
+        sql(self.database().exec("INSERT INTO document_history_grants_v1 VALUES(?,?,?,?,?,?,?,1) ON CONFLICT(grant_id,generation,historical_document_json) DO UPDATE SET owner_epoch=excluded.owner_epoch,current_document_json=excluded.current_document_json,permissions=excluded.permissions,expires_at_ms=excluded.expires_at_ms,active=1", &[&current.authority.grant_id, current.authority.generation.as_str(), &current.authority.owner_epoch, &encode(&current.document)?, &encode(historical)?, &encode(&operations)?, &expires_at_ms.to_string()]))?;
+        self.document_grant(current, operations)?;
+        sql(tx.commit())
+    }
+    pub fn revoke_document_history_grant_trusted(&self, current: &DocumentAccess, historical: &DocumentRef) -> Result<()> {
+        let tx = sql(self.database().transaction())?;
+        self.document_schema()?;
+        self.document_history_schema()?;
+        binding_shape(&current.authority)?;
+        if current.authority.owner_epoch != self.owner_epoch() { return Err(ContractError::InvalidAuthority); }
+        historical_target(&current.document, historical)?;
+        self.document_project(&current.document)?;
+        let changed = sql(self.database().exec("UPDATE document_history_grants_v1 SET active=0 WHERE grant_id=? AND generation=? AND owner_epoch=? AND current_document_json=? AND historical_document_json=?", &[&current.authority.grant_id, current.authority.generation.as_str(), &current.authority.owner_epoch, &encode(&current.document)?, &encode(historical)?]))?;
+        if changed != 1 { return Err(ContractError::InvalidAuthority); }
+        sql(tx.commit())
+    }
+    /// Exact historical metadata authority, not a reader lease or write permit.
+    /// Caller must recheck at byte/result delivery if it does further work.
+    pub(crate) fn document_history_access_in_transaction(&self, tx: &Transaction<'_>, current: &DocumentAccess, historical: &DocumentRef, required: &[DocumentOperation]) -> Result<DocumentMetadata> {
+        if !tx.belongs_to(self.database()) { return Err(ContractError::InvalidAuthority); }
+        historical_operations(required)?;
+        let latest = self.document_access(current, required)?;
+        if historical == &current.document {
+            self.document_grant(current, required)?;
+            return Ok(latest);
+        }
+        self.historical_grant(current, historical, required)?;
+        let metadata = self.historical_metadata(&current.document, historical)?;
+        self.document_grant(current, required)?;
+        self.historical_grant(current, historical, required)?;
+        Ok(metadata)
+    }
     /// Explicit host initialization. Uses the existing lock, connection and schema
     /// namespace; a partial or unknown schema is rejected, never auto-migrated.
     pub fn initialize_documents_trusted(&self) -> Result<()> {
