@@ -35,7 +35,8 @@ class ActionCardsTest {
             host(*CardCapability.entries.toTypedArray())) }
         compose.onNodeWithText("结果未知").assertExists()
         compose.onNodeWithText("实际费用：未知").assertExists()
-        compose.onNodeWithText("取消请求已发出；取消不代表回滚。").assertExists()
+        compose.onNodeWithText("已记录取消意图；尚未确认取消；取消不代表回滚。").assertExists()
+        compose.onNodeWithText("取消请求已发出", substring = true).assertDoesNotExist()
         compose.onNodeWithTag("card-query-receipt").performScrollTo().performClick()
         assertEquals(listOf(CardAction.QueryReceipt(binding, OriginalCardRequest(binding, "submit", "original-intent"))), events)
         compose.onNodeWithTag("card-request-cancel").assertDoesNotExist()
@@ -141,6 +142,8 @@ class ActionCardsTest {
         assertEquals(CardAction.RequestCancel(binding, OriginalCardRequest(binding, "submit", "original")), events.single())
         compose.onNodeWithText("执行中").assertExists()
         compose.runOnIdle { model.value = model.value.copy(cancelRequested = true) }
+        compose.onNodeWithText("已记录取消意图；尚未确认取消；取消不代表回滚。").assertExists()
+        compose.onNodeWithText("取消请求已发出", substring = true).assertDoesNotExist()
         compose.onNodeWithText("已取消").assertDoesNotExist()
         compose.onNodeWithTag("card-request-cancel").assertDoesNotExist()
         compose.onNodeWithTag("card-query-receipt").performScrollTo().performClick()

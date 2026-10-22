@@ -179,7 +179,7 @@ fun ReceiptCard(model: ReceiptCardModel, interactions: CardInteractions = CardIn
     CardFrame("操作回执 · ${model.intentId}", model.status.label, modifier) {
         Note("历史回执不代表当前记录状态。")
         Text(model.detail, style = MaterialTheme.typography.bodyLarge)
-        if (model.cancelRequested) Note("取消请求已发出；取消不代表回滚。")
+        model.cancelIntentNotice?.let { Note(it) }
         if (model.status == ReceiptStatus.Unknown) Note("尚未确认执行结果，不代表失败。请查询原回执。")
         Note("预占：${model.reservedCost ?: "未知"}")
         Note("实际费用：${model.actualCost ?: "未知"}")
