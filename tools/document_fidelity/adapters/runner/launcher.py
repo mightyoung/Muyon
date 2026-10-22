@@ -114,8 +114,11 @@ def _run(source,raw,executor,authority,cancel):
         if cancelled():raise Stop('cancelled','cancelled_before_spawn')
         now=clock()
         if now>=start+policy.timeout_ms:raise Stop('timed_out','deadline_before_spawn')
-        if not authority.check_lease(lease,request,executor,now):raise Stop('held','lease_expired_before_spawn')
+        if not authority.check_worker_lease(lease,request,executor,now):raise Stop('held','worker_phase_or_lease_invalid_before_spawn')
         spawn_attempted=True
+        if authority.assurance=='host_verified':
+            receipt['worker_process_started']=None
+            receipt['engine_execution']='unknown';receipt['real_roundtrip']='unknown'
         process=executor.spawn(workspace,spec,lease)
         if process is None:raise Stop('outcome_unknown','spawn_handle_missing')
         record('spawned')
@@ -178,6 +181,7 @@ def _run(source,raw,executor,authority,cancel):
             state=executor.reconcile(attempt);record('reconciled')
             if type(state) is not model.Reconciliation or state.known is not True:raise Stop('outcome_unknown','reconciliation_unknown')
             workspace,process=state.workspace,state.process
+            if authority.assurance=='host_verified' and process is not None:receipt['worker_process_started']=True
         except Exception:
             receipt['status']='outcome_unknown';receipt['reasons'].append('reconciliation_unknown')
     if process is not None and not drained:

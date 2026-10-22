@@ -79,6 +79,12 @@ class Authority:
             record=self._record(cap)
             try:return bool(record and record['kind']=='lease' and not record.get('closed') and record['executor'] is executor and record['binding']==bind(raw,record['binding'].attempt_id) and type(now) in (int,float) and math.isfinite(now) and 0<=now<record['expiry'])
             except (ValueError,TypeError,KeyError):return False
+    def check_worker_lease(self,cap,raw,executor,now):
+        """Admission validity alone never permits a new worker start."""
+        with self._lock:
+            if not self.check_lease(cap,raw,executor,now):return False
+            record=self._record(cap)
+            return bool(record['claimed'] and record['ready'] and not record['worker_closed'])
     def claim(self,cap,raw,executor,now):
         with self._lock:
             if not self.check_lease(cap,raw,executor,now):return False
@@ -95,6 +101,8 @@ class Authority:
             if self.assurance=='host_verified':
                 evidence=self.session.verify_ready(record['binding'],ready,executor)
                 if type(evidence) is not model.HostReadyEvidence or evidence.binding!=record['binding'] or evidence.ready_digest!=digest or not valid_proof_id(evidence.proof_id):return False
+            # Trusted callbacks can reenter this RLock and terminate the stage.
+            if record.get('closed') or record['worker_closed'] or record['ready'] is not None:return False
             record['ready']=digest;return True
     def issue_worker_permit(self,lease,raw,executor,now,format):
         """Trusted broker integration only; simulation can never issue this cap.
@@ -142,8 +150,10 @@ class Authority:
         with self._lock:
             if self.assurance!='host_verified' or not self.check_lease(lease,raw,executor,now):return None
             record=self._record(lease)
-            if not record['worker_closed'] or not record.get('execution_verified') or not record['ready'] or record.get('credential_issued') or receipt.get('assurance')!='host_verified' or receipt.get('status')!='candidate_validated':return None
+            if not record['worker_closed'] or not record.get('execution_verified') or not record['ready'] or record.get('credential_attempted') or record.get('credential_issued') or receipt.get('assurance')!='host_verified' or receipt.get('status')!='candidate_validated':return None
             digest=model.digest(receipt)
+            # Reserve the only issuance attempt before calling reentrant host code.
+            record['credential_attempted']=True
             evidence=self.session.verify_terminal(record['binding'],record['ready'],receipt,candidate_sha,terminal_proof,executor)
             if type(evidence) is not model.HostTerminalEvidence or evidence.binding!=record['binding'] or evidence.ready_digest!=record['ready'] or evidence.receipt_digest!=digest or evidence.candidate_sha256!=candidate_sha or not valid_proof_id(evidence.proof_id):return None
             # A verifier may block past TTL or close the lease reentrantly.

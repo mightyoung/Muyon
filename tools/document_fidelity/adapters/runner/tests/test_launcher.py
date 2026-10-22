@@ -313,6 +313,46 @@ class LauncherTests(unittest.TestCase):
         self.assertFalse(a.approve_ready(lease,ready,os))
         self.assertIsNone(a.issue_worker_permit(lease,self.req,os,0,'xlsx'))
         self.assertIsNone(a.consume_worker_permit(permit,self.req,'/input/source.xlsx','/output/candidate.xlsx','openpyxl',0))
+    def test_ready_or_cancel_callback_cannot_reopen_closed_worker_phase(self):
+        for close_all in (False,True):
+            a=None
+            class CloseDuringReady(FakeHostSession):
+                def verify_ready(session,binding,ready,executor):
+                    lease=next(cap for cap,record in a._records.items() if record['kind']=='lease')
+                    a.finish(lease) if close_all else a.close_worker_stage(lease)
+                    return super().verify_ready(binding,ready,executor)
+            os=FakeHostOS();a=authority.Authority.host(self.engine,self.policy,CloseDuringReady())
+            r=launcher.run_production(self.source,self.req,launcher.TrustedRuntimeBinding(a,os))
+            self.assertNotIn('spawn',os.calls);self.assertIsNone(r.credential)
+        os=FakeHostOS();a=authority.Authority.host(self.engine,self.policy,FakeHostSession())
+        def close_when_ready():
+            if 'ready' in os.calls:
+                lease=next(cap for cap,record in a._records.items() if record['kind']=='lease')
+                a.close_worker_stage(lease)
+            return False
+        r=launcher.run_production(self.source,self.req,launcher.TrustedRuntimeBinding(a,os),cancel=close_when_ready)
+        self.assertNotIn('spawn',os.calls);self.assertIsNone(r.credential)
+    def test_uncertain_spawn_never_claims_engine_not_run(self):
+        for mode,started in [('spawn_uncertain',None),('spawn_reconciled',True)]:
+            r,os,a=self.host_contract_fake(FakeHostOS(mode))
+            self.assertEqual('unknown',r.public['engine_execution'])
+            self.assertIs(started,r.public['worker_process_started'])
+            self.assertIsNone(r.credential);self.assertIsNone(r.candidate)
+    def test_terminal_verifier_reentry_cannot_issue_second_credential(self):
+        a=None;os=FakeHostOS()
+        class ReenterTerminal(FakeHostSession):
+            nested=False
+            nested_credential=None
+            def verify_terminal(session,binding,ready_digest,receipt,candidate_sha256,proof,executor):
+                if not session.nested:
+                    session.nested=True
+                    session.nested_credential=a.issue_credential(os.lease,self.req,os,os.clock,receipt,candidate_sha256,proof)
+                return super().verify_terminal(binding,ready_digest,receipt,candidate_sha256,proof,executor)
+        session=ReenterTerminal();a=authority.Authority.host(self.engine,self.policy,session)
+        r=launcher.run_production(self.source,self.req,launcher.TrustedRuntimeBinding(a,os))
+        self.assertIsNone(session.nested_credential)
+        self.assertEqual('candidate_validated',r.public['status'],r.public)
+        self.assertTrue(a.consume_credential(r.credential,self.req,r.public['candidate_sha256'],model.digest(r.public),now=os.clock))
     def test_scope_expiry_and_replay_and_simulated_worker_permits(self):
         a=authority.Authority.simulation(self.engine,self.policy);os=FakeOS()
         lease=a.admit(self.req,hashlib.sha256(self.source).hexdigest(),os,'attempt1',0)
