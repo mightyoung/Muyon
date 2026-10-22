@@ -1,0 +1,5 @@
+allprojects { p ->
+    p.afterEvaluate {
+        if (p.path == ':app') p.android.sourceSets.androidTest.java.srcDir('/workspace/ui-shell-tools/3aae/smoke/probe')
+    }
+}

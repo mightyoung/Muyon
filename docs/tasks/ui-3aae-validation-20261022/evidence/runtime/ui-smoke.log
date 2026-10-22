@@ -1,0 +1,14 @@
+{"tag": "cold-uninitialized", "file": "/workspace/ui-shell-tools/3aae/smoke/3aae195c088f1b943be897efc7d874974066d79a-PRODUCT-RUNTIME-PR104-PR105-DEBUG-CANDIDATE-api26-1080x1920-font1.0-cold-uninitialized.png", "sha256": "83d75a873608e06755358bfc130089787da58e6bd5e343c6c9db93a7572e1177", "labels": [{"text": "", "description": "打开工作空间导航", "package": "com.mightyoung.muyon.product", "bounds": "[53,148][116,211]", "enabled": "true"}, {"text": "Muyon 助手", "description": "", "package": "com.mightyoung.muyon.product", "bounds": "[425,210][655,273]", "enabled": "true"}, {"text": "请创建新工作台", "description": "", "package": "com.mightyoung.muyon.product", "bounds": "[63,357][365,420]", "enabled": "true"}, {"text": "创建新工作台", "description": "", "package": "com.mightyoung.muyon.product", "bounds": "[63,515][316,578]", "enabled": "true"}]}
+
+Traceback (most recent call last):
+  File "/workspace/ui-shell-tools/3aae/smoke/ui-smoke.py", line 6, in <module>
+    n=capture('main-empty');assert any(x.get('text')=='今天想做些什么？' for x in n)
+      ^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/ui-shell-tools/3aae/smoke/ui.py", line 16, in capture
+    nodes=hierarchy(tag)
+          ^^^^^^^^^^^^^^
+  File "/workspace/ui-shell-tools/3aae/smoke/ui.py", line 8, in hierarchy
+    if 'dumped' not in result.lower():raise RuntimeError('UI dump not confirmed: '+result)
+                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: UI dump not confirmed: ERROR: null root node returned by UiTestAutomationBridge.
+

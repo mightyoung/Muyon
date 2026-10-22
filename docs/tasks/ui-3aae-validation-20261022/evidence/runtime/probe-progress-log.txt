@@ -1,0 +1,6 @@
+--------- beginning of main
+--------- beginning of system
+10-22 22:03:42.227  4295  4313 I TestRunner: finished: pageReadFailureCanNavigateAndExplicitlyRetryWithoutResendingUnknownSave(com.mightyoung.muyon.product.ui.documents.DocumentReaderPlatformTest)
+10-22 22:03:42.257  4295  4313 I TestRunner: started: nativePdfRendersActualPagesAndRejectsBadPage(com.mightyoung.muyon.product.ui.documents.DocumentReaderPlatformTest)
+10-22 22:03:46.133  4295  4313 I TestRunner: finished: nativePdfRendersActualPagesAndRejectsBadPage(com.mightyoung.muyon.product.ui.documents.DocumentReaderPlatformTest)
+10-22 22:03:46.206  4295  4313 I TestRunner: started: sharedCoreJsonPreservesAnchorAndExactRevision(com.mightyoung.muyon.product.ui.documents.DocumentReaderPlatformTest)

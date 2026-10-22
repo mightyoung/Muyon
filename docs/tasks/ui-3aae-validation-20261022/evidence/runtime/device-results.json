@@ -1,0 +1,82 @@
+{
+  "source_sha": "3aae195c088f1b943be897efc7d874974066d79a",
+  "build_id": "3aae195c088f1b943be897efc7d874974066d79a:060e1e61224d6ca3c14452e8e34b929faff70a31bd2b03faa892863be2dd16ef",
+  "installed_apk_sha256": "2f3b67f53e25085aecce68a433b96921691d3b187813544fc761f0f55113b8bd",
+  "test_count": 14,
+  "tests": [
+    {
+      "class": "com.mightyoung.muyon.product.ui.shell.ConversationShellTest",
+      "test": "draftHasStableAccessiblePurposeAfterTypingAndPreviewRemainsDisabled",
+      "status": "PASS"
+    },
+    {
+      "class": "com.mightyoung.muyon.product.ui.shell.ConversationShellTest",
+      "test": "dismissKeepsMountedBodyAndDraft",
+      "status": "PASS"
+    },
+    {
+      "class": "com.mightyoung.muyon.product.ui.shell.ConversationShellTest",
+      "test": "menuUsesRealEntriesAndSeparatesPinnedFromOrdinary",
+      "status": "PASS"
+    },
+    {
+      "class": "com.mightyoung.muyon.product.ui.shell.ConversationShellTest",
+      "test": "mainHeaderHasOneOriginalMascotAboveTheBody",
+      "status": "PASS"
+    },
+    {
+      "class": "com.mightyoung.muyon.product.ui.shell.ConversationShellTest",
+      "test": "ordinaryHeaderDoesNotRepeatMainMascot",
+      "status": "PASS"
+    },
+    {
+      "class": "com.mightyoung.muyon.product.ui.shell.ConversationShellTest",
+      "test": "navigationHeadingsAndFailureAnnouncementRemainDiscoverable",
+      "status": "PASS"
+    },
+    {
+      "class": "com.mightyoung.muyon.product.ui.documents.DocumentReaderPlatformTest",
+      "test": "pageReadFailureCanNavigateAndExplicitlyRetryWithoutResendingUnknownSave",
+      "status": "PASS"
+    },
+    {
+      "class": "com.mightyoung.muyon.product.ui.documents.DocumentReaderPlatformTest",
+      "test": "nativePdfRendersActualPagesAndRejectsBadPage",
+      "status": "PASS"
+    },
+    {
+      "class": "com.mightyoung.muyon.product.ui.documents.DocumentReaderPlatformTest",
+      "test": "sharedCoreJsonPreservesAnchorAndExactRevision",
+      "status": "PASS"
+    },
+    {
+      "class": "com.mightyoung.muyon.product.ui.documents.DocumentReaderPlatformTest",
+      "test": "pendingSaveAndUnknownLockSurvivePageNavigationAndOtherScopesAreHidden",
+      "status": "PASS"
+    },
+    {
+      "class": "com.mightyoung.muyon.product.ui.shell.RuntimeHealthSmokeProbe",
+      "test": "actualServiceHealthAndNoProviderConfiguration",
+      "status": "PASS"
+    },
+    {
+      "class": "com.mightyoung.muyon.product.agentipc.BotNativeServiceAcceptanceTest",
+      "test": "realServiceSaveCasCancelAndProcessLossRestore",
+      "status": "PASS"
+    },
+    {
+      "class": "com.mightyoung.muyon.product.agentipc.BotNativeServiceAcceptanceTest",
+      "test": "committedNativeReplyDiscardedIsRecoveredOnlyAsOriginalHistory",
+      "status": "PASS"
+    },
+    {
+      "class": "com.mightyoung.muyon.product.agentipc.BotNativeServiceAcceptanceTest",
+      "test": "realNativePreparedOriginalIsDiscoveredAndExplicitlyFencedByService",
+      "status": "PASS"
+    }
+  ],
+  "normal_service_health_records": 1,
+  "real_native_debug_fixture_identity_records": 4,
+  "four_native_hashes_match": true,
+  "boundary": "isolated debug fixture; normal ProductService verified=false; no provider/inference/production Reader proof"
+}

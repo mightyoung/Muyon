@@ -1,0 +1,107 @@
+Success
+
+Activity Resolver Table:
+  Non-Data Actions:
+      android.intent.action.MAIN:
+        dc1ac com.mightyoung.muyon.product/.MainActivity filter 5c9017c
+          Action: "android.intent.action.MAIN"
+          Category: "android.intent.category.LAUNCHER"
+
+Receiver Resolver Table:
+  Non-Data Actions:
+      androidx.profileinstaller.action.SAVE_PROFILE:
+        de60e75 com.mightyoung.muyon.product/androidx.profileinstaller.ProfileInstallReceiver filter 1c1074e
+          Action: "androidx.profileinstaller.action.SAVE_PROFILE"
+      androidx.profileinstaller.action.INSTALL_PROFILE:
+        de60e75 com.mightyoung.muyon.product/androidx.profileinstaller.ProfileInstallReceiver filter ef93050
+          Action: "androidx.profileinstaller.action.INSTALL_PROFILE"
+      androidx.profileinstaller.action.SKIP_FILE:
+        de60e75 com.mightyoung.muyon.product/androidx.profileinstaller.ProfileInstallReceiver filter ab22249
+          Action: "androidx.profileinstaller.action.SKIP_FILE"
+      androidx.profileinstaller.action.BENCHMARK_OPERATION:
+        de60e75 com.mightyoung.muyon.product/androidx.profileinstaller.ProfileInstallReceiver filter 3be106f
+          Action: "androidx.profileinstaller.action.BENCHMARK_OPERATION"
+
+Permissions:
+  Permission [com.mightyoung.muyon.product.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION] (6d9fe0a):
+    sourcePackage=com.mightyoung.muyon.product
+    uid=10071 gids=null type=0 prot=signature
+    perm=Permission{bf4667b com.mightyoung.muyon.product.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION}
+    packageSetting=PackageSetting{c6b4c98 com.mightyoung.muyon.product/10071}
+
+Registered ContentProviders:
+  com.mightyoung.muyon.product/androidx.startup.InitializationProvider:
+    Provider{961cf1 com.mightyoung.muyon.product/androidx.startup.InitializationProvider}
+
+ContentProvider Authorities:
+  [com.mightyoung.muyon.product.androidx-startup]:
+    Provider{961cf1 com.mightyoung.muyon.product/androidx.startup.InitializationProvider}
+      applicationInfo=ApplicationInfo{21f0d6 com.mightyoung.muyon.product}
+
+Key Set Manager:
+  [com.mightyoung.muyon.product]
+      Signing KeySets: 5
+
+Packages:
+  Package [com.mightyoung.muyon.product] (c6b4c98):
+    userId=10071
+    pkg=Package{158ef57 com.mightyoung.muyon.product}
+    codePath=/data/app/com.mightyoung.muyon.product-Ai2mODNRaXMaBsJGvy8jRA==
+    resourcePath=/data/app/com.mightyoung.muyon.product-Ai2mODNRaXMaBsJGvy8jRA==
+    legacyNativeLibraryDir=/data/app/com.mightyoung.muyon.product-Ai2mODNRaXMaBsJGvy8jRA==/lib
+    primaryCpuAbi=x86_64
+    secondaryCpuAbi=null
+    versionCode=1 minSdk=26 targetSdk=36
+    versionName=0.1.0
+    splits=[base]
+    apkSigningVersion=2
+    applicationInfo=ApplicationInfo{21f0d6 com.mightyoung.muyon.product}
+    flags=[ DEBUGGABLE HAS_CODE ALLOW_CLEAR_USER_DATA ]
+    privateFlags=[ PRIVATE_FLAG_ACTIVITIES_RESIZE_MODE_RESIZEABLE_VIA_SDK_VERSION ]
+    dataDir=/data/user/0/com.mightyoung.muyon.product
+    supportsScreens=[small, medium, large, xlarge, resizeable, anyDensity]
+    timeStamp=2026-10-22 21:59:46
+    firstInstallTime=2026-10-22 22:00:31
+    lastUpdateTime=2026-10-22 22:00:31
+    signatures=PackageSignatures{149a44 [9d5750f5]}
+    installPermissionsFixed=true installStatus=1
+    pkgFlags=[ DEBUGGABLE HAS_CODE ALLOW_CLEAR_USER_DATA ]
+    declared permissions:
+      com.mightyoung.muyon.product.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION: prot=signature, INSTALLED
+    requested permissions:
+      android.permission.INTERNET
+      com.mightyoung.muyon.product.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION
+    install permissions:
+      android.permission.INTERNET: granted=true
+      com.mightyoung.muyon.product.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION: granted=true
+    User 0: ceDataInode=98986 installed=true hidden=false suspended=false stopped=true notLaunched=true enabled=0 instant=false
+      gids=[3003]
+      runtime permissions:
+
+Package Changes:
+  Sequence number=7
+  User 0:
+    seq=5, package=com.mightyoung.muyon.product.test
+    seq=6, package=com.mightyoung.muyon.product
+
+
+Dexopt state:
+  [com.mightyoung.muyon.product]
+    Instruction Set: x86_64
+      path: /data/app/com.mightyoung.muyon.product-Ai2mODNRaXMaBsJGvy8jRA==/base.apk
+      status: /data/app/com.mightyoung.muyon.product-Ai2mODNRaXMaBsJGvy8jRA==/oat/x86_64/base.odex[status=kOatUpToDate, 
+      compilation_filter=quicken]
+
+
+Compiler stats:
+  [com.mightyoung.muyon.product]
+     base.apk - 24649
+
+Starting: Intent { cmp=com.mightyoung.muyon.product/.MainActivity }
+Status: ok
+Activity: com.mightyoung.muyon.product/.MainActivity
+ThisTime: 5086
+TotalTime: 5086
+WaitTime: 5486
+Complete
+

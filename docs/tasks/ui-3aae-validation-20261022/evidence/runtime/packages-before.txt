@@ -1,0 +1,2 @@
+package:com.mightyoung.muyon.product
+package:com.mightyoung.muyon.product.test

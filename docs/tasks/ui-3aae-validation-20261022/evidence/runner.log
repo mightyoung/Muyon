@@ -1,0 +1,12 @@
+START model-offline
+END model-offline 0
+START native-build
+END native-build 0
+START binding-build
+END binding-build 0
+START binding-generate
+END binding-generate 0
+START binding-cmp
+END binding-cmp 0
+START product-build
+END product-build 0

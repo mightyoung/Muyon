@@ -1,0 +1,29 @@
+{
+  "pid": 34777,
+  "argv": [
+    "/workspace/ui-shell-tools/sdk/emulator/qemu/linux-x86_64/qemu-system-x86_64-headless",
+    "-avd",
+    "muyon_api26_software",
+    "-accel",
+    "off",
+    "-gpu",
+    "software",
+    "-no-window",
+    "-no-audio",
+    "-no-snapshot",
+    "-memory",
+    "2048",
+    "-cores",
+    "2",
+    "-port",
+    "5558",
+    ""
+  ],
+  "port": 5558,
+  "adb_tcp_port": 5559,
+  "fd_socket_links": [],
+  "errors": [
+    "PermissionError reading /proc/34777/fd socket symlinks; not retried or elevated"
+  ],
+  "socket_to_pid_verified": false
+}

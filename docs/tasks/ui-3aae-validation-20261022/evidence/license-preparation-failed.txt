@@ -1,0 +1,1 @@
+First companion preparation stopped at local assertion: counted generated manifest.json as a seventh model. No APK/model mutation. Fixed companion input selection by copying the actual generated six-entry manifest.

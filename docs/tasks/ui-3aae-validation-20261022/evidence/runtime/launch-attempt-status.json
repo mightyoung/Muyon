@@ -1,0 +1,8 @@
+{
+  "attempted_launcher_pid": 39058,
+  "result": "terminated with FATAL multiple-emulators/same AVD; no new emulator started",
+  "numeric_exit_code": "not retained by detached launcher",
+  "existing_task_emulator_pid": 34777,
+  "reuse": "original owned AVD at ports5558/5559",
+  "fd_socket_mapping": "PermissionError; not retried/elevated"
+}

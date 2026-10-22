@@ -1,0 +1,11 @@
+Active install sessions:
+  Session 1158882998:
+    userId=0 installerPackageName=null installerUid=2000 createdMillis=1792706131826 
+    stageDir=/data/app/vmdl1158882998.tmp stageCid=null 
+    mode=1 installFlags=0x70 installLocation=1 sizeBytes=430153964 appPackageName=null appIcon=false appLabel=null 
+    originatingUri=null originatingUid=-1 referrerUri=null abiOverride=null volumeUuid=null 
+    grantedRuntimePermissions=null 
+    mClientProgress=0.8330074 mProgress=0.6664059 mSealed=false mPermissionsAccepted=true mRelinquished=false 
+    mDestroyed=false mFds=0 mBridges=1 mFinalStatus=0 mFinalMessage=null 
+  
+  

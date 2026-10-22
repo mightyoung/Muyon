@@ -1,0 +1,31 @@
+{
+  "source_sha": "3aae195c088f1b943be897efc7d874974066d79a",
+  "build_id": "3aae195c088f1b943be897efc7d874974066d79a:060e1e61224d6ca3c14452e8e34b929faff70a31bd2b03faa892863be2dd16ef",
+  "state": "ready locally; upload authorization pending; no upload attempted",
+  "files": [
+    {
+      "path": "/workspace/ui-shell-tools/3aae/delivery/3aae195c088f1b943be897efc7d874974066d79a-PRODUCT-RUNTIME-PR104-PR105-DEBUG-CANDIDATE-api26-1080x1920-font1.0-main-empty-confirmed.png",
+      "name": "3aae195c088f1b943be897efc7d874974066d79a-PRODUCT-RUNTIME-PR104-PR105-DEBUG-CANDIDATE-api26-1080x1920-font1.0-main-empty-confirmed.png",
+      "size_bytes": 84467,
+      "sha256": "22115baa6b9efa340182cb124564643eebd038bfcfedeb51a0e90140d8abb7be"
+    },
+    {
+      "path": "/workspace/ui-shell-tools/3aae/delivery/3aae195c088f1b943be897efc7d874974066d79a-PRODUCT-RUNTIME-PR104-PR105-DEBUG-CANDIDATE-api26-1080x1920-font1.0-menu-open.png",
+      "name": "3aae195c088f1b943be897efc7d874974066d79a-PRODUCT-RUNTIME-PR104-PR105-DEBUG-CANDIDATE-api26-1080x1920-font1.0-menu-open.png",
+      "size_bytes": 113864,
+      "sha256": "f29fd17bd27976ff0d802afe03f3526ba7ab4632a0b71145d528dd4d4612e2dc"
+    },
+    {
+      "path": "/workspace/ui-shell-tools/3aae/delivery/Muyon-3aae195c088f1b943be897efc7d874974066d79a-DEBUG-LICENSES-ONLY.zip",
+      "name": "Muyon-3aae195c088f1b943be897efc7d874974066d79a-DEBUG-LICENSES-ONLY.zip",
+      "size_bytes": 47430,
+      "sha256": "7c72dec0b2d0b407a28f78bd8135952c94b32fdfba9b85072e0079f540c88f06"
+    },
+    {
+      "path": "/workspace/ui-shell-tools/3aae/delivery/Muyon-3aae195c088f1b943be897efc7d874974066d79a-DEBUG-PR104-PR105-candidate.apk",
+      "name": "Muyon-3aae195c088f1b943be897efc7d874974066d79a-DEBUG-PR104-PR105-candidate.apk",
+      "size_bytes": 430153964,
+      "sha256": "2f3b67f53e25085aecce68a433b96921691d3b187813544fc761f0f55113b8bd"
+    }
+  ]
+}

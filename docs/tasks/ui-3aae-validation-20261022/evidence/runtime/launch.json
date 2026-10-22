@@ -1,0 +1,23 @@
+{
+  "argv": [
+    "/workspace/ui-shell-tools/sdk/emulator/emulator",
+    "-avd",
+    "muyon_api26_software",
+    "-accel",
+    "off",
+    "-gpu",
+    "software",
+    "-no-window",
+    "-no-audio",
+    "-no-snapshot",
+    "-memory",
+    "2048",
+    "-cores",
+    "2",
+    "-port",
+    "5558"
+  ],
+  "launcher_pid": 39058,
+  "port": 5558,
+  "adb_tcp_port": 5559
+}

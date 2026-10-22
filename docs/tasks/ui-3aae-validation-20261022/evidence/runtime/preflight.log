@@ -1,0 +1,9 @@
+CHECK boot.txt
+1
+
+CHECK packages-before.txt
+package:com.mightyoung.muyon.product
+package:com.mightyoung.muyon.product.test
+
+CHECK accounts-before-private.txt
+  Accounts: 0

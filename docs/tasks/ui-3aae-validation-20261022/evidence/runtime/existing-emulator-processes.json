@@ -1,0 +1,23 @@
+[
+  {
+    "pid": 34777,
+    "argv": [
+      "/workspace/ui-shell-tools/sdk/emulator/qemu/linux-x86_64/qemu-system-x86_64-headless",
+      "-avd",
+      "muyon_api26_software",
+      "-accel",
+      "off",
+      "-gpu",
+      "software",
+      "-no-window",
+      "-no-audio",
+      "-no-snapshot",
+      "-memory",
+      "2048",
+      "-cores",
+      "2",
+      "-port",
+      "5558"
+    ]
+  }
+]

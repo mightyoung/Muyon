@@ -1,0 +1,2 @@
+usage: ci_model_inputs.py [-h] [--fetch] source assets
+ci_model_inputs.py: error: unrecognized arguments: --source --assets
