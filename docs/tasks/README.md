@@ -1,3 +1,5 @@
+> 2026-10-18 候选研究任务：[CTX-MEMORY](CTX-MEMORY-20261017.md)与[REMORY 完整隔离实验协议](../design/remory-isolated-validation-20261018.md)。三项候选分别实验、分别决策；新增14项均未运行，软件合同/现有 CI 不能替代模型收益；生产实施阻断，现有低成本离线验证按授权推进。唯一集成人 LeaderB，其他既有 Agent/基础插件/Android 工作继续。下方旧阶段、人员、环境和“当前”措辞均为历史记录，不能恢复旧授权或认定新架构完成。
+
 # 任务派发索引
 
 **当前入口：先读[当前状态与默认开启计划](CURRENT-STATUS-2026-10-10.md)，再读[当前交接](HANDOVER-LEADER.md)与[本批集成审查](AIUI-36-39-integration-review.md)。** [较早状态快照 v1](CURRENT-STATUS-2026-10-10-v1.md)固定8deb，只作历史记录；[下一批交付队列 v1](NEXT-DELIVERIES-2026-10-10-v1.md)保留7773时点规划。角色与规则见 [ADR-0001](../adr/0001-leadership-and-scope-freeze.md)。**当前是第二阶段**：范围见 [ADR-0003](../adr/0003-phase2-scope.md)，计划见[第二至第四阶段路线图](../superpowers/plans/2026-10-07-roadmap-phase2-4.md)（第一阶段已于 2026-10-07 退出）。
