@@ -55,7 +55,12 @@ with tempfile.TemporaryDirectory(prefix="muyon-document-source-sql-") as directo
                ("grant", "1", "epoch", json.dumps(document), '["read_text","annotate","export"]', "9999999999999"))
     row = {"id": "annotation", "revision": "1", "body": {"kind": "comment", "text": "Synthetic note"},
            "created_by": {"kind": "human", "actor_id": "author"},
-           "modified_by": {"kind": "human", "actor_id": "author"}, "deleted": False}
+           "modified_by": {"kind": "human", "actor_id": "author"}, "deleted": False,
+           "anchor_state": "current", "anchor": {"document": document,
+           "location": {"pdf": {"page_index_zero_based": 0,
+           "coordinates": "pdf_user_space", "rotation": "degrees0",
+           "crop": {"x": 0.0, "y": 0.0, "width": 600.0, "height": 800.0},
+           "region": {"x": 1.0, "y": 2.0, "width": 10.0, "height": 20.0}}}}}
     for prefix in ["INSERT INTO document_annotation_history VALUES", "INSERT INTO document_annotations VALUES"]:
         db.execute(statement(prefix), ("project", "document", "annotation", "1", json.dumps(row)))
     db.execute("COMMIT")
@@ -70,6 +75,13 @@ with tempfile.TemporaryDirectory(prefix="muyon-document-source-sql-") as directo
     assert json.loads(rows[0][2]) == row
     print("PASS: exact source schema and", len(statements), "SQL statements prepare")
     print("PASS: committed synthetic metadata/annotation rows survive reopen")
+
+    db.execute("BEGIN IMMEDIATE")
+    db.execute("UPDATE document_revisions SET payload=?", ("x" * 10000,))
+    bounded = db.execute(statement("SELECT CASE WHEN length(CAST(h.revision AS BLOB))"), ("project", "document")).fetchone()
+    assert bounded[2] is None
+    db.execute("ROLLBACK")
+    print("PASS: SQL excludes oversized metadata payload before returning TEXT")
 
     db.execute("BEGIN IMMEDIATE")
     changed = db.execute(statement("UPDATE document_heads SET revision="), ("2", "project", "document", "0")).rowcount
