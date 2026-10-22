@@ -218,3 +218,33 @@ fn dropping_host_releases_sessions_before_reopening_same_store() {
     let store = BusinessStore::open_existing(&f.path(), "workspace", "new-epoch").unwrap();
     assert_eq!(pins(&store), 0);
 }
+
+#[test]
+fn thirty_mib_stream_hash_cost_is_linear_and_chunk_bytes_are_exact() {
+    let (_f, mut host, _) = setup();
+    let bytes: Vec<u8> = (0..30 * 1024 * 1024).map(|n| (n % 251) as u8).collect();
+    let upload = host.store().begin_upload("project").unwrap();
+    for chunk in bytes.chunks(crate::blobs::MAX_CHUNK) { host.store().append_chunk(&upload.upload_id, chunk).unwrap(); }
+    let finished = host.store().finish_blob(&upload.upload_id, crate::blobs::BlobKind::Document).unwrap();
+    let metadata = host.store().register_document_trusted("project", "large-document", "Original large synthetic", DocumentFormat::Text, &finished).unwrap();
+    let access = DocumentAccess { document: metadata.document, authority: AuthorityBinding { grant_id: "large-grant".into(), generation: Revision::new(1), owner_epoch: "epoch".into() } };
+    let expiry = SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_millis() as u64 + 29_000;
+    host.store().issue_document_grant_trusted(&access.document, &access.authority, &[DocumentOperation::ReadText], expiry).unwrap();
+    crate::blobs::take_document_hash_bytes();
+    let opened = host.open(&access, DocumentReadPurpose::ReadText).unwrap();
+    let open_hash_bytes = crate::blobs::take_document_hash_bytes();
+    let mut offset = 0;
+    loop {
+        let chunk = host.read_chunk(&opened.session_id, crate::blobs::MAX_CHUNK).unwrap();
+        assert_eq!(chunk.offset.value(), offset as u64);
+        assert_eq!(chunk.bytes, bytes[offset..offset + chunk.bytes.len()]);
+        offset += chunk.bytes.len();
+        if chunk.eof { break; }
+    }
+    let stream_hash_bytes = crate::blobs::take_document_hash_bytes();
+    println!("source_bytes={} open_hash_bytes={open_hash_bytes} stream_hash_bytes={stream_hash_bytes}", bytes.len());
+    assert_eq!(offset, bytes.len());
+    assert!(open_hash_bytes <= 4 * bytes.len() as u64);
+    assert_eq!(stream_hash_bytes, 0, "delivery must not repeatedly hash a complete source");
+    assert_eq!(pins(host.store()), 0);
+}

@@ -14,6 +14,16 @@ pub const MAX_CHUNK: usize = 64 * 1024;
 pub const MAX_DOCUMENT_BYTES: u64 = 30 * 1024 * 1024;
 pub const MAX_UPLOAD_BYTES: u64 = 150 * 1024 * 1024;
 type Result<T> = std::result::Result<T, ContractError>;
+#[cfg(test)]
+thread_local! { static DOCUMENT_HASH_BYTES: std::cell::Cell<u64> = const { std::cell::Cell::new(0) }; }
+#[cfg(test)]
+pub(crate) fn record_document_hash_bytes(bytes: usize) {
+    DOCUMENT_HASH_BYTES.with(|count| count.set(count.get() + bytes as u64));
+}
+#[cfg(test)]
+pub(crate) fn take_document_hash_bytes() -> u64 {
+    DOCUMENT_HASH_BYTES.with(|count| count.replace(0))
+}
 #[cfg(target_os = "macos")]
 const NOFOLLOW: i32 = 0x100;
 #[cfg(any(target_os = "linux", target_os = "android"))]
@@ -71,6 +81,11 @@ pub struct ControlledReader {
     file: File,
     source: FileSource,
     position: u64,
+}
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub(crate) struct DocumentReaderStamp {
+    device: u64, inode: u64, length: u64, links: u64,
+    modified: (i64, i64), changed: (i64, i64),
 }
 impl ControlledReader {
     pub fn source(&self) -> &FileSource {
@@ -188,6 +203,8 @@ fn hash_file(file: &mut File, expected_length: u64) -> Result<String> {
             return Err(ContractError::TextLimit);
         }
         hasher.update(&buffer[..n]);
+        #[cfg(test)]
+        record_document_hash_bytes(n);
     }
     if length != expected_length {
         return Err(ContractError::BindingMismatch);
@@ -889,6 +906,18 @@ impl BusinessStore {
         io(reader.file.seek(SeekFrom::Start(reader.position)))?;
         if digest != reader.source.blob.digest { return Err(ContractError::BindingMismatch); }
         Ok(())
+    }
+    pub(crate) fn document_reader_stamp_in_transaction(
+        &self, tx: &Transaction<'_>, reader: &ControlledReader,
+    ) -> Result<DocumentReaderStamp> {
+        if !tx.belongs_to(self.database()) { return Err(ContractError::InvalidAuthority); }
+        self.check_reader(reader)?;
+        let metadata = io(reader.file.metadata())?;
+        if !metadata.is_file() || metadata.len() != reader.source.blob.byte_length.value() {
+            return Err(ContractError::BindingMismatch);
+        }
+        Ok(DocumentReaderStamp { device: metadata.dev(), inode: metadata.ino(), length: metadata.len(), links: metadata.nlink(),
+            modified: (metadata.mtime(), metadata.mtime_nsec()), changed: (metadata.ctime(), metadata.ctime_nsec()) })
     }
     /// Cleanup requires an actual nonconstructible reader, not document rights.
     /// It still works after revocation, deleted pins or corrupt/missing objects.
