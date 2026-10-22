@@ -1,0 +1,10 @@
+test_kernel_enosys_and_signal_permission_failure_are_prelaunch_hold (test_capabilities.CapabilityTests.test_kernel_enosys_and_signal_permission_failure_are_prelaunch_hold) ... ok
+test_missing_api_and_fd_exec_hold_before_any_ipc_or_popen (test_capabilities.CapabilityTests.test_missing_api_and_fd_exec_hold_before_any_ipc_or_popen) ... ok
+test_readonly_hash_rejects_writable_mount_even_when_bytes_match (test_capabilities.CapabilityTests.test_readonly_hash_rejects_writable_mount_even_when_bytes_match) ... ok
+test_root_ro_cannot_hide_writable_nested_mount_or_readonly_bind (test_capabilities.CapabilityTests.test_root_ro_cannot_hide_writable_nested_mount_or_readonly_bind) ... ok
+test_success_probes_only_current_pid_signal_zero_and_sealed_memfd (test_capabilities.CapabilityTests.test_success_probes_only_current_pid_signal_zero_and_sealed_memfd) ... ok
+
+----------------------------------------------------------------------
+Ran 5 tests in 0.007s
+
+OK

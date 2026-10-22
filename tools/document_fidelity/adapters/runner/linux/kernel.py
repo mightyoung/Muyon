@@ -9,6 +9,7 @@ import ctypes,fcntl,hashlib,json,os,platform,re,select,shutil,socket,stat,subpro
 from .. import model
 from . import ipc,snapshot
 from .layout import HOST_CODE,SANDBOX_CODE
+from .capabilities import preflight
 
 @dataclass(frozen=True)
 class Review:
@@ -124,10 +125,35 @@ def _text_at(fd,name,limit=65536):
     try:return _read(child,limit).decode('utf-8',errors='strict').strip()
     finally:os.close(child)
 
-def _regular_hash(fd,limit=67108864):
+def _readonly_source(fd,device,mount_pid=None):
+    """FD mount + underlying superblock must both be read-only.
+
+    A readonly bind of a writable superblock is deliberately insufficient.
+    Caller supplies the observed task's mount namespace for proc magic-link FDs.
+    This is not a chmod test and does not accept a root-path readonly assertion.
+    """
+    if not os.fstatvfs(fd).f_flag&os.ST_RDONLY:raise ValueError('artifact_fd_filesystem_writable')
+    info=_proc(os.getpid(),'fdinfo/'+str(fd),8192)
+    ids=re.findall(r'^mnt_id:\s+(\d+)\s*$',info,re.M)
+    if len(ids)!=1:raise ValueError('artifact_mount_identity_missing')
+    lines=[]
+    for line in _proc(os.getpid() if mount_pid is None else mount_pid,'mountinfo').splitlines():
+        left,separator,right=line.partition(' - ');fields=left.split();superfields=right.split()
+        if fields and fields[0]==ids[0]:lines.append((separator,fields,superfields))
+    if len(lines)!=1:raise ValueError('artifact_fd_mount_not_observed')
+    separator,fields,superfields=lines[0]
+    expected_device=str(os.major(device))+':'+str(os.minor(device))
+    if (not separator or len(fields)<6 or len(superfields)<3 or fields[2]!=expected_device
+            or 'ro' not in fields[5].split(',') or 'ro' not in superfields[2].split(',')):
+        raise ValueError('artifact_mount_or_superblock_not_readonly')
+    return (ids[0],fields[2],superfields[0],superfields[2])
+
+def _regular_hash(fd,limit=67108864,*,mount_pid=None):
     before=os.fstat(fd)
     if not stat.S_ISREG(before.st_mode) or before.st_nlink!=1 or before.st_mode&0o022:raise ValueError('untrusted_artifact_mode')
+    source=_readonly_source(fd,before.st_dev,mount_pid)
     data=_read(fd,limit);after=os.fstat(fd)
+    if source!=_readonly_source(fd,after.st_dev,mount_pid):raise ValueError('artifact_readonly_source_changed')
     if (before.st_dev,before.st_ino,before.st_size,before.st_mtime_ns,before.st_ctime_ns)!=(after.st_dev,after.st_ino,after.st_size,after.st_mtime_ns,after.st_ctime_ns) or len(data)!=before.st_size:raise ValueError('artifact_changed')
     return model.sha(data)
 
@@ -180,6 +206,7 @@ class NativeLinuxSystem:
     def now_ms(self):return time.monotonic_ns()/1000000
     def qualify(self,config):
         if type(config) is not PinnedConfig or platform.system()!='Linux' or platform.machine()!='x86_64':raise ValueError('linux_profile_unconfigured')
+        preflight()
         broker_status=_proc(os.getpid(),'status')
         if not re.search(r'^NoNewPrivs:\s+1$',broker_status,re.M) or any(int(re.search('^'+name+r':\s+([0-9a-fA-F]+)$',broker_status,re.M).group(1),16) for name in ('CapEff','CapPrm','CapAmb')):raise ValueError('preconfigured_unprivileged_nnp_broker_required')
         self.baseline_filters=int(re.search(r'^Seccomp_filters:\s+(\d+)$',broker_status,re.M).group(1)) if 'Seccomp_filters:' in broker_status else 0
@@ -263,6 +290,7 @@ class NativeLinuxSystem:
             for fd in fds:os.close(fd)
             shutil.rmtree(root);raise
     def launch(self,state):
+        preflight() # refresh before even socketpair/Popen; no child on missing API
         # Ownership record exists in LinuxBackend before this call. Host-stage
         # is trusted and cannot exec bwrap until explicit parent isolate gate.
         request=model.sha(state.job)
@@ -314,18 +342,30 @@ class NativeLinuxSystem:
         return True
     def _members(self):return {int(p) for p in _text_at(self.domain_fd,'cgroup.procs').split()}
     def _alive(self,pidfd):return not select.select([pidfd],[],[],0)[0]
+    def _verify_executable(self,pid,expected):
+        fd=os.open('/proc/'+str(pid)+'/exe',os.O_RDONLY|os.O_CLOEXEC)
+        try:
+            actual=_regular_hash(fd,mount_pid=pid)
+            if actual!=expected:raise ValueError('actual_executable_artifact_mismatch')
+            return actual
+        finally:os.close(fd)
+    def _observe_root(self,state):
+        pid=state.process.pid
+        if state.pidfd is None or not self._alive(state.pidfd) or _starttime(pid)!=state.starttime:raise ValueError('root_identity_lost')
+        executable=self._verify_executable(pid,self.config.bwrap_sha256)
+        maps=self._check_maps(pid,False)
+        if not self._alive(state.pidfd) or _starttime(pid)!=state.starttime:raise ValueError('root_changed_during_observation')
+        return dict(pid=pid,start=state.starttime,executable=executable,maps=maps)
     def _observe(self,state):
         pid=state.sandbox_pid
         if not pid or not self._alive(state.sandbox_pidfd) or _starttime(pid)!=state.sandbox_start:raise ValueError('supervisor_identity_lost')
         if state.process is None or state.pidfd is None or _starttime(state.process.pid)!=state.starttime:raise ValueError('root_identity_lost')
         if pid not in self._members() or state.process.pid not in self._members():raise ValueError('not_owned_domain')
+        root_observation=self._observe_root(state)
         check_environment(_proc(pid,'environ',4096).encode())
         status=parse_status(_proc(pid,'status'))
         if status['Seccomp_filters']<=self.baseline_filters:raise ValueError('child_filter_not_observed')
-        exe=os.open('/proc/'+str(pid)+'/exe',os.O_RDONLY|os.O_CLOEXEC)
-        try:
-            if _regular_hash(exe)!=dict(self.config.image_manifest).get('runtime/python3'):raise ValueError('actual_python_artifact_mismatch')
-        finally:os.close(exe)
+        self._verify_executable(pid,dict(self.config.image_manifest).get('runtime/python3'))
         cmdline=_proc(pid,'cmdline',16384).split('\x00')
         if cmdline[:6]!=['/runtime/python3','-I','-S','-B','-c',SANDBOX_CODE]:raise ValueError('actual_supervisor_entry_mismatch')
         self._check_maps(pid,True)
@@ -352,11 +392,11 @@ class NativeLinuxSystem:
             finally:os.close(output)
         finally:os.close(root)
         if not self._alive(state.sandbox_pidfd) or _starttime(pid)!=state.sandbox_start:raise ValueError('identity_changed_during_observation')
-        return dict(pid=pid,start=state.sandbox_start,namespaces=namespaces,status=status,domain=self.config.domain_identity)
+        return dict(pid=pid,start=state.sandbox_start,namespaces=namespaces,status=status,domain=self.config.domain_identity,root=root_observation)
     def _check_maps(self,pid,sandbox):
         expected=dict(self.config.image_manifest);host=dict(self.config.host_libraries)
         host[str(self.config.bwrap)]=self.config.bwrap_sha256
-        root=None
+        root=None;observed=[]
         if sandbox:root=os.open('/proc/'+str(pid)+'/root',os.O_RDONLY|os.O_DIRECTORY|os.O_CLOEXEC)
         try:
             for line in _proc(pid,'maps').splitlines():
@@ -378,10 +418,12 @@ class NativeLinuxSystem:
                     fd=os.open(path,os.O_RDONLY|os.O_NOFOLLOW|os.O_CLOEXEC)
                 try:
                     info=os.fstat(fd)
-                    if info.st_ino!=int(fields[4]) or _regular_hash(fd)!=pin:raise ValueError('mapped_object_identity_or_hash')
+                    if info.st_ino!=int(fields[4]) or _regular_hash(fd,mount_pid=pid if sandbox else None)!=pin:raise ValueError('mapped_object_identity_or_hash')
+                    observed.append((path,info.st_dev,info.st_ino,pin))
                 finally:os.close(fd)
         finally:
             if root is not None:os.close(root)
+        return observed
     def observe_ready(self,state,binding,engine,policy):
         frame=state.sandbox.receive(min(1000,policy.timeout_ms))
         if frame.kind!='paused' or frame.payload!={'stage':'waiting'}:raise ValueError('bootstrap_not_paused')

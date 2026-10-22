@@ -1,0 +1,66 @@
+test_kernel_enosys_and_signal_permission_failure_are_prelaunch_hold (test_capabilities.CapabilityTests.test_kernel_enosys_and_signal_permission_failure_are_prelaunch_hold) ... FAIL
+test_missing_api_and_fd_exec_hold_before_any_ipc_or_popen (test_capabilities.CapabilityTests.test_missing_api_and_fd_exec_hold_before_any_ipc_or_popen) ... FAIL
+test_readonly_hash_rejects_writable_mount_even_when_bytes_match (test_capabilities.CapabilityTests.test_readonly_hash_rejects_writable_mount_even_when_bytes_match) ... FAIL
+test_root_ro_cannot_hide_writable_nested_mount_or_readonly_bind (test_capabilities.CapabilityTests.test_root_ro_cannot_hide_writable_nested_mount_or_readonly_bind) ... FAIL
+test_success_probes_only_current_pid_signal_zero_and_sealed_memfd (test_capabilities.CapabilityTests.test_success_probes_only_current_pid_signal_zero_and_sealed_memfd) ... ok
+
+======================================================================
+FAIL: test_kernel_enosys_and_signal_permission_failure_are_prelaunch_hold (test_capabilities.CapabilityTests.test_kernel_enosys_and_signal_permission_failure_are_prelaunch_hold)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/document-fidelity/tools/document_fidelity/adapters/runner/linux/tests/test_capabilities.py", line 38, in test_kernel_enosys_and_signal_permission_failure_are_prelaunch_hold
+    kernel.NativeLinuxSystem().launch(SimpleNamespace(job=b'job'))
+  File "/workspace/document-fidelity/tools/document_fidelity/adapters/runner/linux/kernel.py", line 269, in launch
+    ga,gc=socket.socketpair();sa,sc=socket.socketpair()
+          ^^^^^^^^^^^^^^^^^^^
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/unittest/mock.py", line 1139, in __call__
+    return self._mock_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/unittest/mock.py", line 1143, in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/unittest/mock.py", line 1198, in _execute_mock_call
+    raise effect
+AssertionError: no preflight
+
+======================================================================
+FAIL: test_missing_api_and_fd_exec_hold_before_any_ipc_or_popen (test_capabilities.CapabilityTests.test_missing_api_and_fd_exec_hold_before_any_ipc_or_popen)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/document-fidelity/tools/document_fidelity/adapters/runner/linux/tests/test_capabilities.py", line 26, in test_missing_api_and_fd_exec_hold_before_any_ipc_or_popen
+    kernel.NativeLinuxSystem().launch(SimpleNamespace(job=b'job'))
+  File "/workspace/document-fidelity/tools/document_fidelity/adapters/runner/linux/kernel.py", line 269, in launch
+    ga,gc=socket.socketpair();sa,sc=socket.socketpair()
+          ^^^^^^^^^^^^^^^^^^^
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/unittest/mock.py", line 1139, in __call__
+    return self._mock_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/unittest/mock.py", line 1143, in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/unittest/mock.py", line 1198, in _execute_mock_call
+    raise effect
+AssertionError: no IPC before preflight
+
+======================================================================
+FAIL: test_readonly_hash_rejects_writable_mount_even_when_bytes_match (test_capabilities.CapabilityTests.test_readonly_hash_rejects_writable_mount_even_when_bytes_match)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/document-fidelity/tools/document_fidelity/adapters/runner/linux/tests/test_capabilities.py", line 55, in test_readonly_hash_rejects_writable_mount_even_when_bytes_match
+    with self.assertRaises(ValueError):kernel._regular_hash(8)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ValueError not raised
+
+======================================================================
+FAIL: test_root_ro_cannot_hide_writable_nested_mount_or_readonly_bind (test_capabilities.CapabilityTests.test_root_ro_cannot_hide_writable_nested_mount_or_readonly_bind)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/document-fidelity/tools/document_fidelity/adapters/runner/linux/tests/test_capabilities.py", line 62, in test_root_ro_cannot_hide_writable_nested_mount_or_readonly_bind
+    with self.assertRaises(ValueError):kernel._regular_hash(8)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ValueError not raised
+
+----------------------------------------------------------------------
+Ran 5 tests in 0.005s
+
+FAILED (failures=4)

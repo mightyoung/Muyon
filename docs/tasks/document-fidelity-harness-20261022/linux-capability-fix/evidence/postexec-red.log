@@ -1,0 +1,31 @@
+test_kernel_enosys_and_signal_permission_failure_are_prelaunch_hold (test_capabilities.CapabilityTests.test_kernel_enosys_and_signal_permission_failure_are_prelaunch_hold) ... ok
+test_missing_api_and_fd_exec_hold_before_any_ipc_or_popen (test_capabilities.CapabilityTests.test_missing_api_and_fd_exec_hold_before_any_ipc_or_popen) ... ok
+test_preexec_python_maps_never_substitute_for_postexec_bwrap_maps (test_capabilities.CapabilityTests.test_preexec_python_maps_never_substitute_for_postexec_bwrap_maps) ... 
+  test_preexec_python_maps_never_substitute_for_postexec_bwrap_maps (test_capabilities.CapabilityTests.test_preexec_python_maps_never_substitute_for_postexec_bwrap_maps) (bad_library=True) ... FAIL
+  test_preexec_python_maps_never_substitute_for_postexec_bwrap_maps (test_capabilities.CapabilityTests.test_preexec_python_maps_never_substitute_for_postexec_bwrap_maps) (bad_library=False) ... ERROR
+test_readonly_hash_rejects_writable_mount_even_when_bytes_match (test_capabilities.CapabilityTests.test_readonly_hash_rejects_writable_mount_even_when_bytes_match) ... ok
+test_root_ro_cannot_hide_writable_nested_mount_or_readonly_bind (test_capabilities.CapabilityTests.test_root_ro_cannot_hide_writable_nested_mount_or_readonly_bind) ... ok
+test_success_probes_only_current_pid_signal_zero_and_sealed_memfd (test_capabilities.CapabilityTests.test_success_probes_only_current_pid_signal_zero_and_sealed_memfd) ... ok
+
+======================================================================
+ERROR: test_preexec_python_maps_never_substitute_for_postexec_bwrap_maps (test_capabilities.CapabilityTests.test_preexec_python_maps_never_substitute_for_postexec_bwrap_maps) (bad_library=False)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/document-fidelity/tools/document_fidelity/adapters/runner/linux/tests/test_capabilities.py", line 98, in test_preexec_python_maps_never_substitute_for_postexec_bwrap_maps
+    result=native._observe(state);self.assertEqual('b'*64,result['root']['executable'])
+                                                          ~~~~~~^^^^^^^^
+KeyError: 'root'
+
+======================================================================
+FAIL: test_preexec_python_maps_never_substitute_for_postexec_bwrap_maps (test_capabilities.CapabilityTests.test_preexec_python_maps_never_substitute_for_postexec_bwrap_maps) (bad_library=True)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/document-fidelity/tools/document_fidelity/adapters/runner/linux/tests/test_capabilities.py", line 96, in test_preexec_python_maps_never_substitute_for_postexec_bwrap_maps
+    with self.assertRaisesRegex(ValueError,'postexec_bwrap_library'):native._observe(state)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ValueError not raised
+
+----------------------------------------------------------------------
+Ran 6 tests in 0.011s
+
+FAILED (failures=1, errors=1)
