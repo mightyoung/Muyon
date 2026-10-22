@@ -1,0 +1,30 @@
+2026-10-22 06:37:12.758696+00:00
+cwd=/workspace/Muyon-document-storage-clippy
+Official API https://doc.rust-lang.org/std/iter/fn.repeat_n.html checked: stable 1.82.0. B strict gate report says actual Rust1.93.1; workspace manifests do not declare uniform MSRV.
+
+$ git rev-parse HEAD
+8f24e8f5384489e2ee7d86b8494ee1ca47c0cd8b
+exit=0
+
+$ git diff 82169330ff6868b5979e351056d538dd496e9519 HEAD -- crates/muyon-core/tests/document_storage.rs
+diff --git a/crates/muyon-core/tests/document_storage.rs b/crates/muyon-core/tests/document_storage.rs
+index 33aed7ae..d9200a75 100644
+--- a/crates/muyon-core/tests/document_storage.rs
++++ b/crates/muyon-core/tests/document_storage.rs
+@@ -682,7 +682,7 @@ fn writes_cannot_strand_existing_annotations_above_read_budget() {
+         let mut row = record.clone();
+         row.id = format!("padded-{n}");
+         let mut payload = serde_json::to_string(&row).unwrap();
+-        payload.extend(std::iter::repeat(' ').take(262144 - payload.len()));
++        payload.extend(std::iter::repeat_n(' ', 262144 - payload.len()));
+         db.exec(
+             "INSERT INTO document_annotations VALUES('project','document',?,'1',?)",
+             &[&row.id, &payload],
+exit=0
+
+$ git diff --check 82169330ff6868b5979e351056d538dd496e9519 HEAD
+exit=0
+
+$ cargo clippy --offline --locked --manifest-path crates/Cargo.toml --workspace --all-targets -- -D warnings
+[Errno 2] No such file or directory: 'cargo'
+exit=127 NOT_RUN tool absent; not a lint failure/pass.

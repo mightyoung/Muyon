@@ -1,0 +1,5 @@
+2026-10-22 06:49:14.472687+00:00
+34226b34 plus first-chunk cost assertion; actual byte counter in hash_file, no production stream optimization yet.
+$ cargo test --offline --locked --manifest-path crates/Cargo.toml -p muyon-core --lib thirty_mib_stream_hash_cost -- --nocapture
+[Errno 2] No such file or directory: 'cargo'
+exit=127 NOT_RUN; no actual cost measurements or RED claimed.

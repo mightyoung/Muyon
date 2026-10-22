@@ -1,0 +1,7 @@
+2026-10-22 06:48:11.039950+00:00
+Fixed fdcdd48e8c85896be4310cc90e63046db65cb6cf; test-only RED source 7a72a8290f821eb015d34421e09c24ac9ca70cdc, old source ff3cc928311afc12bee3205f28b662c6b7499b34 preserved in git.
+$ cargo test --offline --locked --manifest-path crates/Cargo.toml -p muyon-core --lib cleanup_time_revocation
+[Errno 2] No such file or directory: 'cargo'
+exit=127 NOT_RUN; actual RED/GREEN pending independent Rust environment.
+$ git diff --check
+exit=0
