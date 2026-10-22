@@ -25,7 +25,8 @@ fun ShellInputDock(draft: String, onDraft: (String) -> Unit, enabled: Boolean,
                 moreMenu()
             }
             TextField(value = draft, onValueChange = onDraft,
-                modifier = Modifier.weight(1f).heightIn(max = 192.dp).testTag("chat-draft"),
+                modifier = Modifier.weight(1f).heightIn(max = 192.dp).testTag("chat-draft")
+                    .semantics { contentDescription = "消息草稿" },
                 placeholder = { Text("继续提问…") }, minLines = 1, maxLines = 6,
                 textStyle = MaterialTheme.typography.bodyLarge,
                 colors = TextFieldDefaults.colors(
