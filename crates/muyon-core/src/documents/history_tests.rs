@@ -108,3 +108,23 @@ fn text_label_roundtrips_without_default_utf8_or_reader_capability() {
     assert_eq!(serde_json::from_str::<DocumentRef>(&json).unwrap(), document);
     assert_eq!(CapabilityMatrix::default().status(DocumentFormat::Text, DocumentOperation::ReadText), CapabilityStatus::Unknown);
 }
+#[test]
+fn advancing_parent_head_does_not_reuse_old_history_policy() {
+    let f = Fixture::new(); let (store, old) = f.setup(); let (current, metadata) = advance(&store, &old);
+    store.initialize_document_history_trusted().unwrap();
+    store.issue_document_history_grant_trusted(&current, &old.document, &[DocumentOperation::ReadText], expiry()).unwrap();
+    let tx = store.database().transaction().unwrap();
+    store.document_clone_in_transaction(&tx, &current.document, "Next COPY", &metadata.blob).unwrap();
+    tx.commit().unwrap();
+    let tx = store.database().transaction().unwrap();
+    assert_eq!(store.document_history_access_in_transaction(&tx, &current, &old.document, &[DocumentOperation::ReadText]), Err(ContractError::RevisionConflict));
+    drop(tx);
+}
+#[test]
+fn wrong_history_schema_is_rejected_without_changing_document_store() {
+    let f = Fixture::new(); let (store, old) = f.setup(); let (current, _) = advance(&store, &old);
+    store.database().exec("CREATE TABLE document_history_grants_v1(untrusted TEXT)", &[]).unwrap();
+    assert_eq!(store.initialize_document_history_trusted(), Err(ContractError::InvalidVersion));
+    store.initialize_documents_trusted().unwrap();
+    assert_eq!(store.read_document(&current).unwrap().document, current.document);
+}
