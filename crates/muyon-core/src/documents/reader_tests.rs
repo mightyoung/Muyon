@@ -234,14 +234,17 @@ fn thirty_mib_stream_hash_cost_is_linear_and_chunk_bytes_are_exact() {
     let opened = host.open(&access, DocumentReadPurpose::ReadText).unwrap();
     let open_hash_bytes = crate::blobs::take_document_hash_bytes();
     let mut offset = 0;
+    let mut stream_hash_bytes = 0;
     loop {
         let chunk = host.read_chunk(&opened.session_id, crate::blobs::MAX_CHUNK).unwrap();
+        let hashed = crate::blobs::take_document_hash_bytes();
+        stream_hash_bytes += hashed;
+        assert_eq!(hashed, 0, "each chunk must avoid whole-source hashing");
         assert_eq!(chunk.offset.value(), offset as u64);
         assert_eq!(chunk.bytes, bytes[offset..offset + chunk.bytes.len()]);
         offset += chunk.bytes.len();
         if chunk.eof { break; }
     }
-    let stream_hash_bytes = crate::blobs::take_document_hash_bytes();
     println!("source_bytes={} open_hash_bytes={open_hash_bytes} stream_hash_bytes={stream_hash_bytes}", bytes.len());
     assert_eq!(offset, bytes.len());
     assert!(open_hash_bytes <= 4 * bytes.len() as u64);
