@@ -1093,6 +1093,76 @@ fn lookup_json(store: &BusinessStore, intent: &str) -> Result<String, ProductErr
     }
 }
 
+/// On-device Office engine (pure Rust, no I/O, no state). Results are candidate
+/// bytes plus hashes only: nothing is stored, published or treated as authority.
+#[derive(uniffi::Record)]
+pub struct OfficeTextSection {
+    pub name: String,
+    pub text: String,
+}
+#[derive(uniffi::Record)]
+pub struct OfficeCandidate {
+    pub candidate: Vec<u8>,
+    pub source_sha256: String,
+    pub candidate_sha256: String,
+    pub changed_part: String,
+}
+fn office_error(error: muyon_office::OfficeError) -> ProductError {
+    ProductError::Failure {
+        code: format!("OFFICE_{error}").chars().take(96).collect(),
+    }
+}
+fn office_candidate(r: muyon_office::EditReceipt) -> OfficeCandidate {
+    OfficeCandidate {
+        candidate: r.candidate,
+        source_sha256: r.source_sha256,
+        candidate_sha256: r.candidate_sha256,
+        changed_part: r.changed_part,
+    }
+}
+#[uniffi::export]
+pub fn office_extract_text(bytes: Vec<u8>) -> Result<Vec<OfficeTextSection>, ProductError> {
+    let package = muyon_office::Package::open(&bytes, &muyon_office::Limits::default())
+        .map_err(office_error)?;
+    Ok(package
+        .extract_text()
+        .map_err(office_error)?
+        .into_iter()
+        .map(|s| OfficeTextSection {
+            name: s.name,
+            text: s.text,
+        })
+        .collect())
+}
+#[uniffi::export]
+pub fn office_replace_docx_run(
+    bytes: Vec<u8>,
+    expected: String,
+    replacement: String,
+) -> Result<OfficeCandidate, ProductError> {
+    let package = muyon_office::Package::open(&bytes, &muyon_office::Limits::default())
+        .map_err(office_error)?;
+    package
+        .replace_docx_run_text(&expected, &replacement)
+        .map(office_candidate)
+        .map_err(office_error)
+}
+#[uniffi::export]
+pub fn office_set_xlsx_numeric_cell(
+    bytes: Vec<u8>,
+    sheet: String,
+    cell: String,
+    expected: String,
+    replacement: String,
+) -> Result<OfficeCandidate, ProductError> {
+    let package = muyon_office::Package::open(&bytes, &muyon_office::Limits::default())
+        .map_err(office_error)?;
+    package
+        .set_xlsx_numeric_cell(&sheet, &cell, &expected, &replacement)
+        .map(office_candidate)
+        .map_err(office_error)
+}
+
 #[uniffi::export]
 pub fn product_protocol_version() -> u32 {
     PROTOCOL_VERSION
@@ -1101,6 +1171,16 @@ pub fn product_protocol_version() -> u32 {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn office_ffi_extracts_edits_and_refuses_without_state() {
+        let root = concat!(env!("CARGO_MANIFEST_DIR"), "/../../tools/document_fidelity/");
+        let docx = std::fs::read(format!("{root}fixtures_subsets/simple-run.docx")).unwrap();
+        let sections = office_extract_text(docx.clone()).unwrap();
+        assert!(!sections.is_empty());
+        let miss = office_replace_docx_run(docx, "no such run text".into(), "x".into());
+        assert!(matches!(miss, Err(ProductError::Failure { code }) if code.starts_with("OFFICE_")));
+        assert!(office_extract_text(b"not a zip".to_vec()).is_err());
+    }
     #[test]
     fn another_root_and_ordinary_chat_cannot_bypass_an_unknown_child() {
         use muyon_core::agent::{
