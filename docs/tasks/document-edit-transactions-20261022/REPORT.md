@@ -1,3 +1,6 @@
+> Latest real core prepare/query bridge: [CORE-CANDIDATE-BRIDGE-REPORT.md](CORE-CANDIDATE-BRIDGE-REPORT.md).
+> Historical SQL-only preparation below is superseded; publication remains disabled.
+
 > Latest held schema2/edited preparation slice: [SCHEMA2-REPORT.md](SCHEMA2-REPORT.md).
 > Previous results below remain historical; no engine publication is enabled.
 

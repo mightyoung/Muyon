@@ -1,3 +1,6 @@
+> Latest real core prepare/query bridge: [CORE-CANDIDATE-BRIDGE-REPORT.md](CORE-CANDIDATE-BRIDGE-REPORT.md).
+> Historical SQL-only preparation below is superseded; publication remains disabled.
+
 # Edited candidate preparation and atomic publication boundary
 
 Authorized follow-up to90b7a35a49f4acb09ff73a2b088df4c1d1a037a6; exact core

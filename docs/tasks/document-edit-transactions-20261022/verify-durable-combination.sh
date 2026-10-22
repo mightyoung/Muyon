@@ -2,13 +2,13 @@
 # Offline exact-owner combination, no checkout mutation or dependency downloads.
 set -euo pipefail
 repo=$(git rev-parse --show-toplevel)
-core_sha=${DOCUMENT_CORE_SHA:-a27f04aa2460971940d4bdf2c8263bdf81f381c2}
+core_sha=${DOCUMENT_CORE_SHA:-8802bf555bfce1265296318d83a2f8a1fb2b787e}
 combination=$(mktemp -d "${TMPDIR:-/tmp}/muyon-document-durable-check.XXXXXXXX")
 echo "Exact core dependency: $core_sha"
 echo "Combination directory: $combination"
 git -C "$repo" archive "$core_sha" | tar -x -C "$combination"
 cp -R "$repo/crates/muyon-core/src/document_edit" "$combination/crates/muyon-core/src/"
-for target in document_edit_transactions document_edit_gateway document_edit_engine_protocol document_edit_schema2 document_edit_candidates document_edit_policy_epoch; do
+for target in document_edit_transactions document_edit_gateway document_edit_engine_protocol document_edit_schema2 document_edit_candidates document_edit_policy_epoch document_edit_core_bridge; do
   cp "$repo/crates/muyon-core/tests/$target.rs" "$combination/crates/muyon-core/tests/$target.rs"
 done
 cp "$repo/crates/muyon-core/tests/document_edit_tree_goldens.json" "$combination/crates/muyon-core/tests/"
@@ -20,6 +20,6 @@ if 'pub mod document_edit;' not in source:
 PY
 # The permanent module export belongs exclusively to document-core's owner.
 if [[ $# -eq 0 ]]; then
-  set -- -p muyon-core --test document_edit_gateway --test document_edit_engine_protocol --test document_edit_transactions --test document_edit_schema2 --test document_edit_candidates --test document_edit_policy_epoch --test document_storage --test documents
+  set -- -p muyon-core --test document_edit_gateway --test document_edit_engine_protocol --test document_edit_transactions --test document_edit_schema2 --test document_edit_candidates --test document_edit_policy_epoch --test document_edit_core_bridge --test document_storage --test documents
 fi
 "${CARGO:-cargo}" test --offline --locked --manifest-path "$combination/crates/Cargo.toml" "$@"

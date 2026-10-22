@@ -1,3 +1,6 @@
+> Latest real core prepare/query bridge: [CORE-CANDIDATE-BRIDGE-REPORT.md](CORE-CANDIDATE-BRIDGE-REPORT.md).
+> Historical SQL-only preparation below is superseded; publication remains disabled.
+
 # Held schema2 / edited candidate handoff
 
 Branch task/document-edit-transactions-20261022.

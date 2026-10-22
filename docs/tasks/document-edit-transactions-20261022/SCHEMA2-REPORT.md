@@ -1,3 +1,6 @@
+> Latest real core prepare/query bridge: [CORE-CANDIDATE-BRIDGE-REPORT.md](CORE-CANDIDATE-BRIDGE-REPORT.md).
+> Historical SQL-only preparation below is superseded; publication remains disabled.
+
 # Held schema2 and edited-candidate preparation delivery
 
 Scope: follow-up to90b7a35a49f4acb09ff73a2b088df4c1d1a037a6, same isolated branch.
