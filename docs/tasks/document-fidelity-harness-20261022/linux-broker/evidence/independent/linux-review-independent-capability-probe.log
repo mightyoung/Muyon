@@ -1,0 +1,4 @@
+launch: [Errno 38] synthetic ENOSYS
+reconcile: False
+calls: ['Popen(fake)', 'pidfd_open(fake ENOSYS)', 'pidfd_open(fake ENOSYS)']
+state: {'process_created': True, 'pidfd': None, 'uncertain': False}
