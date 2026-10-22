@@ -126,6 +126,18 @@ class HostReadyEvidence:
 
 
 @dataclass(frozen=True)
+class HostExecutionEvidence:
+    """Authenticated worker engine-entry observation, never a spawn receipt.
+
+    Only TrustedHostSession may corroborate proof against the exact engine
+    artifact/runtime/worker and attempt binding. Typed construction is not trust.
+    """
+    binding:Binding
+    engine:EngineIdentity
+    proof_id:str
+
+
+@dataclass(frozen=True)
 class HostTerminalEvidence:
     binding:Binding
     ready_digest:str
@@ -147,6 +159,9 @@ class TrustedHostSession(ABC):
     def verify_admission(self,binding,engine,policy,now_ms):pass
     @abstractmethod
     def verify_ready(self,binding,ready,executor):pass
+    def verify_execution(self,binding,engine,proof,executor):
+        # Missing authenticated worker observation never implies engine entry.
+        return None
     @abstractmethod
     def verify_terminal(self,binding,ready_digest,receipt,candidate_sha256,proof,executor):pass
 

@@ -1,0 +1,15 @@
+test_admission_expiry_during_terminal_callback_cannot_report_success (tools.document_fidelity.adapters.runner.tests.test_launcher.LauncherTests.test_admission_expiry_during_terminal_callback_cannot_report_success) ... FAIL
+
+======================================================================
+FAIL: test_admission_expiry_during_terminal_callback_cannot_report_success (tools.document_fidelity.adapters.runner.tests.test_launcher.LauncherTests.test_admission_expiry_during_terminal_callback_cannot_report_success)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/document-fidelity/tools/document_fidelity/adapters/runner/tests/test_launcher.py", line 281, in test_admission_expiry_during_terminal_callback_cannot_report_success
+    self.assertNotEqual('candidate_validated',r.public['status']);self.assertFalse(r.public['txn_eligible'])
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 'candidate_validated' == 'candidate_validated'
+
+----------------------------------------------------------------------
+Ran 1 test in 0.011s
+
+FAILED (failures=1)

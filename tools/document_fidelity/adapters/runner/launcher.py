@@ -24,7 +24,7 @@ class Stop(Exception):
 
 def held(reason='environment_hold'):
     return model.Result(dict(receipt_version=3,status='held',reasons=[reason],assurance='unqualified',
-                             engine_execution='not_run',real_roundtrip='not_run',txn_eligible=False,
+                             worker_process_started=False,engine_execution='not_run',real_roundtrip='not_run',txn_eligible=False,
                              lifecycle=[],fidelity='unknown',safety='unknown'))
 
 
@@ -66,10 +66,13 @@ def _run(source,raw,executor,authority,cancel):
         value=cancel()
         if type(value) is not bool:raise Stop('failed','invalid_cancel_signal')
         return value
+    def close_workers():
+        if lease is not None and authority.close_worker_stage(lease):record('worker_stage_closed')
     def drain():
         # True means the backend proves both root reaped and the entire
         # attempt-bound process tree empty, not merely root poll() success.
         nonlocal drained
+        close_workers()
         try:
             executor.terminate_tree(process);record('terminate_tree')
             if executor.reap_tree(process,policy.grace_ms) is True:
@@ -116,7 +119,9 @@ def _run(source,raw,executor,authority,cancel):
         process=executor.spawn(workspace,spec,lease)
         if process is None:raise Stop('outcome_unknown','spawn_handle_missing')
         record('spawned')
-        if authority.assurance=='host_verified':receipt['engine_execution']='executed';receipt['real_roundtrip']='unknown'
+        if authority.assurance=='host_verified':
+            receipt['worker_process_started']=True
+            receipt['engine_execution']='unknown';receipt['real_roundtrip']='unknown'
         deadline=start+policy.timeout_ms
         exited=False
         # Finite polls also prevent a broken/nonadvancing fake or OS clock from
@@ -139,6 +144,7 @@ def _run(source,raw,executor,authority,cancel):
             elif event.kind=='exit':
                 if event.data!=b'' or type(event.exit_code) is not int:raise Stop('failed','invalid_exit_event')
                 receipt['exit_code']=event.exit_code;record('exited')
+                close_workers()
                 if event.exit_code!=0:raise Stop('failed','nonzero_exit')
                 if executor.reap_tree(process,policy.grace_ms) is not True:raise Stop('failed','unexpected_descendants')
                 drained=True;record('reaped');exited=True;break
@@ -160,9 +166,12 @@ def _run(source,raw,executor,authority,cancel):
         if authority.assurance=='host_verified':terminal=executor.terminal_proof(process,workspace)
         receipt['status']='simulated_validated' if authority.assurance=='simulation' else 'candidate_validated'
     except Stop as error:
+        close_workers()
         receipt['status']=error.status;receipt['reasons'].append(error.reason)
     except Exception as error:
+        close_workers()
         receipt['status']='failed';receipt['reasons'].append('executor_or_validation_error:'+type(error).__name__)
+    close_workers()
     # Resolve uncertain stage/spawn ownership by attempt identity, never retry.
     if os_touched and (workspace is None or (spawn_attempted and process is None)):
         try:
@@ -197,6 +206,13 @@ def _run(source,raw,executor,authority,cancel):
             receipt['status']=error.status;receipt['reasons'].append(error.reason);candidate=None
         except Exception:
             receipt['status']='failed';receipt['reasons'].append('cancel_signal_failed');candidate=None
+    if receipt['status']=='candidate_validated':
+        try:execution=authority.verify_execution(lease,request,executor,clock(),terminal)
+        except Exception:execution=None
+        if execution is None:
+            receipt['status']='held';receipt['reasons'].append('engine_execution_not_verified');candidate=None
+        else:
+            receipt['engine_execution']='executed';receipt['engine_execution_proof_id']=execution.proof_id
     if receipt['status']=='candidate_validated':
         prospective={**receipt,'txn_eligible':True}
         try:credential=authority.issue_credential(lease,request,executor,clock(),prospective,receipt['candidate_sha256'],terminal)

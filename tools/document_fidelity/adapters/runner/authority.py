@@ -69,7 +69,7 @@ class Authority:
                 refs=(evidence.provenance_review_id,evidence.license_review_id,evidence.scope_review_id,evidence.isolation_attestation_id)
                 if any(not isinstance(r,str) or not re.fullmatch(r'[A-Za-z0-9_.:-]{1,128}',r) for r in refs):return None
             cap=Capability(_SEAL,self)
-            self._records[cap]=dict(kind='lease',binding=bind(request,attempt),executor=executor,expiry=expiry,claimed=False,ready=None)
+            self._records[cap]=dict(kind='lease',binding=bind(request,attempt),executor=executor,expiry=expiry,claimed=False,ready=None,worker_closed=False)
             self._attempts.add(attempt)
             return cap
     def _record(self,cap):
@@ -89,7 +89,7 @@ class Authority:
     def approve_ready(self,cap,ready,executor):
         with self._lock:
             record=self._record(cap)
-            if not record or record.get('closed') or not record['claimed'] or record['executor'] is not executor or record['ready'] is not None or type(ready) is not model.SandboxReady:return False
+            if not record or record.get('closed') or record['worker_closed'] or not record['claimed'] or record['executor'] is not executor or record['ready'] is not None or type(ready) is not model.SandboxReady:return False
             if ready.binding!=record['binding'] or ready.engine!=self.engine or ready.policy_digest!=self.policy.digest() or not ready.guards_hold():return False
             digest=ready_digest(ready)
             if self.assurance=='host_verified':
@@ -107,31 +107,48 @@ class Authority:
             if self.assurance!='host_verified' or not self.check_lease(lease,raw,executor,now):return None
             record=self._record(lease)
             expected={'openpyxl':'xlsx','python-docx':'docx','python-pptx':'pptx'}[self.engine.engine_id]
-            if not record['ready'] or record.get('worker_issued') or format!=expected:return None
+            if record['worker_closed'] or not record['ready'] or record.get('worker_issued') or format!=expected:return None
             record['worker_issued']=True
             cap=Capability(_SEAL,self)
             self._records[cap]=dict(kind='worker',binding=record['binding'],engine=self.engine,policy=self.policy,
-                                    expiry=record['expiry'],source='/input/source.'+format,
+                                    parent=lease,expiry=record['expiry'],source='/input/source.'+format,
                                     candidate='/output/candidate.'+format,used=False)
             return cap
     def consume_worker_permit(self,cap,raw,source,candidate,engine_id,now):
         with self._lock:
             record=self._record(cap)
             if self.assurance!='host_verified' or not record or record['kind']!='worker' or record['used']:return None
+            parent=self._record(record['parent'])
+            if not parent or parent.get('closed') or parent['worker_closed']:return None
             try:
                 if (record['binding']!=bind(raw,record['binding'].attempt_id) or record['source']!=source or record['candidate']!=candidate
                         or record['engine'].engine_id!=engine_id or type(now) not in (int,float) or not math.isfinite(now) or now<0 or now>=record['expiry']):return None
             except (TypeError,ValueError):return None
             record['used']=True
             return record['engine'],record['policy'],record['binding']
+    def verify_execution(self,lease,raw,executor,now,proof):
+        with self._lock:
+            if self.assurance!='host_verified' or not self.check_lease(lease,raw,executor,now):return None
+            record=self._record(lease)
+            if not record['worker_closed'] or not record['ready']:return None
+            evidence=self.session.verify_execution(record['binding'],self.engine,proof,executor)
+            if (type(evidence) is not model.HostExecutionEvidence or evidence.binding!=record['binding']
+                    or evidence.engine!=self.engine or not valid_proof_id(evidence.proof_id)):return None
+            if not self.check_lease(lease,raw,executor,executor.now_ms()):return None
+            record['execution_verified']=True
+            return evidence
+
     def issue_credential(self,lease,raw,executor,now,receipt,candidate_sha,terminal_proof):
         with self._lock:
             if self.assurance!='host_verified' or not self.check_lease(lease,raw,executor,now):return None
             record=self._record(lease)
-            if not record['ready'] or record.get('credential_issued') or receipt.get('assurance')!='host_verified' or receipt.get('status')!='candidate_validated':return None
+            if not record['worker_closed'] or not record.get('execution_verified') or not record['ready'] or record.get('credential_issued') or receipt.get('assurance')!='host_verified' or receipt.get('status')!='candidate_validated':return None
             digest=model.digest(receipt)
             evidence=self.session.verify_terminal(record['binding'],record['ready'],receipt,candidate_sha,terminal_proof,executor)
             if type(evidence) is not model.HostTerminalEvidence or evidence.binding!=record['binding'] or evidence.ready_digest!=record['ready'] or evidence.receipt_digest!=digest or evidence.candidate_sha256!=candidate_sha or not valid_proof_id(evidence.proof_id):return None
+            # A verifier may block past TTL or close the lease reentrantly.
+            # Re-read trusted backend time after evidence verification, before mint.
+            if not self.check_lease(lease,raw,executor,executor.now_ms()):return None
             record['credential_issued']=True
             credential=Capability(_SEAL,self)
             self._records[credential]=dict(kind='validator',binding=record['binding'],candidate=candidate_sha,receipt=digest,expiry=record['expiry'],used=False)
@@ -146,6 +163,20 @@ class Authority:
             except (ValueError,TypeError):return False
             record['used']=True;return True
 
+    def close_worker_stage(self,lease):
+        """Irreversibly revoke worker authority before any stop/reap callback.
+
+        Validation may continue against a reaped immutable snapshot under the
+        separate admission/terminal verifier. This never reopens execution.
+        """
+        with self._lock:
+            record=self._record(lease)
+            if not record or record['kind']!='lease' or record['worker_closed']:return False
+            record['worker_closed']=True
+            for child in self._records.values():
+                if child['kind']=='worker' and child['parent'] is lease:child['used']=True
+            return True
+
     def finish(self,lease,keep_credential=None):
         """Close admission and revoke all child capabilities except accepted result.
 
@@ -156,6 +187,7 @@ class Authority:
         with self._lock:
             record=self._record(lease)
             if not record or record['kind']!='lease':return
+            self.close_worker_stage(lease)
             record['closed']=True
             for cap,child in self._records.items():
                 if child['binding']==record['binding'] and child['kind'] in ('worker','validator') and cap is not keep_credential:

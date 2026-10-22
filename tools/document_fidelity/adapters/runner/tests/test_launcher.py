@@ -76,6 +76,8 @@ class FakeHostSession(model.TrustedHostSession):
         return model.HostEvidence(binding,engine,policy.digest(),now_ms+1000,*(['FAKE_NOT_PRODUCTION']*4))
     def verify_ready(self,binding,ready,executor):
         return model.HostReadyEvidence(binding,authority.ready_digest(ready),'FAKE_NOT_PRODUCTION')
+    def verify_execution(self,binding,engine,proof,executor):
+        return model.HostExecutionEvidence(binding,engine,'FAKE_NOT_PRODUCTION')
     def verify_terminal(self,binding,ready_digest,receipt,candidate_sha256,proof,executor):
         if self.cancel_in_verify:self.cancelled=True
         return model.HostTerminalEvidence(binding,ready_digest,model.digest(receipt),candidate_sha256,'FAKE_NOT_PRODUCTION')
@@ -242,6 +244,75 @@ class LauncherTests(unittest.TestCase):
                 result=super().verify_terminal(*args);args[-1].clock=51;return result
         r,os,a=self.host_contract_fake(session=SlowVerifier())
         self.assertEqual('timed_out',r.public['status']);self.assertIsNone(r.credential);self.assertFalse(r.public['txn_eligible'])
+    def test_stopping_and_cleanup_callbacks_cannot_issue_or_consume_worker(self):
+        for mode in ('cancel','ok','reap_unknown','spawn_reconciled'):
+            for preissued in (False,True):
+                with self.subTest(mode=mode,preissued=preissued):
+                    a=None;observations=[]
+                    class WindowOS(FakeHostOS):
+                        def spawn(os,workspace,spec,lease):
+                            os.lease=lease
+                            os.saved=a.issue_worker_permit(lease,self.req,os,os.clock,'xlsx') if preissued else None
+                            return super().spawn(workspace,spec,lease)
+                        def probe(os,stage):
+                            issued=a.issue_worker_permit(os.lease,self.req,os,os.clock,'xlsx')
+                            consumed=a.consume_worker_permit(os.saved if preissued else issued,self.req,'/input/source.xlsx','/output/candidate.xlsx','openpyxl',os.clock)
+                            observations.append((stage,issued is not None,consumed is not None))
+                        def terminate_tree(os,process):os.probe('terminate');return super().terminate_tree(process)
+                        def kill_tree(os,process):os.probe('kill');return super().kill_tree(process)
+                        def reap_tree(os,process,wait_ms):os.probe('reap');return super().reap_tree(process,wait_ms)
+                        def cleanup(os,workspace):os.probe('cleanup');return super().cleanup(workspace)
+                        def quarantine(os,attempt,workspace=None):os.probe('quarantine');return super().quarantine(attempt,workspace)
+                        def reconcile(os,attempt):os.probe('reconcile');return super().reconcile(attempt)
+                    os=WindowOS(mode);session=FakeHostSession();a=authority.Authority.host(self.engine,self.policy,session)
+                    r=launcher.run_production(self.source,self.req,launcher.TrustedRuntimeBinding(a,os),cancel=lambda:mode=='cancel' and os.poll_count>=1)
+                    self.assertTrue(observations)
+                    self.assertTrue(all(not issued and not consumed for stage,issued,consumed in observations),observations)
+                    if mode=='ok':
+                        self.assertEqual('candidate_validated',r.public['status'],r.public)
+                        self.assertIsNotNone(r.credential) # synthetic trusted-interface unit object only
+                        self.assertTrue(a.consume_credential(r.credential,self.req,r.public['candidate_sha256'],model.digest(r.public),now=os.clock))
+    def test_admission_expiry_during_terminal_callback_cannot_report_success(self):
+        class ShortLeaseSession(FakeHostSession):
+            def verify_admission(session,binding,engine,policy,now_ms):
+                return model.HostEvidence(binding,engine,policy.digest(),15,*(['FAKE_NOT_PRODUCTION']*4))
+            def verify_terminal(session,*args):
+                result=super().verify_terminal(*args);args[-1].clock=20;return result
+        r,os,a=self.host_contract_fake(session=ShortLeaseSession())
+        self.assertLess(os.clock,self.policy.timeout_ms)
+        self.assertNotEqual('candidate_validated',r.public['status']);self.assertFalse(r.public['txn_eligible'])
+        self.assertIsNone(r.candidate);self.assertIsNone(r.credential)
+    def test_spawn_is_not_evidence_of_third_party_engine_execution(self):
+        r,os,a=self.host_contract_fake(FakeHostOS('exit'))
+        self.assertEqual('failed',r.public['status'])
+        self.assertNotEqual('executed',r.public['engine_execution'])
+        self.assertTrue(r.public['worker_process_started'])
+        self.assertFalse(any(name in sys.modules for name in ('openpyxl','docx','pptx')))
+    def test_missing_or_mismatched_authenticated_engine_observation_is_hold(self):
+        for kind in ('missing','json','wrong_engine','wrong_scope'):
+            class UnqualifiedExecution(FakeHostSession):
+                def verify_execution(session,binding,engine,proof,executor):
+                    if kind=='missing':return None
+                    if kind=='json':return {'engine_execution':'executed','verified':True}
+                    if kind=='wrong_engine':return model.HostExecutionEvidence(binding,replace(engine,artifact_sha256='f'*64),'FAKE_NOT_PRODUCTION')
+                    return model.HostExecutionEvidence(replace(binding,request_digest='f'*64),engine,'FAKE_NOT_PRODUCTION')
+            r,os,a=self.host_contract_fake(session=UnqualifiedExecution())
+            self.assertEqual('held',r.public['status'],r.public)
+            self.assertEqual('unknown',r.public['engine_execution']);self.assertIsNone(r.credential);self.assertIsNone(r.candidate)
+            self.assertTrue(r.public['worker_process_started']);self.assertFalse(r.public['txn_eligible'])
+        self.assertFalse(any(name in sys.modules for name in ('openpyxl','docx','pptx')))
+    def test_worker_stage_close_is_irreversible_without_closing_validation_lease(self):
+        session=FakeHostSession();os=FakeHostOS();a=authority.Authority.host(self.engine,self.policy,session)
+        lease=a.admit(self.req,model.sha(self.source),os,'phase_test',0)
+        self.assertTrue(a.claim(lease,self.req,os,0))
+        ready=model.SandboxReady(a.binding(lease),self.engine,self.policy.digest(),True,True,True,True,True,True)
+        self.assertTrue(a.approve_ready(lease,ready,os))
+        permit=a.issue_worker_permit(lease,self.req,os,0,'xlsx');self.assertIsNotNone(permit)
+        self.assertTrue(a.close_worker_stage(lease));self.assertFalse(a.close_worker_stage(lease))
+        self.assertTrue(a.check_lease(lease,self.req,os,0))
+        self.assertFalse(a.approve_ready(lease,ready,os))
+        self.assertIsNone(a.issue_worker_permit(lease,self.req,os,0,'xlsx'))
+        self.assertIsNone(a.consume_worker_permit(permit,self.req,'/input/source.xlsx','/output/candidate.xlsx','openpyxl',0))
     def test_scope_expiry_and_replay_and_simulated_worker_permits(self):
         a=authority.Authority.simulation(self.engine,self.policy);os=FakeOS()
         lease=a.admit(self.req,hashlib.sha256(self.source).hexdigest(),os,'attempt1',0)
