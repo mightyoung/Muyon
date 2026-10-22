@@ -1,0 +1,11 @@
+
+running 1 test
+receipt-tail outcome=Err(StorageCorrupt); head=[[Some("1")]]; notifications=[]
+receipt-tail outcome=Err(StorageCorrupt); head=[[Some("1")]]; notifications=[]
+receipt-tail outcome=Err(StorageCorrupt); head=[[Some("1")]]; notifications=[]
+receipt-tail outcome=Err(StorageCorrupt); head=[[Some("1")]]; notifications=[]
+receipt-tail outcome=Err(BindingMismatch); head=[[Some("1")]]; notifications=[]
+test independent_receipt_tail_fact_corruptions_all_roll_back ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 23 filtered out; finished in 0.15s
+

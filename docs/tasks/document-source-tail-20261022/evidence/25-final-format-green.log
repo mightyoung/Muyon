@@ -1,0 +1,3 @@
+['/workspace/document-edit-tools/toolchain/bin/rustfmt', '--edition', '2021', '--check', 'crates/muyon-core/src/document_edit/gateway.rs', 'crates/muyon-core/tests/document_edit_gateway.rs']
+
+EXIT=0

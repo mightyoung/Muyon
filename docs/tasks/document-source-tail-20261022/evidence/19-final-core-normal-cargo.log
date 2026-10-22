@@ -1,0 +1,44 @@
+['/workspace/document-edit-tools/toolchain/bin/cargo', 'test', '--offline', '--locked', '--manifest-path', '/tmp/muyon-source-tail-a961.667nj4up/crates/Cargo.toml', '-p', 'muyon-core', '--test', 'document_edit_gateway']
+warning: method `document_clone_in_transaction` is never used
+   --> muyon-core/src/documents/storage.rs:556:19
+    |
+104 | impl BusinessStore {
+    | ------------------ method in this implementation
+...
+556 |     pub(crate) fn document_clone_in_transaction(
+    |                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = note: `#[warn(dead_code)]` on by default
+
+warning: `muyon-core` (lib) generated 1 warning
+   Compiling muyon-core v0.1.0 (/tmp/muyon-source-tail-a961.667nj4up/crates/muyon-core)
+warning: unused imports: `CandidateState` and `CandidateStatus`
+  --> muyon-core/src/bin/../documents/mod.rs:24:21
+   |
+24 | pub use candidate::{CandidateState, CandidateStatus};
+   |                     ^^^^^^^^^^^^^^  ^^^^^^^^^^^^^^^
+   |
+   = note: `#[warn(unused_imports)]` on by default
+
+error[E0599]: no method named `invalidate_local_evidence_sources_in_transaction` found for reference `&BusinessStore` in the current scope
+   --> muyon-core/src/bin/../documents/source_notifications.rs:107:37
+    |
+107 |                 let affected = self.invalidate_local_evidence_sources_in_transaction(tx, &document)?;
+    |                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+help: there is a method `document_access_in_transaction` with a similar name, but with different arguments
+   --> muyon-core/src/bin/../documents/storage.rs:397:5
+    |
+397 | /     pub(crate) fn document_access_in_transaction(
+398 | |         &self,
+399 | |         tx: &Transaction<'_>,
+400 | |         access: &DocumentAccess,
+401 | |         required: &[DocumentOperation],
+402 | |     ) -> Result<DocumentMetadata> {
+    | |_________________________________^
+
+For more information about this error, try `rustc --explain E0599`.
+warning: `muyon-core` (bin "business_worker") generated 1 warning
+error: could not compile `muyon-core` (bin "business_worker") due to 1 previous error; 1 warning emitted
+
+EXIT=101

@@ -1,0 +1,4 @@
+{
+  "crates/muyon-core/src/document_edit/gateway.rs": "ad4a0f87cdbee45e22c05a3664135a7c19029f4287d2261bb0879a9abbcd561c",
+  "crates/muyon-core/tests/document_edit_gateway.rs": "f4832e6eb40c59af41dd99a912929d9bb229e7fb4f8c273947d33e43ea1ee5bf"
+}

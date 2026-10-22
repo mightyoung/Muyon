@@ -1,0 +1,19 @@
+{
+  "core_dependency": "a961bb58c08ce77b559ce0d021d2ed50a857bb9e",
+  "independent_archive": "/tmp/muyon-source-tail-independent.eog_1i39",
+  "archive_scope": "git archive exact core plus only owned gateway.rs and document_edit_gateway.rs overlays",
+  "isolated_cargo_target": "/tmp/document-edit-independent-review/source-tail-final/target",
+  "gateway_direct_tests_passed": 23,
+  "core_source_notification_unit_tests_passed": 24,
+  "independent_probe_tests_passed": 1,
+  "independent_probe_fault_cases": 5,
+  "normal_cargo_gate": "BLOCKED: business_worker -> documents/source_notifications.rs:107 E0599 missing invalidate_local_evidence_sources_in_transaction",
+  "engines_run": false,
+  "repository_files_modified": false,
+  "note": "Initial zero-test filter log preserved separately and not counted. Direct real-library tests do not clear normal Cargo gate.",
+  "format_followup": "format-followup.json",
+  "final_formatted_source": "a193b69fc6e216d6f93b227f0e8854b206c2af85",
+  "final_gateway_sha256": "537b4bb2a3a80a530e34d8d689d61304672326232684ca7ad19ea02ec5d47def",
+  "initial_tested_gateway_sha256": "ad4a0f87cdbee45e22c05a3664135a7c19029f4287d2261bb0879a9abbcd561c",
+  "format_business_semantics_unchanged": true
+}

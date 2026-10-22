@@ -1,0 +1,9 @@
+{
+  "source_commit": "e5f96a834d65acf2ae43d3ec5abbd1ce7905ea19",
+  "core_dependency": "a961bb58c08ce77b559ce0d021d2ed50a857bb9e",
+  "toolchain": "rustc 1.90.0 (1159e78c4 2025-09-14)",
+  "owned_sha256": {
+    "crates/muyon-core/src/document_edit/gateway.rs": "ad4a0f87cdbee45e22c05a3664135a7c19029f4287d2261bb0879a9abbcd561c",
+    "crates/muyon-core/tests/document_edit_gateway.rs": "f4832e6eb40c59af41dd99a912929d9bb229e7fb4f8c273947d33e43ea1ee5bf"
+  }
+}

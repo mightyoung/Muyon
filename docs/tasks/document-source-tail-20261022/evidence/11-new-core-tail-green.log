@@ -1,0 +1,16 @@
+Source: /tmp/muyon-source-tail-fixedcore.ax0yz0tb 
+Evidence: /tmp/muyon-source-tail-direct.u89dnewf
+['/workspace/document-edit-tools/toolchain/bin/cargo', 'build', '--offline', '--locked', '--manifest-path', '/tmp/muyon-source-tail-fixedcore.ax0yz0tb/crates/Cargo.toml', '-p', 'muyon-core', '--lib', '--message-format=json']
+   Compiling muyon-core v0.1.0 (/tmp/muyon-source-tail-fixedcore.ax0yz0tb/crates/muyon-core)
+    Finished `dev` profile [unoptimized] target(s) in 7.94s
+['/workspace/document-edit-tools/toolchain/bin/rustc', '--edition=2021', '--test', '/tmp/muyon-source-tail-fixedcore.ax0yz0tb/crates/muyon-core/tests/document_edit_gateway.rs', '-L', 'dependency=/workspace/document-edit-combination/crates/target/debug/deps', '-L', 'native=/workspace/document-edit-tools/native', '--extern', 'muyon_core=/workspace/document-edit-combination/crates/target/debug/libmuyon_core.rlib', '--extern', 'serde_json=/workspace/document-edit-combination/crates/target/debug/deps/libserde_json-ae0abdd76423c00d.rlib', '--extern', 'sha2=/workspace/document-edit-combination/crates/target/debug/deps/libsha2-ee5641143bb9770c.rlib', '-o', '/tmp/muyon-source-tail-direct.u89dnewf/gateway-tests']
+['/tmp/muyon-source-tail-direct.u89dnewf/gateway-tests', 'receipt_tail_cannot_', '--nocapture']
+
+running 2 tests
+test receipt_tail_cannot_delete_actual_source_notification ... ok
+test receipt_tail_cannot_ack_actual_source_notification_before_commit ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 21 filtered out; finished in 0.05s
+
+receipt-tail outcome=Err(StorageCorrupt); head=[[Some("1")]]; notifications=[]
+receipt-tail outcome=Err(StorageCorrupt); head=[[Some("1")]]; notifications=[]

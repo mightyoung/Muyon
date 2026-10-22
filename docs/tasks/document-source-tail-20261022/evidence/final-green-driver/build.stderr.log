@@ -1,0 +1,6 @@
+   Compiling muyon-core-agent-lab v0.1.0 (/tmp/muyon-source-tail-a961.667nj4up/experiments/redesign/core-agent-lab/core)
+   Compiling muyon-plugin-contract-lab v0.1.0 (/tmp/muyon-source-tail-a961.667nj4up/experiments/redesign/plugin-contract-lab/core)
+   Compiling muyon-rust-agent-host-lab v0.1.0 (/tmp/muyon-source-tail-a961.667nj4up/experiments/redesign/rust-agent-host-lab/core)
+   Compiling muyon-web-search-lab v0.1.0 (/tmp/muyon-source-tail-a961.667nj4up/experiments/redesign/web-search-lab/core)
+   Compiling muyon-core v0.1.0 (/tmp/muyon-source-tail-a961.667nj4up/crates/muyon-core)
+    Finished `dev` profile [unoptimized] target(s) in 9.28s

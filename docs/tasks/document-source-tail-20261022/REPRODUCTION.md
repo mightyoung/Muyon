@@ -1,3 +1,7 @@
+> Historical RED record at e5aaf8ddfa6c4cf8f467595cea1de4b431dcba05.
+> Final gateway repair and exact dependency validation: see FINAL-HANDOFF.md.
+> Original raw failures below are preserved and remain historical failures.
+
 # REPRODUCTION ONLY — receipt tail notification loss remains RED
 
 Branch task/document-source-tail-20261022, based exact

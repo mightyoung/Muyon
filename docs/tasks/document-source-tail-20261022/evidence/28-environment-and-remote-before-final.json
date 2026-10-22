@@ -1,0 +1,12 @@
+{
+  "platform": "Linux-6.18.55-x86_64-with-glibc2.41",
+  "python": "3.12.14",
+  "cwd": "/workspace/document-source-tail-20261022",
+  "rustc": "rustc 1.90.0 (1159e78c4 2025-09-14)",
+  "cargo": "cargo 1.90.0 (840b83a10 2025-07-30)",
+  "CARGO_HOME": "/workspace/document-edit-tools/cargo-home",
+  "CARGO_TARGET_DIR": "/workspace/document-edit-combination/crates/target",
+  "RUSTFLAGS": "-L native=/workspace/document-edit-tools/native",
+  "sqlite_alias_realpath": "/usr/lib/x86_64-linux-gnu/libsqlite3.so.0.8.6",
+  "remote_refs": "0ab2c4f667681b9aacb017f8cd2eea6f576cf78e\trefs/heads/develop\ncc7c8d14d30e3d3c4c7c6cb2bf2059a99e46e003\trefs/heads/main\nec41e16b67cde7a9949ffe9e6e732b6cd43f8f44\trefs/heads/task/document-edit-clippy-20261022\n721077297ba77471ede80b653274cec4a8224655\trefs/heads/task/document-edit-transactions-20261022\ne5f96a834d65acf2ae43d3ec5abbd1ce7905ea19\trefs/heads/task/document-source-tail-20261022\n"
+}

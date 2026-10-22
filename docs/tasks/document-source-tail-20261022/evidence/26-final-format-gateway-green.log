@@ -1,0 +1,37 @@
+Source: /tmp/muyon-source-tail-a961.667nj4up 
+Evidence: /tmp/muyon-source-tail-direct.8qnko0hg
+['/workspace/document-edit-tools/toolchain/bin/cargo', 'build', '--offline', '--locked', '--manifest-path', '/tmp/muyon-source-tail-a961.667nj4up/crates/Cargo.toml', '-p', 'muyon-core', '--lib', '--message-format=json']
+   Compiling muyon-core v0.1.0 (/tmp/muyon-source-tail-a961.667nj4up/crates/muyon-core)
+    Finished `dev` profile [unoptimized] target(s) in 7.41s
+['/workspace/document-edit-tools/toolchain/bin/rustc', '--edition=2021', '--test', '/tmp/muyon-source-tail-a961.667nj4up/crates/muyon-core/tests/document_edit_gateway.rs', '-L', 'dependency=/workspace/document-edit-combination/crates/target/debug/deps', '-L', 'native=/workspace/document-edit-tools/native', '--extern', 'muyon_core=/workspace/document-edit-combination/crates/target/debug/libmuyon_core.rlib', '--extern', 'serde_json=/workspace/document-edit-combination/crates/target/debug/deps/libserde_json-ae0abdd76423c00d.rlib', '--extern', 'sha2=/workspace/document-edit-combination/crates/target/debug/deps/libsha2-ee5641143bb9770c.rlib', '-o', '/tmp/muyon-source-tail-direct.8qnko0hg/gateway-tests']
+['/tmp/muyon-source-tail-direct.8qnko0hg/gateway-tests', '--nocapture']
+
+running 23 tests
+test a_different_hash_candidate_cannot_borrow_the_copy_only_publication_route ... ok
+test a_copy_claim_that_cannot_store_its_candidate_is_query_only_after_restart ... ok
+test candidate_and_original_receipt_survive_restart_without_replay ... ok
+test cancellation_is_not_rollback_and_cannot_erase_a_committed_receipt ... ok
+test confirmation_is_exact_and_revocation_stops_publication ... ok
+test candidate_reopens_but_new_effect_requires_an_explicit_fresh_confirmation ... ok
+test corrupt_candidate_never_validates_or_publishes ... ok
+test copy_publication_uses_new_metadata_reference_without_new_upload_or_staging_files ... ok
+test corrupt_oversize_persisted_metadata_is_rejected_before_payload_decode ... ok
+test frozen_source_title_cannot_change_without_changing_the_reviewed_copy_plan ... ok
+test existing_text_source_identity_roundtrips_copy_preparation ... ok
+test duplicate_intent_binds_original_and_never_creates_second_upload ... ok
+test live_engine_envelope_cannot_be_confused_with_a_validated_copy_intent ... ok
+test late_copy_duplicate_is_only_an_authorized_original_result_query ... ok
+test persisted_receipt_title_must_match_frozen_reviewed_source ... ok
+test prepare_is_durable_without_confirmation_or_engine_success ... ok
+test reading_a_newer_different_blob_does_not_authorize_old_candidate_bytes ... ok
+test grant_revoked_or_expired_by_last_receipt_write_rolls_back_the_entire_publish ... ok
+test real_source_copy_keeps_manual_draft_and_queues_one_notification ... ok
+test receipt_tail_cannot_ack_actual_source_notification_before_commit ... ok
+test receipt_tail_failure_rolls_back_cas_and_restart_unknown_never_replays ... ok
+test receipt_tail_cannot_delete_actual_source_notification ... ok
+test two_original_intents_cannot_publish_the_same_source_revision ... ok
+
+test result: ok. 23 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.16s
+
+receipt-tail outcome=Err(StorageCorrupt); head=[[Some("1")]]; notifications=[]
+receipt-tail outcome=Err(StorageCorrupt); head=[[Some("1")]]; notifications=[]

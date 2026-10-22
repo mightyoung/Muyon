@@ -1,0 +1,22 @@
+
+running 2 tests
+test receipt_tail_cannot_ack_actual_source_notification_before_commit ... FAILED
+test receipt_tail_cannot_delete_actual_source_notification ... FAILED
+
+failures:
+
+failures:
+    receipt_tail_cannot_ack_actual_source_notification_before_commit
+    receipt_tail_cannot_delete_actual_source_notification
+
+test result: FAILED. 0 passed; 2 failed; 0 ignored; 0 measured; 21 filtered out; finished in 0.04s
+
+receipt-tail outcome=Ok(DurableIntent { binding: Binding { document: DocumentRef { scope: Scope { workspace_id: "workspace", project_id: Some("project") }, document_id: "document", revision: Revision("1"), format: Text }, patch_digest: [154, 244, 45, 58, 181, 52, 187, 125, 27, 144, 107, 223, 108, 239, 94, 229, 56, 73, 236, 93, 137, 163, 111, 2, 203, 253, 185, 183, 142, 228, 62, 197], intent_id: "source-notification-tail", rollback_target: None }, state: Committed, cancel_requested: false, candidate: Some(BlobRef { digest: "0fa7c5f34eddec1d4c9bc45edf02b85baeb9a2bc18ceab5d131d52de97d7c1b1", byte_length: Revision("58") }), receipt: Some(CopyReceipt { operation: ByteIdenticalCopy, intent_id: "source-notification-tail", binding_digest: "849ee523ebeb577c796082bffd6a3be116638cf342632bac227d053cb7f068b4", result: DocumentMetadata { document: DocumentRef { scope: Scope { workspace_id: "workspace", project_id: Some("project") }, document_id: "document", revision: Revision("2"), format: Text }, title: "Synthetic", blob: BlobRef { digest: "0fa7c5f34eddec1d4c9bc45edf02b85baeb9a2bc18ceab5d131d52de97d7c1b1", byte_length: Revision("58") } } }) }); head=[[Some("2")]]; notifications=[[Some("1"), Some("0")]]
+
+thread 'receipt_tail_cannot_ack_actual_source_notification_before_commit' panicked at /tmp/muyon-source-tail-a961-red.a_gtrx4x/crates/muyon-core/tests/document_edit_gateway.rs:1002:5:
+last receipt write corrupted the real notification but publication succeeded
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+receipt-tail outcome=Ok(DurableIntent { binding: Binding { document: DocumentRef { scope: Scope { workspace_id: "workspace", project_id: Some("project") }, document_id: "document", revision: Revision("1"), format: Text }, patch_digest: [154, 244, 45, 58, 181, 52, 187, 125, 27, 144, 107, 223, 108, 239, 94, 229, 56, 73, 236, 93, 137, 163, 111, 2, 203, 253, 185, 183, 142, 228, 62, 197], intent_id: "source-notification-tail", rollback_target: None }, state: Committed, cancel_requested: false, candidate: Some(BlobRef { digest: "0fa7c5f34eddec1d4c9bc45edf02b85baeb9a2bc18ceab5d131d52de97d7c1b1", byte_length: Revision("58") }), receipt: Some(CopyReceipt { operation: ByteIdenticalCopy, intent_id: "source-notification-tail", binding_digest: "849ee523ebeb577c796082bffd6a3be116638cf342632bac227d053cb7f068b4", result: DocumentMetadata { document: DocumentRef { scope: Scope { workspace_id: "workspace", project_id: Some("project") }, document_id: "document", revision: Revision("2"), format: Text }, title: "Synthetic", blob: BlobRef { digest: "0fa7c5f34eddec1d4c9bc45edf02b85baeb9a2bc18ceab5d131d52de97d7c1b1", byte_length: Revision("58") } } }) }); head=[[Some("2")]]; notifications=[]
+
+thread 'receipt_tail_cannot_delete_actual_source_notification' panicked at /tmp/muyon-source-tail-a961-red.a_gtrx4x/crates/muyon-core/tests/document_edit_gateway.rs:1002:5:
+last receipt write corrupted the real notification but publication succeeded

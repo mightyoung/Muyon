@@ -1,0 +1,9 @@
+{
+  "source_commit": "a193b69fc6e216d6f93b227f0e8854b206c2af85",
+  "semantic_commit": "e5f96a834d65acf2ae43d3ec5abbd1ce7905ea19",
+  "core_dependency": "a961bb58c08ce77b559ce0d021d2ed50a857bb9e",
+  "owned_sha256": {
+    "crates/muyon-core/src/document_edit/gateway.rs": "537b4bb2a3a80a530e34d8d689d61304672326232684ca7ad19ea02ec5d47def",
+    "crates/muyon-core/tests/document_edit_gateway.rs": "f4832e6eb40c59af41dd99a912929d9bb229e7fb4f8c273947d33e43ea1ee5bf"
+  }
+}
