@@ -1,0 +1,36 @@
+2026-10-22T08:45:25.764922+00:00
+source=a961bb58c08ce77b559ce0d021d2ed50a857bb9e
+base=662aeec6d6462cabfcc317e855ae23797dd88d51
+cwd=/workspace/Muyon-source-invalidation-applied
+No retries of the previously denied /root tool locator; only PATH tools attempted.
+
+argv=["cargo", "test", "--offline", "--locked", "--manifest-path", "crates/Cargo.toml", "-p", "muyon-core", "--lib", "documents::source_notification_tests"]
+exit=127
+NOT_RUN: [Errno 2] No such file or directory: 'cargo'
+
+argv=["cargo", "test", "--offline", "--locked", "--manifest-path", "crates/Cargo.toml", "-p", "muyon-core"]
+exit=127
+NOT_RUN: [Errno 2] No such file or directory: 'cargo'
+
+argv=["cargo", "test", "--offline", "--locked", "--manifest-path", "crates/Cargo.toml", "--workspace"]
+exit=127
+NOT_RUN: [Errno 2] No such file or directory: 'cargo'
+
+argv=["cargo", "clippy", "--offline", "--locked", "--manifest-path", "crates/Cargo.toml", "--workspace", "--all-targets", "--", "-D", "warnings"]
+exit=127
+NOT_RUN: [Errno 2] No such file or directory: 'cargo'
+
+argv=["rustfmt", "--check", "--edition", "2021", "--config", "skip_children=true", "crates/muyon-core/src/blobs.rs", "crates/muyon-core/src/documents/mod.rs", "crates/muyon-core/src/documents/source_notification_tests.rs", "crates/muyon-core/src/documents/source_notifications.rs", "crates/muyon-core/src/documents/storage.rs"]
+exit=127
+NOT_RUN: [Errno 2] No such file or directory: 'rustfmt'
+
+argv=["git", "diff", "--check", "662aeec6d6462cabfcc317e855ae23797dd88d51", "a961bb58c08ce77b559ce0d021d2ed50a857bb9e"]
+exit=2
+docs/tasks/document-source-invalidation-applied-20261022/INTERMEDIATE-4498-tail-verification.log:41: new blank line at EOF.
+docs/tasks/document-source-invalidation-applied-20261022/verification.log:29: new blank line at EOF.
+
+
+
+Source-only whitespace (raw original log EOF retained):
+argv=["git", "diff", "--check", "662aeec6d6462cabfcc317e855ae23797dd88d51", "a961bb58c08ce77b559ce0d021d2ed50a857bb9e", "--", "crates/muyon-core/src"]
+exit=0

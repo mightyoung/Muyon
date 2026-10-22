@@ -1,3 +1,5 @@
+> Superseded implementation status: see [BATCH-AND-GATEWAY-TAIL-HANDOFF.md](BATCH-AND-GATEWAY-TAIL-HANDOFF.md). Final source is a961bb58c08ce77b559ce0d021d2ed50a857bb9e. e3fa had a later independently confirmed ABA RED; its prior validation claims below are historical, and the unchanged gateway remains HOLD.
+
 # Applied source invalidation — trigger-tail fix, pending Rust validation
 
 Branch: `task/document-source-invalidation-applied-20261022`.

@@ -1,3 +1,5 @@
+> Implemented in fixed source a961bb58c08ce77b559ce0d021d2ed50a857bb9e; signatures below remain exact. Final preparation precedes ALL original blob/head/grant and source-owner writes. See BATCH-AND-GATEWAY-TAIL-HANDOFF.md for current source/validation gates.
+
 # Gateway publication tail contract (source implementation follows)
 
 Dependency: applied source branch based on B662aeec6; current prior source e3fa0ee7. Existing gateway remains HOLD until its original owner consumes this additive API and actual receipt-trigger probes pass. Core owner does NOT edit gateway.rs.
