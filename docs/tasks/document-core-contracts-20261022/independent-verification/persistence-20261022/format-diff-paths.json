@@ -1,0 +1,9 @@
+[
+  "crates/muyon-core/src/documents/annotation.rs",
+  "crates/muyon-core/src/documents/capability.rs",
+  "crates/muyon-core/src/documents/identity.rs",
+  "crates/muyon-core/src/documents/mod.rs",
+  "crates/muyon-core/src/documents/storage.rs",
+  "crates/muyon-core/src/documents/storage_tests.rs",
+  "crates/muyon-core/tests/document_storage.rs"
+]

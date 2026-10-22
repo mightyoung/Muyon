@@ -1,0 +1,25 @@
+<?xml version='1.0' encoding='utf-8'?>
+<testsuite name="contracts-targeted" tests="18" failures="0" errors="0" skipped="0">
+  <properties>
+    <property name="origin" value="derived from retained libtest stdout; not native JUnit; invocations overlap" />
+    <property name="raw_sha256" value="4bc35ed51840f2557594f2211bccb8f31ea20f18113621372444a3e2babb5a18" />
+  </properties>
+  <testcase classname="contracts-targeted" name="cached_metadata_never_bypasses_revocation_or_unknown_authority" />
+  <testcase classname="contracts-targeted" name="capability_for_other_operation_or_format_grants_nothing" />
+  <testcase classname="contracts-targeted" name="anchors_are_bound_to_identity_revision_and_format" />
+  <testcase classname="contracts-targeted" name="declared_format_never_enables_a_reader" />
+  <testcase classname="contracts-targeted" name="each_missing_pdf_geometry_field_remains_unresolved" />
+  <testcase classname="contracts-targeted" name="current_host_and_operation_capability_must_both_allow_read" />
+  <testcase classname="contracts-targeted" name="invalid_document_metadata_is_rejected_and_revision_is_preserved" />
+  <testcase classname="contracts-targeted" name="nonfinite_empty_overflowing_and_invalid_normalized_rectangles_fail" />
+  <testcase classname="contracts-targeted" name="host_errors_and_invalid_or_stale_lease_fail_closed" />
+  <testcase classname="contracts-targeted" name="normalized_regions_preserve_explicit_rotation_and_reject_invalid_crop" />
+  <testcase classname="contracts-targeted" name="old_revision_or_other_document_is_rejected" />
+  <testcase classname="contracts-targeted" name="pdf_geometry_keeps_unknowns_without_guessing" />
+  <testcase classname="contracts-targeted" name="read_contract_cannot_admit_edit_even_when_both_lists_allow_it" />
+  <testcase classname="contracts-targeted" name="stale_grant_epoch_generation_and_id_are_rejected" />
+  <testcase classname="contracts-targeted" name="structured_anchors_validate_ids_ranges_and_package_parts" />
+  <testcase classname="contracts-targeted" name="unsupported_and_gated_capabilities_deny" />
+  <testcase classname="contracts-targeted" name="visible_pdf_selection_must_fit_the_declared_crop" />
+  <testcase classname="contracts-targeted" name="workspace_and_project_are_exact_not_wildcards" />
+</testsuite>

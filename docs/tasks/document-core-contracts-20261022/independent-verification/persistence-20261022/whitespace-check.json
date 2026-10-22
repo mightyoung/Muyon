@@ -1,0 +1,31 @@
+{
+  "at_utc": "2026-10-22T05:08:47.687519+00:00",
+  "raw_bytes_preserved": true,
+  "results": [
+    {
+      "argv": [
+        "git",
+        "diff",
+        "--cached",
+        "--check"
+      ],
+      "exit_status": 2,
+      "stdout": "docs/tasks/document-core-contracts-20261022/independent-verification/persistence-20261022/contracts-targeted.stdout.log:23: new blank line at EOF.\ndocs/tasks/document-core-contracts-20261022/independent-verification/persistence-20261022/core-full.stdout.log:273: new blank line at EOF.\ndocs/tasks/document-core-contracts-20261022/independent-verification/persistence-20261022/scoped-fmt.stdout.log:52: trailing whitespace.\n+ \ndocs/tasks/document-core-contracts-20261022/independent-verification/persistence-20261022/scoped-fmt.stdout.log:122: trailing whitespace.\n+ \ndocs/tasks/document-core-contracts-20261022/independent-verification/persistence-20261022/scoped-fmt.stdout.log:160: trailing whitespace.\n+ \ndocs/tasks/document-core-contracts-20261022/independent-verification/persistence-20261022/scoped-fmt.stdout.log:216: trailing whitespace.\n+ \ndocs/tasks/document-core-contracts-20261022/independent-verification/persistence-20261022/scoped-fmt.stdout.log:1043: trailing whitespace.\n+ \ndocs/tasks/document-core-contracts-20261022/independent-verification/persistence-20261022/scoped-fmt.stdout.log:1098: trailing whitespace.\n+ \ndocs/tasks/document-core-contracts-20261022/independent-verification/persistence-20261022/scoped-fmt.stdout.log:1925: trailing whitespace.\n+ \ndocs/tasks/document-core-contracts-20261022/independent-verification/persistence-20261022/scoped-fmt.stdout.log:2122: trailing whitespace.\n+ \ndocs/tasks/document-core-contracts-20261022/independent-verification/persistence-20261022/scoped-fmt.stdout.log:2820: trailing whitespace.\n+ \ndocs/tasks/document-core-contracts-20261022/independent-verification/persistence-20261022/scoped-fmt.stdout.log:2820: new blank line at EOF.\ndocs/tasks/document-core-contracts-20261022/independent-verification/persistence-20261022/storage-targeted.stdout.log:20: new blank line at EOF.\ndocs/tasks/document-core-contracts-20261022/independent-verification/persistence-20261022/tail-hook-targeted.stdout.log:8: new blank line at EOF.\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "git",
+        "diff",
+        "--cached",
+        "--check",
+        "--",
+        ".",
+        ":(exclude)docs/tasks/document-core-contracts-20261022/independent-verification/persistence-20261022/*.log"
+      ],
+      "exit_status": 0,
+      "stdout": "",
+      "stderr": ""
+    }
+  ]
+}

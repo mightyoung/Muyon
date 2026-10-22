@@ -1,0 +1,22 @@
+<?xml version='1.0' encoding='utf-8'?>
+<testsuite name="storage-targeted" tests="15" failures="0" errors="0" skipped="0">
+  <properties>
+    <property name="origin" value="derived from retained libtest stdout; not native JUnit; invocations overlap" />
+    <property name="raw_sha256" value="8a1be28a9bef983ec18bb10c757035e151f8c281b46111679b426c0c703710f8" />
+  </properties>
+  <testcase classname="storage-targeted" name="corrupted_revision_keys_or_missing_snapshot_fail_closed" />
+  <testcase classname="storage-targeted" name="annotation_cas_tombstones_and_ai_provenance_are_durable" />
+  <testcase classname="storage-targeted" name="delete_expiry_at_publication_tail_preserves_previous_annotation" />
+  <testcase classname="storage-targeted" name="expires_deleted_project_and_missing_permissions_fail_closed" />
+  <testcase classname="storage-targeted" name="foreign_upload_and_bad_schema_are_rejected_without_partial_metadata" />
+  <testcase classname="storage-targeted" name="export_is_deterministic_sidecar_data_with_origin_and_tombstones" />
+  <testcase classname="storage-targeted" name="grant_scope_revision_epoch_generation_and_revoke_are_current" />
+  <testcase classname="storage-targeted" name="immutable_document_revisions_invalidate_access_and_preserve_old_anchors" />
+  <testcase classname="storage-targeted" name="invalid_or_cross_revision_anchors_do_not_leave_rows" />
+  <testcase classname="storage-targeted" name="late_metadata_failure_rolls_back_blob_publication_and_head" />
+  <testcase classname="storage-targeted" name="late_annotation_failure_rolls_back_history" />
+  <testcase classname="storage-targeted" name="save_expiry_at_publication_tail_rolls_back_sidecar_and_history" />
+  <testcase classname="storage-targeted" name="oversized_persistent_payloads_are_rejected_before_decode" />
+  <testcase classname="storage-targeted" name="synthetic_metadata_blob_and_annotation_survive_reopen" />
+  <testcase classname="storage-targeted" name="writes_cannot_strand_existing_annotations_above_read_budget" />
+</testsuite>
