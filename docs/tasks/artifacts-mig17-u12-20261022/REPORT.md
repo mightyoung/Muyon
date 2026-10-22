@@ -1,3 +1,5 @@
+> Historical first-batch record for 4eec6d16. Current continuation and fulfilled historical-hook integration: [WORKFLOW-REPORT.md](WORKFLOW-REPORT.md). Original evidence below is preserved.
+
 # MIG17 / U12 — reviewable backend source, integration HOLD
 
 Branch: `task/artifacts-mig17-u12-20261022`.

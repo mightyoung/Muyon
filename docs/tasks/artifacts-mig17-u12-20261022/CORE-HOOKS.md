@@ -1,3 +1,5 @@
+> Historical first-batch record for 4eec6d16. Current continuation and fulfilled historical-hook integration: [WORKFLOW-REPORT.md](WORKFLOW-REPORT.md). Original evidence below is preserved.
+
 # Core owner integration request
 
 Required now: add `pub mod artifacts;` in core lib.rs; this branch never edits it.
