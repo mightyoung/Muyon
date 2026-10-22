@@ -1,0 +1,26 @@
+Thu Oct 22 04:23:07 UTC 2026
+b6fcc030410d1718d00fbad15627423d4f809e2f
+apps/muyon_android/app/src/androidTest/kotlin/com/mightyoung/muyon/product/ui/shell/ConversationShellTest.kt
+apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/MainActivity.kt
+apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/chat/ChatScreen.kt
+apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/ui/shell/ConversationShell.kt
+apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/ui/system/FoundationTokens.kt
+apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/ui/system/README.md
+apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/ui/system/REVIEW.md
+apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/ui/system/checks/test_contrast.py
+apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/ui/system/evidence/material-roles-regression.log
+apps/muyon_android/app/src/main/res/drawable-nodpi/muyon_brand_icon.png
+apps/muyon_android/app/src/main/res/drawable-nodpi/muyon_brand_mascot_front.png
+apps/muyon_android/app/src/main/res/drawable-nodpi/muyon_brand_mascot_views.png
+docs/tasks/ui-brand-resources-20261022/REPORT.md
+docs/tasks/ui-brand-resources-20261022/RESOURCE-MAP.json
+docs/tasks/ui-shell-20261022/BRAND-FOUNDATION-BATCH.md
+docs/tasks/ui-shell-20261022/NEXT-BATCH.md
+docs/tasks/ui-shell-20261022/REPORT.md
+docs/tasks/ui-shell-20261022/evidence/brand-final-android.log
+docs/tasks/ui-shell-20261022/evidence/brand-foundation-checks.log
+docs/tasks/ui-shell-20261022/evidence/brand-original-hashes.log
+docs/tasks/ui-shell-20261022/evidence/brand-test-first.log
+diff_check_exit=0
+ac573b5bdb2795a34dcb122193d2dbc679ec1ccd8c5acc9c7c9b6728606646a6  docs/tasks/document-core-contracts-20261022/research-office-v2.0.md
+50207312dd01eaec7995ad60b794e8b615b7a955b680e361d621ee46dac87101  docs/tasks/document-core-contracts-20261022/research-static-evidence-v1.0.md
