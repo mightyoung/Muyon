@@ -516,6 +516,10 @@ impl BusinessStore {
                 &encode(&metadata)?,
             ],
         ))?;
+        self.invalidate_document_dependents_in_transaction(tx, &metadata.document)?;
+        if self.current_document(&metadata.document)? != metadata {
+            return Err(ContractError::StorageCorrupt);
+        }
         Ok(metadata)
     }
     /// COPY-only: append metadata for the exact existing source bytes. There is
@@ -582,6 +586,10 @@ impl BusinessStore {
                 &encode(&metadata)?,
             ],
         ))?;
+        self.invalidate_document_dependents_in_transaction(tx, &metadata.document)?;
+        if self.current_document(&metadata.document)? != metadata {
+            return Err(ContractError::StorageCorrupt);
+        }
         Ok(metadata)
     }
     /// HOST ONLY, after authentic current policy/user authorization. No model or
@@ -595,7 +603,7 @@ impl BusinessStore {
     ) -> Result<()> {
         let tx = sql(self.database().transaction())?;
         self.document_schema()?;
-        self.current_document(document)?;
+        let expected_metadata = self.current_document(document)?;
         binding_shape(authority)?;
         let now = now_ms()?;
         if authority.owner_epoch != self.owner_epoch()
@@ -609,7 +617,8 @@ impl BusinessStore {
         {
             return Err(ContractError::InvalidAuthority);
         }
-        let old = sql(self.database().query("SELECT CASE WHEN length(CAST(generation AS BLOB))<=20 THEN generation ELSE NULL END FROM document_grants WHERE grant_id=?", &[&authority.grant_id]))?;
+        let old = sql(self.database().query("SELECT CASE WHEN length(CAST(generation AS BLOB))<=20 THEN generation ELSE NULL END,CASE WHEN length(CAST(document_json AS BLOB))<=8192 THEN document_json ELSE NULL END FROM document_grants WHERE grant_id=?", &[&authority.grant_id]))?;
+        let old_document = old.first().map(|row| self.document_grant_target(cell(row, 1)?)).transpose()?;
         let expected = if old.is_empty() {
             Revision::new(1)
         } else {
@@ -619,7 +628,34 @@ impl BusinessStore {
             return Err(ContractError::InvalidAuthority);
         }
         sql(self.database().exec("INSERT INTO document_grants VALUES(?,?,?,?,?,?,1) ON CONFLICT(grant_id) DO UPDATE SET generation=excluded.generation,owner_epoch=excluded.owner_epoch,document_json=excluded.document_json,permissions=excluded.permissions,expires_at_ms=excluded.expires_at_ms,active=1", &[&authority.grant_id, authority.generation.as_str(), self.owner_epoch(), &encode(document)?, &encode(&operations)?, &expires_at_ms.to_string()]))?;
+        let mut queued = Vec::new();
+        if let Some(previous) = old_document.as_ref() {
+            queued.push((previous, self.invalidate_document_dependents_in_transaction(&tx, previous)?));
+        }
+        if old_document.as_ref() != Some(document) {
+            queued.push((document, self.invalidate_document_dependents_in_transaction(&tx, document)?));
+        }
+        for (changed, events) in &queued {
+            self.verify_document_source_notifications_in_transaction(&tx, changed, events)?;
+        }
+        self.document_grant_write_postcondition(authority, &encode(document)?, &encode(&operations)?, &expires_at_ms.to_string(), "1")?;
+        self.document_grant(&DocumentAccess { document: document.clone(), authority: authority.clone() }, operations)?;
+        if self.current_document(document)? != expected_metadata { return Err(ContractError::StorageCorrupt); }
         sql(tx.commit())
+    }
+    // Read-only exact write receipt, after all hook/outbox writes. This is not
+    // authorization: normal grant expiry/project checks still run for issue.
+    fn document_grant_write_postcondition(&self, authority: &AuthorityBinding, document_json: &str, permissions: &str, expires: &str, active: &str) -> Result<()> {
+        let rows = sql(self.database().query("SELECT 1 FROM document_grants WHERE grant_id=? AND generation=? AND owner_epoch=? AND document_json=? AND permissions=? AND expires_at_ms=? AND active=?", &[&authority.grant_id, authority.generation.as_str(), self.owner_epoch(), document_json, permissions, expires, active]))?;
+        if rows.len() != 1 { return Err(ContractError::StorageCorrupt); }
+        Ok(())
+    }
+    fn document_grant_target(&self, payload: &str) -> Result<DocumentRef> {
+        let document: DocumentRef = decode(payload)?;
+        if document.scope().workspace_id != self.workspace_id() || document.scope().project_id.is_none() || document.revision().value() == 0 {
+            return Err(ContractError::StorageCorrupt);
+        }
+        Ok(document)
     }
     pub fn revoke_document_grant_trusted(&self, authority: &AuthorityBinding) -> Result<()> {
         let tx = sql(self.database().transaction())?;
@@ -628,10 +664,15 @@ impl BusinessStore {
         if authority.owner_epoch != self.owner_epoch() {
             return Err(ContractError::InvalidAuthority);
         }
+        let targets = sql(self.database().query("SELECT CASE WHEN length(CAST(document_json AS BLOB))<=8192 THEN document_json ELSE NULL END,CASE WHEN length(CAST(permissions AS BLOB))<=1024 THEN permissions ELSE NULL END,CASE WHEN length(CAST(expires_at_ms AS BLOB))<=20 THEN expires_at_ms ELSE NULL END FROM document_grants WHERE grant_id=? AND generation=? AND owner_epoch=?", &[&authority.grant_id, authority.generation.as_str(), self.owner_epoch()]))?;
+        let target = self.document_grant_target(cell(targets.first().ok_or(ContractError::InvalidAuthority)?, 0)?)?;
         let changed = sql(self.database().exec("UPDATE document_grants SET active=0 WHERE grant_id=? AND generation=? AND owner_epoch=?", &[&authority.grant_id, authority.generation.as_str(), self.owner_epoch()]))?;
         if changed != 1 {
             return Err(ContractError::InvalidAuthority);
         }
+        self.invalidate_document_dependents_in_transaction(&tx, &target)?;
+        let original = targets.first().ok_or(ContractError::InvalidAuthority)?;
+        self.document_grant_write_postcondition(authority, cell(original, 0)?, cell(original, 1)?, cell(original, 2)?, "0")?;
         sql(tx.commit())
     }
     pub fn read_document(&self, access: &DocumentAccess) -> Result<DocumentMetadata> {

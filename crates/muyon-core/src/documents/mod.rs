@@ -137,3 +137,6 @@ pub struct RevisionPrecondition {
     pub document: DocumentRef,
     pub authority: AuthorityBinding,
 }
+pub mod source_notifications;
+#[cfg(test)]
+mod source_notification_tests;
