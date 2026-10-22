@@ -1,0 +1,25 @@
+Actual source checkout: 78c3f85c1a1cdf50ddbac71f21ceb41d94c0ae16
+Actual Rust source manifest SHA256: 9c7723e33eff57de884122c4c275dd00f39da8fa5e709f1118cb67fcea1e26c7
+Runner SHA256: 0ca6f7223a30d44adffb1a6d781b66064fbed7881f2af3cb75aa7ba0be5c6b19
+Generated module-only harness: /tmp/muyon-evidence-store-harness-w8w8z0bh
+All harness dependencies match repository lock versions/sources/checksums
+   Compiling muyon-core v0.1.0 (/tmp/muyon-evidence-store-harness-w8w8z0bh)
+    Finished `test` profile [unoptimized] target(s) in 3.20s
+     Running unittests lib.rs (/tmp/evidence-store-final-target/debug/deps/muyon_core-b4ac5d1e8b153320)
+
+running 12 tests
+test evidence::store::tests::inspect_is_not_readtext_and_failure_opens_no_reader ... ok
+test evidence::store::tests::corrupt_controlled_blob_never_uses_previous_cache_as_success ... ok
+test evidence::store::tests::changed_current_revision_never_rebinds_old_evidence ... ok
+test evidence::store::tests::malformed_saved_text_is_failed_processing_not_saved_or_index_success ... ok
+test evidence::store::tests::original_unknown_intents_are_not_looked_up_retried_or_changed ... ok
+test evidence::store::tests::actual_registered_pdf_and_ocr_have_unsupported_receipt_not_fake_content ... ok
+test evidence::store::tests::owner_delivery_transaction_excludes_other_sqlite_writer ... ok
+test evidence::store::tests::processing_errors_release_actual_reader_pins_without_new_intents ... ok
+test evidence::store::tests::reader_lease_and_grant_mutation_in_same_transaction_block_delivery ... ok
+test evidence::store::tests::real_saved_text_readtext_grant_produces_processing_receipt_and_exact_quote ... ok
+test evidence::store::tests::unknown_pdf_and_relabelled_pdf_never_gain_utf8_processing ... ok
+test evidence::store::tests::persisted_revocation_expiry_generation_epoch_and_project_deletion_deny_cached_results ... ok
+
+test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 35 filtered out; finished in 0.05s
+
