@@ -5,6 +5,43 @@ import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicReference
 
 fun readerBatchChecks() {
+    // Revocation during native work blocks more business calls but MUST NOT drop
+    // the original administrative drain or exact output disposal.
+    run {
+        var alive = true
+        val owner = LocalWorkspaceReaderPrincipal("workspace", "epoch", "session", "project", 1, Any()) { alive }
+        val registry = ReaderAdmissionRegistry(owner, ReaderDocumentBatchDomain())
+        val selected = registry.acceptSelection(owner, 1, ExactReaderSource("workspace", "project", "doc", "1", "pdf", "a".repeat(64)))
+        var drained = 0; var cleared = 0; var discarded = 0
+        check(runCatching { registry.runNativeDocumentBatch(owner, selected, { permit ->
+            permit.requireBusiness(owner); alive = false
+            check(runCatching { permit.requireBusiness(owner) }.isFailure)
+            "synthetic-native-result"
+        }, { permit -> permit.requireAdministrative(); drained++; ReaderBatchInvalidation.CLEAN },
+            { check(it === selected); cleared++ }, { error("unexpected_global_clear") }, { discarded++ }) }.isFailure)
+        check(drained == 1 && cleared == 1 && discarded == 1)
+    }
+    // A native transport permit cannot escape its serialized operation+drain batch.
+    run {
+        val owner = LocalWorkspaceReaderPrincipal("workspace", "epoch", "session", "project", 1, Any()) { true }
+        val registry = ReaderAdmissionRegistry(owner, ReaderDocumentBatchDomain())
+        val selected = registry.acceptSelection(owner, 1, ExactReaderSource("workspace", "project", "doc", "1", "pdf", "a".repeat(64)))
+        var captured: ReaderNativeBatchPermit? = null
+        registry.runNativeDocumentBatch(owner, selected, { permit ->
+            permit.requireBusiness(owner)
+            permit.requireSource(selected.source)
+            check(runCatching { permit.requireSource(selected.source.copy(documentId = "foreign")) }.isFailure)
+            check(runCatching { permit.requireAdministrative(ReaderDocumentBatchDomain()) }.isFailure)
+            val offThread = java.util.concurrent.atomic.AtomicBoolean(false)
+            val thread = Thread { offThread.set(runCatching { permit.requireBusiness(owner) }.isFailure) }
+            thread.start(); thread.join(1000); check(!thread.isAlive && offThread.get())
+            captured = permit; "fixture"
+        }, { permit -> permit.requireAdministrative(); ReaderBatchInvalidation.CLEAN }, {}, {}, {})
+        check(runCatching { checkNotNull(captured).requireBusiness(owner) }.isFailure)
+        check(runCatching { checkNotNull(captured).requireAdministrative() }.isFailure)
+        check(registry.isCurrent(owner, selected))
+    }
+
     fun interleave(globalClear: Boolean) {
         val domain = ReaderDocumentBatchDomain()
         val a = LocalWorkspaceReaderPrincipal("w", "epoch", "A", "p", 1, Any()) { true }

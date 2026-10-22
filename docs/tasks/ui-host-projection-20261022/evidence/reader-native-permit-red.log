@@ -1,0 +1,36 @@
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/documents/host/ReaderBatchChecks.kt:13:23: error: unresolved reference 'ReaderNativeBatchPermit'.
+        var captured: ReaderNativeBatchPermit? = null
+                      ^^^^^^^^^^^^^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/documents/host/ReaderBatchChecks.kt:14:18: error: unresolved reference 'runNativeDocumentBatch'.
+        registry.runNativeDocumentBatch(owner, selected, { permit ->
+                 ^^^^^^^^^^^^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/documents/host/ReaderBatchChecks.kt:14:60: error: cannot infer type for value parameter 'permit'. Specify it explicitly.
+        registry.runNativeDocumentBatch(owner, selected, { permit ->
+                                                           ^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/documents/host/ReaderBatchChecks.kt:15:20: error: unresolved reference 'requireBusiness'.
+            permit.requireBusiness(owner); captured = permit; "fixture"
+                   ^^^^^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/documents/host/ReaderBatchChecks.kt:16:14: error: cannot infer type for value parameter 'permit'. Specify it explicitly.
+        }, { permit -> permit.requireAdministrative(); ReaderBatchInvalidation.CLEAN }, {}, {}, {})
+             ^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/documents/host/ReaderBatchChecks.kt:16:31: error: unresolved reference 'requireAdministrative'.
+        }, { permit -> permit.requireAdministrative(); ReaderBatchInvalidation.CLEAN }, {}, {}, {})
+                              ^^^^^^^^^^^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/documents/host/ReaderBatchChecks.kt:17:15: error: cannot infer type for type parameter 'R'. Specify it explicitly.
+        check(runCatching { checkNotNull(captured).requireBusiness(owner) }.isFailure)
+              ^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/documents/host/ReaderBatchChecks.kt:17:29: error: cannot infer type for type parameter 'T'. Specify it explicitly.
+        check(runCatching { checkNotNull(captured).requireBusiness(owner) }.isFailure)
+                            ^^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/documents/host/ReaderBatchChecks.kt:17:52: error: unresolved reference 'requireBusiness'.
+        check(runCatching { checkNotNull(captured).requireBusiness(owner) }.isFailure)
+                                                   ^^^^^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/documents/host/ReaderBatchChecks.kt:18:15: error: cannot infer type for type parameter 'R'. Specify it explicitly.
+        check(runCatching { checkNotNull(captured).requireAdministrative() }.isFailure)
+              ^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/documents/host/ReaderBatchChecks.kt:18:29: error: cannot infer type for type parameter 'T'. Specify it explicitly.
+        check(runCatching { checkNotNull(captured).requireAdministrative() }.isFailure)
+                            ^^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/documents/host/ReaderBatchChecks.kt:18:52: error: unresolved reference 'requireAdministrative'.
+        check(runCatching { checkNotNull(captured).requireAdministrative() }.isFailure)
+                                                   ^^^^^^^^^^^^^^^^^^^^^

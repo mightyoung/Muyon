@@ -8,6 +8,7 @@ import com.mightyoung.muyon.productbridge.ProductException
 import android.util.Base64
 import com.mightyoung.muyon.product.documents.host.LocalWorkspaceReaderPrincipal
 import com.mightyoung.muyon.product.documents.host.ReaderDocumentBatchDomain
+import com.mightyoung.muyon.product.documents.host.NativeReaderPresentationPort
 import com.mightyoung.muyon.product.documents.host.ReaderAdmissionRegistry
 import com.mightyoung.muyon.product.chat.ProductChatPort
 import com.mightyoung.muyon.product.chat.ProductChatRuntime
@@ -170,6 +171,8 @@ class ProductService : Service() {
     /** Private typed reader adapter only. No JSON principal/allow parameter or model route.
      * Identity facts do not authorize documents; current native policy remains mandatory. */
     private fun newReaderAdmission(principal: LocalWorkspaceReaderPrincipal) = ReaderAdmissionRegistry(principal, readerDocumentBatches)
+    private fun newReaderPresentationTransport(principal: LocalWorkspaceReaderPrincipal) =
+        NativeReaderPresentationPort(principal, readerDocumentBatches) { open(false) }
     private fun withReaderPrincipal(owner: IBinder, project: String?, generation: Long,
         callback: (LocalWorkspaceReaderPrincipal?) -> Unit) {
         val session = clients[owner]

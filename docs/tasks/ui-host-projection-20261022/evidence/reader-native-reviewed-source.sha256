@@ -1,0 +1,3 @@
+73c540bdfc3cd2fd75d3c11fdbc88197d4a8f416e05c3910d670abbb27eb1b54  apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/documents/host/ReaderAdmissionRegistry.kt
+d53946d3362880e88efeef3874201fc10a22f65d6211c6247493d36c827a8084  apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/documents/host/NativeReaderPresentationPort.kt
+cfe984426643f3218f51faa679b3539c79c20e9505b96f33bbbacf869bfc0087  apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/documents/host/ReaderBatchChecks.kt

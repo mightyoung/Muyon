@@ -2,6 +2,23 @@ package com.mightyoung.muyon.product.documents.host
 
 /** Host selection identity only; NOT a native token, grant or presentation. */
 internal class ReaderSelectionLease internal constructor(val source: ExactReaderSource, val sequence: Long)
+/** Ephemeral in-process native-call admission; never serializable or a grant. */
+internal class ReaderNativeBatchPermit internal constructor(
+    private val domain: ReaderDocumentBatchDomain, private val owner: LocalWorkspaceReaderPrincipal,
+    private val source: ExactReaderSource, private val businessCurrent: () -> Boolean,
+) {
+    private var thread: Thread? = null
+    internal fun enter() { check(thread == null); thread = Thread.currentThread() }
+    internal fun exit() { thread = null }
+    fun requireAdministrative(expectedDomain: ReaderDocumentBatchDomain = domain) {
+        check(expectedDomain === domain && thread === Thread.currentThread() && Thread.holdsLock(domain.lock) && domain.inBatch)
+    }
+    fun requireSource(expectedSource: ExactReaderSource) { requireAdministrative(); check(source == expectedSource && businessCurrent()) }
+    fun requireBusiness(principal: LocalWorkspaceReaderPrincipal, expectedDomain: ReaderDocumentBatchDomain = domain) {
+        requireAdministrative(expectedDomain)
+        check(owner.sameOwnerScope(principal) && businessCurrent())
+    }
+}
 internal enum class ReaderBatchInvalidation { CLEAN, CURRENT_TERMINAL, CLEAR_ALL }
 
 /** ONE instance per actual Service/native owner, shared by every reader surface.
@@ -81,6 +98,18 @@ internal class ReaderAdmissionRegistry(private val owner: LocalWorkspaceReaderPr
             }
             checkNotNull(value)
         } finally { domain.inBatch = false }
+    }
+    /** The actual generated-binding transport requires this ephemeral permit.
+     * Administrative drain remains admitted after scope loss during the operation. */
+    fun <T : Any> runNativeDocumentBatch(principal: LocalWorkspaceReaderPrincipal, selection: ReaderSelectionLease,
+        operation: (ReaderNativeBatchPermit) -> T, drain: (ReaderNativeBatchPermit) -> ReaderBatchInvalidation,
+        clearSelectionOutput: (ReaderSelectionLease) -> Unit, clearAllOutputs: () -> Unit,
+        discardExactResult: (T) -> Unit): T {
+        val permit = ReaderNativeBatchPermit(domain, owner, selection.source) { current(principal, selection) }
+        return try {
+            runDocumentBatch(principal, selection, { permit.enter(); operation(permit) }, { drain(permit) },
+                clearSelectionOutput, clearAllOutputs, discardExactResult)
+        } finally { permit.exit() }
     }
     /** Old callback cannot terminate a newer selection. Never “close current”. */
     fun stopIfCurrent(principal: LocalWorkspaceReaderPrincipal, selection: ReaderSelectionLease): Boolean = synchronized(domain.lock) {

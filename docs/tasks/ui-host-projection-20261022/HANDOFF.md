@@ -182,3 +182,18 @@ A1->B2->A3 cannot invoke destructive coreopen or clear/close B's frame. No newgr
 or callback may revive stopped/revoked/poisoned intent or switch source revision.
 Real >30s foreground/background/page/principal/revoke/generation/late-response Android
 acceptance remains NOT_RUN; verifiedfalse, business writes/external ops still closed.
+
+
+## Latest actual presentation Host checkpoint
+
+Read NATIVE-PRESENTATION-CONSUMER.md and LOCAL-WORKSPACE-READER-POLICY-REQUEST.md.
+Identity/batch86fc3fe7193a14d99ce72d107f07a1add7794552 independently reviewed;
+actual B662/generated01e1 adopted by ordinary mergea2314cec535261e7ceec3d1133e7828f04f678ea.
+New NativeReaderPresentationPort consumes exact seven generated methods, shared
+Service-native domain + original-source/thread/lifetime-bound permit. Scope-dead
+admin drain remains admitted; no grant issuance or latestframe. Final admission and
+Runtime regressions PASS and independent final PASS; original REDs remain.
+Actual Android compile exit2 NOT_RUN (existing Gradle8.13 missing). Adapter itself
+not compiled by pure runner. No actual IPC/catalog/policy/PFD/Activity join or >30s
+acceptance; verified=false. These private typed seams are NOT ready Shell IPC.
+No permission decision, synthetic/native equivalence or overall completion claimed.
