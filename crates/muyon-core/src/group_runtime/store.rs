@@ -243,6 +243,12 @@ impl GroupScope {
         Ok(scope)
     }
 }
+// Captured from the actual active grant in the effect transaction. This is not
+// a reusable permission token; only the final exact UPDATE may consume it.
+#[derive(PartialEq, Eq)]
+struct GroupGrantWitness {
+    expires_at_ms: String,
+}
 impl BusinessStore {
     /// Explicitly creates only the extension namespace, never a group/account.
     pub fn initialize_group_runtime(&self) -> Result<()> {
@@ -312,12 +318,100 @@ impl BusinessStore {
         }
         Ok(())
     }
-    fn group_authority(&self, c: &GroupCommand, binding: &str) -> Result<()> {
+    fn group_authority(&self, c: &GroupCommand, binding: &str) -> Result<GroupGrantWitness> {
         if c.authority.owner_epoch != self.owner_epoch() {
             return Err(ContractError::InvalidAuthority);
         }
-        let rows=io(self.database().query("SELECT expires_at_ms FROM business_grants WHERE grant_id=? AND generation=? AND owner_epoch=? AND binding_digest=? AND active=1",&[&c.authority.grant_id,c.authority.generation.as_str(),self.owner_epoch(),binding]))?;
-        if rows.len() != 1 || now()? >= Revision::parse(cell(&rows[0], 0)?)?.value() {
+        let rows=io(self.database().query("SELECT expires_at_ms,admission_id FROM business_grants WHERE grant_id=? AND generation=? AND owner_epoch=? AND binding_digest=? AND active=1",&[&c.authority.grant_id,c.authority.generation.as_str(),self.owner_epoch(),binding]))?;
+        if rows.len() != 1
+            || rows[0][1].is_some()
+            || now()? >= Revision::parse(cell(&rows[0], 0)?)?.value()
+        {
+            return Err(ContractError::InvalidAuthority);
+        }
+        Ok(GroupGrantWitness {
+            expires_at_ms: cell(&rows[0], 0)?.into(),
+        })
+    }
+    fn group_verify_intent_tail(
+        &self,
+        c: &GroupCommand,
+        binding: &str,
+        status: &str,
+        receipt: &LocalReceipt,
+    ) -> Result<()> {
+        let expected = vec![
+            Some(c.workspace_id.clone()),
+            Some(c.project_id.clone()),
+            Some(c.group_id.clone()),
+            Some(binding.into()),
+            Some(status.into()),
+            Some(encode(receipt)?),
+        ];
+        let rows=io(self.database().query("SELECT workspace,project_id,group_id,binding_digest,status,receipt FROM group_runtime_local_intents WHERE intent_id=?",&[&c.intent_id]))?;
+        if rows != vec![expected] {
+            return Err(ContractError::Storage);
+        }
+        Ok(())
+    }
+    fn group_consume_and_verify_tail(
+        &self,
+        tx: &crate::sqlite::Transaction<'_>,
+        c: &GroupCommand,
+        binding: &str,
+        grant: &GroupGrantWitness,
+        receipt: &LocalReceipt,
+        group_after_effect: &[Vec<Option<String>>],
+    ) -> Result<()> {
+        let db = self.database();
+        if !tx.belongs_to(db) {
+            return Err(ContractError::Storage);
+        }
+        // A consumed-looking row is insufficient: prove THIS transaction matched
+        // the original active row, including its exact expiry and local-only
+        // admission namespace. No CAST or lexical comparison of u64 TEXT.
+        if self.group_authority(c, binding)? != *grant {
+            return Err(ContractError::InvalidAuthority);
+        }
+        if io(db.exec("UPDATE business_grants SET active=0 WHERE grant_id=? AND generation=? AND owner_epoch=? AND binding_digest=? AND active=1 AND admission_id IS NULL AND expires_at_ms=?",&[&c.authority.grant_id,c.authority.generation.as_str(),self.owner_epoch(),binding,&grant.expires_at_ms]))? != 1 { return Err(ContractError::InvalidAuthority); }
+        // All writes (including the consumption UPDATE) can run SQL triggers.
+        // Only reads follow, then the caller commits this very transaction.
+        self.group_check(c)?;
+        let scope = GroupScope::current(self, &c.project_id, &c.group_id)?;
+        let group = self.group_registration(&scope)?;
+        if group.revision != receipt.revision {
+            return Err(ContractError::RevisionConflict);
+        }
+        let actual_group=io(db.query("SELECT workspace,project_id,revision,record FROM group_runtime_groups WHERE group_id=?",&[&c.group_id]))?;
+        if actual_group != group_after_effect {
+            return Err(ContractError::ScopeMismatch);
+        }
+        self.group_verify_intent_tail(c, binding, "committed", receipt)?;
+        let events = io(db.query(
+            "SELECT group_id,run_id,record FROM group_runtime_events WHERE intent_id=?",
+            &[&c.intent_id],
+        ))?;
+        if events
+            != vec![vec![
+                Some(c.group_id.clone()),
+                Some(run_id(&c.operation).unwrap_or("").into()),
+                Some(encode(&c.operation)?),
+            ]]
+        {
+            return Err(ContractError::Storage);
+        }
+        let consumed=io(db.query("SELECT generation,owner_epoch,binding_digest,active,admission_id,expires_at_ms FROM business_grants WHERE grant_id=?",&[&c.authority.grant_id]))?;
+        if consumed
+            != vec![vec![
+                Some(c.authority.generation.as_str().into()),
+                Some(self.owner_epoch().into()),
+                Some(binding.into()),
+                Some("0".into()),
+                None,
+                Some(grant.expires_at_ms.clone()),
+            ]]
+            || now()? >= Revision::parse(&grant.expires_at_ms)?.value()
+        {
             return Err(ContractError::InvalidAuthority);
         }
         Ok(())
@@ -394,9 +488,12 @@ impl BusinessStore {
         let result = (|| {
             let tx = io(db.transaction())?;
             self.group_check(c)?;
-            self.group_authority(c, &binding)?;
+            let original_grant = self.group_authority(c, &binding)?;
             let result = self.group_effect(c, owner)?;
-            self.group_authority(c, &binding)?;
+            if self.group_authority(c, &binding)? != original_grant {
+                return Err(ContractError::InvalidAuthority);
+            }
+            let group_after_effect=io(db.query("SELECT workspace,project_id,revision,record FROM group_runtime_groups WHERE group_id=?",&[&c.group_id]))?;
             let receipt = LocalReceipt {
                 intent_id: c.intent_id.clone(),
                 status: LocalStatus::Committed,
@@ -413,7 +510,14 @@ impl BusinessStore {
                 ],
             ))?;
             if io(db.exec("UPDATE group_runtime_local_intents SET status='committed',receipt=? WHERE intent_id=? AND binding_digest=? AND status='pending'",&[&encode(&receipt)?,&c.intent_id,&binding]))?!=1{return Err(ContractError::IntentConflict)}
-            if io(db.exec("UPDATE business_grants SET active=0 WHERE grant_id=? AND generation=? AND owner_epoch=? AND binding_digest=? AND active=1",&[&c.authority.grant_id,c.authority.generation.as_str(),self.owner_epoch(),&binding]))?!=1{return Err(ContractError::InvalidAuthority)}
+            self.group_consume_and_verify_tail(
+                &tx,
+                c,
+                &binding,
+                &original_grant,
+                &receipt,
+                &group_after_effect,
+            )?;
             io(tx.commit())?;
             Ok(receipt)
         })();
@@ -427,16 +531,21 @@ impl BusinessStore {
                 | ContractError::StorageCorrupt,
             ) => Ok(pending(c)),
             Err(e) => {
-                let tx = io(db.transaction())?;
                 let r = LocalReceipt {
                     intent_id: c.intent_id.clone(),
                     status: LocalStatus::Rejected,
                     revision: c.expected_revision.clone(),
                     result: serde_json::json!({"error":e,"execution_authority":false}),
                 };
-                io(db.exec("UPDATE group_runtime_local_intents SET status='rejected',receipt=? WHERE intent_id=? AND status='pending'",&[&encode(&r)?,&c.intent_id]))?;
-                io(tx.commit())?;
-                Ok(r)
+                let rejected = (|| -> Result<()> {
+                    let tx = io(db.transaction())?;
+                    if io(db.exec("UPDATE group_runtime_local_intents SET status='rejected',receipt=? WHERE intent_id=? AND workspace=? AND project_id=? AND group_id=? AND binding_digest=? AND status='pending'",&[&encode(&r)?,&c.intent_id,self.workspace_id(),&c.project_id,&c.group_id,&binding]))?!=1 { return Err(ContractError::Storage); }
+                    self.group_verify_intent_tail(c, &binding, "rejected", &r)?;
+                    io(tx.commit())
+                })();
+                // A suppressed/changed/failed/uncertain rejection write does not
+                // prove a terminal receipt. Drop rolls it back; query original.
+                Ok(if rejected.is_ok() { r } else { pending(c) })
             }
         }
     }
@@ -513,7 +622,7 @@ impl BusinessStore {
         let request = n.request_id.ok_or(ContractError::NotFound)?;
         if owner
             .request_conversation(&request)
-            .map_err(|_| ContractError::NotFound)?
+            .map_err(original_identity_read_error)?
             != g.conversation_id
         {
             return Err(ContractError::ScopeMismatch);
@@ -797,15 +906,15 @@ impl BusinessStore {
                     }
                     if owner
                         .request_conversation(request_id)
-                        .map_err(|_| ContractError::NotFound)?
+                        .map_err(original_identity_read_error)?
                         != g.conversation_id
                     {
                         return Err(ContractError::ScopeMismatch);
                     }
                     let chain = owner
                         .request_chain(request_id)
-                        .map_err(|_| ContractError::Unknown)?;
-                    let receipt = chain.last().ok_or(ContractError::Unknown)?;
+                        .map_err(|_| ContractError::Storage)?;
+                    let receipt = chain.last().ok_or(ContractError::Storage)?;
                     n.request_id = Some(request_id.clone());
                     n.state = if terminal(&receipt.status) {
                         receipt.status.clone()
@@ -818,7 +927,9 @@ impl BusinessStore {
                     node_id, evidence, ..
                 } => {
                     let owner = owner.ok_or(ContractError::InvalidAuthority)?;
-                    let receipt = self.group_lookup_original(&scope, rid, node_id, owner)?;
+                    let receipt = self
+                        .group_lookup_original(&scope, rid, node_id, owner)
+                        .map_err(inconclusive_original_read)?;
                     let mut n = self.group_node(&scope, rid, node_id)?;
                     // Late original receipts may update historical evidence,
                     // never current-epoch advice or authority.
@@ -865,12 +976,21 @@ impl BusinessStore {
                     self.group_owner(&scope, owner)?;
                     owner
                         .ensure_conversation_resolved(&group.conversation_id)
-                        .map_err(|_| ContractError::Unknown)?;
+                        .map_err(|error| {
+                            if error == "conversation_original_outcome_required" {
+                                // Actual owner positively proves an unresolved original:
+                                // this local handoff is definitely refused.
+                                ContractError::Unknown
+                            } else {
+                                ContractError::Storage
+                            }
+                        })?;
                     let mut nodes = self.group_nodes(&scope, rid)?;
                     for n in &mut nodes {
                         if n.request_id.is_some() {
-                            let original =
-                                self.group_lookup_original(&scope, rid, &n.node_id, owner)?;
+                            let original = self
+                                .group_lookup_original(&scope, rid, &n.node_id, owner)
+                                .map_err(inconclusive_original_read)?;
                             if !terminal(&original.status) {
                                 return Err(ContractError::Unknown);
                             }
@@ -979,4 +1099,22 @@ fn run_id(op: &GroupOperation) -> Option<&str> {
 }
 fn terminal(s: &str) -> bool {
     matches!(s, "completed" | "failed" | "cancelled")
+}
+
+// A failed original-owner read is inconclusive; unlike a positively observed
+// unresolved original it must not fabricate a definitive local rejection.
+fn inconclusive_original_read(error: ContractError) -> ContractError {
+    if error == ContractError::Unknown {
+        ContractError::Storage
+    } else {
+        error
+    }
+}
+
+fn original_identity_read_error(error: &'static str) -> ContractError {
+    match error {
+        "agent_request_not_found" => ContractError::NotFound,
+        "agent_identity_invalid" => ContractError::InvalidIdentity,
+        _ => ContractError::Storage,
+    }
 }

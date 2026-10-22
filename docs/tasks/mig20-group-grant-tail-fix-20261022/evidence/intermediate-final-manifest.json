@@ -1,0 +1,140 @@
+{
+  "cwd": "/workspace/mig20",
+  "environment": {
+    "CARGO_HOME": "/tmp/mig20-cargo",
+    "CARGO_TARGET_DIR": "/tmp/mig20-target",
+    "RUSTFLAGS": "-L native=/tmp/mig20-native-libs"
+  },
+  "runs": [
+    {
+      "name": "final-rustc",
+      "command": [
+        "/tmp/mig20-rust/bin/rustc",
+        "--version",
+        "--verbose"
+      ],
+      "start_utc": "2026-10-22T05:59:18.476930+00:00",
+      "end_utc": "2026-10-22T05:59:18.484902+00:00",
+      "exit_code": 0
+    },
+    {
+      "name": "final-runtime-compile",
+      "command": [
+        "/tmp/mig20-rust/bin/rustc",
+        "--edition=2021",
+        "-D",
+        "warnings",
+        "--test",
+        "crates/muyon-core/tests/group_runtime.rs",
+        "-o",
+        "/tmp/mig20-final-runtime"
+      ],
+      "start_utc": "2026-10-22T05:59:18.485171+00:00",
+      "end_utc": "2026-10-22T05:59:18.967767+00:00",
+      "exit_code": 0
+    },
+    {
+      "name": "final-runtime",
+      "command": [
+        "/tmp/mig20-final-runtime"
+      ],
+      "start_utc": "2026-10-22T05:59:18.968193+00:00",
+      "end_utc": "2026-10-22T05:59:18.971494+00:00",
+      "exit_code": 0
+    },
+    {
+      "name": "final-governance-compile",
+      "command": [
+        "/tmp/mig20-rust/bin/rustc",
+        "--edition=2021",
+        "-D",
+        "warnings",
+        "--test",
+        "crates/muyon-core/tests/group_governance.rs",
+        "-o",
+        "/tmp/mig20-final-governance"
+      ],
+      "start_utc": "2026-10-22T05:59:18.971718+00:00",
+      "end_utc": "2026-10-22T05:59:19.311349+00:00",
+      "exit_code": 0
+    },
+    {
+      "name": "final-governance",
+      "command": [
+        "/tmp/mig20-final-governance"
+      ],
+      "start_utc": "2026-10-22T05:59:19.311764+00:00",
+      "end_utc": "2026-10-22T05:59:19.316961+00:00",
+      "exit_code": 0
+    },
+    {
+      "name": "final-format",
+      "command": [
+        "/tmp/mig20-rust/bin/rustfmt",
+        "--edition",
+        "2021",
+        "--check",
+        "crates/muyon-core/src/group_runtime/mod.rs",
+        "crates/muyon-core/tests/group_runtime.rs",
+        "crates/muyon-core/src/group_runtime/store.rs",
+        "crates/muyon-core/tests/group_runtime_store.rs"
+      ],
+      "start_utc": "2026-10-22T05:59:19.317203+00:00",
+      "end_utc": "2026-10-22T05:59:19.498226+00:00",
+      "exit_code": 0
+    },
+    {
+      "name": "final-store",
+      "command": [
+        "/tmp/mig20-rust/bin/cargo",
+        "test",
+        "--manifest-path",
+        "crates/Cargo.toml",
+        "-p",
+        "muyon-core",
+        "--locked",
+        "--offline",
+        "--test",
+        "group_runtime_store"
+      ],
+      "start_utc": "2026-10-22T05:59:19.498581+00:00",
+      "end_utc": "2026-10-22T05:59:20.781584+00:00",
+      "exit_code": 0
+    },
+    {
+      "name": "final-cargo",
+      "command": [
+        "/tmp/mig20-rust/bin/cargo",
+        "test",
+        "--manifest-path",
+        "crates/Cargo.toml",
+        "-p",
+        "muyon-core",
+        "--locked",
+        "--offline"
+      ],
+      "start_utc": "2026-10-22T05:59:20.782154+00:00",
+      "end_utc": "2026-10-22T06:00:02.109359+00:00",
+      "exit_code": 0
+    },
+    {
+      "name": "final-diff",
+      "command": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "start_utc": "2026-10-22T06:00:02.109722+00:00",
+      "end_utc": "2026-10-22T06:00:02.116617+00:00",
+      "exit_code": 0
+    }
+  ],
+  "sha256": {
+    "crates/muyon-core/src/group_runtime/mod.rs": "db2aa97ea80560fb218e07381b36357c9e3862079e75ad25ea949691128cf1c0",
+    "crates/muyon-core/tests/group_runtime.rs": "513770b074fb6e5d6ad836d38b16ba57025d974e0aaf0c41ac36e6f65973267c",
+    "crates/muyon-core/src/group_governance/mod.rs": "0cea48fe4e01a95c0980e0d77d4ece899f6aa86adc58c4c43a8d2b068a2b0099",
+    "crates/Cargo.lock": "3a87fdce6228dff89d292547057627f999e7286ccf0a774c1683c4ba5f95f367",
+    "crates/muyon-core/src/group_runtime/store.rs": "2ced65d1e2baa5e3dc8b705ee6d186f836e5f1d7df900daf9f8346cdbbc1690d",
+    "crates/muyon-core/tests/group_runtime_store.rs": "4545917fdd56e529a9cf644ec576373336324aad473ce21bea305806287e1151"
+  }
+}
