@@ -109,8 +109,10 @@ class MainActivity : ComponentActivity() {
                     onTogglePin = { key ->
                         val pins = shellPreferences.getStringSet("pinned", emptySet()).orEmpty()
                         val next = if (key in pins) pins - key else pins + key
-                        if (shellPreferences.edit().putStringSet("pinned", next).commit()) shellRevision++
-                        else navigationError = "置顶状态未能保存，请重试。"
+                        if (shellPreferences.edit().putStringSet("pinned", next).commit()) {
+                            shellRevision++
+                            if (navigationError == "置顶状态未能保存，请重试。") navigationError = ""
+                        } else navigationError = "置顶状态未能保存，请重试。"
                     }) { openMenu ->
                     Column(Modifier.fillMaxSize()) {
                         if (tab == "chat" && (!connected || !initialized)) ConversationHeader(title, openMenu)

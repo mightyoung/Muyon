@@ -35,3 +35,9 @@ Build/device evidence must come from actual subsequent runs. The review did not
 independently execute Android compilation, IME/Back/rotation, TalkBack, screenshot,
 200% font or inherited Kotlin tests. Those tests' actual integrator-run evidence is
 listed separately in REPORT.md. No static approval is called runtime acceptance.
+
+Final public-document/notice review: only existing project navigation is enabled;
+common reader/edit actions disabled, no new engine/FFI/file authority. Menu failure
+notice visible inside the modal. One low feedback issue was identified and fixed:
+a successful pin commit now clears its specific previous failure message. Card and
+contract merges contain no production card call and are not described as adoption.
