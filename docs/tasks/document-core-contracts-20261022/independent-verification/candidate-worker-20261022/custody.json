@@ -1,0 +1,97 @@
+{
+  "at_utc": "2026-10-22T06:17:47.732612+00:00",
+  "old_26_evidence_hashes_unchanged": true,
+  "owner_copied_E0599_stderr_matches_original_bytes": true,
+  "results": [
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/workspace/Muyon-document-worker-fixed",
+        "rev-parse",
+        "HEAD"
+      ],
+      "exit_status": 0,
+      "stdout": "faeef3aec3a9407d7c15490dcdb33866413e7453\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/workspace/Muyon-document-worker-fixed",
+        "status",
+        "--short"
+      ],
+      "exit_status": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "git",
+        "diff",
+        "--exit-code",
+        "cab23b69b2aa56f55f3b44e0fe248f026da9c08d",
+        "faeef3aec3a9407d7c15490dcdb33866413e7453",
+        "--",
+        "crates"
+      ],
+      "exit_status": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "git",
+        "diff",
+        "--exit-code",
+        "263dfe4067612ba0206afa5ba4ad77dcf2d59744",
+        "--",
+        "crates",
+        "experiments"
+      ],
+      "exit_status": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/workspace/Muyon-group",
+        "rev-parse",
+        "HEAD"
+      ],
+      "exit_status": 0,
+      "stdout": "7fde617bab8f45644820590529def5b2f2193454\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/workspace/Muyon-group",
+        "status",
+        "--short"
+      ],
+      "exit_status": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "git",
+        "ls-remote",
+        "origin",
+        "refs/heads/task/document-core-contracts-20261022",
+        "refs/heads/task/document-core-verification-20261022",
+        "refs/heads/main",
+        "refs/heads/develop"
+      ],
+      "exit_status": 0,
+      "stdout": "0ab2c4f667681b9aacb017f8cd2eea6f576cf78e\trefs/heads/develop\ncc7c8d14d30e3d3c4c7c6cb2bf2059a99e46e003\trefs/heads/main\nfaeef3aec3a9407d7c15490dcdb33866413e7453\trefs/heads/task/document-core-contracts-20261022\n263dfe4067612ba0206afa5ba4ad77dcf2d59744\trefs/heads/task/document-core-verification-20261022\n",
+      "stderr": ""
+    }
+  ]
+}

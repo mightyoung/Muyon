@@ -53,3 +53,7 @@ history8通过不等于history reader/cache接线；旧head读取须独立授权
 原始NOT_RUN/TDD与旧轮次事实保持，main/develop/group/provider/作者分支未改，未合入/部署/付费，Leader B仍唯一合入执行者。总体结论：**targeted运行通过；全包编译阻断；scoped格式失败；生产发布硬拒，需owner修复再验。**
 
 本批证据SHA256SUMS覆盖本分目录其他所有文件（自身除外），可在目录执行sha256sum -c SHA256SUMS。全量staged diff-check exit2来自原始libtest/formatter输出空白；保留字节，排除本批原始.log后的编写文件检查exit0，命令与输出均在whitespace-check.json。未把证据空白当成源码格式已修或编译已过。
+
+## worker修复后新源实际复验
+
+本页8802bf的E0599与格式失败保持原记录。新完整源 `faeef3aec3a9407d7c15490dcdb33866413e7453`（生产源cab23b69）已经实际worker check exit0、worker48测试通过、core全包240次执行通过、scoped14文件fmt exit0，未改源或放行GC。240包含library/worker同源测试重复，不等于240独立场景，也不加上单独worker48。精确来源、原输出和计数交集见 [WORKER-FIX-RUST-RECHECK.md](WORKER-FIX-RUST-RECHECK.md)。本结论不代替txn/B405组合或生产发布验收。

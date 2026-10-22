@@ -1,0 +1,31 @@
+{
+  "at_utc": "2026-10-22T06:18:26.081809+00:00",
+  "raw_output_bytes_preserved": true,
+  "results": [
+    {
+      "argv": [
+        "git",
+        "diff",
+        "--cached",
+        "--check"
+      ],
+      "exit_status": 2,
+      "stdout": "docs/tasks/document-core-contracts-20261022/independent-verification/candidate-worker-20261022/core-full.stdout.log:330: new blank line at EOF.\ndocs/tasks/document-core-contracts-20261022/independent-verification/candidate-worker-20261022/worker-tests.stdout.log:53: new blank line at EOF.\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "git",
+        "diff",
+        "--cached",
+        "--check",
+        "--",
+        ".",
+        ":(exclude)docs/tasks/document-core-contracts-20261022/independent-verification/candidate-worker-20261022/*.log"
+      ],
+      "exit_status": 0,
+      "stdout": "",
+      "stderr": ""
+    }
+  ]
+}
