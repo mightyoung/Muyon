@@ -1,0 +1,27 @@
+{
+  "rustc": {
+    "argv": [
+      "/tmp/bot-cargo/bin/rustc",
+      "--version"
+    ],
+    "exit_code": 0,
+    "stdout": "rustc 1.99.0 (b940084d7 2026-09-28)\n",
+    "stderr": ""
+  },
+  "cargo": {
+    "argv": [
+      "/tmp/bot-cargo/bin/cargo",
+      "--version"
+    ],
+    "exit_code": 0,
+    "stdout": "cargo 1.99.0 (5f94df478 2026-08-27)\n",
+    "stderr": ""
+  },
+  "sqlite": {
+    "path": "/lib/x86_64-linux-gnu/libsqlite3.so.0",
+    "version": "3.46.1",
+    "sha256": "14c4418a06c5c2e30f5fb57bc8add93762236ae17898c6708984cf15e680ca71",
+    "temporary_linker_alias": "/tmp/bot-sqlite-link/libsqlite3.so",
+    "LIBRARY_PATH": "/tmp/bot-sqlite-link"
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "kind": "new_final_independent_tail_recheck",
+  "head": "00b042ea7748c315d7c3ab9f4c8b9b02fdd4660d",
+  "head_after": "00b042ea7748c315d7c3ab9f4c8b9b02fdd4660d",
+  "dependency": "098d9aca214e6642c1b3ffde64921ebedbae335d",
+  "dependency_sha256": "6514165380738130e639d4be1ab5440e1bcb09c7d82fd0184b22b986e0d3c678",
+  "registry_ddl_verbatim_matches_dependency": true,
+  "command": [
+    "python3",
+    "docs/tasks/bot-setup-draft-20261022/run-creation-checks.py"
+  ],
+  "cwd": "/workspace/bot-setup-draft",
+  "utc_start": "2026-10-22T06:36:49.902966Z",
+  "utc_end": "2026-10-22T06:36:55.647223Z",
+  "exit_code": 0,
+  "source_sha256_before": {
+    "crates/muyon-core/src/bot_definitions.rs": "fa62ca121575e0a9e1308e1465f20eacd565f29380f5612c70301f0881dc651d",
+    "crates/muyon-core/src/bot_definitions/tests.rs": "e16f915b8e7102cfe859dbb604c0b565c56d38b7e8731c1d51becaaadc18313d",
+    "docs/tasks/bot-setup-draft-20261022/run-creation-checks.py": "ebba19d7e67093b2a80436adecea5d4be54b4c42c050b5de10763d3513327ba4"
+  },
+  "source_sha256_after": {
+    "crates/muyon-core/src/bot_definitions.rs": "fa62ca121575e0a9e1308e1465f20eacd565f29380f5612c70301f0881dc651d",
+    "crates/muyon-core/src/bot_definitions/tests.rs": "e16f915b8e7102cfe859dbb604c0b565c56d38b7e8731c1d51becaaadc18313d",
+    "docs/tasks/bot-setup-draft-20261022/run-creation-checks.py": "ebba19d7e67093b2a80436adecea5d4be54b4c42c050b5de10763d3513327ba4"
+  },
+  "logs_sha256": {
+    "stderr.log": "52609270bfa66ae74447005d702adfbe89abbd4edcbb3aeb44feb2631027709f",
+    "stdout.log": "4caaebec806861467d30f0ba752b9fc9ed0ec751635061019a2abc1506b0c9ac"
+  }
+}

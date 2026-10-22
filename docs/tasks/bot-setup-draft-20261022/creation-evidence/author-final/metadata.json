@@ -1,0 +1,142 @@
+{
+  "head": "bdc58460410b4c5b51c52e10516f058a0079092e",
+  "kind": "new author synthetic SQLite combination, not product deployment",
+  "started_utc": "2026-10-22T06:22:26.949374+00:00",
+  "inputs_sha256": {
+    "crates/muyon-core/src/bot_definitions.rs": "41843c10a5c9a1848d138bd6cad4bbd5b7005bd3f9c51b694f40750d1ef3a9d2",
+    "crates/muyon-core/src/bot_definitions/tests.rs": "6d73d1ebc8a43350e3c92c05a5667112bb09b1fce361f4961c58284b77cf5d00",
+    "docs/tasks/bot-setup-draft-20261022/run-creation-checks.py": "a1540173a710bf88c551d64d231c56bc4764f093a027d6aa830433187d007d84"
+  },
+  "dependency_commit": "15c65c7c9c1f0af1e73c8092b2de2ac78939eea7",
+  "commands": [
+    {
+      "label": "baseline",
+      "argv": [
+        "python3",
+        "docs/tasks/bot-setup-draft-20261022/run-creation-checks.py"
+      ],
+      "cwd": "/workspace/bot-setup-draft",
+      "started_utc": "2026-10-22T06:22:26.951537+00:00",
+      "ended_utc": "2026-10-22T06:22:33.336329+00:00",
+      "exit_code": 0
+    },
+    {
+      "label": "review-digest",
+      "argv": [
+        "python3",
+        "docs/tasks/bot-setup-draft-20261022/run-creation-checks.py"
+      ],
+      "cwd": "/tmp/bot-create-mutation-8kmqlwrw/repo",
+      "started_utc": "2026-10-22T06:22:33.789367+00:00",
+      "ended_utc": "2026-10-22T06:22:39.428336+00:00",
+      "exit_code": 1
+    },
+    {
+      "label": "draft-cas",
+      "argv": [
+        "python3",
+        "docs/tasks/bot-setup-draft-20261022/run-creation-checks.py"
+      ],
+      "cwd": "/tmp/bot-create-mutation-e9aok3b9/repo",
+      "started_utc": "2026-10-22T06:22:39.902791+00:00",
+      "ended_utc": "2026-10-22T06:22:45.247585+00:00",
+      "exit_code": 1
+    },
+    {
+      "label": "draft-stop",
+      "argv": [
+        "python3",
+        "docs/tasks/bot-setup-draft-20261022/run-creation-checks.py"
+      ],
+      "cwd": "/tmp/bot-create-mutation-20_c9371/repo",
+      "started_utc": "2026-10-22T06:22:45.729385+00:00",
+      "ended_utc": "2026-10-22T06:22:51.240355+00:00",
+      "exit_code": 1
+    },
+    {
+      "label": "owner-epoch",
+      "argv": [
+        "python3",
+        "docs/tasks/bot-setup-draft-20261022/run-creation-checks.py"
+      ],
+      "cwd": "/tmp/bot-create-mutation-xwqr7b45/repo",
+      "started_utc": "2026-10-22T06:22:51.809291+00:00",
+      "ended_utc": "2026-10-22T06:22:57.084957+00:00",
+      "exit_code": 1
+    },
+    {
+      "label": "split-receipt-transaction",
+      "argv": [
+        "python3",
+        "docs/tasks/bot-setup-draft-20261022/run-creation-checks.py"
+      ],
+      "cwd": "/tmp/bot-create-mutation-ic181zfg/repo",
+      "started_utc": "2026-10-22T06:22:57.571678+00:00",
+      "ended_utc": "2026-10-22T06:23:02.923241+00:00",
+      "exit_code": 1
+    }
+  ],
+  "mutations": [
+    {
+      "label": "review-digest",
+      "before": "if i.digest != review_digest {",
+      "after": "if false {",
+      "replacement_count": 1,
+      "mutated_source_sha256": "bf899f26680186d495b0bb3d60a8ce9fe81e85f21d08db4e6b527e68a1edc619",
+      "result": "compiled, failed behavioral tests",
+      "exit_code": 1
+    },
+    {
+      "label": "draft-cas",
+      "before": "load(store, conversation, project, &binding(&i.frozen))?",
+      "after": "i.frozen.clone()",
+      "replacement_count": 2,
+      "mutated_source_sha256": "f73b8955d5594554a1ecc75f98001141ba0cadfacdfcab12c00ea1ba96bb77bb",
+      "result": "compiled, failed behavioral tests",
+      "exit_code": 1
+    },
+    {
+      "label": "draft-stop",
+      "before": "if !active.is_empty() {",
+      "after": "if false {",
+      "replacement_count": 1,
+      "mutated_source_sha256": "9fdbbd06213d0ca488d81a2f8ac8a971e1c68d0da2f107dec20224753be81833",
+      "result": "compiled, failed behavioral tests",
+      "exit_code": 1
+    },
+    {
+      "label": "owner-epoch",
+      "before": "if i.epoch != store.owner_epoch() {",
+      "after": "if false {",
+      "replacement_count": 1,
+      "mutated_source_sha256": "65d1dc3750b736d220413fb470a0918854e2e5c7306dcedc4a476f5a03f715b4",
+      "result": "compiled, failed behavioral tests",
+      "exit_code": 1
+    },
+    {
+      "label": "split-receipt-transaction",
+      "before": "&text(&i.frozen.definition)?,\n        ],\n    ))?;\n    if sql(store",
+      "after": "&text(&i.frozen.definition)?,\n        ],\n    ))?;\n    sql(store.database().exec(\"COMMIT\", &[]))?;\n    sql(store.database().exec(\"BEGIN IMMEDIATE\", &[]))?;\n    if sql(store",
+      "replacement_count": 1,
+      "mutated_source_sha256": "3468086029ad7c0d66de7b504d8c9725021272be378bffaf95f740715bc4bee1",
+      "result": "compiled, failed behavioral tests",
+      "exit_code": 1
+    }
+  ],
+  "dependency_source_sha256": "29b9a76a845c9da7b28254640c8aac0941736dd871c99811255dafffef382d9a",
+  "ended_utc": "2026-10-22T06:23:02.946194+00:00",
+  "log_sha256": {
+    "baseline.stderr.log": "e123f1731b0de7b43c0abbbe226cd325dd93b147c74862164f845ae605828ae4",
+    "baseline.stdout.log": "77e8f67e0da33e57bccbabcce9da3cc98115130b64ed85ba19634fc24bc758c7",
+    "draft-cas.stderr.log": "d6a5d56c8f890118142dc96e8e89487b410329b77fa3630ccd165799d34ba3bb",
+    "draft-cas.stdout.log": "e4e6219ff7eccf87bf8d228800354c6007da1baa319b4e97efc4eab4a5eed489",
+    "draft-stop.stderr.log": "037066fa6e9106cafd23982f15932ce97de486ac0c4e6cfc55d8a402ec7c9ed7",
+    "draft-stop.stdout.log": "73bb1321eb59173d5fd50b2b4024088e8811bbbf265ec7d3e6542125fa0644bc",
+    "owner-epoch.stderr.log": "d42b9831d1568222a7088d87e3c3e3a1a5b7c8fbc7d5adc8f1d47e3728b412bc",
+    "owner-epoch.stdout.log": "1d3bbb223dc58ba2cb6ad462d8ced62c40fe259d2ed0f5c0570f6492b3177864",
+    "review-digest.stderr.log": "a8e18b84db40c1c1c72b4b127ec67f2cc50e4d227823e689f610f9bcb3521948",
+    "review-digest.stdout.log": "d03e01a94cd1dc59b8b22a3bd94218ada03fd82222652dd5e3238daa877b6cd2",
+    "split-receipt-transaction.stderr.log": "0857334d73c820d709426a9dce6cb1ee95e482cdaadbca8a44ffafc0c6bd7944",
+    "split-receipt-transaction.stdout.log": "2af83d4320de7480356b050c934dfb0689132529a43961cd0c527bacd0cc7890"
+  }
+}

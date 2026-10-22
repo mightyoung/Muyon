@@ -1,0 +1,164 @@
+{
+  "head": "00b042ea7748c315d7c3ab9f4c8b9b02fdd4660d",
+  "kind": "new latest-protocol transaction-tail regression verification",
+  "started_utc": "2026-10-22T06:36:53.008819+00:00",
+  "inputs_sha256": {
+    "crates/muyon-core/src/bot_definitions.rs": "fa62ca121575e0a9e1308e1465f20eacd565f29380f5612c70301f0881dc651d",
+    "crates/muyon-core/src/bot_definitions/tests.rs": "e16f915b8e7102cfe859dbb604c0b565c56d38b7e8731c1d51becaaadc18313d",
+    "docs/tasks/bot-setup-draft-20261022/run-creation-checks.py": "ebba19d7e67093b2a80436adecea5d4be54b4c42c050b5de10763d3513327ba4"
+  },
+  "dependency_commit": "098d9aca214e6642c1b3ffde64921ebedbae335d",
+  "commands": [
+    {
+      "label": "baseline",
+      "argv": [
+        "python3",
+        "docs/tasks/bot-setup-draft-20261022/run-creation-checks.py"
+      ],
+      "cwd": "/workspace/bot-setup-draft",
+      "started_utc": "2026-10-22T06:36:53.011554+00:00",
+      "ended_utc": "2026-10-22T06:37:00.541553+00:00",
+      "exit_code": 0
+    },
+    {
+      "label": "tail-verification",
+      "argv": [
+        "python3",
+        "docs/tasks/bot-setup-draft-20261022/run-creation-checks.py"
+      ],
+      "cwd": "/tmp/bot-create-mutation-a_b8vqy_/repo",
+      "started_utc": "2026-10-22T06:37:00.975009+00:00",
+      "ended_utc": "2026-10-22T06:37:06.835221+00:00",
+      "exit_code": 1
+    },
+    {
+      "label": "live-project",
+      "argv": [
+        "python3",
+        "docs/tasks/bot-setup-draft-20261022/run-creation-checks.py"
+      ],
+      "cwd": "/tmp/bot-create-mutation-az27fenh/repo",
+      "started_utc": "2026-10-22T06:37:07.331113+00:00",
+      "ended_utc": "2026-10-22T06:37:13.148882+00:00",
+      "exit_code": 1
+    },
+    {
+      "label": "source-scope-key",
+      "argv": [
+        "python3",
+        "docs/tasks/bot-setup-draft-20261022/run-creation-checks.py"
+      ],
+      "cwd": "/tmp/bot-create-mutation-35lnlqoa/repo",
+      "started_utc": "2026-10-22T06:37:13.640341+00:00",
+      "ended_utc": "2026-10-22T06:37:19.306227+00:00",
+      "exit_code": 1
+    },
+    {
+      "label": "tail-epoch",
+      "argv": [
+        "python3",
+        "docs/tasks/bot-setup-draft-20261022/run-creation-checks.py"
+      ],
+      "cwd": "/tmp/bot-create-mutation-f8ub1r9g/repo",
+      "started_utc": "2026-10-22T06:37:19.805894+00:00",
+      "ended_utc": "2026-10-22T06:37:25.725845+00:00",
+      "exit_code": 1
+    },
+    {
+      "label": "source-registry-version",
+      "argv": [
+        "python3",
+        "docs/tasks/bot-setup-draft-20261022/run-creation-checks.py"
+      ],
+      "cwd": "/tmp/bot-create-mutation-8djv4mph/repo",
+      "started_utc": "2026-10-22T06:37:26.221857+00:00",
+      "ended_utc": "2026-10-22T06:37:35.876707+00:00",
+      "exit_code": 1
+    },
+    {
+      "label": "persistent-workspace",
+      "argv": [
+        "python3",
+        "docs/tasks/bot-setup-draft-20261022/run-creation-checks.py"
+      ],
+      "cwd": "/tmp/bot-create-mutation-frvg0394/repo",
+      "started_utc": "2026-10-22T06:37:36.348775+00:00",
+      "ended_utc": "2026-10-22T06:37:42.051808+00:00",
+      "exit_code": 1
+    }
+  ],
+  "mutations": [
+    {
+      "label": "tail-verification",
+      "before": "verify_current(store, &key, id, &original, \"committed\", Some(&receipt))?;",
+      "after": "/* omitted tail verification */",
+      "replacement_count": 1,
+      "mutated_source_sha256": "c0ac640b023f8b05941aa6177b4953d5f4e3b3686b546b48052b472b247eb588",
+      "result": "compiled, failed behavioral tests",
+      "exit_code": 1
+    },
+    {
+      "label": "live-project",
+      "before": "ReadScope::current(store, project).map_err(|_| \"bot_scope\")?;",
+      "after": "/* omitted current project read */",
+      "replacement_count": 1,
+      "mutated_source_sha256": "ad58eef61b3e2bef03ecd7149700a862d3ac1799236169a79fea8023293df9fe",
+      "result": "compiled, failed behavioral tests",
+      "exit_code": 1
+    },
+    {
+      "label": "source-scope-key",
+      "before": "|| cell(r, 8)? != key",
+      "after": "",
+      "replacement_count": 1,
+      "mutated_source_sha256": "4d32a3627c5c8f927582a32017e1ec19bcb3583bcf66a035ddd91780d56a7ee5",
+      "result": "compiled, failed behavioral tests",
+      "exit_code": 1
+    },
+    {
+      "label": "tail-epoch",
+      "before": "|| current.epoch != original.epoch\n        || current.epoch != store.owner_epoch()",
+      "after": "",
+      "replacement_count": 1,
+      "mutated_source_sha256": "8c613fe2025463de56eabbe2ede1fcf2afe4ed14a4d517ba32fdcb14bbcc4d9d",
+      "result": "compiled, failed behavioral tests",
+      "exit_code": 1
+    },
+    {
+      "label": "source-registry-version",
+      "before": "|| cell(&ns[0], 1)? != \"1\"",
+      "after": "",
+      "replacement_count": 1,
+      "mutated_source_sha256": "a624f25a21676137154c8323caae75e034a9b54d599feec7d205a2797215aae0",
+      "result": "compiled, failed behavioral tests",
+      "exit_code": 1
+    },
+    {
+      "label": "persistent-workspace",
+      "before": "|| cell(&workspace[0], 0)? != store.workspace_id()",
+      "after": "",
+      "replacement_count": 1,
+      "mutated_source_sha256": "f17653aae042c9240b5ea5e5361629889ec4a09995ff5b8bfaf558eda399a4ba",
+      "result": "compiled, failed behavioral tests",
+      "exit_code": 1
+    }
+  ],
+  "dependency_source_sha256": "6514165380738130e639d4be1ab5440e1bcb09c7d82fd0184b22b986e0d3c678",
+  "ended_utc": "2026-10-22T06:37:42.077251+00:00",
+  "log_sha256": {
+    "baseline.stderr.log": "fb8714c4cd93367a796a3d978dd7e60dd608732334864f842ec19226c7db031c",
+    "baseline.stdout.log": "94bd2504535604b955ca10f68b5ae5293cb10e8a91485740f615ea4a20731207",
+    "live-project.stderr.log": "3e42690a7d180f9bb886e13db95990395d90114137047024460c4aa7e420fdca",
+    "live-project.stdout.log": "c878e12cb1041eda4db858895705b4b2b58166bb86437fa2f3e31791d8a6c102",
+    "persistent-workspace.stderr.log": "9e0074fe6dfa8903a22e8d2ea0bbb9f92768f8baa71ca8542d37691307845a4c",
+    "persistent-workspace.stdout.log": "20431938c102d1f3e0b96786bba1330737bc99dbe445ee2c4cfdd8ec5eae53e1",
+    "source-registry-version.stderr.log": "56317cc95a0581e98f0d57c105168f24e3719f3781b03a3e0e77484a0d2a9d7a",
+    "source-registry-version.stdout.log": "b3244394c68bc43d2eef8d86a123534e6c1899fed6f6ea4ee65d7f978d7c8b49",
+    "source-scope-key.stderr.log": "7b5f9c045157c9bbe0acbc01af7237ddd53b269839db439f1ea31ac0c8e6487c",
+    "source-scope-key.stdout.log": "1d68d07e452cb0e226d752f8a22698b0ecad3368d693e61d12eefd5bdf2ab436",
+    "tail-epoch.stderr.log": "23c1393d1a2f6cfa2ccc6f340c058c0c3a750a1620976e9fc483546b88a23e2e",
+    "tail-epoch.stdout.log": "24593063e9a8bfa45b71453b3a46d17c5b4dd4d7f48182ee19205643a85624ed",
+    "tail-verification.stderr.log": "5803636adc54283daa1c3ec40c668329a61de7faa8bbdfd47b920071c39a6711",
+    "tail-verification.stdout.log": "ca1a40e9606401d10a35fbbb7a5fea0a4b1cfcb7f7c312f4a15bc831545ef804"
+  }
+}

@@ -1,0 +1,89 @@
+{
+  "head": "a132ebe5447fc65f9bc2a0c7afbc3ce1e23a3d17",
+  "dependency": "098d9aca214e6642c1b3ffde64921ebedbae335d",
+  "extra_test_source": "\n#[test]\nfn independent_registry_workspace_rejects() { check_receipt_tail_trigger(\"UPDATE local_bot_draft_meta SET workspace='wrong-workspace'\"); }\n#[test]\nfn independent_registry_schema_rejects() { check_receipt_tail_trigger(\"UPDATE local_bot_draft_meta SET schema_version='2'\"); }\n#[test]\nfn independent_registry_archive_blob_rejects() { check_receipt_tail_trigger(\"UPDATE local_bot_drafts SET archive_hex=CAST(archive_hex AS BLOB) WHERE project_id='p1'\"); }\n#[test]\nfn independent_registry_digest_blob_rejects() { check_receipt_tail_trigger(\"UPDATE local_bot_drafts SET archive_digest=CAST(archive_digest AS BLOB) WHERE project_id='p1'\"); }\n#[test]\nfn independent_entry_revoked_cannot_be_restored_by_insert() {\n let f=project_fixture();\n let r=prepare_create(f.store(), CONVERSATION, Some(\"p1\"), &f.binding, INTENT).unwrap();\n f.store().database().exec(\"CREATE TRIGGER regrant_on_insert AFTER INSERT ON local_bot_definitions BEGIN UPDATE projects SET deleted=0 WHERE id='p1'; END\",&[]).unwrap();\n let result=confirm_create_with_boundary(f.store(),CONVERSATION,Some(\"p1\"),INTENT,&r.review_digest,|| {sql(f.store().database().exec(\"UPDATE projects SET deleted=1 WHERE id='p1'\",&[]))?;Ok(())});\n assert_eq!(result.unwrap_err(),\"bot_query_original\");\n assert_original_pending_zero_definitions(&f);\n}\n",
+  "cases": [
+    {
+      "label": "extra-valid",
+      "removed_source": null,
+      "source_sha256": "3d6452678f668d5de7018d3f6c3f83c2be09ce49342d15bf04e65e47638cd4e0",
+      "command": [
+        "/tmp/bot-cargo/bin/cargo",
+        "test",
+        "--manifest-path",
+        "/tmp/bot-tail-release-probes-0a4_v_xn/repo/crates/Cargo.toml",
+        "-p",
+        "muyon-core",
+        "--lib",
+        "independent_",
+        "--",
+        "--test-threads=1",
+        "--nocapture"
+      ],
+      "utc_start": "2026-10-22T06:40:58.034480Z",
+      "utc_end": "2026-10-22T06:41:07.494026Z",
+      "exit_code": 0,
+      "expected_exit": 0
+    },
+    {
+      "label": "delete-effect-entry",
+      "removed_source": "verify_current(store, &key, id, &original, \"pending\", None)?;",
+      "source_sha256": "85bceb8448a2fe79ac05764fa174f23af6346a93367227cba0d9b30e307b86c1",
+      "command": [
+        "/tmp/bot-cargo/bin/cargo",
+        "test",
+        "--manifest-path",
+        "/tmp/bot-tail-release-probes-0a4_v_xn/repo/crates/Cargo.toml",
+        "-p",
+        "muyon-core",
+        "--lib",
+        "independent_entry_",
+        "--",
+        "--test-threads=1",
+        "--nocapture"
+      ],
+      "utc_start": "2026-10-22T06:41:07.494319Z",
+      "utc_end": "2026-10-22T06:41:10.569287Z",
+      "exit_code": 101,
+      "expected_exit": 101
+    },
+    {
+      "label": "delete-effect-tail",
+      "removed_source": "verify_current(store, &key, id, &original, \"committed\", Some(&receipt))?;",
+      "source_sha256": "ec0a9a8065833f03b2d4e049d79aefdcd269be635a982583cb17907a66cfa11a",
+      "command": [
+        "/tmp/bot-cargo/bin/cargo",
+        "test",
+        "--manifest-path",
+        "/tmp/bot-tail-release-probes-0a4_v_xn/repo/crates/Cargo.toml",
+        "-p",
+        "muyon-core",
+        "--lib",
+        "tail_",
+        "--",
+        "--test-threads=1",
+        "--nocapture"
+      ],
+      "utc_start": "2026-10-22T06:41:10.569506Z",
+      "utc_end": "2026-10-22T06:41:13.654159Z",
+      "exit_code": 101,
+      "expected_exit": 101
+    }
+  ],
+  "unmodified_source_sha256": "3d6452678f668d5de7018d3f6c3f83c2be09ce49342d15bf04e65e47638cd4e0",
+  "dependency_sha256": "6514165380738130e639d4be1ab5440e1bcb09c7d82fd0184b22b986e0d3c678",
+  "logs_sha256": {
+    "rustc-version.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "python-version.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "rustc-version.stdout.log": "8dc912acd5bfeafc70b01b1d2a2afb0844afa02f5dba2f1ae8d5c212d005afb6",
+    "delete-effect-tail.stderr.log": "697104bf0e460db4419781a6207e0148ebd45d5517627ce95aa18106c49eeadd",
+    "stderr.log": "7182a4609b79f7d52b11efb5c0d549d0fa3a5130616d1dac6884e73a97eb6b03",
+    "delete-effect-entry.stderr.log": "38b34a0dcad0c3bc20b4e37367f4862c831869768eeba2fb0652a57c26015856",
+    "delete-effect-entry.stdout.log": "c757199a01ca23fa698fa4f91c0dd228674e0b783f40bcb591f57cd4eaac2145",
+    "extra-valid.stdout.log": "db8110df094b158146161cee06882b5197dafc7f87388eacf17560d27de56253",
+    "stdout.log": "855c752605e824ead5b1e76152223348d5e76e11ca7cabd00575fd21f8dec83d",
+    "delete-effect-tail.stdout.log": "ebe0a1b5c9e0426eadb2510edac5bf182ed72713d01c5bab75aea190f2db9d8c",
+    "extra-valid.stderr.log": "2430e44dc3884d727f5ed3f491af902dc165cf3f6568dba949431fb4ef96f311",
+    "python-version.stdout.log": "4c3569f5da09975434dd9fd9a91fadbc4367a91d8f3c3fab59e9241ab9ee4bd8"
+  }
+}

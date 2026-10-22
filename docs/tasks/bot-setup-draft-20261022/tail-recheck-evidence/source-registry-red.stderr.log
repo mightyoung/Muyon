@@ -1,0 +1,48 @@
+   Compiling muyon-core-agent-lab v0.1.0 (/tmp/muyon-bot-create-15jcf8s0/repo/experiments/redesign/core-agent-lab/core)
+warning: suspicious definition of the runtime `read` symbol used by the standard library
+   --> /tmp/muyon-bot-create-15jcf8s0/repo/experiments/redesign/core-agent-lab/core/src/host_session.rs:132:124
+    |
+132 | ...ount: usize, timeout: i32) -> i32; fn read(fd: i32, buffer: *mut u8, count: usize) -> isize; fn write(fd: i32, buffer: *const u8...
+    |                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = note: expected `unsafe extern "C" fn(i32, *mut c_void, usize) -> isize` (for the current target)
+            found    `unsafe extern "C" fn(i32, *mut u8, usize) -> isize`
+    = help: either fix the signature or remove any attributes like `#[unsafe(no_mangle)]`, `#[unsafe(export_name = "read")]`, or `#[link_name = "read"]`
+    = help: allow this lint if the signature is compatible
+    = note: `#[warn(suspicious_runtime_symbol_definitions)]` on by default
+
+warning: suspicious definition of the runtime `write` symbol used by the standard library
+   --> /tmp/muyon-bot-create-15jcf8s0/repo/experiments/redesign/core-agent-lab/core/src/host_session.rs:132:182
+    |
+132 | ... *mut u8, count: usize) -> isize; fn write(fd: i32, buffer: *const u8, count: usize) -> isize; }
+    |                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = note: expected `unsafe extern "C" fn(i32, *const c_void, usize) -> isize` (for the current target)
+            found    `unsafe extern "C" fn(i32, *const u8, usize) -> isize`
+    = help: either fix the signature or remove any attributes like `#[unsafe(no_mangle)]`, `#[unsafe(export_name = "write")]`, or `#[link_name = "write"]`
+    = help: allow this lint if the signature is compatible
+
+   Compiling muyon-plugin-contract-lab v0.1.0 (/tmp/muyon-bot-create-15jcf8s0/repo/experiments/redesign/plugin-contract-lab/core)
+   Compiling muyon-rust-agent-host-lab v0.1.0 (/tmp/muyon-bot-create-15jcf8s0/repo/experiments/redesign/rust-agent-host-lab/core)
+warning: `muyon-core-agent-lab` (lib) generated 2 warnings
+   Compiling muyon-web-search-lab v0.1.0 (/tmp/muyon-bot-create-15jcf8s0/repo/experiments/redesign/web-search-lab/core)
+   Compiling muyon-core v0.1.0 (/tmp/muyon-bot-create-15jcf8s0/repo/crates/muyon-core)
+    Finished `test` profile [unoptimized] target(s) in 4.91s
+     Running unittests src/lib.rs (/tmp/bot-definitions-target/debug/deps/muyon_core-7183f16bd696047f)
+
+thread 'bot_definitions::tests::source_registry_ddl_changed_between_transactions_rejects' (8727) panicked at muyon-core/src/bot_definitions/tests.rs:648:23:
+called `Result::unwrap_err()` on an `Ok` value: CreateReceipt { intent_id: "22222222-2222-4222-8222-222222222222", review_digest: "50a2977279b32ac0f83f368da4bd2b2ad5aa391367f86d808e24c4d24458e822", status: Committed, definition: Some(BotDefinition { id: "bot-d79b78942203940cd9c4a5aa5874a1fdf739c6a4d0bea2c1ee06c98bafc1de2d", name: "论文助手", purpose: "整理文献", role: "研究员", runnable: false, unavailable_reason: "provider_not_configured" }) }
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+thread 'bot_definitions::tests::tail_source_registry_version_rolls_back' (8738) panicked at muyon-core/src/bot_definitions/tests.rs:438:16:
+called `Result::unwrap_err()` on an `Ok` value: CreateReceipt { intent_id: "22222222-2222-4222-8222-222222222222", review_digest: "fee98c3de45fcf936edacd292648957fb053f118bf951340f352d028af0b8bca", status: Committed, definition: Some(BotDefinition { id: "bot-7d42bf3873195cb73a607acb2e5021b8529a5e7da659fbdc3425b00406b2905e", name: "论文助手", purpose: "整理文献", role: "研究员", runnable: false, unavailable_reason: "provider_not_configured" }) }
+
+thread 'bot_definitions::tests::tail_source_registry_workspace_rolls_back' (8739) panicked at muyon-core/src/bot_definitions/tests.rs:438:16:
+called `Result::unwrap_err()` on an `Ok` value: CreateReceipt { intent_id: "22222222-2222-4222-8222-222222222222", review_digest: "b52fa32c2a6313b2b05dffa12c49c309a31f8e017127706a7162c89aaab25447", status: Committed, definition: Some(BotDefinition { id: "bot-9179a24d6ffc2fb550fadacf5c462cb9309fe462e46fad5e47cbb2b395f61791", name: "论文助手", purpose: "整理文献", role: "研究员", runnable: false, unavailable_reason: "provider_not_configured" }) }
+error: test failed, to rerun pass `-p muyon-core --lib`
+Traceback (most recent call last):
+  File "/workspace/bot-setup-draft/docs/tasks/bot-setup-draft-20261022/run-creation-checks.py", line 17, in <module>
+    subprocess.run(['/tmp/bot-cargo/bin/cargo','test','--manifest-path',str(target/'crates/Cargo.toml'),'-p','muyon-core','--lib','bot_definitions','--','--test-threads=1','--nocapture'],env=env,check=True)
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/subprocess.py", line 571, in run
+    raise CalledProcessError(retcode, process.args,
+subprocess.CalledProcessError: Command '['/tmp/bot-cargo/bin/cargo', 'test', '--manifest-path', '/tmp/muyon-bot-create-15jcf8s0/repo/crates/Cargo.toml', '-p', 'muyon-core', '--lib', 'bot_definitions', '--', '--test-threads=1', '--nocapture']' returned non-zero exit status 101.

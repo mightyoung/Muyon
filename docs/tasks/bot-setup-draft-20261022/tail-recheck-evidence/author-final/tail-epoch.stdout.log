@@ -1,0 +1,39 @@
+
+running 27 tests
+test bot_definitions::tests::cas_scope_and_changed_confirmation_reject_without_definition ... ok
+test bot_definitions::tests::committed_receipt_and_definition_survive_restart_without_replaying ... ok
+test bot_definitions::tests::corrupted_archive_and_unknown_schema_fail_closed ... ok
+test bot_definitions::tests::creates_only_after_confirm_and_original_intent_is_idempotent ... ok
+test bot_definitions::tests::insert_draft_lifecycle_rolls_back ... ok
+test bot_definitions::tests::insert_draft_revision_rolls_back ... ok
+test bot_definitions::tests::insert_draft_scope_rolls_back ... ok
+test bot_definitions::tests::old_prepared_review_is_sealed_and_explicit_cancel_allows_new_review ... ok
+test bot_definitions::tests::pending_unknown_never_reexecutes_and_archive_replay_cannot_clear_stop ... ok
+test bot_definitions::tests::pending_update_project_deletion_cannot_commit_effect ... ok
+test bot_definitions::tests::project_deleted_exactly_between_pending_and_effect_must_not_commit ... ok
+test bot_definitions::tests::real_child_process_kill_preserves_pending_and_original_lookup ... 
+running 1 test
+ok
+test bot_definitions::tests::receipt_update_failure_rolls_back_definition_and_keeps_original_pending ... ok
+test bot_definitions::tests::source_registry_ddl_changed_between_transactions_rejects ... ok
+test bot_definitions::tests::tail_definition_identity_tampering_rolls_back ... ok
+test bot_definitions::tests::tail_definition_tampering_rolls_back ... ok
+test bot_definitions::tests::tail_draft_lifecycle_rolls_back ... ok
+test bot_definitions::tests::tail_draft_revision_rolls_back ... ok
+test bot_definitions::tests::tail_draft_scope_rolls_back ... ok
+test bot_definitions::tests::tail_intent_identity_tampering_rolls_back ... ok
+test bot_definitions::tests::tail_original_intent_rename_rolls_back ... ok
+test bot_definitions::tests::tail_owner_epoch_rolls_back ... FAILED
+test bot_definitions::tests::tail_project_deletion_rolls_back ... ok
+test bot_definitions::tests::tail_receipt_tampering_rolls_back ... ok
+test bot_definitions::tests::tail_source_registry_version_rolls_back ... ok
+test bot_definitions::tests::tail_source_registry_workspace_rolls_back ... ok
+test bot_definitions::tests::tail_workspace_change_rolls_back ... ok
+
+failures:
+
+failures:
+    bot_definitions::tests::tail_owner_epoch_rolls_back
+
+test result: FAILED. 26 passed; 1 failed; 0 ignored; 0 measured; 18 filtered out; finished in 0.20s
+
