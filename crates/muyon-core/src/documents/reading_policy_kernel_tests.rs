@@ -111,3 +111,26 @@ fn renewal_issues_owned_child_once_without_mutating_parent(){
  let historical=host.renew(&mut reader,&request).unwrap();assert!(historical.historical);assert_eq!(issued.outcome_id,historical.outcome_id);assert_eq!(issued.expires_at_ms,historical.expires_at_ms);
  let mut altered=request;altered.observation_id="different".into();assert!(host.renew(&mut reader,&altered).is_err());
 }
+#[test]
+fn issued_attempt_trigger_cannot_erase_canonical_observation(){
+ for mutation in ["observation_id=NULL","root_id='unrelated-root'","stage='prepared'"]{
+ let(_f,mut reader,access)=setup();let mut host=ReadingPolicyHost::open(&mut reader).unwrap();host.selection_changed(&mut reader,&scope(),&Revision::new(1)).unwrap();
+ let info=reader.open_presentation(&access).unwrap();let begun=host.begin(&mut reader,&request(&access,&info,"begin"),&info.status.ticket,&Revision::new(1)).unwrap();
+ let prepared=host.prepare(&mut reader,&prepare_request(&access,&begun,"renew")).unwrap();
+ let trigger=format!("CREATE TRIGGER corrupt_issue AFTER UPDATE ON document_reading_policy_attempts_v1 WHEN NEW.stage='issued' BEGIN UPDATE document_reading_policy_attempts_v1 SET {mutation} WHERE attempt_id=NEW.attempt_id; END");reader.store().database().exec(&trigger,&[]).unwrap();
+ let request=PolicyRenewRequest{scope:scope(),root_id:begun.root_id.unwrap(),expected_root_revision:Revision::new(1),original_attempt_id:"renew".into(),challenge_id:prepared.challenge_id.unwrap(),surface_binding:surface(),observation_id:"observed-now".into()};
+ assert!(host.renew(&mut reader,&request).is_err(),"accepted {mutation}");
+ assert_eq!(reader.store().database().query("SELECT grant_id FROM document_grants",&[]).unwrap().len(),1);
+ }
+}
+#[test]
+fn child_issue_trigger_cannot_extend_shared_parent_expiry(){
+ let(_f,mut reader,access)=setup();let mut host=ReadingPolicyHost::open(&mut reader).unwrap();host.selection_changed(&mut reader,&scope(),&Revision::new(1)).unwrap();
+ let info=reader.open_presentation(&access).unwrap();let begun=host.begin(&mut reader,&request(&access,&info,"begin"),&info.status.ticket,&Revision::new(1)).unwrap();
+ let prepared=host.prepare(&mut reader,&prepare_request(&access,&begun,"renew")).unwrap();
+ let parent=reader.store().database().query("SELECT * FROM document_grants WHERE grant_id='grant'",&[]).unwrap();
+ reader.store().database().exec("CREATE TRIGGER extend_parent AFTER INSERT ON document_grants BEGIN UPDATE document_grants SET expires_at_ms='9999999999999' WHERE grant_id='grant'; END",&[]).unwrap();
+ let request=PolicyRenewRequest{scope:scope(),root_id:begun.root_id.unwrap(),expected_root_revision:Revision::new(1),original_attempt_id:"renew".into(),challenge_id:prepared.challenge_id.unwrap(),surface_binding:surface(),observation_id:"observed-now".into()};
+ assert!(host.renew(&mut reader,&request).is_err());
+ assert_eq!(reader.store().database().query("SELECT * FROM document_grants WHERE grant_id='grant'",&[]).unwrap(),parent);
+}
