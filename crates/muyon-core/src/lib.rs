@@ -2,6 +2,7 @@
 pub mod agent;
 pub mod archive;
 pub mod blobs;
+pub mod bot_drafts;
 pub mod business;
 pub mod contract;
 pub mod documents;
