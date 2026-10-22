@@ -21,3 +21,7 @@ Raw publication output contains GitHub remote trailing whitespace; original log 
 ## Installed-engine continuation (2026-10-22)
 
 See [engine-evaluation/HANDOFF.md](engine-evaluation/HANDOFF.md) and its report/review for the subsequent existing-engine inventory and complex corpus. Namespace setup failed before engine work; actual round-trip remains NOT_RUN, no retry or bypass. Independent source ff2eed64c74b070885d1fedaaae07adcfc7cf916 verified32 tests and six fixtures. Earlier commit/publication entries above remain the historical first batch.
+
+## Held adapter source continuation
+
+See [adapter-source/HANDOFF.md](adapter-source/HANDOFF.md) for proposed Rust-neutral request/output protocol, fixed openpyxl candidate launch specification, dormant worker and independent single-cell output validator. Source d18636f7f1eb7a54f06b647eae14aa55d0da89d1 passes43 author tests after independent review/fix pass. Fake tests are explicitly simulation only; real engine, host wiring and CAS integration remain HOLD/NOT_RUN. No Rust/Android files modified.
