@@ -11,6 +11,10 @@ mod business;
 #[path = "../src/contract.rs"]
 mod contract;
 #[path = "../src/documents/mod.rs"]
+#[expect(
+    unused_imports,
+    reason = "Source-inclusion wrapper retains the full library document module for real candidate retention tests; this target does not consume all library-only reexports"
+)]
 mod documents;
 #[path = "../src/group_runtime/store.rs"]
 mod group_runtime_store;

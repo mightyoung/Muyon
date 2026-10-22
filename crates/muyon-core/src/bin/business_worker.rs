@@ -17,6 +17,10 @@ mod contract;
 // the library. Keep the full document owner module in this standalone harness.
 #[path = "../documents/mod.rs"]
 #[allow(dead_code)]
+#[expect(
+    unused_imports,
+    reason = "Source-inclusion wrapper retains the full library document module for real candidate retention tests; this target does not consume all library-only reexports"
+)]
 mod documents;
 #[path = "../research.rs"]
 #[allow(dead_code)]
