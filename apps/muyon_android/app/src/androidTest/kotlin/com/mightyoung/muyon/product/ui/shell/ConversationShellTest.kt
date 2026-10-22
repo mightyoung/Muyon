@@ -8,6 +8,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.runtime.*
 import androidx.compose.ui.test.*
+import androidx.compose.ui.semantics.SemanticsProperties
+import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.test.junit4.createComposeRule
 import org.junit.Assert.assertEquals
 import org.junit.Rule
@@ -83,4 +85,32 @@ class ConversationShellTest {
         compose.onNodeWithContentDescription("关闭菜单").performClick()
         compose.onNodeWithTag("test-draft").assertTextContains("真实本地草稿")
     }
+
+    @Test fun draftHasStableAccessiblePurposeAfterTypingAndPreviewRemainsDisabled() {
+        compose.setContent {
+            MaterialTheme {
+                var draft by remember { mutableStateOf("") }
+                ShellInputDock(draft, { draft = it }, enabled = false, onChat = {}, onMore = {}, moreMenu = {})
+            }
+        }
+        compose.onNodeWithContentDescription("消息草稿").performTextInput("仅本地输入测试")
+        compose.onNodeWithContentDescription("消息草稿").assertTextContains("仅本地输入测试")
+        compose.onNodeWithTag("chat-send").assertIsNotEnabled()
+    }
+
+    @Test fun navigationHeadingsAndFailureAnnouncementRemainDiscoverable() {
+        compose.setContent {
+            MaterialTheme {
+                ConversationShell("chat", "测试标题", "default", emptyList(), {}, {}, {},
+                    notice = "测试：置顶尚未保存") { open -> ConversationHeader("测试标题", open) }
+            }
+        }
+        compose.onNodeWithText("测试标题").assert(SemanticsMatcher.keyIsDefined(SemanticsProperties.Heading))
+        compose.onNodeWithContentDescription("打开工作空间导航").performClick()
+        compose.onNodeWithText("主 Agent 与置顶").assert(SemanticsMatcher.keyIsDefined(SemanticsProperties.Heading))
+        compose.onNodeWithText("最近会话").assert(SemanticsMatcher.keyIsDefined(SemanticsProperties.Heading))
+        compose.onNodeWithText("测试：置顶尚未保存")
+            .assert(SemanticsMatcher.expectValue(SemanticsProperties.LiveRegion, LiveRegionMode.Polite))
+    }
+
 }

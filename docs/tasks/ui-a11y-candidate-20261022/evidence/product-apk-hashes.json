@@ -1,0 +1,16 @@
+{
+  "source_sha": "708570d59ea51024ee69bb62c97f63380d490f78",
+  "build_id": "708570d59ea51024ee69bb62c97f63380d490f78:95d79703ba3b05f9af3020118286fb5559f17c7042d183cee394074dc25ae811",
+  "artifacts": [
+    {
+      "path": "/workspace/muyon-ui-candidate/apps/muyon_android/app/build/outputs/apk/debug/app-debug.apk",
+      "size_bytes": 426369208,
+      "sha256": "f1cc240fd981a1ea08841f3964c6422e5b240268984447022406428723ddeb0b"
+    },
+    {
+      "path": "/workspace/muyon-ui-candidate/apps/muyon_android/app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk",
+      "size_bytes": 1439740,
+      "sha256": "fa0c08ed932d8a28f439601a224e45c0a4854ad73ec3983d6ef396287ba01d1d"
+    }
+  ]
+}
