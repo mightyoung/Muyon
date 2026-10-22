@@ -1,0 +1,21 @@
+[
+  {
+    "label": "artifact-build",
+    "argv": [
+      "cargo",
+      "build",
+      "--offline",
+      "--locked",
+      "--manifest-path",
+      "crates/Cargo.toml",
+      "-p",
+      "muyon-core",
+      "--lib",
+      "--message-format=json"
+    ],
+    "cwd": "/workspace/Muyon-source-invalidation-applied-verification",
+    "start_utc": "2026-10-22T08:26:37.295037+00:00",
+    "end_utc": "2026-10-22T08:26:47.049456+00:00",
+    "exit_status": 0
+  }
+]

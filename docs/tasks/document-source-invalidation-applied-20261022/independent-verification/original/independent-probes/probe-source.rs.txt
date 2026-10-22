@@ -1,0 +1,120 @@
+#[path="/workspace/Muyon-source-invalidation-applied-verification/crates/muyon-core/src/agent/mod.rs"]
+pub mod agent;
+#[path="/workspace/Muyon-source-invalidation-applied-verification/crates/muyon-core/src/archive.rs"]
+pub mod archive;
+#[path="/workspace/Muyon-source-invalidation-applied-verification/crates/muyon-core/src/blobs.rs"]
+pub mod blobs;
+#[path="/workspace/Muyon-source-invalidation-applied-verification/crates/muyon-core/src/business.rs"]
+pub mod business;
+#[path="/workspace/Muyon-source-invalidation-applied-verification/crates/muyon-core/src/contract.rs"]
+pub mod contract;
+#[path="/workspace/Muyon-source-invalidation-applied-verification/crates/muyon-core/src/documents/mod.rs"]
+pub mod documents;
+#[path="/workspace/Muyon-source-invalidation-applied-verification/crates/muyon-core/src/research.rs"]
+pub mod research;
+#[path="/workspace/Muyon-source-invalidation-applied-verification/crates/muyon-core/src/review_lifecycle.rs"]
+mod review_lifecycle;
+#[path="/workspace/Muyon-source-invalidation-applied-verification/crates/muyon-core/src/sqlite.rs"]
+pub mod sqlite;
+
+#[path="/workspace/Muyon-source-invalidation-applied-verification/crates/muyon-core/src/artifacts/mod.rs"]
+pub mod artifacts;
+
+#[path="/workspace/Muyon-source-invalidation-applied-verification/crates/muyon-core/src/bot_definitions.rs"]
+pub mod bot_definitions;
+#[path="/workspace/Muyon-source-invalidation-applied-verification/crates/muyon-core/src/bot_drafts.rs"]
+pub mod bot_drafts;
+
+#[path="/workspace/Muyon-source-invalidation-applied-verification/crates/muyon-core/src/document_edit/mod.rs"]
+pub mod document_edit;
+
+#[path="/workspace/Muyon-source-invalidation-applied-verification/crates/muyon-core/src/evidence/mod.rs"]
+pub mod evidence;
+
+#[path="/workspace/Muyon-source-invalidation-applied-verification/crates/muyon-core/src/group_governance/mod.rs"]
+pub mod group_governance;
+
+#[path="/workspace/Muyon-source-invalidation-applied-verification/crates/muyon-core/src/group_runtime/mod.rs"]
+pub mod group_runtime;
+#[path="/workspace/Muyon-source-invalidation-applied-verification/crates/muyon-core/src/group_runtime/store.rs"]
+pub mod group_runtime_store;
+
+#[path="/workspace/Muyon-source-invalidation-applied-verification/crates/muyon-core/src/group_runtime/bridge.rs"]
+pub mod group_runtime_bridge;
+
+#[cfg(test)] mod independent_source_validation { use crate::documents::*; #[path="/tmp/muyon-source-invalidation-applied-red/storage_fixture.rs"] mod storage_tests; mod probe {
+//! Integration regressions against real fixed Artifacts/Evidence, synthetic data.
+use super::{storage_tests::Fixture, *};
+use crate::{artifacts::{*, local_interactions::*}, blobs::BlobKind, business::BusinessStore, contract::*, evidence::{store::StoreEvidence, InputKind}, sqlite::Db};
+use std::collections::BTreeSet;
+
+fn expiry() -> u64 { std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).unwrap().as_millis() as u64 + 25_000 }
+fn upload(store: &BusinessStore, project: &str, bytes: &[u8]) -> crate::blobs::FinishedBlob {
+    let upload = store.begin_upload(project).unwrap();
+    store.append_chunk(&upload.upload_id, bytes).unwrap();
+    store.finish_blob(&upload.upload_id, BlobKind::Document).unwrap()
+}
+fn bind(store: &BusinessStore, source: &DocumentAccess, local: &LocalAccess, kind: &LocalKind) {
+    let evidence = StoreEvidence::new(store);
+    let processing = evidence.process(source, InputKind::Utf8Text).unwrap();
+    let hits = evidence.find_literal(source, &processing, "synthetic", 1).unwrap();
+    let proof = store.resolve_local_evidence_trusted(&local.project, ArtifactProjectOperation::LocalDraft, source, &processing, &hits[0]).unwrap();
+    assert_eq!(local.object.target, proof.target());
+    store.issue_local_evidence_binding_trusted(local, kind, expiry(), &proof).unwrap();
+}
+fn fixture() -> (Fixture, BusinessStore, DocumentAccess, LocalAccess, LocalKind) {
+    let f = Fixture::new(); let (store, _) = f.setup();
+    store.initialize_artifacts_trusted().unwrap();
+    store.initialize_artifact_workflows_trusted().unwrap();
+    store.initialize_local_interactions_trusted().unwrap();
+    let blob = upload(&store, "project", b"Original synthetic evidence passage.");
+    let metadata = store.register_document_trusted("project", "text-source", "Synthetic", DocumentFormat::Text, &blob).unwrap();
+    let source = DocumentAccess { document: metadata.document, authority: AuthorityBinding { grant_id: "source-grant".into(), generation: Revision::new(1), owner_epoch: "epoch".into() } };
+    store.issue_document_grant_trusted(&source.document, &source.authority, &[DocumentOperation::Inspect, DocumentOperation::ReadText, DocumentOperation::StructuredEdit], expiry()).unwrap();
+    let project = ArtifactProjectAccess { scope: source.document.scope().clone(), actor_id: "actor".into(), project_revision: Revision::new(1), authority: AuthorityBinding { grant_id: "project-grant".into(), generation: Revision::new(1), owner_epoch: "epoch".into() } };
+    store.issue_artifact_project_grant_trusted(&project, &[ArtifactProjectOperation::LocalDraft, ArtifactProjectOperation::ReadOwnLocal], expiry()).unwrap();
+    let evidence = StoreEvidence::new(&store);
+    let processing = evidence.process(&source, InputKind::Utf8Text).unwrap();
+    let hits = evidence.find_literal(&source, &processing, "synthetic", 1).unwrap();
+    let proof = store.resolve_local_evidence_trusted(&project, ArtifactProjectOperation::LocalDraft, &source, &processing, &hits[0]).unwrap();
+    let local = LocalAccess { project, object: LocalObjectRef { object_id: "object".into(), target: proof.target(), component_id: "component".into(), component_revision: Revision::new(1), attempt_id: "attempt".into() }, binding_generation: Revision::new(1) };
+    let kind = LocalKind::Form(FormSpec { fields: vec![LocalField::Text], single_options: Vec::new(), multiple_options: Vec::new() });
+    store.issue_local_evidence_binding_trusted(&local, &kind, expiry(), &proof).unwrap();
+    drop(proof);
+    let change = LocalMutation::Patch { expected: Revision::new(0), changes: vec![FieldChange::Text { value: "original manual draft".into() }], author: AnnotationAuthor::Human { actor_id: "actor".into() } };
+    assert_eq!(store.mutate_local_trusted("manual", &local, &change).unwrap().status, ArtifactSaveStatus::Committed);
+    (f, store, source, local, kind)
+}
+fn active(store: &BusinessStore) -> String { store.database().query("SELECT active FROM artifact_local_evidence_sources_v1 WHERE object_id='object'", &[]).unwrap()[0][0].clone().unwrap() }
+fn head(store: &BusinessStore) -> String { store.database().query("SELECT revision FROM document_heads WHERE document_id='text-source'", &[]).unwrap()[0][0].clone().unwrap() }
+fn raw_forms(store: &BusinessStore) -> Vec<Vec<Option<String>>> { store.database().query("SELECT * FROM artifact_local_forms_v1 ORDER BY object_id", &[]).unwrap() }
+
+
+#[test]
+fn independent_notification_trigger_must_not_restore_revoked_grant() {
+ let (_f,store,source,_,_)=fixture();
+ store.database().exec("CREATE TRIGGER independent_restore AFTER INSERT ON document_source_notifications_v1 BEGIN UPDATE document_grants SET active=1 WHERE grant_id='source-grant'; END",&[]).unwrap();
+ let result=store.revoke_document_grant_trusted(&source.authority);
+ let granted=store.database().query("SELECT active FROM document_grants WHERE grant_id='source-grant'",&[]).unwrap();
+ let queue=store.pending_document_source_notifications_trusted(None,256).unwrap();
+ println!("revocation_ok={} grant_active={:?} source_active={} queue_pending={} authorized_read_ok={}",result.is_ok(),granted,active(&store),queue.len(),store.read_document(&source).is_ok());
+ assert!(result.is_err(),"must reject and rollback when queue trigger restored revoked grant before commit");
+}
+#[test]
+fn independent_notification_trigger_must_not_delete_queued_invalidation() {
+ let (_f,store,source,_,_)=fixture();
+ store.database().exec("CREATE TRIGGER independent_delete AFTER INSERT ON document_source_notifications_v1 BEGIN DELETE FROM document_source_notifications_v1 WHERE project_id=NEW.project_id AND actor_id=NEW.actor_id AND object_id=NEW.object_id; END",&[]).unwrap();
+ let result=store.revoke_document_grant_trusted(&source.authority);let queue=store.pending_document_source_notifications_trusted(None,256).unwrap();
+ println!("revocation_ok={} source_active={} queue_pending={}",result.is_ok(),active(&store),queue.len());
+ assert!(result.is_err(),"must reject and rollback when trigger deleted required invalidation before commit");
+}
+#[test]
+fn independent_notification_trigger_must_not_preack_queued_invalidation() {
+ let (_f,store,source,_,_)=fixture();
+ store.database().exec("CREATE TRIGGER independent_preack AFTER INSERT ON document_source_notifications_v1 BEGIN UPDATE document_source_notifications_v1 SET pending=0 WHERE project_id=NEW.project_id AND actor_id=NEW.actor_id AND object_id=NEW.object_id; END",&[]).unwrap();
+ let result=store.revoke_document_grant_trusted(&source.authority);let queue=store.pending_document_source_notifications_trusted(None,256).unwrap();
+ println!("revocation_ok={} source_active={} queue_pending={}",result.is_ok(),active(&store),queue.len());
+ assert!(result.is_err(),"must reject and rollback when trigger preacked invalidation before Runtime delivery");
+}
+
+}}

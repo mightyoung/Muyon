@@ -1,0 +1,17 @@
+#[test]
+fn independent_notification_batch_must_freeze_generations_before_all_writes() {
+ let (_f,store,mut source,mut local,kind)=fixture();
+ let mut z=LocalAccess{object:LocalObjectRef{object_id:"object-z".into(),..local.object.clone()},..local.clone()};bind(&store,&source,&z,&kind);
+ store.revoke_document_grant_trusted(&source.authority).unwrap();let first=store.pending_document_source_notifications_trusted(None,256).unwrap();assert_eq!(first.len(),2);assert!(first.iter().all(|e|e.generation.value()==1));
+ let old_z=first.iter().find(|e|e.object_id=="object-z").unwrap().clone();assert_eq!(store.ack_document_source_notifications_trusted(&first).unwrap(),2);
+ source.authority.generation=source.authority.generation.next().unwrap();store.issue_document_grant_trusted(&source.document,&source.authority,&[DocumentOperation::Inspect,DocumentOperation::ReadText],expiry()).unwrap();
+ local.binding_generation=local.binding_generation.next().unwrap();z.binding_generation=z.binding_generation.next().unwrap();bind(&store,&source,&local,&kind);bind(&store,&source,&z,&kind);
+ store.database().exec("CREATE TRIGGER independent_aba AFTER UPDATE ON document_source_notifications_v1 WHEN NEW.object_id='object' BEGIN DELETE FROM document_source_notifications_v1 WHERE project_id=NEW.project_id AND actor_id=NEW.actor_id AND object_id='object-z'; END",&[]).unwrap();
+ let result=store.revoke_document_grant_trusted(&source.authority);let second=store.pending_document_source_notifications_trusted(None,256).unwrap();
+ if result.is_err(){assert!(second.is_empty());assert_eq!(active(&store),"1");return;}
+ let new_z=second.iter().find(|e|e.object_id=="object-z").unwrap().clone();let ack=store.ack_document_source_notifications_trusted(&[old_z.clone()]).unwrap();
+ let after=store.pending_document_source_notifications_trusted(None,256).unwrap();
+ println!("second_revoke_ok={} old_z_generation={} new_z_generation={} stale_z_ack_count={} pending_after={:?}",result.is_ok(),old_z.generation.value(),new_z.generation.value(),ack,after.iter().map(|e|(&e.object_id,e.generation.value())).collect::<Vec<_>>());
+ assert_eq!(ack,0,"old object-z generation1 ACK must not erase newly invalidated object-z after earlier queue write deleted its tombstone");
+ assert!(new_z.generation.value()>old_z.generation.value());
+}

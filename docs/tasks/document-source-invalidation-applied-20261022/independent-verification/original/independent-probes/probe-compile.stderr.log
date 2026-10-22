@@ -1,0 +1,42 @@
+warning: unused import: `sqlite::Db`
+ --> /tmp/muyon-source-invalidation-applied-red/storage_fixture.rs:3:68
+  |
+3 | use crate::{blobs::BlobKind, business::BusinessStore, contract::*, sqlite::Db};
+  |                                                                    ^^^^^^^^^^
+  |
+  = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused import: `sqlite::Db`
+  --> /tmp/muyon-source-invalidation-applied-red/probes.rs:48:152
+   |
+48 | ... contract::*, evidence::{store::StoreEvidence, InputKind}, sqlite::Db};
+   |                                                               ^^^^^^^^^^
+
+warning: unused import: `std::collections::BTreeSet`
+  --> /tmp/muyon-source-invalidation-applied-red/probes.rs:49:5
+   |
+49 | use std::collections::BTreeSet;
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `bind` is never used
+  --> /tmp/muyon-source-invalidation-applied-red/probes.rs:57:4
+   |
+57 | fn bind(store: &BusinessStore, source: &DocumentAccess, local: &LocalAccess, kind: &LocalKind) {
+   |    ^^^^
+   |
+   = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: function `head` is never used
+  --> /tmp/muyon-source-invalidation-applied-red/probes.rs:89:4
+   |
+89 | fn head(store: &BusinessStore) -> String { store.database().query("SELECT revision FROM document_heads WHERE document_id='text-sourc...
+   |    ^^^^
+
+warning: function `raw_forms` is never used
+  --> /tmp/muyon-source-invalidation-applied-red/probes.rs:90:4
+   |
+90 | fn raw_forms(store: &BusinessStore) -> Vec<Vec<Option<String>>> { store.database().query("SELECT * FROM artifact_local_forms_v1 ORDE...
+   |    ^^^^^^^^^
+
+warning: 6 warnings emitted
+

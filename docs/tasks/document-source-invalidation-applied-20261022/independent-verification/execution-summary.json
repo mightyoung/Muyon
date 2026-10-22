@@ -1,0 +1,50 @@
+{
+  "note": "Targeted repetitions are overlapping execution evidence, not unique scenarios. Failed core/workspace commands are zero executed tests with compile/resolution errors. JUnit derived, no invented timings.",
+  "results": {
+    "original/source-targeted": {
+      "passed": 20,
+      "failed": 0,
+      "ignored": 0
+    },
+    "original/artifacts-targeted": {
+      "passed": 41,
+      "failed": 0,
+      "ignored": 0
+    },
+    "original/reader-targeted": {
+      "passed": 17,
+      "failed": 0,
+      "ignored": 0
+    },
+    "original/presentation-targeted": {
+      "passed": 10,
+      "failed": 0,
+      "ignored": 0
+    },
+    "library-only/core-library-full": {
+      "passed": 182,
+      "failed": 0,
+      "ignored": 0
+    },
+    "original/independent-probes/probe-tests": {
+      "passed": 3,
+      "failed": 0,
+      "ignored": 0
+    },
+    "original/additional-probes/probe-tests": {
+      "passed": 6,
+      "failed": 0,
+      "ignored": 0
+    },
+    "original/reader-probes/probe-tests": {
+      "passed": 6,
+      "failed": 0,
+      "ignored": 0
+    },
+    "original/aba-probe/probe-tests": {
+      "passed": 0,
+      "failed": 1,
+      "ignored": 0
+    }
+  }
+}

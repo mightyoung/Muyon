@@ -1,0 +1,621 @@
+warning: suspicious definition of the runtime `read` symbol used by the standard library
+   --> /workspace/Muyon-source-invalidation-applied-verification/experiments/redesign/core-agent-lab/core/src/host_session.rs:132:124
+    |
+132 | ...ount: usize, timeout: i32) -> i32; fn read(fd: i32, buffer: *mut u8, count: usize) -> isize; fn write(fd: i32, buffer: *const u8...
+    |                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = note: expected `unsafe extern "C" fn(i32, *mut c_void, usize) -> isize` (for the current target)
+            found    `unsafe extern "C" fn(i32, *mut u8, usize) -> isize`
+    = help: either fix the signature or remove any attributes like `#[unsafe(no_mangle)]`, `#[unsafe(export_name = "read")]`, or `#[link_name = "read"]`
+    = help: allow this lint if the signature is compatible
+    = note: `#[warn(suspicious_runtime_symbol_definitions)]` on by default
+
+warning: suspicious definition of the runtime `write` symbol used by the standard library
+   --> /workspace/Muyon-source-invalidation-applied-verification/experiments/redesign/core-agent-lab/core/src/host_session.rs:132:182
+    |
+132 | ... *mut u8, count: usize) -> isize; fn write(fd: i32, buffer: *const u8, count: usize) -> isize; }
+    |                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = note: expected `unsafe extern "C" fn(i32, *const c_void, usize) -> isize` (for the current target)
+            found    `unsafe extern "C" fn(i32, *const u8, usize) -> isize`
+    = help: either fix the signature or remove any attributes like `#[unsafe(no_mangle)]`, `#[unsafe(export_name = "write")]`, or `#[link_name = "write"]`
+    = help: allow this lint if the signature is compatible
+
+warning: `muyon-core-agent-lab` (lib) generated 2 warnings
+   Compiling muyon-core v0.1.0 (/workspace/Muyon-source-invalidation-applied-verification/crates/muyon-core)
+error[E0433]: cannot find `artifacts` in the crate root
+ --> muyon-core/tests/../src/documents/source_notification_tests.rs:3:13
+  |
+3 | use crate::{artifacts::{*, local_interactions::*}, blobs::BlobKind, business::BusinessStore, contract::*, evidence::{store::StoreEvid...
+  |             ^^^^^^^^^ could not find `artifacts` in the crate root
+
+error[E0433]: cannot find `evidence` in the crate root
+ --> muyon-core/tests/../src/documents/source_notification_tests.rs:3:107
+  |
+3 | ... business::BusinessStore, contract::*, evidence::{store::StoreEvidence, InputKind}, sqlite::Db};
+  |                                           ^^^^^^^^ could not find `evidence` in the crate root
+
+error[E0432]: unresolved imports `crate::artifacts`, `crate::evidence`
+ --> muyon-core/tests/../src/documents/source_notification_tests.rs:3:13
+  |
+3 | use crate::{artifacts::{*, local_interactions::*}, blobs::BlobKind, business::BusinessStore, contract::*, evidence::{store::StoreEvid...
+  |             ^^^^^^^^^ could not find `artifacts` in the crate root                                        ^^^^^^^^ could not find `evidence` in the crate root
+
+warning: unused import: `CandidateStatus`
+  --> muyon-core/tests/../src/documents/mod.rs:24:37
+   |
+24 | pub use candidate::{CandidateState, CandidateStatus};
+   |                                     ^^^^^^^^^^^^^^^
+   |
+   = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+error[E0433]: cannot find `artifacts` in the crate root
+ --> muyon-core/src/bin/../documents/source_notification_tests.rs:3:13
+  |
+3 | use crate::{artifacts::{*, local_interactions::*}, blobs::BlobKind, business::BusinessStore, contract::*, evidence::{store::StoreEvid...
+  |             ^^^^^^^^^ could not find `artifacts` in the crate root
+
+error[E0433]: cannot find `evidence` in the crate root
+ --> muyon-core/src/bin/../documents/source_notification_tests.rs:3:107
+  |
+3 | ... business::BusinessStore, contract::*, evidence::{store::StoreEvidence, InputKind}, sqlite::Db};
+  |                                           ^^^^^^^^ could not find `evidence` in the crate root
+
+error[E0432]: unresolved imports `crate::artifacts`, `crate::evidence`
+ --> muyon-core/src/bin/../documents/source_notification_tests.rs:3:13
+  |
+3 | use crate::{artifacts::{*, local_interactions::*}, blobs::BlobKind, business::BusinessStore, contract::*, evidence::{store::StoreEvid...
+  |             ^^^^^^^^^ could not find `artifacts` in the crate root                                        ^^^^^^^^ could not find `evidence` in the crate root
+
+warning: unused imports: `CandidateState` and `CandidateStatus`
+  --> muyon-core/src/bin/../documents/mod.rs:24:21
+   |
+24 | pub use candidate::{CandidateState, CandidateStatus};
+   |                     ^^^^^^^^^^^^^^  ^^^^^^^^^^^^^^^
+   |
+   = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused import: `CandidateStatus`
+  --> muyon-core/src/bin/../documents/mod.rs:24:37
+   |
+24 | pub use candidate::{CandidateState, CandidateStatus};
+   |                                     ^^^^^^^^^^^^^^^
+   |
+   = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+error[E0599]: no method named `invalidate_local_evidence_sources_in_transaction` found for reference `&BusinessStore` in the current scope
+  --> muyon-core/src/bin/../documents/source_notifications.rs:45:29
+   |
+45 |         let affected = self.invalidate_local_evidence_sources_in_transaction(tx, changed)?;
+   |                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+help: there is a method `invalidate_document_dependents_in_transaction` with a similar name
+   |
+45 -         let affected = self.invalidate_local_evidence_sources_in_transaction(tx, changed)?;
+45 +         let affected = self.invalidate_document_dependents_in_transaction(tx, changed)?;
+   |
+
+error[E0599]: no method named `invalidate_local_evidence_sources_in_transaction` found for reference `&business::BusinessStore` in the current scope
+  --> muyon-core/tests/../src/documents/source_notifications.rs:45:29
+   |
+45 |         let affected = self.invalidate_local_evidence_sources_in_transaction(tx, changed)?;
+   |                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+help: there is a method `invalidate_document_dependents_in_transaction` with a similar name
+   |
+45 -         let affected = self.invalidate_local_evidence_sources_in_transaction(tx, changed)?;
+45 +         let affected = self.invalidate_document_dependents_in_transaction(tx, changed)?;
+   |
+
+error[E0599]: no method named `resolve_local_evidence_trusted` found for reference `&business::BusinessStore` in the current scope
+   --> muyon-core/tests/../src/documents/source_notification_tests.rs:16:23
+    |
+ 16 |     let proof = store.resolve_local_evidence_trusted(&local.project, ArtifactProjectOperation::LocalDraft, source, &processing, &hi...
+    |                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+help: there is a method `revoke_grant_trusted` with a similar name, but with different arguments
+   --> muyon-core/tests/../src/business.rs:314:5
+    |
+314 | /     pub fn revoke_grant_trusted(
+315 | |         &self,
+316 | |         grant_id: &str,
+317 | |         generation: &Revision,
+318 | |     ) -> Result<(), ContractError> {
+    | |__________________________________^
+
+error[E0599]: no method named `issue_local_evidence_binding_trusted` found for reference `&business::BusinessStore` in the current scope
+  --> muyon-core/tests/../src/documents/source_notification_tests.rs:18:11
+   |
+18 |     store.issue_local_evidence_binding_trusted(local, kind, expiry(), &proof).unwrap();
+   |           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+help: there is a method `issue_document_grant_trusted` with a similar name
+   |
+18 -     store.issue_local_evidence_binding_trusted(local, kind, expiry(), &proof).unwrap();
+18 +     store.issue_document_grant_trusted(local, kind, expiry(), &proof).unwrap();
+   |
+
+error[E0599]: no method named `initialize_artifacts_trusted` found for struct `business::BusinessStore` in the current scope
+  --> muyon-core/tests/../src/documents/source_notification_tests.rs:22:11
+   |
+22 |     store.initialize_artifacts_trusted().unwrap();
+   |           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+  ::: muyon-core/tests/../src/business.rs:69:1
+   |
+69 | pub struct BusinessStore {
+   | ------------------------ method `initialize_artifacts_trusted` not found for this struct
+   |
+help: there is a method `initialize_documents_trusted` with a similar name
+   |
+22 -     store.initialize_artifacts_trusted().unwrap();
+22 +     store.initialize_documents_trusted().unwrap();
+   |
+
+error[E0599]: no method named `initialize_artifact_workflows_trusted` found for struct `business::BusinessStore` in the current scope
+  --> muyon-core/tests/../src/documents/source_notification_tests.rs:23:11
+   |
+23 |     store.initialize_artifact_workflows_trusted().unwrap();
+   |           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+  ::: muyon-core/tests/../src/business.rs:69:1
+   |
+69 | pub struct BusinessStore {
+   | ------------------------ method `initialize_artifact_workflows_trusted` not found for this struct
+   |
+help: there is a method `initialize_documents_trusted` with a similar name
+   |
+23 -     store.initialize_artifact_workflows_trusted().unwrap();
+23 +     store.initialize_documents_trusted().unwrap();
+   |
+
+error[E0599]: no method named `initialize_local_interactions_trusted` found for struct `business::BusinessStore` in the current scope
+  --> muyon-core/tests/../src/documents/source_notification_tests.rs:24:11
+   |
+24 |     store.initialize_local_interactions_trusted().unwrap();
+   |           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+  ::: muyon-core/tests/../src/business.rs:69:1
+   |
+69 | pub struct BusinessStore {
+   | ------------------------ method `initialize_local_interactions_trusted` not found for this struct
+   |
+help: there is a method `initialize_documents_trusted` with a similar name
+   |
+24 -     store.initialize_local_interactions_trusted().unwrap();
+24 +     store.initialize_documents_trusted().unwrap();
+   |
+
+error[E0599]: no method named `issue_artifact_project_grant_trusted` found for struct `business::BusinessStore` in the current scope
+   --> muyon-core/tests/../src/documents/source_notification_tests.rs:30:11
+    |
+ 30 |     store.issue_artifact_project_grant_trusted(&project, &[ArtifactProjectOperation::LocalDraft, ArtifactProjectOperation::ReadOwnL...
+    |           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+   ::: muyon-core/tests/../src/business.rs:69:1
+    |
+ 69 | pub struct BusinessStore {
+    | ------------------------ method `issue_artifact_project_grant_trusted` not found for this struct
+    |
+help: there is a method `issue_grant_trusted` with a similar name, but with different arguments
+   --> muyon-core/tests/../src/business.rs:277:5
+    |
+277 | /     pub fn issue_grant_trusted(
+278 | |         &self,
+279 | |         command: &CommandEnvelope,
+280 | |         admission_id: Option<&str>,
+281 | |     ) -> Result<(), ContractError> {
+    | |__________________________________^
+
+error[E0599]: no method named `resolve_local_evidence_trusted` found for struct `business::BusinessStore` in the current scope
+   --> muyon-core/tests/../src/documents/source_notification_tests.rs:34:23
+    |
+ 34 |     let proof = store.resolve_local_evidence_trusted(&project, ArtifactProjectOperation::LocalDraft, &source, &processing, &hits[0]...
+    |                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+   ::: muyon-core/tests/../src/business.rs:69:1
+    |
+ 69 | pub struct BusinessStore {
+    | ------------------------ method `resolve_local_evidence_trusted` not found for this struct
+    |
+help: there is a method `revoke_grant_trusted` with a similar name, but with different arguments
+   --> muyon-core/tests/../src/business.rs:314:5
+    |
+314 | /     pub fn revoke_grant_trusted(
+315 | |         &self,
+316 | |         grant_id: &str,
+317 | |         generation: &Revision,
+318 | |     ) -> Result<(), ContractError> {
+    | |__________________________________^
+
+error[E0599]: no method named `issue_local_evidence_binding_trusted` found for struct `business::BusinessStore` in the current scope
+  --> muyon-core/tests/../src/documents/source_notification_tests.rs:37:11
+   |
+37 |     store.issue_local_evidence_binding_trusted(&local, &kind, expiry(), &proof).unwrap();
+   |           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+  ::: muyon-core/tests/../src/business.rs:69:1
+   |
+69 | pub struct BusinessStore {
+   | ------------------------ method `issue_local_evidence_binding_trusted` not found for this struct
+   |
+help: there is a method `issue_document_grant_trusted` with a similar name
+   |
+37 -     store.issue_local_evidence_binding_trusted(&local, &kind, expiry(), &proof).unwrap();
+37 +     store.issue_document_grant_trusted(&local, &kind, expiry(), &proof).unwrap();
+   |
+
+error[E0599]: no method named `mutate_local_trusted` found for struct `business::BusinessStore` in the current scope
+   --> muyon-core/tests/../src/documents/source_notification_tests.rs:40:22
+    |
+ 40 |     assert_eq!(store.mutate_local_trusted("manual", &local, &change).unwrap().status, ArtifactSaveStatus::Committed);
+    |                      ^^^^^^^^^^^^^^^^^^^^
+    |
+   ::: muyon-core/tests/../src/business.rs:69:1
+    |
+ 69 | pub struct BusinessStore {
+    | ------------------------ method `mutate_local_trusted` not found for this struct
+    |
+help: there is a method `cancel_trusted` with a similar name, but with different arguments
+   --> muyon-core/tests/../src/business.rs:783:5
+    |
+783 |     pub fn cancel_trusted(&self, intent_id: &str) -> Result<ExecutionResult, ContractError> {
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+error[E0599]: no method named `invalidate_local_evidence_sources_in_transaction` found for reference `&business::BusinessStore` in the current scope
+  --> muyon-core/src/bin/../documents/source_notifications.rs:45:29
+   |
+45 |         let affected = self.invalidate_local_evidence_sources_in_transaction(tx, changed)?;
+   |                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+help: there is a method `invalidate_document_dependents_in_transaction` with a similar name
+   |
+45 -         let affected = self.invalidate_local_evidence_sources_in_transaction(tx, changed)?;
+45 +         let affected = self.invalidate_document_dependents_in_transaction(tx, changed)?;
+   |
+
+error[E0599]: no method named `initialize_artifacts_trusted` found for struct `business::BusinessStore` in the current scope
+  --> muyon-core/tests/../src/documents/source_notification_tests.rs:58:11
+   |
+58 |     store.initialize_artifacts_trusted().unwrap();
+   |           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+  ::: muyon-core/tests/../src/business.rs:69:1
+   |
+69 | pub struct BusinessStore {
+   | ------------------------ method `initialize_artifacts_trusted` not found for this struct
+   |
+help: there is a method `initialize_documents_trusted` with a similar name
+   |
+58 -     store.initialize_artifacts_trusted().unwrap();
+58 +     store.initialize_documents_trusted().unwrap();
+   |
+
+error[E0599]: no method named `resolve_local_evidence_trusted` found for reference `&business::BusinessStore` in the current scope
+   --> muyon-core/src/bin/../documents/source_notification_tests.rs:16:23
+    |
+ 16 |     let proof = store.resolve_local_evidence_trusted(&local.project, ArtifactProjectOperation::LocalDraft, source, &processing, &hi...
+    |                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+help: there is a method `revoke_grant_trusted` with a similar name, but with different arguments
+   --> muyon-core/src/bin/../business.rs:314:5
+    |
+314 | /     pub fn revoke_grant_trusted(
+315 | |         &self,
+316 | |         grant_id: &str,
+317 | |         generation: &Revision,
+318 | |     ) -> Result<(), ContractError> {
+    | |__________________________________^
+
+error[E0599]: no method named `initialize_artifact_workflows_trusted` found for struct `business::BusinessStore` in the current scope
+  --> muyon-core/tests/../src/documents/source_notification_tests.rs:59:11
+   |
+59 |     store.initialize_artifact_workflows_trusted().unwrap();
+   |           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+  ::: muyon-core/tests/../src/business.rs:69:1
+   |
+69 | pub struct BusinessStore {
+   | ------------------------ method `initialize_artifact_workflows_trusted` not found for this struct
+   |
+help: there is a method `initialize_documents_trusted` with a similar name
+   |
+59 -     store.initialize_artifact_workflows_trusted().unwrap();
+59 +     store.initialize_documents_trusted().unwrap();
+   |
+
+error[E0599]: no method named `issue_local_evidence_binding_trusted` found for reference `&business::BusinessStore` in the current scope
+  --> muyon-core/src/bin/../documents/source_notification_tests.rs:18:11
+   |
+18 |     store.issue_local_evidence_binding_trusted(local, kind, expiry(), &proof).unwrap();
+   |           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+help: there is a method `issue_document_grant_trusted` with a similar name
+   |
+18 -     store.issue_local_evidence_binding_trusted(local, kind, expiry(), &proof).unwrap();
+18 +     store.issue_document_grant_trusted(local, kind, expiry(), &proof).unwrap();
+   |
+
+error[E0599]: no method named `initialize_artifacts_trusted` found for struct `business::BusinessStore` in the current scope
+  --> muyon-core/src/bin/../documents/source_notification_tests.rs:22:11
+   |
+22 |     store.initialize_artifacts_trusted().unwrap();
+   |           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+  ::: muyon-core/src/bin/../business.rs:69:1
+   |
+69 | pub struct BusinessStore {
+   | ------------------------ method `initialize_artifacts_trusted` not found for this struct
+   |
+help: there is a method `initialize_documents_trusted` with a similar name
+   |
+22 -     store.initialize_artifacts_trusted().unwrap();
+22 +     store.initialize_documents_trusted().unwrap();
+   |
+
+error[E0599]: no method named `initialize_local_interactions_trusted` found for struct `business::BusinessStore` in the current scope
+  --> muyon-core/tests/../src/documents/source_notification_tests.rs:60:11
+   |
+60 |     store.initialize_local_interactions_trusted().unwrap();
+   |           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+  ::: muyon-core/tests/../src/business.rs:69:1
+   |
+69 | pub struct BusinessStore {
+   | ------------------------ method `initialize_local_interactions_trusted` not found for this struct
+   |
+help: there is a method `initialize_documents_trusted` with a similar name
+   |
+60 -     store.initialize_local_interactions_trusted().unwrap();
+60 +     store.initialize_documents_trusted().unwrap();
+   |
+
+error[E0599]: no method named `initialize_artifact_workflows_trusted` found for struct `business::BusinessStore` in the current scope
+  --> muyon-core/src/bin/../documents/source_notification_tests.rs:23:11
+   |
+23 |     store.initialize_artifact_workflows_trusted().unwrap();
+   |           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+  ::: muyon-core/src/bin/../business.rs:69:1
+   |
+69 | pub struct BusinessStore {
+   | ------------------------ method `initialize_artifact_workflows_trusted` not found for this struct
+   |
+help: there is a method `initialize_documents_trusted` with a similar name
+   |
+23 -     store.initialize_artifact_workflows_trusted().unwrap();
+23 +     store.initialize_documents_trusted().unwrap();
+   |
+
+error[E0599]: no method named `initialize_local_interactions_trusted` found for struct `business::BusinessStore` in the current scope
+  --> muyon-core/src/bin/../documents/source_notification_tests.rs:24:11
+   |
+24 |     store.initialize_local_interactions_trusted().unwrap();
+   |           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+  ::: muyon-core/src/bin/../business.rs:69:1
+   |
+69 | pub struct BusinessStore {
+   | ------------------------ method `initialize_local_interactions_trusted` not found for this struct
+   |
+help: there is a method `initialize_documents_trusted` with a similar name
+   |
+24 -     store.initialize_local_interactions_trusted().unwrap();
+24 +     store.initialize_documents_trusted().unwrap();
+   |
+
+error[E0599]: no method named `issue_artifact_project_grant_trusted` found for struct `business::BusinessStore` in the current scope
+   --> muyon-core/src/bin/../documents/source_notification_tests.rs:30:11
+    |
+ 30 |     store.issue_artifact_project_grant_trusted(&project, &[ArtifactProjectOperation::LocalDraft, ArtifactProjectOperation::ReadOwnL...
+    |           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+   ::: muyon-core/src/bin/../business.rs:69:1
+    |
+ 69 | pub struct BusinessStore {
+    | ------------------------ method `issue_artifact_project_grant_trusted` not found for this struct
+    |
+help: there is a method `issue_grant_trusted` with a similar name, but with different arguments
+   --> muyon-core/src/bin/../business.rs:277:5
+    |
+277 | /     pub fn issue_grant_trusted(
+278 | |         &self,
+279 | |         command: &CommandEnvelope,
+280 | |         admission_id: Option<&str>,
+281 | |     ) -> Result<(), ContractError> {
+    | |__________________________________^
+
+error[E0599]: no method named `resolve_local_evidence_trusted` found for struct `business::BusinessStore` in the current scope
+   --> muyon-core/tests/../src/documents/source_notification_tests.rs:205:23
+    |
+205 |     let proof = store.resolve_local_evidence_trusted(&local.project, ArtifactProjectOperation::LocalDraft, &source, &processing, &h...
+    |                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+   ::: muyon-core/tests/../src/business.rs:69:1
+    |
+ 69 | pub struct BusinessStore {
+    | ------------------------ method `resolve_local_evidence_trusted` not found for this struct
+    |
+help: there is a method `revoke_grant_trusted` with a similar name, but with different arguments
+   --> muyon-core/tests/../src/business.rs:314:5
+    |
+314 | /     pub fn revoke_grant_trusted(
+315 | |         &self,
+316 | |         grant_id: &str,
+317 | |         generation: &Revision,
+318 | |     ) -> Result<(), ContractError> {
+    | |__________________________________^
+
+error[E0599]: no method named `resolve_local_evidence_trusted` found for struct `business::BusinessStore` in the current scope
+   --> muyon-core/src/bin/../documents/source_notification_tests.rs:34:23
+    |
+ 34 |     let proof = store.resolve_local_evidence_trusted(&project, ArtifactProjectOperation::LocalDraft, &source, &processing, &hits[0]...
+    |                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+   ::: muyon-core/src/bin/../business.rs:69:1
+    |
+ 69 | pub struct BusinessStore {
+    | ------------------------ method `resolve_local_evidence_trusted` not found for this struct
+    |
+help: there is a method `revoke_grant_trusted` with a similar name, but with different arguments
+   --> muyon-core/src/bin/../business.rs:314:5
+    |
+314 | /     pub fn revoke_grant_trusted(
+315 | |         &self,
+316 | |         grant_id: &str,
+317 | |         generation: &Revision,
+318 | |     ) -> Result<(), ContractError> {
+    | |__________________________________^
+
+error[E0599]: no method named `issue_local_evidence_binding_trusted` found for struct `business::BusinessStore` in the current scope
+   --> muyon-core/tests/../src/documents/source_notification_tests.rs:208:15
+    |
+208 |         store.issue_local_evidence_binding_trusted(&extra, &kind, expiry(), &proof).unwrap();
+    |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+   ::: muyon-core/tests/../src/business.rs:69:1
+    |
+ 69 | pub struct BusinessStore {
+    | ------------------------ method `issue_local_evidence_binding_trusted` not found for this struct
+    |
+help: there is a method `issue_document_grant_trusted` with a similar name
+    |
+208 -         store.issue_local_evidence_binding_trusted(&extra, &kind, expiry(), &proof).unwrap();
+208 +         store.issue_document_grant_trusted(&extra, &kind, expiry(), &proof).unwrap();
+    |
+
+error[E0599]: no method named `issue_local_evidence_binding_trusted` found for struct `business::BusinessStore` in the current scope
+  --> muyon-core/src/bin/../documents/source_notification_tests.rs:37:11
+   |
+37 |     store.issue_local_evidence_binding_trusted(&local, &kind, expiry(), &proof).unwrap();
+   |           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+  ::: muyon-core/src/bin/../business.rs:69:1
+   |
+69 | pub struct BusinessStore {
+   | ------------------------ method `issue_local_evidence_binding_trusted` not found for this struct
+   |
+help: there is a method `issue_document_grant_trusted` with a similar name
+   |
+37 -     store.issue_local_evidence_binding_trusted(&local, &kind, expiry(), &proof).unwrap();
+37 +     store.issue_document_grant_trusted(&local, &kind, expiry(), &proof).unwrap();
+   |
+
+error[E0599]: no method named `mutate_local_trusted` found for struct `business::BusinessStore` in the current scope
+   --> muyon-core/src/bin/../documents/source_notification_tests.rs:40:22
+    |
+ 40 |     assert_eq!(store.mutate_local_trusted("manual", &local, &change).unwrap().status, ArtifactSaveStatus::Committed);
+    |                      ^^^^^^^^^^^^^^^^^^^^
+    |
+   ::: muyon-core/src/bin/../business.rs:69:1
+    |
+ 69 | pub struct BusinessStore {
+    | ------------------------ method `mutate_local_trusted` not found for this struct
+    |
+help: there is a method `cancel_trusted` with a similar name, but with different arguments
+   --> muyon-core/src/bin/../business.rs:783:5
+    |
+783 |     pub fn cancel_trusted(&self, intent_id: &str) -> Result<ExecutionResult, ContractError> {
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+error[E0599]: no method named `initialize_artifacts_trusted` found for struct `business::BusinessStore` in the current scope
+  --> muyon-core/src/bin/../documents/source_notification_tests.rs:58:11
+   |
+58 |     store.initialize_artifacts_trusted().unwrap();
+   |           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+  ::: muyon-core/src/bin/../business.rs:69:1
+   |
+69 | pub struct BusinessStore {
+   | ------------------------ method `initialize_artifacts_trusted` not found for this struct
+   |
+help: there is a method `initialize_documents_trusted` with a similar name
+   |
+58 -     store.initialize_artifacts_trusted().unwrap();
+58 +     store.initialize_documents_trusted().unwrap();
+   |
+
+error[E0599]: no method named `initialize_artifact_workflows_trusted` found for struct `business::BusinessStore` in the current scope
+  --> muyon-core/src/bin/../documents/source_notification_tests.rs:59:11
+   |
+59 |     store.initialize_artifact_workflows_trusted().unwrap();
+   |           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+  ::: muyon-core/src/bin/../business.rs:69:1
+   |
+69 | pub struct BusinessStore {
+   | ------------------------ method `initialize_artifact_workflows_trusted` not found for this struct
+   |
+help: there is a method `initialize_documents_trusted` with a similar name
+   |
+59 -     store.initialize_artifact_workflows_trusted().unwrap();
+59 +     store.initialize_documents_trusted().unwrap();
+   |
+
+error[E0599]: no method named `initialize_local_interactions_trusted` found for struct `business::BusinessStore` in the current scope
+  --> muyon-core/src/bin/../documents/source_notification_tests.rs:60:11
+   |
+60 |     store.initialize_local_interactions_trusted().unwrap();
+   |           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+  ::: muyon-core/src/bin/../business.rs:69:1
+   |
+69 | pub struct BusinessStore {
+   | ------------------------ method `initialize_local_interactions_trusted` not found for this struct
+   |
+help: there is a method `initialize_documents_trusted` with a similar name
+   |
+60 -     store.initialize_local_interactions_trusted().unwrap();
+60 +     store.initialize_documents_trusted().unwrap();
+   |
+
+error[E0599]: no method named `resolve_local_evidence_trusted` found for struct `business::BusinessStore` in the current scope
+   --> muyon-core/src/bin/../documents/source_notification_tests.rs:205:23
+    |
+205 |     let proof = store.resolve_local_evidence_trusted(&local.project, ArtifactProjectOperation::LocalDraft, &source, &processing, &h...
+    |                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+   ::: muyon-core/src/bin/../business.rs:69:1
+    |
+ 69 | pub struct BusinessStore {
+    | ------------------------ method `resolve_local_evidence_trusted` not found for this struct
+    |
+help: there is a method `revoke_grant_trusted` with a similar name, but with different arguments
+   --> muyon-core/src/bin/../business.rs:314:5
+    |
+314 | /     pub fn revoke_grant_trusted(
+315 | |         &self,
+316 | |         grant_id: &str,
+317 | |         generation: &Revision,
+318 | |     ) -> Result<(), ContractError> {
+    | |__________________________________^
+
+error[E0599]: no method named `issue_local_evidence_binding_trusted` found for struct `business::BusinessStore` in the current scope
+   --> muyon-core/src/bin/../documents/source_notification_tests.rs:208:15
+    |
+208 |         store.issue_local_evidence_binding_trusted(&extra, &kind, expiry(), &proof).unwrap();
+    |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+   ::: muyon-core/src/bin/../business.rs:69:1
+    |
+ 69 | pub struct BusinessStore {
+    | ------------------------ method `issue_local_evidence_binding_trusted` not found for this struct
+    |
+help: there is a method `issue_document_grant_trusted` with a similar name
+    |
+208 -         store.issue_local_evidence_binding_trusted(&extra, &kind, expiry(), &proof).unwrap();
+208 +         store.issue_document_grant_trusted(&extra, &kind, expiry(), &proof).unwrap();
+    |
+
+For more information about this error, try `rustc --explain E0599`.
+warning: `muyon-core` (bin "business_worker") generated 1 warning
+error: could not compile `muyon-core` (bin "business_worker") due to 1 previous error; 1 warning emitted
+warning: build failed, waiting for other jobs to finish...
+Some errors have detailed explanations: E0432, E0433, E0599.
+For more information about an error, try `rustc --explain E0432`.
+warning: `muyon-core` (bin "business_worker" test) generated 1 warning
+error: could not compile `muyon-core` (bin "business_worker" test) due to 18 previous errors; 1 warning emitted
+warning: `muyon-core` (test "group_runtime_store") generated 1 warning (1 duplicate)
+error: could not compile `muyon-core` (test "group_runtime_store") due to 18 previous errors; 1 warning emitted
+warning: `muyon-core` (test "group_runtime_bridge") generated 1 warning
+error: could not compile `muyon-core` (test "group_runtime_bridge") due to 18 previous errors; 1 warning emitted

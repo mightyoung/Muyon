@@ -1,0 +1,12 @@
+
+running 1 test
+second_revoke_ok=true old_z_generation=1 new_z_generation=1 stale_z_ack_count=1 pending_after=[("object", 2)]
+test independent_source_validation::probe::independent_notification_batch_must_freeze_generations_before_all_writes ... FAILED
+
+failures:
+
+failures:
+    independent_source_validation::probe::independent_notification_batch_must_freeze_generations_before_all_writes
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 182 filtered out; finished in 0.04s
+

@@ -1,0 +1,26 @@
+#[test]
+fn independent_notification_trigger_must_not_restore_revoked_grant() {
+ let (_f,store,source,_,_)=fixture();
+ store.database().exec("CREATE TRIGGER independent_restore AFTER INSERT ON document_source_notifications_v1 BEGIN UPDATE document_grants SET active=1 WHERE grant_id='source-grant'; END",&[]).unwrap();
+ let result=store.revoke_document_grant_trusted(&source.authority);
+ let granted=store.database().query("SELECT active FROM document_grants WHERE grant_id='source-grant'",&[]).unwrap();
+ let queue=store.pending_document_source_notifications_trusted(None,256).unwrap();
+ println!("revocation_ok={} grant_active={:?} source_active={} queue_pending={} authorized_read_ok={}",result.is_ok(),granted,active(&store),queue.len(),store.read_document(&source).is_ok());
+ assert!(result.is_err(),"must reject and rollback when queue trigger restored revoked grant before commit");
+}
+#[test]
+fn independent_notification_trigger_must_not_delete_queued_invalidation() {
+ let (_f,store,source,_,_)=fixture();
+ store.database().exec("CREATE TRIGGER independent_delete AFTER INSERT ON document_source_notifications_v1 BEGIN DELETE FROM document_source_notifications_v1 WHERE project_id=NEW.project_id AND actor_id=NEW.actor_id AND object_id=NEW.object_id; END",&[]).unwrap();
+ let result=store.revoke_document_grant_trusted(&source.authority);let queue=store.pending_document_source_notifications_trusted(None,256).unwrap();
+ println!("revocation_ok={} source_active={} queue_pending={}",result.is_ok(),active(&store),queue.len());
+ assert!(result.is_err(),"must reject and rollback when trigger deleted required invalidation before commit");
+}
+#[test]
+fn independent_notification_trigger_must_not_preack_queued_invalidation() {
+ let (_f,store,source,_,_)=fixture();
+ store.database().exec("CREATE TRIGGER independent_preack AFTER INSERT ON document_source_notifications_v1 BEGIN UPDATE document_source_notifications_v1 SET pending=0 WHERE project_id=NEW.project_id AND actor_id=NEW.actor_id AND object_id=NEW.object_id; END",&[]).unwrap();
+ let result=store.revoke_document_grant_trusted(&source.authority);let queue=store.pending_document_source_notifications_trusted(None,256).unwrap();
+ println!("revocation_ok={} source_active={} queue_pending={}",result.is_ok(),active(&store),queue.len());
+ assert!(result.is_err(),"must reject and rollback when trigger preacked invalidation before Runtime delivery");
+}

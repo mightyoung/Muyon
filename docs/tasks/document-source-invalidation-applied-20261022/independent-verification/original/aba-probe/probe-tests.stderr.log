@@ -1,0 +1,6 @@
+
+thread 'independent_source_validation::probe::independent_notification_batch_must_freeze_generations_before_all_writes' (29881) panicked at /tmp/muyon-source-invalidation-applied-aba/probes.rs:107:2:
+assertion `left == right` failed: old object-z generation1 ACK must not erase newly invalidated object-z after earlier queue write deleted its tombstone
+  left: 1
+ right: 0
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace

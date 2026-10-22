@@ -1,0 +1,29 @@
+{
+  "checks": [
+    {
+      "label": "full-staged",
+      "argv": [
+        "git",
+        "diff",
+        "--cached",
+        "--check"
+      ],
+      "exit_status": 2
+    },
+    {
+      "label": "authored",
+      "argv": [
+        "git",
+        "diff",
+        "--cached",
+        "--check",
+        "--",
+        "docs/tasks/document-source-invalidation-applied-20261022/INDEPENDENT-RUST-VERIFICATION.md",
+        ":(glob)docs/tasks/document-source-invalidation-applied-20261022/independent-verification/**/*.json",
+        ":(glob)docs/tasks/document-source-invalidation-applied-20261022/independent-verification/**/*.xml"
+      ],
+      "exit_status": 0
+    }
+  ],
+  "note": "Raw stdout/stderr and actual source diffs preserved byte-exact; includes historical blank lines/context whitespace. Authored report/JSON/JUnit checked separately."
+}

@@ -1,0 +1,35 @@
+[
+  {
+    "label": "delivery-handoff",
+    "argv": [
+      "git",
+      "show",
+      "d646e3412063e6e30901cfc6257719a3f3256850:docs/tasks/document-source-invalidation-applied-20261022/HANDOFF.md"
+    ],
+    "exit_status": 0
+  },
+  {
+    "label": "source-delta",
+    "argv": [
+      "git",
+      "diff",
+      "662aeec6d6462cabfcc317e855ae23797dd88d51",
+      "e3fa0ee71f071bb8cff667d50ee1c0da6827a7c9",
+      "--",
+      "crates"
+    ],
+    "exit_status": 0
+  },
+  {
+    "label": "remote-before-evidence-push",
+    "argv": [
+      "git",
+      "ls-remote",
+      "origin",
+      "refs/heads/main",
+      "refs/heads/develop",
+      "refs/heads/task/document-source-invalidation-applied-20261022"
+    ],
+    "exit_status": 0
+  }
+]

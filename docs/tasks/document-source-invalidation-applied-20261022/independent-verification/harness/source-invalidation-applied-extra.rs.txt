@@ -1,0 +1,71 @@
+#[test]
+fn independent_notification_abort_rolls_back_grant_source_manual_and_queue() {
+ let (_f,store,source,_,_)=fixture();let before=raw_forms(&store);
+ store.database().exec("CREATE TRIGGER independent_abort BEFORE INSERT ON document_source_notifications_v1 BEGIN SELECT RAISE(ABORT,'original synthetic failure'); END",&[]).unwrap();
+ assert!(store.revoke_document_grant_trusted(&source.authority).is_err());
+ assert!(store.read_document(&source).is_ok());assert_eq!(active(&store),"1");assert_eq!(raw_forms(&store),before);
+ assert!(store.pending_document_source_notifications_trusted(None,256).unwrap().is_empty());
+}
+#[test]
+fn independent_grant_target_replacement_invalidates_old_and_preserves_independent_new_source() {
+ let (_f,store,source,local,kind)=fixture();
+ let blob=upload(&store,"project",b"Another original synthetic evidence source.");
+ let metadata=store.register_document_trusted("project","another","Another",DocumentFormat::Text,&blob).unwrap();
+ let other=DocumentAccess{document:metadata.document,authority:AuthorityBinding{grant_id:"independent-other-grant".into(),generation:Revision::new(1),owner_epoch:"epoch".into()}};
+ store.issue_document_grant_trusted(&other.document,&other.authority,&[DocumentOperation::Inspect,DocumentOperation::ReadText],expiry()).unwrap();
+ let evidence=StoreEvidence::new(&store);let processing=evidence.process(&other,InputKind::Utf8Text).unwrap();let hits=evidence.find_literal(&other,&processing,"synthetic",1).unwrap();
+ let proof=store.resolve_local_evidence_trusted(&local.project,ArtifactProjectOperation::LocalDraft,&other,&processing,&hits[0]).unwrap();
+ let otherlocal=LocalAccess{object:LocalObjectRef{object_id:"other-object".into(),target:proof.target(),..local.object.clone()},..local.clone()};
+ store.issue_local_evidence_binding_trusted(&otherlocal,&kind,expiry(),&proof).unwrap();drop(proof);
+ let next=AuthorityBinding{generation:source.authority.generation.next().unwrap(),..source.authority.clone()};
+ store.issue_document_grant_trusted(&other.document,&next,&[DocumentOperation::Inspect,DocumentOperation::ReadText],expiry()).unwrap();
+ assert!(store.read_document(&source).is_err());assert!(store.read_document(&other).is_ok());assert_eq!(active(&store),"0");
+ let rows=store.database().query("SELECT active FROM artifact_local_evidence_sources_v1 WHERE object_id='other-object'",&[]).unwrap();assert_eq!(rows[0][0].as_deref(),Some("1"));
+ let events=store.pending_document_source_notifications_trusted(None,256).unwrap();assert_eq!(events.len(),1);assert_eq!(events[0].object_id,"object");
+}
+#[test]
+fn independent_outbox_commit_rollback_and_stale_ack_preserve_later_generation() {
+ let (f,store,mut source,mut local,kind)=fixture();
+ let metadata=store.read_document(&source).unwrap();let observer=Db::open(f.path().to_str().unwrap(),true,false).unwrap();
+ let tx=store.database().transaction().unwrap();store.document_clone_in_transaction(&tx,&source.document,"rollback",&metadata.blob).unwrap();
+ assert!(store.pending_document_source_notifications_trusted(None,256).is_err());
+ assert!(observer.query("SELECT 1 FROM document_source_notifications_v1 WHERE pending=1",&[]).unwrap().is_empty());drop(tx);
+ assert!(store.pending_document_source_notifications_trusted(None,256).unwrap().is_empty());assert_eq!(active(&store),"1");
+ store.revoke_document_grant_trusted(&source.authority).unwrap();let first=store.pending_document_source_notifications_trusted(None,256).unwrap();assert_eq!(first.len(),1);
+ assert_eq!(store.ack_document_source_notifications_trusted(&first).unwrap(),1);assert_eq!(store.ack_document_source_notifications_trusted(&first).unwrap(),0);
+ source.authority.generation=source.authority.generation.next().unwrap();store.issue_document_grant_trusted(&source.document,&source.authority,&[DocumentOperation::Inspect,DocumentOperation::ReadText],expiry()).unwrap();
+ local.binding_generation=local.binding_generation.next().unwrap();bind(&store,&source,&local,&kind);store.revoke_document_grant_trusted(&source.authority).unwrap();
+ let second=store.pending_document_source_notifications_trusted(None,256).unwrap();assert!(second[0].generation.value()>first[0].generation.value());
+ assert_eq!(store.ack_document_source_notifications_trusted(&first).unwrap(),0);assert_eq!(store.pending_document_source_notifications_trusted(None,256).unwrap(),second);
+}
+#[test]
+fn independent_uninitialized_compatible_but_installed_missing_or_corrupt_source_denied() {
+ let f=Fixture::new();let (store,access)=f.setup();assert!(store.pending_document_source_notifications_trusted(None,256).unwrap().is_empty());store.revoke_document_grant_trusted(&access.authority).unwrap();
+ assert!(store.database().query("SELECT name FROM sqlite_master WHERE name='document_source_notifications_v1'",&[]).unwrap().is_empty());
+ for malformed in [false,true] {
+  let (_f,store,source,_,_)=fixture();store.database().exec("DROP TABLE artifact_local_evidence_sources_v1",&[]).unwrap();
+  if malformed {store.database().exec("CREATE TABLE artifact_local_evidence_sources_v1(wrong TEXT)",&[]).unwrap();}
+  assert!(store.revoke_document_grant_trusted(&source.authority).is_err());assert!(store.read_document(&source).is_ok());
+  assert_eq!(store.database().query("SELECT active FROM document_grants WHERE grant_id='source-grant'",&[]).unwrap()[0][0].as_deref(),Some("1"));
+ }
+}
+#[test]
+fn independent_outbox_tail_blob_reference_loss_rolls_back_publish_and_copy() {
+ for copy in [false,true] {
+  let (_f,store,source,_,_)=fixture();let original=store.read_document(&source).unwrap();
+  let refs=store.database().query("SELECT * FROM blob_references ORDER BY reference_id",&[]).unwrap();
+  store.database().exec("CREATE TRIGGER independent_blob_tail AFTER INSERT ON document_source_notifications_v1 BEGIN DELETE FROM blob_references WHERE target_id='text-source'; END",&[]).unwrap();
+  let rejected=if copy {let tx=store.database().transaction().unwrap();let result=store.document_clone_in_transaction(&tx,&source.document,"copy",&original.blob);if result.is_ok(){tx.commit().unwrap();}result.is_err()}
+   else {let blob=upload(&store,"project",b"Independent new synthetic replacement source.");store.publish_document_revision_trusted(&source.document,"replacement",DocumentFormat::Text,&blob).is_err()};
+  println!("blob tail copy={} rejected={} head={} source_active={}",copy,rejected,head(&store),active(&store));
+  assert!(rejected,"blob receipt deleted after outbox INSERT must deny and roll back");assert_eq!(head(&store),"1");assert_eq!(active(&store),"1");
+  assert_eq!(store.database().query("SELECT * FROM blob_references ORDER BY reference_id",&[]).unwrap(),refs);assert!(store.pending_document_source_notifications_trusted(None,256).unwrap().is_empty());
+ }
+}
+#[test]
+fn independent_ignored_ack_cannot_delete_generation_tombstone() {
+ let (_f,store,source,_,_)=fixture();store.revoke_document_grant_trusted(&source.authority).unwrap();let pending=store.pending_document_source_notifications_trusted(None,256).unwrap();assert_eq!(pending.len(),1);
+ store.database().exec("CREATE TRIGGER independent_ack_tail BEFORE UPDATE ON document_source_notifications_v1 BEGIN DELETE FROM document_source_notifications_v1 WHERE project_id=OLD.project_id AND actor_id=OLD.actor_id AND object_id=OLD.object_id; SELECT RAISE(IGNORE); END",&[]).unwrap();
+ let result=store.ack_document_source_notifications_trusted(&pending);println!("ignored ack rejected={} pending_after={}",result.is_err(),store.pending_document_source_notifications_trusted(None,256).unwrap().len());
+ assert!(result.is_err(),"ignored SQL ACK write may not delete generation tombstone");assert_eq!(store.pending_document_source_notifications_trusted(None,256).unwrap(),pending);
+}
