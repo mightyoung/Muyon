@@ -1,6 +1,6 @@
 # Parent / core txn owner / Leader B handoff
 
-Independent branch `task/document-fidelity-harness-20261022`, prior tip `6b796c8d6e094d45ef25e28698048c21ef0ae7b3`. Initial frozen source `f5a65182516fba1bafed542384019b28316cf768`; review/final validation are recorded in REPORT.md once completed.
+Independent branch `task/document-fidelity-harness-20261022`, prior tip `6b796c8d6e094d45ef25e28698048c21ef0ae7b3`. Initial frozen source `f5a65182516fba1bafed542384019b28316cf768`; final source6f1ac828de642503dc1ec774fac9fa1023d873c2 includes one author review-fix pass. REPORT.md records independent13+60 versus author20+60 and the original5-probe replay; no independent20-test rerun is claimed.
 
 The proposal and source live in DESIGN-AND-RECEIPTS.md and tools/document_fidelity/adapters/runner/. Adapter/runner owns source preflight/preview, independent delta oracle, request-bound admission orchestration, worker gates, lifecycle and bounded audit receipts. Rust/core owns authorization, scoped file/revision handles, durable bytes/reports, idempotency/CAS, rollback and final commit/sync. No Rust/Android/UI file has been edited or protocol consumer wired by this slice.
 
