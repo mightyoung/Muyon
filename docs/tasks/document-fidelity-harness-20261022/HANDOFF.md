@@ -17,3 +17,7 @@ Delivery: tools/document_fidelity; REPORT.md, REVIEW.md, ADR-ENGINE-EVALUATION.m
 Pre-push UI remote advanced to `b6fcc030410d1718d00fbad15627423d4f809e2f`; read-only diff has no task-directory overlap; did not merge/rebase. Original workspace remains clean on work branch. No main/develop edit, force push, delete, deploy, cost, credential setup, permission expansion, live model/search call or historical unknown retry. Historical2 unknown / ¥0.002620 reservation untouched. No action denied or uncertain in this batch. Remaining environment/engine limitations are in REPORT.md. Leader B remains sole develop merger; no merge performed.
 
 Raw publication output contains GitHub remote trailing whitespace; original log retained. Publication receipt raw diff check returns2 solely on that log, while handoff Markdown scoped check passes. No whole-diff clean claim.
+
+## Installed-engine continuation (2026-10-22)
+
+See [engine-evaluation/HANDOFF.md](engine-evaluation/HANDOFF.md) and its report/review for the subsequent existing-engine inventory and complex corpus. Namespace setup failed before engine work; actual round-trip remains NOT_RUN, no retry or bypass. Independent source ff2eed64c74b070885d1fedaaae07adcfc7cf916 verified32 tests and six fixtures. Earlier commit/publication entries above remain the historical first batch.
