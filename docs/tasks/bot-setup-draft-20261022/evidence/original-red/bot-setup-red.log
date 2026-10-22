@@ -1,0 +1,309 @@
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupDraftChecks.kt:10:18: error: unresolved reference 'BotSetupDraft'.
+    fun ready(): BotSetupDraft = BotSetupDraft("account/project", "draft-1").apply {
+                 ^^^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupDraftChecks.kt:10:34: error: unresolved reference 'BotSetupDraft'.
+    fun ready(): BotSetupDraft = BotSetupDraft("account/project", "draft-1").apply {
+                                 ^^^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupDraftChecks.kt:10:78: error: cannot infer type for this parameter. Specify it explicitly.
+    fun ready(): BotSetupDraft = BotSetupDraft("account/project", "draft-1").apply {
+                                                                             ^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupDraftChecks.kt:10:84: error: cannot infer type for this parameter. Specify it explicitly.
+    fun ready(): BotSetupDraft = BotSetupDraft("account/project", "draft-1").apply {
+                                                                                   ^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupDraftChecks.kt:11:9: error: unresolved reference 'editName'.
+        editName("论文助手📚"); next(); editPurpose("整理当前项目文献"); next()
+        ^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupDraftChecks.kt:11:29: error: unresolved reference 'next'.
+        editName("论文助手📚"); next(); editPurpose("整理当前项目文献"); next()
+                            ^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupDraftChecks.kt:11:37: error: unresolved reference 'editPurpose'.
+        editName("论文助手📚"); next(); editPurpose("整理当前项目文献"); next()
+                                    ^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupDraftChecks.kt:11:62: error: unresolved reference 'next'.
+        editName("论文助手📚"); next(); editPurpose("整理当前项目文献"); next()
+                                                             ^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupDraftChecks.kt:14:17: error: unresolved reference 'BotSetupDraft'.
+        val a = BotSetupDraft("account/project", "draft-a")
+                ^^^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupDraftChecks.kt:15:17: error: unresolved reference 'BotSetupDraft'.
+        val b = BotSetupDraft("account/project", "draft-b")
+                ^^^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupDraftChecks.kt:18:47: error: unresolved reference 'CreationStatus'.
+        check(a.snapshot().creation.status == CreationStatus.NOT_REQUESTED)
+                                              ^^^^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupDraftChecks.kt:27:21: error: unresolved reference 'requestSuggestions'.
+        val old = d.requestSuggestions()
+                    ^^^^^^^^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupDraftChecks.kt:28:11: error: unresolved reference 'editName'.
+        d.editName("采购助手")
+          ^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupDraftChecks.kt:29:18: error: unresolved reference 'receiveSuggestions'.
+        check(!d.receiveSuggestions(old, LocalSetupTemplates.suggest(old)))
+                 ^^^^^^^^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupDraftChecks.kt:29:42: error: unresolved reference 'LocalSetupTemplates'.
+        check(!d.receiveSuggestions(old, LocalSetupTemplates.suggest(old)))
+                                         ^^^^^^^^^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupDraftChecks.kt:30:25: error: unresolved reference 'requestSuggestions'.
+        val current = d.requestSuggestions()
+                        ^^^^^^^^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupDraftChecks.kt:31:11: error: unresolved reference 'editPurpose'.
+        d.editPurpose("手动用途")
+          ^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupDraftChecks.kt:32:18: error: unresolved reference 'receiveSuggestions'.
+        check(!d.receiveSuggestions(current, LocalSetupTemplates.suggest(current)))
+                 ^^^^^^^^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupDraftChecks.kt:32:46: error: unresolved reference 'LocalSetupTemplates'.
+        check(!d.receiveSuggestions(current, LocalSetupTemplates.suggest(current)))
+                                             ^^^^^^^^^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupDraftChecks.kt:33:17: error: unresolved reference 'snapshot'.
+        check(d.snapshot().purpose.value == "手动用途")
+                ^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupDraftChecks.kt:37:23: error: unresolved reference 'requestSuggestions'.
+        val first = d.requestSuggestions(); val second = d.requestSuggestions()
+                      ^^^^^^^^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupDraftChecks.kt:37:60: error: unresolved reference 'requestSuggestions'.
+        val first = d.requestSuggestions(); val second = d.requestSuggestions()
+                                                           ^^^^^^^^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupDraftChecks.kt:38:18: error: unresolved reference 'receiveSuggestions'.
+        check(!d.receiveSuggestions(first, LocalSetupTemplates.suggest(first)))
+                 ^^^^^^^^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupDraftChecks.kt:38:44: error: unresolved reference 'LocalSetupTemplates'.
+        check(!d.receiveSuggestions(first, LocalSetupTemplates.suggest(first)))
+                                           ^^^^^^^^^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupDraftChecks.kt:39:17: error: unresolved reference 'receiveSuggestions'.
+        check(d.receiveSuggestions(second, LocalSetupTemplates.suggest(second)))
+                ^^^^^^^^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupDraftChecks.kt:39:44: error: unresolved reference 'LocalSetupTemplates'.
+        check(d.receiveSuggestions(second, LocalSetupTemplates.suggest(second)))
+                                           ^^^^^^^^^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupDraftChecks.kt:40:23: error: unresolved reference 'requestSuggestions'.
+        val third = d.requestSuggestions(); d.cancel()
+                      ^^^^^^^^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupDraftChecks.kt:40:47: error: unresolved reference 'cancel'.
+        val third = d.requestSuggestions(); d.cancel()
+                                              ^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupDraftChecks.kt:41:18: error: unresolved reference 'receiveSuggestions'.
+        check(!d.receiveSuggestions(third, LocalSetupTemplates.suggest(third)))
+                 ^^^^^^^^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupDraftChecks.kt:41:44: error: unresolved reference 'LocalSetupTemplates'.
+        check(!d.receiveSuggestions(third, LocalSetupTemplates.suggest(third)))
+                                           ^^^^^^^^^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupDraftChecks.kt:42:11: error: unresolved reference 'resume'.
+        d.resume()
+          ^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupDraftChecks.kt:43:17: error: unresolved reference 'snapshot'.
+        check(d.snapshot().purpose.value == "整理当前项目文献")
+                ^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupDraftChecks.kt:47:25: error: unresolved reference 'requestSuggestions'.
+        val request = d.requestSuggestions()
+                        ^^^^^^^^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupDraftChecks.kt:48:24: error: unresolved reference 'LocalSetupTemplates'.
+        val proposal = LocalSetupTemplates.suggest(request)
+                       ^^^^^^^^^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupDraftChecks.kt:50:17: error: unresolved reference 'receiveSuggestions'.
+        check(d.receiveSuggestions(request, proposal))
+                ^^^^^^^^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupDraftChecks.kt:51:17: error: unresolved reference 'snapshot'.
+        check(d.snapshot().role.value.isEmpty())
+                ^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupDraftChecks.kt:52:17: error: unresolved reference 'acceptRoleSuggestion'.
+        check(d.acceptRoleSuggestion(request))
+                ^^^^^^^^^^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupDraftChecks.kt:53:17: error: unresolved reference 'snapshot'.
+        check(d.snapshot().role.origin == FieldOrigin.TEMPLATE)
+                ^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupDraftChecks.kt:53:43: error: unresolved reference 'FieldOrigin'.
+        check(d.snapshot().role.origin == FieldOrigin.TEMPLATE)
+                                          ^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupDraftChecks.kt:54:11: error: unresolved reference 'editRole'.
+        d.editRole("我的角色")
+          ^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupDraftChecks.kt:55:22: error: unresolved reference 'requestSuggestions'.
+        val next = d.requestSuggestions()
+                     ^^^^^^^^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupDraftChecks.kt:56:17: error: unresolved reference 'receiveSuggestions'.
+        check(d.receiveSuggestions(next, LocalSetupTemplates.suggest(next)))
+                ^^^^^^^^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupDraftChecks.kt:56:42: error: unresolved reference 'LocalSetupTemplates'.
+        check(d.receiveSuggestions(next, LocalSetupTemplates.suggest(next)))
+                                         ^^^^^^^^^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupDraftChecks.kt:57:18: error: unresolved reference 'acceptRoleSuggestion'.
+        check(!d.acceptRoleSuggestion(next))
+                 ^^^^^^^^^^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupDraftChecks.kt:58:17: error: unresolved reference 'snapshot'.
+        check(d.snapshot().role.value == "我的角色")
+                ^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupDraftChecks.kt:59:17: error: unresolved reference 'snapshot'.
+        check(d.snapshot().role.userLocked)
+                ^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupDraftChecks.kt:60:17: error: unresolved reference 'snapshot'.
+        check(d.snapshot().role.revision <= d.snapshot().revision)
+                ^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupDraftChecks.kt:60:47: error: unresolved reference 'snapshot'.
+        check(d.snapshot().role.revision <= d.snapshot().revision)
+                                              ^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupDraftChecks.kt:63:28: error: unresolved reference 'editRole'.
+        val d = ready(); d.editRole("研究员"); d.next()
+                           ^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupDraftChecks.kt:63:47: error: unresolved reference 'next'.
+        val d = ready(); d.editRole("研究员"); d.next()
+                                              ^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupDraftChecks.kt:64:17: error: unresolved reference 'snapshot'.
+        check(d.snapshot().step == SetupStep.REVIEW)
+                ^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupDraftChecks.kt:64:36: error: unresolved reference 'SetupStep'.
+        check(d.snapshot().step == SetupStep.REVIEW)
+                                   ^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupDraftChecks.kt:65:24: error: unresolved reference 'preview'.
+        val before = d.preview()
+                       ^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupDraftChecks.kt:66:11: error: unresolved reference 'back'.
+        d.back(); check(d.snapshot().role.value == "研究员"); d.next()
+          ^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupDraftChecks.kt:66:27: error: unresolved reference 'snapshot'.
+        d.back(); check(d.snapshot().role.value == "研究员"); d.next()
+                          ^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupDraftChecks.kt:66:62: error: unresolved reference 'next'.
+        d.back(); check(d.snapshot().role.value == "研究员"); d.next()
+                                                             ^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupDraftChecks.kt:67:11: error: unresolved reference 'cancel'.
+        d.cancel(); check(d.snapshot().cancelled); d.resume()
+          ^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupDraftChecks.kt:67:29: error: unresolved reference 'snapshot'.
+        d.cancel(); check(d.snapshot().cancelled); d.resume()
+                            ^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupDraftChecks.kt:67:54: error: unresolved reference 'resume'.
+        d.cancel(); check(d.snapshot().cancelled); d.resume()
+                                                     ^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupDraftChecks.kt:68:17: error: unresolved reference 'preview'.
+        check(d.preview().name == before.name)
+                ^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupDraftChecks.kt:69:17: error: unresolved reference 'preview'.
+        check(d.preview().purpose == before.purpose)
+                ^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupDraftChecks.kt:70:17: error: unresolved reference 'preview'.
+        check(d.preview().role == before.role)
+                ^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupDraftChecks.kt:71:21: error: unresolved reference 'restoreScope'.
+        rejects { d.restoreScope("different/project") }
+                    ^^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupDraftChecks.kt:74:28: error: unresolved reference 'editName'.
+        val d = ready(); d.editName("采购付款 Bot"); d.editRole("自动支付"); d.next()
+                           ^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupDraftChecks.kt:74:52: error: unresolved reference 'editRole'.
+        val d = ready(); d.editName("采购付款 Bot"); d.editRole("自动支付"); d.next()
+                                                   ^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupDraftChecks.kt:74:72: error: unresolved reference 'next'.
+        val d = ready(); d.editName("采购付款 Bot"); d.editRole("自动支付"); d.next()
+                                                                       ^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupDraftChecks.kt:75:19: error: unresolved reference 'preview'.
+        val p = d.preview()
+                  ^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupDraftChecks.kt:83:28: error: unresolved reference 'editRole'.
+        val d = ready(); d.editRole("研究员"); d.next()
+                           ^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupDraftChecks.kt:83:47: error: unresolved reference 'next'.
+        val d = ready(); d.editRole("研究员"); d.next()
+                                              ^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupDraftChecks.kt:84:21: error: unresolved reference 'preview'.
+        val old = d.preview(); d.editName("改名")
+                    ^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupDraftChecks.kt:84:34: error: unresolved reference 'editName'.
+        val old = d.preview(); d.editName("改名")
+                                 ^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupDraftChecks.kt:85:21: error: unresolved reference 'observePendingCreation'.
+        rejects { d.observePendingCreation("intent-1", old.revision) }
+                    ^^^^^^^^^^^^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupDraftChecks.kt:86:11: error: unresolved reference 'next'.
+        d.next(); val p = d.preview()
+          ^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupDraftChecks.kt:86:29: error: unresolved reference 'preview'.
+        d.next(); val p = d.preview()
+                            ^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupDraftChecks.kt:87:11: error: unresolved reference 'observePendingCreation'.
+        d.observePendingCreation("intent-1", p.revision)
+          ^^^^^^^^^^^^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupDraftChecks.kt:88:21: error: unresolved reference 'observePendingCreation'.
+        rejects { d.observePendingCreation("intent-2", p.revision) }
+                    ^^^^^^^^^^^^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupDraftChecks.kt:89:11: error: unresolved reference 'observeCreationResult'.
+        d.observeCreationResult("intent-1", CreationStatus.UNKNOWN)
+          ^^^^^^^^^^^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupDraftChecks.kt:89:45: error: unresolved reference 'CreationStatus'.
+        d.observeCreationResult("intent-1", CreationStatus.UNKNOWN)
+                                            ^^^^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupDraftChecks.kt:90:21: error: unresolved reference 'editName'.
+        rejects { d.editName("重建") }
+                    ^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupDraftChecks.kt:91:21: error: unresolved reference 'cancel'.
+        rejects { d.cancel() }
+                    ^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupDraftChecks.kt:92:21: error: unresolved reference 'observePendingCreation'.
+        rejects { d.observePendingCreation("intent-2", p.revision) }
+                    ^^^^^^^^^^^^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupDraftChecks.kt:93:21: error: unresolved reference 'observeCreationResult'.
+        rejects { d.observeCreationResult("other", CreationStatus.CREATED, "agent-other") }
+                    ^^^^^^^^^^^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupDraftChecks.kt:93:52: error: unresolved reference 'CreationStatus'.
+        rejects { d.observeCreationResult("other", CreationStatus.CREATED, "agent-other") }
+                                                   ^^^^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupDraftChecks.kt:94:17: error: unresolved reference 'snapshot'.
+        check(d.snapshot().creation.intentId == "intent-1")
+                ^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupDraftChecks.kt:95:11: error: unresolved reference 'observeCreationResult'.
+        d.observeCreationResult("intent-1", CreationStatus.UNKNOWN)
+          ^^^^^^^^^^^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupDraftChecks.kt:95:45: error: unresolved reference 'CreationStatus'.
+        d.observeCreationResult("intent-1", CreationStatus.UNKNOWN)
+                                            ^^^^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupDraftChecks.kt:96:11: error: unresolved reference 'observeCreationResult'.
+        d.observeCreationResult("intent-1", CreationStatus.CREATED, "agent-1")
+          ^^^^^^^^^^^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupDraftChecks.kt:96:45: error: unresolved reference 'CreationStatus'.
+        d.observeCreationResult("intent-1", CreationStatus.CREATED, "agent-1")
+                                            ^^^^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupDraftChecks.kt:97:17: error: unresolved reference 'snapshot'.
+        check(d.snapshot().creation.agentId == "agent-1")
+                ^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupDraftChecks.kt:98:21: error: unresolved reference 'observeCreationResult'.
+        rejects { d.observeCreationResult("intent-1", CreationStatus.REJECTED) }
+                    ^^^^^^^^^^^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupDraftChecks.kt:98:55: error: unresolved reference 'CreationStatus'.
+        rejects { d.observeCreationResult("intent-1", CreationStatus.REJECTED) }
+                                                      ^^^^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupDraftChecks.kt:101:28: error: unresolved reference 'editRole'.
+        val d = ready(); d.editRole("研究员"); d.next()
+                           ^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupDraftChecks.kt:101:47: error: unresolved reference 'next'.
+        val d = ready(); d.editRole("研究员"); d.next()
+                                              ^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupDraftChecks.kt:102:21: error: unresolved reference 'observeCreationResult'.
+        rejects { d.observeCreationResult("none", CreationStatus.UNKNOWN) }
+                    ^^^^^^^^^^^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupDraftChecks.kt:102:51: error: unresolved reference 'CreationStatus'.
+        rejects { d.observeCreationResult("none", CreationStatus.UNKNOWN) }
+                                                  ^^^^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupDraftChecks.kt:103:11: error: unresolved reference 'observePendingCreation'.
+        d.observePendingCreation("i", d.preview().revision)
+          ^^^^^^^^^^^^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupDraftChecks.kt:103:41: error: unresolved reference 'preview'.
+        d.observePendingCreation("i", d.preview().revision)
+                                        ^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupDraftChecks.kt:104:11: error: unresolved reference 'observeCreationResult'.
+        d.observeCreationResult("i", CreationStatus.REJECTED)
+          ^^^^^^^^^^^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupDraftChecks.kt:104:38: error: unresolved reference 'CreationStatus'.
+        d.observeCreationResult("i", CreationStatus.REJECTED)
+                                     ^^^^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupDraftChecks.kt:105:17: error: unresolved reference 'snapshot'.
+        check(d.snapshot().purpose.value == "整理当前项目文献")
+                ^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupDraftChecks.kt:106:11: error: unresolved reference 'editPurpose'.
+        d.editPurpose("补充说明")
+          ^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupDraftChecks.kt:107:17: error: unresolved reference 'snapshot'.
+        check(d.snapshot().creation.status == CreationStatus.NOT_REQUESTED)
+                ^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupDraftChecks.kt:107:47: error: unresolved reference 'CreationStatus'.
+        check(d.snapshot().creation.status == CreationStatus.NOT_REQUESTED)
+                                              ^^^^^^^^^^^^^^

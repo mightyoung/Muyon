@@ -1,0 +1,255 @@
+{
+  "record_type": "NEW offline rerun; not recovered original GREEN/mutation output",
+  "actor": "author",
+  "started_utc": "2026-10-22T03:54:47.472993+00:00",
+  "cwd": "/workspace/bot-setup-draft",
+  "head": "79cf88974f6a44cb8e30df0e81d827a9376303b1",
+  "platform": "Linux-6.18.55-x86_64-with-glibc2.41",
+  "python_version": "3.12.14",
+  "inputs_sha256": {
+    "apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupDraft.kt": "4715e21b685599f4b6fb993a89d241b97304de3def997e87c84f654a98773550",
+    "apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupDraftChecks.kt": "9e87bda0a17f52bef483b24c8c22f1f6cae8dee63a019e0c0fd954b536fe711b",
+    "apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/run-offline-checks.sh": "86742bdcefb59e3cd564da435269af0ec15cf1f62f8c7e9e7a24080acb4f5b52"
+  },
+  "commands": [
+    {
+      "label": "java-version",
+      "argv": [
+        "java",
+        "-version"
+      ],
+      "started_utc": "2026-10-22T03:54:47.570029+00:00",
+      "ended_utc": "2026-10-22T03:54:47.611388+00:00",
+      "exit_code": 0
+    },
+    {
+      "label": "kotlin-version",
+      "argv": [
+        "/tmp/bot-setup-tools/kotlinc/bin/kotlinc",
+        "-version"
+      ],
+      "started_utc": "2026-10-22T03:54:47.611404+00:00",
+      "ended_utc": "2026-10-22T03:54:49.263543+00:00",
+      "exit_code": 0
+    },
+    {
+      "label": "baseline",
+      "argv": [
+        "/workspace/bot-setup-draft/apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/run-offline-checks.sh"
+      ],
+      "started_utc": "2026-10-22T03:54:49.263626+00:00",
+      "ended_utc": "2026-10-22T03:54:55.740056+00:00",
+      "exit_code": 0
+    },
+    {
+      "label": "late-result-compile",
+      "argv": [
+        "/tmp/bot-setup-tools/kotlinc/bin/kotlinc",
+        "/tmp/bot-setup-audit-wl5xgbp6/late-result/BotSetupDraft.kt",
+        "/workspace/bot-setup-draft/apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupDraftChecks.kt",
+        "-include-runtime",
+        "-d",
+        "/tmp/bot-setup-audit-wl5xgbp6/late-result/checks.jar"
+      ],
+      "started_utc": "2026-10-22T03:54:55.740573+00:00",
+      "ended_utc": "2026-10-22T03:55:01.703868+00:00",
+      "exit_code": 0
+    },
+    {
+      "label": "late-result-run",
+      "argv": [
+        "java",
+        "-jar",
+        "/tmp/bot-setup-audit-wl5xgbp6/late-result/checks.jar"
+      ],
+      "started_utc": "2026-10-22T03:55:01.703886+00:00",
+      "ended_utc": "2026-10-22T03:55:01.807118+00:00",
+      "exit_code": 1
+    },
+    {
+      "label": "user-lock-compile",
+      "argv": [
+        "/tmp/bot-setup-tools/kotlinc/bin/kotlinc",
+        "/tmp/bot-setup-audit-wl5xgbp6/user-lock/BotSetupDraft.kt",
+        "/workspace/bot-setup-draft/apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupDraftChecks.kt",
+        "-include-runtime",
+        "-d",
+        "/tmp/bot-setup-audit-wl5xgbp6/user-lock/checks.jar"
+      ],
+      "started_utc": "2026-10-22T03:55:01.807300+00:00",
+      "ended_utc": "2026-10-22T03:55:07.513445+00:00",
+      "exit_code": 0
+    },
+    {
+      "label": "user-lock-run",
+      "argv": [
+        "java",
+        "-jar",
+        "/tmp/bot-setup-audit-wl5xgbp6/user-lock/checks.jar"
+      ],
+      "started_utc": "2026-10-22T03:55:07.513464+00:00",
+      "ended_utc": "2026-10-22T03:55:07.629430+00:00",
+      "exit_code": 1
+    },
+    {
+      "label": "unknown-unfreeze-compile",
+      "argv": [
+        "/tmp/bot-setup-tools/kotlinc/bin/kotlinc",
+        "/tmp/bot-setup-audit-wl5xgbp6/unknown-unfreeze/BotSetupDraft.kt",
+        "/workspace/bot-setup-draft/apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupDraftChecks.kt",
+        "-include-runtime",
+        "-d",
+        "/tmp/bot-setup-audit-wl5xgbp6/unknown-unfreeze/checks.jar"
+      ],
+      "started_utc": "2026-10-22T03:55:07.630140+00:00",
+      "ended_utc": "2026-10-22T03:55:15.481103+00:00",
+      "exit_code": 0
+    },
+    {
+      "label": "unknown-unfreeze-run",
+      "argv": [
+        "java",
+        "-jar",
+        "/tmp/bot-setup-audit-wl5xgbp6/unknown-unfreeze/checks.jar"
+      ],
+      "started_utc": "2026-10-22T03:55:15.481119+00:00",
+      "ended_utc": "2026-10-22T03:55:15.617972+00:00",
+      "exit_code": 1
+    },
+    {
+      "label": "unconfirmed-review-compile",
+      "argv": [
+        "/tmp/bot-setup-tools/kotlinc/bin/kotlinc",
+        "/tmp/bot-setup-audit-wl5xgbp6/unconfirmed-review/BotSetupDraft.kt",
+        "/workspace/bot-setup-draft/apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupDraftChecks.kt",
+        "-include-runtime",
+        "-d",
+        "/tmp/bot-setup-audit-wl5xgbp6/unconfirmed-review/checks.jar"
+      ],
+      "started_utc": "2026-10-22T03:55:15.618332+00:00",
+      "ended_utc": "2026-10-22T03:55:22.440590+00:00",
+      "exit_code": 0
+    },
+    {
+      "label": "unconfirmed-review-run",
+      "argv": [
+        "java",
+        "-jar",
+        "/tmp/bot-setup-audit-wl5xgbp6/unconfirmed-review/checks.jar"
+      ],
+      "started_utc": "2026-10-22T03:55:22.440610+00:00",
+      "ended_utc": "2026-10-22T03:55:22.564789+00:00",
+      "exit_code": 1
+    },
+    {
+      "label": "cross-scope-compile",
+      "argv": [
+        "/tmp/bot-setup-tools/kotlinc/bin/kotlinc",
+        "/tmp/bot-setup-audit-wl5xgbp6/cross-scope/BotSetupDraft.kt",
+        "/workspace/bot-setup-draft/apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupDraftChecks.kt",
+        "-include-runtime",
+        "-d",
+        "/tmp/bot-setup-audit-wl5xgbp6/cross-scope/checks.jar"
+      ],
+      "started_utc": "2026-10-22T03:55:22.565303+00:00",
+      "ended_utc": "2026-10-22T03:55:28.700263+00:00",
+      "exit_code": 0
+    },
+    {
+      "label": "cross-scope-run",
+      "argv": [
+        "java",
+        "-jar",
+        "/tmp/bot-setup-audit-wl5xgbp6/cross-scope/checks.jar"
+      ],
+      "started_utc": "2026-10-22T03:55:28.700281+00:00",
+      "ended_utc": "2026-10-22T03:55:28.807646+00:00",
+      "exit_code": 1
+    }
+  ],
+  "compiler_archive_sha256": "302d1d8e671e5c3207e6ed62ff11fb555462a628e22a1158254dcaaf7e7394bc",
+  "baseline_environment_override": {
+    "KOTLINC": "/tmp/bot-setup-tools/kotlinc/bin/kotlinc"
+  },
+  "mutations": [
+    {
+      "label": "late-result",
+      "replace_before": "if (cancelled || token != request || token.revision != revision) return false",
+      "replace_after": "if (cancelled) return false",
+      "replacement_count": 1,
+      "mutated_source_sha256": "16cbab336785b0fc880fdd179b63b8394a0399838834cbd017f89571476918b4",
+      "compile_exit_code": 0,
+      "run_exit_code": 1,
+      "outcome": "KILLED by behavioral assertion"
+    },
+    {
+      "label": "user-lock",
+      "replace_before": "|| role.userLocked",
+      "replace_after": "",
+      "replacement_count": 1,
+      "mutated_source_sha256": "c24757048b861e292ca4793efebfac1ad74ed8465eb21ed9d1a324c178e1e47c",
+      "compile_exit_code": 0,
+      "run_exit_code": 1,
+      "outcome": "KILLED by behavioral assertion"
+    },
+    {
+      "label": "unknown-unfreeze",
+      "replace_before": "require(!cancelled && creation.status in setOf(CreationStatus.NOT_REQUESTED, CreationStatus.REJECTED))",
+      "replace_after": "require(!cancelled)",
+      "replacement_count": 1,
+      "mutated_source_sha256": "33810138ae04fd4fe2dd5ec534cf3dfc64e47aee234ff1a9797c76d390918965",
+      "compile_exit_code": 0,
+      "run_exit_code": 1,
+      "outcome": "KILLED by behavioral assertion"
+    },
+    {
+      "label": "unconfirmed-review",
+      "replace_before": "require(invalidations.isEmpty())",
+      "replace_after": "require(true)",
+      "replacement_count": 2,
+      "mutated_source_sha256": "fc72f857b1efa4dbc380b38245ac82dacf53f99ff38e9c8d2343202655ecf260",
+      "compile_exit_code": 0,
+      "run_exit_code": 1,
+      "outcome": "KILLED by behavioral assertion"
+    },
+    {
+      "label": "cross-scope",
+      "replace_before": "require(allowedMaterials.all { it.id.isNotBlank() && it.scope == scope })",
+      "replace_after": "require(allowedMaterials.all { it.id.isNotBlank() })",
+      "replacement_count": 1,
+      "mutated_source_sha256": "a9254554299be99fef778f2aa6c220811eb3305df20e5b2dd7332040daf48003",
+      "compile_exit_code": 0,
+      "run_exit_code": 1,
+      "outcome": "KILLED by behavioral assertion"
+    }
+  ],
+  "ended_utc": "2026-10-22T03:55:28.808751+00:00",
+  "output_sha256": {
+    "baseline.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "baseline.stdout.log": "3917e3e515a15c3ed7f6ee46bdadfa63d7e5cf7e90ef25cc14e369394b544098",
+    "cross-scope-compile.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "cross-scope-compile.stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "cross-scope-run.stderr.log": "b9dd5a3ac47be1bec3b38756ce0ce4f20e7179b95541a54aee914ae1049b22ee",
+    "cross-scope-run.stdout.log": "cb74e1f2670c40b5cb5386f05f22c8226e781141f9144262d074e4b09448cc89",
+    "java-version.stderr.log": "bf61371a588e139353579c26bedbc9693004380fe8e053aa012cb6f7d2c43f20",
+    "java-version.stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "kotlin-version.stderr.log": "66a17105b1a6dfa2764b499aaf01107c29f15e848196c82aed2cc00d41d52458",
+    "kotlin-version.stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "late-result-compile.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "late-result-compile.stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "late-result-run.stderr.log": "94e786fb33aa8e91b01528108931970bd3458946ab24dc1b5ed1958e01713e31",
+    "late-result-run.stdout.log": "e848a27398912e437dd0d4393f6720c59355fcd78a2adc73dea61cd032916fd1",
+    "unconfirmed-review-compile.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "unconfirmed-review-compile.stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "unconfirmed-review-run.stderr.log": "fbf2fd3889112f81a8515112b80a16987b9a097dfbec400e8381d9db56c1a86d",
+    "unconfirmed-review-run.stdout.log": "cb74e1f2670c40b5cb5386f05f22c8226e781141f9144262d074e4b09448cc89",
+    "unknown-unfreeze-compile.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "unknown-unfreeze-compile.stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "unknown-unfreeze-run.stderr.log": "09b835f74c94bfd35b95b80fa1432fc7b953d3aedc0d09a159dbc0623400a228",
+    "unknown-unfreeze-run.stdout.log": "0de33743ff1c8720cb5abdcd26c7724a034b9f16a03cab57adb50573c6a7c2f6",
+    "user-lock-compile.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "user-lock-compile.stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "user-lock-run.stderr.log": "7a8ff61832206bd2c273aa81df353ef1e8d03d4e78afa6e13648ba632347705b",
+    "user-lock-run.stdout.log": "332972bcfe127a6925da11253eb8429e7266d81f0062fa1e514388e9ad83f1bf"
+  }
+}

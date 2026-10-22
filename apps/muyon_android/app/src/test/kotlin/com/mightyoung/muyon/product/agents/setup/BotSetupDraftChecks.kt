@@ -160,5 +160,6 @@ fun main() {
         d.editName("📚".repeat(30))
         rejects { d.editName("📚".repeat(31)) }
     }
+    passed += runPersistenceChecks()
     println("PASS $passed offline checks")
 }

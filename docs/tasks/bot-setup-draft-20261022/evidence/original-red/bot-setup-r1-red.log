@@ -1,0 +1,48 @@
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupDraftChecks.kt:123:27: error: unresolved reference 'invalidations'.
+        check(d.choices().invalidations.map { it.reason }.toSet() == setOf(
+                          ^^^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupDraftChecks.kt:123:47: error: unresolved reference 'it'.
+        check(d.choices().invalidations.map { it.reason }.toSet() == setOf(
+                                              ^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupDraftChecks.kt:123:70: error: cannot infer type for this parameter. Specify it explicitly.
+        check(d.choices().invalidations.map { it.reason }.toSet() == setOf(
+                                                                     ^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupDraftChecks.kt:124:13: error: unresolved reference 'SelectionInvalidationReason'.
+            SelectionInvalidationReason.CAPABILITY_CHANGED, SelectionInvalidationReason.MATERIAL_UNAVAILABLE))
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupDraftChecks.kt:124:61: error: unresolved reference 'SelectionInvalidationReason'.
+            SelectionInvalidationReason.CAPABILITY_CHANGED, SelectionInvalidationReason.MATERIAL_UNAVAILABLE))
+                                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupDraftChecks.kt:127:27: error: unresolved reference 'invalidations'.
+        check(d.choices().invalidations.isEmpty())
+                          ^^^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupDraftChecks.kt:140:35: error: unresolved reference 'invalidations'.
+        val notices = d.choices().invalidations
+                                  ^^^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupDraftChecks.kt:141:29: error: unresolved reference 'it'.
+        check(notices.map { it.reason }.toSet() == setOf(
+                            ^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupDraftChecks.kt:141:52: error: cannot infer type for this parameter. Specify it explicitly.
+        check(notices.map { it.reason }.toSet() == setOf(
+                                                   ^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupDraftChecks.kt:142:13: error: unresolved reference 'SelectionInvalidationReason'.
+            SelectionInvalidationReason.CAPABILITY_REMOVED, SelectionInvalidationReason.MATERIAL_REMOVED))
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupDraftChecks.kt:142:61: error: unresolved reference 'SelectionInvalidationReason'.
+            SelectionInvalidationReason.CAPABILITY_REMOVED, SelectionInvalidationReason.MATERIAL_REMOVED))
+                                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupDraftChecks.kt:143:29: error: unresolved reference 'it'.
+        check(notices.map { it.id }.toSet() == setOf(cap.id, material.id))
+                            ^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupDraftChecks.kt:145:27: error: unresolved reference 'invalidations'.
+        check(d.choices().invalidations == notices)
+                          ^^^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupDraftChecks.kt:150:27: error: unresolved reference 'invalidations'.
+        check(d.choices().invalidations.single().reason == SelectionInvalidationReason.CAPABILITY_UNAVAILABLE)
+                          ^^^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupDraftChecks.kt:150:50: error: unresolved reference 'reason'.
+        check(d.choices().invalidations.single().reason == SelectionInvalidationReason.CAPABILITY_UNAVAILABLE)
+                                                 ^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupDraftChecks.kt:150:60: error: unresolved reference 'SelectionInvalidationReason'.
+        check(d.choices().invalidations.single().reason == SelectionInvalidationReason.CAPABILITY_UNAVAILABLE)
+                                                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
