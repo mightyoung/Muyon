@@ -1,0 +1,21 @@
+test_primitives (unittest.loader._FailedTest.test_primitives) ... ERROR
+
+======================================================================
+ERROR: test_primitives (unittest.loader._FailedTest.test_primitives)
+----------------------------------------------------------------------
+ImportError: Failed to import test module: test_primitives
+Traceback (most recent call last):
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/unittest/loader.py", line 396, in _find_test_path
+    module = self._get_module_from_name(name)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/unittest/loader.py", line 339, in _get_module_from_name
+    __import__(name)
+  File "/workspace/document-fidelity/tools/document_fidelity/adapters/runner/linux/tests/test_primitives.py", line 3, in <module>
+    from tools.document_fidelity.adapters.runner.linux import ipc,snapshot
+ImportError: cannot import name 'ipc' from 'tools.document_fidelity.adapters.runner.linux' (unknown location)
+
+
+----------------------------------------------------------------------
+Ran 1 test in 0.000s
+
+FAILED (errors=1)

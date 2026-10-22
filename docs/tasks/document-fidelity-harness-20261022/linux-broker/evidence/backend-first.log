@@ -1,0 +1,57 @@
+test_concrete_backend_default_hold_before_process_and_fake_never_qualifies (test_backend.BackendTests.test_concrete_backend_default_hold_before_process_and_fake_never_qualifies) ... ok
+test_kernel_text_parsers_reject_false_isolation_and_unlimited_limits (test_backend.BackendTests.test_kernel_text_parsers_reject_false_isolation_and_unlimited_limits) ... ERROR
+test_pre_spawn_supervisor_owned_reconciled_and_reaped_on_ready_failure (test_backend.BackendTests.test_pre_spawn_supervisor_owned_reconciled_and_reaped_on_ready_failure) ... ok
+test_reserve_uncertain_launch_has_attempt_ownership_and_no_retry (test_backend.BackendTests.test_reserve_uncertain_launch_has_attempt_ownership_and_no_retry) ... ok
+test_same_lock_dispatch_cannot_serialize_or_replay_capability (test_backend.BackendTests.test_same_lock_dispatch_cannot_serialize_or_replay_capability) ... ok
+test_snapshot_and_cleanup_cannot_precede_tree_reap (test_backend.BackendTests.test_snapshot_and_cleanup_cannot_precede_tree_reap) ... ok
+test_admission_expiry_during_terminal_callback_cannot_report_success (tools.document_fidelity.adapters.runner.tests.test_launcher.LauncherTests.test_admission_expiry_during_terminal_callback_cannot_report_success) ... ok
+test_admission_registry_is_bounded_without_eviction_or_replay (tools.document_fidelity.adapters.runner.tests.test_launcher.LauncherTests.test_admission_registry_is_bounded_without_eviction_or_replay) ... ok
+test_cancel_before_spawn_and_running_are_reaped (tools.document_fidelity.adapters.runner.tests.test_launcher.LauncherTests.test_cancel_before_spawn_and_running_are_reaped) ... ok
+test_cancellation_during_snapshot_discards_candidate (tools.document_fidelity.adapters.runner.tests.test_launcher.LauncherTests.test_cancellation_during_snapshot_discards_candidate) ... ok
+test_deadline_before_spawn_and_after_cleanup_prevents_release (tools.document_fidelity.adapters.runner.tests.test_launcher.LauncherTests.test_deadline_before_spawn_and_after_cleanup_prevents_release) ... ok
+test_docx_and_pptx_fake_os_pipeline_remains_inert (tools.document_fidelity.adapters.runner.tests.test_launcher.LauncherTests.test_docx_and_pptx_fake_os_pipeline_remains_inert) ... ok
+test_fake_trusted_interface_requires_strict_executor_and_proof_shapes (tools.document_fidelity.adapters.runner.tests.test_launcher.LauncherTests.test_fake_trusted_interface_requires_strict_executor_and_proof_shapes) ... ok
+test_full_fake_lifecycle_receipt_is_never_txn_eligible (tools.document_fidelity.adapters.runner.tests.test_launcher.LauncherTests.test_full_fake_lifecycle_receipt_is_never_txn_eligible) ... ok
+test_kill_reap_and_uncertain_reap_quarantine (tools.document_fidelity.adapters.runner.tests.test_launcher.LauncherTests.test_kill_reap_and_uncertain_reap_quarantine) ... ok
+test_missing_or_mismatched_authenticated_engine_observation_is_hold (tools.document_fidelity.adapters.runner.tests.test_launcher.LauncherTests.test_missing_or_mismatched_authenticated_engine_observation_is_hold) ... ok
+test_missing_ready_and_wrong_engine_proof_never_spawn (tools.document_fidelity.adapters.runner.tests.test_launcher.LauncherTests.test_missing_ready_and_wrong_engine_proof_never_spawn) ... ok
+test_policy_only_tightens_and_no_json_host_session_or_opaque_factory (tools.document_fidelity.adapters.runner.tests.test_launcher.LauncherTests.test_policy_only_tightens_and_no_json_host_session_or_opaque_factory) ... ok
+test_production_default_and_plain_json_can_never_open_execution (tools.document_fidelity.adapters.runner.tests.test_launcher.LauncherTests.test_production_default_and_plain_json_can_never_open_execution) ... ok
+test_ready_or_cancel_callback_cannot_reopen_closed_worker_phase (tools.document_fidelity.adapters.runner.tests.test_launcher.LauncherTests.test_ready_or_cancel_callback_cannot_reopen_closed_worker_phase) ... ok
+test_ready_transition_is_single_use_and_guards_are_strict_booleans (tools.document_fidelity.adapters.runner.tests.test_launcher.LauncherTests.test_ready_transition_is_single_use_and_guards_are_strict_booleans) ... ok
+test_scope_expiry_and_replay_and_simulated_worker_permits (tools.document_fidelity.adapters.runner.tests.test_launcher.LauncherTests.test_scope_expiry_and_replay_and_simulated_worker_permits) ... ok
+test_snapshot_source_links_and_unknown_parts_fail_validation (tools.document_fidelity.adapters.runner.tests.test_launcher.LauncherTests.test_snapshot_source_links_and_unknown_parts_fail_validation) ... ok
+test_spawn_is_not_evidence_of_third_party_engine_execution (tools.document_fidelity.adapters.runner.tests.test_launcher.LauncherTests.test_spawn_is_not_evidence_of_third_party_engine_execution) ... ok
+test_spawn_uncertainty_reconciles_without_retry (tools.document_fidelity.adapters.runner.tests.test_launcher.LauncherTests.test_spawn_uncertainty_reconciles_without_retry) ... ok
+test_stopping_and_cleanup_callbacks_cannot_issue_or_consume_worker (tools.document_fidelity.adapters.runner.tests.test_launcher.LauncherTests.test_stopping_and_cleanup_callbacks_cannot_issue_or_consume_worker) ... ok
+test_terminal_close_revokes_preissued_worker_and_slow_verifier (tools.document_fidelity.adapters.runner.tests.test_launcher.LauncherTests.test_terminal_close_revokes_preissued_worker_and_slow_verifier) ... ok
+test_terminal_host_callback_cancellation_revokes_synthetic_capability (tools.document_fidelity.adapters.runner.tests.test_launcher.LauncherTests.test_terminal_host_callback_cancellation_revokes_synthetic_capability) ... ok
+test_terminal_lease_cannot_mint_worker_permit_and_credential_has_expiry (tools.document_fidelity.adapters.runner.tests.test_launcher.LauncherTests.test_terminal_lease_cannot_mint_worker_permit_and_credential_has_expiry) ... ok
+test_terminal_verifier_reentry_cannot_issue_second_credential (tools.document_fidelity.adapters.runner.tests.test_launcher.LauncherTests.test_terminal_verifier_reentry_cannot_issue_second_credential) ... ok
+test_terminate_failure_still_attempts_kill_and_reap (tools.document_fidelity.adapters.runner.tests.test_launcher.LauncherTests.test_terminate_failure_still_attempts_kill_and_reap) ... ok
+test_time_logs_outputs_exit_and_exception_fail_closed (tools.document_fidelity.adapters.runner.tests.test_launcher.LauncherTests.test_time_logs_outputs_exit_and_exception_fail_closed) ... ok
+test_uncertain_spawn_never_claims_engine_not_run (tools.document_fidelity.adapters.runner.tests.test_launcher.LauncherTests.test_uncertain_spawn_never_claims_engine_not_run) ... ok
+test_worker_stage_close_is_irreversible_without_closing_validation_lease (tools.document_fidelity.adapters.runner.tests.test_launcher.LauncherTests.test_worker_stage_close_is_irreversible_without_closing_validation_lease) ... ok
+test_limit_duplicate_json_wrong_peer_and_truncation (test_primitives.IPCTests.test_limit_duplicate_json_wrong_peer_and_truncation) ... ok
+test_partial_io_and_replay_wrong_binding_timeout (test_primitives.IPCTests.test_partial_io_and_replay_wrong_binding_timeout) ... ok
+test_real_socketpair_credentials_sequence_binding_and_eof (test_primitives.IPCTests.test_real_socketpair_credentials_sequence_binding_and_eof) ... ok
+test_send_is_bounded_and_unknown_fields_refused (test_primitives.IPCTests.test_send_is_bounded_and_unknown_fields_refused) ... ok
+test_changed_links_extras_and_path_escape_refused (test_primitives.SnapshotTests.test_changed_links_extras_and_path_escape_refused) ... ok
+test_reaped_required_before_open_and_stable_regular_bytes (test_primitives.SnapshotTests.test_reaped_required_before_open_and_stable_regular_bytes) ... ok
+
+======================================================================
+ERROR: test_kernel_text_parsers_reject_false_isolation_and_unlimited_limits (test_backend.BackendTests.test_kernel_text_parsers_reject_false_isolation_and_unlimited_limits)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/document-fidelity/tools/document_fidelity/adapters/runner/linux/tests/test_backend.py", line 73, in test_kernel_text_parsers_reject_false_isolation_and_unlimited_limits
+    with self.assertRaises(ValueError):kernel.parse_status('NoNewPrivs:\t0\nCapEff:\t0\nSeccomp:\t2\n')
+                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/document-fidelity/tools/document_fidelity/adapters/runner/linux/kernel.py", line 77, in parse_status
+    result={key:int(values[key],base) for key,base in required.items()}
+                    ~~~~~~^^^^^
+KeyError: 'Seccomp_filters'
+
+----------------------------------------------------------------------
+Ran 40 tests in 0.271s
+
+FAILED (errors=1)
