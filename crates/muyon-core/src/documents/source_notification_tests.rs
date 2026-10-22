@@ -379,3 +379,32 @@ fn later_ack_trigger_cannot_mutate_an_earlier_stale_or_missing_target() {
         assert_eq!(store.pending_document_source_notifications_trusted(None, 256).unwrap(), pending);
     }
 }
+
+#[test]
+fn first_outbox_update_cannot_reset_a_later_tombstone_generation() {
+    let (_f, store, mut source, mut local, kind) = fixture();
+    let mut second = local.clone(); second.object.object_id = "object-z".into();
+    bind(&store, &source, &second, &kind);
+    store.revoke_document_grant_trusted(&source.authority).unwrap();
+    let first = store.pending_document_source_notifications_trusted(None, 256).unwrap();
+    assert_eq!(first.len(), 2);
+    assert!(first.iter().all(|event| event.generation == Revision::new(1)));
+    store.ack_document_source_notifications_trusted(&first).unwrap();
+    source.authority.generation = source.authority.generation.next().unwrap();
+    store.issue_document_grant_trusted(&source.document, &source.authority, &[DocumentOperation::Inspect, DocumentOperation::ReadText], expiry()).unwrap();
+    local.binding_generation = local.binding_generation.next().unwrap();
+    second.binding_generation = second.binding_generation.next().unwrap();
+    bind(&store, &source, &local, &kind); bind(&store, &source, &second, &kind);
+    store.database().exec("CREATE TRIGGER tamper AFTER UPDATE ON document_source_notifications_v1 WHEN NEW.object_id='object' AND NEW.pending=1 BEGIN DELETE FROM document_source_notifications_v1 WHERE object_id='object-z'; END", &[]).unwrap();
+    assert!(store.revoke_document_grant_trusted(&source.authority).is_err(), "cross-row tombstone deletion must roll back, not reuse generation1");
+    assert!(store.read_document(&source).is_ok()); assert_eq!(active(&store), "1");
+    let tombstones = store.database().query("SELECT generation,pending FROM document_source_notifications_v1 ORDER BY object_id", &[]).unwrap();
+    assert_eq!(tombstones, vec![vec![Some("1".into()), Some("0".into())]; 2]);
+    store.database().exec("DROP TRIGGER tamper", &[]).unwrap();
+    store.revoke_document_grant_trusted(&source.authority).unwrap();
+    let renewed = store.pending_document_source_notifications_trusted(None, 256).unwrap();
+    assert!(renewed.iter().all(|event| event.generation == Revision::new(2)));
+    assert_eq!(store.ack_document_source_notifications_trusted(&first).unwrap(), 0);
+    assert_eq!(store.pending_document_source_notifications_trusted(None, 256).unwrap(), renewed);
+}
+
