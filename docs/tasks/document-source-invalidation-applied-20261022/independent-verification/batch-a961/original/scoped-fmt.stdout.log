@@ -1,0 +1,2030 @@
+Diff in /workspace/Muyon-source-invalidation-batch-verification/crates/muyon-core/src/documents/mod.rs:137:
+     pub document: DocumentRef,
+     pub authority: AuthorityBinding,
+ }
+-pub mod source_notifications;
+ #[cfg(test)]
+ mod source_notification_tests;
++pub mod source_notifications;
+ 
+Diff in /workspace/Muyon-source-invalidation-batch-verification/crates/muyon-core/src/documents/storage.rs:465:
+         format: DocumentFormat,
+         finished: &FinishedBlob,
+     ) -> Result<DocumentMetadata> {
+-        let (metadata, postcondition) = self.document_publish_with_postcondition_in_transaction(tx, base, title, format, finished)?;
++        let (metadata, postcondition) = self.document_publish_with_postcondition_in_transaction(
++            tx, base, title, format, finished,
++        )?;
+         self.document_publication_postcondition_in_transaction(tx, postcondition)?;
+         Ok(metadata)
+     }
+Diff in /workspace/Muyon-source-invalidation-batch-verification/crates/muyon-core/src/documents/storage.rs:541:
+                 &encode(&metadata)?,
+             ],
+         ))?;
+-        let source_effects = self.finish_document_source_mutation_in_transaction(tx, source_plan)?;
++        let source_effects =
++            self.finish_document_source_mutation_in_transaction(tx, source_plan)?;
+         let postcondition = DocumentPublicationPostcondition {
+-            transaction: tx, metadata: metadata.clone(), reference_id: reference,
+-            upload_id: Some(finished.upload_id.clone()), source_effects,
++            transaction: tx,
++            metadata: metadata.clone(),
++            reference_id: reference,
++            upload_id: Some(finished.upload_id.clone()),
++            source_effects,
+         };
+         self.verify_document_publication_postcondition(tx, &postcondition)?;
+         Ok((metadata, postcondition))
+Diff in /workspace/Muyon-source-invalidation-batch-verification/crates/muyon-core/src/documents/storage.rs:560:
+         title: &str,
+         expected_blob: &BlobRef,
+     ) -> Result<DocumentMetadata> {
+-        let (metadata, postcondition) = self.document_clone_with_postcondition_in_transaction(tx, base, title, expected_blob)?;
++        let (metadata, postcondition) =
++            self.document_clone_with_postcondition_in_transaction(tx, base, title, expected_blob)?;
+         self.document_publication_postcondition_in_transaction(tx, postcondition)?;
+         Ok(metadata)
+     }
+Diff in /workspace/Muyon-source-invalidation-batch-verification/crates/muyon-core/src/documents/storage.rs:627:
+                 &encode(&metadata)?,
+             ],
+         ))?;
+-        let source_effects = self.finish_document_source_mutation_in_transaction(tx, source_plan)?;
++        let source_effects =
++            self.finish_document_source_mutation_in_transaction(tx, source_plan)?;
+         let postcondition = DocumentPublicationPostcondition {
+-            transaction: tx, metadata: metadata.clone(), reference_id: reference,
+-            upload_id: None, source_effects,
++            transaction: tx,
++            metadata: metadata.clone(),
++            reference_id: reference,
++            upload_id: None,
++            source_effects,
+         };
+         self.verify_document_publication_postcondition(tx, &postcondition)?;
+         Ok((metadata, postcondition))
+Diff in /workspace/Muyon-source-invalidation-batch-verification/crates/muyon-core/src/documents/storage.rs:637:
+     }
+     fn verify_document_publication_postcondition(
+-        &self, tx: &Transaction<'_>, postcondition: &DocumentPublicationPostcondition<'_, '_>,
++        &self,
++        tx: &Transaction<'_>,
++        postcondition: &DocumentPublicationPostcondition<'_, '_>,
+     ) -> Result<()> {
+         if !tx.belongs_to(self.database()) || !std::ptr::eq(tx, postcondition.transaction) {
+             return Err(ContractError::InvalidAuthority);
+Diff in /workspace/Muyon-source-invalidation-batch-verification/crates/muyon-core/src/documents/storage.rs:644:
+         self.document_schema()?;
+         self.verify_document_source_mutation_in_transaction(tx, &postcondition.source_effects)?;
+         let metadata = &postcondition.metadata;
+-        self.verify_blob_publication_in_transaction(tx, &postcondition.reference_id, self.document_project(&metadata.document)?, metadata.document.document_id(), &metadata.blob, postcondition.upload_id.as_deref())?;
+-        if self.current_document(&metadata.document)? != *metadata { return Err(ContractError::StorageCorrupt); }
++        self.verify_blob_publication_in_transaction(
++            tx,
++            &postcondition.reference_id,
++            self.document_project(&metadata.document)?,
++            metadata.document.document_id(),
++            &metadata.blob,
++            postcondition.upload_id.as_deref(),
++        )?;
++        if self.current_document(&metadata.document)? != *metadata {
++            return Err(ContractError::StorageCorrupt);
++        }
+         Ok(())
+     }
+     /// AFTER the gateway's final receipt/journal write and original grant check,
+Diff in /workspace/Muyon-source-invalidation-batch-verification/crates/muyon-core/src/documents/storage.rs:652:
+     /// immediately before COMMIT. Consumes the unforgeable exact-tx effect token.
+     /// Propagate failure; no business write may follow this read-only tail.
+     pub(crate) fn document_publication_postcondition_in_transaction(
+-        &self, tx: &Transaction<'_>, postcondition: DocumentPublicationPostcondition<'_, '_>,
++        &self,
++        tx: &Transaction<'_>,
++        postcondition: DocumentPublicationPostcondition<'_, '_>,
+     ) -> Result<()> {
+         self.verify_document_publication_postcondition(tx, &postcondition)
+     }
+Diff in /workspace/Muyon-source-invalidation-batch-verification/crates/muyon-core/src/documents/storage.rs:682:
+             return Err(ContractError::InvalidAuthority);
+         }
+         let old = sql(self.database().query("SELECT CASE WHEN length(CAST(generation AS BLOB))<=20 THEN generation ELSE NULL END,CASE WHEN length(CAST(document_json AS BLOB))<=8192 THEN document_json ELSE NULL END FROM document_grants WHERE grant_id=?", &[&authority.grant_id]))?;
+-        let old_document = old.first().map(|row| self.document_grant_target(cell(row, 1)?)).transpose()?;
++        let old_document = old
++            .first()
++            .map(|row| self.document_grant_target(cell(row, 1)?))
++            .transpose()?;
+         let expected = if old.is_empty() {
+             Revision::new(1)
+         } else {
+Diff in /workspace/Muyon-source-invalidation-batch-verification/crates/muyon-core/src/documents/storage.rs:692:
+             return Err(ContractError::InvalidAuthority);
+         }
+         let mut changed_documents = vec![document];
+-        if let Some(previous) = old_document.as_ref() { changed_documents.push(previous); }
+-        let source_plan = self.prepare_document_source_mutation_in_transaction(&tx, &changed_documents)?;
++        if let Some(previous) = old_document.as_ref() {
++            changed_documents.push(previous);
++        }
++        let source_plan =
++            self.prepare_document_source_mutation_in_transaction(&tx, &changed_documents)?;
+         sql(self.database().exec("INSERT INTO document_grants VALUES(?,?,?,?,?,?,1) ON CONFLICT(grant_id) DO UPDATE SET generation=excluded.generation,owner_epoch=excluded.owner_epoch,document_json=excluded.document_json,permissions=excluded.permissions,expires_at_ms=excluded.expires_at_ms,active=1", &[&authority.grant_id, authority.generation.as_str(), self.owner_epoch(), &encode(document)?, &encode(&operations)?, &expires_at_ms.to_string()]))?;
+         self.finish_document_source_mutation_in_transaction(&tx, source_plan)?;
+-        self.document_grant_write_postcondition(authority, &encode(document)?, &encode(&operations)?, &expires_at_ms.to_string(), "1")?;
+-        self.document_grant(&DocumentAccess { document: document.clone(), authority: authority.clone() }, operations)?;
+-        if self.current_document(document)? != expected_metadata { return Err(ContractError::StorageCorrupt); }
++        self.document_grant_write_postcondition(
++            authority,
++            &encode(document)?,
++            &encode(&operations)?,
++            &expires_at_ms.to_string(),
++            "1",
++        )?;
++        self.document_grant(
++            &DocumentAccess {
++                document: document.clone(),
++                authority: authority.clone(),
++            },
++            operations,
++        )?;
++        if self.current_document(document)? != expected_metadata {
++            return Err(ContractError::StorageCorrupt);
++        }
+         sql(tx.commit())
+     }
+     // Read-only exact write receipt, after all hook/outbox writes. This is not
+Diff in /workspace/Muyon-source-invalidation-batch-verification/crates/muyon-core/src/documents/storage.rs:705:
+     // authorization: normal grant expiry/project checks still run for issue.
+-    fn document_grant_write_postcondition(&self, authority: &AuthorityBinding, document_json: &str, permissions: &str, expires: &str, active: &str) -> Result<()> {
++    fn document_grant_write_postcondition(
++        &self,
++        authority: &AuthorityBinding,
++        document_json: &str,
++        permissions: &str,
++        expires: &str,
++        active: &str,
++    ) -> Result<()> {
+         let rows = sql(self.database().query("SELECT 1 FROM document_grants WHERE grant_id=? AND generation=? AND owner_epoch=? AND document_json=? AND permissions=? AND expires_at_ms=? AND active=?", &[&authority.grant_id, authority.generation.as_str(), self.owner_epoch(), document_json, permissions, expires, active]))?;
+-        if rows.len() != 1 { return Err(ContractError::StorageCorrupt); }
++        if rows.len() != 1 {
++            return Err(ContractError::StorageCorrupt);
++        }
+         Ok(())
+     }
+     fn document_grant_target(&self, payload: &str) -> Result<DocumentRef> {
+Diff in /workspace/Muyon-source-invalidation-batch-verification/crates/muyon-core/src/documents/storage.rs:712:
+         let document: DocumentRef = decode(payload)?;
+-        if document.scope().workspace_id != self.workspace_id() || document.scope().project_id.is_none() || document.revision().value() == 0 {
++        if document.scope().workspace_id != self.workspace_id()
++            || document.scope().project_id.is_none()
++            || document.revision().value() == 0
++        {
+             return Err(ContractError::StorageCorrupt);
+         }
+         Ok(document)
+Diff in /workspace/Muyon-source-invalidation-batch-verification/crates/muyon-core/src/documents/storage.rs:723:
+             return Err(ContractError::InvalidAuthority);
+         }
+         let targets = sql(self.database().query("SELECT CASE WHEN length(CAST(document_json AS BLOB))<=8192 THEN document_json ELSE NULL END,CASE WHEN length(CAST(permissions AS BLOB))<=1024 THEN permissions ELSE NULL END,CASE WHEN length(CAST(expires_at_ms AS BLOB))<=20 THEN expires_at_ms ELSE NULL END FROM document_grants WHERE grant_id=? AND generation=? AND owner_epoch=?", &[&authority.grant_id, authority.generation.as_str(), self.owner_epoch()]))?;
+-        let target = self.document_grant_target(cell(targets.first().ok_or(ContractError::InvalidAuthority)?, 0)?)?;
++        let target = self.document_grant_target(cell(
++            targets.first().ok_or(ContractError::InvalidAuthority)?,
++            0,
++        )?)?;
+         let source_plan = self.prepare_document_source_mutation_in_transaction(&tx, &[&target])?;
+         let changed = sql(self.database().exec("UPDATE document_grants SET active=0 WHERE grant_id=? AND generation=? AND owner_epoch=?", &[&authority.grant_id, authority.generation.as_str(), self.owner_epoch()]))?;
+         if changed != 1 {
+Diff in /workspace/Muyon-source-invalidation-batch-verification/crates/muyon-core/src/documents/storage.rs:731:
+         }
+         self.finish_document_source_mutation_in_transaction(&tx, source_plan)?;
+         let original = targets.first().ok_or(ContractError::InvalidAuthority)?;
+-        self.document_grant_write_postcondition(authority, cell(original, 0)?, cell(original, 1)?, cell(original, 2)?, "0")?;
++        self.document_grant_write_postcondition(
++            authority,
++            cell(original, 0)?,
++            cell(original, 1)?,
++            cell(original, 2)?,
++            "0",
++        )?;
+         sql(tx.commit())
+     }
+     pub fn read_document(&self, access: &DocumentAccess) -> Result<DocumentMetadata> {
+Diff in /workspace/Muyon-source-invalidation-batch-verification/crates/muyon-core/src/documents/source_notifications.rs:1:
+ //! Same-transaction metadata-only outbox for the actual Artifacts source hook.
+ //! Requires fixed resolver0e85c6e9 plus real library/harness composition by B.
+ use super::{identity::valid_id, DocumentRef};
+-use crate::{business::BusinessStore, contract::{ContractError, Revision}, sqlite::Transaction};
++use crate::{
++    business::BusinessStore,
++    contract::{ContractError, Revision},
++    sqlite::Transaction,
++};
+ use serde::Serialize;
+ use std::collections::{BTreeMap, BTreeSet};
+ 
+Diff in /workspace/Muyon-source-invalidation-batch-verification/crates/muyon-core/src/documents/source_notifications.rs:36:
+     batches: Vec<(DocumentRef, Vec<DocumentSourceNotification>)>,
+     installed: bool,
+ }
+-fn sql<T>(value: crate::sqlite::Result<T>) -> Result<T> { value.map_err(|_| ContractError::Storage) }
+-fn cell(row: &[Option<String>], index: usize) -> Result<&str> { row.get(index).and_then(Option::as_deref).ok_or(ContractError::StorageCorrupt) }
++fn sql<T>(value: crate::sqlite::Result<T>) -> Result<T> {
++    value.map_err(|_| ContractError::Storage)
++}
++fn cell(row: &[Option<String>], index: usize) -> Result<&str> {
++    row.get(index)
++        .and_then(Option::as_deref)
++        .ok_or(ContractError::StorageCorrupt)
++}
+ fn ids(project: &str, actor: &str, object: &str) -> Result<()> {
+-    if [project, actor, object].iter().all(|id| valid_id(id)) { Ok(()) } else { Err(ContractError::StorageCorrupt) }
++    if [project, actor, object].iter().all(|id| valid_id(id)) {
++        Ok(())
++    } else {
++        Err(ContractError::StorageCorrupt)
++    }
+ }
+ impl BusinessStore {
+     pub(super) fn document_notification_schema(&self) -> Result<bool> {
+Diff in /workspace/Muyon-source-invalidation-batch-verification/crates/muyon-core/src/documents/source_notifications.rs:46:
+         let rows = sql(self.database().query("SELECT type,CASE WHEN length(CAST(sql AS BLOB))<=1024 THEN sql ELSE NULL END FROM sqlite_master WHERE name=?", &[NAME]))?;
+-        if rows.is_empty() { return Ok(false); }
+-        if rows.len() != 1 || cell(&rows[0], 0)? != "table" || cell(&rows[0], 1)? != DDL { return Err(ContractError::InvalidVersion); }
++        if rows.is_empty() {
++            return Ok(false);
++        }
++        if rows.len() != 1 || cell(&rows[0], 0)? != "table" || cell(&rows[0], 1)? != DDL {
++            return Err(ContractError::InvalidVersion);
++        }
+         Ok(true)
+     }
+     /// Routing projections only, not an authority decision. Freeze BEFORE the
+Diff in /workspace/Muyon-source-invalidation-batch-verification/crates/muyon-core/src/documents/source_notifications.rs:52:
+     /// document/grant/blob writes and before the real owner's source UPDATEs.
+-    pub(super) fn prepare_document_source_mutation_in_transaction<'tx, 'db>(&self, tx: &'tx Transaction<'db>, changed: &[&DocumentRef]) -> Result<DocumentSourceMutationPlan<'tx, 'db>> {
+-        if !tx.belongs_to(self.database()) { return Err(ContractError::ScopeMismatch); }
++    pub(super) fn prepare_document_source_mutation_in_transaction<'tx, 'db>(
++        &self,
++        tx: &'tx Transaction<'db>,
++        changed: &[&DocumentRef],
++    ) -> Result<DocumentSourceMutationPlan<'tx, 'db>> {
++        if !tx.belongs_to(self.database()) {
++            return Err(ContractError::ScopeMismatch);
++        }
+         let notifications = self.document_notification_schema()?;
+-        let source = sql(self.database().query("SELECT type FROM sqlite_master WHERE name=?", &[SOURCE]))?;
++        let source = sql(self
++            .database()
++            .query("SELECT type FROM sqlite_master WHERE name=?", &[SOURCE]))?;
+         let installed = !source.is_empty();
+-        if installed && (source.len() != 1 || cell(&source[0], 0)? != "table") { return Err(ContractError::InvalidVersion); }
+-        if !installed && notifications { return Err(ContractError::InvalidVersion); }
++        if installed && (source.len() != 1 || cell(&source[0], 0)? != "table") {
++            return Err(ContractError::InvalidVersion);
++        }
++        if !installed && notifications {
++            return Err(ContractError::InvalidVersion);
++        }
+         let mut documents: Vec<DocumentRef> = Vec::new();
+         let mut routes = Vec::new();
+         for document in changed {
+Diff in /workspace/Muyon-source-invalidation-batch-verification/crates/muyon-core/src/documents/source_notifications.rs:63:
+-            if document.scope().workspace_id != self.workspace_id() { return Err(ContractError::ScopeMismatch); }
+-            let project = document.scope().project_id.as_deref().ok_or(ContractError::ScopeMismatch)?;
+-            if documents.iter().any(|old| old.scope() == document.scope() && old.document_id() == document.document_id()) { continue; }
++            if document.scope().workspace_id != self.workspace_id() {
++                return Err(ContractError::ScopeMismatch);
++            }
++            let project = document
++                .scope()
++                .project_id
++                .as_deref()
++                .ok_or(ContractError::ScopeMismatch)?;
++            if documents.iter().any(|old| {
++                old.scope() == document.scope() && old.document_id() == document.document_id()
++            }) {
++                continue;
++            }
+             documents.push((**document).clone());
+-            if !installed { continue; }
+-            let mut actor = String::new(); let mut object = String::new();
++            if !installed {
++                continue;
++            }
++            let mut actor = String::new();
++            let mut object = String::new();
+             loop {
+                 // Include inactive sources: their existing tombstones must not
+                 // be erased as a side effect of another source's invalidation.
+Diff in /workspace/Muyon-source-invalidation-batch-verification/crates/muyon-core/src/documents/source_notifications.rs:72:
+                 let rows = sql(self.database().query("SELECT CASE WHEN length(CAST(actor_id AS BLOB))<=128 THEN actor_id ELSE NULL END,CASE WHEN length(CAST(object_id AS BLOB))<=128 THEN object_id ELSE NULL END FROM artifact_local_evidence_sources_v1 WHERE project_id=? AND document_id=? AND (actor_id>? OR (actor_id=? AND object_id>?)) ORDER BY actor_id,object_id LIMIT 256", &[project, document.document_id(), &actor, &actor, &object]))?;
+-                if rows.is_empty() { break; }
++                if rows.is_empty() {
++                    break;
++                }
+                 for row in rows {
+-                    actor = cell(&row, 0)?.into(); object = cell(&row, 1)?.into();
++                    actor = cell(&row, 0)?.into();
++                    object = cell(&row, 1)?.into();
+                     ids(project, &actor, &object)?;
+-                    let event = DocumentSourceNotification { project_id: project.into(), actor_id: actor.clone(), object_id: object.clone(), generation: Revision::new(1) };
+-                    let expected = if notifications { self.document_notification_state(&event)? } else { None };
+-                    routes.push(DocumentSourceRoute { document: (**document).clone(), event, expected });
++                    let event = DocumentSourceNotification {
++                        project_id: project.into(),
++                        actor_id: actor.clone(),
++                        object_id: object.clone(),
++                        generation: Revision::new(1),
++                    };
++                    let expected = if notifications {
++                        self.document_notification_state(&event)?
++                    } else {
++                        None
++                    };
++                    routes.push(DocumentSourceRoute {
++                        document: (**document).clone(),
++                        event,
++                        expected,
++                    });
+                 }
+             }
+         }
+Diff in /workspace/Muyon-source-invalidation-batch-verification/crates/muyon-core/src/documents/source_notifications.rs:83:
+-        Ok(DocumentSourceMutationPlan { transaction: tx, documents, routes, notifications, installed })
++        Ok(DocumentSourceMutationPlan {
++            transaction: tx,
++            documents,
++            routes,
++            notifications,
++            installed,
++        })
+     }
+-    fn verify_document_source_routes(&self, routes: &[DocumentSourceRoute], notifications: bool) -> Result<()> {
++    fn verify_document_source_routes(
++        &self,
++        routes: &[DocumentSourceRoute],
++        notifications: bool,
++    ) -> Result<()> {
+         for route in routes {
+             let source = sql(self.database().query("SELECT 1 FROM artifact_local_evidence_sources_v1 s JOIN artifact_local_bindings_v1 b ON b.project_id=s.project_id AND b.actor_id=s.actor_id AND b.object_id=s.object_id WHERE s.project_id=? AND s.actor_id=? AND s.object_id=? AND s.document_id=?", &[&route.event.project_id, &route.event.actor_id, &route.event.object_id, route.document.document_id()]))?;
+-            if source.len() != 1 { return Err(ContractError::StorageCorrupt); }
+-            let actual = if notifications { self.document_notification_state(&route.event)? } else { None };
+-            if actual != route.expected { return Err(ContractError::StorageCorrupt); }
++            if source.len() != 1 {
++                return Err(ContractError::StorageCorrupt);
++            }
++            let actual = if notifications {
++                self.document_notification_state(&route.event)?
++            } else {
++                None
++            };
++            if actual != route.expected {
++                return Err(ContractError::StorageCorrupt);
++            }
+         }
+         Ok(())
+     }
+Diff in /workspace/Muyon-source-invalidation-batch-verification/crates/muyon-core/src/documents/source_notifications.rs:94:
+     /// Called after the original mutation, still in its exact transaction. The
+     /// REAL owner decides invalidity; core only preserves the frozen queue facts.
+-    pub(super) fn finish_document_source_mutation_in_transaction(&self, tx: &Transaction<'_>, plan: DocumentSourceMutationPlan<'_, '_>) -> Result<DocumentSourceMutationPostcondition> {
+-        if !tx.belongs_to(self.database()) || !std::ptr::eq(tx, plan.transaction) { return Err(ContractError::ScopeMismatch); }
++    pub(super) fn finish_document_source_mutation_in_transaction(
++        &self,
++        tx: &Transaction<'_>,
++        plan: DocumentSourceMutationPlan<'_, '_>,
++    ) -> Result<DocumentSourceMutationPostcondition> {
++        if !tx.belongs_to(self.database()) || !std::ptr::eq(tx, plan.transaction) {
++            return Err(ContractError::ScopeMismatch);
++        }
+         self.verify_document_source_notification_namespace(plan.notifications, plan.installed)?;
+         self.verify_document_source_routes(&plan.routes, plan.notifications)?;
+         let mut routes = plan.routes;
+Diff in /workspace/Muyon-source-invalidation-batch-verification/crates/muyon-core/src/documents/source_notifications.rs:101:
+-        let route_indices: BTreeMap<_, _> = routes.iter().enumerate().map(|(index, route)| ((route.event.project_id.clone(), route.event.actor_id.clone(), route.event.object_id.clone()), index)).collect();
++        let route_indices: BTreeMap<_, _> = routes
++            .iter()
++            .enumerate()
++            .map(|(index, route)| {
++                (
++                    (
++                        route.event.project_id.clone(),
++                        route.event.actor_id.clone(),
++                        route.event.object_id.clone(),
++                    ),
++                    index,
++                )
++            })
++            .collect();
+         let mut queued_indices = BTreeSet::new();
+         let mut batches = Vec::new();
+         let mut frozen = Vec::new();
+Diff in /workspace/Muyon-source-invalidation-batch-verification/crates/muyon-core/src/documents/source_notifications.rs:105:
+         if plan.installed {
+             for document in plan.documents {
+-                let affected = self.invalidate_local_evidence_sources_in_transaction(tx, &document)?;
++                let affected =
++                    self.invalidate_local_evidence_sources_in_transaction(tx, &document)?;
+                 let mut events = Vec::with_capacity(affected.len());
+                 for affected in affected {
+-                    ids(&affected.project_id, &affected.actor_id, &affected.object_id)?;
+-                    let index = *route_indices.get(&(affected.project_id.clone(), affected.actor_id.clone(), affected.object_id.clone())).ok_or(ContractError::StorageCorrupt)?;
+-                    if routes[index].document.scope() != document.scope() || routes[index].document.document_id() != document.document_id() || !queued_indices.insert(index) { return Err(ContractError::StorageCorrupt); }
++                    ids(
++                        &affected.project_id,
++                        &affected.actor_id,
++                        &affected.object_id,
++                    )?;
++                    let index = *route_indices
++                        .get(&(
++                            affected.project_id.clone(),
++                            affected.actor_id.clone(),
++                            affected.object_id.clone(),
++                        ))
++                        .ok_or(ContractError::StorageCorrupt)?;
++                    if routes[index].document.scope() != document.scope()
++                        || routes[index].document.document_id() != document.document_id()
++                        || !queued_indices.insert(index)
++                    {
++                        return Err(ContractError::StorageCorrupt);
++                    }
+                     let old = routes[index].expected.clone();
+-                    let generation = match &old { Some((generation, _)) => generation.next()?, None => Revision::new(1) };
+-                    let event = DocumentSourceNotification { project_id: affected.project_id, actor_id: affected.actor_id, object_id: affected.object_id, generation };
+-                    events.push(event.clone()); frozen.push((index, event, old));
++                    let generation = match &old {
++                        Some((generation, _)) => generation.next()?,
++                        None => Revision::new(1),
++                    };
++                    let event = DocumentSourceNotification {
++                        project_id: affected.project_id,
++                        actor_id: affected.actor_id,
++                        object_id: affected.object_id,
++                        generation,
++                    };
++                    events.push(event.clone());
++                    frozen.push((index, event, old));
+                 }
+                 batches.push((document, events));
+             }
+Diff in /workspace/Muyon-source-invalidation-batch-verification/crates/muyon-core/src/documents/source_notifications.rs:120:
+             // Owner source/binding triggers also precede all queue writes.
+             self.verify_document_source_notification_namespace(plan.notifications, true)?;
+             self.verify_document_source_routes(&routes, plan.notifications)?;
+-            if !plan.notifications { sql(self.database().exec(DDL, &[]))?; }
++            if !plan.notifications {
++                sql(self.database().exec(DDL, &[]))?;
++            }
+             for (index, event, old) in frozen {
+-                if self.document_notification_state(&event)? != old { return Err(ContractError::StorageCorrupt); }
++                if self.document_notification_state(&event)? != old {
++                    return Err(ContractError::StorageCorrupt);
++                }
+                 sql(self.database().exec("INSERT INTO document_source_notifications_v1 VALUES(?,?,?,?,1) ON CONFLICT(project_id,actor_id,object_id) DO UPDATE SET generation=excluded.generation,pending=1", &[&event.project_id, &event.actor_id, &event.object_id, event.generation.as_str()]))?;
+                 routes[index].expected = Some((event.generation, true));
+             }
+Diff in /workspace/Muyon-source-invalidation-batch-verification/crates/muyon-core/src/documents/source_notifications.rs:129:
+         }
+-        let postcondition = DocumentSourceMutationPostcondition { routes, batches, installed: plan.installed };
++        let postcondition = DocumentSourceMutationPostcondition {
++            routes,
++            batches,
++            installed: plan.installed,
++        };
+         self.verify_document_source_mutation_in_transaction(tx, &postcondition)?;
+         Ok(postcondition)
+     }
+Diff in /workspace/Muyon-source-invalidation-batch-verification/crates/muyon-core/src/documents/source_notifications.rs:134:
+-    pub(super) fn verify_document_source_mutation_in_transaction(&self, tx: &Transaction<'_>, postcondition: &DocumentSourceMutationPostcondition) -> Result<()> {
+-        if !tx.belongs_to(self.database()) { return Err(ContractError::ScopeMismatch); }
+-        self.verify_document_source_notification_namespace(postcondition.installed, postcondition.installed)?;
++    pub(super) fn verify_document_source_mutation_in_transaction(
++        &self,
++        tx: &Transaction<'_>,
++        postcondition: &DocumentSourceMutationPostcondition,
++    ) -> Result<()> {
++        if !tx.belongs_to(self.database()) {
++            return Err(ContractError::ScopeMismatch);
++        }
++        self.verify_document_source_notification_namespace(
++            postcondition.installed,
++            postcondition.installed,
++        )?;
+         self.verify_document_source_routes(&postcondition.routes, postcondition.installed)?;
+         for (document, events) in &postcondition.batches {
+             self.verify_document_source_notifications_in_transaction(tx, document, events)?;
+Diff in /workspace/Muyon-source-invalidation-batch-verification/crates/muyon-core/src/documents/source_notifications.rs:140:
+         }
+         Ok(())
+     }
+-    pub(super) fn verify_document_source_notification_namespace(&self, notifications: bool, installed: bool) -> Result<()> {
+-        if self.document_notification_schema()? != notifications { return Err(ContractError::InvalidVersion); }
+-        let source = sql(self.database().query("SELECT type FROM sqlite_master WHERE name=?", &[SOURCE]))?;
++    pub(super) fn verify_document_source_notification_namespace(
++        &self,
++        notifications: bool,
++        installed: bool,
++    ) -> Result<()> {
++        if self.document_notification_schema()? != notifications {
++            return Err(ContractError::InvalidVersion);
++        }
++        let source = sql(self
++            .database()
++            .query("SELECT type FROM sqlite_master WHERE name=?", &[SOURCE]))?;
+         if installed {
+-            if source.len() != 1 || cell(&source[0], 0)? != "table" { return Err(ContractError::InvalidVersion); }
+-        } else if !source.is_empty() { return Err(ContractError::InvalidVersion); }
++            if source.len() != 1 || cell(&source[0], 0)? != "table" {
++                return Err(ContractError::InvalidVersion);
++            }
++        } else if !source.is_empty() {
++            return Err(ContractError::InvalidVersion);
++        }
+         Ok(())
+     }
+-    fn verify_document_notification_rows(&self, events: &[DocumentSourceNotification], pending: &str) -> Result<()> {
+-        if !events.is_empty() && !self.document_notification_schema()? { return Err(ContractError::StorageCorrupt); }
++    fn verify_document_notification_rows(
++        &self,
++        events: &[DocumentSourceNotification],
++        pending: &str,
++    ) -> Result<()> {
++        if !events.is_empty() && !self.document_notification_schema()? {
++            return Err(ContractError::StorageCorrupt);
++        }
+         for event in events {
+             let rows = sql(self.database().query("SELECT 1 FROM document_source_notifications_v1 WHERE project_id=? AND actor_id=? AND object_id=? AND generation=? AND pending=?", &[&event.project_id, &event.actor_id, &event.object_id, event.generation.as_str(), pending]))?;
+-            if rows.len() != 1 { return Err(ContractError::StorageCorrupt); }
++            if rows.len() != 1 {
++                return Err(ContractError::StorageCorrupt);
++            }
+         }
+         Ok(())
+     }
+Diff in /workspace/Muyon-source-invalidation-batch-verification/crates/muyon-core/src/documents/source_notifications.rs:159:
+     /// Read-only postcondition of the REAL owner's returned invalidations; this
+     /// projects only exact inactive flags, never decodes grants/payloads or makes
+     /// a source-authority decision. No owner schema/permission logic is copied.
+-    pub(super) fn verify_document_source_notifications_in_transaction(&self, tx: &Transaction<'_>, changed: &DocumentRef, events: &[DocumentSourceNotification]) -> Result<()> {
+-        if !tx.belongs_to(self.database()) { return Err(ContractError::ScopeMismatch); }
++    pub(super) fn verify_document_source_notifications_in_transaction(
++        &self,
++        tx: &Transaction<'_>,
++        changed: &DocumentRef,
++        events: &[DocumentSourceNotification],
++    ) -> Result<()> {
++        if !tx.belongs_to(self.database()) {
++            return Err(ContractError::ScopeMismatch);
++        }
+         self.verify_document_notification_rows(events, "1")?;
+         for event in events {
+-            if changed.scope().workspace_id != self.workspace_id() || changed.scope().project_id.as_deref() != Some(event.project_id.as_str()) { return Err(ContractError::ScopeMismatch); }
++            if changed.scope().workspace_id != self.workspace_id()
++                || changed.scope().project_id.as_deref() != Some(event.project_id.as_str())
++            {
++                return Err(ContractError::ScopeMismatch);
++            }
+             let rows = sql(self.database().query("SELECT 1 FROM artifact_local_evidence_sources_v1 s JOIN artifact_local_bindings_v1 b ON b.project_id=s.project_id AND b.actor_id=s.actor_id AND b.object_id=s.object_id WHERE s.project_id=? AND s.actor_id=? AND s.object_id=? AND s.document_id=? AND s.active=0 AND b.active=0", &[&event.project_id, &event.actor_id, &event.object_id, changed.document_id()]))?;
+-            if rows.len() != 1 { return Err(ContractError::StorageCorrupt); }
++            if rows.len() != 1 {
++                return Err(ContractError::StorageCorrupt);
++            }
+         }
+         Ok(())
+     }
+Diff in /workspace/Muyon-source-invalidation-batch-verification/crates/muyon-core/src/documents/source_notifications.rs:172:
+     /// Post-commit trusted Host call only. Nested calls during a source mutation
+     /// fail to start a transaction; no Runtime event may be emitted before COMMIT.
+-    pub fn pending_document_source_notifications_trusted(&self, after: Option<&DocumentSourceNotification>, limit: usize) -> Result<Vec<DocumentSourceNotification>> {
+-        if limit == 0 || limit > MAX_PAGE { return Err(ContractError::TextLimit); }
++    pub fn pending_document_source_notifications_trusted(
++        &self,
++        after: Option<&DocumentSourceNotification>,
++        limit: usize,
++    ) -> Result<Vec<DocumentSourceNotification>> {
++        if limit == 0 || limit > MAX_PAGE {
++            return Err(ContractError::TextLimit);
++        }
+         let tx = sql(self.database().transaction())?;
+         self.document_schema()?;
+-        if !self.document_notification_schema()? { sql(tx.commit())?; return Ok(Vec::new()); }
++        if !self.document_notification_schema()? {
++            sql(tx.commit())?;
++            return Ok(Vec::new());
++        }
+         let (project, actor, object) = match after {
+-            Some(cursor) => { ids(&cursor.project_id, &cursor.actor_id, &cursor.object_id)?; (cursor.project_id.as_str(), cursor.actor_id.as_str(), cursor.object_id.as_str()) }
++            Some(cursor) => {
++                ids(&cursor.project_id, &cursor.actor_id, &cursor.object_id)?;
++                (
++                    cursor.project_id.as_str(),
++                    cursor.actor_id.as_str(),
++                    cursor.object_id.as_str(),
++                )
++            }
+             None => ("", "", ""),
+         };
+         let rows = sql(self.database().query("SELECT CASE WHEN length(CAST(project_id AS BLOB))<=128 THEN project_id ELSE NULL END,CASE WHEN length(CAST(actor_id AS BLOB))<=128 THEN actor_id ELSE NULL END,CASE WHEN length(CAST(object_id AS BLOB))<=128 THEN object_id ELSE NULL END,CASE WHEN length(CAST(generation AS BLOB))<=20 THEN generation ELSE NULL END FROM document_source_notifications_v1 WHERE pending=1 AND (project_id>? OR (project_id=? AND (actor_id>? OR (actor_id=? AND object_id>?)))) ORDER BY project_id,actor_id,object_id LIMIT ?", &[project, project, actor, actor, object, &limit.to_string()]))?;
+Diff in /workspace/Muyon-source-invalidation-batch-verification/crates/muyon-core/src/documents/source_notifications.rs:185:
+         for row in rows {
+             ids(cell(&row, 0)?, cell(&row, 1)?, cell(&row, 2)?)?;
+             let generation = Revision::parse(cell(&row, 3)?)?;
+-            if generation.value() == 0 { return Err(ContractError::StorageCorrupt); }
+-            events.push(DocumentSourceNotification { project_id: cell(&row, 0)?.into(), actor_id: cell(&row, 1)?.into(), object_id: cell(&row, 2)?.into(), generation });
++            if generation.value() == 0 {
++                return Err(ContractError::StorageCorrupt);
++            }
++            events.push(DocumentSourceNotification {
++                project_id: cell(&row, 0)?.into(),
++                actor_id: cell(&row, 1)?.into(),
++                object_id: cell(&row, 2)?.into(),
++                generation,
++            });
+         }
+         sql(tx.commit())?;
+         Ok(events)
+Diff in /workspace/Muyon-source-invalidation-batch-verification/crates/muyon-core/src/documents/source_notifications.rs:193:
+     }
+-    fn document_notification_state(&self, event: &DocumentSourceNotification) -> Result<Option<(Revision, bool)>> {
++    fn document_notification_state(
++        &self,
++        event: &DocumentSourceNotification,
++    ) -> Result<Option<(Revision, bool)>> {
+         let rows = sql(self.database().query("SELECT CASE WHEN length(CAST(generation AS BLOB))<=20 THEN generation ELSE NULL END,pending FROM document_source_notifications_v1 WHERE project_id=? AND actor_id=? AND object_id=?", &[&event.project_id, &event.actor_id, &event.object_id]))?;
+-        if rows.is_empty() { return Ok(None); }
+-        if rows.len() != 1 { return Err(ContractError::StorageCorrupt); }
++        if rows.is_empty() {
++            return Ok(None);
++        }
++        if rows.len() != 1 {
++            return Err(ContractError::StorageCorrupt);
++        }
+         let generation = Revision::parse(cell(&rows[0], 0)?)?;
+-        if generation.value() == 0 { return Err(ContractError::StorageCorrupt); }
+-        let pending = match cell(&rows[0], 1)? { "0" => false, "1" => true, _ => return Err(ContractError::StorageCorrupt) };
++        if generation.value() == 0 {
++            return Err(ContractError::StorageCorrupt);
++        }
++        let pending = match cell(&rows[0], 1)? {
++            "0" => false,
++            "1" => true,
++            _ => return Err(ContractError::StorageCorrupt),
++        };
+         Ok(Some((generation, pending)))
+     }
+     /// Call only after Runtime accepted the corresponding local notification.
+Diff in /workspace/Muyon-source-invalidation-batch-verification/crates/muyon-core/src/documents/source_notifications.rs:204:
+     /// Keep tombstones: deleting an acked row could reuse generation1 (ABA).
+-    pub fn ack_document_source_notifications_trusted(&self, events: &[DocumentSourceNotification]) -> Result<usize> {
+-        if events.len() > MAX_PAGE { return Err(ContractError::TextLimit); }
+-        if events.is_empty() { return Ok(0); }
++    pub fn ack_document_source_notifications_trusted(
++        &self,
++        events: &[DocumentSourceNotification],
++    ) -> Result<usize> {
++        if events.len() > MAX_PAGE {
++            return Err(ContractError::TextLimit);
++        }
++        if events.is_empty() {
++            return Ok(0);
++        }
+         let tx = sql(self.database().transaction())?;
+         self.document_schema()?;
+-        if !self.document_notification_schema()? { return Err(ContractError::NotFound); }
++        if !self.document_notification_schema()? {
++            return Err(ContractError::NotFound);
++        }
+         // Freeze EVERY supplied target before ANY write, including stale and
+         // missing rows. sqlite changes()==0 can hide a successful trigger that
+         // deleted a tombstone and then RAISE(IGNORE)'d the original UPDATE.
+Diff in /workspace/Muyon-source-invalidation-batch-verification/crates/muyon-core/src/documents/source_notifications.rs:214:
+         let mut frozen = Vec::with_capacity(events.len());
+         for event in events {
+             ids(&event.project_id, &event.actor_id, &event.object_id)?;
+-            if event.generation.value() == 0 { return Err(ContractError::InvalidRevision); }
++            if event.generation.value() == 0 {
++                return Err(ContractError::InvalidRevision);
++            }
+             frozen.push((event, self.document_notification_state(event)?));
+         }
+         let mut acknowledged = 0;
+Diff in /workspace/Muyon-source-invalidation-batch-verification/crates/muyon-core/src/documents/source_notifications.rs:221:
+         for event in events {
+             let changed = sql(self.database().exec("UPDATE document_source_notifications_v1 SET pending=0 WHERE project_id=? AND actor_id=? AND object_id=? AND generation=? AND pending=1", &[&event.project_id, &event.actor_id, &event.object_id, event.generation.as_str()]))?;
+-            if changed > 1 { return Err(ContractError::StorageCorrupt); }
++            if changed > 1 {
++                return Err(ContractError::StorageCorrupt);
++            }
+             acknowledged += changed;
+         }
+-        if !self.document_notification_schema()? { return Err(ContractError::StorageCorrupt); }
++        if !self.document_notification_schema()? {
++            return Err(ContractError::StorageCorrupt);
++        }
+         for (event, before) in frozen {
+             let expected = before.map(|(generation, pending)| {
+-                let matched = events.iter().any(|input| input.project_id == event.project_id && input.actor_id == event.actor_id && input.object_id == event.object_id && input.generation == generation);
++                let matched = events.iter().any(|input| {
++                    input.project_id == event.project_id
++                        && input.actor_id == event.actor_id
++                        && input.object_id == event.object_id
++                        && input.generation == generation
++                });
+                 (generation, pending && !matched)
+             });
+-            if self.document_notification_state(event)? != expected { return Err(ContractError::StorageCorrupt); }
++            if self.document_notification_state(event)? != expected {
++                return Err(ContractError::StorageCorrupt);
++            }
+         }
+         tx.commit().map_err(|_| ContractError::Unknown)?;
+         Ok(acknowledged)
+Diff in /workspace/Muyon-source-invalidation-batch-verification/crates/muyon-core/src/documents/source_notification_tests.rs:1:
+ //! Integration regressions against real fixed Artifacts/Evidence, synthetic data.
+ use super::{storage_tests::Fixture, *};
+-use crate::{artifacts::{*, local_interactions::*}, blobs::BlobKind, business::BusinessStore, contract::*, evidence::{store::StoreEvidence, InputKind}, sqlite::Db};
++use crate::{
++    artifacts::{local_interactions::*, *},
++    blobs::BlobKind,
++    business::BusinessStore,
++    contract::*,
++    evidence::{store::StoreEvidence, InputKind},
++    sqlite::Db,
++};
+ use std::collections::BTreeSet;
+ 
+-fn expiry() -> u64 { std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).unwrap().as_millis() as u64 + 25_000 }
++fn expiry() -> u64 {
++    std::time::SystemTime::now()
++        .duration_since(std::time::UNIX_EPOCH)
++        .unwrap()
++        .as_millis() as u64
++        + 25_000
++}
+ fn upload(store: &BusinessStore, project: &str, bytes: &[u8]) -> crate::blobs::FinishedBlob {
+     let upload = store.begin_upload(project).unwrap();
+     store.append_chunk(&upload.upload_id, bytes).unwrap();
+Diff in /workspace/Muyon-source-invalidation-batch-verification/crates/muyon-core/src/documents/source_notification_tests.rs:10:
+-    store.finish_blob(&upload.upload_id, BlobKind::Document).unwrap()
++    store
++        .finish_blob(&upload.upload_id, BlobKind::Document)
++        .unwrap()
+ }
+ fn bind(store: &BusinessStore, source: &DocumentAccess, local: &LocalAccess, kind: &LocalKind) {
+     let evidence = StoreEvidence::new(store);
+Diff in /workspace/Muyon-source-invalidation-batch-verification/crates/muyon-core/src/documents/source_notification_tests.rs:14:
+     let processing = evidence.process(source, InputKind::Utf8Text).unwrap();
+-    let hits = evidence.find_literal(source, &processing, "synthetic", 1).unwrap();
+-    let proof = store.resolve_local_evidence_trusted(&local.project, ArtifactProjectOperation::LocalDraft, source, &processing, &hits[0]).unwrap();
++    let hits = evidence
++        .find_literal(source, &processing, "synthetic", 1)
++        .unwrap();
++    let proof = store
++        .resolve_local_evidence_trusted(
++            &local.project,
++            ArtifactProjectOperation::LocalDraft,
++            source,
++            &processing,
++            &hits[0],
++        )
++        .unwrap();
+     assert_eq!(local.object.target, proof.target());
+-    store.issue_local_evidence_binding_trusted(local, kind, expiry(), &proof).unwrap();
++    store
++        .issue_local_evidence_binding_trusted(local, kind, expiry(), &proof)
++        .unwrap();
+ }
+-fn fixture() -> (Fixture, BusinessStore, DocumentAccess, LocalAccess, LocalKind) {
+-    let f = Fixture::new(); let (store, _) = f.setup();
++fn fixture() -> (
++    Fixture,
++    BusinessStore,
++    DocumentAccess,
++    LocalAccess,
++    LocalKind,
++) {
++    let f = Fixture::new();
++    let (store, _) = f.setup();
+     store.initialize_artifacts_trusted().unwrap();
+     store.initialize_artifact_workflows_trusted().unwrap();
+     store.initialize_local_interactions_trusted().unwrap();
+Diff in /workspace/Muyon-source-invalidation-batch-verification/crates/muyon-core/src/documents/source_notification_tests.rs:25:
+     let blob = upload(&store, "project", b"Original synthetic evidence passage.");
+-    let metadata = store.register_document_trusted("project", "text-source", "Synthetic", DocumentFormat::Text, &blob).unwrap();
+-    let source = DocumentAccess { document: metadata.document, authority: AuthorityBinding { grant_id: "source-grant".into(), generation: Revision::new(1), owner_epoch: "epoch".into() } };
+-    store.issue_document_grant_trusted(&source.document, &source.authority, &[DocumentOperation::Inspect, DocumentOperation::ReadText, DocumentOperation::StructuredEdit], expiry()).unwrap();
+-    let project = ArtifactProjectAccess { scope: source.document.scope().clone(), actor_id: "actor".into(), project_revision: Revision::new(1), authority: AuthorityBinding { grant_id: "project-grant".into(), generation: Revision::new(1), owner_epoch: "epoch".into() } };
+-    store.issue_artifact_project_grant_trusted(&project, &[ArtifactProjectOperation::LocalDraft, ArtifactProjectOperation::ReadOwnLocal], expiry()).unwrap();
++    let metadata = store
++        .register_document_trusted(
++            "project",
++            "text-source",
++            "Synthetic",
++            DocumentFormat::Text,
++            &blob,
++        )
++        .unwrap();
++    let source = DocumentAccess {
++        document: metadata.document,
++        authority: AuthorityBinding {
++            grant_id: "source-grant".into(),
++            generation: Revision::new(1),
++            owner_epoch: "epoch".into(),
++        },
++    };
++    store
++        .issue_document_grant_trusted(
++            &source.document,
++            &source.authority,
++            &[
++                DocumentOperation::Inspect,
++                DocumentOperation::ReadText,
++                DocumentOperation::StructuredEdit,
++            ],
++            expiry(),
++        )
++        .unwrap();
++    let project = ArtifactProjectAccess {
++        scope: source.document.scope().clone(),
++        actor_id: "actor".into(),
++        project_revision: Revision::new(1),
++        authority: AuthorityBinding {
++            grant_id: "project-grant".into(),
++            generation: Revision::new(1),
++            owner_epoch: "epoch".into(),
++        },
++    };
++    store
++        .issue_artifact_project_grant_trusted(
++            &project,
++            &[
++                ArtifactProjectOperation::LocalDraft,
++                ArtifactProjectOperation::ReadOwnLocal,
++            ],
++            expiry(),
++        )
++        .unwrap();
+     let evidence = StoreEvidence::new(&store);
+     let processing = evidence.process(&source, InputKind::Utf8Text).unwrap();
+-    let hits = evidence.find_literal(&source, &processing, "synthetic", 1).unwrap();
+-    let proof = store.resolve_local_evidence_trusted(&project, ArtifactProjectOperation::LocalDraft, &source, &processing, &hits[0]).unwrap();
+-    let local = LocalAccess { project, object: LocalObjectRef { object_id: "object".into(), target: proof.target(), component_id: "component".into(), component_revision: Revision::new(1), attempt_id: "attempt".into() }, binding_generation: Revision::new(1) };
+-    let kind = LocalKind::Form(FormSpec { fields: vec![LocalField::Text], single_options: Vec::new(), multiple_options: Vec::new() });
+-    store.issue_local_evidence_binding_trusted(&local, &kind, expiry(), &proof).unwrap();
++    let hits = evidence
++        .find_literal(&source, &processing, "synthetic", 1)
++        .unwrap();
++    let proof = store
++        .resolve_local_evidence_trusted(
++            &project,
++            ArtifactProjectOperation::LocalDraft,
++            &source,
++            &processing,
++            &hits[0],
++        )
++        .unwrap();
++    let local = LocalAccess {
++        project,
++        object: LocalObjectRef {
++            object_id: "object".into(),
++            target: proof.target(),
++            component_id: "component".into(),
++            component_revision: Revision::new(1),
++            attempt_id: "attempt".into(),
++        },
++        binding_generation: Revision::new(1),
++    };
++    let kind = LocalKind::Form(FormSpec {
++        fields: vec![LocalField::Text],
++        single_options: Vec::new(),
++        multiple_options: Vec::new(),
++    });
++    store
++        .issue_local_evidence_binding_trusted(&local, &kind, expiry(), &proof)
++        .unwrap();
+     drop(proof);
+-    let change = LocalMutation::Patch { expected: Revision::new(0), changes: vec![FieldChange::Text { value: "original manual draft".into() }], author: AnnotationAuthor::Human { actor_id: "actor".into() } };
+-    assert_eq!(store.mutate_local_trusted("manual", &local, &change).unwrap().status, ArtifactSaveStatus::Committed);
++    let change = LocalMutation::Patch {
++        expected: Revision::new(0),
++        changes: vec![FieldChange::Text {
++            value: "original manual draft".into(),
++        }],
++        author: AnnotationAuthor::Human {
++            actor_id: "actor".into(),
++        },
++    };
++    assert_eq!(
++        store
++            .mutate_local_trusted("manual", &local, &change)
++            .unwrap()
++            .status,
++        ArtifactSaveStatus::Committed
++    );
+     (f, store, source, local, kind)
+ }
+-fn active(store: &BusinessStore) -> String { store.database().query("SELECT active FROM artifact_local_evidence_sources_v1 WHERE object_id='object'", &[]).unwrap()[0][0].clone().unwrap() }
+-fn head(store: &BusinessStore) -> String { store.database().query("SELECT revision FROM document_heads WHERE document_id='text-source'", &[]).unwrap()[0][0].clone().unwrap() }
+-fn raw_forms(store: &BusinessStore) -> Vec<Vec<Option<String>>> { store.database().query("SELECT * FROM artifact_local_forms_v1 ORDER BY object_id", &[]).unwrap() }
++fn active(store: &BusinessStore) -> String {
++    store
++        .database()
++        .query(
++            "SELECT active FROM artifact_local_evidence_sources_v1 WHERE object_id='object'",
++            &[],
++        )
++        .unwrap()[0][0]
++        .clone()
++        .unwrap()
++}
++fn head(store: &BusinessStore) -> String {
++    store
++        .database()
++        .query(
++            "SELECT revision FROM document_heads WHERE document_id='text-source'",
++            &[],
++        )
++        .unwrap()[0][0]
++        .clone()
++        .unwrap()
++}
++fn raw_forms(store: &BusinessStore) -> Vec<Vec<Option<String>>> {
++    store
++        .database()
++        .query(
++            "SELECT * FROM artifact_local_forms_v1 ORDER BY object_id",
++            &[],
++        )
++        .unwrap()
++}
+ 
+ #[test]
+ fn uninitialized_source_feature_does_not_block_docs_or_create_tables_on_read() {
+Diff in /workspace/Muyon-source-invalidation-batch-verification/crates/muyon-core/src/documents/source_notification_tests.rs:49:
+-    let f = Fixture::new(); let (store, access) = f.setup();
+-    assert!(store.pending_document_source_notifications_trusted(None, 256).unwrap().is_empty());
+-    store.revoke_document_grant_trusted(&access.authority).unwrap();
+-    assert!(store.database().query("SELECT name FROM sqlite_master WHERE name='document_source_notifications_v1'", &[]).unwrap().is_empty());
++    let f = Fixture::new();
++    let (store, access) = f.setup();
++    assert!(store
++        .pending_document_source_notifications_trusted(None, 256)
++        .unwrap()
++        .is_empty());
++    store
++        .revoke_document_grant_trusted(&access.authority)
++        .unwrap();
++    assert!(store
++        .database()
++        .query(
++            "SELECT name FROM sqlite_master WHERE name='document_source_notifications_v1'",
++            &[]
++        )
++        .unwrap()
++        .is_empty());
+ }
+ 
+ #[test]
+Diff in /workspace/Muyon-source-invalidation-batch-verification/crates/muyon-core/src/documents/source_notification_tests.rs:56:
+ fn legacy_local_tables_without_source_namespace_remain_compatible() {
+-    let f = Fixture::new(); let (store, access) = f.setup();
++    let f = Fixture::new();
++    let (store, access) = f.setup();
+     store.initialize_artifacts_trusted().unwrap();
+     store.initialize_artifact_workflows_trusted().unwrap();
+     store.initialize_local_interactions_trusted().unwrap();
+Diff in /workspace/Muyon-source-invalidation-batch-verification/crates/muyon-core/src/documents/source_notification_tests.rs:61:
+     // Reproduce the previous six-table feature shape before a tracked source or
+     // core notification marker exists. This is not the damaged-installed case.
+-    store.database().exec("DROP TABLE artifact_local_evidence_sources_v1", &[]).unwrap();
+-    store.revoke_document_grant_trusted(&access.authority).unwrap();
+-    assert!(store.pending_document_source_notifications_trusted(None, 256).unwrap().is_empty());
+-    assert!(store.database().query("SELECT name FROM sqlite_master WHERE name='document_source_notifications_v1'", &[]).unwrap().is_empty());
++    store
++        .database()
++        .exec("DROP TABLE artifact_local_evidence_sources_v1", &[])
++        .unwrap();
++    store
++        .revoke_document_grant_trusted(&access.authority)
++        .unwrap();
++    assert!(store
++        .pending_document_source_notifications_trusted(None, 256)
++        .unwrap()
++        .is_empty());
++    assert!(store
++        .database()
++        .query(
++            "SELECT name FROM sqlite_master WHERE name='document_source_notifications_v1'",
++            &[]
++        )
++        .unwrap()
++        .is_empty());
+ }
+ 
+ #[test]
+Diff in /workspace/Muyon-source-invalidation-batch-verification/crates/muyon-core/src/documents/source_notification_tests.rs:70:
+ fn reissuing_same_document_grant_invalidates_active_original_generation() {
+     let (_f, store, source, _, _) = fixture();
+     let forms = raw_forms(&store);
+-    let next = AuthorityBinding { generation: source.authority.generation.next().unwrap(), ..source.authority };
+-    store.issue_document_grant_trusted(&source.document, &next, &[DocumentOperation::ReadText], expiry()).unwrap();
++    let next = AuthorityBinding {
++        generation: source.authority.generation.next().unwrap(),
++        ..source.authority
++    };
++    store
++        .issue_document_grant_trusted(
++            &source.document,
++            &next,
++            &[DocumentOperation::ReadText],
++            expiry(),
++        )
++        .unwrap();
+     assert_eq!(active(&store), "0");
+     assert_eq!(raw_forms(&store), forms);
+-    assert_eq!(store.pending_document_source_notifications_trusted(None, 256).unwrap().len(), 1);
++    assert_eq!(
++        store
++            .pending_document_source_notifications_trusted(None, 256)
++            .unwrap()
++            .len(),
++        1
++    );
+ }
+ 
+ #[test]
+Diff in /workspace/Muyon-source-invalidation-batch-verification/crates/muyon-core/src/documents/source_notification_tests.rs:85:
+         if copy {
+             let metadata = store.read_document(&source).unwrap();
+             let tx = store.database().transaction().unwrap();
+-            store.document_clone_in_transaction(&tx, &source.document, "Copy", &metadata.blob).unwrap();
++            store
++                .document_clone_in_transaction(&tx, &source.document, "Copy", &metadata.blob)
++                .unwrap();
+             tx.commit().unwrap();
+         } else {
+             let blob = upload(&store, "project", b"Replacement synthetic source.");
+Diff in /workspace/Muyon-source-invalidation-batch-verification/crates/muyon-core/src/documents/source_notification_tests.rs:92:
+-            store.publish_document_revision_trusted(&source.document, "Next", DocumentFormat::Text, &blob).unwrap();
++            store
++                .publish_document_revision_trusted(
++                    &source.document,
++                    "Next",
++                    DocumentFormat::Text,
++                    &blob,
++                )
++                .unwrap();
+         }
+-        assert_eq!(head(&store), "2"); assert_eq!(active(&store), "0");
++        assert_eq!(head(&store), "2");
++        assert_eq!(active(&store), "0");
+         assert_eq!(raw_forms(&store), forms);
+-        let pending = store.pending_document_source_notifications_trusted(None, 256).unwrap();
++        let pending = store
++            .pending_document_source_notifications_trusted(None, 256)
++            .unwrap();
+         assert_eq!(pending.len(), 1);
+-        assert_eq!((pending[0].project_id.as_str(), pending[0].actor_id.as_str(), pending[0].object_id.as_str()), ("project", "actor", "object"));
++        assert_eq!(
++            (
++                pending[0].project_id.as_str(),
++                pending[0].actor_id.as_str(),
++                pending[0].object_id.as_str()
++            ),
++            ("project", "actor", "object")
++        );
+     }
+ }
+ 
+Diff in /workspace/Muyon-source-invalidation-batch-verification/crates/muyon-core/src/documents/source_notification_tests.rs:105:
+     let observer = Db::open(f.path().to_str().unwrap(), true, false).unwrap();
+     let metadata = store.read_document(&source).unwrap();
+     let tx = store.database().transaction().unwrap();
+-    store.document_clone_in_transaction(&tx, &source.document, "Uncommitted", &metadata.blob).unwrap();
+-    assert!(store.pending_document_source_notifications_trusted(None, 256).is_err(), "nested transaction cannot publish pending IDs");
+-    assert_eq!(observer.query("SELECT active FROM artifact_local_evidence_sources_v1", &[]).unwrap()[0][0].as_deref(), Some("1"));
+-    assert!(observer.query("SELECT 1 FROM document_source_notifications_v1 WHERE pending=1", &[]).unwrap().is_empty());
++    store
++        .document_clone_in_transaction(&tx, &source.document, "Uncommitted", &metadata.blob)
++        .unwrap();
++    assert!(
++        store
++            .pending_document_source_notifications_trusted(None, 256)
++            .is_err(),
++        "nested transaction cannot publish pending IDs"
++    );
++    assert_eq!(
++        observer
++            .query("SELECT active FROM artifact_local_evidence_sources_v1", &[])
++            .unwrap()[0][0]
++            .as_deref(),
++        Some("1")
++    );
++    assert!(observer
++        .query(
++            "SELECT 1 FROM document_source_notifications_v1 WHERE pending=1",
++            &[]
++        )
++        .unwrap()
++        .is_empty());
+     drop(tx);
+-    assert_eq!(active(&store), "1"); assert_eq!(head(&store), "1");
+-    assert!(store.pending_document_source_notifications_trusted(None, 256).unwrap().is_empty());
++    assert_eq!(active(&store), "1");
++    assert_eq!(head(&store), "1");
++    assert!(store
++        .pending_document_source_notifications_trusted(None, 256)
++        .unwrap()
++        .is_empty());
+     let tx = store.database().transaction().unwrap();
+-    store.document_clone_in_transaction(&tx, &source.document, "Committed", &metadata.blob).unwrap();
++    store
++        .document_clone_in_transaction(&tx, &source.document, "Committed", &metadata.blob)
++        .unwrap();
+     tx.commit().unwrap();
+-    assert_eq!(store.pending_document_source_notifications_trusted(None, 256).unwrap().len(), 1);
++    assert_eq!(
++        store
++            .pending_document_source_notifications_trusted(None, 256)
++            .unwrap()
++            .len(),
++        1
++    );
+ }
+ 
+ #[test]
+Diff in /workspace/Muyon-source-invalidation-batch-verification/crates/muyon-core/src/documents/source_notification_tests.rs:125:
+         store.database().exec("CREATE TRIGGER fail_source_notification BEFORE INSERT ON document_source_notifications_v1 BEGIN SELECT RAISE(ABORT,'synthetic notification failure'); END", &[]).unwrap();
+         if mutation == 0 {
+             let blob = upload(&store, "project", b"Replacement synthetic source.");
+-            assert!(store.publish_document_revision_trusted(&source.document, "Next", DocumentFormat::Text, &blob).is_err());
+-        } else if mutation == 1 { assert!(store.revoke_document_grant_trusted(&source.authority).is_err()); }
+-        else {
+-            let next = AuthorityBinding { generation: source.authority.generation.next().unwrap(), ..source.authority.clone() };
+-            assert!(store.issue_document_grant_trusted(&source.document, &next, &[DocumentOperation::ReadText], expiry()).is_err());
++            assert!(store
++                .publish_document_revision_trusted(
++                    &source.document,
++                    "Next",
++                    DocumentFormat::Text,
++                    &blob
++                )
++                .is_err());
++        } else if mutation == 1 {
++            assert!(store
++                .revoke_document_grant_trusted(&source.authority)
++                .is_err());
++        } else {
++            let next = AuthorityBinding {
++                generation: source.authority.generation.next().unwrap(),
++                ..source.authority.clone()
++            };
++            assert!(store
++                .issue_document_grant_trusted(
++                    &source.document,
++                    &next,
++                    &[DocumentOperation::ReadText],
++                    expiry()
++                )
++                .is_err());
+         }
+-        assert_eq!(head(&store), "1"); assert_eq!(active(&store), "1");
++        assert_eq!(head(&store), "1");
++        assert_eq!(active(&store), "1");
+         assert!(store.read_document(&source).is_ok());
+-        assert!(store.pending_document_source_notifications_trusted(None, 256).unwrap().is_empty());
++        assert!(store
++            .pending_document_source_notifications_trusted(None, 256)
++            .unwrap()
++            .is_empty());
+     }
+ }
+ 
+Diff in /workspace/Muyon-source-invalidation-batch-verification/crates/muyon-core/src/documents/source_notification_tests.rs:141:
+ fn grant_replacement_invalidates_old_document_even_when_new_scope_differs() {
+     let (_f, store, source, _, _) = fixture();
+     let forms = raw_forms(&store);
+-    store.database().exec("INSERT INTO projects VALUES('other-project','workspace','Other','1',0)", &[]).unwrap();
++    store
++        .database()
++        .exec(
++            "INSERT INTO projects VALUES('other-project','workspace','Other','1',0)",
++            &[],
++        )
++        .unwrap();
+     let blob = upload(&store, "other-project", b"Other original synthetic source.");
+-    let other = store.register_document_trusted("other-project", "other-document", "Other", DocumentFormat::Text, &blob).unwrap();
+-    let authority = AuthorityBinding { generation: source.authority.generation.next().unwrap(), ..source.authority };
+-    store.issue_document_grant_trusted(&other.document, &authority, &[DocumentOperation::ReadText], expiry()).unwrap();
+-    assert_eq!(active(&store), "0"); assert_eq!(raw_forms(&store), forms);
+-    let pending = store.pending_document_source_notifications_trusted(None, 256).unwrap();
+-    assert_eq!(pending.len(), 1); assert_eq!(pending[0].project_id, "project");
++    let other = store
++        .register_document_trusted(
++            "other-project",
++            "other-document",
++            "Other",
++            DocumentFormat::Text,
++            &blob,
++        )
++        .unwrap();
++    let authority = AuthorityBinding {
++        generation: source.authority.generation.next().unwrap(),
++        ..source.authority
++    };
++    store
++        .issue_document_grant_trusted(
++            &other.document,
++            &authority,
++            &[DocumentOperation::ReadText],
++            expiry(),
++        )
++        .unwrap();
++    assert_eq!(active(&store), "0");
++    assert_eq!(raw_forms(&store), forms);
++    let pending = store
++        .pending_document_source_notifications_trusted(None, 256)
++        .unwrap();
++    assert_eq!(pending.len(), 1);
++    assert_eq!(pending[0].project_id, "project");
+ }
+ 
+ #[test]
+Diff in /workspace/Muyon-source-invalidation-batch-verification/crates/muyon-core/src/documents/source_notification_tests.rs:168:
+ #[test]
+ fn malformed_original_grant_target_is_not_discarded_during_reissue_or_revoke() {
+     let (_f, store, mut source, _, _) = fixture();
+-    store.database().exec("UPDATE document_grants SET document_json='{' WHERE grant_id='source-grant'", &[]).unwrap();
+-    assert!(store.revoke_document_grant_trusted(&source.authority).is_err());
++    store
++        .database()
++        .exec(
++            "UPDATE document_grants SET document_json='{' WHERE grant_id='source-grant'",
++            &[],
++        )
++        .unwrap();
++    assert!(store
++        .revoke_document_grant_trusted(&source.authority)
++        .is_err());
+     source.authority.generation = source.authority.generation.next().unwrap();
+-    assert!(store.issue_document_grant_trusted(&source.document, &source.authority, &[DocumentOperation::ReadText], expiry()).is_err());
+-    assert_eq!(store.database().query("SELECT generation,active FROM document_grants WHERE grant_id='source-grant'", &[]).unwrap()[0], vec![Some("1".into()), Some("1".into())]);
++    assert!(store
++        .issue_document_grant_trusted(
++            &source.document,
++            &source.authority,
++            &[DocumentOperation::ReadText],
++            expiry()
++        )
++        .is_err());
++    assert_eq!(
++        store
++            .database()
++            .query(
++                "SELECT generation,active FROM document_grants WHERE grant_id='source-grant'",
++                &[]
++            )
++            .unwrap()[0],
++        vec![Some("1".into()), Some("1".into())]
++    );
+ }
+ 
+ #[test]
+Diff in /workspace/Muyon-source-invalidation-batch-verification/crates/muyon-core/src/documents/source_notification_tests.rs:179:
+ fn pending_notifications_repeat_until_ack_and_stale_ack_cannot_erase_new_generation() {
+     let (_f, store, mut source, mut local, kind) = fixture();
+     let forms = raw_forms(&store);
+-    store.revoke_document_grant_trusted(&source.authority).unwrap();
+-    let first = store.pending_document_source_notifications_trusted(None, 256).unwrap();
+-    assert_eq!(store.pending_document_source_notifications_trusted(None, 256).unwrap(), first);
+-    assert_eq!(store.ack_document_source_notifications_trusted(&first).unwrap(), 1);
++    store
++        .revoke_document_grant_trusted(&source.authority)
++        .unwrap();
++    let first = store
++        .pending_document_source_notifications_trusted(None, 256)
++        .unwrap();
++    assert_eq!(
++        store
++            .pending_document_source_notifications_trusted(None, 256)
++            .unwrap(),
++        first
++    );
++    assert_eq!(
++        store
++            .ack_document_source_notifications_trusted(&first)
++            .unwrap(),
++        1
++    );
+     source.authority.generation = source.authority.generation.next().unwrap();
+-    store.issue_document_grant_trusted(&source.document, &source.authority, &[DocumentOperation::Inspect, DocumentOperation::ReadText], expiry()).unwrap();
++    store
++        .issue_document_grant_trusted(
++            &source.document,
++            &source.authority,
++            &[DocumentOperation::Inspect, DocumentOperation::ReadText],
++            expiry(),
++        )
++        .unwrap();
+     local.binding_generation = local.binding_generation.next().unwrap();
+     bind(&store, &source, &local, &kind);
+-    store.revoke_document_grant_trusted(&source.authority).unwrap();
+-    let second = store.pending_document_source_notifications_trusted(None, 256).unwrap();
++    store
++        .revoke_document_grant_trusted(&source.authority)
++        .unwrap();
++    let second = store
++        .pending_document_source_notifications_trusted(None, 256)
++        .unwrap();
+     assert!(second[0].generation.value() > first[0].generation.value());
+-    assert_eq!(store.ack_document_source_notifications_trusted(&first).unwrap(), 0);
+-    assert_eq!(store.pending_document_source_notifications_trusted(None, 256).unwrap(), second);
+-    assert_eq!(store.ack_document_source_notifications_trusted(&second).unwrap(), 1);
++    assert_eq!(
++        store
++            .ack_document_source_notifications_trusted(&first)
++            .unwrap(),
++        0
++    );
++    assert_eq!(
++        store
++            .pending_document_source_notifications_trusted(None, 256)
++            .unwrap(),
++        second
++    );
++    assert_eq!(
++        store
++            .ack_document_source_notifications_trusted(&second)
++            .unwrap(),
++        1
++    );
+     assert_eq!(raw_forms(&store), forms);
+ }
+ 
+Diff in /workspace/Muyon-source-invalidation-batch-verification/crates/muyon-core/src/documents/source_notification_tests.rs:201:
+     let (_f, store, source, local, kind) = fixture();
+     let evidence = StoreEvidence::new(&store);
+     let processing = evidence.process(&source, InputKind::Utf8Text).unwrap();
+-    let hits = evidence.find_literal(&source, &processing, "synthetic", 1).unwrap();
+-    let proof = store.resolve_local_evidence_trusted(&local.project, ArtifactProjectOperation::LocalDraft, &source, &processing, &hits[0]).unwrap();
++    let hits = evidence
++        .find_literal(&source, &processing, "synthetic", 1)
++        .unwrap();
++    let proof = store
++        .resolve_local_evidence_trusted(
++            &local.project,
++            ArtifactProjectOperation::LocalDraft,
++            &source,
++            &processing,
++            &hits[0],
++        )
++        .unwrap();
+     for n in 0..257 {
+-        let mut extra = local.clone(); extra.object.object_id = format!("object-{n:03}");
+-        store.issue_local_evidence_binding_trusted(&extra, &kind, expiry(), &proof).unwrap();
++        let mut extra = local.clone();
++        extra.object.object_id = format!("object-{n:03}");
++        store
++            .issue_local_evidence_binding_trusted(&extra, &kind, expiry(), &proof)
++            .unwrap();
+     }
+     drop(proof);
+-    store.revoke_document_grant_trusted(&source.authority).unwrap();
+-    assert!(store.database().query("SELECT 1 FROM artifact_local_evidence_sources_v1 WHERE active=1", &[]).unwrap().is_empty());
+-    let first = store.pending_document_source_notifications_trusted(None, 256).unwrap();
+-    let second = store.pending_document_source_notifications_trusted(first.last(), 256).unwrap();
+-    assert_eq!(first.len(), 256); assert_eq!(second.len(), 2);
+-    let unique: BTreeSet<_> = first.iter().chain(&second).map(|event| (&event.project_id, &event.actor_id, &event.object_id)).collect();
++    store
++        .revoke_document_grant_trusted(&source.authority)
++        .unwrap();
++    assert!(store
++        .database()
++        .query(
++            "SELECT 1 FROM artifact_local_evidence_sources_v1 WHERE active=1",
++            &[]
++        )
++        .unwrap()
++        .is_empty());
++    let first = store
++        .pending_document_source_notifications_trusted(None, 256)
++        .unwrap();
++    let second = store
++        .pending_document_source_notifications_trusted(first.last(), 256)
++        .unwrap();
++    assert_eq!(first.len(), 256);
++    assert_eq!(second.len(), 2);
++    let unique: BTreeSet<_> = first
++        .iter()
++        .chain(&second)
++        .map(|event| (&event.project_id, &event.actor_id, &event.object_id))
++        .collect();
+     assert_eq!(unique.len(), 258);
+ }
+ 
+Diff in /workspace/Muyon-source-invalidation-batch-verification/crates/muyon-core/src/documents/source_notification_tests.rs:222:
+     let (_f, store, source, _, _) = fixture();
+     let other = Db::open(":memory:", false, true).unwrap();
+     let tx = other.transaction().unwrap();
+-    assert!(store.prepare_document_source_mutation_in_transaction(&tx, &[&source.document]).is_err());
+-    assert!(store.pending_document_source_notifications_trusted(None, 0).is_err());
+-    assert!(store.pending_document_source_notifications_trusted(None, 257).is_err());
++    assert!(store
++        .prepare_document_source_mutation_in_transaction(&tx, &[&source.document])
++        .is_err());
++    assert!(store
++        .pending_document_source_notifications_trusted(None, 0)
++        .is_err());
++    assert!(store
++        .pending_document_source_notifications_trusted(None, 257)
++        .is_err());
+ }
+ 
+ // Successful AFTER triggers must not turn a successful SQL statement into an
+Diff in /workspace/Muyon-source-invalidation-batch-verification/crates/muyon-core/src/documents/source_notification_tests.rs:242:
+     ] {
+         let (_f, store, source, _, _) = fixture();
+         store.database().exec(&format!("CREATE TRIGGER tamper AFTER INSERT ON document_source_notifications_v1 BEGIN {action}; END"), &[]).unwrap();
+-        assert!(store.revoke_document_grant_trusted(&source.authority).is_err(), "successful trigger escaped the tail: {action}");
++        assert!(
++            store
++                .revoke_document_grant_trusted(&source.authority)
++                .is_err(),
++            "successful trigger escaped the tail: {action}"
++        );
+         assert!(store.read_document(&source).is_ok());
+         assert_eq!(active(&store), "1");
+-        assert!(store.pending_document_source_notifications_trusted(None, 256).unwrap().is_empty());
++        assert!(store
++            .pending_document_source_notifications_trusted(None, 256)
++            .unwrap()
++            .is_empty());
+     }
+ }
+ 
+Diff in /workspace/Muyon-source-invalidation-batch-verification/crates/muyon-core/src/documents/source_notification_tests.rs:255:
+         let (_f, store, source, _, _) = fixture();
+         let action = if mutation == 0 {
+             "UPDATE document_grants SET generation='1' WHERE grant_id='source-grant'"
+-        } else { "UPDATE document_heads SET revision='1' WHERE document_id='text-source'" };
++        } else {
++            "UPDATE document_heads SET revision='1' WHERE document_id='text-source'"
++        };
+         store.database().exec(&format!("CREATE TRIGGER tamper AFTER INSERT ON document_source_notifications_v1 BEGIN {action}; END"), &[]).unwrap();
+         if mutation == 0 {
+-            let next = AuthorityBinding { generation: source.authority.generation.next().unwrap(), ..source.authority.clone() };
+-            assert!(store.issue_document_grant_trusted(&source.document, &next, &[DocumentOperation::ReadText], expiry()).is_err());
++            let next = AuthorityBinding {
++                generation: source.authority.generation.next().unwrap(),
++                ..source.authority.clone()
++            };
++            assert!(store
++                .issue_document_grant_trusted(
++                    &source.document,
++                    &next,
++                    &[DocumentOperation::ReadText],
++                    expiry()
++                )
++                .is_err());
+         } else if mutation == 1 {
+             let blob = upload(&store, "project", b"Replacement synthetic source.");
+-            assert!(store.publish_document_revision_trusted(&source.document, "Next", DocumentFormat::Text, &blob).is_err());
++            assert!(store
++                .publish_document_revision_trusted(
++                    &source.document,
++                    "Next",
++                    DocumentFormat::Text,
++                    &blob
++                )
++                .is_err());
+         } else {
+             let metadata = store.read_document(&source).unwrap();
+             let tx = store.database().transaction().unwrap();
+Diff in /workspace/Muyon-source-invalidation-batch-verification/crates/muyon-core/src/documents/source_notification_tests.rs:269:
+-            assert!(store.document_clone_in_transaction(&tx, &source.document, "Copy", &metadata.blob).is_err());
++            assert!(store
++                .document_clone_in_transaction(&tx, &source.document, "Copy", &metadata.blob)
++                .is_err());
+             drop(tx);
+         }
+-        assert_eq!(head(&store), "1"); assert_eq!(active(&store), "1");
++        assert_eq!(head(&store), "1");
++        assert_eq!(active(&store), "1");
+         assert!(store.read_document(&source).is_ok());
+-        assert!(store.pending_document_source_notifications_trusted(None, 256).unwrap().is_empty());
++        assert!(store
++            .pending_document_source_notifications_trusted(None, 256)
++            .unwrap()
++            .is_empty());
+     }
+ }
+ 
+Diff in /workspace/Muyon-source-invalidation-batch-verification/crates/muyon-core/src/documents/source_notification_tests.rs:278:
+ #[test]
+ fn later_outbox_write_cannot_erase_an_earlier_event() {
+     let (_f, store, source, local, kind) = fixture();
+-    let mut second = local.clone(); second.object.object_id = "object-z".into();
++    let mut second = local.clone();
++    second.object.object_id = "object-z".into();
+     bind(&store, &source, &second, &kind);
+     store.database().exec("CREATE TRIGGER tamper AFTER INSERT ON document_source_notifications_v1 WHEN NEW.object_id='object-z' BEGIN DELETE FROM document_source_notifications_v1 WHERE object_id='object'; END", &[]).unwrap();
+-    assert!(store.revoke_document_grant_trusted(&source.authority).is_err());
+-    assert!(store.read_document(&source).is_ok()); assert_eq!(active(&store), "1");
+-    assert!(store.pending_document_source_notifications_trusted(None, 256).unwrap().is_empty());
++    assert!(store
++        .revoke_document_grant_trusted(&source.authority)
++        .is_err());
++    assert!(store.read_document(&source).is_ok());
++    assert_eq!(active(&store), "1");
++    assert!(store
++        .pending_document_source_notifications_trusted(None, 256)
++        .unwrap()
++        .is_empty());
+ }
+ 
+ #[test]
+Diff in /workspace/Muyon-source-invalidation-batch-verification/crates/muyon-core/src/documents/source_notification_tests.rs:290:
+ fn successful_outbox_update_and_ack_tampering_cannot_report_success() {
+     for acknowledge in [false, true] {
+         let (_f, store, mut source, mut local, kind) = fixture();
+-        store.revoke_document_grant_trusted(&source.authority).unwrap();
+-        let first = store.pending_document_source_notifications_trusted(None, 256).unwrap();
++        store
++            .revoke_document_grant_trusted(&source.authority)
++            .unwrap();
++        let first = store
++            .pending_document_source_notifications_trusted(None, 256)
++            .unwrap();
+         if acknowledge {
+             store.database().exec("CREATE TRIGGER tamper AFTER UPDATE ON document_source_notifications_v1 WHEN NEW.pending=0 BEGIN UPDATE document_source_notifications_v1 SET pending=1 WHERE object_id=NEW.object_id; END", &[]).unwrap();
+-            assert!(store.ack_document_source_notifications_trusted(&first).is_err());
+-            assert_eq!(store.pending_document_source_notifications_trusted(None, 256).unwrap(), first);
++            assert!(store
++                .ack_document_source_notifications_trusted(&first)
++                .is_err());
++            assert_eq!(
++                store
++                    .pending_document_source_notifications_trusted(None, 256)
++                    .unwrap(),
++                first
++            );
+         } else {
+-            store.ack_document_source_notifications_trusted(&first).unwrap();
++            store
++                .ack_document_source_notifications_trusted(&first)
++                .unwrap();
+             source.authority.generation = source.authority.generation.next().unwrap();
+-            store.issue_document_grant_trusted(&source.document, &source.authority, &[DocumentOperation::Inspect, DocumentOperation::ReadText], expiry()).unwrap();
++            store
++                .issue_document_grant_trusted(
++                    &source.document,
++                    &source.authority,
++                    &[DocumentOperation::Inspect, DocumentOperation::ReadText],
++                    expiry(),
++                )
++                .unwrap();
+             local.binding_generation = local.binding_generation.next().unwrap();
+             bind(&store, &source, &local, &kind);
+             store.database().exec("CREATE TRIGGER tamper AFTER UPDATE ON document_source_notifications_v1 WHEN NEW.pending=1 BEGIN UPDATE document_grants SET active=1 WHERE grant_id='source-grant'; END", &[]).unwrap();
+Diff in /workspace/Muyon-source-invalidation-batch-verification/crates/muyon-core/src/documents/source_notification_tests.rs:306:
+-            assert!(store.revoke_document_grant_trusted(&source.authority).is_err());
+-            assert!(store.read_document(&source).is_ok()); assert_eq!(active(&store), "1");
+-            assert!(store.pending_document_source_notifications_trusted(None, 256).unwrap().is_empty());
++            assert!(store
++                .revoke_document_grant_trusted(&source.authority)
++                .is_err());
++            assert!(store.read_document(&source).is_ok());
++            assert_eq!(active(&store), "1");
++            assert!(store
++                .pending_document_source_notifications_trusted(None, 256)
++                .unwrap()
++                .is_empty());
+         }
+     }
+ }
+Diff in /workspace/Muyon-source-invalidation-batch-verification/crates/muyon-core/src/documents/source_notification_tests.rs:314:
+ fn successful_outbox_trigger_cannot_delete_blob_publication_receipt() {
+     for copy in [false, true] {
+         let (_f, store, source, _, _) = fixture();
+-        let before = store.database().query("SELECT * FROM blob_references ORDER BY reference_id", &[]).unwrap();
++        let before = store
++            .database()
++            .query("SELECT * FROM blob_references ORDER BY reference_id", &[])
++            .unwrap();
+         store.database().exec("CREATE TRIGGER tamper AFTER INSERT ON document_source_notifications_v1 BEGIN DELETE FROM blob_references WHERE target_id='text-source'; END", &[]).unwrap();
+         if copy {
+             let metadata = store.read_document(&source).unwrap();
+Diff in /workspace/Muyon-source-invalidation-batch-verification/crates/muyon-core/src/documents/source_notification_tests.rs:321:
+             let tx = store.database().transaction().unwrap();
+-            assert!(store.document_clone_in_transaction(&tx, &source.document, "Copy", &metadata.blob).is_err());
++            assert!(store
++                .document_clone_in_transaction(&tx, &source.document, "Copy", &metadata.blob)
++                .is_err());
+             drop(tx);
+         } else {
+             let blob = upload(&store, "project", b"Replacement synthetic source.");
+Diff in /workspace/Muyon-source-invalidation-batch-verification/crates/muyon-core/src/documents/source_notification_tests.rs:326:
+-            assert!(store.publish_document_revision_trusted(&source.document, "Next", DocumentFormat::Text, &blob).is_err());
++            assert!(store
++                .publish_document_revision_trusted(
++                    &source.document,
++                    "Next",
++                    DocumentFormat::Text,
++                    &blob
++                )
++                .is_err());
+         }
+-        assert_eq!(store.database().query("SELECT * FROM blob_references ORDER BY reference_id", &[]).unwrap(), before);
+-        assert_eq!(head(&store), "1"); assert_eq!(active(&store), "1");
+-        assert!(store.pending_document_source_notifications_trusted(None, 256).unwrap().is_empty());
++        assert_eq!(
++            store
++                .database()
++                .query("SELECT * FROM blob_references ORDER BY reference_id", &[])
++                .unwrap(),
++            before
++        );
++        assert_eq!(head(&store), "1");
++        assert_eq!(active(&store), "1");
++        assert!(store
++            .pending_document_source_notifications_trusted(None, 256)
++            .unwrap()
++            .is_empty());
+     }
+ }
+ 
+Diff in /workspace/Muyon-source-invalidation-batch-verification/crates/muyon-core/src/documents/source_notification_tests.rs:338:
+         let blob = upload(&store, "project", b"Replacement synthetic source.");
+         let action = if pin {
+             format!("INSERT INTO blob_pins SELECT 'synthetic-pin',digest,'upload',upload_id,snapshot_id,owner_epoch FROM blob_uploads WHERE upload_id='{}'", blob.upload_id)
+-        } else { format!("UPDATE blob_uploads SET state='pinned' WHERE upload_id='{}'", blob.upload_id) };
++        } else {
++            format!(
++                "UPDATE blob_uploads SET state='pinned' WHERE upload_id='{}'",
++                blob.upload_id
++            )
++        };
+         store.database().exec(&format!("CREATE TRIGGER tamper AFTER INSERT ON document_source_notifications_v1 BEGIN {action}; END"), &[]).unwrap();
+-        assert!(store.publish_document_revision_trusted(&source.document, "Next", DocumentFormat::Text, &blob).is_err());
+-        assert_eq!(head(&store), "1"); assert_eq!(active(&store), "1");
+-        assert_eq!(store.database().query("SELECT state FROM blob_uploads WHERE upload_id=?", &[&blob.upload_id]).unwrap()[0][0].as_deref(), Some("pinned"));
+-        assert!(store.pending_document_source_notifications_trusted(None, 256).unwrap().is_empty());
++        assert!(store
++            .publish_document_revision_trusted(
++                &source.document,
++                "Next",
++                DocumentFormat::Text,
++                &blob
++            )
++            .is_err());
++        assert_eq!(head(&store), "1");
++        assert_eq!(active(&store), "1");
++        assert_eq!(
++            store
++                .database()
++                .query(
++                    "SELECT state FROM blob_uploads WHERE upload_id=?",
++                    &[&blob.upload_id]
++                )
++                .unwrap()[0][0]
++                .as_deref(),
++            Some("pinned")
++        );
++        assert!(store
++            .pending_document_source_notifications_trusted(None, 256)
++            .unwrap()
++            .is_empty());
+     }
+ }
+ 
+Diff in /workspace/Muyon-source-invalidation-batch-verification/crates/muyon-core/src/documents/source_notification_tests.rs:350:
+ #[test]
+ fn ignored_ack_write_cannot_delete_the_generation_tombstone() {
+     let (_f, store, source, _, _) = fixture();
+-    store.revoke_document_grant_trusted(&source.authority).unwrap();
+-    let first = store.pending_document_source_notifications_trusted(None, 256).unwrap();
++    store
++        .revoke_document_grant_trusted(&source.authority)
++        .unwrap();
++    let first = store
++        .pending_document_source_notifications_trusted(None, 256)
++        .unwrap();
+     store.database().exec("CREATE TRIGGER tamper BEFORE UPDATE ON document_source_notifications_v1 WHEN NEW.pending=0 BEGIN DELETE FROM document_source_notifications_v1 WHERE object_id=OLD.object_id; SELECT RAISE(IGNORE); END", &[]).unwrap();
+-    assert!(store.ack_document_source_notifications_trusted(&first).is_err());
+-    assert_eq!(store.pending_document_source_notifications_trusted(None, 256).unwrap(), first);
++    assert!(store
++        .ack_document_source_notifications_trusted(&first)
++        .is_err());
++    assert_eq!(
++        store
++            .pending_document_source_notifications_trusted(None, 256)
++            .unwrap(),
++        first
++    );
+ }
+ 
+ #[test]
+Diff in /workspace/Muyon-source-invalidation-batch-verification/crates/muyon-core/src/documents/source_notification_tests.rs:361:
+ fn later_ack_trigger_cannot_mutate_an_earlier_stale_or_missing_target() {
+     for missing in [false, true] {
+         let (_f, store, source, local, kind) = fixture();
+-        let mut second = local.clone(); second.object.object_id = "object-z".into();
++        let mut second = local.clone();
++        second.object.object_id = "object-z".into();
+         bind(&store, &source, &second, &kind);
+-        store.revoke_document_grant_trusted(&source.authority).unwrap();
+-        let pending = store.pending_document_source_notifications_trusted(None, 256).unwrap();
++        store
++            .revoke_document_grant_trusted(&source.authority)
++            .unwrap();
++        let pending = store
++            .pending_document_source_notifications_trusted(None, 256)
++            .unwrap();
+         assert_eq!(pending.len(), 2);
+         let mut first_input = pending[0].clone();
+         let action = if missing {
+Diff in /workspace/Muyon-source-invalidation-batch-verification/crates/muyon-core/src/documents/source_notification_tests.rs:375:
+             "DELETE FROM document_source_notifications_v1 WHERE object_id='object'"
+         };
+         store.database().exec(&format!("CREATE TRIGGER tamper AFTER UPDATE ON document_source_notifications_v1 WHEN NEW.object_id='object-z' BEGIN {action}; END"), &[]).unwrap();
+-        assert!(store.ack_document_source_notifications_trusted(&[first_input, pending[1].clone()]).is_err());
+-        assert_eq!(store.pending_document_source_notifications_trusted(None, 256).unwrap(), pending);
++        assert!(store
++            .ack_document_source_notifications_trusted(&[first_input, pending[1].clone()])
++            .is_err());
++        assert_eq!(
++            store
++                .pending_document_source_notifications_trusted(None, 256)
++                .unwrap(),
++            pending
++        );
+     }
+ }
+ 
+Diff in /workspace/Muyon-source-invalidation-batch-verification/crates/muyon-core/src/documents/source_notification_tests.rs:383:
+ #[test]
+ fn first_outbox_update_cannot_reset_a_later_tombstone_generation() {
+     let (_f, store, mut source, mut local, kind) = fixture();
+-    let mut second = local.clone(); second.object.object_id = "object-z".into();
++    let mut second = local.clone();
++    second.object.object_id = "object-z".into();
+     bind(&store, &source, &second, &kind);
+-    store.revoke_document_grant_trusted(&source.authority).unwrap();
+-    let first = store.pending_document_source_notifications_trusted(None, 256).unwrap();
++    store
++        .revoke_document_grant_trusted(&source.authority)
++        .unwrap();
++    let first = store
++        .pending_document_source_notifications_trusted(None, 256)
++        .unwrap();
+     assert_eq!(first.len(), 2);
+-    assert!(first.iter().all(|event| event.generation == Revision::new(1)));
+-    store.ack_document_source_notifications_trusted(&first).unwrap();
++    assert!(first
++        .iter()
++        .all(|event| event.generation == Revision::new(1)));
++    store
++        .ack_document_source_notifications_trusted(&first)
++        .unwrap();
+     source.authority.generation = source.authority.generation.next().unwrap();
+-    store.issue_document_grant_trusted(&source.document, &source.authority, &[DocumentOperation::Inspect, DocumentOperation::ReadText], expiry()).unwrap();
++    store
++        .issue_document_grant_trusted(
++            &source.document,
++            &source.authority,
++            &[DocumentOperation::Inspect, DocumentOperation::ReadText],
++            expiry(),
++        )
++        .unwrap();
+     local.binding_generation = local.binding_generation.next().unwrap();
+     second.binding_generation = second.binding_generation.next().unwrap();
+-    bind(&store, &source, &local, &kind); bind(&store, &source, &second, &kind);
++    bind(&store, &source, &local, &kind);
++    bind(&store, &source, &second, &kind);
+     store.database().exec("CREATE TRIGGER tamper AFTER UPDATE ON document_source_notifications_v1 WHEN NEW.object_id='object' AND NEW.pending=1 BEGIN DELETE FROM document_source_notifications_v1 WHERE object_id='object-z'; END", &[]).unwrap();
+-    assert!(store.revoke_document_grant_trusted(&source.authority).is_err(), "cross-row tombstone deletion must roll back, not reuse generation1");
+-    assert!(store.read_document(&source).is_ok()); assert_eq!(active(&store), "1");
+-    let tombstones = store.database().query("SELECT generation,pending FROM document_source_notifications_v1 ORDER BY object_id", &[]).unwrap();
+-    assert_eq!(tombstones, vec![vec![Some("1".into()), Some("0".into())]; 2]);
++    assert!(
++        store
++            .revoke_document_grant_trusted(&source.authority)
++            .is_err(),
++        "cross-row tombstone deletion must roll back, not reuse generation1"
++    );
++    assert!(store.read_document(&source).is_ok());
++    assert_eq!(active(&store), "1");
++    let tombstones = store
++        .database()
++        .query(
++            "SELECT generation,pending FROM document_source_notifications_v1 ORDER BY object_id",
++            &[],
++        )
++        .unwrap();
++    assert_eq!(
++        tombstones,
++        vec![vec![Some("1".into()), Some("0".into())]; 2]
++    );
+     store.database().exec("DROP TRIGGER tamper", &[]).unwrap();
+-    store.revoke_document_grant_trusted(&source.authority).unwrap();
+-    let renewed = store.pending_document_source_notifications_trusted(None, 256).unwrap();
+-    assert!(renewed.iter().all(|event| event.generation == Revision::new(2)));
+-    assert_eq!(store.ack_document_source_notifications_trusted(&first).unwrap(), 0);
+-    assert_eq!(store.pending_document_source_notifications_trusted(None, 256).unwrap(), renewed);
++    store
++        .revoke_document_grant_trusted(&source.authority)
++        .unwrap();
++    let renewed = store
++        .pending_document_source_notifications_trusted(None, 256)
++        .unwrap();
++    assert!(renewed
++        .iter()
++        .all(|event| event.generation == Revision::new(2)));
++    assert_eq!(
++        store
++            .ack_document_source_notifications_trusted(&first)
++            .unwrap(),
++        0
++    );
++    assert_eq!(
++        store
++            .pending_document_source_notifications_trusted(None, 256)
++            .unwrap(),
++        renewed
++    );
+ }
+ 
+-
+ #[test]
+ fn publication_token_rejects_later_write_tampering_and_rolls_back() {
+     // Core seam test only: this does NOT claim the real gateway receipt path ran.
+Diff in /workspace/Muyon-source-invalidation-batch-verification/crates/muyon-core/src/documents/source_notification_tests.rs:422:
+         let (_f, store, source, _, _) = fixture();
+         let metadata = store.read_document(&source).unwrap();
+         let tx = store.database().transaction().unwrap();
+-        let (_, token) = store.document_clone_with_postcondition_in_transaction(&tx, &source.document, "Copy", &metadata.blob).unwrap();
++        let (_, token) = store
++            .document_clone_with_postcondition_in_transaction(
++                &tx,
++                &source.document,
++                "Copy",
++                &metadata.blob,
++            )
++            .unwrap();
+         store.database().exec(action, &[]).unwrap();
+-        assert!(store.document_publication_postcondition_in_transaction(&tx, token).is_err(), "{action}");
++        assert!(
++            store
++                .document_publication_postcondition_in_transaction(&tx, token)
++                .is_err(),
++            "{action}"
++        );
+         drop(tx);
+-        assert_eq!(head(&store), "1"); assert_eq!(active(&store), "1");
+-        assert!(store.pending_document_source_notifications_trusted(None, 256).unwrap().is_empty());
++        assert_eq!(head(&store), "1");
++        assert_eq!(active(&store), "1");
++        assert!(store
++            .pending_document_source_notifications_trusted(None, 256)
++            .unwrap()
++            .is_empty());
+     }
+ }
+ 
+Diff in /workspace/Muyon-source-invalidation-batch-verification/crates/muyon-core/src/documents/source_notification_tests.rs:436:
+     let (_f, store, source, _, _) = fixture();
+     let metadata = store.read_document(&source).unwrap();
+     let tx = store.database().transaction().unwrap();
+-    let (_, token) = store.document_clone_with_postcondition_in_transaction(&tx, &source.document, "Copy", &metadata.blob).unwrap();
+-    let other = Db::open(":memory:", false, true).unwrap(); let foreign = other.transaction().unwrap();
+-    assert!(store.document_publication_postcondition_in_transaction(&foreign, token).is_err());
+-    drop(tx); drop(foreign);
++    let (_, token) = store
++        .document_clone_with_postcondition_in_transaction(
++            &tx,
++            &source.document,
++            "Copy",
++            &metadata.blob,
++        )
++        .unwrap();
++    let other = Db::open(":memory:", false, true).unwrap();
++    let foreign = other.transaction().unwrap();
++    assert!(store
++        .document_publication_postcondition_in_transaction(&foreign, token)
++        .is_err());
++    drop(tx);
++    drop(foreign);
+     assert_eq!(head(&store), "1");
+     let tx = store.database().transaction().unwrap();
+-    let (result, token) = store.document_clone_with_postcondition_in_transaction(&tx, &source.document, "Copy", &metadata.blob).unwrap();
+-    store.document_grant_in_transaction(&tx, &source, &[DocumentOperation::StructuredEdit]).unwrap();
+-    store.document_publication_postcondition_in_transaction(&tx, token).unwrap();
++    let (result, token) = store
++        .document_clone_with_postcondition_in_transaction(
++            &tx,
++            &source.document,
++            "Copy",
++            &metadata.blob,
++        )
++        .unwrap();
++    store
++        .document_grant_in_transaction(&tx, &source, &[DocumentOperation::StructuredEdit])
++        .unwrap();
++    store
++        .document_publication_postcondition_in_transaction(&tx, token)
++        .unwrap();
+     tx.commit().unwrap();
+     assert_eq!(result.document.revision(), &Revision::new(2));
+-    assert_eq!(store.pending_document_source_notifications_trusted(None, 256).unwrap().len(), 1);
++    assert_eq!(
++        store
++            .pending_document_source_notifications_trusted(None, 256)
++            .unwrap()
++            .len(),
++        1
++    );
+ }
+ 
+ #[test]
+Diff in /workspace/Muyon-source-invalidation-batch-verification/crates/muyon-core/src/documents/source_notification_tests.rs:454:
+ fn earlier_grant_source_or_binding_write_cannot_reset_a_tombstone() {
+-    for table in ["document_grants", "artifact_local_evidence_sources_v1", "artifact_local_bindings_v1"] {
++    for table in [
++        "document_grants",
++        "artifact_local_evidence_sources_v1",
++        "artifact_local_bindings_v1",
++    ] {
+         let (_f, store, mut source, mut local, kind) = fixture();
+-        let mut second = local.clone(); second.object.object_id = "object-z".into();
++        let mut second = local.clone();
++        second.object.object_id = "object-z".into();
+         bind(&store, &source, &second, &kind);
+-        store.revoke_document_grant_trusted(&source.authority).unwrap();
+-        let first = store.pending_document_source_notifications_trusted(None, 256).unwrap();
+-        store.ack_document_source_notifications_trusted(&first).unwrap();
++        store
++            .revoke_document_grant_trusted(&source.authority)
++            .unwrap();
++        let first = store
++            .pending_document_source_notifications_trusted(None, 256)
++            .unwrap();
++        store
++            .ack_document_source_notifications_trusted(&first)
++            .unwrap();
+         source.authority.generation = source.authority.generation.next().unwrap();
+-        store.issue_document_grant_trusted(&source.document, &source.authority, &[DocumentOperation::Inspect, DocumentOperation::ReadText], expiry()).unwrap();
+-        local.binding_generation = local.binding_generation.next().unwrap(); second.binding_generation = second.binding_generation.next().unwrap();
+-        bind(&store, &source, &local, &kind); bind(&store, &source, &second, &kind);
++        store
++            .issue_document_grant_trusted(
++                &source.document,
++                &source.authority,
++                &[DocumentOperation::Inspect, DocumentOperation::ReadText],
++                expiry(),
++            )
++            .unwrap();
++        local.binding_generation = local.binding_generation.next().unwrap();
++        second.binding_generation = second.binding_generation.next().unwrap();
++        bind(&store, &source, &local, &kind);
++        bind(&store, &source, &second, &kind);
+         store.database().exec(&format!("CREATE TRIGGER tamper AFTER UPDATE ON {table} WHEN NEW.active=0 BEGIN DELETE FROM document_source_notifications_v1 WHERE object_id='object-z'; END"), &[]).unwrap();
+-        assert!(store.revoke_document_grant_trusted(&source.authority).is_err(), "{table} write preceded frozen generation boundary");
+-        assert!(store.read_document(&source).is_ok()); assert_eq!(active(&store), "1");
++        assert!(
++            store
++                .revoke_document_grant_trusted(&source.authority)
++                .is_err(),
++            "{table} write preceded frozen generation boundary"
++        );
++        assert!(store.read_document(&source).is_ok());
++        assert_eq!(active(&store), "1");
+         store.database().exec("DROP TRIGGER tamper", &[]).unwrap();
+-        store.revoke_document_grant_trusted(&source.authority).unwrap();
+-        let renewed = store.pending_document_source_notifications_trusted(None, 256).unwrap();
+-        assert!(renewed.iter().all(|event| event.generation == Revision::new(2)));
+-        assert_eq!(store.ack_document_source_notifications_trusted(&first).unwrap(), 0);
+-        assert_eq!(store.pending_document_source_notifications_trusted(None, 256).unwrap(), renewed);
++        store
++            .revoke_document_grant_trusted(&source.authority)
++            .unwrap();
++        let renewed = store
++            .pending_document_source_notifications_trusted(None, 256)
++            .unwrap();
++        assert!(renewed
++            .iter()
++            .all(|event| event.generation == Revision::new(2)));
++        assert_eq!(
++            store
++                .ack_document_source_notifications_trusted(&first)
++                .unwrap(),
++            0
++        );
++        assert_eq!(
++            store
++                .pending_document_source_notifications_trusted(None, 256)
++                .unwrap(),
++            renewed
++        );
+     }
+ }
+ 

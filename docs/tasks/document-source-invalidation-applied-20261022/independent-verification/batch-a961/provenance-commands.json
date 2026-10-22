@@ -1,0 +1,37 @@
+[
+  {
+    "label": "handoff",
+    "argv": [
+      "git",
+      "show",
+      "b7d5a7a21c4fd28064b916f984aec081c721f3bc:docs/tasks/document-source-invalidation-applied-20261022/BATCH-AND-GATEWAY-TAIL-HANDOFF.md"
+    ],
+    "exit_status": 0
+  },
+  {
+    "label": "harness-diff",
+    "argv": [
+      "git",
+      "diff",
+      "e3fa0ee71f071bb8cff667d50ee1c0da6827a7c9",
+      "a961bb58c08ce77b559ce0d021d2ed50a857bb9e",
+      "--",
+      "crates/muyon-core/src/bin/business_worker.rs",
+      "crates/muyon-core/tests/group_runtime_store.rs",
+      "crates/muyon-core/tests/group_runtime_bridge.rs"
+    ],
+    "exit_status": 0
+  },
+  {
+    "label": "remote-before-evidence",
+    "argv": [
+      "git",
+      "ls-remote",
+      "origin",
+      "refs/heads/main",
+      "refs/heads/develop",
+      "refs/heads/task/document-source-invalidation-batch-format-20261022"
+    ],
+    "exit_status": 0
+  }
+]

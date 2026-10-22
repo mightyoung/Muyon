@@ -1,0 +1,66 @@
+{
+  "source": "a961bb58c08ce77b559ce0d021d2ed50a857bb9e",
+  "format_source": "0fda32e4d41d8e5524d6f7c4d35c467cbb1ba200",
+  "input_report": "b7d5a7a21c4fd28064b916f984aec081c721f3bc",
+  "original_probe_equivalence": [
+    {
+      "phase": "original",
+      "checks": {
+        "aba-probe": {
+          "same_added_source_sha256_as_prior": "ac9deb97f155db892b54fcf2915f0c455c855595951d0ab80014268e724b7f3a"
+        },
+        "independent-probes": {
+          "same_added_source_sha256_as_prior": "96136bb15ce79daa19c90859ffbc2657ab8137b286994528a304b6fc0a6fa146"
+        },
+        "additional-probes": {
+          "same_added_source_sha256_as_prior": "8a2c6f81b653009bf399d467de8ce69e8cb8660f0b46a98213eb5e98dd76b784"
+        },
+        "reader-probes": {
+          "same_added_source_sha256_as_prior": "01f944aec3a00c86107ebd6d7f6739d4f1a6946ae142cc6a26a2cce814143998"
+        }
+      }
+    },
+    {
+      "phase": "formatted",
+      "checks": {
+        "aba-probe": {
+          "same_added_source_sha256_as_prior": "ac9deb97f155db892b54fcf2915f0c455c855595951d0ab80014268e724b7f3a"
+        },
+        "independent-probes": {
+          "same_added_source_sha256_as_prior": "96136bb15ce79daa19c90859ffbc2657ab8137b286994528a304b6fc0a6fa146"
+        },
+        "additional-probes": {
+          "same_added_source_sha256_as_prior": "8a2c6f81b653009bf399d467de8ce69e8cb8660f0b46a98213eb5e98dd76b784"
+        },
+        "reader-probes": {
+          "same_added_source_sha256_as_prior": "01f944aec3a00c86107ebd6d7f6739d4f1a6946ae142cc6a26a2cce814143998"
+        }
+      }
+    }
+  ],
+  "source_hash_checks_completed": true,
+  "worktree_status": "",
+  "report_crates_diff": "",
+  "tools": {
+    "rustc": {
+      "version": "rustc 1.99.1 (58cf8f9c3 2026-10-13)",
+      "sha256": "b53b780f77f952062f8ca8a3b70aef2390b1e45ad91939be94afdc9543026853"
+    },
+    "cargo": {
+      "version": "cargo 1.99.1 (5f94df478 2026-08-27)",
+      "sha256": "a670e02cfa39ac2e53f77a2d911ca1fc9e2c479b0603ec956625be1daf24e3af"
+    },
+    "rustfmt": {
+      "version": "rustfmt 1.10.0-stable (58cf8f9c35 2026-10-13)",
+      "sha256": "68cb47a2a38daa8ff2ec6d623a2374b0a165d77ec74f1f654216665018c04598"
+    }
+  },
+  "lock_sha256": "3a87fdce6228dff89d292547057627f999e7286ccf0a774c1683c4ba5f95f367",
+  "not_run": [
+    "full core embedded harnesses remain B-owned",
+    "workspace known offline anyhow cache gap; no repeat/download",
+    "strict workspace clippy",
+    "actual gateway receipt path pending owner source"
+  ],
+  "boundaries": "Own existing toolchain/cache only; no author /root access or retries/escalation; temporary original fixtures; no product semantics/harness edits."
+}

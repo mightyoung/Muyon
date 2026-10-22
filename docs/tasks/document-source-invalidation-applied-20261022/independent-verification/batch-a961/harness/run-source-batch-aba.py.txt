@@ -1,0 +1,29 @@
+import pathlib,subprocess,os,json,hashlib,datetime,re
+root=pathlib.Path('/workspace/Muyon-source-invalidation-batch-verification');out=pathlib.Path('/workspace/Muyon-document-verification/docs/tasks/document-source-invalidation-applied-20261022/independent-verification/batch-a961/original/aba-probe');out.mkdir(parents=True,exist_ok=True);tmp=pathlib.Path('/tmp/muyon-source-batch-aba');tmp.mkdir(exist_ok=True)
+env=os.environ.copy();env.update(PATH='/tmp/muyon-rust/bin:'+env['PATH'],CARGO_HOME='/tmp/muyon-cargo',CARGO_TARGET_DIR='/tmp/muyon-document-cargo-target',RUSTFLAGS='-L native=/tmp/muyon-native-libs');records=[];now=lambda:datetime.datetime.now(datetime.timezone.utc).isoformat()
+def run(label,args):
+ start=now();r=subprocess.run(args,cwd=root,env=env,capture_output=True);(out/(label+'.stdout.log')).write_bytes(r.stdout);(out/(label+'.stderr.log')).write_bytes(r.stderr);records.append({'label':label,'argv':args,'cwd':str(root),'start_utc':start,'end_utc':now(),'exit_status':r.returncode});(out/'commands.json').write_text(json.dumps(records,indent=2)+'\n');print(label,r.returncode,flush=True);return r
+r=run('artifact-build',['cargo','build','--offline','--locked','--manifest-path','crates/Cargo.toml','-p','muyon-core','--lib','--message-format=json']);assert r.returncode==0
+arts={}
+for line in r.stdout.splitlines():
+ row=json.loads(line)
+ if row.get('reason')=='compiler-artifact':
+  for file in row['filenames']:
+   if file.endswith('.rlib'):arts[row['target']['name']]=file
+storage=(root/'crates/muyon-core/src/documents/storage_tests.rs').read_text().split('#[test]',1)[0];(tmp/'storage_fixture.rs').write_text(storage)
+fixture=(root/'crates/muyon-core/src/documents/source_notification_tests.rs').read_text().split('#[test]',1)[0]
+lib=(root/'crates/muyon-core/src/lib.rs').read_text();lib=re.sub(r'^//!.*\n','',lib,flags=re.M);lib=re.sub(r'^#\[path = .*?\]\n','',lib,flags=re.M)
+def module(match):
+ name=match[2];p=root/'crates/muyon-core/src'/('group_runtime/store.rs' if name=='group_runtime_store' else ('group_runtime/bridge.rs' if name=='group_runtime_bridge' else name+'.rs'))
+ if not p.exists():p=root/'crates/muyon-core/src'/name/'mod.rs'
+ assert p.exists(),p
+ return '#[path="'+str(p)+'"]\n'+match[0]
+lib=re.sub(r'^(pub )?mod (\w+);',module,lib,flags=re.M)
+probe=lib+'\n#[cfg(test)] mod independent_source_validation { use crate::documents::*; #[path="'+str(tmp/'storage_fixture.rs')+'"] mod storage_tests; mod probe {\n'+fixture+'\n'+pathlib.Path('/tmp/source-invalidation-applied-aba.rs').read_text()+'\n}}\n'
+(tmp/'probes.rs').write_text(probe);(out/'probe-source.rs.txt').write_text(probe);(out/'storage-fixture.rs.txt').write_text(storage)
+args=['/tmp/muyon-rust/bin/rustc','--edition=2021','--test',str(tmp/'probes.rs'),'-L','dependency=/tmp/muyon-document-cargo-target/debug/deps','-L','native=/tmp/muyon-native-libs']
+for name,path in arts.items():
+ if name!='muyon_core':args+=['--extern',name+'='+path]
+args+=['-o',str(tmp/'probe-tests')];r=run('probe-compile',args);assert r.returncode==0,r.stderr.decode()[-2000:]
+r=run('probe-tests',[str(tmp/'probe-tests'),'independent_source_validation::probe::independent_','--nocapture']);print(r.stdout.decode())
+(out/'manifest.json').write_text(json.dumps({'source_composition':{'source_commit':'a961bb58c08ce77b559ce0d021d2ed50a857bb9e'},'temporary_harness':'Exact lib modules referenced by absolute path; only synthetic fixture/setup and independent tests appended. Product source unmodified. Existing cfg(test) owner tests filtered out.','linked_artifacts':{k:{'path':v,'sha256':hashlib.sha256(pathlib.Path(v).read_bytes()).hexdigest()} for k,v in arts.items()},'probe_extra_sha256':hashlib.sha256(pathlib.Path('/tmp/source-invalidation-applied-aba.rs').read_bytes()).hexdigest(),'commands':records},indent=2)+'\n')

@@ -1,0 +1,14 @@
+
+running 6 tests
+ignored ack rejected=true pending_after=1
+test independent_source_validation::probe::independent_ignored_ack_cannot_delete_generation_tombstone ... ok
+test independent_source_validation::probe::independent_notification_abort_rolls_back_grant_source_manual_and_queue ... ok
+test independent_source_validation::probe::independent_outbox_commit_rollback_and_stale_ack_preserve_later_generation ... ok
+blob tail copy=false rejected=true head=1 source_active=1
+test independent_source_validation::probe::independent_grant_target_replacement_invalidates_old_and_preserves_independent_new_source ... ok
+blob tail copy=true rejected=true head=1 source_active=1
+test independent_source_validation::probe::independent_outbox_tail_blob_reference_loss_rolls_back_publish_and_copy ... ok
+test independent_source_validation::probe::independent_uninitialized_compatible_but_installed_missing_or_corrupt_source_denied ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 186 filtered out; finished in 0.09s
+

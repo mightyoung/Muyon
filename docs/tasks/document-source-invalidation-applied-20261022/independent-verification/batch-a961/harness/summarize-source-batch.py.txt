@@ -1,0 +1,28 @@
+from pathlib import Path
+import re,json,hashlib,subprocess,xml.etree.ElementTree as ET,shutil
+b=Path('/workspace/Muyon-document-verification/docs/tasks/document-source-invalidation-applied-20261022/independent-verification/batch-a961');root=Path('/workspace/Muyon-source-invalidation-batch-verification');sha=lambda p:hashlib.sha256(Path(p).read_bytes()).hexdigest();summary={}
+labels=['source-targeted','artifacts-targeted','reader-targeted','presentation-targeted','core-library-full','independent-probes/probe-tests','additional-probes/probe-tests','aba-probe/probe-tests','reader-probes/probe-tests']
+for phase,commit in [('original','a961bb58c08ce77b559ce0d021d2ed50a857bb9e'),('formatted','0fda32e4d41d8e5524d6f7c4d35c467cbb1ba200')]:
+ p=b/phase;suites=ET.Element('testsuites',{'name':phase+' actual batch hook tests; derived Rust stdout'});rs={}
+ for label in labels:
+  stdout=(p/(label+'.stdout.log')).read_text();blocks=re.findall(r'[\s\S]*?test result: (?:ok|FAILED)\. [^\n]+',stdout);assert len(blocks)==1,(phase,label);block=blocks[0];m=re.search(r'test result: ok\. (\d+) passed; (\d+) failed; (\d+) ignored',block);assert m;passed,failed,ignored=map(int,m.groups());assert failed==ignored==0
+  cases=re.findall(r'^test (\S+) \.\.\. ok$',block,re.M);assert len(cases)==passed
+  ts=ET.SubElement(suites,'testsuite',{'name':label,'tests':str(passed),'failures':'0','errors':'0','skipped':'0'})
+  for name in cases:ET.SubElement(ts,'testcase',{'classname':phase+'/'+label,'name':name})
+  rs[label]={'passed':passed,'failed':failed,'exit_status':0}
+ assert rs['source-targeted']['passed']==24;assert rs['core-library-full']['passed']==186
+ ET.indent(suites);ET.ElementTree(suites).write(p/'derived-junit.xml',encoding='utf-8',xml_declaration=True)
+ m=json.loads((p/'manifest.json').read_text());assert m['base']==commit;assert m['source_hashes_unchanged'];assert all(c['exit_status']==(1 if phase=='original' and c['label']=='scoped-fmt' else 0) for c in m['commands']);rs['scoped-fmt']={'exit_status':next(c['exit_status'] for c in m['commands'] if c['label']=='scoped-fmt')};summary[phase]={'source_commit':commit,'results':rs}
+ if phase=='original':
+  for f,h in m['source_sha256'].items():assert hashlib.sha256(subprocess.check_output(['git','show',commit+':'+f],cwd=root)).hexdigest()==h,f
+ else:assert all(sha(root/f)==h for f,h in m['source_sha256'].items())
+old=b.parent/'original';proof=[]
+for phase in ['original','formatted']:
+ rows={}
+ for folder,field in [('aba-probe','probe_extra_sha256'),('independent-probes','probe_extra_sha256'),('additional-probes','probe_extra_sha256'),('reader-probes','added_probe_source_sha256')]:
+  m=json.loads((b/phase/folder/'manifest.json').read_text());before=json.loads((old/folder/'manifest.json').read_text());assert m[field]==before[field];rows[folder]={'same_added_source_sha256_as_prior':m[field]}
+ proof.append({'phase':phase,'checks':rows})
+h=b/'harness';h.mkdir(exist_ok=True)
+for name in ['verify-source-batch.py','verify-source-batch-formatted.py','run-source-batch-aba.py','run-source-batch-aba-formatted.py','run-source-batch-red.py','run-source-batch-red-formatted.py','run-source-batch-extra.py','run-source-batch-extra-formatted.py','run-source-batch-reader.py','format-source-batch.py','summarize-source-batch.py']:
+ shutil.copyfile('/tmp/'+name,h/(name+'.txt'))
+final={'source':'a961bb58c08ce77b559ce0d021d2ed50a857bb9e','format_source':'0fda32e4d41d8e5524d6f7c4d35c467cbb1ba200','input_report':'b7d5a7a21c4fd28064b916f984aec081c721f3bc','original_probe_equivalence':proof,'source_hash_checks_completed':True,'worktree_status':subprocess.check_output(['git','status','--short'],cwd=root,text=True),'report_crates_diff':subprocess.check_output(['git','diff','a961bb58c08ce77b559ce0d021d2ed50a857bb9e','b7d5a7a21c4fd28064b916f984aec081c721f3bc','--','crates'],cwd=root,text=True),'tools':{n:{'version':subprocess.check_output(['/tmp/muyon-rust/bin/'+n,'--version'],text=True).strip(),'sha256':sha('/tmp/muyon-rust/bin/'+n)} for n in ['rustc','cargo','rustfmt']},'lock_sha256':sha(root/'crates/Cargo.lock'),'not_run':['full core embedded harnesses remain B-owned','workspace known offline anyhow cache gap; no repeat/download','strict workspace clippy','actual gateway receipt path pending owner source'],'boundaries':'Own existing toolchain/cache only; no author /root access or retries/escalation; temporary original fixtures; no product semantics/harness edits.'};assert not final['worktree_status'];assert not final['report_crates_diff'];(b/'final-provenance.json').write_text(json.dumps(final,indent=2)+'\n');(b/'execution-summary.json').write_text(json.dumps({'note':'Per-phase repeated targeted and library executions overlap; not unique scenario totals. No earlier result borrowed. JUnit derived, no invented timings.','phases':summary},indent=2)+'\n');print('all phases verified')

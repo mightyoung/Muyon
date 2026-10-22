@@ -1,0 +1,128 @@
+docs/tasks/document-source-invalidation-applied-20261022/independent-verification/batch-a961/format/format-commit.patch:43: trailing whitespace.
++ 
+docs/tasks/document-source-invalidation-applied-20261022/independent-verification/batch-a961/format/format-commit.patch:245: trailing whitespace.
++ 
+docs/tasks/document-source-invalidation-applied-20261022/independent-verification/batch-a961/format/format-commit.patch:270: trailing whitespace.
++ 
+docs/tasks/document-source-invalidation-applied-20261022/independent-verification/batch-a961/format/format-commit.patch:305: trailing whitespace.
++ 
+docs/tasks/document-source-invalidation-applied-20261022/independent-verification/batch-a961/format/format-commit.patch:335: trailing whitespace.
++ 
+docs/tasks/document-source-invalidation-applied-20261022/independent-verification/batch-a961/format/format-commit.patch:378: trailing whitespace.
++ 
+docs/tasks/document-source-invalidation-applied-20261022/independent-verification/batch-a961/format/format-commit.patch:434: trailing whitespace.
++ 
+docs/tasks/document-source-invalidation-applied-20261022/independent-verification/batch-a961/format/format-commit.patch:482: trailing whitespace.
++ 
+docs/tasks/document-source-invalidation-applied-20261022/independent-verification/batch-a961/format/format-commit.patch:531: trailing whitespace.
++ 
+docs/tasks/document-source-invalidation-applied-20261022/independent-verification/batch-a961/format/format-commit.patch:571: trailing whitespace.
++ 
+docs/tasks/document-source-invalidation-applied-20261022/independent-verification/batch-a961/format/format-commit.patch:642: trailing whitespace.
++ 
+docs/tasks/document-source-invalidation-applied-20261022/independent-verification/batch-a961/format/format-commit.patch:703: trailing whitespace.
++ 
+docs/tasks/document-source-invalidation-applied-20261022/independent-verification/batch-a961/format/format-commit.patch:721: trailing whitespace.
++ 
+docs/tasks/document-source-invalidation-applied-20261022/independent-verification/batch-a961/format/format-commit.patch:743: trailing whitespace.
++ 
+docs/tasks/document-source-invalidation-applied-20261022/independent-verification/batch-a961/format/format-commit.patch:799: trailing whitespace.
++ 
+docs/tasks/document-source-invalidation-applied-20261022/independent-verification/batch-a961/format/format-commit.patch:821: trailing whitespace.
++ 
+docs/tasks/document-source-invalidation-applied-20261022/independent-verification/batch-a961/format/format-commit.patch:928: trailing whitespace.
++ 
+docs/tasks/document-source-invalidation-applied-20261022/independent-verification/batch-a961/format/format-commit.patch:972: trailing whitespace.
++ 
+docs/tasks/document-source-invalidation-applied-20261022/independent-verification/batch-a961/format/format-commit.patch:997: trailing whitespace.
++ 
+docs/tasks/document-source-invalidation-applied-20261022/independent-verification/batch-a961/format/format-commit.patch:1034: trailing whitespace.
++ 
+docs/tasks/document-source-invalidation-applied-20261022/independent-verification/batch-a961/format/format-commit.patch:1126: trailing whitespace.
++ 
+docs/tasks/document-source-invalidation-applied-20261022/independent-verification/batch-a961/format/format-commit.patch:1163: trailing whitespace.
++ 
+docs/tasks/document-source-invalidation-applied-20261022/independent-verification/batch-a961/format/format-commit.patch:1217: trailing whitespace.
++ 
+docs/tasks/document-source-invalidation-applied-20261022/independent-verification/batch-a961/format/format-commit.patch:1315: trailing whitespace.
++ 
+docs/tasks/document-source-invalidation-applied-20261022/independent-verification/batch-a961/format/format-commit.patch:2017: trailing whitespace.
++-- 
+docs/tasks/document-source-invalidation-applied-20261022/independent-verification/batch-a961/format/format-commit.patch:2019: new blank line at EOF.
+docs/tasks/document-source-invalidation-applied-20261022/independent-verification/batch-a961/formatted/aba-probe/probe-compile.stderr.log:36: new blank line at EOF.
+docs/tasks/document-source-invalidation-applied-20261022/independent-verification/batch-a961/formatted/aba-probe/probe-tests.stdout.log:6: new blank line at EOF.
+docs/tasks/document-source-invalidation-applied-20261022/independent-verification/batch-a961/formatted/additional-probes/probe-compile.stderr.log:16: new blank line at EOF.
+docs/tasks/document-source-invalidation-applied-20261022/independent-verification/batch-a961/formatted/additional-probes/probe-tests.stdout.log:14: new blank line at EOF.
+docs/tasks/document-source-invalidation-applied-20261022/independent-verification/batch-a961/formatted/artifacts-targeted.stdout.log:46: new blank line at EOF.
+docs/tasks/document-source-invalidation-applied-20261022/independent-verification/batch-a961/formatted/core-library-full.stdout.log:193: new blank line at EOF.
+docs/tasks/document-source-invalidation-applied-20261022/independent-verification/batch-a961/formatted/independent-probes/probe-compile.stderr.log:42: new blank line at EOF.
+docs/tasks/document-source-invalidation-applied-20261022/independent-verification/batch-a961/formatted/independent-probes/probe-tests.stdout.log:11: new blank line at EOF.
+docs/tasks/document-source-invalidation-applied-20261022/independent-verification/batch-a961/formatted/presentation-targeted.stdout.log:15: new blank line at EOF.
+docs/tasks/document-source-invalidation-applied-20261022/independent-verification/batch-a961/formatted/reader-probes/probe-tests.stdout.log:13: new blank line at EOF.
+docs/tasks/document-source-invalidation-applied-20261022/independent-verification/batch-a961/formatted/reader-targeted.stdout.log:22: new blank line at EOF.
+docs/tasks/document-source-invalidation-applied-20261022/independent-verification/batch-a961/formatted/source-targeted.stdout.log:29: new blank line at EOF.
+docs/tasks/document-source-invalidation-applied-20261022/independent-verification/batch-a961/original/aba-probe/probe-compile.stderr.log:36: new blank line at EOF.
+docs/tasks/document-source-invalidation-applied-20261022/independent-verification/batch-a961/original/aba-probe/probe-tests.stdout.log:6: new blank line at EOF.
+docs/tasks/document-source-invalidation-applied-20261022/independent-verification/batch-a961/original/additional-probes/probe-compile.stderr.log:16: new blank line at EOF.
+docs/tasks/document-source-invalidation-applied-20261022/independent-verification/batch-a961/original/additional-probes/probe-tests.stdout.log:14: new blank line at EOF.
+docs/tasks/document-source-invalidation-applied-20261022/independent-verification/batch-a961/original/artifacts-targeted.stdout.log:46: new blank line at EOF.
+docs/tasks/document-source-invalidation-applied-20261022/independent-verification/batch-a961/original/core-library-full.stdout.log:193: new blank line at EOF.
+docs/tasks/document-source-invalidation-applied-20261022/independent-verification/batch-a961/original/independent-probes/probe-compile.stderr.log:42: new blank line at EOF.
+docs/tasks/document-source-invalidation-applied-20261022/independent-verification/batch-a961/original/independent-probes/probe-tests.stdout.log:11: new blank line at EOF.
+docs/tasks/document-source-invalidation-applied-20261022/independent-verification/batch-a961/original/presentation-targeted.stdout.log:15: new blank line at EOF.
+docs/tasks/document-source-invalidation-applied-20261022/independent-verification/batch-a961/original/reader-probes/probe-tests.stdout.log:13: new blank line at EOF.
+docs/tasks/document-source-invalidation-applied-20261022/independent-verification/batch-a961/original/reader-targeted.stdout.log:22: new blank line at EOF.
+docs/tasks/document-source-invalidation-applied-20261022/independent-verification/batch-a961/original/scoped-fmt.stdout.log:9: trailing whitespace.
++ 
+docs/tasks/document-source-invalidation-applied-20261022/independent-verification/batch-a961/original/scoped-fmt.stdout.log:224: trailing whitespace.
++ 
+docs/tasks/document-source-invalidation-applied-20261022/independent-verification/batch-a961/original/scoped-fmt.stdout.log:755: trailing whitespace.
++ 
+docs/tasks/document-source-invalidation-applied-20261022/independent-verification/batch-a961/original/scoped-fmt.stdout.log:960: trailing whitespace.
++ 
+docs/tasks/document-source-invalidation-applied-20261022/independent-verification/batch-a961/original/scoped-fmt.stdout.log:986: trailing whitespace.
++ 
+docs/tasks/document-source-invalidation-applied-20261022/independent-verification/batch-a961/original/scoped-fmt.stdout.log:1023: trailing whitespace.
++ 
+docs/tasks/document-source-invalidation-applied-20261022/independent-verification/batch-a961/original/scoped-fmt.stdout.log:1054: trailing whitespace.
++ 
+docs/tasks/document-source-invalidation-applied-20261022/independent-verification/batch-a961/original/scoped-fmt.stdout.log:1098: trailing whitespace.
++ 
+docs/tasks/document-source-invalidation-applied-20261022/independent-verification/batch-a961/original/scoped-fmt.stdout.log:1154: trailing whitespace.
++ 
+docs/tasks/document-source-invalidation-applied-20261022/independent-verification/batch-a961/original/scoped-fmt.stdout.log:1202: trailing whitespace.
++ 
+docs/tasks/document-source-invalidation-applied-20261022/independent-verification/batch-a961/original/scoped-fmt.stdout.log:1251: trailing whitespace.
++ 
+docs/tasks/document-source-invalidation-applied-20261022/independent-verification/batch-a961/original/scoped-fmt.stdout.log:1291: trailing whitespace.
++ 
+docs/tasks/document-source-invalidation-applied-20261022/independent-verification/batch-a961/original/scoped-fmt.stdout.log:1363: trailing whitespace.
++ 
+docs/tasks/document-source-invalidation-applied-20261022/independent-verification/batch-a961/original/scoped-fmt.stdout.log:1424: trailing whitespace.
++ 
+docs/tasks/document-source-invalidation-applied-20261022/independent-verification/batch-a961/original/scoped-fmt.stdout.log:1442: trailing whitespace.
++ 
+docs/tasks/document-source-invalidation-applied-20261022/independent-verification/batch-a961/original/scoped-fmt.stdout.log:1464: trailing whitespace.
++ 
+docs/tasks/document-source-invalidation-applied-20261022/independent-verification/batch-a961/original/scoped-fmt.stdout.log:1521: trailing whitespace.
++ 
+docs/tasks/document-source-invalidation-applied-20261022/independent-verification/batch-a961/original/scoped-fmt.stdout.log:1544: trailing whitespace.
++ 
+docs/tasks/document-source-invalidation-applied-20261022/independent-verification/batch-a961/original/scoped-fmt.stdout.log:1655: trailing whitespace.
++ 
+docs/tasks/document-source-invalidation-applied-20261022/independent-verification/batch-a961/original/scoped-fmt.stdout.log:1699: trailing whitespace.
++ 
+docs/tasks/document-source-invalidation-applied-20261022/independent-verification/batch-a961/original/scoped-fmt.stdout.log:1725: trailing whitespace.
++ 
+docs/tasks/document-source-invalidation-applied-20261022/independent-verification/batch-a961/original/scoped-fmt.stdout.log:1763: trailing whitespace.
++ 
+docs/tasks/document-source-invalidation-applied-20261022/independent-verification/batch-a961/original/scoped-fmt.stdout.log:1856: trailing whitespace.
++ 
+docs/tasks/document-source-invalidation-applied-20261022/independent-verification/batch-a961/original/scoped-fmt.stdout.log:1893: trailing whitespace.
++ 
+docs/tasks/document-source-invalidation-applied-20261022/independent-verification/batch-a961/original/scoped-fmt.stdout.log:1947: trailing whitespace.
++ 
+docs/tasks/document-source-invalidation-applied-20261022/independent-verification/batch-a961/original/scoped-fmt.stdout.log:2030: trailing whitespace.
++ 
+docs/tasks/document-source-invalidation-applied-20261022/independent-verification/batch-a961/original/scoped-fmt.stdout.log:2030: new blank line at EOF.
+docs/tasks/document-source-invalidation-applied-20261022/independent-verification/batch-a961/original/source-targeted.stdout.log:29: new blank line at EOF.

@@ -1,0 +1,65 @@
+{
+  "parent": "a961bb58c08ce77b559ce0d021d2ed50a857bb9e",
+  "format_commit": "0fda32e4d41d8e5524d6f7c4d35c467cbb1ba200",
+  "branch": "task/document-source-invalidation-batch-format-20261022",
+  "argv": [
+    "/tmp/muyon-rust/bin/rustfmt",
+    "--edition",
+    "2021",
+    "--config",
+    "skip_children=true",
+    "/tmp/muyon-source-batch-format-expected/crates/muyon-core/src/blobs.rs",
+    "/tmp/muyon-source-batch-format-expected/crates/muyon-core/src/documents/mod.rs",
+    "/tmp/muyon-source-batch-format-expected/crates/muyon-core/src/documents/storage.rs",
+    "/tmp/muyon-source-batch-format-expected/crates/muyon-core/src/documents/source_notifications.rs",
+    "/tmp/muyon-source-batch-format-expected/crates/muyon-core/src/documents/source_notification_tests.rs"
+  ],
+  "start_utc": "2026-10-22T08:53:32.154522+00:00",
+  "end_utc": "2026-10-22T08:53:32.256260+00:00",
+  "exit_status": 0,
+  "changed_paths": [
+    "crates/muyon-core/src/documents/mod.rs",
+    "crates/muyon-core/src/documents/storage.rs",
+    "crates/muyon-core/src/documents/source_notifications.rs",
+    "crates/muyon-core/src/documents/source_notification_tests.rs"
+  ],
+  "all_core_source_test_files_checked": 84,
+  "files": [
+    {
+      "path": "crates/muyon-core/src/blobs.rs",
+      "before_sha256": "4db4a45211d73062d143ed6ce497b8f6837c9935907abac7ec42b755d77e4218",
+      "expected_rustfmt_sha256": "4db4a45211d73062d143ed6ce497b8f6837c9935907abac7ec42b755d77e4218",
+      "after_sha256": "4db4a45211d73062d143ed6ce497b8f6837c9935907abac7ec42b755d77e4218",
+      "equal_bytes": true
+    },
+    {
+      "path": "crates/muyon-core/src/documents/mod.rs",
+      "before_sha256": "31694be0e6cec6f73d118527083d911194982c17d31acd20c1208b021b01d939",
+      "expected_rustfmt_sha256": "26d4956be03b3ef0b98692fd39b88fadf7eed98c95c48b107a910e3164545a6e",
+      "after_sha256": "26d4956be03b3ef0b98692fd39b88fadf7eed98c95c48b107a910e3164545a6e",
+      "equal_bytes": true
+    },
+    {
+      "path": "crates/muyon-core/src/documents/storage.rs",
+      "before_sha256": "2053e856e3d421a1692a49b9fb3f970c54025932c678a8c975cf12c039756ed3",
+      "expected_rustfmt_sha256": "b86f6a0314474be4ffe65a1017ff4dbaba491a25418313e6aeb4ba9ce93d7d5c",
+      "after_sha256": "b86f6a0314474be4ffe65a1017ff4dbaba491a25418313e6aeb4ba9ce93d7d5c",
+      "equal_bytes": true
+    },
+    {
+      "path": "crates/muyon-core/src/documents/source_notifications.rs",
+      "before_sha256": "842a3a3e5737644da06409f286d4ff437e2dc15e6e9458baa01622d9ad4a291a",
+      "expected_rustfmt_sha256": "00a4fdcc16557e7a2ecd528f1f9dad2b2eec7bb10cff8e34bdc6874d65771fe6",
+      "after_sha256": "00a4fdcc16557e7a2ecd528f1f9dad2b2eec7bb10cff8e34bdc6874d65771fe6",
+      "equal_bytes": true
+    },
+    {
+      "path": "crates/muyon-core/src/documents/source_notification_tests.rs",
+      "before_sha256": "6aa19b2fa0651b1e8edcf0a18b30d3feafdd2d72742a51dba2614d67ad32cad0",
+      "expected_rustfmt_sha256": "6b55ee54d0bc68a81358ab12c5ef598a09ef44969b5b2e8cda41ef75bbd7b038",
+      "after_sha256": "6b55ee54d0bc68a81358ab12c5ef598a09ef44969b5b2e8cda41ef75bbd7b038",
+      "equal_bytes": true
+    }
+  ],
+  "other_source_bytes_unchanged": true
+}

@@ -1,0 +1,90 @@
+//! Same-owner transaction hook regressions using original synthetic blob bytes.
+use super::*;
+use crate::{blobs::BlobKind, business::BusinessStore, contract::*, sqlite::Db};
+use std::{
+    fs,
+    path::PathBuf,
+    sync::atomic::{AtomicU64, Ordering},
+    time::{SystemTime, UNIX_EPOCH},
+};
+static NEXT: AtomicU64 = AtomicU64::new(0);
+pub(super) struct Fixture(PathBuf);
+impl Fixture {
+    pub(super) fn new() -> Self {
+        let root = std::env::temp_dir().join(format!(
+            "muyon-document-grant-tail-{}-{}",
+            std::process::id(),
+            NEXT.fetch_add(1, Ordering::Relaxed)
+        ));
+        fs::create_dir(&root).unwrap();
+        Self(root)
+    }
+    pub(super) fn path(&self) -> PathBuf {
+        self.0.join("store.sqlite")
+    }
+    pub(super) fn setup(&self) -> (BusinessStore, DocumentAccess) {
+        BusinessStore::initialize(&self.path(), "workspace").unwrap();
+        let store = BusinessStore::open_existing(&self.path(), "workspace", "epoch").unwrap();
+        store
+            .database()
+            .exec(
+                "INSERT INTO projects VALUES('project','workspace','Synthetic','1',0)",
+                &[],
+            )
+            .unwrap();
+        store.initialize_documents_trusted().unwrap();
+        let finished = upload(&store);
+        let metadata = store
+            .register_document_trusted(
+                "project",
+                "document",
+                "Synthetic",
+                DocumentFormat::Pdf,
+                &finished,
+            )
+            .unwrap();
+        let authority = AuthorityBinding {
+            grant_id: "grant".into(),
+            generation: Revision::new(1),
+            owner_epoch: "epoch".into(),
+        };
+        let expiry = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .unwrap()
+            .as_millis() as u64
+            + 20_000;
+        store
+            .issue_document_grant_trusted(
+                &metadata.document,
+                &authority,
+                &[
+                    DocumentOperation::Inspect,
+                    DocumentOperation::StructuredEdit,
+                ],
+                expiry,
+            )
+            .unwrap();
+        (
+            store,
+            DocumentAccess {
+                document: metadata.document,
+                authority,
+            },
+        )
+    }
+}
+impl Drop for Fixture {
+    fn drop(&mut self) {
+        let _ = fs::remove_dir_all(&self.0);
+    }
+}
+fn upload(store: &BusinessStore) -> crate::blobs::FinishedBlob {
+    let upload = store.begin_upload("project").unwrap();
+    store
+        .append_chunk(
+            &upload.upload_id,
+            b"%PDF-1.4\noriginal synthetic hook fixture\n%%EOF\n",
+        )
+        .unwrap();
+    store.finish_blob(&upload.upload_id, BlobKind::Pdf).unwrap()
+}

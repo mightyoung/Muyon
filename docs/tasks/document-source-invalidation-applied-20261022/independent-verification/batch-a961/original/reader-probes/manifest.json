@@ -1,0 +1,79 @@
+{
+  "source_commit": "a961bb58c08ce77b559ce0d021d2ed50a857bb9e",
+  "seed_test_source_sha256": "1220f4e38478ab0673f141f3d7278289721ca71f15c5d934a4f5c79cf521a897",
+  "added_probe_source_sha256": "01f944aec3a00c86107ebd6d7f6739d4f1a6946ae142cc6a26a2cce814143998",
+  "probe_source_sha256": "15e6b14254894a2fae1c4659972621304dbd9783b92d95bd90d6d3c2d785b763",
+  "linked_artifacts": {
+    "sha2": {
+      "path": "/tmp/muyon-document-cargo-target/debug/deps/libsha2-ac6e1e3f5db50395.rlib",
+      "sha256": "5d58c5d2c330e2d6d032065384466b3b2206d7e48eb2ff46b918935dee3a507d"
+    },
+    "serde_json": {
+      "path": "/tmp/muyon-document-cargo-target/debug/deps/libserde_json-bd1e7064091000e5.rlib",
+      "sha256": "b7471ea236ac91d5b3168928b82733d82466777d737f90b8618bfe1c399ff6b2"
+    },
+    "muyon_core": {
+      "path": "/tmp/muyon-document-cargo-target/debug/libmuyon_core.rlib",
+      "sha256": "ed937eb36e0a08839cb687177e3a2373dedfd35a3b339d996a9a3c1c0952ed3c"
+    }
+  },
+  "commands": [
+    {
+      "label": "artifact-build",
+      "argv": [
+        "cargo",
+        "build",
+        "--offline",
+        "--locked",
+        "--manifest-path",
+        "crates/Cargo.toml",
+        "-p",
+        "muyon-core",
+        "--lib",
+        "--message-format=json"
+      ],
+      "cwd": "/workspace/Muyon-source-invalidation-batch-verification",
+      "start_utc": "2026-10-22T08:52:15.885163+00:00",
+      "end_utc": "2026-10-22T08:52:20.065846+00:00",
+      "exit_status": 0
+    },
+    {
+      "label": "probe-compile",
+      "argv": [
+        "/tmp/muyon-rust/bin/rustc",
+        "--edition=2021",
+        "--test",
+        "/tmp/muyon-source-batch-reader-probes-original.rs",
+        "-L",
+        "dependency=/tmp/muyon-document-cargo-target/debug/deps",
+        "-L",
+        "native=/tmp/muyon-native-libs",
+        "--extern",
+        "sha2=/tmp/muyon-document-cargo-target/debug/deps/libsha2-ac6e1e3f5db50395.rlib",
+        "--extern",
+        "serde_json=/tmp/muyon-document-cargo-target/debug/deps/libserde_json-bd1e7064091000e5.rlib",
+        "--extern",
+        "muyon_core=/tmp/muyon-document-cargo-target/debug/libmuyon_core.rlib",
+        "-o",
+        "/tmp/muyon-source-batch-reader-probes-original"
+      ],
+      "cwd": "/workspace/Muyon-source-invalidation-batch-verification",
+      "start_utc": "2026-10-22T08:52:20.066557+00:00",
+      "end_utc": "2026-10-22T08:52:20.811922+00:00",
+      "exit_status": 0
+    },
+    {
+      "label": "probe-tests",
+      "argv": [
+        "/tmp/muyon-source-batch-reader-probes-original",
+        "independent_",
+        "--nocapture"
+      ],
+      "cwd": "/workspace/Muyon-source-invalidation-batch-verification",
+      "start_utc": "2026-10-22T08:52:20.811943+00:00",
+      "end_utc": "2026-10-22T08:52:21.021784+00:00",
+      "exit_status": 0
+    }
+  ],
+  "boundary": "Original immutable six Reader probes, including the two prior real cleanup-tail RED. Copied synthetic fixture only; no product edits."
+}

@@ -1,0 +1,17 @@
+import pathlib,subprocess,datetime,json,hashlib,os
+root=pathlib.Path('/workspace/Muyon-source-invalidation-batch-verification');out=pathlib.Path('/workspace/Muyon-document-verification/docs/tasks/document-source-invalidation-applied-20261022/independent-verification/batch-a961/original');out.mkdir(parents=True,exist_ok=True)
+env=os.environ.copy();env.update(PATH='/tmp/muyon-rust/bin:'+env['PATH'],CARGO_HOME='/tmp/muyon-cargo',CARGO_TARGET_DIR='/tmp/muyon-document-cargo-target',RUSTFLAGS='-L native=/tmp/muyon-native-libs');now=lambda:datetime.datetime.now(datetime.timezone.utc).isoformat();sha=lambda p:hashlib.sha256(p.read_bytes()).hexdigest();files=sorted(list((root/'crates/muyon-core/src').rglob('*.rs'))+list((root/'crates/muyon-core/tests').rglob('*.rs')));m={'base':subprocess.check_output(['git','rev-parse','HEAD'],cwd=root,text=True).strip(),'delivery_source':'a961bb58c08ce77b559ce0d021d2ed50a857bb9e','environment':{k:env[k] for k in ['PATH','CARGO_HOME','CARGO_TARGET_DIR','RUSTFLAGS']},'tools':{n:subprocess.check_output(['/tmp/muyon-rust/bin/'+n,'--version'],text=True).strip() for n in ['rustc','cargo','rustfmt']},'source_sha256':{str(p.relative_to(root)):sha(p) for p in files},'commands':[]}
+def save():(out/'manifest.json').write_text(json.dumps(m,indent=2)+'\n')
+def run(label,args):
+ start=now();print(label,'START',start,flush=True)
+ with (out/(label+'.stdout.log')).open('wb') as stdout,(out/(label+'.stderr.log')).open('wb') as stderr:r=subprocess.run(args,cwd=root,env=env,stdout=stdout,stderr=stderr)
+ m['commands'].append({'label':label,'argv':args,'cwd':str(root),'start_utc':start,'end_utc':now(),'exit_status':r.returncode});save();print(label,'EXIT',r.returncode,flush=True)
+common=['cargo','test','--offline','--locked','--manifest-path','crates/Cargo.toml','-p','muyon-core'];save()
+run('source-targeted',common+['--lib','documents::source_notification_tests'])
+run('artifacts-targeted',common+['--lib','artifacts::'])
+run('reader-targeted',common+['--lib','documents::reader_tests'])
+run('presentation-targeted',common+['--lib','documents::presentation_tests'])
+run('core-library-full',common+['--lib'])
+run('scoped-fmt',['/tmp/muyon-rust/bin/rustfmt','--check','--edition','2021','--config','skip_children=true','crates/muyon-core/src/blobs.rs','crates/muyon-core/src/documents/mod.rs','crates/muyon-core/src/documents/storage.rs','crates/muyon-core/src/documents/source_notifications.rs','crates/muyon-core/src/documents/source_notification_tests.rs'])
+
+assert all(sha(root/p)==h for p,h in m['source_sha256'].items());m['source_hashes_unchanged']=True;save()

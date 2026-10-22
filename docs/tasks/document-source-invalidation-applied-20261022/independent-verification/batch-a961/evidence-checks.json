@@ -1,0 +1,29 @@
+{
+  "commands": [
+    {
+      "label": "full-staged",
+      "argv": [
+        "git",
+        "diff",
+        "--cached",
+        "--check"
+      ],
+      "exit_status": 2
+    },
+    {
+      "label": "authored",
+      "argv": [
+        "git",
+        "diff",
+        "--cached",
+        "--check",
+        "--",
+        "docs/tasks/document-source-invalidation-applied-20261022/BATCH-A961-INDEPENDENT-RUST-VERIFICATION.md",
+        ":(glob)docs/tasks/document-source-invalidation-applied-20261022/independent-verification/batch-a961/**/*.json",
+        ":(glob)docs/tasks/document-source-invalidation-applied-20261022/independent-verification/batch-a961/**/*.xml"
+      ],
+      "exit_status": 0
+    }
+  ],
+  "boundary": "Raw logs/standard format-patch preserved byte-exact, including trailing blank lines/context whitespace; report/JSON/JUnit checked separately."
+}
