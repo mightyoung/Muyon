@@ -110,7 +110,7 @@ fn hex(b: &[u8]) -> String {
 }
 fn unhex(s: &str) -> Result<Vec<u8>> {
     if s.len() > 2 * MAX_ARCHIVE
-        || s.len() % 2 != 0
+        || !s.len().is_multiple_of(2)
         || !s
             .bytes()
             .all(|b| b.is_ascii_digit() || (b'a'..=b'f').contains(&b))
