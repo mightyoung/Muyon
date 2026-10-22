@@ -32,3 +32,18 @@ Tools: official rustup1.28.2 archive/checksum verified, Rust1.93.1 minimal+
 clippy/rustfmt installed in task-local /tmp without modifying PATH files. No
 Gradle/Android/Flutter install, no new license acceptance, security/system changes.
 Historical denied artifacts/I04 untouched. New candidate not production-ready.
+
+Later final contract guard added: original Flutter job bodies/triggers compared
+structurally to214 excluding only the extracted Laya step; eight tests now PASS.
+The earlier seven count was an intermediate TDD result, not the final total.
+
+Independent whole-branch source review at a7cdc6a2 found no Critical/Important;
+23 immutable Git references and two schema fixtures independently matched bytes,
+SHA256 and blob IDs. Minor intermediate count ambiguity clarified above. No
+hosted workflow execution or full historical closure is claimed.
+
+Final prerequisite results: fixeda7 workspace576/30groups PASS, strict0,
+supplier12 PASS; staged-no-active-Dart12 PASS after exact missing synthetic
+JSON/asset dependencies added. Preserve both staging compile failures. Python8
+and actual Laya29 PASS. No full Dart historical closure/hosted CI/Android claim.
+Current PR101 remains red; direct gate repair proceeds on separate branch.

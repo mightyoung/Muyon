@@ -1,0 +1,13 @@
+{
+  "argv": [
+    "bash",
+    "scripts/check_laya_offline.sh"
+  ],
+  "cwd": "/workspace/Muyon-retirement-prerequisites-20261022",
+  "source_sha": "a7cdc6a2aecdb27700cdad95008dff923bbec6dd",
+  "dirty_source": false,
+  "start_utc": "2026-10-22T18:06:58.019473+00:00",
+  "exit_code": 0,
+  "duration_seconds": 13.094,
+  "end_utc": "2026-10-22T18:07:11.006785+00:00"
+}

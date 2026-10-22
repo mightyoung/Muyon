@@ -1,0 +1,25 @@
+BEGIN {"argv": ["cargo", "+1.93.1", "test", "--offline", "--locked", "--manifest-path", "/tmp/muyon-retirement-no-active-dart/experiments/redesign/rust-agent-host-lab/core/Cargo.toml", "--test", "supplier_store"], "cwd": "/workspace/Muyon-retirement-prerequisites-20261022", "source_sha": "a7cdc6a2aecdb27700cdad95008dff923bbec6dd", "dirty_source": false, "start_utc": "2026-10-22T18:08:22.239113+00:00"}
+    Blocking waiting for file lock on artifact directory
+   Compiling muyon-core-agent-lab v0.1.0 (/tmp/muyon-retirement-no-active-dart/experiments/redesign/core-agent-lab/core)
+   Compiling muyon-plugin-contract-lab v0.1.0 (/tmp/muyon-retirement-no-active-dart/experiments/redesign/plugin-contract-lab/core)
+error: couldn't read `/tmp/muyon-retirement-no-active-dart/experiments/redesign/plugin-contract-lab/core/src/../../fixtures/research_read.json`: No such file or directory (os error 2)
+  --> /tmp/muyon-retirement-no-active-dart/experiments/redesign/plugin-contract-lab/core/src/mappings.rs:31:32
+   |
+31 |         MappingKind::Research=>include_str!("../../fixtures/research_read.json"),
+   |                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+error: couldn't read `/tmp/muyon-retirement-no-active-dart/experiments/redesign/plugin-contract-lab/core/src/../../fixtures/inquiry_read.json`: No such file or directory (os error 2)
+  --> /tmp/muyon-retirement-no-active-dart/experiments/redesign/plugin-contract-lab/core/src/mappings.rs:32:31
+   |
+32 |         MappingKind::Inquiry=>include_str!("../../fixtures/inquiry_read.json"),
+   |                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+error: couldn't read `/tmp/muyon-retirement-no-active-dart/experiments/redesign/plugin-contract-lab/core/src/../../fixtures/equipment_loan.json`: No such file or directory (os error 2)
+  --> /tmp/muyon-retirement-no-active-dart/experiments/redesign/plugin-contract-lab/core/src/mappings.rs:33:33
+   |
+33 |         MappingKind::Equipment=>include_str!("../../fixtures/equipment_loan.json"),
+   |                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+error: could not compile `muyon-plugin-contract-lab` (lib) due to 3 previous errors
+warning: build failed, waiting for other jobs to finish...
+END {"argv": ["cargo", "+1.93.1", "test", "--offline", "--locked", "--manifest-path", "/tmp/muyon-retirement-no-active-dart/experiments/redesign/rust-agent-host-lab/core/Cargo.toml", "--test", "supplier_store"], "cwd": "/workspace/Muyon-retirement-prerequisites-20261022", "source_sha": "a7cdc6a2aecdb27700cdad95008dff923bbec6dd", "dirty_source": false, "start_utc": "2026-10-22T18:08:22.239113+00:00", "exit_code": 101, "duration_seconds": 241.078, "end_utc": "2026-10-22T18:12:23.187204+00:00"}

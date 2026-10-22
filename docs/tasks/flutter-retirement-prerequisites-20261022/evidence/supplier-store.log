@@ -1,0 +1,24 @@
+BEGIN {"argv": ["cargo", "+1.93.1", "test", "--offline", "--locked", "--manifest-path", "experiments/redesign/rust-agent-host-lab/core/Cargo.toml", "--test", "supplier_store"], "cwd": "/workspace/Muyon-retirement-prerequisites-20261022", "source_sha": "214b4031deb38ca7dfd35ee86396089eb48157d5", "dirty_source": true, "start_utc": "2026-10-22T18:06:09.481389+00:00"}
+   Compiling muyon-core-agent-lab v0.1.0 (/workspace/Muyon-retirement-prerequisites-20261022/experiments/redesign/core-agent-lab/core)
+   Compiling muyon-plugin-contract-lab v0.1.0 (/workspace/Muyon-retirement-prerequisites-20261022/experiments/redesign/plugin-contract-lab/core)
+   Compiling muyon-rust-agent-host-lab v0.1.0 (/workspace/Muyon-retirement-prerequisites-20261022/experiments/redesign/rust-agent-host-lab/core)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 26.43s
+     Running tests/supplier_store.rs (/tmp/muyon-retirement-target/debug/deps/supplier_store-c0fcb33207afda58)
+
+running 12 tests
+test authority_unavailable_during_registered_dispatch_revokes_publication ... ok
+test fixture_domain_contract_is_tied_to_actual_dart_schema_source ... ok
+test current_projection_rereads_name_while_historical_receipt_identity_stays_original ... ok
+test current_reads_reject_pinned_revision_drift_and_pending_or_revoked_authority ... ok
+test identity_and_request_shape_are_not_sql_or_path_authority ... ok
+test mode_change_and_symlink_ancestor_are_denied ... ok
+test replaced_file_symlinks_owner_mode_and_no_create_fail_closed ... ok
+test registered_read_yields_business_name_and_original_durable_receipt_without_business_write ... ok
+test same_revision_tamper_without_host_source_stamp_change_is_denied ... ok
+test meta_shape_and_storage_types_are_checked ... ok
+test actual_source_mutation_in_each_final_host_sample_denies_publication ... ok
+test unknown_schema_missing_deleted_malformed_and_oversized_sources_fail_closed ... ok
+
+test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 4.30s
+
+END {"argv": ["cargo", "+1.93.1", "test", "--offline", "--locked", "--manifest-path", "experiments/redesign/rust-agent-host-lab/core/Cargo.toml", "--test", "supplier_store"], "cwd": "/workspace/Muyon-retirement-prerequisites-20261022", "source_sha": "214b4031deb38ca7dfd35ee86396089eb48157d5", "dirty_source": true, "start_utc": "2026-10-22T18:06:09.481389+00:00", "exit_code": 0, "duration_seconds": 31.126, "end_utc": "2026-10-22T18:06:40.325267+00:00"}

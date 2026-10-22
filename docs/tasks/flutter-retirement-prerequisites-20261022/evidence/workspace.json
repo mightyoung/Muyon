@@ -1,0 +1,20 @@
+{
+  "argv": [
+    "cargo",
+    "+1.93.1",
+    "test",
+    "--offline",
+    "--locked",
+    "--manifest-path",
+    "crates/Cargo.toml",
+    "--workspace",
+    "--all-targets"
+  ],
+  "cwd": "/workspace/Muyon-retirement-prerequisites-20261022",
+  "source_sha": "a7cdc6a2aecdb27700cdad95008dff923bbec6dd",
+  "dirty_source": false,
+  "start_utc": "2026-10-22T18:06:54.404011+00:00",
+  "exit_code": 0,
+  "duration_seconds": 447.194,
+  "end_utc": "2026-10-22T18:14:21.536633+00:00"
+}

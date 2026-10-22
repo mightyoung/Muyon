@@ -1,0 +1,23 @@
+BEGIN {"argv": ["bash", "scripts/check_laya_offline.sh"], "cwd": "/workspace/Muyon-retirement-prerequisites-20261022", "source_sha": "a7cdc6a2aecdb27700cdad95008dff923bbec6dd", "dirty_source": false, "start_utc": "2026-10-22T18:06:58.019473+00:00"}
+........
+----------------------------------------------------------------------
+Ran 8 tests in 0.093s
+
+OK
+....
+----------------------------------------------------------------------
+Ran 4 tests in 10.113s
+
+OK
+........
+----------------------------------------------------------------------
+Ran 8 tests in 0.266s
+
+OK
+.....stage2 mix upload=2213 validation=554 target={'none|zh': 18, 'read|en': 12, 'read|mixed': 12, 'read|zh': 25} source={'none|en': 22, 'none|mixed': 5, 'none|zh': 168, 'read|en': 61, 'read|mixed': 89, 'read|zh': 209} unmatched={} dropped={'none|en': 22, 'none|mixed': 5}
+....
+----------------------------------------------------------------------
+Ran 9 tests in 1.150s
+
+OK
+END {"argv": ["bash", "scripts/check_laya_offline.sh"], "cwd": "/workspace/Muyon-retirement-prerequisites-20261022", "source_sha": "a7cdc6a2aecdb27700cdad95008dff923bbec6dd", "dirty_source": false, "start_utc": "2026-10-22T18:06:58.019473+00:00", "exit_code": 0, "duration_seconds": 13.094, "end_utc": "2026-10-22T18:07:11.006785+00:00"}

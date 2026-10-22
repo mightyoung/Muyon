@@ -1,0 +1,870 @@
+{
+  "source": "a7cdc6a2aecdb27700cdad95008dff923bbec6dd",
+  "active_dart_directories_absent": true,
+  "exact_staged_files": [
+    {
+      "path": "crates/Cargo.toml",
+      "git_blob": "f65a8ae293c479881e221927481789bb83f283e9"
+    },
+    {
+      "path": "crates/Cargo.lock",
+      "git_blob": "22efc37db33771ad83d5de896dc7c2dc41f59b58"
+    },
+    {
+      "path": "crates/.gitignore",
+      "git_blob": "b83d22266ac8aa2f8df2edef68082c789727841d"
+    },
+    {
+      "path": "experiments/redesign/android-compose-lab/app/src/main/assets/synthetic-supplier-schema12.siq",
+      "git_blob": "eeaf8db22a78d622ac8b43c5672e4e04213b412e"
+    },
+    {
+      "path": "experiments/redesign/web-search-lab/core/Cargo.toml",
+      "git_blob": "88fcafa203b4e047e36785c29d748739dbaa15b6"
+    },
+    {
+      "path": "experiments/redesign/web-search-lab/core/Cargo.lock",
+      "git_blob": "6f718584c28f75f2e19720bac77355652cef9cd1"
+    },
+    {
+      "path": "experiments/redesign/web-search-lab/core/.gitignore",
+      "git_blob": "b83d22266ac8aa2f8df2edef68082c789727841d"
+    },
+    {
+      "path": "experiments/redesign/web-search-lab/core/tests/service_send.rs",
+      "git_blob": "cda26c88ad49169bba35edf7ee7acce11949eafe"
+    },
+    {
+      "path": "experiments/redesign/web-search-lab/core/tests/contract.rs",
+      "git_blob": "95544ee7b59e4d0da2192d98dca240d6ff3968c7"
+    },
+    {
+      "path": "experiments/redesign/web-search-lab/core/tests/agent_search.rs",
+      "git_blob": "c9a3993cffbc1f1c7c365abc8e76475467955c33"
+    },
+    {
+      "path": "experiments/redesign/web-search-lab/core/src/runtime.rs",
+      "git_blob": "c6b799b3b25d2b84ec6a2446a217fc9ef23282a5"
+    },
+    {
+      "path": "experiments/redesign/web-search-lab/core/src/lib.rs",
+      "git_blob": "dac4c7c322a8ab235daa7b883d15dcf438bbfdcc"
+    },
+    {
+      "path": "experiments/redesign/web-search-lab/core/src/deepseek.rs",
+      "git_blob": "069b3be93bc590aff94fcf324920cd0d6aa8c925"
+    },
+    {
+      "path": "experiments/redesign/web-search-lab/core/src/chat_route.rs",
+      "git_blob": "520f27e76e8d1a6349f1cca6839bc839a17886cb"
+    },
+    {
+      "path": "experiments/redesign/rust-agent-host-lab/core/README.md",
+      "git_blob": "534c00f55b8864c2a3efea749f6016bac0eb6dbc"
+    },
+    {
+      "path": "experiments/redesign/rust-agent-host-lab/core/Cargo.toml",
+      "git_blob": "49b1f047820f3158fd8c68cdcecf08f4b6b6b8a8"
+    },
+    {
+      "path": "experiments/redesign/rust-agent-host-lab/core/Cargo.lock",
+      "git_blob": "78e3451e0e7035235e02c415fcdbd2a4b26c19ba"
+    },
+    {
+      "path": "experiments/redesign/rust-agent-host-lab/core/tests/supplier_store.rs",
+      "git_blob": "62293a393b2f3837659a14f192ca407ef67c2b4c"
+    },
+    {
+      "path": "experiments/redesign/rust-agent-host-lab/core/tests/supplier_scope_bridge.rs",
+      "git_blob": "6e37be9b41fc2278952c82c1da7c977150e81f2b"
+    },
+    {
+      "path": "experiments/redesign/rust-agent-host-lab/core/tests/supplier_lab_source.rs",
+      "git_blob": "74543e994d70b163cf7139e54a4965fafc41e9e9"
+    },
+    {
+      "path": "experiments/redesign/rust-agent-host-lab/core/tests/supplier_business_controller.rs",
+      "git_blob": "f2de0035a8dede64b1b9d0dbc92b239a2e0490e6"
+    },
+    {
+      "path": "experiments/redesign/rust-agent-host-lab/core/tests/service_runtime.rs",
+      "git_blob": "0bfa69ee46f7fab974ec6015e63bdeeffcf55475"
+    },
+    {
+      "path": "experiments/redesign/rust-agent-host-lab/core/tests/service_root.rs",
+      "git_blob": "7cbf6fa4829e7dae8c3a5e813cea41be8a44fb71"
+    },
+    {
+      "path": "experiments/redesign/rust-agent-host-lab/core/tests/service_provider_release.rs",
+      "git_blob": "015ea08cf9e004120669d70e2751a5c144aeb703"
+    },
+    {
+      "path": "experiments/redesign/rust-agent-host-lab/core/tests/service_provider.rs",
+      "git_blob": "88a5af88222abd75a3ccff52e0ed1857bdc370dc"
+    },
+    {
+      "path": "experiments/redesign/rust-agent-host-lab/core/tests/service_oracle.rs",
+      "git_blob": "2945c872730bd38bed1ca0cf034bb8b091e9a643"
+    },
+    {
+      "path": "experiments/redesign/rust-agent-host-lab/core/tests/service_lifecycle.rs",
+      "git_blob": "5aa612cde26ab55dd2db38eee962568303e103dc"
+    },
+    {
+      "path": "experiments/redesign/rust-agent-host-lab/core/tests/service_host_controller.rs",
+      "git_blob": "e4e6739dfd0a5c881eb41eea9a4df4fccda33522"
+    },
+    {
+      "path": "experiments/redesign/rust-agent-host-lab/core/tests/service_controller.rs",
+      "git_blob": "9ac56d3009b6aea0ddd889ba1ae610d3837391bc"
+    },
+    {
+      "path": "experiments/redesign/rust-agent-host-lab/core/tests/ordinary_chat_live_controller.rs",
+      "git_blob": "42c35a23b55e2bf4ac836d18731abbd3d0aa597d"
+    },
+    {
+      "path": "experiments/redesign/rust-agent-host-lab/core/tests/ordinary_chat_controller.rs",
+      "git_blob": "016ca180ad421caafd7aa3aeaefe71857ee26e0d"
+    },
+    {
+      "path": "experiments/redesign/rust-agent-host-lab/core/tests/native_read.rs",
+      "git_blob": "d768e6bb8bc12b7d00304e582ea3849cb59406b8"
+    },
+    {
+      "path": "experiments/redesign/rust-agent-host-lab/core/tests/host_http.rs",
+      "git_blob": "67627b39e176829ccb9b23bbe27dc8874172cc54"
+    },
+    {
+      "path": "experiments/redesign/rust-agent-host-lab/core/tests/contract_transport.rs",
+      "git_blob": "a969344b5607e714b37c6c411cc823a6d89c03fb"
+    },
+    {
+      "path": "experiments/redesign/rust-agent-host-lab/core/src/supplier_store.rs",
+      "git_blob": "318a0a6904ee2a14691f37c19d7734aef32192c3"
+    },
+    {
+      "path": "experiments/redesign/rust-agent-host-lab/core/src/supplier_sqlite.rs",
+      "git_blob": "43c618541bd1e2fa4c1221feab332e8816c73da8"
+    },
+    {
+      "path": "experiments/redesign/rust-agent-host-lab/core/src/supplier_scope_bridge.rs",
+      "git_blob": "5b474f6b6ca6421f924c1797b5cdb99d3f34cd11"
+    },
+    {
+      "path": "experiments/redesign/rust-agent-host-lab/core/src/supplier_name_contract.json",
+      "git_blob": "7a982820fc7fbc0b140668f3501abc7b5ec1bcb1"
+    },
+    {
+      "path": "experiments/redesign/rust-agent-host-lab/core/src/supplier_lab_source.rs",
+      "git_blob": "0f1691a2b1e2087c01844d88e94a2f135b18c687"
+    },
+    {
+      "path": "experiments/redesign/rust-agent-host-lab/core/src/supplier_business.rs",
+      "git_blob": "6fca9c8315fd4458c2fcf381a2b452a3cbf8f9a5"
+    },
+    {
+      "path": "experiments/redesign/rust-agent-host-lab/core/src/store.rs",
+      "git_blob": "35574b267c7403894f43a17ad92c553da50fa59f"
+    },
+    {
+      "path": "experiments/redesign/rust-agent-host-lab/core/src/service_types.rs",
+      "git_blob": "67476c7b2e3e29833ba06ae7f62f1894e623dd1e"
+    },
+    {
+      "path": "experiments/redesign/rust-agent-host-lab/core/src/service_tools.rs",
+      "git_blob": "95d4b9a23c91bdd09d257ea5f0db763f846ac0c0"
+    },
+    {
+      "path": "experiments/redesign/rust-agent-host-lab/core/src/service_runtime.rs",
+      "git_blob": "818513637d43b8bafd900d76265ec51acb51057f"
+    },
+    {
+      "path": "experiments/redesign/rust-agent-host-lab/core/src/service_root.rs",
+      "git_blob": "c0b96447605df6f3dde49bea36c1f8754a5ddce7"
+    },
+    {
+      "path": "experiments/redesign/rust-agent-host-lab/core/src/service_provider.rs",
+      "git_blob": "009b7b0f96a88a37305009bc229bcdef87fcc72b"
+    },
+    {
+      "path": "experiments/redesign/rust-agent-host-lab/core/src/service_host.rs",
+      "git_blob": "ece575658f25b369d65acbd27178f0360729f62f"
+    },
+    {
+      "path": "experiments/redesign/rust-agent-host-lab/core/src/service_evidence.rs",
+      "git_blob": "95f0711e79ed6ea72b01da86b80e85ce6a202195"
+    },
+    {
+      "path": "experiments/redesign/rust-agent-host-lab/core/src/service_controller.rs",
+      "git_blob": "91ce6d14e6ffd545a154e39a96f5c91422ee0ac0"
+    },
+    {
+      "path": "experiments/redesign/rust-agent-host-lab/core/src/read_registry.rs",
+      "git_blob": "fc661f68a43be0f43931d4e7c8dfbf84956b5f78"
+    },
+    {
+      "path": "experiments/redesign/rust-agent-host-lab/core/src/plugin_process.rs",
+      "git_blob": "b5aba899ac80b56c8a64d05174647581d0045db7"
+    },
+    {
+      "path": "experiments/redesign/rust-agent-host-lab/core/src/ordinary_chat.rs",
+      "git_blob": "ea3a79f14420df30f3c326ec6b93aabbd8207248"
+    },
+    {
+      "path": "experiments/redesign/rust-agent-host-lab/core/src/model_gateway.rs",
+      "git_blob": "b953664d415297b333c8201ad8f99b4830998ba9"
+    },
+    {
+      "path": "experiments/redesign/rust-agent-host-lab/core/src/lib.rs",
+      "git_blob": "60e478b3597902142f93318e97f6c646e338047a"
+    },
+    {
+      "path": "experiments/redesign/rust-agent-host-lab/core/src/http_recovery_tests.rs",
+      "git_blob": "96d23d1ddeb2438ba11ae2cf2ddce22dc873a5e5"
+    },
+    {
+      "path": "experiments/redesign/rust-agent-host-lab/core/src/contract_transport.rs",
+      "git_blob": "571701d8affd33d0301e8debb6bebb0c21e7c324"
+    },
+    {
+      "path": "experiments/redesign/rust-agent-host-lab/core/src/chat_history.rs",
+      "git_blob": "0a887ff8f52c287f978ae6b8098c648a79f3237b"
+    },
+    {
+      "path": "experiments/redesign/rust-agent-host-lab/core/tests/fixtures/legacy-schema12/store.dart",
+      "git_blob": "6499d3afdbc394ab333bcbb0b41ed7eb537c92b2"
+    },
+    {
+      "path": "experiments/redesign/rust-agent-host-lab/core/tests/fixtures/legacy-schema12/manifest.json",
+      "git_blob": "aab99b5726e9ceb1c500f387aa75dd1355d1f6a6"
+    },
+    {
+      "path": "experiments/redesign/rust-agent-host-lab/core/tests/fixtures/legacy-schema12/entities.dart",
+      "git_blob": "00c5e1d0e7393c13c823b6beff4402dc527f08be"
+    },
+    {
+      "path": "experiments/redesign/rust-agent-host-lab/core/src/bin/native-protocol-fixture.rs",
+      "git_blob": "836bde8e41994350f740c51132084bfd5adf1ee4"
+    },
+    {
+      "path": "experiments/redesign/plugin-contract-lab/fixtures/research_read.json",
+      "git_blob": "de1b357778011acb9520260be47c5bf2dfd89fa2"
+    },
+    {
+      "path": "experiments/redesign/plugin-contract-lab/fixtures/inquiry_read.json",
+      "git_blob": "695b13b1903da8fae702608002575dca7e115e19"
+    },
+    {
+      "path": "experiments/redesign/plugin-contract-lab/fixtures/equipment_loan.json",
+      "git_blob": "9a5016dd39f8e96bc8e5259ef2a863d9d6b12cd5"
+    },
+    {
+      "path": "experiments/redesign/plugin-contract-lab/fixtures/MAPPINGS.md",
+      "git_blob": "d104a5bc1762c06860047a8c7cdf1e2de1e37312"
+    },
+    {
+      "path": "experiments/redesign/plugin-contract-lab/core/Cargo.toml",
+      "git_blob": "084abffb09e03a3dc48bcf162e7f0437b8efd146"
+    },
+    {
+      "path": "experiments/redesign/plugin-contract-lab/core/Cargo.lock",
+      "git_blob": "ab3c369b6ec6f153b9541ae2d4631f51fca2e8e9"
+    },
+    {
+      "path": "experiments/redesign/plugin-contract-lab/core/tests/registration.rs",
+      "git_blob": "24c865cf411309ff10a515b7350a8425d04b0721"
+    },
+    {
+      "path": "experiments/redesign/plugin-contract-lab/core/tests/read_contract.rs",
+      "git_blob": "c04bd26392223f8984e34549fa0f7820c20c2c89"
+    },
+    {
+      "path": "experiments/redesign/plugin-contract-lab/core/tests/mapping_contract.rs",
+      "git_blob": "01feed52953284df3d49ac0873476ca243bb3b75"
+    },
+    {
+      "path": "experiments/redesign/plugin-contract-lab/core/src/schema.rs",
+      "git_blob": "159d48f4d3586266ab1dc7402e3b0c7190616328"
+    },
+    {
+      "path": "experiments/redesign/plugin-contract-lab/core/src/mappings.rs",
+      "git_blob": "76b5b7c5754fa02fb9f7541f56e32728064a740b"
+    },
+    {
+      "path": "experiments/redesign/plugin-contract-lab/core/src/main.rs",
+      "git_blob": "fb6f29039a3357530b5b684e07d39ba82e99c0e4"
+    },
+    {
+      "path": "experiments/redesign/plugin-contract-lab/core/src/lib.rs",
+      "git_blob": "a0dab587f38e5cb01132148c7e088fbbfa52a54e"
+    },
+    {
+      "path": "experiments/redesign/plugin-contract-lab/core/tests/support/mod.rs",
+      "git_blob": "a6a64be6a9f3891f9a8b96cc1a017d94d3f2038d"
+    },
+    {
+      "path": "experiments/redesign/core-agent-lab/core/mutations.py",
+      "git_blob": "044d612c73c5992903d416d51bf6a0946bbb7a94"
+    },
+    {
+      "path": "experiments/redesign/core-agent-lab/core/host_mutations.py",
+      "git_blob": "00af416f38d700d7b8f10d80ddf6472b6480b1fa"
+    },
+    {
+      "path": "experiments/redesign/core-agent-lab/core/Cargo.toml",
+      "git_blob": "f4bae266f73078d38433c0bdde554a8ca63c2d76"
+    },
+    {
+      "path": "experiments/redesign/core-agent-lab/core/Cargo.lock",
+      "git_blob": "cff731287ac6c35a507c61caaf517aec8e719b6c"
+    },
+    {
+      "path": "experiments/redesign/core-agent-lab/core/CLI.md",
+      "git_blob": "67775e6dc0cb397a7d73d13f2757278da7b2ea89"
+    },
+    {
+      "path": "experiments/redesign/core-agent-lab/core/tests/wire_review.rs",
+      "git_blob": "e1c01dd9ecfc7bd9c22f5dd0579be9dcfd8b746c"
+    },
+    {
+      "path": "experiments/redesign/core-agent-lab/core/tests/wire.rs",
+      "git_blob": "96f8b1128ebcbc0c95f9ed665a02b06d7c48a11d"
+    },
+    {
+      "path": "experiments/redesign/core-agent-lab/core/tests/timing_fsync_delay.c",
+      "git_blob": "b432f4bd443ec0d39fda91afe8cc507c7907d06c"
+    },
+    {
+      "path": "experiments/redesign/core-agent-lab/core/tests/timing_diagnostics.py",
+      "git_blob": "3a1d70c14e35e7f9a3f5751d672b9036b36b6ca0"
+    },
+    {
+      "path": "experiments/redesign/core-agent-lab/core/tests/native_runtime_restore.rs",
+      "git_blob": "5ce8c93fae4277fbf69172bac434c403384b3959"
+    },
+    {
+      "path": "experiments/redesign/core-agent-lab/core/tests/native_protocol.rs",
+      "git_blob": "e78d58d4aae3be74af4dda7d279585d5113743b3"
+    },
+    {
+      "path": "experiments/redesign/core-agent-lab/core/tests/native_ports.rs",
+      "git_blob": "7b275d816bdce60215216b88126dcb3f9ab62a76"
+    },
+    {
+      "path": "experiments/redesign/core-agent-lab/core/tests/kernel.rs",
+      "git_blob": "04d42b8746d4f352a0ed6dc952589618f44e8d63"
+    },
+    {
+      "path": "experiments/redesign/core-agent-lab/core/tests/http_transport.rs",
+      "git_blob": "eee726914eac340681e52cf77e2c1ca1f9faedf8"
+    },
+    {
+      "path": "experiments/redesign/core-agent-lab/core/tests/host.rs",
+      "git_blob": "55186e4189e19666a7d26ac3b914cddd876e7148"
+    },
+    {
+      "path": "experiments/redesign/core-agent-lab/core/tests/TIMING.md",
+      "git_blob": "2a832bc238aeb692858adf9e6159fa4cd34f2d1c"
+    },
+    {
+      "path": "experiments/redesign/core-agent-lab/core/src/wire_sse.rs",
+      "git_blob": "8693d93705cc55eedba2d650971885594d704f14"
+    },
+    {
+      "path": "experiments/redesign/core-agent-lab/core/src/wire_provider.rs",
+      "git_blob": "8f76b7e67ad690a6152e86d8c77d5d8f81009321"
+    },
+    {
+      "path": "experiments/redesign/core-agent-lab/core/src/wire_json.rs",
+      "git_blob": "65b63a6e4b7c30a57c16dd44eb8e27b844c17fec"
+    },
+    {
+      "path": "experiments/redesign/core-agent-lab/core/src/store.rs",
+      "git_blob": "535310429ba8d7f62de81556ba92f0ff9d7d2154"
+    },
+    {
+      "path": "experiments/redesign/core-agent-lab/core/src/policy.rs",
+      "git_blob": "36b6fbabd3d63df93f677ff366d7f8a5755f8702"
+    },
+    {
+      "path": "experiments/redesign/core-agent-lab/core/src/model.rs",
+      "git_blob": "4713346e031fec922397945d5994937c21e58318"
+    },
+    {
+      "path": "experiments/redesign/core-agent-lab/core/src/main.rs",
+      "git_blob": "a9d970eb440be6c0bbe8ce3017fc67df2066c793"
+    },
+    {
+      "path": "experiments/redesign/core-agent-lab/core/src/lib.rs",
+      "git_blob": "62b2d3f877d411b4fff74c89cf6d296632222dd9"
+    },
+    {
+      "path": "experiments/redesign/core-agent-lab/core/src/http_transport.rs",
+      "git_blob": "3eb97caf06d56f33ad71f1d7018771b46460ad6f"
+    },
+    {
+      "path": "experiments/redesign/core-agent-lab/core/src/host_session.rs",
+      "git_blob": "310d6da39ec621431bc9c324a4aa1d911668d869"
+    },
+    {
+      "path": "experiments/redesign/core-agent-lab/core/src/agent_ports.rs",
+      "git_blob": "1e687631d47d20c5586edbef3ba38353599ca31e"
+    },
+    {
+      "path": "experiments/redesign/core-agent-lab/core/src/agent.rs",
+      "git_blob": "76aeb633a75bb61134846208ddf4681777043433"
+    },
+    {
+      "path": "docs/contracts/redesign-v1.3.2/supplier-name-contract.md",
+      "git_blob": "006c32b6bc2f59674c14070385624f73cb15f1b7"
+    },
+    {
+      "path": "docs/contracts/redesign-v1.3.2/recovery-minimal-contract.md",
+      "git_blob": "8a8ec0c3645aaebd454e401d55677c72d60551fd"
+    },
+    {
+      "path": "docs/contracts/redesign-v1.3.2/authorization-minimal-contract.md",
+      "git_blob": "f6e18b0e3fd73567db3902e31ebb56f5aa5862e8"
+    },
+    {
+      "path": "docs/contracts/muyon-android/semantics/README.md",
+      "git_blob": "83e3bae8af825362619247dc06b755b5535628a8"
+    },
+    {
+      "path": "docs/contracts/muyon-android/semantics/P01-VERIFICATION.md",
+      "git_blob": "712f81e4e69deeaf2c8b4ac50fcb7ad31dbb1e12"
+    },
+    {
+      "path": "docs/contracts/muyon-android/schema/result-v1.schema.json",
+      "git_blob": "8ae156d8880b8312923fcc1a79e1e0e93429fecf"
+    },
+    {
+      "path": "docs/contracts/muyon-android/schema/command-v1.schema.json",
+      "git_blob": "11978fcc5b48ed3abb8b984f0e5d2a164b5c5a6a"
+    },
+    {
+      "path": "docs/contracts/muyon-android/fixtures/supplier-create.json",
+      "git_blob": "194bf3534a4a965eaf9d71349b26c868ebcfe735"
+    },
+    {
+      "path": "docs/contracts/muyon-android/fixtures/lifecycle.json",
+      "git_blob": "f54b276fc882b5ffc0c0660c0c42ff6f2d80e325"
+    },
+    {
+      "path": "docs/contracts/muyon-android/fixtures/codec-vectors.json",
+      "git_blob": "f840d2d77f969820a2b0d8babc98012976ab44b5"
+    },
+    {
+      "path": "crates/muyon-core/Cargo.toml",
+      "git_blob": "04071e255443a6e4696a45cbb0dddcad89f1b7e0"
+    },
+    {
+      "path": "crates/muyon-android-ffi/uniffi.android.toml",
+      "git_blob": "62add447a0c57036957ec59526afb71a40362be0"
+    },
+    {
+      "path": "crates/muyon-android-ffi/Cargo.toml",
+      "git_blob": "11112dc63f6405c3140c13ba425e6fd0faf7542b"
+    },
+    {
+      "path": "crates/muyon-core/tests/store_admission_additional.rs",
+      "git_blob": "faee0b2bad6fb65b20a70ef953b2640c4fa59a8a"
+    },
+    {
+      "path": "crates/muyon-core/tests/resource_boundaries_additional.rs",
+      "git_blob": "69826e707f6a07cb5051d846e4a576716da28c21"
+    },
+    {
+      "path": "crates/muyon-core/tests/research.rs",
+      "git_blob": "9c2eb191f22982867a126f84cdc12d4bd4c4e441"
+    },
+    {
+      "path": "crates/muyon-core/tests/group_runtime_store.rs",
+      "git_blob": "2e98112f725a535ee91afc915caea6bb4ea47b0d"
+    },
+    {
+      "path": "crates/muyon-core/tests/group_runtime.rs",
+      "git_blob": "e2130ce817630d7ac06f06d133751d3109e768de"
+    },
+    {
+      "path": "crates/muyon-core/tests/group_governance.rs",
+      "git_blob": "040deb26965777c476fcf215423f2fffff8dcaf1"
+    },
+    {
+      "path": "crates/muyon-core/tests/evidence_local.rs",
+      "git_blob": "65dbdf22ff20d624a3c4d00e58f9ec18bc651f8d"
+    },
+    {
+      "path": "crates/muyon-core/tests/documents.rs",
+      "git_blob": "829aee12727e372ec654af6e753b3d47e30620d1"
+    },
+    {
+      "path": "crates/muyon-core/tests/document_storage.rs",
+      "git_blob": "d9200a7504b6ff7afba203546870d4fda4d06bd5"
+    },
+    {
+      "path": "crates/muyon-core/tests/document_edit_tree_goldens.json",
+      "git_blob": "e11f069c2301f0c59c9abc2eade30c8875b0d1d2"
+    },
+    {
+      "path": "crates/muyon-core/tests/document_edit_transactions.rs",
+      "git_blob": "7168203aa1a59d731f1e14d39b3f2fb7eb14fdca"
+    },
+    {
+      "path": "crates/muyon-core/tests/document_edit_schema2.rs",
+      "git_blob": "b2ff93650f6aee6a9f1eae8da75c68a35300eb71"
+    },
+    {
+      "path": "crates/muyon-core/tests/document_edit_policy_epoch.rs",
+      "git_blob": "14213778f274a4f07ae27039730812f1ad6146c1"
+    },
+    {
+      "path": "crates/muyon-core/tests/document_edit_gateway.rs",
+      "git_blob": "77028b974dda6b8aed7bda7090d9207bbfc12790"
+    },
+    {
+      "path": "crates/muyon-core/tests/document_edit_engine_protocol.rs",
+      "git_blob": "af302416c2188a30e4989554cb7b966efc059846"
+    },
+    {
+      "path": "crates/muyon-core/tests/document_edit_core_bridge.rs",
+      "git_blob": "159b4f1f59d65e4defd6cbff753e11a64423f58f"
+    },
+    {
+      "path": "crates/muyon-core/tests/document_edit_candidates.rs",
+      "git_blob": "8420da8ae44090b2a8e3923bee0763a176731f4d"
+    },
+    {
+      "path": "crates/muyon-core/tests/contract_vectors_additional.rs",
+      "git_blob": "aa88a169333bb73c2f07b87b3bab674eac55c9ee"
+    },
+    {
+      "path": "crates/muyon-core/tests/contract.rs",
+      "git_blob": "151d634b28732ca36cfd59a65441f981b3508157"
+    },
+    {
+      "path": "crates/muyon-core/tests/business.rs",
+      "git_blob": "cf70a1c02f684ae2e1c78ff3acbbddbc0920e742"
+    },
+    {
+      "path": "crates/muyon-core/tests/bot_drafts.rs",
+      "git_blob": "a355c86c4586d930005cf53e8e52ade44ff5d829"
+    },
+    {
+      "path": "crates/muyon-core/tests/blobs.rs",
+      "git_blob": "6ca1dcc5aad3f2846c461b6cd4811e1703e8d150"
+    },
+    {
+      "path": "crates/muyon-core/tests/archive.rs",
+      "git_blob": "79fa9113dcb422cee4d8cee719bd3cd24e4fc5aa"
+    },
+    {
+      "path": "crates/muyon-core/tests/agent_workflow.rs",
+      "git_blob": "d1c259e1b36c881d330db726a2b3dad665ab948e"
+    },
+    {
+      "path": "crates/muyon-core/tests/agent_tools.rs",
+      "git_blob": "7f7639e1de4179208f1263a462d241cf8388b066"
+    },
+    {
+      "path": "crates/muyon-core/tests/agent_product.rs",
+      "git_blob": "f05b955c8a4a7b6fcc91cad1a04960fb58154e9b"
+    },
+    {
+      "path": "crates/muyon-core/tests/agent_owner.rs",
+      "git_blob": "024eea1e8a9236001fca0ccd6a8d191f2abf47bf"
+    },
+    {
+      "path": "crates/muyon-core/tests/agent_child_tools.rs",
+      "git_blob": "67216b0cb47a8d7dc4f185033bb6cb8f2ac9d422"
+    },
+    {
+      "path": "crates/muyon-core/src/sqlite.rs",
+      "git_blob": "9874440c370dd9ab29179a4660f33efbec745531"
+    },
+    {
+      "path": "crates/muyon-core/src/review_lifecycle.rs",
+      "git_blob": "dd571c110b3f8e3285ff9eb32fe4c6cb08c5a709"
+    },
+    {
+      "path": "crates/muyon-core/src/research.rs",
+      "git_blob": "1f080b2f2a28402326f46351cd050e17fbacac88"
+    },
+    {
+      "path": "crates/muyon-core/src/lib.rs",
+      "git_blob": "32eb56498f1b294806afbd4f0dc14b9df5fb6652"
+    },
+    {
+      "path": "crates/muyon-core/src/contract.rs",
+      "git_blob": "76bd40a4b7f68ea8a147ff6dd040d128a028705b"
+    },
+    {
+      "path": "crates/muyon-core/src/business.rs",
+      "git_blob": "0c3e4b8d3ca90bb194aa920d4e619e716d7dbdfe"
+    },
+    {
+      "path": "crates/muyon-core/src/bot_drafts.rs",
+      "git_blob": "0ac37802442f27fa7d5b8282390e3b8efa9701b2"
+    },
+    {
+      "path": "crates/muyon-core/src/bot_definitions.rs",
+      "git_blob": "c4daf80433afbf82de402fe49fc4d8f9dde30510"
+    },
+    {
+      "path": "crates/muyon-core/src/blobs.rs",
+      "git_blob": "c87c7f60a1b9d82e4f0390ee0aaf11c66e9346cb"
+    },
+    {
+      "path": "crates/muyon-core/src/archive.rs",
+      "git_blob": "fc08b171575814addb99b9f771d8e84884b0d083"
+    },
+    {
+      "path": "crates/muyon-core/tests/fixtures/archive/zip64-extra.zip",
+      "git_blob": "182bdd4725e599f91cae22e010fc46d4df75606a"
+    },
+    {
+      "path": "crates/muyon-core/tests/fixtures/archive/unknown-extra.zip",
+      "git_blob": "2535482fc30d9017a87b6151a2bda4531aa99d37"
+    },
+    {
+      "path": "crates/muyon-core/tests/fixtures/archive/unicode-alias.zip",
+      "git_blob": "f478c8eb1d209da8a99769feb545d0672092c2fa"
+    },
+    {
+      "path": "crates/muyon-core/tests/fixtures/archive/traversal.zip",
+      "git_blob": "7c87a15ec310669a34763d3bb95f5c0b7c7ae148"
+    },
+    {
+      "path": "crates/muyon-core/tests/fixtures/archive/symlink.zip",
+      "git_blob": "ff78551d28ed30cdaa099781383cf776f31163c0"
+    },
+    {
+      "path": "crates/muyon-core/tests/fixtures/archive/stored.zip",
+      "git_blob": "7b27431df903e3f09f7dd65cbfcc2f878e6bdee0"
+    },
+    {
+      "path": "crates/muyon-core/tests/fixtures/archive/prefix-file.zip",
+      "git_blob": "4950776c53d63d9600e39a1a7486ce46f2f36357"
+    },
+    {
+      "path": "crates/muyon-core/tests/fixtures/archive/overlap.zip",
+      "git_blob": "d47e04974ac84d56b6f0428de71a9432863d49c7"
+    },
+    {
+      "path": "crates/muyon-core/tests/fixtures/archive/generate.py",
+      "git_blob": "e2b1179a2b2bd999f84d291692c821a124a861e5"
+    },
+    {
+      "path": "crates/muyon-core/tests/fixtures/archive/fifo.zip",
+      "git_blob": "7d02b38df3e156cad0c7bd1a4c156e3c3b39be5b"
+    },
+    {
+      "path": "crates/muyon-core/tests/fixtures/archive/empty-part.zip",
+      "git_blob": "f3d8ba2c5c67642d0cb4ad89f609bc15662aaa41"
+    },
+    {
+      "path": "crates/muyon-core/tests/fixtures/archive/duplicate.zip",
+      "git_blob": "302021a2cc3d9ac6bb6c1c06952aad2289b912b9"
+    },
+    {
+      "path": "crates/muyon-core/tests/fixtures/archive/drive.zip",
+      "git_blob": "e7ab3b55ab18725b3a42caaf8cded523a65981cb"
+    },
+    {
+      "path": "crates/muyon-core/tests/fixtures/archive/directories.zip",
+      "git_blob": "533d3a4c6abece7a5469effd425374c2a6643211"
+    },
+    {
+      "path": "crates/muyon-core/tests/fixtures/archive/device.zip",
+      "git_blob": "67de4b01a92db705151ba4ac4297e03a23ecb882"
+    },
+    {
+      "path": "crates/muyon-core/tests/fixtures/archive/descriptor.zip",
+      "git_blob": "cfd804b578b6f660c29d673e1c37f19218b20497"
+    },
+    {
+      "path": "crates/muyon-core/tests/fixtures/archive/deflated.zip",
+      "git_blob": "cdfbb71854d2ffe5700905836b169e0c346ccbc6"
+    },
+    {
+      "path": "crates/muyon-core/tests/fixtures/archive/backslash.zip",
+      "git_blob": "bee1f168857e6147aaf09bea2ba46285e0433a08"
+    },
+    {
+      "path": "crates/muyon-core/tests/fixtures/archive/archive409.zip",
+      "git_blob": "06d7bbe5c3bab328b973327830c80d0ad3232008"
+    },
+    {
+      "path": "crates/muyon-core/tests/fixtures/archive/aggregate-limit.zip",
+      "git_blob": "23b3649123e7e5c05cd6f664e3abb525bad8b9fc"
+    },
+    {
+      "path": "crates/muyon-core/tests/fixtures/archive/absolute.zip",
+      "git_blob": "6cb76650a0ec39402fb988bd69f32447918d483b"
+    },
+    {
+      "path": "crates/muyon-core/src/group_runtime/store.rs",
+      "git_blob": "e73aedab999312d32223b7ec34fb0cd6b30f036e"
+    },
+    {
+      "path": "crates/muyon-core/src/group_runtime/mod.rs",
+      "git_blob": "dda3a2d97520e3d9dc46e9a08937a6ad856de035"
+    },
+    {
+      "path": "crates/muyon-core/src/group_governance/mod.rs",
+      "git_blob": "ce7569ade4955c9d7d021de53b2820665eaa14b1"
+    },
+    {
+      "path": "crates/muyon-core/src/evidence/store_tests.rs",
+      "git_blob": "63133f868206b50ed443d0fa420216db5db16bae"
+    },
+    {
+      "path": "crates/muyon-core/src/evidence/store.rs",
+      "git_blob": "d554822211c221c3f9d76de10d87213733a4479a"
+    },
+    {
+      "path": "crates/muyon-core/src/evidence/run-store-tests.py",
+      "git_blob": "a8b4da6c431f87ae5e3aeb19feb83a764650e3ca"
+    },
+    {
+      "path": "crates/muyon-core/src/evidence/mod.rs",
+      "git_blob": "5cc623245dca2b6d81f4574484f0c79181b9205d"
+    },
+    {
+      "path": "crates/muyon-core/src/evidence/local.rs",
+      "git_blob": "e6000ef1e8753f924dcbc2b100bc3174c916a52c"
+    },
+    {
+      "path": "crates/muyon-core/src/documents/storage_tests.rs",
+      "git_blob": "bdc37fb54c5b3abbf180aef0939983884d0474bd"
+    },
+    {
+      "path": "crates/muyon-core/src/documents/storage.rs",
+      "git_blob": "b0976ce4a39ac441d48d7a820712ea59e8172fbf"
+    },
+    {
+      "path": "crates/muyon-core/src/documents/mod.rs",
+      "git_blob": "11c974d3264d15cad16364159e31cc9f1d78d5c7"
+    },
+    {
+      "path": "crates/muyon-core/src/documents/identity.rs",
+      "git_blob": "86b34288d1cf2dbc557751ced7766d7a25208a97"
+    },
+    {
+      "path": "crates/muyon-core/src/documents/history_tests.rs",
+      "git_blob": "36527d7b0c642aabc3de662bf4802bc329629b24"
+    },
+    {
+      "path": "crates/muyon-core/src/documents/capability.rs",
+      "git_blob": "1860608619665b1668e8ac1a20ca834435966377"
+    },
+    {
+      "path": "crates/muyon-core/src/documents/candidate_tests.rs",
+      "git_blob": "26b06d6305c676d9be5c780e874b808fb4061995"
+    },
+    {
+      "path": "crates/muyon-core/src/documents/candidate.rs",
+      "git_blob": "530eb8b0676ab6a5be6cb419f586c6b67f56be89"
+    },
+    {
+      "path": "crates/muyon-core/src/documents/annotation.rs",
+      "git_blob": "1bd9ae82d70d48102c38ed3f4ac8cf241a0b6bc6"
+    },
+    {
+      "path": "crates/muyon-core/src/documents/anchor.rs",
+      "git_blob": "76cffe25cb0e31ff0abcd8d3af0d195032bb2423"
+    },
+    {
+      "path": "crates/muyon-core/src/document_edit/text_protocol.rs",
+      "git_blob": "629c620b829db0ab8468dcf53792f8a3a6eb02d2"
+    },
+    {
+      "path": "crates/muyon-core/src/document_edit/mod.rs",
+      "git_blob": "1cc510d1cea46f17a42229bf65ff705f2df5fa1d"
+    },
+    {
+      "path": "crates/muyon-core/src/document_edit/gateway.rs",
+      "git_blob": "784bda14ffb1edc332bb8adf31ad0cb6f759e17e"
+    },
+    {
+      "path": "crates/muyon-core/src/document_edit/fingerprint.rs",
+      "git_blob": "078d1916a6e0c166c8c74f2fbe19f034149b7e2a"
+    },
+    {
+      "path": "crates/muyon-core/src/document_edit/engine_protocol.rs",
+      "git_blob": "2c5994acc6feaed8ccdb7a0f7ebda2d2c4e2146a"
+    },
+    {
+      "path": "crates/muyon-core/src/document_edit/edited_candidates.rs",
+      "git_blob": "f66d1abfbb2a064181261dc723cf32591b68567f"
+    },
+    {
+      "path": "crates/muyon-core/src/bot_definitions/tests.rs",
+      "git_blob": "c3921432a7b506e033218840ad1bf0172000b4ae"
+    },
+    {
+      "path": "crates/muyon-core/src/bin/business_worker.rs",
+      "git_blob": "cdd96f2ce554083588f004d9c4489251bf3bbd64"
+    },
+    {
+      "path": "crates/muyon-core/src/artifacts/workflow_tests.rs",
+      "git_blob": "0e29759584b66b2f891bb9006130f1081999974b"
+    },
+    {
+      "path": "crates/muyon-core/src/artifacts/tests.rs",
+      "git_blob": "d70179a87d41f392908e90d65e50972c83c81307"
+    },
+    {
+      "path": "crates/muyon-core/src/artifacts/save_journal.rs",
+      "git_blob": "a583a3376eb59e2a9ac9fa01630b3f215898390b"
+    },
+    {
+      "path": "crates/muyon-core/src/artifacts/project_access.rs",
+      "git_blob": "9e9037ec0faca7d81a5e5484512444bf6b85e389"
+    },
+    {
+      "path": "crates/muyon-core/src/artifacts/mod.rs",
+      "git_blob": "f063d2b15aadca594e5f9eed55a87f9b399bc51c"
+    },
+    {
+      "path": "crates/muyon-core/src/artifacts/catalog.rs",
+      "git_blob": "f167a42ea4bafc311ff1d58e8d1ea0d5c3d755e3"
+    },
+    {
+      "path": "crates/muyon-core/src/agent/workflow.rs",
+      "git_blob": "4e1d86f3e8eabb4518382ed1c2a8b9a169c27b2f"
+    },
+    {
+      "path": "crates/muyon-core/src/agent/tools.rs",
+      "git_blob": "32d668b0ae242f29e4c45ec96bcb15fa16eb9bf9"
+    },
+    {
+      "path": "crates/muyon-core/src/agent/owner.rs",
+      "git_blob": "833770fe076b54481cfa61c1e6773eb5a41ddc87"
+    },
+    {
+      "path": "crates/muyon-core/src/agent/mod.rs",
+      "git_blob": "9bd65a05b2fdaa5e1001084615e81ead65c3112b"
+    },
+    {
+      "path": "crates/muyon-core/src/document_edit/edited_candidates/core_bridge.rs",
+      "git_blob": "95e91b240a7669970d5fcc859e3f00c9bd640691"
+    },
+    {
+      "path": "crates/muyon-core/src/agent/skills/supplier-overview/SKILL.md",
+      "git_blob": "4e22a75f305b199821cb66109e67ba949cffb8e2"
+    },
+    {
+      "path": "crates/muyon-core/src/agent/skills/paper-overview/SKILL.md",
+      "git_blob": "86ee452c42d9d90fa78eac3db951ce913175ee90"
+    },
+    {
+      "path": "crates/muyon-android-ffi/src/lib.rs",
+      "git_blob": "df5ecf724a63a6258ab01e16a7fed228cb216c14"
+    },
+    {
+      "path": "crates/muyon-android-ffi/src/bin/uniffi-bindgen.rs",
+      "git_blob": "a01b5470614a45e4ce3dfca5556f72e74027a07a"
+    }
+  ]
+}

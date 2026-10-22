@@ -1,0 +1,20 @@
+{
+  "argv": [
+    "cargo",
+    "+1.93.1",
+    "test",
+    "--offline",
+    "--locked",
+    "--manifest-path",
+    "/tmp/muyon-retirement-no-active-dart/experiments/redesign/rust-agent-host-lab/core/Cargo.toml",
+    "--test",
+    "supplier_store"
+  ],
+  "cwd": "/workspace/Muyon-retirement-prerequisites-20261022",
+  "source_sha": "a7cdc6a2aecdb27700cdad95008dff923bbec6dd",
+  "dirty_source": true,
+  "start_utc": "2026-10-22T18:16:44.918355+00:00",
+  "exit_code": 0,
+  "duration_seconds": 13.886,
+  "end_utc": "2026-10-22T18:16:58.713639+00:00"
+}

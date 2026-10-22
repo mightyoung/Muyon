@@ -1,0 +1,22 @@
+BEGIN {"argv": ["cargo", "+1.93.1", "test", "--offline", "--locked", "--manifest-path", "/tmp/muyon-retirement-no-active-dart/experiments/redesign/rust-agent-host-lab/core/Cargo.toml", "--test", "supplier_store"], "cwd": "/workspace/Muyon-retirement-prerequisites-20261022", "source_sha": "a7cdc6a2aecdb27700cdad95008dff923bbec6dd", "dirty_source": true, "start_utc": "2026-10-22T18:16:44.918355+00:00"}
+   Compiling muyon-rust-agent-host-lab v0.1.0 (/tmp/muyon-retirement-no-active-dart/experiments/redesign/rust-agent-host-lab/core)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 12.01s
+     Running tests/supplier_store.rs (/tmp/muyon-retirement-target/debug/deps/supplier_store-307b19097cb1611d)
+
+running 12 tests
+test authority_unavailable_during_registered_dispatch_revokes_publication ... ok
+test fixture_domain_contract_is_tied_to_actual_dart_schema_source ... ok
+test identity_and_request_shape_are_not_sql_or_path_authority ... ok
+test current_projection_rereads_name_while_historical_receipt_identity_stays_original ... ok
+test current_reads_reject_pinned_revision_drift_and_pending_or_revoked_authority ... ok
+test mode_change_and_symlink_ancestor_are_denied ... ok
+test registered_read_yields_business_name_and_original_durable_receipt_without_business_write ... ok
+test replaced_file_symlinks_owner_mode_and_no_create_fail_closed ... ok
+test same_revision_tamper_without_host_source_stamp_change_is_denied ... ok
+test meta_shape_and_storage_types_are_checked ... ok
+test actual_source_mutation_in_each_final_host_sample_denies_publication ... ok
+test unknown_schema_missing_deleted_malformed_and_oversized_sources_fail_closed ... ok
+
+test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.66s
+
+END {"argv": ["cargo", "+1.93.1", "test", "--offline", "--locked", "--manifest-path", "/tmp/muyon-retirement-no-active-dart/experiments/redesign/rust-agent-host-lab/core/Cargo.toml", "--test", "supplier_store"], "cwd": "/workspace/Muyon-retirement-prerequisites-20261022", "source_sha": "a7cdc6a2aecdb27700cdad95008dff923bbec6dd", "dirty_source": true, "start_utc": "2026-10-22T18:16:44.918355+00:00", "exit_code": 0, "duration_seconds": 13.886, "end_utc": "2026-10-22T18:16:58.713639+00:00"}

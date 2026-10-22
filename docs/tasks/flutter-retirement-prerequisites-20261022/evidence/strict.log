@@ -1,0 +1,50 @@
+BEGIN {"argv": ["cargo", "+1.93.1", "clippy", "--offline", "--locked", "--manifest-path", "crates/Cargo.toml", "--workspace", "--all-targets", "--", "-D", "warnings"], "cwd": "/workspace/Muyon-retirement-prerequisites-20261022", "source_sha": "a7cdc6a2aecdb27700cdad95008dff923bbec6dd", "dirty_source": false, "start_utc": "2026-10-22T18:08:20.515518+00:00"}
+    Blocking waiting for file lock on build directory
+    Checking serde_core v1.0.229
+    Checking typenum v1.20.1
+    Checking cfg-if v1.0.5
+    Checking zmij v1.0.23
+    Checking memchr v2.8.3
+    Checking itoa v1.0.18
+    Checking muyon-core-agent-lab v0.1.0 (/workspace/Muyon-retirement-prerequisites-20261022/experiments/redesign/core-agent-lab/core)
+    Checking const-oid v0.10.2
+    Checking cpufeatures v0.3.1
+    Checking tinyvec v1.13.3
+    Checking muyon-plugin-contract-lab v0.1.0 (/workspace/Muyon-retirement-prerequisites-20261022/experiments/redesign/plugin-contract-lab/core)
+    Checking muyon-rust-agent-host-lab v0.1.0 (/workspace/Muyon-retirement-prerequisites-20261022/experiments/redesign/rust-agent-host-lab/core)
+    Checking hybrid-array v0.4.15
+    Checking unicode-normalization v0.1.25
+    Checking crypto-common v0.2.2
+    Checking block-buffer v0.12.1
+    Checking serde_json v1.0.154
+    Checking serde v1.0.229
+    Checking digest v0.11.3
+    Checking sha2 v0.11.1
+    Checking muyon-web-search-lab v0.1.0 (/workspace/Muyon-retirement-prerequisites-20261022/experiments/redesign/web-search-lab/core)
+    Checking libc v0.2.191
+    Checking linux-raw-sys v0.12.1
+    Checking bitflags v2.13.2
+    Checking once_cell v1.21.4
+    Checking muyon-core v0.1.0 (/workspace/Muyon-retirement-prerequisites-20261022/crates/muyon-core)
+    Checking anyhow v1.0.104
+    Checking fastrand v2.5.0
+    Checking rustix v1.1.5
+    Checking getrandom v0.4.3
+    Checking hashbrown v0.17.1
+    Checking equivalent v1.0.3
+    Checking thiserror v2.0.21
+    Checking camino v1.2.6
+    Checking indexmap v2.14.2
+    Checking cargo-platform v0.3.3
+    Checking semver v1.0.28
+    Checking static_assertions v1.1.0
+    Checking bytes v1.12.1
+    Checking heck v0.5.0
+    Checking cargo_metadata v0.23.1
+    Checking uniffi_core v0.32.2
+    Checking tempfile v3.27.0
+    Checking uniffi_pipeline v0.32.2
+    Checking uniffi v0.32.2
+    Checking muyon-android-ffi v0.1.0 (/workspace/Muyon-retirement-prerequisites-20261022/crates/muyon-android-ffi)
+    Finished `dev` profile [unoptimized] target(s) in 3m 49s
+END {"argv": ["cargo", "+1.93.1", "clippy", "--offline", "--locked", "--manifest-path", "crates/Cargo.toml", "--workspace", "--all-targets", "--", "-D", "warnings"], "cwd": "/workspace/Muyon-retirement-prerequisites-20261022", "source_sha": "a7cdc6a2aecdb27700cdad95008dff923bbec6dd", "dirty_source": false, "start_utc": "2026-10-22T18:08:20.515518+00:00", "exit_code": 0, "duration_seconds": 230.818, "end_utc": "2026-10-22T18:12:10.864129+00:00"}
