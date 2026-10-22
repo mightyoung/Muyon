@@ -640,6 +640,43 @@ impl BusinessStore {
             byte_length: Revision::new(u.length),
         })
     }
+    /// COPY-only: add a reference to an already-published immutable source blob.
+    /// The caller owns authorization/intent and the same SQL transaction. This
+    /// performs no upload, staging, file write, pin change or independent commit.
+    pub(crate) fn clone_blob_reference_in_transaction(
+        &self,
+        tx: &Transaction<'_>,
+        project_id: &str,
+        target_id: &str,
+        expected_blob: &BlobRef,
+        new_reference_id: &str,
+    ) -> Result<BlobRef> {
+        if !tx.belongs_to(self.database()) {
+            return Err(ContractError::InvalidAuthority);
+        }
+        identity(target_id)?;
+        identity(new_reference_id)?;
+        expected_blob.validate()?;
+        self.project_revision_for_blob(project_id)?;
+        let rows = sql(self.database().query(
+            "SELECT CASE WHEN length(CAST(b.byte_length AS BLOB))<=20 THEN b.byte_length ELSE NULL END FROM blob_references r JOIN blobs b ON b.digest=r.digest WHERE r.project_id=? AND r.digest=? AND b.state='ready' LIMIT 1",
+            &[project_id, &expected_blob.digest],
+        ))?;
+        let row = rows.first().ok_or(ContractError::NotFound)?;
+        if cell(row, 0)? != expected_blob.byte_length.as_str() {
+            return Err(ContractError::BindingMismatch);
+        }
+        verify_file(
+            &self.object_path(&expected_blob.digest)?,
+            expected_blob.byte_length.value(),
+            &expected_blob.digest,
+        )?;
+        sql(self.database().exec(
+            "INSERT INTO blob_references(reference_id,project_id,target_id,digest) VALUES(?,?,?,?)",
+            &[new_reference_id, project_id, target_id, &expected_blob.digest],
+        ))?;
+        Ok(expected_blob.clone())
+    }
     fn open_reader_for(
         &self,
         project: &str,

@@ -342,6 +342,63 @@ impl BusinessStore {
         ))?;
         Ok(metadata)
     }
+    /// COPY-only: append metadata for the exact existing source bytes. There is
+    /// no edited-candidate or format-change argument. Gateway must check current
+    /// authority before this hook, append its receipt and recheck grant at COMMIT.
+    /// This hook never commits; propagate errors and roll back the entire tx.
+    pub(crate) fn document_clone_in_transaction(
+        &self,
+        tx: &Transaction<'_>,
+        base: &DocumentRef,
+        title: &str,
+        expected_blob: &BlobRef,
+    ) -> Result<DocumentMetadata> {
+        if !tx.belongs_to(self.database()) {
+            return Err(ContractError::InvalidAuthority);
+        }
+        self.document_schema()?;
+        let current = self.current_document(base)?;
+        expected_blob.validate()?;
+        if &current.blob != expected_blob {
+            return Err(ContractError::BindingMismatch);
+        }
+        let project = self.document_project(base)?;
+        let title = normalize_text(title, 500, true)?.ok_or(ContractError::Required)?;
+        let revision = base.revision().next()?;
+        let document = DocumentRef::new(
+            base.scope().clone(),
+            base.document_id(),
+            revision.clone(),
+            current.document.format(),
+        )
+        .map_err(|_| ContractError::InvalidIdentity)?;
+        let binding = encode(&document)?;
+        let digest: String = Sha256::digest(binding.as_bytes())
+            .iter()
+            .map(|byte| format!("{byte:02x}"))
+            .collect();
+        let reference = format!("doc-{digest}");
+        let blob = self.clone_blob_reference_in_transaction(
+            tx,
+            project,
+            base.document_id(),
+            expected_blob,
+            &reference,
+        )?;
+        let changed = sql(self.database().exec(
+            "UPDATE document_heads SET revision=? WHERE project_id=? AND document_id=? AND revision=?",
+            &[revision.as_str(), project, base.document_id(), base.revision().as_str()],
+        ))?;
+        if changed != 1 {
+            return Err(ContractError::RevisionConflict);
+        }
+        let metadata = DocumentMetadata { document, title, blob };
+        sql(self.database().exec(
+            "INSERT INTO document_revisions VALUES(?,?,?,?)",
+            &[project, base.document_id(), revision.as_str(), &encode(&metadata)?],
+        ))?;
+        Ok(metadata)
+    }
     /// HOST ONLY, after authentic current policy/user authorization. No model or
     /// deserialized permission list may call this. Reissue must use next generation.
     pub fn issue_document_grant_trusted(
