@@ -30,12 +30,15 @@ class DocumentReaderPlatformTest {
         val result = CompletableDeferred<SidecarSaveResult>()
         val calls = AtomicInteger()
         try {
-            PdfDocument().use { doc ->
+            val doc = PdfDocument()
+            try {
                 repeat(2) { index ->
                     val page = doc.startPage(PdfDocument.PageInfo.Builder(100, 100, index + 1).create())
                     page.canvas.drawColor(Color.WHITE); doc.finishPage(page)
                 }
                 file.outputStream().use { doc.writeTo(it) }
+            } finally {
+                doc.close()
             }
             val ref = ReaderDocumentRef("w", "p", "d", "1", DocumentFormat.PDF)
             val note = SidecarAnnotation("n", "1", ref, "{opaque-core-anchor}", "第 1 页", "人工 h",
@@ -83,12 +86,15 @@ class DocumentReaderPlatformTest {
         val current = AtomicBoolean(true)
         val saves = AtomicInteger()
         try {
-            PdfDocument().use { doc ->
+            val doc = PdfDocument()
+            try {
                 repeat(3) { index ->
                     val page = doc.startPage(PdfDocument.PageInfo.Builder(100, 100, index + 1).create())
                     page.canvas.drawColor(Color.WHITE); doc.finishPage(page)
                 }
                 file.outputStream().use { doc.writeTo(it) }
+            } finally {
+                doc.close()
             }
             val ref = ReaderDocumentRef("w", "p", "retry-doc", "1", DocumentFormat.PDF)
             val note = SidecarAnnotation("n", "1", ref, "{opaque-core-anchor}", "第 1 页", "人工 h",
@@ -155,13 +161,16 @@ class DocumentReaderPlatformTest {
         val context = InstrumentationRegistry.getInstrumentation().targetContext
         val file = File.createTempFile("synthetic-reader-", ".pdf", context.cacheDir)
         try {
-            PdfDocument().use { doc ->
+            val doc = PdfDocument()
+            try {
                 listOf(Color.RED, Color.BLUE).forEachIndexed { index, color ->
                     val page = doc.startPage(PdfDocument.PageInfo.Builder(100, 200, index + 1).create())
                     page.canvas.drawRect(0f, 0f, 100f, 200f, Paint().apply { this.color = color })
                     doc.finishPage(page)
                 }
                 file.outputStream().use { doc.writeTo(it) }
+            } finally {
+                doc.close()
             }
             fun descriptor() = ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY)
             val first = NativeDocumentPreview.pdf(descriptor(), 0)
