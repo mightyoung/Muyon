@@ -148,3 +148,15 @@ newReaderAdmission(principal), shared Service domain. These are internal seams,
 not a working IPC/API for shell to guess. Catalog, root grant mapping/policy,
 PFD resource transport, actual binding consumer and typed surface IPC remain pending.
 Actual presentation binding01e1 is available and is the next integration dependency.
+
+
+## Exact owner handoff now available
+
+NATIVE-READER-POLICY-V1.md supersedes the earlier semantic-only endpoint requests:
+six precise native request/output contracts, observed real authorization fields,
+natural TTL vs terminal revoke/foreign generation, original-attempt reconciliation
+(which may fence), atomic root-chain revoke including existing hooks, retention and
+mandatory tests. Proposed ABI names are explicit, not generated APIs. Host source
+checkpoint66394026000d3acdc4942df1df31400a8603adaa already pushed. Missing code
+is not new user authorization; the only unresolved initial-access rule and narrow
+recommended local-workspace gesture policy are stated separately.
