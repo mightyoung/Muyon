@@ -19,7 +19,7 @@ impl Fixture {
         fs::create_dir(&root).unwrap();
         Self(root)
     }
-    fn path(&self) -> PathBuf {
+    pub(super) fn path(&self) -> PathBuf {
         self.0.join("store.sqlite")
     }
     pub(super) fn setup(&self) -> (BusinessStore, DocumentAccess) {

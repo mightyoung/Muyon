@@ -202,7 +202,7 @@ impl BusinessStore {
         self.document_schema()?;
         sql(tx.commit())
     }
-    fn document_schema(&self) -> Result<()> {
+    pub(super) fn document_schema(&self) -> Result<()> {
         for (name, ddl) in SCHEMA {
             let rows = sql(self.database().query(
                 "SELECT sql FROM sqlite_master WHERE type='table' AND name=?",
