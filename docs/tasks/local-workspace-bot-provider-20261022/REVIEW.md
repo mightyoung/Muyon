@@ -18,3 +18,15 @@ FFI fixture header/revision/length/checksum.
 
 Limits: reviewer did not compile Rust, run Rust/FFI tests or generate UniFFI bindings;
 cargo/rustc unavailable. Independent static review is not runtime acceptance.
+
+
+## Actual Rust failure and repair re-review
+
+The original static review missed the NULL CASE defect later found by actual Rust
+verification (1 PASS/14 FAIL). That failure supersedes any implication of functional
+acceptance. Original failure evidence is preserved unchanged. Follow-up independent
+read-only review inspected the NULL/type/byte-bound repair and four regressions,
+ran source-extracted SQL checks, and found an unbounded original receipt digest.
+The same text/exact64-byte projection guard was added there and independently
+rechecked; no outstanding static findings. Repaired-source Rust is still NOT_RUN.
+See NULL-PROJECTION-FIX.md for scope, evidence and remaining HOLD conditions.
