@@ -9,7 +9,7 @@ with tempfile.TemporaryDirectory(prefix='muyon-bot-create-') as temp:
   p=root/rel
   if p.exists():
    (target/rel).parent.mkdir(parents=True,exist_ok=True);shutil.copyfile(p,target/rel)
- draft=subprocess.check_output(['git','show','15c65c7c9c1f0af1e73c8092b2de2ac78939eea7:crates/muyon-core/src/bot_drafts.rs'],cwd=root)
+ draft=subprocess.check_output(['git','show','098d9aca214e6642c1b3ffde64921ebedbae335d:crates/muyon-core/src/bot_drafts.rs'],cwd=root)
  (target/'crates/muyon-core/src/bot_drafts.rs').write_bytes(draft)
  lib=target/'crates/muyon-core/src/lib.rs'
  with lib.open('a') as f:f.write('\npub mod bot_drafts;\npub mod bot_definitions;\n')

@@ -414,6 +414,18 @@ pub fn confirm_create_trusted(
     id: &str,
     review_digest: &str,
 ) -> Result<CreateReceipt> {
+    confirm_create_with_boundary(store, conversation, project, id, review_digest, || Ok(()))
+}
+
+// Private deterministic test seam at the real durable pending/effect boundary.
+fn confirm_create_with_boundary(
+    store: &BusinessStore,
+    conversation: &str,
+    project: Option<&str>,
+    id: &str,
+    review_digest: &str,
+    after_pending: impl FnOnce() -> Result<()>,
+) -> Result<CreateReceipt> {
     let key = scope(store, conversation, project)?;
     {
         let tx = sql(store.database().transaction())?;
@@ -437,6 +449,7 @@ pub fn confirm_create_trusted(
         sql(store.database().exec("UPDATE local_bot_definition_intents SET status='pending' WHERE intent_id=? AND status='prepared'",&[id]))?;
         sql(tx.commit())?; // durable pending before effect; any uncertainty requires original lookup
     }
+    after_pending()?;
     let tx = sql(store.database().transaction())?;
     let i = intent(store, &key, id)?;
     if i.status != "pending" || load(store, conversation, project, &binding(&i.frozen))? != i.frozen

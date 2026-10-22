@@ -28,7 +28,7 @@ impl Fixture {
             expected_generation: "1".into(),
             expected_stored_revision: "0".into(),
         };
-        crate::bot_drafts::save(
+        save_draft(
             &store,
             CONVERSATION,
             None,
@@ -114,7 +114,7 @@ fn cas_scope_and_changed_confirmation_reject_without_definition() {
     let r = prepare(&f);
     assert!(confirm_create_trusted(f.store(), CONVERSATION, None, INTENT, "wrong").is_err());
     assert!(lookup_create(f.store(), OTHER, None, INTENT).is_err());
-    crate::bot_drafts::save(
+    save_draft(
         f.store(),
         CONVERSATION,
         None,
@@ -149,7 +149,7 @@ fn pending_unknown_never_reexecutes_and_archive_replay_cannot_clear_stop() {
         confirm_create_trusted(f.store(), CONVERSATION, None, INTENT, &r.review_digest).unwrap(),
         unknown
     );
-    crate::bot_drafts::save(
+    save_draft(
         f.store(),
         CONVERSATION,
         None,
@@ -162,7 +162,7 @@ fn pending_unknown_never_reexecutes_and_archive_replay_cannot_clear_stop() {
     f.binding.expected_stored_revision = "2".into();
     // Restored/newly saved editing data cannot erase the durable creation guard.
     assert!(prepare_create(f.store(), CONVERSATION, None, &f.binding, OTHER).is_err());
-    assert!(crate::bot_drafts::save(
+    assert!(save_draft(
         f.store(),
         CONVERSATION,
         None,
@@ -328,4 +328,280 @@ fn real_child_process_kill_preserves_pending_and_original_lookup() {
     );
     assert!(list(f.store(), CONVERSATION, None).unwrap().is_empty());
     assert!(prepare_create(f.store(), CONVERSATION, None, &f.binding, OTHER).is_err());
+}
+
+fn project_fixture() -> Fixture {
+    let mut f = Fixture::new();
+    f.store()
+        .database()
+        .exec(
+            "INSERT INTO projects VALUES('p1','synthetic','Synthetic project','1',0)",
+            &[],
+        )
+        .unwrap();
+    let d = crate::bot_drafts::resolve(f.store(), CONVERSATION, Some("p1")).unwrap();
+    f.binding = DraftBinding {
+        namespace_id: d["namespace_id"].as_str().unwrap().into(),
+        draft_id: d["draft_id"].as_str().unwrap().into(),
+        expected_generation: "1".into(),
+        expected_stored_revision: "0".into(),
+    };
+    save_draft(
+        f.store(),
+        CONVERSATION,
+        Some("p1"),
+        &f.binding,
+        "44444444-4444-4444-8444-444444444444",
+        "3",
+        &archive(1),
+    )
+    .unwrap();
+    f.binding.expected_stored_revision = "1".into();
+    f
+}
+fn assert_original_pending_zero_definitions(f: &Fixture) {
+    let db = crate::sqlite::Db::open(f.path.to_str().unwrap(), true, false).unwrap();
+    assert_eq!(
+        db.query("SELECT COUNT(*) FROM local_bot_definitions", &[])
+            .unwrap()[0][0]
+            .as_deref(),
+        Some("0")
+    );
+    assert_eq!(
+        db.query(
+            "SELECT status FROM local_bot_definition_intents WHERE intent_id=?",
+            &[INTENT]
+        )
+        .unwrap()[0][0]
+            .as_deref(),
+        Some("pending")
+    );
+    assert!(db
+        .query(
+            "SELECT receipt_json FROM local_bot_definition_intents WHERE intent_id=?",
+            &[INTENT]
+        )
+        .unwrap()[0][0]
+        .is_none());
+}
+#[test]
+fn project_deleted_exactly_between_pending_and_effect_must_not_commit() {
+    let f = project_fixture();
+    let r = prepare_create(f.store(), CONVERSATION, Some("p1"), &f.binding, INTENT).unwrap();
+    let result = confirm_create_with_boundary(
+        f.store(),
+        CONVERSATION,
+        Some("p1"),
+        INTENT,
+        &r.review_digest,
+        || {
+            sql(f
+                .store()
+                .database()
+                .exec("UPDATE projects SET deleted=1 WHERE id='p1'", &[]))?;
+            Ok(())
+        },
+    );
+    assert!(result.is_err(), "revoked project must not create a Bot");
+    assert_original_pending_zero_definitions(&f);
+    assert_eq!(
+        f.store()
+            .database()
+            .query("SELECT deleted FROM projects WHERE id='p1'", &[])
+            .unwrap()[0][0]
+            .as_deref(),
+        Some("1")
+    );
+}
+fn check_receipt_tail_trigger(body: &str) {
+    check_mutation_trigger(body, false)
+}
+fn check_mutation_trigger(body: &str, after_insert: bool) {
+    let f = project_fixture();
+    let r = prepare_create(f.store(), CONVERSATION, Some("p1"), &f.binding, INTENT).unwrap();
+    let ddl = if after_insert {
+        format!(
+            "CREATE TRIGGER mutate_tail AFTER INSERT ON local_bot_definitions BEGIN {body}; END"
+        )
+    } else {
+        format!("CREATE TRIGGER mutate_tail AFTER UPDATE OF status ON local_bot_definition_intents WHEN NEW.status='committed' BEGIN {body}; END")
+    };
+    f.store().database().exec(&ddl, &[]).unwrap();
+    let result = confirm_create_trusted(
+        f.store(),
+        CONVERSATION,
+        Some("p1"),
+        INTENT,
+        &r.review_digest,
+    );
+    assert!(
+        result.is_err(),
+        "tail mutation must not be reported committed: {body}"
+    );
+    assert_original_pending_zero_definitions(&f);
+    assert_eq!(
+        f.store()
+            .database()
+            .query("SELECT deleted FROM projects WHERE id='p1'", &[])
+            .unwrap()[0][0]
+            .as_deref(),
+        Some("0")
+    );
+    assert_eq!(
+        f.store()
+            .database()
+            .query(
+                "SELECT stored_revision FROM local_bot_drafts WHERE draft_id=?",
+                &[&f.binding.draft_id]
+            )
+            .unwrap()[0][0]
+            .as_deref(),
+        Some("1")
+    );
+    assert_eq!(
+        f.store()
+            .database()
+            .query(
+                "SELECT owner_epoch FROM local_bot_definition_intents WHERE intent_id=?",
+                &[INTENT]
+            )
+            .unwrap()[0][0]
+            .as_deref(),
+        Some("epoch1")
+    );
+    f.store()
+        .database()
+        .exec("DROP TRIGGER mutate_tail", &[])
+        .unwrap();
+    assert_eq!(
+        lookup_create(f.store(), CONVERSATION, Some("p1"), INTENT)
+            .unwrap()
+            .status,
+        CreateStatus::Unknown
+    );
+    assert_eq!(
+        confirm_create_trusted(
+            f.store(),
+            CONVERSATION,
+            Some("p1"),
+            INTENT,
+            &r.review_digest
+        )
+        .unwrap()
+        .status,
+        CreateStatus::Unknown
+    );
+    assert!(prepare_create(f.store(), CONVERSATION, Some("p1"), &f.binding, OTHER).is_err());
+}
+#[test]
+fn tail_project_deletion_rolls_back() {
+    check_receipt_tail_trigger("UPDATE projects SET deleted=1 WHERE id='p1'");
+}
+#[test]
+fn tail_draft_revision_rolls_back() {
+    check_receipt_tail_trigger("UPDATE local_bot_drafts SET stored_revision='2'");
+}
+#[test]
+fn tail_owner_epoch_rolls_back() {
+    check_receipt_tail_trigger(
+        "UPDATE local_bot_definition_intents SET owner_epoch='changed-epoch'",
+    );
+}
+#[test]
+fn tail_workspace_change_rolls_back() {
+    check_receipt_tail_trigger("UPDATE meta SET value='changed-workspace' WHERE key='workspace'");
+}
+#[test]
+fn tail_definition_tampering_rolls_back() {
+    check_receipt_tail_trigger(
+        "UPDATE local_bot_definitions SET definition_json=replace(definition_json,'研究员','篡改')",
+    );
+}
+#[test]
+fn tail_definition_identity_tampering_rolls_back() {
+    check_receipt_tail_trigger("UPDATE local_bot_definitions SET draft_key='forged'");
+}
+#[test]
+fn tail_receipt_tampering_rolls_back() {
+    check_receipt_tail_trigger("UPDATE local_bot_definition_intents SET receipt_json=replace(receipt_json,'committed','unknown')");
+}
+#[test]
+fn tail_intent_identity_tampering_rolls_back() {
+    check_receipt_tail_trigger("UPDATE local_bot_definition_intents SET draft_key='forged'");
+}
+
+fn save_draft(
+    store: &BusinessStore,
+    conversation: &str,
+    project: Option<&str>,
+    binding: &DraftBinding,
+    attempt: &str,
+    memory: &str,
+    bytes: &[u8],
+) -> Result<serde_json::Value> {
+    crate::bot_drafts::prepare_save(
+        store,
+        conversation,
+        project,
+        binding,
+        attempt,
+        crate::bot_drafts::SaveRevisions {
+            exported_memory_revision: memory,
+            host_editor_revision: memory,
+        },
+        bytes,
+    )?;
+    crate::bot_drafts::save(
+        store,
+        conversation,
+        project,
+        binding,
+        attempt,
+        memory,
+        bytes,
+    )
+}
+
+#[test]
+fn pending_update_project_deletion_cannot_commit_effect() {
+    let f = project_fixture();
+    let r = prepare_create(f.store(), CONVERSATION, Some("p1"), &f.binding, INTENT).unwrap();
+    f.store().database().exec("CREATE TRIGGER revoke_at_pending AFTER UPDATE OF status ON local_bot_definition_intents WHEN NEW.status='pending' BEGIN UPDATE projects SET deleted=1 WHERE id='p1'; END",&[]).unwrap();
+    assert!(confirm_create_trusted(
+        f.store(),
+        CONVERSATION,
+        Some("p1"),
+        INTENT,
+        &r.review_digest
+    )
+    .is_err());
+    assert_original_pending_zero_definitions(&f);
+    assert_eq!(
+        f.store()
+            .database()
+            .query("SELECT deleted FROM projects WHERE id='p1'", &[])
+            .unwrap()[0][0]
+            .as_deref(),
+        Some("1")
+    );
+}
+#[test]
+fn insert_draft_revision_rolls_back() {
+    check_mutation_trigger("UPDATE local_bot_drafts SET stored_revision='2'", true);
+}
+#[test]
+fn insert_draft_lifecycle_rolls_back() {
+    check_mutation_trigger("UPDATE local_bot_drafts SET lifecycle='invalid'", true);
+}
+#[test]
+fn insert_draft_scope_rolls_back() {
+    check_mutation_trigger("UPDATE local_bot_drafts SET scope_key='changed'", true);
+}
+#[test]
+fn tail_draft_lifecycle_rolls_back() {
+    check_receipt_tail_trigger("UPDATE local_bot_drafts SET lifecycle='invalid'");
+}
+#[test]
+fn tail_draft_scope_rolls_back() {
+    check_receipt_tail_trigger("UPDATE local_bot_drafts SET scope_key='changed'");
 }
