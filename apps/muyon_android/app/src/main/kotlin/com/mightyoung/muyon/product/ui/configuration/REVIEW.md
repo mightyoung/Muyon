@@ -30,7 +30,7 @@ From `/workspace/Muyon/apps/muyon_android`:
 
 **NOT_RUN**, exit 2: `set MUYON_UI_GRADLE to the existing Gradle 8.13 executable.` An earlier command issued from the repository root failed because `./gradlew` is not there; the corrected command above is the relevant environment result. No Android compile, full suite, Compose test, emulator/device or screenshot result is claimed.
 
-ConfigurationScreenTest.kt adds three instrumentation cases for back/later draft preservation, querying unknown original intent, and group no-default/disabled run. They were read, not executed. They do not yet exercise a host-published status transition through the same mounted editor; add that test before UI acceptance.
+ConfigurationScreenTest.kt now adds four instrumentation cases: back/later draft preservation, querying unknown original intent, a host-published status transition through the same mounted editor, and group no-default/disabled run. All four were read, not executed. The fourth method added during review, `hostReceiptRefreshChangesUnknownToCreatedWithoutRecreation`, keeps the editor reference fixed, publishes immutable snapshots through `mutableStateOf`, and asserts REVIEW → UNKNOWN → CREATED feedback plus absence of the obsolete unknown message and next-step action. It uses only passive local observations of the same original intent; it makes no create/start call and does not remount the editor. Static incremental review found no new issue. The pending state is traversed inside one runOnIdle block rather than asserted as a separate rendered frame. Runtime correctness remains NOT_RUN and must be verified before UI acceptance.
 
 ## Contract and boundary assessment
 
