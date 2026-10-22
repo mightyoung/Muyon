@@ -1,6 +1,6 @@
 //! Trusted host facade. Raw bytes are not evidence of parsing/rendering support.
 use super::*;
-use crate::{blobs::{ControlledReader, MAX_CHUNK, MAX_DOCUMENT_BYTES}, business::BusinessStore,
+use crate::{blobs::{ControlledReader, DocumentReaderStamp, MAX_CHUNK, MAX_DOCUMENT_BYTES}, business::BusinessStore,
     contract::*, sqlite::Transaction};
 use serde::Serialize;
 use sha2::{Digest, Sha256};
@@ -8,6 +8,7 @@ use std::{cell::RefCell, collections::BTreeMap, time::{Duration, Instant}};
 
 pub const MAX_READ_SESSIONS: usize = 8;
 pub const MAX_SOURCE_BUFFER: usize = 2_000_000;
+pub const MAX_SESSION_SNAPSHOT_BYTES: usize = 64 * 1024 * 1024;
 const IDLE: Duration = Duration::from_secs(15);
 const LIFETIME: Duration = Duration::from_secs(30);
 type Result<T> = std::result::Result<T, DocumentReadError>;
@@ -47,6 +48,8 @@ struct Session {
     metadata: DocumentMetadata,
     purpose: DocumentReadPurpose,
     reader: ControlledReader,
+    snapshot: Box<[u8]>,
+    stamp: DocumentReaderStamp,
     opened: Instant,
     touched: Instant,
     delivered: u64,
@@ -63,6 +66,21 @@ fn validate(store: &BusinessStore, tx: &Transaction<'_>, access: &DocumentAccess
     // delivery after expiry. The owner transaction still binds the same head.
     let tail = store.document_access_in_transaction(tx, access, &[purpose.operation()])?;
     if &tail != metadata { return Err(ContractError::BindingMismatch); }
+    Ok(())
+}
+fn validate_snapshot(store: &BusinessStore, tx: &Transaction<'_>, session: &Session) -> CoreResult<()> {
+    let current = store.document_access_in_transaction(tx, &session.access, &[session.purpose.operation()])?;
+    if current != session.metadata || session.reader.source().blob != current.blob {
+        return Err(ContractError::BindingMismatch);
+    }
+    // The delivered memory is private, immutable and authenticated at open.
+    // Stamps detect observed backing-file mutation; cryptographic byte integrity
+    // comes from that snapshot, never from assuming timestamps are unforgeable.
+    if store.document_reader_stamp_in_transaction(tx, &session.reader)? != session.stamp {
+        return Err(ContractError::BindingMismatch);
+    }
+    let tail = store.document_access_in_transaction(tx, &session.access, &[session.purpose.operation()])?;
+    if tail != session.metadata { return Err(ContractError::BindingMismatch); }
     Ok(())
 }
 
@@ -91,6 +109,22 @@ impl DocumentReaderHost {
             }
         }
     }
+    fn deliver_eof(&mut self, session: Session, chunk: DocumentReadChunk) -> Result<DocumentReadChunk> {
+        let access = session.access.clone();
+        let metadata = session.metadata.clone();
+        let purpose = session.purpose;
+        let opened = session.opened;
+        let touched = session.touched;
+        let chunk = self.release(session, Ok(chunk))?;
+        // Cleanup can wait or change persistent authority. The removed pin is
+        // no longer a delivery prerequisite, but exact document/grant truth is.
+        let tx = sql(self.store.database().transaction())?;
+        let current = self.store.document_access_in_transaction(&tx, &access, &[purpose.operation()])?;
+        if current != metadata { return Err(ContractError::BindingMismatch.into()); }
+        if opened.elapsed() >= LIFETIME || touched.elapsed() >= IDLE { return Err(ContractError::InvalidAuthority.into()); }
+        tx.commit().map_err(|_| ContractError::Unknown)?;
+        Ok(chunk)
+    }
     fn sweep(&mut self) -> Result<()> {
         let expired: Vec<_> = self.sessions.iter().filter(|(_, value)| value.expired()).map(|(key, _)| key.clone()).collect();
         for key in expired { self.close(&key)?; }
@@ -103,11 +137,28 @@ impl DocumentReaderHost {
         let tx = sql(self.store.database().transaction())?;
         let metadata = self.store.document_access_in_transaction(&tx, access, &[purpose.operation()])?;
         if metadata.blob.byte_length.value() > MAX_DOCUMENT_BYTES { return Err(ContractError::TextLimit.into()); }
+        let reserved: usize = self.sessions.values().map(|session| session.snapshot.len()).sum();
+        let length = metadata.blob.byte_length.value() as usize;
+        if reserved.checked_add(length).ok_or(ContractError::TextLimit)? > MAX_SESSION_SNAPSHOT_BYTES {
+            return Err(ContractError::TextLimit.into());
+        }
         let project = access.document.scope().project_id.as_deref().ok_or(ContractError::ScopeMismatch)?;
         let mut reader = self.store.open_document_reader_in_transaction(&tx, project, &metadata.blob)?;
         validate(&self.store, &tx, access, purpose, &metadata, &mut reader)?;
+        let stamp = self.store.document_reader_stamp_in_transaction(&tx, &reader)?;
+        let mut snapshot = Vec::with_capacity(length);
+        while snapshot.len() < length {
+            let chunk = self.store.read_blob_chunk(&mut reader, MAX_CHUNK.min(length - snapshot.len()))?;
+            if chunk.is_empty() { return Err(ContractError::StorageCorrupt.into()); }
+            snapshot.extend_from_slice(&chunk);
+        }
+        let digest: String = Sha256::digest(&snapshot).iter().map(|byte| format!("{byte:02x}")).collect();
+        #[cfg(test)]
+        crate::blobs::record_document_hash_bytes(snapshot.len());
+        if digest != metadata.blob.digest { return Err(ContractError::BindingMismatch.into()); }
         let now = Instant::now();
-        let session = Session { access: access.clone(), metadata: metadata.clone(), purpose, reader, opened: now, touched: now, delivered: 0 };
+        let session = Session { access: access.clone(), metadata: metadata.clone(), purpose, reader, snapshot: snapshot.into_boxed_slice(), stamp, opened: now, touched: now, delivered: 0 };
+        validate_snapshot(&self.store, &tx, &session)?;
         let info = DocumentReadSessionInfo { session_id: session.reader.source().lease.lease_id.clone(), metadata, source: session.reader.source().clone(), purpose };
         if tx.commit().is_err() { return self.release(session, Err(ContractError::Unknown)); }
         self.sessions.insert(info.session_id.clone(), session);
@@ -120,13 +171,14 @@ impl DocumentReaderHost {
         let result = (|| -> CoreResult<DocumentReadChunk> {
             if max_bytes == 0 || max_bytes > MAX_CHUNK { return Err(ContractError::TextLimit); }
             let tx = sql(self.store.database().transaction())?;
-            validate(&self.store, &tx, &session.access, session.purpose, &session.metadata, &mut session.reader)?;
-            let bytes = self.store.read_blob_chunk(&mut session.reader, max_bytes)?;
+            validate_snapshot(&self.store, &tx, &session)?;
             let offset = session.delivered;
+            let end = (offset as usize + max_bytes).min(session.snapshot.len());
+            let bytes = session.snapshot[offset as usize..end].to_vec();
             session.delivered = session.delivered.checked_add(bytes.len() as u64).ok_or(ContractError::TextLimit)?;
             let length = session.metadata.blob.byte_length.value();
             if session.delivered > length || session.delivered > MAX_DOCUMENT_BYTES { return Err(ContractError::TextLimit); }
-            validate(&self.store, &tx, &session.access, session.purpose, &session.metadata, &mut session.reader)?;
+            validate_snapshot(&self.store, &tx, &session)?;
             if session.expired() { return Err(ContractError::InvalidAuthority); }
             tx.commit().map_err(|_| ContractError::Unknown)?;
             Ok(DocumentReadChunk { offset: Revision::new(offset), bytes, eof: session.delivered == length })
@@ -135,7 +187,8 @@ impl DocumentReaderHost {
             Ok(chunk) if !chunk.eof => {
                 session.touched = Instant::now(); self.sessions.insert(id.into(), session); Ok(chunk)
             }
-            result => self.release(session, result),
+            Ok(chunk) => self.deliver_eof(session, chunk),
+            Err(error) => self.release(session, Err(error)),
         }
     }
     pub fn is_current(&mut self, id: &str) -> Result<bool> {
@@ -165,6 +218,13 @@ impl DocumentReaderHost {
         let session = self.sessions.get_mut(id).unwrap();
         if idle { session.touched = Instant::now() - IDLE; }
         else { session.opened = Instant::now() - LIFETIME; }
+    }
+    #[cfg(test)]
+    pub(super) fn resample_stamp_for_test(&mut self, id: &str) {
+        let session = self.sessions.get_mut(id).unwrap();
+        let tx = self.store.database().transaction().unwrap();
+        session.stamp = self.store.document_reader_stamp_in_transaction(&tx, &session.reader).unwrap();
+        tx.commit().unwrap();
     }
 }
 impl Drop for DocumentReaderHost { fn drop(&mut self) { let _ = self.close_all(); } }
@@ -218,7 +278,15 @@ impl BusinessStore {
         view.resolve_current(&view.request()).map_err(|_| ContractError::InvalidAuthority)?;
         self.release_document_reader(&reader.borrow())?;
         drop(reader.into_inner());
+        // Finish cleanup before its delivery check, retaining any durable
+        // authority changes made during cleanup instead of undoing them.
         tx.commit().map_err(|_| ContractError::Unknown)?;
+        // The write COMMIT itself may wait. Do not let pre-COMMIT authority
+        // authorize output after that wait; this final transaction is read-only.
+        let delivery = sql(self.database().transaction())?;
+        let current = self.document_access_in_transaction(&delivery, access, &[purpose.operation()])?;
+        if current != metadata { return Err(ContractError::BindingMismatch.into()); }
+        delivery.commit().map_err(|_| ContractError::Unknown)?;
         Ok(value)
     }
 }

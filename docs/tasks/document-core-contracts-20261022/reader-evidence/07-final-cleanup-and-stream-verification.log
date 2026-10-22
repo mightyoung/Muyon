@@ -1,0 +1,32 @@
+2026-10-22 06:57:03.696730+00:00
+Linux-6.18.55-x86_64-with-glibc2.41
+Performance+security fixed source 2e71384e808ecbe5bb010d05e87094e33e9cd3fd; pure security source fec40dc8aeec350ef6d77005d4efb79fd186eb7a.
+
+$ cargo test --offline --locked --manifest-path crates/Cargo.toml -p muyon-core --lib cleanup_time_revocation
+[Errno 2] No such file or directory: 'cargo'
+exit=127 NOT_RUN: no actual RED/GREEN, hash counts or format pass.
+
+$ cargo test --offline --locked --manifest-path crates/Cargo.toml -p muyon-core --lib thirty_mib_stream_hash_cost -- --nocapture
+[Errno 2] No such file or directory: 'cargo'
+exit=127 NOT_RUN: no actual RED/GREEN, hash counts or format pass.
+
+$ cargo test --offline --locked --manifest-path crates/Cargo.toml -p muyon-core --lib documents::reader_tests
+[Errno 2] No such file or directory: 'cargo'
+exit=127 NOT_RUN: no actual RED/GREEN, hash counts or format pass.
+
+$ cargo test --offline --locked --manifest-path crates/Cargo.toml -p muyon-core
+[Errno 2] No such file or directory: 'cargo'
+exit=127 NOT_RUN: no actual RED/GREEN, hash counts or format pass.
+
+$ rustfmt --check --edition 2021 crates/muyon-core/src/blobs.rs crates/muyon-core/src/documents/reader.rs crates/muyon-core/src/documents/reader_tests.rs crates/muyon-core/src/documents/mod.rs
+[Errno 2] No such file or directory: 'rustfmt'
+exit=127 NOT_RUN: no actual RED/GREEN, hash counts or format pass.
+
+$ git diff --check
+exit=0
+
+Sealing checks after adding exact copied original logs:
+$ git diff --cached --check
+exit=2; original-cleanup-red-probe-tests.stdout.log:19 new blank line at EOF, preserved original bytes.
+$ git diff --cached --check -- . ':(exclude)docs/tasks/document-core-contracts-20261022/reader-evidence/original-cleanup-red-probe-tests.stdout.log'
+exit=0

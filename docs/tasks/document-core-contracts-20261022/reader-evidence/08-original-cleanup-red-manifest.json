@@ -1,0 +1,15 @@
+{
+  "immutable_evidence_commit": "4fae7905fd40a6a6234699c6f00a1c1555adab66",
+  "files": [
+    {
+      "origin": "docs/tasks/document-core-contracts-20261022/independent-verification/reader-20261022/original/probes/probe-tests.stdout.log",
+      "local": "docs/tasks/document-core-contracts-20261022/reader-evidence/original-cleanup-red-probe-tests.stdout.log",
+      "sha256": "d676bf6ac2066cea7201b93459339ce63c431a57632f83ee692b42942459dd60"
+    },
+    {
+      "origin": "docs/tasks/document-core-contracts-20261022/independent-verification/reader-20261022/original/probes/probe-tests.stderr.log",
+      "local": "docs/tasks/document-core-contracts-20261022/reader-evidence/original-cleanup-red-probe-tests.stderr.log",
+      "sha256": "0579ef8fdf5814ae9328f60d805b4a600e78c9eaea21e6e907ef98876aa92a63"
+    }
+  ]
+}

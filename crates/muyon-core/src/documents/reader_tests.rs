@@ -122,6 +122,24 @@ fn one_shot_callback_failure_and_cleanup_failure_return_no_success_or_pin() {
 }
 
 #[test]
+fn one_shot_cleanup_time_revocation_withholds_prepared_output() {
+    let (_f, host, access) = setup();
+    host.store().database().exec("CREATE TRIGGER expire_during_reader_cleanup BEFORE DELETE ON blob_pins WHEN OLD.kind='reader' BEGIN UPDATE document_grants SET expires_at_ms='0'; END", &[]).unwrap();
+    let result = host.store().with_document_source(&access, DocumentReadPurpose::ReadText, 1024, |view| Ok(view.bytes().to_vec()));
+    assert!(result.is_err(), "cleanup-time revocation must withhold output");
+    assert_eq!(pins(host.store()), 0);
+}
+
+#[test]
+fn eof_cleanup_time_revocation_withholds_prepared_chunk() {
+    let (_f, mut host, access) = setup();
+    let opened = host.open(&access, DocumentReadPurpose::ReadText).unwrap();
+    host.store().database().exec("CREATE TRIGGER expire_during_reader_cleanup BEFORE DELETE ON blob_pins WHEN OLD.kind='reader' BEGIN UPDATE document_grants SET expires_at_ms='0'; END", &[]).unwrap();
+    assert!(host.read_chunk(&opened.session_id, crate::blobs::MAX_CHUNK).is_err(), "cleanup-time revocation must withhold EOF bytes");
+    assert_eq!(pins(host.store()), 0);
+}
+
+#[test]
 fn bounded_sessions_idle_absolute_lifetime_and_invalid_chunk_release_pins() {
     let (_f, mut host, access) = setup();
     let mut ids = Vec::new();
@@ -199,4 +217,61 @@ fn dropping_host_releases_sessions_before_reopening_same_store() {
     drop(host);
     let store = BusinessStore::open_existing(&f.path(), "workspace", "new-epoch").unwrap();
     assert_eq!(pins(&store), 0);
+}
+
+#[test]
+fn thirty_mib_stream_hash_cost_is_linear_and_chunk_bytes_are_exact() {
+    let (_f, mut host, _) = setup();
+    let bytes: Vec<u8> = (0..30 * 1024 * 1024).map(|n| (n % 251) as u8).collect();
+    let upload = host.store().begin_upload("project").unwrap();
+    for chunk in bytes.chunks(crate::blobs::MAX_CHUNK) { host.store().append_chunk(&upload.upload_id, chunk).unwrap(); }
+    let finished = host.store().finish_blob(&upload.upload_id, crate::blobs::BlobKind::Document).unwrap();
+    let metadata = host.store().register_document_trusted("project", "large-document", "Original large synthetic", DocumentFormat::Text, &finished).unwrap();
+    let access = DocumentAccess { document: metadata.document, authority: AuthorityBinding { grant_id: "large-grant".into(), generation: Revision::new(1), owner_epoch: "epoch".into() } };
+    let expiry = SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_millis() as u64 + 29_000;
+    host.store().issue_document_grant_trusted(&access.document, &access.authority, &[DocumentOperation::ReadText], expiry).unwrap();
+    crate::blobs::take_document_hash_bytes();
+    let opened = host.open(&access, DocumentReadPurpose::ReadText).unwrap();
+    let open_hash_bytes = crate::blobs::take_document_hash_bytes();
+    let backup = host.open(&access, DocumentReadPurpose::ReadText).unwrap();
+    assert!(matches!(host.open(&access, DocumentReadPurpose::ReadText), Err(DocumentReadError::Core(ContractError::TextLimit))));
+    assert_eq!(pins(host.store()), 2, "64 MiB aggregate admission must precede pin creation");
+    let backup_hash_bytes = crate::blobs::take_document_hash_bytes();
+    host.close(&backup.session_id).unwrap();
+    let mut offset = 0;
+    let mut stream_hash_bytes = 0;
+    loop {
+        let chunk = host.read_chunk(&opened.session_id, crate::blobs::MAX_CHUNK).unwrap();
+        let hashed = crate::blobs::take_document_hash_bytes();
+        stream_hash_bytes += hashed;
+        assert_eq!(hashed, 0, "each chunk must avoid whole-source hashing");
+        assert_eq!(chunk.offset.value(), offset as u64);
+        assert_eq!(chunk.bytes, bytes[offset..offset + chunk.bytes.len()]);
+        offset += chunk.bytes.len();
+        if chunk.eof { break; }
+    }
+    println!("source_bytes={} open_hash_bytes={open_hash_bytes} backup_open_hash_bytes={backup_hash_bytes} stream_hash_bytes={stream_hash_bytes}", bytes.len());
+    assert_eq!(offset, bytes.len());
+    assert!(open_hash_bytes <= 4 * bytes.len() as u64);
+    assert!(backup_hash_bytes <= 4 * bytes.len() as u64);
+    assert_eq!(stream_hash_bytes, 0, "delivery must not repeatedly hash a complete source");
+    assert_eq!(pins(host.store()), 0);
+}
+
+#[test]
+fn authenticated_snapshot_never_delivers_mutated_disk_bytes_even_with_resampled_stamp() {
+    let (_f, mut host, access) = setup();
+    let opened = host.open(&access, DocumentReadPurpose::ReadText).unwrap();
+    let path = host.store().root_dir().join("objects").join(&opened.metadata.blob.digest);
+    let original = fs::read(&path).unwrap();
+    let mut tampered = original.clone(); tampered[0] ^= 1; fs::write(&path, &tampered).unwrap();
+    // Model metadata spoofing in this test only: snapshot cryptographic byte
+    // integrity must not depend on timestamps detecting the backing-file change.
+    host.resample_stamp_for_test(&opened.session_id);
+    let chunk = host.read_chunk(&opened.session_id, 7).unwrap();
+    assert_eq!(chunk.bytes, original[..7]);
+    assert_ne!(chunk.bytes, tampered[..7]);
+    // Explicit is_current still performs its original full held-file hash.
+    assert!(!host.is_current(&opened.session_id).unwrap());
+    assert_eq!(pins(host.store()), 0);
 }
