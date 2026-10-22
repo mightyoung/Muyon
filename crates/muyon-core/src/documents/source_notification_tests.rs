@@ -356,3 +356,26 @@ fn ignored_ack_write_cannot_delete_the_generation_tombstone() {
     assert!(store.ack_document_source_notifications_trusted(&first).is_err());
     assert_eq!(store.pending_document_source_notifications_trusted(None, 256).unwrap(), first);
 }
+
+#[test]
+fn later_ack_trigger_cannot_mutate_an_earlier_stale_or_missing_target() {
+    for missing in [false, true] {
+        let (_f, store, source, local, kind) = fixture();
+        let mut second = local.clone(); second.object.object_id = "object-z".into();
+        bind(&store, &source, &second, &kind);
+        store.revoke_document_grant_trusted(&source.authority).unwrap();
+        let pending = store.pending_document_source_notifications_trusted(None, 256).unwrap();
+        assert_eq!(pending.len(), 2);
+        let mut first_input = pending[0].clone();
+        let action = if missing {
+            first_input.object_id = "missing".into();
+            "INSERT INTO document_source_notifications_v1 VALUES('project','actor','missing','1',1)"
+        } else {
+            first_input.generation = Revision::new(99);
+            "DELETE FROM document_source_notifications_v1 WHERE object_id='object'"
+        };
+        store.database().exec(&format!("CREATE TRIGGER tamper AFTER UPDATE ON document_source_notifications_v1 WHEN NEW.object_id='object-z' BEGIN {action}; END"), &[]).unwrap();
+        assert!(store.ack_document_source_notifications_trusted(&[first_input, pending[1].clone()]).is_err());
+        assert_eq!(store.pending_document_source_notifications_trusted(None, 256).unwrap(), pending);
+    }
+}
