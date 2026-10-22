@@ -66,7 +66,7 @@ fn hex(bytes: &[u8]) -> String {
 fn bytes(r: &Record) -> Result<Vec<u8>> {
     let text = r.bytes.as_deref().ok_or(ContractError::NotFound)?;
     if text.len() > MAX_CANDIDATE * 2
-        || text.len() % 2 != 0
+        || !text.len().is_multiple_of(2)
         || !text
             .bytes()
             .all(|b| b.is_ascii_digit() || (b'a'..=b'f').contains(&b))
