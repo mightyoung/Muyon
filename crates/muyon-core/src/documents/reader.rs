@@ -91,6 +91,22 @@ impl DocumentReaderHost {
             }
         }
     }
+    fn deliver_eof(&mut self, session: Session, chunk: DocumentReadChunk) -> Result<DocumentReadChunk> {
+        let access = session.access.clone();
+        let metadata = session.metadata.clone();
+        let purpose = session.purpose;
+        let opened = session.opened;
+        let touched = session.touched;
+        let chunk = self.release(session, Ok(chunk))?;
+        // Cleanup can wait or change persistent authority. The removed pin is
+        // no longer a delivery prerequisite, but exact document/grant truth is.
+        let tx = sql(self.store.database().transaction())?;
+        let current = self.store.document_access_in_transaction(&tx, &access, &[purpose.operation()])?;
+        if current != metadata { return Err(ContractError::BindingMismatch.into()); }
+        if opened.elapsed() >= LIFETIME || touched.elapsed() >= IDLE { return Err(ContractError::InvalidAuthority.into()); }
+        tx.commit().map_err(|_| ContractError::Unknown)?;
+        Ok(chunk)
+    }
     fn sweep(&mut self) -> Result<()> {
         let expired: Vec<_> = self.sessions.iter().filter(|(_, value)| value.expired()).map(|(key, _)| key.clone()).collect();
         for key in expired { self.close(&key)?; }
@@ -135,7 +151,8 @@ impl DocumentReaderHost {
             Ok(chunk) if !chunk.eof => {
                 session.touched = Instant::now(); self.sessions.insert(id.into(), session); Ok(chunk)
             }
-            result => self.release(session, result),
+            Ok(chunk) => self.deliver_eof(session, chunk),
+            Err(error) => self.release(session, Err(error)),
         }
     }
     pub fn is_current(&mut self, id: &str) -> Result<bool> {
@@ -218,6 +235,10 @@ impl BusinessStore {
         view.resolve_current(&view.request()).map_err(|_| ContractError::InvalidAuthority)?;
         self.release_document_reader(&reader.borrow())?;
         drop(reader.into_inner());
+        // Reauthorize after cleanup, without requiring the deliberately deleted
+        // reader pin. A cleanup-triggered revocation/expiry must withhold value.
+        let current = self.document_access_in_transaction(&tx, access, &[purpose.operation()])?;
+        if current != metadata { return Err(ContractError::BindingMismatch.into()); }
         tx.commit().map_err(|_| ContractError::Unknown)?;
         Ok(value)
     }
