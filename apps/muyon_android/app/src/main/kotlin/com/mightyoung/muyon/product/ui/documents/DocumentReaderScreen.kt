@@ -76,11 +76,12 @@ private fun ReaderContent(snapshot: DocumentReaderSnapshot, host: DocumentReader
     var pageCount by remember { mutableIntStateOf(0) }
     var pageInput by remember { mutableStateOf("1") }
     var accessLost by remember { mutableStateOf(false) }
+    var readAttempt by remember { mutableIntStateOf(0) }
     val document = snapshot.document
     val saveScope = rememberCoroutineScope()
     // UI drafts and pending outcomes survive page-loading subtree removal.
     val editors = remember { mutableMapOf<EditorKey, EditorState>() }
-    val preview by produceState<Preview>(Preview.Loading, position.pageIndex) {
+    val preview by produceState<Preview>(Preview.Loading, position.pageIndex, readAttempt) {
         value = Preview.Loading
         val requestedPage = position.pageIndex
         var rendered: NativeDocumentPreview.PdfPage? = null
@@ -118,6 +119,12 @@ private fun ReaderContent(snapshot: DocumentReaderSnapshot, host: DocumentReader
     }
     val pdf = (preview as? Preview.Pdf)?.takeIf { it.pageIndex == position.pageIndex }
     val ready = !accessLost && (pdf != null || preview is Preview.Office)
+    val navigation = ReaderNavigation(pageCount, when {
+        accessLost -> ReaderReadStatus.ACCESS_LOST
+        ready -> ReaderReadStatus.READY
+        preview == Preview.Failed -> ReaderReadStatus.PAGE_FAILED
+        else -> ReaderReadStatus.LOADING
+    })
     Column(Modifier.fillMaxSize().padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
             Text("公共文档阅读", style = MaterialTheme.typography.titleLarge)
@@ -126,18 +133,18 @@ private fun ReaderContent(snapshot: DocumentReaderSnapshot, host: DocumentReader
         Text("${document.documentId} · 修订 ${document.revision}")
         if (document.format == DocumentFormat.PDF) {
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                OutlinedButton(enabled = ready && position.pageIndex > 0, onClick = {
+                OutlinedButton(enabled = navigation.canNavigate && position.pageIndex > 0, onClick = {
                     position = position.goTo(position.pageIndex, pageCount); pageInput = (position.pageIndex + 1).toString()
                 }) { Text("上一页") }
                 Text("${position.pageIndex + 1} / ${if (pageCount == 0) "?" else pageCount}")
-                OutlinedButton(enabled = ready && position.pageIndex < pageCount - 1, onClick = {
+                OutlinedButton(enabled = navigation.canNavigate && position.pageIndex < pageCount - 1, onClick = {
                     position = position.goTo(position.pageIndex + 2, pageCount); pageInput = (position.pageIndex + 1).toString()
                 }) { Text("下一页") }
             }
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 OutlinedTextField(pageInput, { pageInput = it.take(10) }, Modifier.weight(1f),
                     label = { Text("页码") }, singleLine = true)
-                OutlinedButton(enabled = ready && pageInput.toIntOrNull() != null, onClick = {
+                OutlinedButton(enabled = navigation.canNavigate && pageInput.toIntOrNull() != null, onClick = {
                     position = position.goTo(pageInput.toIntOrNull() ?: 1, pageCount)
                     pageInput = (position.pageIndex + 1).toString()
                 }) { Text("定位") }
@@ -150,7 +157,14 @@ private fun ReaderContent(snapshot: DocumentReaderSnapshot, host: DocumentReader
             if (accessLost) Text("访问或修订已失效；请返回重新打开。")
             else when (val shown = preview) {
                 Preview.Loading -> { CircularProgressIndicator(); Text("正在本地读取原文件…") }
-                Preview.Failed -> Text("无法预览：文件损坏、加密、不可寻址、超过安全上限或格式不受支持。未改动原文件。")
+                Preview.Failed -> {
+                    Text("本次读取失败：可能是暂时读取错误、页面损坏、加密、超过安全上限或格式不受支持。未改动原文件。")
+                    if (navigation.canRetry) {
+                        OutlinedButton(onClick = { readAttempt++ }) {
+                            Text(if (document.format == DocumentFormat.PDF) "重试读取当前页" else "重试读取文档")
+                        }
+                    }
+                }
                 is Preview.Pdf -> if (pdf != null) {
                     val width = (LocalConfiguration.current.screenWidthDp - 32).coerceAtLeast(100).dp * position.zoom
                     Box(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState())) {

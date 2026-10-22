@@ -90,3 +90,12 @@ enum class SidecarSubmission(val canSubmit: Boolean) {
         SidecarSaveResult.Unknown -> UNKNOWN
     }
 }
+
+/** A page IO/render failure does not invalidate a still-authorized document or known page count. */
+enum class ReaderReadStatus { LOADING, READY, PAGE_FAILED, ACCESS_LOST }
+
+data class ReaderNavigation(val pageCount: Int, val status: ReaderReadStatus) {
+    val canNavigate: Boolean get() = pageCount > 0 &&
+        (status == ReaderReadStatus.READY || status == ReaderReadStatus.PAGE_FAILED)
+    val canRetry: Boolean get() = status == ReaderReadStatus.PAGE_FAILED
+}

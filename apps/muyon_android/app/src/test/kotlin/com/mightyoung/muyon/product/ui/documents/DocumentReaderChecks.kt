@@ -24,6 +24,13 @@ fun main() {
     check(SidecarSubmission.REJECTED.canSubmit)
     check(SidecarSubmission.SAVING.finished(SidecarSaveResult.Unknown) == SidecarSubmission.UNKNOWN)
     check(SidecarSubmission.SAVING.finished(SidecarSaveResult.Saved) == SidecarSubmission.SAVED)
+    val failedPage = ReaderNavigation(3, ReaderReadStatus.PAGE_FAILED)
+    check(failedPage.canNavigate && failedPage.canRetry)
+    check(!ReaderNavigation(0, ReaderReadStatus.PAGE_FAILED).canNavigate)
+    check(ReaderNavigation(0, ReaderReadStatus.PAGE_FAILED).canRetry)
+    check(!ReaderNavigation(3, ReaderReadStatus.ACCESS_LOST).canNavigate)
+    check(!ReaderNavigation(3, ReaderReadStatus.ACCESS_LOST).canRetry)
+    check(!ReaderNavigation(3, ReaderReadStatus.LOADING).canRetry)
     val item = SidecarAnnotation("note", "2", ref, "{raw-anchor}", "第 1 页", "human:alice",
         AnnotationContent.Comment("before"), false, false)
     check(item.edit(ref, "after")?.expectedAnnotationRevision == "2")
@@ -57,6 +64,13 @@ fun main() {
         "xl/worksheets/sheet1.xml" to "<sheet><row><c r='A1' t='s'><v>0</v></c><c r='B1'><f>1+1</f><v>2</v></c></row></sheet>")
     check(sheet.single().text.contains("A1: Hello world"))
     check(sheet.single().text.contains("B1: 2 [公式缓存值]"))
+    val inlinePhonetic = preview(DocumentFormat.XLSX, "xl/worksheets/sheet1.xml" to
+        """<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><sheetData><row r="1"><c r="A1" t="inlineStr"><is><t>東京</t><rPh sb="0" eb="2"><t>とうきょう</t></rPh><r><t>駅</t></r></is></c><c r="B1" t="inlineStr"><is><t>next</t></is></c></row></sheetData></worksheet>""")
+    check(inlinePhonetic.single().text == "A1: 東京駅\nB1: next\n") { inlinePhonetic.single().text }
+    val sharedPhonetic = preview(DocumentFormat.XLSX,
+        "xl/sharedStrings.xml" to """<sst xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><si><r><t>東京</t></r><rPh sb="0" eb="2"><t>とうきょう</t></rPh><r><t>駅</t></r></si><si><t>next</t></si></sst>""",
+        "xl/worksheets/sheet1.xml" to """<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><sheetData><row><c r="A1" t="s"><v>0</v></c><c r="B1" t="s"><v>1</v></c></row></sheetData></worksheet>""")
+    check(sharedPhonetic.single().text == "A1: 東京駅\nB1: next\n") { sharedPhonetic.single().text }
     check(runCatching { preview(DocumentFormat.DOCX, "word/document.xml" to
         "<!DOCTYPE a [<!ENTITY x SYSTEM 'file:///not-read'>]><a><t>&x;</t></a>") }.isFailure)
     check(runCatching { preview(DocumentFormat.DOCX, "word/document.xml" to "<a>broken") }.isFailure)

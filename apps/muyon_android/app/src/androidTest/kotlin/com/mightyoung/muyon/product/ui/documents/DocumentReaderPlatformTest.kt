@@ -17,6 +17,7 @@ import org.junit.Test
 import org.junit.Rule
 import kotlinx.coroutines.CompletableDeferred
 import java.util.concurrent.atomic.AtomicInteger
+import java.util.concurrent.atomic.AtomicBoolean
 import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
@@ -73,6 +74,81 @@ class DocumentReaderPlatformTest {
             compose.onNodeWithText("edited").assertExists()
             assertEquals(1, calls.get())
         } finally { result.cancel(); file.delete() }
+    }
+
+    @Test fun pageReadFailureCanNavigateAndExplicitlyRetryWithoutResendingUnknownSave() {
+        val context = InstrumentationRegistry.getInstrumentation().targetContext
+        val file = File.createTempFile("synthetic-reader-retry-", ".pdf", context.cacheDir)
+        val failOpen = AtomicBoolean(false)
+        val current = AtomicBoolean(true)
+        val saves = AtomicInteger()
+        try {
+            PdfDocument().use { doc ->
+                repeat(3) { index ->
+                    val page = doc.startPage(PdfDocument.PageInfo.Builder(100, 100, index + 1).create())
+                    page.canvas.drawColor(Color.WHITE); doc.finishPage(page)
+                }
+                file.outputStream().use { doc.writeTo(it) }
+            }
+            val ref = ReaderDocumentRef("w", "p", "retry-doc", "1", DocumentFormat.PDF)
+            val note = SidecarAnnotation("n", "1", ref, "{opaque-core-anchor}", "第 1 页", "人工 h",
+                AnnotationContent.Comment("before"), false, false)
+            val host = DocumentReaderHost(
+                openCurrent = { _, _, _ ->
+                    if (failOpen.get()) error("Synthetic transient FD failure")
+                    ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY)
+                },
+                isCurrent = { _, _ -> current.get() },
+                saveSidecar = { _, _ -> saves.incrementAndGet(); SidecarSaveResult.Unknown },
+            )
+            compose.setContent { MaterialTheme {
+                DocumentReaderScreen(DocumentReaderSnapshot(ref, Uri.parse("content://synthetic/retry"),
+                    1L, true, listOf(note)), host, {})
+            } }
+            fun awaitPage(number: Int) = compose.waitUntil(10000) {
+                compose.onAllNodesWithContentDescription("文档 retry-doc 第 $number 页原文件渲染")
+                    .fetchSemanticsNodes().isNotEmpty()
+            }
+            fun awaitFailure() = compose.waitUntil(10000) {
+                compose.onAllNodesWithText("重试读取当前页").fetchSemanticsNodes().isNotEmpty()
+            }
+            awaitPage(1)
+            compose.onNodeWithText("批注正文").performScrollTo().performTextReplacement("retained draft")
+            compose.onNodeWithText("保存 sidecar 批注").performScrollTo().performClick()
+            compose.waitUntil { saves.get() == 1 }
+            failOpen.set(true)
+            compose.onNodeWithText("下一页").performClick()
+            awaitFailure()
+            compose.onNodeWithText("上一页").assertIsEnabled()
+            compose.onNodeWithText("下一页").assertIsEnabled()
+            compose.onNodeWithText("定位").assertIsEnabled()
+            // Recovery reads no longer require closing this reader or discarding its editor state.
+            failOpen.set(false)
+            compose.onNodeWithText("重试读取当前页").performScrollTo().performClick()
+            awaitPage(2)
+            compose.onNodeWithText("保存 sidecar 批注").performScrollTo().assertIsNotEnabled()
+            compose.onNodeWithText("retained draft").assertExists()
+            assertEquals(1, saves.get())
+            failOpen.set(true)
+            compose.onNodeWithText("下一页").performClick()
+            awaitFailure()
+            failOpen.set(false)
+            compose.onNodeWithText("上一页").performClick()
+            awaitPage(2)
+            assertEquals(1, saves.get())
+            // Distinct failure class: invalid current document cannot retry or navigate.
+            current.set(false)
+            compose.onNodeWithText("下一页").performClick()
+            compose.waitUntil(10000) {
+                compose.onAllNodesWithText("访问或修订已失效；请返回重新打开。")
+                    .fetchSemanticsNodes().isNotEmpty()
+            }
+            compose.onNodeWithText("上一页").assertIsNotEnabled()
+            compose.onNodeWithText("下一页").assertIsNotEnabled()
+            compose.onNodeWithText("定位").assertIsNotEnabled()
+            compose.onNodeWithText("重试读取当前页").assertDoesNotExist()
+            assertEquals(1, saves.get())
+        } finally { file.delete() }
     }
 
     @Test fun nativePdfRendersActualPagesAndRejectsBadPage() {
