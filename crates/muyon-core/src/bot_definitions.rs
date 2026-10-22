@@ -254,7 +254,7 @@ fn load(
 ) -> Result<Frozen> {
     // Repeat actual scope checks under the caller's live transaction, including at its tail.
     let key = scope(store, conversation, project)?;
-    let rows=sql(store.database().query("SELECT workspace,conversation_id,project_id,registry_generation,stored_revision,lifecycle,CASE WHEN LENGTH(archive_hex)<=65536 THEN archive_hex ELSE NULL END,archive_digest,scope_key FROM local_bot_drafts WHERE draft_id=?",&[&b.draft_id]))?;
+    let rows=sql(store.database().query("SELECT workspace,conversation_id,project_id,registry_generation,stored_revision,lifecycle,CASE WHEN archive_hex IS NULL THEN NULL WHEN typeof(archive_hex)!='text' THEN NULL WHEN LENGTH(CAST(archive_hex AS BLOB))<=65536 THEN archive_hex ELSE NULL END,CASE WHEN typeof(archive_digest)='text' AND LENGTH(CAST(archive_digest AS BLOB))=64 THEN archive_digest ELSE NULL END,scope_key FROM local_bot_drafts WHERE draft_id=? AND typeof(scope_key)='text' AND typeof(workspace)='text' AND typeof(conversation_id)='text' AND (project_id IS NULL OR typeof(project_id)='text') AND typeof(registry_generation)='text' AND typeof(stored_revision)='text' AND typeof(lifecycle)='text'",&[&b.draft_id]))?;
     let actual_schema = sql(store.database().query(
         "SELECT name,sql FROM sqlite_master WHERE type='table' AND name GLOB 'local_bot_draft*'",
         &[],
@@ -338,7 +338,7 @@ struct Intent {
 }
 fn intent(store: &BusinessStore, key: &str, id: &str) -> Result<Intent> {
     identity(id)?;
-    let rows=sql(store.database().query("SELECT scope_key,binding_digest,CASE WHEN LENGTH(frozen_json)<=32768 THEN frozen_json ELSE NULL END,owner_epoch,status,CASE WHEN LENGTH(receipt_json)<=32768 THEN receipt_json ELSE NULL END,draft_key FROM local_bot_definition_intents WHERE intent_id=?",&[id]))?;
+    let rows=sql(store.database().query("SELECT scope_key,binding_digest,CASE WHEN LENGTH(CAST(frozen_json AS BLOB))<=32768 THEN frozen_json ELSE NULL END,owner_epoch,status,CASE WHEN LENGTH(CAST(receipt_json AS BLOB))<=32768 THEN receipt_json ELSE NULL END,draft_key FROM local_bot_definition_intents WHERE intent_id=? AND typeof(intent_id)='text' AND typeof(scope_key)='text' AND typeof(draft_key)='text' AND typeof(binding_digest)='text' AND typeof(frozen_json)='text' AND typeof(owner_epoch)='text' AND typeof(status)='text' AND (receipt_json IS NULL OR typeof(receipt_json)='text')",&[id]))?;
     if rows.len() != 1 {
         return Err("bot_intent_not_found");
     }
@@ -439,7 +439,7 @@ fn verify_current(
             return Err("bot_query_original");
         }
         let rows = sql(store.database().query(
-            "SELECT scope_key,draft_key,definition_json FROM local_bot_definitions WHERE id=?",
+            "SELECT scope_key,draft_key,definition_json FROM local_bot_definitions WHERE id=? AND typeof(scope_key)='text' AND typeof(draft_key)='text' AND typeof(definition_json)='text'",
             &[&original.frozen.definition.id],
         ))?;
         if rows.len() != 1
@@ -616,7 +616,7 @@ pub fn lookup_create(
     Ok(out)
 }
 fn get_inner(store: &BusinessStore, key: &str, id: &str) -> Result<BotDefinition> {
-    let rows=sql(store.database().query("SELECT CASE WHEN LENGTH(definition_json)<=32768 THEN definition_json ELSE NULL END FROM local_bot_definitions WHERE id=? AND scope_key=?",&[id,key]))?;
+    let rows=sql(store.database().query("SELECT CASE WHEN LENGTH(CAST(definition_json AS BLOB))<=32768 THEN definition_json ELSE NULL END FROM local_bot_definitions WHERE id=? AND scope_key=? AND typeof(definition_json)='text' AND typeof(draft_key)='text' ",&[id,key]))?;
     if rows.len() != 1 {
         return Err("bot_not_found");
     }
