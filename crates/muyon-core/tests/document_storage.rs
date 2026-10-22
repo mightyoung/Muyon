@@ -682,7 +682,7 @@ fn writes_cannot_strand_existing_annotations_above_read_budget() {
         let mut row = record.clone();
         row.id = format!("padded-{n}");
         let mut payload = serde_json::to_string(&row).unwrap();
-        payload.extend(std::iter::repeat(' ').take(262144 - payload.len()));
+        payload.extend(std::iter::repeat_n(' ', 262144 - payload.len()));
         db.exec(
             "INSERT INTO document_annotations VALUES('project','document',?,'1',?)",
             &[&row.id, &payload],
