@@ -10,12 +10,13 @@ import androidx.compose.ui.unit.dp
 
 /** Neutral capability entry only. It neither selects an engine nor grants a business scope. */
 @Composable
-fun DocumentCapabilitiesScreen(onOpenExistingProjectMaterials: () -> Unit) {
+fun DocumentCapabilitiesScreen(readerSurface: ActivityReaderSurface? = null, project: String? = null, onOpenExistingProjectMaterials: () -> Unit) {
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(20.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)) {
         Text("公共文档能力", style = MaterialTheme.typography.headlineSmall)
         Text("阅读与适量编辑规划覆盖 PDF、Word、PPT、Excel。公共入口尚未接线；引擎选型与权限验证进行中。")
         Text("现有项目 PDF 资料入口保留；公共能力不会扩大科研或供应商的数据范围与授权。")
+        readerSurface?.let { ReaderSelectionSurface(it, project) }
         Button(onClick = onOpenExistingProjectMaterials, modifier = Modifier.heightIn(min = 48.dp)) {
             Text("打开现有项目资料")
         }

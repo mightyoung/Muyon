@@ -1,11 +1,12 @@
-"""Dormant python-docx source; unconditional gate before third-party import."""
-from_guard_message='environment_hold: source/license/isolation/launcher qualification missing'
+"""Permit-checked python-docx copy source; no default authority or engine import."""
+from .runner.worker_gate import require_worker_permit
 
 
-def edit_copy(job,source_path,candidate_path):
-    raise RuntimeError(from_guard_message)
-    # Unreachable source sketch: only a host-prevalidated direct run may be edited.
+def edit_copy(job,source_path,candidate_path,*,permit=None):
+    admitted=require_worker_permit(permit,job,source_path,candidate_path,'python-docx')
+    job=admitted.request
     from docx import Document
+    admitted.engine_entered()
     document=Document(source_path)
     op=job['operation'];run=document.paragraphs[op['paragraph_index']].runs[op['run_index']]
     if run.text != op['expected']:raise ValueError('expected_value_conflict')
@@ -15,4 +16,10 @@ def edit_copy(job,source_path,candidate_path):
     with candidate_path.open('xb') as output:document.save(output)
 
 
-if __name__=='__main__':raise RuntimeError(from_guard_message)
+def main():
+    from .runner.worker_entry import dispatch
+    return dispatch('docx')
+
+if __name__=='__main__':
+    import json
+    print(json.dumps(main(),sort_keys=True))
