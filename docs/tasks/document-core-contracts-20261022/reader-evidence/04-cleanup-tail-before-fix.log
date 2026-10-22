@@ -1,0 +1,5 @@
+2026-10-22 06:45:15.306669+00:00
+Original source ff3cc928311afc12bee3205f28b662c6b7499b34 plus regression tests only.
+$ cargo test --offline --locked --manifest-path crates/Cargo.toml -p muyon-core --lib cleanup_time_revocation
+[Errno 2] No such file or directory: 'cargo'
+exit=127 NOT_RUN; static counterexample, no actual RED claimed.
