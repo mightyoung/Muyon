@@ -1,13 +1,29 @@
 //! Immutable metadata. These values are never proof of host authority.
 use super::{DocumentFormat, ReadInvalidation};
 use crate::contract::{Revision, Scope};
+use serde::{Deserialize, Deserializer, Serialize};
 
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq, Serialize)]
 pub struct DocumentRef {
     scope: Scope,
     document_id: String,
     revision: Revision,
     format: DocumentFormat,
+}
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+struct StoredDocumentRef {
+    scope: Scope,
+    document_id: String,
+    revision: Revision,
+    format: DocumentFormat,
+}
+impl<'de> Deserialize<'de> for DocumentRef {
+    fn deserialize<D: Deserializer<'de>>(decoder: D) -> Result<Self, D::Error> {
+        let value = StoredDocumentRef::deserialize(decoder)?;
+        Self::new(value.scope, &value.document_id, value.revision, value.format)
+            .map_err(|_| serde::de::Error::custom("invalid document identity"))
+    }
 }
 impl DocumentRef {
     pub fn new(

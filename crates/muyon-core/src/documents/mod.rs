@@ -5,10 +5,14 @@
 pub mod anchor;
 pub mod capability;
 pub mod identity;
+pub mod annotation;
+pub mod storage;
 use crate::contract::{AuthorityBinding, FileSource};
 pub use anchor::*;
 pub use capability::*;
 pub use identity::DocumentRef;
+pub use annotation::*;
+pub use storage::{DocumentAccess, DocumentMetadata};
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum ReadInvalidation {

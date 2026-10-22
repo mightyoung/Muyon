@@ -1,7 +1,9 @@
 //! Format declarations are not evidence that an engine is installed or evaluated.
 use std::collections::BTreeMap;
+use serde::{Deserialize, Serialize};
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
 pub enum DocumentFormat {
     Docx,
     Pptx,
@@ -13,7 +15,8 @@ pub enum DocumentFormat {
     Unknown,
 }
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
 pub enum DocumentOperation {
     Inspect,
     ReadText,

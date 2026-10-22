@@ -1,7 +1,9 @@
 //! Revision-bound locations. Validation is structural, never target resolution.
 use super::{identity::valid_id, DocumentFormat, DocumentRef, ReadInvalidation};
+use serde::{Deserialize, Serialize};
 
-#[derive(Clone, Copy, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
 pub struct Rect {
     pub x: f64,
     pub y: f64,
@@ -24,7 +26,8 @@ impl Rect {
             && self.height > 0.0
     }
 }
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
 pub enum CoordinateSystem {
     Unknown,
     /// PDF user-space coordinates before page rotation; crop may have an offset.
@@ -32,7 +35,8 @@ pub enum CoordinateSystem {
     /// Coordinates normalized to the unrotated crop, top-left origin, [0,1].
     CropNormalizedTopLeft,
 }
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
 pub enum PageRotation {
     Degrees0,
     Degrees90,
@@ -40,7 +44,8 @@ pub enum PageRotation {
     Degrees270,
 }
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
 pub struct PdfAnchor {
     pub page_index_zero_based: Option<u32>,
     pub coordinates: CoordinateSystem,
@@ -50,7 +55,8 @@ pub struct PdfAnchor {
     /// Visible selection region. With known user-space crop, must fit inside it.
     pub region: Rect,
 }
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case", deny_unknown_fields)]
 pub enum AnchorLocation {
     Pdf(PdfAnchor),
     Docx {
@@ -75,7 +81,8 @@ pub enum AnchorStatus {
     StructurallyValid,
     UnresolvedGeometry,
 }
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
 pub struct DocumentAnchor {
     pub document: DocumentRef,
     pub location: AnchorLocation,
