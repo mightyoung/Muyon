@@ -18,8 +18,10 @@ or privilege changes. Historical two unknown requests / ¥0.002620 hold untouche
   controlled display/local selection surface; no FFI added.
 - Theme public contract read at `290fcdc593cb67de66a4238d5ce93acd6ad5e1e3`.
   Uses FoundationTheme/controls without changing ui/system or adding theme tokens.
-  At final verification that branch publishes README contract only; actual component
-  source is an outstanding dependency. This branch alone is not Android-buildable.
+  Final source subsequently published at `2aa95ba7ab74ea11f9a89a42d2568650363e6c17`
+  and merged conflict-free at `88e68f8b504db2742e169a351b77634fb68c1549`.
+  Actual signatures inspected; both screens explicitly use theme background, no copied
+  tokens. Android compilation remains unverified due to absent Gradle/SDK.
 - Full UI specification and actual PNG 06/09 read/viewed from archive
   `399e3094740c8fcf1783797f0d0ae1f076dfd123`; later brand archive announcement
   `400e206135690c284c8402521e3135cfb7bfaee8` acknowledged. PNGs are design
@@ -92,8 +94,8 @@ git diff --check
 
 ## Remaining blockers / sole shell integrator handoff
 
-- Compose source must be combined with actual Foundation implementation, then compiled
-  and instrumented on Android. Current partial source is not production UI acceptance.
+- Foundation source is now combined. It still requires actual Android compilation
+  and instrumentation. Current partial source is not production UI acceptance.
 - ui-shell owns screen routing, scope-bound retained editor/ViewModel, immutable host
   snapshot publication, lifecycle/back/keyboard ordering and original receipt callbacks.
   No shell entry was added here. Current BackHandler handles editor steps only;

@@ -1,6 +1,7 @@
 package com.mightyoung.muyon.product.ui.configuration
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -35,7 +36,7 @@ fun BotConfigurationScreen(
         else update { editor.back() } }
     BackHandler(onBack = ::back)
     FoundationTheme {
-        Column(modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(20.dp),
+        Column(modifier.fillMaxSize().background(MaterialTheme.colorScheme.background).verticalScroll(rememberScrollState()).padding(20.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)) {
             Text("配置 Bot", style = MaterialTheme.typography.headlineMedium)
             Text("名称 → 用途 → 建议与修改 → 最终预览", style = MaterialTheme.typography.bodyLarge)

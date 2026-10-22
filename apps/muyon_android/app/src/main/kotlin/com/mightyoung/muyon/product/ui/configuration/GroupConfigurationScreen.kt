@@ -1,5 +1,6 @@
 package com.mightyoung.muyon.product.ui.configuration
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -29,7 +30,7 @@ fun GroupConfigurationScreen(
     onQueryOriginalRequest: ((String) -> Unit)? = null,
 ) {
     FoundationTheme {
-        Column(modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(20.dp),
+        Column(modifier.fillMaxSize().background(MaterialTheme.colorScheme.background).verticalScroll(rememberScrollState()).padding(20.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)) {
             Text("群组协作方式", style = MaterialTheme.typography.headlineMedium)
             FoundationTag("离线配置预览 · 未保存 · 未运行")
