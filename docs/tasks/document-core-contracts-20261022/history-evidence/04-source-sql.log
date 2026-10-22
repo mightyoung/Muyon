@@ -1,0 +1,5 @@
+PASS: exact source DDL and 5 historical-policy SQL statements prepare
+PASS: explicit synthetic policy survives reopen and exact target/generation select
+PASS: oversized projected JSON returns NULL; revoked policy excluded; FK check empty
+LIMIT: Rust authority/head/expiry/metadata logic and byte delivery NOT_RUN here
+SQLite: 3.53.1

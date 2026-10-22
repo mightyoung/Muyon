@@ -1,0 +1,38 @@
+{
+  "gate": "PASS",
+  "build_id": "4a1534a6f10c5d645587740ad4507de26b8a13c2:2cb18838c2bbf47f1100ccc0fc0a00c368db02bae5c8c4f1cb363344a48f6d73",
+  "required_methods": 45,
+  "runs": [
+    {
+      "log": "docs/implementation/android-local-models-20261021/NONPICKER.log",
+      "passed": 40,
+      "gate": "PASS"
+    },
+    {
+      "log": "docs/implementation/android-local-models-20261021/PICKER-GENERATE.log",
+      "passed": 1,
+      "gate": "PASS"
+    },
+    {
+      "log": "docs/implementation/android-local-models-20261021/PICKER-PDF.log",
+      "passed": 1,
+      "gate": "PASS"
+    },
+    {
+      "log": "docs/implementation/android-local-models-20261021/PICKER-ZIP.log",
+      "passed": 1,
+      "gate": "PASS"
+    },
+    {
+      "log": "docs/implementation/android-local-models-20261021/PICKER-DIRECTORY.log",
+      "passed": 1,
+      "gate": "PASS"
+    },
+    {
+      "log": "docs/implementation/android-local-models-20261021/PICKER-PRIVATE.log",
+      "passed": 1,
+      "gate": "PASS"
+    }
+  ],
+  "boundary": "product instrumentation only; I04, production pricing proof and real provider/tool-loop remain separate gates"
+}

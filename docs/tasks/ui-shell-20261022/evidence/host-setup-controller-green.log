@@ -1,0 +1,1 @@
+PASS real host/controller: one reducer, exact CAS, stale/double action rejection, template token/manual buffer, lost outcome original read, cancel/resume, closed-view callback isolation; no native/transport

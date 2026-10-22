@@ -1,0 +1,20 @@
+
+running 8 tests
+test bot_definitions::tests::cas_scope_and_changed_confirmation_reject_without_definition ... FAILED
+test bot_definitions::tests::committed_receipt_and_definition_survive_restart_without_replaying ... ok
+test bot_definitions::tests::corrupted_archive_and_unknown_schema_fail_closed ... ok
+test bot_definitions::tests::creates_only_after_confirm_and_original_intent_is_idempotent ... ok
+test bot_definitions::tests::old_prepared_review_is_sealed_and_explicit_cancel_allows_new_review ... ok
+test bot_definitions::tests::pending_unknown_never_reexecutes_and_archive_replay_cannot_clear_stop ... ok
+test bot_definitions::tests::real_child_process_kill_preserves_pending_and_original_lookup ... 
+running 1 test
+ok
+test bot_definitions::tests::receipt_update_failure_rolls_back_definition_and_keeps_original_pending ... ok
+
+failures:
+
+failures:
+    bot_definitions::tests::cas_scope_and_changed_confirmation_reject_without_definition
+
+test result: FAILED. 7 passed; 1 failed; 0 ignored; 0 measured; 18 filtered out; finished in 0.04s
+

@@ -1,0 +1,208 @@
+{
+  "head": "a132ebe5447fc65f9bc2a0c7afbc3ce1e23a3d17",
+  "kind": "new latest-protocol transaction-tail regression verification",
+  "started_utc": "2026-10-22T06:40:03.357403+00:00",
+  "inputs_sha256": {
+    "crates/muyon-core/src/bot_definitions.rs": "3d6452678f668d5de7018d3f6c3f83c2be09ce49342d15bf04e65e47638cd4e0",
+    "crates/muyon-core/src/bot_definitions/tests.rs": "87f5f210db6acd256770f212a904332d4a712df74811d8f5b06129e3fe693564",
+    "docs/tasks/bot-setup-draft-20261022/run-creation-checks.py": "ebba19d7e67093b2a80436adecea5d4be54b4c42c050b5de10763d3513327ba4"
+  },
+  "dependency_commit": "098d9aca214e6642c1b3ffde64921ebedbae335d",
+  "commands": [
+    {
+      "label": "baseline",
+      "argv": [
+        "python3",
+        "docs/tasks/bot-setup-draft-20261022/run-creation-checks.py"
+      ],
+      "cwd": "/workspace/bot-setup-draft",
+      "started_utc": "2026-10-22T06:40:03.359487+00:00",
+      "ended_utc": "2026-10-22T06:40:09.058657+00:00",
+      "exit_code": 0
+    },
+    {
+      "label": "tail-verification",
+      "argv": [
+        "python3",
+        "docs/tasks/bot-setup-draft-20261022/run-creation-checks.py"
+      ],
+      "cwd": "/tmp/bot-create-mutation-a54h15o4/repo",
+      "started_utc": "2026-10-22T06:40:09.521057+00:00",
+      "ended_utc": "2026-10-22T06:40:15.065410+00:00",
+      "exit_code": 1
+    },
+    {
+      "label": "live-project",
+      "argv": [
+        "python3",
+        "docs/tasks/bot-setup-draft-20261022/run-creation-checks.py"
+      ],
+      "cwd": "/tmp/bot-create-mutation-elhmkk0s/repo",
+      "started_utc": "2026-10-22T06:40:15.568557+00:00",
+      "ended_utc": "2026-10-22T06:40:25.143234+00:00",
+      "exit_code": 1
+    },
+    {
+      "label": "source-scope-key",
+      "argv": [
+        "python3",
+        "docs/tasks/bot-setup-draft-20261022/run-creation-checks.py"
+      ],
+      "cwd": "/tmp/bot-create-mutation-1kgus18i/repo",
+      "started_utc": "2026-10-22T06:40:25.612831+00:00",
+      "ended_utc": "2026-10-22T06:40:31.471920+00:00",
+      "exit_code": 1
+    },
+    {
+      "label": "tail-epoch",
+      "argv": [
+        "python3",
+        "docs/tasks/bot-setup-draft-20261022/run-creation-checks.py"
+      ],
+      "cwd": "/tmp/bot-create-mutation-86zuqxym/repo",
+      "started_utc": "2026-10-22T06:40:31.964541+00:00",
+      "ended_utc": "2026-10-22T06:40:37.736313+00:00",
+      "exit_code": 1
+    },
+    {
+      "label": "source-registry-version",
+      "argv": [
+        "python3",
+        "docs/tasks/bot-setup-draft-20261022/run-creation-checks.py"
+      ],
+      "cwd": "/tmp/bot-create-mutation-j4_3ckh2/repo",
+      "started_utc": "2026-10-22T06:40:38.210828+00:00",
+      "ended_utc": "2026-10-22T06:40:43.936265+00:00",
+      "exit_code": 1
+    },
+    {
+      "label": "persistent-workspace",
+      "argv": [
+        "python3",
+        "docs/tasks/bot-setup-draft-20261022/run-creation-checks.py"
+      ],
+      "cwd": "/tmp/bot-create-mutation-epguf138/repo",
+      "started_utc": "2026-10-22T06:40:44.425885+00:00",
+      "ended_utc": "2026-10-22T06:40:50.229657+00:00",
+      "exit_code": 1
+    },
+    {
+      "label": "archive-storage-type",
+      "argv": [
+        "python3",
+        "docs/tasks/bot-setup-draft-20261022/run-creation-checks.py"
+      ],
+      "cwd": "/tmp/bot-create-mutation-h4lhdb7e/repo",
+      "started_utc": "2026-10-22T06:40:50.701953+00:00",
+      "ended_utc": "2026-10-22T06:40:56.229817+00:00",
+      "exit_code": 1
+    },
+    {
+      "label": "receipt-storage-type",
+      "argv": [
+        "python3",
+        "docs/tasks/bot-setup-draft-20261022/run-creation-checks.py"
+      ],
+      "cwd": "/tmp/bot-create-mutation-yxwbgoow/repo",
+      "started_utc": "2026-10-22T06:40:56.719354+00:00",
+      "ended_utc": "2026-10-22T06:41:02.718042+00:00",
+      "exit_code": 1
+    }
+  ],
+  "mutations": [
+    {
+      "label": "tail-verification",
+      "before": "verify_current(store, &key, id, &original, \"committed\", Some(&receipt))?;",
+      "after": "/* omitted tail verification */",
+      "replacement_count": 1,
+      "mutated_source_sha256": "c7860bf536b65a26cb0ac91f4a2cd1fe06915d852c4858f318b42707782bd75e",
+      "result": "compiled, failed behavioral tests",
+      "exit_code": 1
+    },
+    {
+      "label": "live-project",
+      "before": "ReadScope::current(store, project).map_err(|_| \"bot_scope\")?;",
+      "after": "/* omitted current project read */",
+      "replacement_count": 1,
+      "mutated_source_sha256": "ade2a8a9c09849d354c1f4d0078cfb3bd9094d76ac2aac2932b8ea320232b55a",
+      "result": "compiled, failed behavioral tests",
+      "exit_code": 1
+    },
+    {
+      "label": "source-scope-key",
+      "before": "|| cell(r, 8)? != key",
+      "after": "",
+      "replacement_count": 1,
+      "mutated_source_sha256": "7a473140a98a622cc5976051dd20ce0863c64fe58c398b39521a9597c07b2237",
+      "result": "compiled, failed behavioral tests",
+      "exit_code": 1
+    },
+    {
+      "label": "tail-epoch",
+      "before": "|| current.epoch != original.epoch\n        || current.epoch != store.owner_epoch()",
+      "after": "",
+      "replacement_count": 1,
+      "mutated_source_sha256": "ed5ffbd05d805853d99f6ff2d5ce8e806473f1fa2e194488fa9088b048e72e91",
+      "result": "compiled, failed behavioral tests",
+      "exit_code": 1
+    },
+    {
+      "label": "source-registry-version",
+      "before": "|| cell(&ns[0], 1)? != \"1\"",
+      "after": "",
+      "replacement_count": 1,
+      "mutated_source_sha256": "e4a671f1e419f492acb8a9afedaf9ec029de7dd696ffe5ecd03e60d89ba58e7f",
+      "result": "compiled, failed behavioral tests",
+      "exit_code": 1
+    },
+    {
+      "label": "persistent-workspace",
+      "before": "|| cell(&workspace[0], 0)? != store.workspace_id()",
+      "after": "",
+      "replacement_count": 1,
+      "mutated_source_sha256": "63acae164db9e1a8a270d5bc48f19ce547fca98adf89a5dd6d2f67a15373dfde",
+      "result": "compiled, failed behavioral tests",
+      "exit_code": 1
+    },
+    {
+      "label": "archive-storage-type",
+      "before": "WHEN typeof(archive_hex)!='text' THEN NULL",
+      "after": "WHEN false THEN NULL",
+      "replacement_count": 1,
+      "mutated_source_sha256": "1d4e58cf93646031422ac2ec96c5c5064e9bd92b891cf0fb7aaca95a483954df",
+      "result": "compiled, failed behavioral tests",
+      "exit_code": 1
+    },
+    {
+      "label": "receipt-storage-type",
+      "before": "AND (receipt_json IS NULL OR typeof(receipt_json)='text')",
+      "after": "",
+      "replacement_count": 1,
+      "mutated_source_sha256": "f97462c66ae4ae6e8996929e87883461cb46691ffbd53ca02e5534a404549e89",
+      "result": "compiled, failed behavioral tests",
+      "exit_code": 1
+    }
+  ],
+  "dependency_source_sha256": "6514165380738130e639d4be1ab5440e1bcb09c7d82fd0184b22b986e0d3c678",
+  "ended_utc": "2026-10-22T06:41:02.744197+00:00",
+  "log_sha256": {
+    "archive-storage-type.stderr.log": "f3b1354fdafa799c4612b275062c7cbfbe8a7de34d46a015700372375a1c7414",
+    "archive-storage-type.stdout.log": "bef852ccddff8e4a7858cfe6c1d6fbd49aa4b3815ecc88e590b2cff29b88411e",
+    "baseline.stderr.log": "d14330053553c2428c0b3760ebcedf7bec23cd23a9dc1cfffd10d105b96ad0f4",
+    "baseline.stdout.log": "0494914f010739b5faeab2f768ff6032531917c7f7279f1446bf6c05020ae0d0",
+    "live-project.stderr.log": "bcaa5b444025347ca4f3107f737a81bfc0ab2463267e78f3535fe866e3caea09",
+    "live-project.stdout.log": "909dd9fd7af42280ff1e0e7c6a94df49b6d0d3a89e52668b892e7191fc0465c9",
+    "persistent-workspace.stderr.log": "3299b43c5120812acc47590484c54ebef58065ee3085127da14360bda0be8992",
+    "persistent-workspace.stdout.log": "4e73c75af6be8a48489a928f7ac672331e240296908ec8196202ee89bf8dc100",
+    "receipt-storage-type.stderr.log": "187ba3f3ac4dca3321139f54e869a29aebc091ed681ff8a039f5e8f980616a90",
+    "receipt-storage-type.stdout.log": "ac1aa1349017c14b4544f14aafddf4531b9d7824e20ea2259f6184bcf3fcdbfd",
+    "source-registry-version.stderr.log": "0a18151bc3fa24e85aecc923d326d3f55967bfa187eed66ceaf0e9d25cc473b4",
+    "source-registry-version.stdout.log": "46e7577de40eded84b4856d2ec802b448b925c9e50c8e50f20a31f41f9303bc2",
+    "source-scope-key.stderr.log": "76ae9b95da06aa62ea380faab47628e7a59577e47a6f4f1ef97f2b98dd9a77b1",
+    "source-scope-key.stdout.log": "dff51dcc05f37d23a8b1740c9000d909ce3a1b40f678b691edb0a8f3d216b868",
+    "tail-epoch.stderr.log": "fdf3dcfa736891a6c41ae6808eb4d7831dbb6c3747b15e5b01ed052b32de2c75",
+    "tail-epoch.stdout.log": "d310b6020205354480440e0e4d9ce5cc265b67320129bde255e102da3482ef7e",
+    "tail-verification.stderr.log": "dc7c98661ee9fb6ba5440ce4a6e5f8ec73338a8ec3c1e387ed9f187fb7e1f8f6",
+    "tail-verification.stdout.log": "ac271ada06c0e334bb75e0984cb8f30dd9a528c8d04b09df72b142793cb2d72c"
+  }
+}

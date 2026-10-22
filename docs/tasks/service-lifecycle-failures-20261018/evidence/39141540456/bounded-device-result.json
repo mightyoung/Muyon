@@ -1,0 +1,74 @@
+{
+  "source_sha": "c1f57af047671ec3c3f2b2d73d20ac6ece4bcc32",
+  "run_id": 39141540456,
+  "run_status": "completed",
+  "conclusion": "success",
+  "successful_jobs": 11,
+  "fixed_cases": [
+    {
+      "job_id": 117717160200,
+      "name": "package-device (failOwner)",
+      "build": "PASS",
+      "instrumentation_step": "PASS",
+      "job_url": "https://github.com/mightyoung/Muyon/actions/runs/39141540456/job/117717160200"
+    },
+    {
+      "job_id": 117717160250,
+      "name": "package-device (failSetupOwner)",
+      "build": "PASS",
+      "instrumentation_step": "PASS",
+      "job_url": "https://github.com/mightyoung/Muyon/actions/runs/39141540456/job/117717160250"
+    },
+    {
+      "job_id": 117717160252,
+      "name": "package-device (failReady)",
+      "build": "PASS",
+      "instrumentation_step": "PASS",
+      "job_url": "https://github.com/mightyoung/Muyon/actions/runs/39141540456/job/117717160252"
+    },
+    {
+      "job_id": 117717160270,
+      "name": "package-device (failInflight)",
+      "build": "PASS",
+      "instrumentation_step": "PASS",
+      "job_url": "https://github.com/mightyoung/Muyon/actions/runs/39141540456/job/117717160270"
+    },
+    {
+      "job_id": 117717160273,
+      "name": "package-device (failConstructDestroy)",
+      "build": "PASS",
+      "instrumentation_step": "PASS",
+      "job_url": "https://github.com/mightyoung/Muyon/actions/runs/39141540456/job/117717160273"
+    },
+    {
+      "job_id": 117717160278,
+      "name": "package-device (failUnknown)",
+      "build": "PASS",
+      "instrumentation_step": "PASS",
+      "job_url": "https://github.com/mightyoung/Muyon/actions/runs/39141540456/job/117717160278"
+    },
+    {
+      "job_id": 117717160295,
+      "name": "package-device (failSetup)",
+      "build": "PASS",
+      "instrumentation_step": "PASS",
+      "job_url": "https://github.com/mightyoung/Muyon/actions/runs/39141540456/job/117717160295"
+    },
+    {
+      "job_id": 117717160307,
+      "name": "package-device (failNative)",
+      "build": "PASS",
+      "instrumentation_step": "PASS",
+      "job_url": "https://github.com/mightyoung/Muyon/actions/runs/39141540456/job/117717160307"
+    }
+  ],
+  "evidence_basis": "GitHub permitted run/job/step metadata plus reviewed frozen workflow/source assertions; raw current-run log retrieval was denied403 and not retried.",
+  "assertions_verified_by_successful_workflow": "Exact named method; workflow requires OK (1 test), rejects failure/crash markers; API26/private PID/UID/order/count/SQLite assertions in frozen test source.",
+  "raw_fixture_json": "UNAVAILABLE_PERMISSION_DENIED; no opaque PID/receipt invented",
+  "foreign_constructor_destructor_exceptions": "NOT_RUN",
+  "underlying_SQLite_close_failure": "NOT_RUN",
+  "physical_device": "NOT_RUN",
+  "real_model_provider_network": "NOT_RUN",
+  "production_authority": "NOT_INSTALLED",
+  "hold": "PR86/I04 HOLD remains"
+}

@@ -1,0 +1,31 @@
+   Compiling muyon-core v0.1.0 (/tmp/muyon-document-durable-check.HuqkpAc8/crates/muyon-core)
+error[E0432]: unresolved import `muyon_core::document_edit::text_protocol`
+  --> muyon-core/tests/document_edit_schema2.rs:67:179
+   |
+67 | ...check_response_held,ProtocolError},text_protocol::{prepare_text_request_trusted,TextEdit,TextLocation}}};
+   |                                       ^^^^^^^^^^^^^ could not find `text_protocol` in `document_edit`
+
+error[E0308]: mismatched types
+   --> muyon-core/tests/document_edit_schema2.rs:107:26
+    |
+107 |  r["fake_executor_used"]=true;assert_eq!(check_response_held(&p,&serde_json::to_vec(&r).unwrap()).unwrap_err(),ProtocolError::SimulationF...
+    |  ----------------------- ^^^^ expected `Value`, found `bool`
+    |  |
+    |  expected due to the type of this binding
+    |
+help: try wrapping the expression in `serde_json::Value::Bool`
+    |
+107 |  r["fake_executor_used"]=serde_json::Value::Bool(true);assert_eq!(check_response_held(&p,&serde_json::to_vec(&r).unwrap()).unwrap_err(),ProtocolError::SimulationForbidden);
+    |                          ++++++++++++++++++++++++    +
+
+error[E0308]: mismatched types
+   --> muyon-core/tests/document_edit_schema2.rs:108:22
+    |
+108 |  r["schema_version"]=1;assert_eq!(check_response_held(&p,&serde_json::to_vec(&r).unwrap()).unwrap_err(),ProtocolError::InvalidResponse);
+    |  ------------------- ^ expected `Value`, found integer
+    |  |
+    |  expected due to the type of this binding
+
+Some errors have detailed explanations: E0308, E0432.
+For more information about an error, try `rustc --explain E0308`.
+error: could not compile `muyon-core` (test "document_edit_schema2") due to 3 previous errors

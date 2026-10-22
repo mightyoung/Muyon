@@ -1,0 +1,200 @@
+    Updating crates.io index
+ Downloading crates ...
+  Downloaded camino v1.2.6
+  Downloaded anstyle v1.0.14
+  Downloaded askama v0.16.1
+  Downloaded basic-toml v0.1.10
+  Downloaded askama_macros v0.16.1
+  Downloaded anyhow v1.0.104
+  Downloaded cargo-platform v0.3.2
+  Downloaded bytes v1.12.1
+  Downloaded askama_derive v0.16.1
+  Downloaded clap v4.6.7
+  Downloaded cargo_metadata v0.23.1
+  Downloaded errno v0.3.14
+  Downloaded clap_lex v1.1.1
+  Downloaded cfg-if v1.0.5
+  Downloaded glob v0.3.4
+  Downloaded clap_derive v4.6.7
+  Downloaded equivalent v1.0.3
+  Downloaded clap_builder v4.6.7
+  Downloaded fastrand v2.5.0
+  Downloaded getrandom v0.4.3
+  Downloaded itoa v1.0.18
+  Downloaded indexmap v2.14.2
+  Downloaded minimal-lexical v0.2.1
+  Downloaded libc v0.2.190
+  Downloaded once_cell v1.21.4
+  Downloaded quote v1.0.47
+  Downloaded goblin v0.8.2
+  Downloaded hashbrown v0.17.1
+  Downloaded memchr v2.8.3
+  Downloaded heck v0.5.0
+  Downloaded scroll v0.12.0
+  Downloaded serde_core v1.0.229
+  Downloaded nom v7.1.3
+  Downloaded fs-err v3.3.2
+  Downloaded plain v0.2.3
+  Downloaded serde_spanned v1.1.2
+  Downloaded serde_derive v1.0.229
+  Downloaded proc-macro2 v1.0.107
+  Downloaded rustc-hash v2.1.3
+  Downloaded strsim v0.11.1
+  Downloaded serde_json v1.0.154
+  Downloaded thiserror-impl v2.0.21
+  Downloaded siphasher v1.0.4
+  Downloaded serde v1.0.229
+  Downloaded smawk v0.3.3
+  Downloaded log v0.4.34
+  Downloaded tempfile v3.27.0
+  Downloaded toml_datetime v1.1.2+spec-1.1.0
+  Downloaded textwrap v0.16.4
+  Downloaded uniffi_internal_macros v0.32.2
+  Downloaded weedle2 v5.0.0
+  Downloaded toml v1.1.8+spec-1.1.0
+  Downloaded toml_writer v1.1.3+spec-1.1.0
+  Downloaded rustix v1.1.5
+  Downloaded uniffi v0.32.2
+  Downloaded uniffi_macros v0.32.2
+  Downloaded syn v3.0.9
+  Downloaded uniffi_core v0.32.2
+  Downloaded uniffi_udl v0.32.2
+  Downloaded uniffi_pipeline v0.32.2
+  Downloaded uniffi_meta v0.32.2
+  Downloaded unicode-width v0.2.2
+  Downloaded scroll_derive v0.12.1
+  Downloaded uniffi_bindgen v0.32.2
+  Downloaded winnow v1.0.4
+  Downloaded percent-encoding v2.3.2
+  Downloaded semver v1.0.28
+  Downloaded toml_parser v1.1.5+spec-1.1.0
+  Downloaded askama_parser v0.16.1
+  Downloaded static_assertions v1.1.0
+  Downloaded thiserror v2.0.21
+  Downloaded autocfg v1.5.1
+  Downloaded bitflags v2.13.2
+  Downloaded syn v2.0.119
+  Downloaded unicode-ident v1.0.27
+  Downloaded zmij v1.0.23
+  Downloaded linux-raw-sys v0.12.1
+   Compiling proc-macro2 v1.0.107
+   Compiling quote v1.0.47
+   Compiling unicode-ident v1.0.27
+   Compiling serde_core v1.0.229
+   Compiling libc v0.2.190
+   Compiling serde v1.0.229
+   Compiling anyhow v1.0.104
+   Compiling syn v3.0.9
+   Compiling syn v2.0.119
+   Compiling rustix v1.1.5
+   Compiling hashbrown v0.17.1
+   Compiling equivalent v1.0.3
+   Compiling getrandom v0.4.3
+   Compiling cfg-if v1.0.5
+   Compiling once_cell v1.21.4
+   Compiling heck v0.5.0
+   Compiling linux-raw-sys v0.12.1
+   Compiling memchr v2.8.3
+   Compiling bitflags v2.13.2
+   Compiling winnow v1.0.4
+   Compiling serde_derive v1.0.229
+   Compiling indexmap v2.14.2
+   Compiling fastrand v2.5.0
+   Compiling tempfile v3.27.0
+   Compiling rustc-hash v2.1.3
+   Compiling autocfg v1.5.1
+   Compiling uniffi_internal_macros v0.32.2
+   Compiling siphasher v1.0.4
+   Compiling zmij v1.0.23
+   Compiling fs-err v3.3.2
+   Compiling toml_writer v1.1.3+spec-1.1.0
+   Compiling glob v0.3.4
+   Compiling itoa v1.0.18
+   Compiling serde_json v1.0.154
+   Compiling camino v1.2.6
+   Compiling thiserror v2.0.21
+   Compiling minimal-lexical v0.2.1
+   Compiling uniffi_pipeline v0.32.2
+   Compiling nom v7.1.3
+   Compiling scroll_derive v0.12.1
+   Compiling thiserror-impl v2.0.21
+   Compiling basic-toml v0.1.10
+   Compiling askama_parser v0.16.1
+   Compiling smawk v0.3.3
+   Compiling textwrap v0.16.4
+   Compiling toml_parser v1.1.5+spec-1.1.0
+   Compiling weedle2 v5.0.0
+   Compiling scroll v0.12.0
+   Compiling uniffi_meta v0.32.2
+   Compiling askama_derive v0.16.1
+   Compiling serde_spanned v1.1.2
+   Compiling cargo-platform v0.3.2
+   Compiling semver v1.0.28
+   Compiling toml_datetime v1.1.2+spec-1.1.0
+   Compiling clap_lex v1.1.1
+   Compiling plain v0.2.3
+   Compiling anstyle v1.0.14
+   Compiling log v0.4.34
+   Compiling strsim v0.11.1
+   Compiling goblin v0.8.2
+   Compiling toml v1.1.8+spec-1.1.0
+   Compiling clap_builder v4.6.7
+   Compiling askama_macros v0.16.1
+   Compiling askama v0.16.1
+   Compiling cargo_metadata v0.23.1
+   Compiling uniffi_udl v0.32.2
+   Compiling clap_derive v4.6.7
+   Compiling muyon-core-agent-lab v0.1.0 (/workspace/Muyon/experiments/redesign/core-agent-lab/core)
+   Compiling static_assertions v1.1.0
+   Compiling bytes v1.12.1
+   Compiling uniffi_macros v0.32.2
+warning: suspicious definition of the runtime `read` symbol used by the standard library
+   --> /workspace/Muyon/experiments/redesign/core-agent-lab/core/src/host_session.rs:132:124
+    |
+132 | ...ount: usize, timeout: i32) -> i32; fn read(fd: i32, buffer: *mut u8, count: usize) -> isize; fn write(fd: i32, buffer: *const u8...
+    |                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = note: expected `unsafe extern "C" fn(i32, *mut c_void, usize) -> isize` (for the current target)
+            found    `unsafe extern "C" fn(i32, *mut u8, usize) -> isize`
+    = help: either fix the signature or remove any attributes like `#[unsafe(no_mangle)]`, `#[unsafe(export_name = "read")]`, or `#[link_name = "read"]`
+    = help: allow this lint if the signature is compatible
+    = note: `#[warn(suspicious_runtime_symbol_definitions)]` on by default
+
+warning: suspicious definition of the runtime `write` symbol used by the standard library
+   --> /workspace/Muyon/experiments/redesign/core-agent-lab/core/src/host_session.rs:132:182
+    |
+132 | ... *mut u8, count: usize) -> isize; fn write(fd: i32, buffer: *const u8, count: usize) -> isize; }
+    |                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = note: expected `unsafe extern "C" fn(i32, *const c_void, usize) -> isize` (for the current target)
+            found    `unsafe extern "C" fn(i32, *const u8, usize) -> isize`
+    = help: either fix the signature or remove any attributes like `#[unsafe(no_mangle)]`, `#[unsafe(export_name = "write")]`, or `#[link_name = "write"]`
+    = help: allow this lint if the signature is compatible
+
+   Compiling uniffi_core v0.32.2
+   Compiling muyon-plugin-contract-lab v0.1.0 (/workspace/Muyon/experiments/redesign/plugin-contract-lab/core)
+   Compiling uniffi_bindgen v0.32.2
+   Compiling clap v4.6.7
+   Compiling muyon-android-contract-bridge-lab v0.1.0 (/workspace/Muyon/experiments/redesign/android-rust-bridge-lab/core)
+   Compiling muyon-rust-agent-host-lab v0.1.0 (/workspace/Muyon/experiments/redesign/rust-agent-host-lab/core)
+warning: `muyon-core-agent-lab` (lib) generated 2 warnings
+   Compiling uniffi v0.32.2
+error[E0603]: enum `Json` is private
+   --> src/service_host_bridge.rs:137:93
+    |
+137 |     fn exchange_chat(&self,admission:&ProviderAdmission,context:&muyon_rust_agent_host_lab::Json)->Result<muyon_rust_agent_host_lab...
+    |                                                                                             ^^^^ private enum
+    |
+note: the enum `Json` is defined here
+   --> /workspace/Muyon/experiments/redesign/rust-agent-host-lab/core/src/lib.rs:21:49
+    |
+ 21 | use muyon_plugin_contract_lab::{object, string, Json};
+    |                                                 ^^^^
+help: import `Json` directly
+    |
+137 -     fn exchange_chat(&self,admission:&ProviderAdmission,context:&muyon_rust_agent_host_lab::Json)->Result<muyon_rust_agent_host_lab::ordinary_chat::ChatResponse,String>{
+137 +     fn exchange_chat(&self,admission:&ProviderAdmission,context:&muyon_core_agent_lab::wire_json::Json)->Result<muyon_rust_agent_host_lab::ordinary_chat::ChatResponse,String>{
+    |
+
+For more information about this error, try `rustc --explain E0603`.
+error: could not compile `muyon-android-contract-bridge-lab` (lib) due to 1 previous error

@@ -1,0 +1,51 @@
+{
+  "base_sha": "f4781e16ddf4e542b983fbd77f266a0071148255",
+  "archive_sha": "400e206135690c284c8402521e3135cfb7bfaee8",
+  "resources": [
+    {
+      "resource_name": "R.drawable.muyon_brand_mascot_front",
+      "resource_path": "apps/muyon_android/app/src/main/res/drawable-nodpi/muyon_brand_mascot_front.png",
+      "source_commit": "400e206135690c284c8402521e3135cfb7bfaee8",
+      "source_path": "docs/design/2026-10-22/brand-originals/1000144583(1).png",
+      "library_file_id": "libfile_318651bdb1008191a7d6c09790e1a885",
+      "file_id": "file_000000006cc081f999314f3e811b7e89",
+      "library_version_number": 0,
+      "size_bytes": 2089286,
+      "sha256": "049b8b9d63c9b03d5fecd2d1306ee660cc9f7d478c273ff7a1e97b57787a46a2",
+      "width_px": 1254,
+      "height_px": 1254,
+      "image_mode": "RGBA",
+      "modified": false
+    },
+    {
+      "resource_name": "R.drawable.muyon_brand_mascot_views",
+      "resource_path": "apps/muyon_android/app/src/main/res/drawable-nodpi/muyon_brand_mascot_views.png",
+      "source_commit": "400e206135690c284c8402521e3135cfb7bfaee8",
+      "source_path": "docs/design/2026-10-22/brand-originals/1000144584(1).png",
+      "library_file_id": "libfile_3244286245348191aa0b5d9040b48f7f",
+      "file_id": "file_000000001c2081f9a2ad63b50cb798e5",
+      "library_version_number": 0,
+      "size_bytes": 2851456,
+      "sha256": "852ed1c814eb80102af5cb515066786284c04a0e2c8a75066da71ee942cf5643",
+      "width_px": 1536,
+      "height_px": 1024,
+      "image_mode": "RGBA",
+      "modified": false
+    },
+    {
+      "resource_name": "R.drawable.muyon_brand_icon",
+      "resource_path": "apps/muyon_android/app/src/main/res/drawable-nodpi/muyon_brand_icon.png",
+      "source_commit": "400e206135690c284c8402521e3135cfb7bfaee8",
+      "source_path": "docs/design/2026-10-22/brand-originals/1000144624(1).png",
+      "library_file_id": "libfile_0a8ca4ea6fac81919b6d095a4b3890ca",
+      "file_id": "file_00000000d0d881f99b59759dba0eae2a",
+      "library_version_number": 0,
+      "size_bytes": 1489074,
+      "sha256": "61d3953eba983cbbdb9353a15af2841a2bdd6e663074be0b89930c9b910e9e88",
+      "width_px": 1254,
+      "height_px": 1254,
+      "image_mode": "RGB",
+      "modified": false
+    }
+  ]
+}

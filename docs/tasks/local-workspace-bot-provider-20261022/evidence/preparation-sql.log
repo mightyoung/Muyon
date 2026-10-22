@@ -1,0 +1,7 @@
+PASS every original+journal source SQL statement parses/binds in actual SQLite
+PASS request-before-dispatch preparation pointer and export/editor binding survive actual DB restart; no saved archive
+PASS lookup fence is durable: conditional late transition from prepared now changes zero rows
+PASS injected terminal journal failure rolls back archive/CAS/original receipt together, prepared pointer retained
+PASS committed exact original/export/editor and prior terminal history survive restart without timestamp search
+PASS journal payload SQL type and byte budget guards reject oversized/BLOB/multibyte corrupt storage
+NOT_RUN Rust state-machine/serialization/FFI/Kotlin/Android: SQL-only diagnostics are not provider acceptance

@@ -1,0 +1,9 @@
+Fresh behavioral RED; extracted existing misleading label unchanged
+UTC: 2026-10-22T04:05:51.720641+00:00
+Command: KOTLINC=/tmp/action-cards-tools/kotlinc/bin/kotlinc bash apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/ui/cards/run-offline.sh
+Exception in thread "main" java.lang.IllegalStateException: Check failed.
+	at com.mightyoung.muyon.product.ui.cards.CardProjectionChecksKt.verify(CardProjectionChecks.kt:4)
+	at com.mightyoung.muyon.product.ui.cards.CardProjectionChecksKt.main(CardProjectionChecks.kt:14)
+	at com.mightyoung.muyon.product.ui.cards.CardProjectionChecksKt.main(CardProjectionChecks.kt)
+
+Exit: 1

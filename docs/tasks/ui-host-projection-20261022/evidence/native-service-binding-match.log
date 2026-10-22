@@ -1,0 +1,7 @@
+PASS generated binding exact B88e810 bytes sha256=65bd9238bba93e4ea17d233acd666128e81ecdde0489d4417d98801c54a616a9
+MATCH generated declaration and real Service call: localDraftResolve
+MATCH generated declaration and real Service call: localDraftRead
+MATCH generated declaration and real Service call: localDraftSave
+MATCH generated declaration and real Service call: localDraftLookupSave
+Service has actual calls; verified=false remains cold-attempt/Android acceptance gate
+STATIC ONLY: no Kotlin/Android/FFI native invocation executed by this check

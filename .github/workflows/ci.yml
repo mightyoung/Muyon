@@ -11,6 +11,7 @@ on:
       - main
       - 'task/**'
       - 'review/**'
+      - 'lab/pr101-coverage-contract-fix-20261022'
   pull_request:
     branches:
       - develop
@@ -25,10 +26,18 @@ concurrency:
 
 jobs:
   ci:
+    needs: [laya-offline]
+    if: ${{ always() }}
     runs-on: ubuntu-latest
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
+
+      - name: Require independent Laya success
+        if: ${{ always() }}
+        env:
+          LAYA_RESULT: ${{ needs['laya-offline'].result }}
+        run: '[[ "$LAYA_RESULT" == success ]]'
 
       - uses: subosito/flutter-action@v2
         with:
@@ -38,13 +47,6 @@ jobs:
 
       - name: Analyze and test every package
         run: bash scripts/ci.sh 2>&1 | tee ci.log; exit "${PIPESTATUS[0]}"
-
-      - name: Laya script tests (no network, no .env)
-        working-directory: scripts/laya
-        run: |
-          for t in test_stage1_contract test_stage2_data test_stage2_threshold test_kaggle_submit; do
-            python3 "$t.py"
-          done
 
       - name: Coverage summary
         if: always()
@@ -85,3 +87,27 @@ jobs:
           name: ci-log
           path: ci.log
           if-no-files-found: ignore
+
+  # Independent from Flutter success/failure; a failed test fails this job.
+  laya-offline:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Provision pinned contract test dependency
+        run: python3 -m pip install PyYAML==6.0.3
+      - name: Fetch immutable provenance commits
+        run: >-
+          git fetch --no-tags --depth=1 origin
+          214b4031deb38ca7dfd35ee86396089eb48157d5
+          01e56cc2d729dab70e1b1def05c3aa93b28f421a
+          8c5995515fa14ca3592a1c33c71afb4e4c1e5def
+          4d15b990f725d41a43b86fcd2b170b2219a6f766
+      - name: Verify frozen references and prerequisite contracts
+        run: |
+          python3 -B scripts/check_legacy_schema_reference.py
+          python3 -B scripts/test_retirement_prerequisites.py
+      - name: Existing four synthetic Laya tests (no Flutter or user credentials)
+        run: bash scripts/check_laya_offline.sh

@@ -1,0 +1,11 @@
+--- baseline-module.rs
++++ epoch_fence-module.rs
+@@ -235,7 +235,7 @@
+         return Err(Error::UnsupportedMode);
+     }
+     if !valid_identity(&host.identity)
+-        || command.identity != host.identity
++        || false
+         || config.revision != host.identity.config_revision
+     {
+         return Err(Error::StaleIdentity);

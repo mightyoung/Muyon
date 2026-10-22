@@ -1,0 +1,66 @@
+test_hidden_protected_and_merged_preview_blocks_fake_dispatch (tools.document_fidelity.tests.test_text_subsets.PreviewTests.test_hidden_protected_and_merged_preview_blocks_fake_dispatch) ... 
+  test_hidden_protected_and_merged_preview_blocks_fake_dispatch (tools.document_fidelity.tests.test_text_subsets.PreviewTests.test_hidden_protected_and_merged_preview_blocks_fake_dispatch) (label='row') ... ERROR
+  test_hidden_protected_and_merged_preview_blocks_fake_dispatch (tools.document_fidelity.tests.test_text_subsets.PreviewTests.test_hidden_protected_and_merged_preview_blocks_fake_dispatch) (label='column') ... ERROR
+  test_hidden_protected_and_merged_preview_blocks_fake_dispatch (tools.document_fidelity.tests.test_text_subsets.PreviewTests.test_hidden_protected_and_merged_preview_blocks_fake_dispatch) (label='protected') ... ERROR
+  test_hidden_protected_and_merged_preview_blocks_fake_dispatch (tools.document_fidelity.tests.test_text_subsets.PreviewTests.test_hidden_protected_and_merged_preview_blocks_fake_dispatch) (label='merged') ... ERROR
+test_hidden_sheet_preview_and_unchanged_decimal_serialization_rule (tools.document_fidelity.tests.test_text_subsets.PreviewTests.test_hidden_sheet_preview_and_unchanged_decimal_serialization_rule) ... ERROR
+test_preview_visible_target_and_lexical_values (tools.document_fidelity.tests.test_text_subsets.PreviewTests.test_preview_visible_target_and_lexical_values) ... ERROR
+
+======================================================================
+ERROR: test_hidden_protected_and_merged_preview_blocks_fake_dispatch (tools.document_fidelity.tests.test_text_subsets.PreviewTests.test_hidden_protected_and_merged_preview_blocks_fake_dispatch) (label='row')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/document-fidelity/tools/document_fidelity/tests/test_text_subsets.py", line 34, in test_hidden_protected_and_merged_preview_blocks_fake_dispatch
+    r=xlsx.preview(data,req);self.assertEqual('unsupported',r['status'],r)
+      ^^^^^^^^^^^^
+AttributeError: module 'tools.document_fidelity.adapters.xlsx' has no attribute 'preview'
+
+======================================================================
+ERROR: test_hidden_protected_and_merged_preview_blocks_fake_dispatch (tools.document_fidelity.tests.test_text_subsets.PreviewTests.test_hidden_protected_and_merged_preview_blocks_fake_dispatch) (label='column')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/document-fidelity/tools/document_fidelity/tests/test_text_subsets.py", line 34, in test_hidden_protected_and_merged_preview_blocks_fake_dispatch
+    r=xlsx.preview(data,req);self.assertEqual('unsupported',r['status'],r)
+      ^^^^^^^^^^^^
+AttributeError: module 'tools.document_fidelity.adapters.xlsx' has no attribute 'preview'
+
+======================================================================
+ERROR: test_hidden_protected_and_merged_preview_blocks_fake_dispatch (tools.document_fidelity.tests.test_text_subsets.PreviewTests.test_hidden_protected_and_merged_preview_blocks_fake_dispatch) (label='protected')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/document-fidelity/tools/document_fidelity/tests/test_text_subsets.py", line 34, in test_hidden_protected_and_merged_preview_blocks_fake_dispatch
+    r=xlsx.preview(data,req);self.assertEqual('unsupported',r['status'],r)
+      ^^^^^^^^^^^^
+AttributeError: module 'tools.document_fidelity.adapters.xlsx' has no attribute 'preview'
+
+======================================================================
+ERROR: test_hidden_protected_and_merged_preview_blocks_fake_dispatch (tools.document_fidelity.tests.test_text_subsets.PreviewTests.test_hidden_protected_and_merged_preview_blocks_fake_dispatch) (label='merged')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/document-fidelity/tools/document_fidelity/tests/test_text_subsets.py", line 34, in test_hidden_protected_and_merged_preview_blocks_fake_dispatch
+    r=xlsx.preview(data,req);self.assertEqual('unsupported',r['status'],r)
+      ^^^^^^^^^^^^
+AttributeError: module 'tools.document_fidelity.adapters.xlsx' has no attribute 'preview'
+
+======================================================================
+ERROR: test_hidden_sheet_preview_and_unchanged_decimal_serialization_rule (tools.document_fidelity.tests.test_text_subsets.PreviewTests.test_hidden_sheet_preview_and_unchanged_decimal_serialization_rule)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/document-fidelity/tools/document_fidelity/tests/test_text_subsets.py", line 41, in test_hidden_sheet_preview_and_unchanged_decimal_serialization_rule
+    r=xlsx.preview(data,request(data));self.assertTrue(r['hidden']['sheet']);self.assertEqual('unsupported',r['status'])
+      ^^^^^^^^^^^^
+AttributeError: module 'tools.document_fidelity.adapters.xlsx' has no attribute 'preview'
+
+======================================================================
+ERROR: test_preview_visible_target_and_lexical_values (tools.document_fidelity.tests.test_text_subsets.PreviewTests.test_preview_visible_target_and_lexical_values)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/document-fidelity/tools/document_fidelity/tests/test_text_subsets.py", line 20, in test_preview_visible_target_and_lexical_values
+    r=xlsx.preview(self.data,request(self.data))
+      ^^^^^^^^^^^^
+AttributeError: module 'tools.document_fidelity.adapters.xlsx' has no attribute 'preview'
+
+----------------------------------------------------------------------
+Ran 3 tests in 0.008s
+
+FAILED (errors=6)

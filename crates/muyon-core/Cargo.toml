@@ -1,0 +1,17 @@
+[package]
+name = "muyon-core"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+[dependencies]
+serde.workspace = true
+serde_json.workspace = true
+sha2.workspace = true
+unicode-normalization.workspace = true
+muyon-rust-agent-host-lab = { path = "../../experiments/redesign/rust-agent-host-lab/core" }
+muyon-core-agent-lab = { path = "../../experiments/redesign/core-agent-lab/core" }
+muyon-web-search-lab = { path = "../../experiments/redesign/web-search-lab/core" }
+
+[target.'cfg(target_os = "android")'.dependencies]
+libsqlite3-sys = { version = "=0.35.0", features = ["bundled"] }

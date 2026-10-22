@@ -13,8 +13,13 @@ pub struct PhysicalReadHandler {
     required_arguments: std::collections::BTreeMap<String, Json>,
     record_ref: Option<Json>,
     type_argument: Option<String>,
+    raw_limit: Option<usize>,
 }
 impl PhysicalReadHandler {
+    pub(crate) fn service_bounded(mut self) -> Self {
+        self.raw_limit = Some(8192);
+        self
+    }
     pub fn bind_record(mut self, reference: Json, type_argument: Option<String>) -> Result<Self> {
         crate::validate_reference(&reference)?;
         if field(&reference, "key")?.string()? != self.expected_key {
@@ -66,6 +71,7 @@ impl PhysicalReadHandler {
             required_arguments: std::collections::BTreeMap::new(),
             record_ref: None,
             type_argument: None,
+            raw_limit: None,
         })
     }
 }
@@ -102,8 +108,28 @@ impl ReadHandler for PhysicalReadHandler {
             return Err("physical_record_scope".into());
         }
         store::validate_dir(&self.dir)?;
-        let raw =
-            muyon_plugin_contract_lab::parse(store::read(&self.dir.join(&self.file))?.as_bytes())?;
+        let source = if let Some(limit) = self.raw_limit {
+            use std::io::Read;
+            let path = self.dir.join(&self.file);
+            let meta =
+                std::fs::symlink_metadata(&path).map_err(|_| "physical_source_unavailable")?;
+            if !meta.is_file() || meta.file_type().is_symlink() || meta.len() > limit as u64 {
+                return Err("service_raw_budget".into());
+            }
+            let mut bytes = Vec::new();
+            std::fs::File::open(path)
+                .map_err(|_| "physical_source_unavailable")?
+                .take(limit as u64 + 1)
+                .read_to_end(&mut bytes)
+                .map_err(|_| "physical_source_unavailable")?;
+            if bytes.len() > limit {
+                return Err("service_raw_budget".into());
+            }
+            String::from_utf8(bytes).map_err(|_| "physical_source_utf8")?
+        } else {
+            store::read(&self.dir.join(&self.file))?
+        };
+        let raw = muyon_plugin_contract_lab::parse(source.as_bytes())?;
         let mut selected = std::collections::BTreeMap::new();
         for name in &self.fields {
             selected.insert(name.clone(), field(&raw, name)?.clone());

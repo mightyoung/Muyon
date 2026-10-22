@@ -1,0 +1,8 @@
+Thu Oct 22 05:17:54 UTC 2026
+/bin/bash: line 1: cargo: command not found
+unit_exit=127
+/bin/bash: line 1: cargo: command not found
+core_exit=127
+/bin/bash: line 1: rustfmt: command not found
+format_exit=127
+diff_check_exit=0

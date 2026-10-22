@@ -1,0 +1,38 @@
+{
+  "gate": "PASS",
+  "build_id": "79dca05ba6ff84dbc8a60d0838951aec6720227a:cbc8b291d425d3a291ddb30bfe8c3baa81d33c6a385b06bdc626216bc00b1f11",
+  "required_methods": 54,
+  "runs": [
+    {
+      "log": "/private/tmp/muyon-android-refactor-20261020/docs/implementation/agent-workflow-proof-20261021/nonpicker.log",
+      "passed": 49,
+      "gate": "PASS"
+    },
+    {
+      "log": "/private/tmp/muyon-android-refactor-20261020/docs/implementation/agent-workflow-proof-20261021/GENERATE.log",
+      "passed": 1,
+      "gate": "PASS"
+    },
+    {
+      "log": "/private/tmp/muyon-android-refactor-20261020/docs/implementation/agent-workflow-proof-20261021/PDF.log",
+      "passed": 1,
+      "gate": "PASS"
+    },
+    {
+      "log": "/private/tmp/muyon-android-refactor-20261020/docs/implementation/agent-workflow-proof-20261021/ZIP.log",
+      "passed": 1,
+      "gate": "PASS"
+    },
+    {
+      "log": "/private/tmp/muyon-android-refactor-20261020/docs/implementation/agent-workflow-proof-20261021/DIRECTORY.log",
+      "passed": 1,
+      "gate": "PASS"
+    },
+    {
+      "log": "/private/tmp/muyon-android-refactor-20261020/docs/implementation/agent-workflow-proof-20261021/PRIVATE.log",
+      "passed": 1,
+      "gate": "PASS"
+    }
+  ],
+  "boundary": "product instrumentation only; I04, production pricing proof and real provider/tool-loop remain separate gates"
+}

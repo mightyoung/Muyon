@@ -1,0 +1,32 @@
+{
+  "command": "am instrument -w -r -e class com.mightyoung.muyon.product.agentipc.BotNativeServiceAcceptanceTest com.mightyoung.muyon.product.test/androidx.test.runner.AndroidJUnitRunner",
+  "legacy_shell_exit_status": null,
+  "device_test_result": "PASS",
+  "statuses": [
+    {
+      "method": "realServiceSaveCasCancelAndProcessLossRestore",
+      "code": 1
+    },
+    {
+      "method": "realServiceSaveCasCancelAndProcessLossRestore",
+      "code": 0
+    },
+    {
+      "method": "committedNativeReplyDiscardedIsRecoveredOnlyAsOriginalHistory",
+      "code": 1
+    },
+    {
+      "method": "committedNativeReplyDiscardedIsRecoveredOnlyAsOriginalHistory",
+      "code": 0
+    },
+    {
+      "method": "realNativePreparedOriginalIsDiscoveredAndExplicitlyFencedByService",
+      "code": 1
+    },
+    {
+      "method": "realNativePreparedOriginalIsDiscoveredAndExplicitlyFencedByService",
+      "code": 0
+    }
+  ],
+  "terminal_transport_closed": true
+}

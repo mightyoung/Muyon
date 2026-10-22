@@ -1,0 +1,6 @@
+{
+  "crates/muyon-core/src/document_edit/gateway.rs": "68c836f7d0c58008ff50ce8f08cc3b15533568ff3485c3576560a5b0ce1fe7a0",
+  "crates/muyon-core/src/document_edit/engine_protocol.rs": "58a77ce0afeafb20997534985903262c0a33668c634f4ab4d70f4bd3a62423cf",
+  "crates/muyon-core/tests/document_edit_gateway.rs": "8a5064213bb6a2abd5e72d7854e655b7aeb4bfe05619aa556c3606535d3e6121",
+  "crates/muyon-core/tests/document_edit_engine_protocol.rs": "2caf103f88bd61086856010ab1cac7750ee6cd8f62cc3d6f9e4a97892ca46d68"
+}

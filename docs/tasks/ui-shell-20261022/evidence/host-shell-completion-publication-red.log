@@ -1,0 +1,3 @@
+Exception in thread "main" java.lang.IllegalStateException: Check failed.
+	at com.mightyoung.muyon.product.ui.shell.HostSetupControllerChecksKt.main(HostSetupControllerChecks.kt:99)
+	at com.mightyoung.muyon.product.ui.shell.HostSetupControllerChecksKt.main(HostSetupControllerChecks.kt)

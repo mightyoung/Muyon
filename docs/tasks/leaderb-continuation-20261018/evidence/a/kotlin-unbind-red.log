@@ -1,0 +1,3 @@
+Exception in thread "main" java.lang.IllegalStateException: UNBIND_OWNER_RED: failed unbind must retain cleanup ownership
+	at com.mightyoung.muyon.agent.ReceiptObserverChecksKt.main(ReceiptObserverChecks.kt:101)
+	at com.mightyoung.muyon.agent.ReceiptObserverChecksKt.main(ReceiptObserverChecks.kt)

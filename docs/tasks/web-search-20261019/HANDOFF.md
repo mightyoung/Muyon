@@ -1,0 +1,26 @@
+# Independent Search handoff
+
+Draft [PR98](https://github.com/mightyoung/Muyon/pull/98), branch `feat/deepseek-web-search`, stacks open PR97 (`lab/ordinary-chat-context-20261019`). Final executable source: **d9fcbec49e3ec9556e3912276bd4b967e5887cef**. Later sealing changes are documentation/evidence only.
+
+Dedicated [CI39276355867](https://github.com/mightyoung/Muyon/actions/runs/39276355867) at that exact source is **completed/success, attempt1**. Its sole `registered-agent-fixtures` job118141550174 and exact build-only catalog + two new integration-target gate succeeded. Native metadata is retained in evidence/CI39276355867*.json. No raw logs/artifacts were requested. Local evidence LOCAL-25.log records **25 passed,0 failed** (20 actual registered Agent-composition fixture tests +5 wire-contract tests); independent reviewer inspected source/logs but did not rerun tests. Two inherited read/write declaration warnings remain unchanged.
+
+## Delivered coverage
+
+- Verified October17 independent Search JSON contract, distinct from model server-side tools and Fetch. Query/count/need_content=false only; no model/tools/stream, conversation, ori_question or localization. Official Unicode limits, count and response type/null/decimal handling. Fixed HTTPS endpoint; no URL/icon fetch, retries or redirect following.
+- Provider-neutral SearchConfig/Provider/Host seam. Default disabled/unconfigured, installed-transport readiness and opaque generation-bound credential handle; config checks never probe/pay. Existing Catalog/Enrollment registers connection/source/response data and generic `web_search.search`. A second synthetic provider uses the identical entry.
+- Existing core Agent driven through existing RuntimePorts; wrapper supplies actual task/attempt/scope/model-call identity. Shared mode policy preserves Auto confirmation and FullAllow’s exemption from extra risk confirmation; hard credential/revocation/scope restrictions remain. Exact query owner review happens before native args persistence; all normalized result content is reviewed before raw receipt, which equals the reviewed projection. All tool outputs including empty results are tainted with no instruction authority. Real URL/provider/request/rank provenance and explicit currency/cost are projected; no fake server citation IDs/dates.
+- Controlled errors, unknown without resend, exact config/handle revalidation and cancellation/receipt/state-persistence fault coverage. New-root synthetic owner restores full durable bindings/tombstones/call quota and same-currency spend, holds unknown, releases empty spend and preserves nonempty cost across owner reconstruction. These are fixture guarantees, not claims about installed Android owner behavior.
+
+## Pending production integration — not a completed user feature
+
+The new SearchHost interface is a **coordination proposal**. Same real durable owner/budget/outbound ledger integration, trusted credential resolver/TLS adapter (certificate validation, no redirects, exact final admission), configuration persistence/settings UI, ordinary Send tool advertisement/dispatch, device behavior and actual service/paid use are **NOT_RUN / NOT_IMPLEMENTED** in this patch. Mere settings/profile existence does not enable transport. No shared chat/owner/core/bridge runtime file was modified; the separately reported denied Mac chat worktree operation was neither retried nor taken over here. Parent must coordinate owner scope before real installation; search spending has not been authorized, and the separate CNY1 chat budget cannot be used.
+
+The implementation is deliberately a reviewable offline integration slice. The overall request “configure Muyon and use live DeepSeek search” remains incomplete until those owner/UI/runtime and authorized real-service gates are implemented and verified. Current call-count/micro-cost tests are synthetic, and do not prove TLS, DeepSeek availability, model comprehension, account-wide QPS, real billing or physical-device acceptance.
+
+## Review and restrictions
+
+Independent short design, source/whole-test and workflow final review approved exact d9fcbec4 for this offline scope. Reviews caught/fixed unexpected-status cost release, incomplete fixture restore/budget and owner-query review ordering. Separate owner-only marker has actual RED/GREEN evidence; initial incorrect saved-state assertion failure is retained separately from product defects.
+
+I04 task.db→HTTP→old-state reopen and containing suites remain prohibited/unexecuted. Only exact new contract/agent_search targets ran, with dependency binaries build-only; no Agent::open or inherited aggregate/HTTP execution. PR86 stays open/draft at3f1be180bb009a91e659c113ba5b1916e5360332 with dependency HOLD unchanged. No old403 log/artifact retry, alternate route or retrieval. No real key/.env/account configuration, network Search/Fetch/model, paid calls, merge/deploy/delete.
+
+Remote readback before delivery: main cc7c8d14d30e3d3c4c7c6cb2bf2059a99e46e003; develop0ab2c4f667681b9aacb017f8cd2eea6f576cf78e; PR95c1c3ef986efd273225f598e468ce4ed25b427f2a; PR96 4af049a47e37a63cd7d4361d6bd74c9b52c9eb4d; PR97 3abc1cae405de4c941d540f1043cdf31463b3f95. PR97 prior CI39214397484success atd1df232 is baseline evidence only, separate from the new Search CI.

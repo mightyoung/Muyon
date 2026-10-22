@@ -1,0 +1,29 @@
+{
+  "full_raw_evidence_preserved": {
+    "command": [
+      "git",
+      "diff",
+      "--cached",
+      "--check"
+    ],
+    "exit_code": 2,
+    "reason": "16 raw logs retain original libtest/compiler whitespace"
+  },
+  "authored_files": {
+    "command": [
+      "git",
+      "diff",
+      "--cached",
+      "--check",
+      "--",
+      "crates/muyon-core/src/group_runtime/mod.rs",
+      "crates/muyon-core/tests/group_runtime.rs",
+      "docs/tasks/mig20-group-runtime-20261022/PLAN.md",
+      "docs/tasks/mig20-group-runtime-20261022/REPORT.md",
+      "docs/tasks/mig20-group-runtime-20261022/INDEPENDENT-REVIEW.md",
+      "docs/tasks/mig20-group-runtime-20261022/verify.py",
+      "docs/tasks/mig20-group-runtime-20261022/evidence/README.md"
+    ],
+    "exit_code": 0
+  }
+}

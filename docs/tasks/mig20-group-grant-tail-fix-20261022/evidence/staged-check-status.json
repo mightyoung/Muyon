@@ -1,0 +1,30 @@
+[
+  {
+    "name": "full-staged",
+    "command": [
+      "git",
+      "diff",
+      "--cached",
+      "--check"
+    ],
+    "exit_code": 2
+  },
+  {
+    "name": "authored-staged",
+    "command": [
+      "git",
+      "diff",
+      "--cached",
+      "--check",
+      "--",
+      "crates/muyon-core/src/group_runtime/store.rs",
+      "crates/muyon-core/tests/group_runtime_store.rs",
+      "docs/tasks/mig20-group-grant-tail-fix-20261022/PLAN.md",
+      "docs/tasks/mig20-group-grant-tail-fix-20261022/REPORT.md",
+      "docs/tasks/mig20-group-grant-tail-fix-20261022/INDEPENDENT-REVIEW.md",
+      "docs/tasks/mig20-group-grant-tail-fix-20261022/verify.py",
+      "docs/tasks/mig20-group-grant-tail-fix-20261022/evidence/README.md"
+    ],
+    "exit_code": 0
+  }
+]

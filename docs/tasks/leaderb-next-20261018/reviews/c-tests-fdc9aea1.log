@@ -1,0 +1,52 @@
+warning: suspicious definition of the runtime `read` symbol used by the standard library
+   --> /workspace/leaderb-store/experiments/redesign/core-agent-lab/core/src/host_session.rs:132:124
+    |
+132 | ...ount: usize, timeout: i32) -> i32; fn read(fd: i32, buffer: *mut u8, count: usize) -> isize; fn write(fd: i32, buffer: *const u8...
+    |                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = note: expected `unsafe extern "C" fn(i32, *mut c_void, usize) -> isize` (for the current target)
+            found    `unsafe extern "C" fn(i32, *mut u8, usize) -> isize`
+    = help: either fix the signature or remove any attributes like `#[unsafe(no_mangle)]`, `#[unsafe(export_name = "read")]`, or `#[link_name = "read"]`
+    = help: allow this lint if the signature is compatible
+    = note: `#[warn(suspicious_runtime_symbol_definitions)]` on by default
+
+warning: suspicious definition of the runtime `write` symbol used by the standard library
+   --> /workspace/leaderb-store/experiments/redesign/core-agent-lab/core/src/host_session.rs:132:182
+    |
+132 | ... *mut u8, count: usize) -> isize; fn write(fd: i32, buffer: *const u8, count: usize) -> isize; }
+    |                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = note: expected `unsafe extern "C" fn(i32, *const c_void, usize) -> isize` (for the current target)
+            found    `unsafe extern "C" fn(i32, *const u8, usize) -> isize`
+    = help: either fix the signature or remove any attributes like `#[unsafe(no_mangle)]`, `#[unsafe(export_name = "write")]`, or `#[link_name = "write"]`
+    = help: allow this lint if the signature is compatible
+
+warning: `muyon-core-agent-lab` (lib) generated 2 warnings
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.00s
+     Running tests/service_runtime.rs (/workspace/toolchains/review-store-target/debug/deps/service_runtime-2b5dc67ee66291a5)
+
+running 2 tests
+test pre_cancelled_worker_never_bootstraps_or_reads ... ok
+test all_builtins_read_physical_file_and_journal_two_actual_payloads ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+     Running tests/supplier_store.rs (/workspace/toolchains/review-store-target/debug/deps/supplier_store-a5450c3eadbaa4c8)
+
+running 12 tests
+test authority_unavailable_during_registered_dispatch_revokes_publication ... ok
+test fixture_domain_contract_is_tied_to_actual_dart_schema_source ... ok
+test identity_and_request_shape_are_not_sql_or_path_authority ... ok
+test current_projection_rereads_name_while_historical_receipt_identity_stays_original ... ok
+test current_reads_reject_pinned_revision_drift_and_pending_or_revoked_authority ... ok
+test mode_change_and_symlink_ancestor_are_denied ... ok
+BUSINESS_READ_EVIDENCE {"projection":{"name":"合成供应商甲","supplier":{"key":"11111111-1111-4111-8111-111111111111","module_id":"inquiry","revision":"7","schema_version":1,"type":"supplier"}},"receipt_ref":{"binding_id":"host-supplier-name-read","identity":"da8ca1ca4dec2f066dab0ba0d5ba54c6","invocation_id":"i-cb7281708a10a0c963fb832b5bfb99b6","owner":"ToolRegistry"}}
+test registered_read_yields_business_name_and_original_durable_receipt_without_business_write ... ok
+test replaced_file_symlinks_owner_mode_and_no_create_fail_closed ... ok
+test same_revision_tamper_without_host_source_stamp_change_is_denied ... ok
+test meta_shape_and_storage_types_are_checked ... ok
+test actual_source_mutation_in_each_final_host_sample_denies_publication ... ok
+test unknown_schema_missing_deleted_malformed_and_oversized_sources_fail_closed ... ok
+
+test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.34s
+

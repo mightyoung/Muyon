@@ -1,0 +1,8 @@
+Thu Oct 22 04:24:08 UTC 2026
+/bin/bash: line 1: cargo: command not found
+targeted_exit=127
+/bin/bash: line 1: cargo: command not found
+workspace_exit=127
+/bin/bash: line 1: cargo: command not found
+format_exit=127
+diff_check_exit=0

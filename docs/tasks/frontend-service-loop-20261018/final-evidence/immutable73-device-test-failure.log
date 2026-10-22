@@ -1,0 +1,615 @@
+﻿2026-10-18T07:17:56.6194314Z Current runner version: '2.337.0'
+2026-10-18T07:17:56.6219381Z ##[group]Runner Image Provisioner
+2026-10-18T07:17:56.6220222Z Hosted Compute Agent
+2026-10-18T07:17:56.6220914Z Version: 20261012.601
+2026-10-18T07:17:56.6221584Z Commit: f3dc54e1fb89da6852db922499a0233137369e1d
+2026-10-18T07:17:56.6222306Z Build Date: 2026-10-12T17:48:21Z
+2026-10-18T07:17:56.6223116Z Worker ID: {652a960e-ff5a-43ca-a5d8-93e3b8b0586c}
+2026-10-18T07:17:56.6223843Z Region: eastus
+2026-10-18T07:17:56.6224811Z Cloud: Azure
+2026-10-18T07:17:56.6225413Z ##[endgroup]
+2026-10-18T07:17:56.6227266Z ##[group]Operating System
+2026-10-18T07:17:56.6228436Z Ubuntu
+2026-10-18T07:17:56.6228973Z 24.04.5
+2026-10-18T07:17:56.6229517Z LTS
+2026-10-18T07:17:56.6230173Z ##[endgroup]
+2026-10-18T07:17:56.6230730Z ##[group]Runner Image
+2026-10-18T07:17:56.6231412Z Image: ubuntu-24.04
+2026-10-18T07:17:56.6232006Z Version: 20261012.334.1
+2026-10-18T07:17:56.6233384Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20261012.334/images/ubuntu/Ubuntu2404-Readme.md
+2026-10-18T07:17:56.6235248Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20261012.334
+2026-10-18T07:17:56.6236258Z ##[endgroup]
+2026-10-18T07:17:56.6237405Z ##[group]GITHUB_TOKEN Permissions
+2026-10-18T07:17:56.6239645Z Actions: read
+2026-10-18T07:17:56.6240268Z Contents: read
+2026-10-18T07:17:56.6240961Z Metadata: read
+2026-10-18T07:17:56.6241599Z ##[endgroup]
+2026-10-18T07:17:56.6243772Z Secret source: Actions
+2026-10-18T07:17:56.6245067Z Cache mode: write
+2026-10-18T07:17:56.6246167Z Prepare workflow directory
+2026-10-18T07:17:56.6760625Z Prepare all required actions
+2026-10-18T07:17:56.6810511Z Getting action download info
+2026-10-18T07:17:56.8853249Z Download action repository 'actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683' (SHA:11bd71901bbe5b1630ceea73d27597364c9af683)
+2026-10-18T07:17:57.0246315Z Download action repository 'actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00' (SHA:c5195efecf7bdfc987ee8bae7a71cb8b11521c00)
+2026-10-18T07:17:57.2644825Z Download action repository 'actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093' (SHA:d3f86a106a0bac45b974a628896c90dbdf5c8093)
+2026-10-18T07:17:57.4389157Z Download action repository 'actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02' (SHA:ea165f8d65b6e75b540449e92b4886f43607fa02)
+2026-10-18T07:17:57.6745821Z Complete job name: device
+2026-10-18T07:17:57.7593896Z ##[group]Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+2026-10-18T07:17:57.7595783Z with:
+2026-10-18T07:17:57.7596588Z   ref: 73a582d3c948d70450a45da4205435a715eeb6b4
+2026-10-18T07:17:57.7597650Z   persist-credentials: false
+2026-10-18T07:17:57.7598557Z   repository: mightyoung/Muyon
+2026-10-18T07:17:57.7607563Z   token: ***
+2026-10-18T07:17:57.7608309Z   ssh-strict: true
+2026-10-18T07:17:57.7609057Z   ssh-user: git
+2026-10-18T07:17:57.7609775Z   clean: true
+2026-10-18T07:17:57.7610531Z   sparse-checkout-cone-mode: true
+2026-10-18T07:17:57.7611444Z   fetch-depth: 1
+2026-10-18T07:17:57.7612208Z   fetch-tags: false
+2026-10-18T07:17:57.7612985Z   show-progress: true
+2026-10-18T07:17:57.7613764Z   lfs: false
+2026-10-18T07:17:57.7614620Z   submodules: false
+2026-10-18T07:17:57.7615401Z   set-safe-directory: true
+2026-10-18T07:17:57.7616503Z env:
+2026-10-18T07:17:57.7617320Z   SOURCE_SHA: 73a582d3c948d70450a45da4205435a715eeb6b4
+2026-10-18T07:17:57.7618445Z   PRODUCER_RUN: 39106124839
+2026-10-18T07:17:57.7619421Z   HARNESS_SHA: 210b1ddac609c5546394c66c082d2a2ebb921e92
+2026-10-18T07:17:57.7620492Z ##[endgroup]
+2026-10-18T07:17:57.8642145Z Syncing repository: mightyoung/Muyon
+2026-10-18T07:17:57.8646341Z ##[group]Getting Git version info
+2026-10-18T07:17:57.8648282Z Working directory is '/home/runner/work/Muyon/Muyon'
+2026-10-18T07:17:57.8651421Z [command]/usr/bin/git version
+2026-10-18T07:17:57.8689863Z git version 2.55.0
+2026-10-18T07:17:57.8713547Z ##[endgroup]
+2026-10-18T07:17:57.8728616Z Temporarily overriding HOME='/home/runner/work/_temp/0bc7d273-42ff-4ff4-831a-28c2009572f7' before making global git config changes
+2026-10-18T07:17:57.8733640Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-18T07:17:57.8737509Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/Muyon/Muyon
+2026-10-18T07:17:57.8783923Z Deleting the contents of '/home/runner/work/Muyon/Muyon'
+2026-10-18T07:17:57.8789646Z ##[group]Initializing the repository
+2026-10-18T07:17:57.8793425Z [command]/usr/bin/git init /home/runner/work/Muyon/Muyon
+2026-10-18T07:17:57.8902173Z hint: Using 'master' as the name for the initial branch. This default branch name
+2026-10-18T07:17:57.8904907Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+2026-10-18T07:17:57.8906765Z hint: to use in all of your new repositories, which will suppress this warning,
+2026-10-18T07:17:57.8908291Z hint: call:
+2026-10-18T07:17:57.8909058Z hint:
+2026-10-18T07:17:57.8910119Z hint: 	git config --global init.defaultBranch <name>
+2026-10-18T07:17:57.8911360Z hint:
+2026-10-18T07:17:57.8912493Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+2026-10-18T07:17:57.8914632Z hint: 'development'. The just-created branch can be renamed via this command:
+2026-10-18T07:17:57.8916085Z hint:
+2026-10-18T07:17:57.8916868Z hint: 	git branch -m <name>
+2026-10-18T07:17:57.8917949Z hint:
+2026-10-18T07:17:57.8919149Z hint: Disable this message with "git config set advice.defaultBranchName false"
+2026-10-18T07:17:57.8926222Z Initialized empty Git repository in /home/runner/work/Muyon/Muyon/.git/
+2026-10-18T07:17:57.8938478Z [command]/usr/bin/git remote add origin https://github.com/mightyoung/Muyon
+2026-10-18T07:17:57.9027840Z ##[endgroup]
+2026-10-18T07:17:57.9030371Z ##[group]Disabling automatic garbage collection
+2026-10-18T07:17:57.9032860Z [command]/usr/bin/git config --local gc.auto 0
+2026-10-18T07:17:57.9073154Z ##[endgroup]
+2026-10-18T07:17:57.9075742Z ##[group]Setting up auth
+2026-10-18T07:17:57.9078166Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-18T07:17:57.9106749Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-18T07:17:57.9479969Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-18T07:17:57.9524640Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-18T07:17:57.9752221Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+2026-10-18T07:17:57.9795801Z ##[endgroup]
+2026-10-18T07:17:57.9798311Z ##[group]Fetching the repository
+2026-10-18T07:17:57.9808405Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin 73a582d3c948d70450a45da4205435a715eeb6b4
+2026-10-18T07:18:00.3691040Z From https://github.com/mightyoung/Muyon
+2026-10-18T07:18:00.3691965Z  * branch            73a582d3c948d70450a45da4205435a715eeb6b4 -> FETCH_HEAD
+2026-10-18T07:18:00.3696904Z ##[endgroup]
+2026-10-18T07:18:00.3697742Z ##[group]Determining the checkout info
+2026-10-18T07:18:00.3699384Z ##[endgroup]
+2026-10-18T07:18:00.3706058Z [command]/usr/bin/git sparse-checkout disable
+2026-10-18T07:18:00.3759226Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+2026-10-18T07:18:00.3793153Z ##[group]Checking out the ref
+2026-10-18T07:18:00.3798436Z [command]/usr/bin/git checkout --progress --force 73a582d3c948d70450a45da4205435a715eeb6b4
+2026-10-18T07:18:00.8925706Z Note: switching to '73a582d3c948d70450a45da4205435a715eeb6b4'.
+2026-10-18T07:18:00.8926437Z 
+2026-10-18T07:18:00.8926860Z You are in 'detached HEAD' state. You can look around, make experimental
+2026-10-18T07:18:00.8928170Z changes and commit them, and you can discard any commits you make in this
+2026-10-18T07:18:00.8929572Z state without impacting any branches by switching back to a branch.
+2026-10-18T07:18:00.8930281Z 
+2026-10-18T07:18:00.8930925Z If you want to create a new branch to retain commits you create, you may
+2026-10-18T07:18:00.8932168Z do so (now or later) by using -c with the switch command. Example:
+2026-10-18T07:18:00.8933569Z 
+2026-10-18T07:18:00.8934443Z   git switch -c <new-branch-name>
+2026-10-18T07:18:00.8934839Z 
+2026-10-18T07:18:00.8935212Z Or undo this operation with:
+2026-10-18T07:18:00.8935534Z 
+2026-10-18T07:18:00.8935767Z   git switch -
+2026-10-18T07:18:00.8936071Z 
+2026-10-18T07:18:00.8936487Z Turn off this advice by setting config variable advice.detachedHead to false
+2026-10-18T07:18:00.8937228Z 
+2026-10-18T07:18:00.8937679Z HEAD is now at 73a582d ci(android): keep log collection separate from required device tests
+2026-10-18T07:18:00.8957862Z ##[endgroup]
+2026-10-18T07:18:00.9008030Z [command]/usr/bin/git log -1 --format=%H
+2026-10-18T07:18:00.9042257Z 73a582d3c948d70450a45da4205435a715eeb6b4
+2026-10-18T07:18:00.9116513Z ##[group]Removing auth
+2026-10-18T07:18:00.9135507Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-18T07:18:00.9137618Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-18T07:18:00.9326287Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-18T07:18:00.9358452Z http.https://github.com/.extraheader
+2026-10-18T07:18:00.9367088Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+2026-10-18T07:18:00.9403396Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-18T07:18:00.9627628Z ##[endgroup]
+2026-10-18T07:18:00.9906067Z ##[group]Run actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00
+2026-10-18T07:18:00.9906502Z with:
+2026-10-18T07:18:00.9906708Z   distribution: temurin
+2026-10-18T07:18:00.9906939Z   java-version: 17
+2026-10-18T07:18:00.9907148Z   java-package: jdk
+2026-10-18T07:18:00.9907361Z   check-latest: false
+2026-10-18T07:18:00.9907574Z   server-id: github
+2026-10-18T07:18:00.9907790Z   server-username: GITHUB_ACTOR
+2026-10-18T07:18:00.9908048Z   server-password: GITHUB_TOKEN
+2026-10-18T07:18:00.9908296Z   overwrite-settings: true
+2026-10-18T07:18:00.9908526Z   job-status: success
+2026-10-18T07:18:00.9911095Z   token: ***
+2026-10-18T07:18:00.9911297Z env:
+2026-10-18T07:18:00.9911534Z   SOURCE_SHA: 73a582d3c948d70450a45da4205435a715eeb6b4
+2026-10-18T07:18:00.9911849Z   PRODUCER_RUN: 39106124839
+2026-10-18T07:18:00.9912139Z   HARNESS_SHA: 210b1ddac609c5546394c66c082d2a2ebb921e92
+2026-10-18T07:18:00.9912443Z ##[endgroup]
+2026-10-18T07:18:01.1517546Z ##[group]Installed distributions
+2026-10-18T07:18:01.1719733Z Resolved Java 17.0.20+1 from tool-cache
+2026-10-18T07:18:01.1731536Z (node:2338) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-18T07:18:01.1732553Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-18T07:18:01.1733099Z Setting Java 17.0.20+1 as the default
+2026-10-18T07:18:01.1735276Z Creating toolchains.xml for JDK version 17 from temurin
+2026-10-18T07:18:01.1815984Z Writing to /home/runner/.m2/toolchains.xml
+2026-10-18T07:18:01.1816450Z 
+2026-10-18T07:18:01.1816646Z Java configuration:
+2026-10-18T07:18:01.1817064Z   Distribution: temurin
+2026-10-18T07:18:01.1817483Z   Version: 17.0.20+1
+2026-10-18T07:18:01.1817974Z   Path: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.20-1/x64
+2026-10-18T07:18:01.1818426Z 
+2026-10-18T07:18:01.1819164Z ##[endgroup]
+2026-10-18T07:18:01.1839930Z Creating settings.xml with server-id: github
+2026-10-18T07:18:01.1845107Z Writing to /home/runner/.m2/settings.xml
+2026-10-18T07:18:01.2046851Z ##[group]Run actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+2026-10-18T07:18:01.2047705Z with:
+2026-10-18T07:18:01.2048067Z   name: loop-package-device
+2026-10-18T07:18:01.2048476Z   run-id: 39106124839
+2026-10-18T07:18:01.2053544Z   github-token: ***
+2026-10-18T07:18:01.2054252Z   path: /home/runner/work/_temp/immutable-apk
+2026-10-18T07:18:01.2054787Z   merge-multiple: false
+2026-10-18T07:18:01.2055204Z   repository: mightyoung/Muyon
+2026-10-18T07:18:01.2055470Z env:
+2026-10-18T07:18:01.2055712Z   SOURCE_SHA: 73a582d3c948d70450a45da4205435a715eeb6b4
+2026-10-18T07:18:01.2056030Z   PRODUCER_RUN: 39106124839
+2026-10-18T07:18:01.2056310Z   HARNESS_SHA: 210b1ddac609c5546394c66c082d2a2ebb921e92
+2026-10-18T07:18:01.2056726Z   JAVA_HOME: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.20-1/x64
+2026-10-18T07:18:01.2057209Z   JAVA_HOME_17_X64: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.20-1/x64
+2026-10-18T07:18:01.2057596Z ##[endgroup]
+2026-10-18T07:18:01.3600422Z Downloading single artifact
+2026-10-18T07:18:01.3672167Z (node:2352) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-18T07:18:01.3673541Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-18T07:18:01.3860391Z (node:2352) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+2026-10-18T07:18:01.5252899Z Preparing to download the following artifacts:
+2026-10-18T07:18:01.5254677Z - loop-package-device (ID: 12129275262, Size: 22337512, Expected Digest: sha256:e319ded58e9f57266123e7889d01c54db6955963ab46bfd9dd35f1b4624f7e3e)
+2026-10-18T07:18:01.5296652Z Downloading artifact '12129275262' from 'mightyoung/Muyon'
+2026-10-18T07:18:01.6558079Z Redirecting to blob download url: https://productionresultssa3.blob.core.windows.net/actions-results/a359af89-a0a4-8dc4-9bbb-d0aea0d3cfd6/workflow-job-run-95c1da70-fdeb-5481-a071-e342829dea45/artifacts/f752b424e15aebfbb687f395f8e91922506f3b3145e7a7d61893fc74e2ea12ef.zip
+2026-10-18T07:18:01.6559890Z Starting download of artifact to: /home/runner/work/_temp/immutable-apk
+2026-10-18T07:18:01.7258059Z (node:2352) [DEP0005] DeprecationWarning: Buffer() is deprecated due to security and usability issues. Please use the Buffer.alloc(), Buffer.allocUnsafe(), or Buffer.from() methods instead.
+2026-10-18T07:18:02.1392043Z SHA256 digest of downloaded artifact is e319ded58e9f57266123e7889d01c54db6955963ab46bfd9dd35f1b4624f7e3e
+2026-10-18T07:18:02.1393566Z Artifact download completed successfully.
+2026-10-18T07:18:02.1394786Z Total of 1 artifact(s) downloaded
+2026-10-18T07:18:02.1397400Z Download artifact has finished successfully
+2026-10-18T07:18:02.1587068Z ##[group]Run set -euo pipefail
+2026-10-18T07:18:02.1587442Z [36;1mset -euo pipefail[0m
+2026-10-18T07:18:02.1587755Z [36;1mexport EVIDENCE="$RUNNER_TEMP/device-evidence"[0m
+2026-10-18T07:18:02.1588113Z [36;1mmkdir -p "$EVIDENCE"[0m
+2026-10-18T07:18:02.1588363Z [36;1mpython3 - <<'PY'[0m
+2026-10-18T07:18:02.1588630Z [36;1mimport hashlib, json, os, subprocess[0m
+2026-10-18T07:18:02.1588931Z [36;1mfrom pathlib import Path[0m
+2026-10-18T07:18:02.1589250Z [36;1mroot=Path(os.environ['RUNNER_TEMP'])/'immutable-apk'[0m
+2026-10-18T07:18:02.1589681Z [36;1mproducer=json.loads((root/'package-result.json').read_text())[0m
+2026-10-18T07:18:02.1590191Z [36;1mactual=subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip()[0m
+2026-10-18T07:18:02.1590700Z [36;1massert actual==os.environ['SOURCE_SHA']==producer['source_sha'][0m
+2026-10-18T07:18:02.1591159Z [36;1massert producer['build']=='PASS' and producer['min_api']==26[0m
+2026-10-18T07:18:02.1591729Z [36;1mfor name,key in [('app-debug.apk','apk_sha256'),('app-debug-androidTest.apk','test_apk_sha256')]:[0m
+2026-10-18T07:18:02.1592319Z [36;1m    assert hashlib.sha256((root/name).read_bytes()).hexdigest()==producer[key][0m
+2026-10-18T07:18:02.1593270Z [36;1mrecord=dict(source_sha=actual,harness_sha=os.environ['HARNESS_SHA'],producer_run=os.environ['PRODUCER_RUN'],producer=producer,model_api_called=False)[0m
+2026-10-18T07:18:02.1594371Z [36;1mPath(os.environ['EVIDENCE'],'provenance.json').write_text(json.dumps(record,indent=2)+'\n')[0m
+2026-10-18T07:18:02.1595085Z [36;1mprint('IMMUTABLE_COMBINED_APK_VERIFIED source='+actual)[0m
+2026-10-18T07:18:02.1595430Z [36;1mPY[0m
+2026-10-18T07:18:02.1843023Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2026-10-18T07:18:02.1843465Z env:
+2026-10-18T07:18:02.1843760Z   SOURCE_SHA: 73a582d3c948d70450a45da4205435a715eeb6b4
+2026-10-18T07:18:02.1844494Z   PRODUCER_RUN: 39106124839
+2026-10-18T07:18:02.1844868Z   HARNESS_SHA: 210b1ddac609c5546394c66c082d2a2ebb921e92
+2026-10-18T07:18:02.1845421Z   JAVA_HOME: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.20-1/x64
+2026-10-18T07:18:02.1846057Z   JAVA_HOME_17_X64: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.20-1/x64
+2026-10-18T07:18:02.1846562Z ##[endgroup]
+2026-10-18T07:18:02.2481122Z IMMUTABLE_COMBINED_APK_VERIFIED source=73a582d3c948d70450a45da4205435a715eeb6b4
+2026-10-18T07:18:02.2573185Z ##[group]Run set -euo pipefail
+2026-10-18T07:18:02.2573538Z [36;1mset -euo pipefail[0m
+2026-10-18T07:18:02.2573828Z [36;1mevidence="$RUNNER_TEMP/device-evidence"[0m
+2026-10-18T07:18:02.2574558Z [36;1mexport ANDROID_AVD_HOME="$RUNNER_TEMP/muyon-device-avds"[0m
+2026-10-18T07:18:02.2574935Z [36;1mmkdir -p "$ANDROID_AVD_HOME"[0m
+2026-10-18T07:18:02.2575309Z [36;1mmanager="$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager"[0m
+2026-10-18T07:18:02.2575804Z [36;1m# Existing runner SDK license state only. No license acceptance command.[0m
+2026-10-18T07:18:02.2576528Z [36;1m"$manager" --install 'platform-tools' 'emulator' 'system-images;android-26;google_apis;x86_64' 2>&1 | tee "$evidence/sdk-setup.log"[0m
+2026-10-18T07:18:02.2577150Z [36;1madb_bin="$ANDROID_HOME/platform-tools/adb"[0m
+2026-10-18T07:18:02.2577450Z [36;1mtest -x "$adb_bin"[0m
+2026-10-18T07:18:02.2577745Z [36;1m"$adb_bin" version > "$evidence/adb-version.txt"[0m
+2026-10-18T07:18:02.2578091Z [36;1msudo chmod a+rw /dev/kvm[0m
+2026-10-18T07:18:02.2578738Z [36;1mprintf 'no\n' | "$ANDROID_HOME/cmdline-tools/latest/bin/avdmanager" create avd -n muyon-loop-api26 -k 'system-images;android-26;google_apis;x86_64' --force[0m
+2026-10-18T07:18:02.2579826Z [36;1m"$ANDROID_HOME/emulator/emulator" -avd muyon-loop-api26 -no-window -no-audio -no-boot-anim -no-snapshot -gpu swiftshader_indirect > "$evidence/emulator.log" 2>&1 &[0m
+2026-10-18T07:18:02.2580557Z [36;1mtimeout 300 "$adb_bin" wait-for-device[0m
+2026-10-18T07:18:02.2581135Z [36;1mfor attempt in $(seq 1 120); do if [[ "$("$adb_bin" shell getprop sys.boot_completed | tr -d '\r')" == 1 ]]; then break; fi; sleep 2; done[0m
+2026-10-18T07:18:02.2581777Z [36;1mtest "$("$adb_bin" shell getprop sys.boot_completed | tr -d '\r')" = 1[0m
+2026-10-18T07:18:02.2582260Z [36;1mtest "$("$adb_bin" shell getprop ro.build.version.sdk | tr -d '\r')" = 26[0m
+2026-10-18T07:18:02.2582669Z [36;1m"$adb_bin" shell input keyevent 82[0m
+2026-10-18T07:18:02.2583050Z [36;1m"$adb_bin" install -r "$RUNNER_TEMP/immutable-apk/app-debug.apk"[0m
+2026-10-18T07:18:02.2583540Z [36;1m"$adb_bin" install -r "$RUNNER_TEMP/immutable-apk/app-debug-androidTest.apk"[0m
+2026-10-18T07:18:02.2584318Z [36;1mif ! timeout 15 "$adb_bin" logcat -c > "$evidence/logcat-clear.log" 2>&1; then[0m
+2026-10-18T07:18:02.2585038Z [36;1m  printf 'UNAVAILABLE: API26 log buffer clear; instrumentation still required\n' > "$evidence/logcat-clear-status.txt"[0m
+2026-10-18T07:18:02.2585578Z [36;1mfi[0m
+2026-10-18T07:18:02.2586479Z [36;1mtimeout 240 "$adb_bin" shell am instrument -w -r -e class com.mightyoung.muyon.androidlab.FrontendServiceLoopTest com.mightyoung.muyon.androidlab.test/androidx.test.runner.AndroidJUnitRunner | tee "$evidence/instrumentation.log"[0m
+2026-10-18T07:18:02.2587559Z [36;1mif ! timeout 30 "$adb_bin" logcat -d > "$evidence/logcat.txt" 2>&1; then[0m
+2026-10-18T07:18:02.2588251Z [36;1m  printf 'UNAVAILABLE: API26 logcat dump\n' > "$evidence/logcat-status.txt"[0m
+2026-10-18T07:18:02.2588649Z [36;1mfi[0m
+2026-10-18T07:18:02.2588932Z [36;1m"$adb_bin" shell ps -A > "$evidence/device-processes.txt"[0m
+2026-10-18T07:18:02.2589336Z [36;1mgrep -F 'OK (2 tests)' "$evidence/instrumentation.log"[0m
+2026-10-18T07:18:02.2589913Z [36;1mif grep -E 'FAILURES|INSTRUMENTATION_FAILED|Process crashed' "$evidence/instrumentation.log"; then exit 1; fi[0m
+2026-10-18T07:18:02.2590806Z [36;1mprintf 'API26 UI/Binder/native/synthetic schema12 and original-receipt process recovery PASS; model API NOT_RUN\n' > "$evidence/device-result.txt"[0m
+2026-10-18T07:18:02.2657643Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2026-10-18T07:18:02.2657983Z env:
+2026-10-18T07:18:02.2658246Z   SOURCE_SHA: 73a582d3c948d70450a45da4205435a715eeb6b4
+2026-10-18T07:18:02.2658603Z   PRODUCER_RUN: 39106124839
+2026-10-18T07:18:02.2658878Z   HARNESS_SHA: 210b1ddac609c5546394c66c082d2a2ebb921e92
+2026-10-18T07:18:02.2659299Z   JAVA_HOME: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.20-1/x64
+2026-10-18T07:18:02.2659977Z   JAVA_HOME_17_X64: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.20-1/x64
+2026-10-18T07:18:02.2660361Z ##[endgroup]
+2026-10-18T07:18:07.1980414Z Loading package information...                                                  
+2026-10-18T07:18:07.2912408Z Loading local repository...                                                     
+2026-10-18T07:18:07.2915842Z [                                       ] 3% Loading local repository...        
+2026-10-18T07:18:08.5942350Z [                                       ] 3% Fetch remote repository...         
+2026-10-18T07:18:09.1416562Z [=                                      ] 3% Fetch remote repository...         
+2026-10-18T07:18:09.2298966Z [=                                      ] 4% Fetch remote repository...         
+2026-10-18T07:18:09.2730700Z [=                                      ] 5% Fetch remote repository...         
+2026-10-18T07:18:09.3299726Z [==                                     ] 5% Fetch remote repository...         
+2026-10-18T07:18:09.3981797Z [==                                     ] 6% Fetch remote repository...         
+2026-10-18T07:18:09.6315577Z [==                                     ] 7% Fetch remote repository...         
+2026-10-18T07:18:09.6354796Z [==                                     ] 7% Computing updates...               
+2026-10-18T07:18:09.6440250Z [===                                    ] 8% Computing updates...               
+2026-10-18T07:18:09.6764254Z [===                                    ] 10% Computing updates...              
+2026-10-18T07:18:09.7268156Z [===                                    ] 10% Installing Android Emulator       
+2026-10-18T07:18:10.0230226Z [===                                    ] 10% Downloading emulator-linux_x64-164
+2026-10-18T07:18:10.1819360Z [====                                   ] 10% Downloading emulator-linux_x64-164
+2026-10-18T07:18:10.3287958Z [====                                   ] 11% Downloading emulator-linux_x64-164
+2026-10-18T07:18:10.4533277Z [====                                   ] 12% Downloading emulator-linux_x64-164
+2026-10-18T07:18:10.5476291Z [=====                                  ] 13% Downloading emulator-linux_x64-164
+2026-10-18T07:18:10.6243054Z [=====                                  ] 14% Downloading emulator-linux_x64-164
+2026-10-18T07:18:10.6682940Z [=====                                  ] 15% Downloading emulator-linux_x64-164
+2026-10-18T07:18:10.7038063Z [======                                 ] 15% Downloading emulator-linux_x64-164
+2026-10-18T07:18:10.7834578Z [======                                 ] 16% Downloading emulator-linux_x64-164
+2026-10-18T07:18:10.8565120Z [======                                 ] 17% Downloading emulator-linux_x64-164
+2026-10-18T07:18:10.9186147Z [=======                                ] 18% Downloading emulator-linux_x64-164
+2026-10-18T07:18:10.9755320Z [=======                                ] 19% Downloading emulator-linux_x64-164
+2026-10-18T07:18:11.0010401Z [=======                                ] 20% Downloading emulator-linux_x64-164
+2026-10-18T07:18:11.0388555Z [========                               ] 20% Downloading emulator-linux_x64-164
+2026-10-18T07:18:11.0863834Z [========                               ] 21% Downloading emulator-linux_x64-164
+2026-10-18T07:18:11.2225562Z [========                               ] 21% Unzipping...                      
+2026-10-18T07:18:11.2226572Z [========                               ] 21% Unzipping... emulator/            
+2026-10-18T07:18:11.2227562Z [========                               ] 21% Unzipping... emulator/resources/  
+2026-10-18T07:18:11.2629577Z [========                               ] 21% Unzipping... emulator/qsn         
+2026-10-18T07:18:11.3199143Z [========                               ] 21% Unzipping... emulator/emulator    
+2026-10-18T07:18:11.3460995Z [========                               ] 21% Unzipping... emulator/netsimd     
+2026-10-18T07:18:11.4397957Z [========                               ] 22% Unzipping... emulator/netsimd     
+2026-10-18T07:18:11.4398982Z [========                               ] 22% Unzipping... emulator/bin64/      
+2026-10-18T07:18:11.4399645Z [========                               ] 22% Unzipping... emulator/qemu/       
+2026-10-18T07:18:11.4416250Z [========                               ] 22% Unzipping... emulator/NOTICE.txt  
+2026-10-18T07:18:11.4605218Z [========                               ] 22% Unzipping... emulator/crashpad_han
+2026-10-18T07:18:11.4608897Z [========                               ] 22% Unzipping... emulator/source.prope
+2026-10-18T07:18:11.5206758Z [========                               ] 22% Unzipping... emulator/nimble_bridg
+2026-10-18T07:18:11.5209555Z [========                               ] 22% Unzipping... emulator/LICENSE     
+2026-10-18T07:18:11.5210523Z [========                               ] 22% Unzipping... emulator/lib/        
+2026-10-18T07:18:11.5297914Z [========                               ] 22% Unzipping... emulator/qemu-img    
+2026-10-18T07:18:11.5298980Z [========                               ] 22% Unzipping... emulator/include/    
+2026-10-18T07:18:11.5306686Z [========                               ] 22% Unzipping... emulator/NOTICE.csv  
+2026-10-18T07:18:11.5307403Z [========                               ] 22% Unzipping... emulator/lib64/      
+2026-10-18T07:18:11.5470083Z [========                               ] 22% Unzipping... emulator/emulator-che
+2026-10-18T07:18:11.5667882Z [========                               ] 22% Unzipping... emulator/crashreport 
+2026-10-18T07:18:11.5669616Z [========                               ] 22% Unzipping... emulator/mksdcard    
+2026-10-18T07:18:11.5906013Z [========                               ] 22% Unzipping... emulator/resources/To
+2026-10-18T07:18:11.5976125Z [========                               ] 22% Unzipping... emulator/resources/de
+2026-10-18T07:18:11.5979038Z [========                               ] 22% Unzipping... emulator/resources/To
+2026-10-18T07:18:11.5991946Z [========                               ] 22% Unzipping... emulator/resources/de
+2026-10-18T07:18:11.6162113Z [========                               ] 22% Unzipping... emulator/resources/To
+2026-10-18T07:18:11.6174836Z [========                               ] 22% Unzipping... emulator/resources/ma
+2026-10-18T07:18:11.6190715Z [========                               ] 22% Unzipping... emulator/resources/de
+2026-10-18T07:18:11.6191659Z [========                               ] 22% Unzipping... emulator/resources/sk
+2026-10-18T07:18:11.6233093Z [========                               ] 22% Unzipping... emulator/resources/de
+2026-10-18T07:18:11.6233844Z [========                               ] 22% Unzipping... emulator/resources/ma
+2026-10-18T07:18:11.6245731Z [========                               ] 22% Unzipping... emulator/resources/po
+2026-10-18T07:18:11.6311565Z [========                               ] 22% Unzipping... emulator/resources/ma
+2026-10-18T07:18:11.6316783Z [=========                              ] 23% Unzipping... emulator/resources/ma
+2026-10-18T07:18:11.6378420Z [=========                              ] 23% Unzipping... emulator/resources/sk
+2026-10-18T07:18:11.6392838Z [=========                              ] 23% Unzipping... emulator/resources/ma
+2026-10-18T07:18:11.6425639Z [=========                              ] 23% Unzipping... emulator/bin64/e2fsck
+2026-10-18T07:18:11.6474449Z [=========                              ] 23% Unzipping... emulator/bin64/fsck.e
+2026-10-18T07:18:11.6483008Z [=========                              ] 23% Unzipping... emulator/bin64/tune2f
+2026-10-18T07:18:11.6506150Z [=========                              ] 23% Unzipping... emulator/bin64/resize
+2026-10-18T07:18:11.6520786Z [=========                              ] 23% Unzipping... emulator/bin64/mkfs.e
+2026-10-18T07:18:12.0148781Z [=========                              ] 23% Unzipping... emulator/qemu/linux-x
+2026-10-18T07:18:12.3580113Z [=========                              ] 24% Unzipping... emulator/qemu/linux-x
+2026-10-18T07:18:12.5268354Z [=========                              ] 25% Unzipping... emulator/qemu/linux-x
+2026-10-18T07:18:12.7086339Z [==========                             ] 25% Unzipping... emulator/qemu/linux-x
+2026-10-18T07:18:12.7089419Z [==========                             ] 25% Unzipping... emulator/lib/emulator
+2026-10-18T07:18:12.7094915Z [==========                             ] 25% Unzipping... emulator/lib/rtc_serv
+2026-10-18T07:18:12.7097648Z [==========                             ] 25% Unzipping... emulator/lib/advanced
+2026-10-18T07:18:12.7102346Z [==========                             ] 25% Unzipping... emulator/lib/cmake/  
+2026-10-18T07:18:12.7102869Z [==========                             ] 25% Unzipping... emulator/lib/emulator
+2026-10-18T07:18:12.7103662Z [==========                             ] 25% Unzipping... emulator/lib/control_
+2026-10-18T07:18:12.7107500Z [==========                             ] 25% Unzipping... emulator/lib/emulated
+2026-10-18T07:18:12.7110151Z [==========                             ] 25% Unzipping... emulator/lib/rtc_serv
+2026-10-18T07:18:12.7113173Z [==========                             ] 25% Unzipping... emulator/lib/emu-orig
+2026-10-18T07:18:12.7120231Z [==========                             ] 25% Unzipping... emulator/lib/hardware
+2026-10-18T07:18:12.7120922Z [==========                             ] 25% Unzipping... emulator/lib/pkgconfi
+2026-10-18T07:18:12.7121690Z [==========                             ] 25% Unzipping... emulator/lib/pc-bios/
+2026-10-18T07:18:12.7122343Z [==========                             ] 25% Unzipping... emulator/lib/snapshot
+2026-10-18T07:18:12.7130073Z [==========                             ] 25% Unzipping... emulator/lib/adb_serv
+2026-10-18T07:18:12.7133872Z [==========                             ] 25% Unzipping... emulator/lib/hostapd.
+2026-10-18T07:18:12.7136963Z [==========                             ] 25% Unzipping... emulator/lib/grpc_end
+2026-10-18T07:18:12.7152987Z [==========                             ] 25% Unzipping... emulator/lib/ca-bundl
+2026-10-18T07:18:12.7156670Z [==========                             ] 25% Unzipping... emulator/lib/ui_contr
+2026-10-18T07:18:12.7165575Z [==========                             ] 25% Unzipping... emulator/lib/snapshot
+2026-10-18T07:18:12.7166434Z [==========                             ] 25% Unzipping... emulator/lib/ice_conf
+2026-10-18T07:18:12.7268921Z [==========                             ] 25% Unzipping... emulator/lib/libflatb
+2026-10-18T07:18:12.7472686Z [==========                             ] 26% Unzipping... emulator/lib/libflatb
+2026-10-18T07:18:12.7479970Z [==========                             ] 26% Unzipping... emulator/lib/emulator
+2026-10-18T07:18:12.7482708Z [==========                             ] 26% Unzipping... emulator/lib/waterfal
+2026-10-18T07:18:12.7486571Z [==========                             ] 26% Unzipping... emulator/lib/emulated
+2026-10-18T07:18:12.7498629Z [==========                             ] 26% Unzipping... emulator/lib/cmake/fl
+2026-10-18T07:18:12.7500896Z [==========                             ] 26% Unzipping... emulator/lib/pkgconfi
+2026-10-18T07:18:12.7686732Z [==========                             ] 26% Unzipping... emulator/lib/pc-bios/
+2026-10-18T07:18:12.7772453Z [==========                             ] 26% Unzipping... emulator/include/flat
+2026-10-18T07:18:12.7843766Z [==========                             ] 26% Unzipping... emulator/lib64/libgli
+2026-10-18T07:18:12.7963048Z [==========                             ] 26% Unzipping... emulator/lib64/libpro
+2026-10-18T07:18:12.7964810Z [==========                             ] 26% Unzipping... emulator/lib64/qt/   
+2026-10-18T07:18:12.8352782Z [==========                             ] 26% Unzipping... emulator/lib64/liband
+2026-10-18T07:18:12.9038275Z [==========                             ] 26% Unzipping... emulator/lib64/libgfx
+2026-10-18T07:18:12.9039112Z [==========                             ] 26% Unzipping... emulator/lib64/gles_l
+2026-10-18T07:18:12.9047316Z [==========                             ] 26% Unzipping... emulator/lib64/liband
+2026-10-18T07:18:12.9048197Z [==========                             ] 26% Unzipping... emulator/lib64/vulkan
+2026-10-18T07:18:12.9049050Z [==========                             ] 26% Unzipping... emulator/lib64/gles_s
+2026-10-18T07:18:12.9052391Z [==========                             ] 26% Unzipping... emulator/lib64/libemu
+2026-10-18T07:18:12.9171155Z [==========                             ] 26% Unzipping... emulator/lib64/libpro
+2026-10-18T07:18:13.0679452Z [==========                             ] 26% Unzipping... emulator/lib64/liband
+2026-10-18T07:18:13.0698518Z [==========                             ] 26% Unzipping... emulator/lib64/libtcm
+2026-10-18T07:18:13.0701943Z [==========                             ] 26% Unzipping... emulator/lib64/libima
+2026-10-18T07:18:13.0767078Z [==========                             ] 26% Unzipping... emulator/lib64/libc++
+2026-10-18T07:18:13.1039217Z [==========                             ] 26% Unzipping... emulator/lib64/liband
+2026-10-18T07:18:13.1084252Z [==========                             ] 26% Unzipping... emulator/lib64/libabs
+2026-10-18T07:18:13.1085461Z [==========                             ] 26% Unzipping... emulator/lib64/gles_a
+2026-10-18T07:18:13.1153391Z [==========                             ] 26% Unzipping... emulator/lib64/libsha
+2026-10-18T07:18:13.1218255Z [==========                             ] 26% Unzipping... emulator/lib64/libc++
+2026-10-18T07:18:13.1219160Z [==========                             ] 26% Unzipping... emulator/lib64/qt/res
+2026-10-18T07:18:13.1219888Z [==========                             ] 26% Unzipping... emulator/lib64/qt/lib
+2026-10-18T07:18:13.1220801Z [==========                             ] 26% Unzipping... emulator/lib64/qt/tra
+2026-10-18T07:18:13.1222195Z [==========                             ] 26% Unzipping... emulator/lib64/qt/plu
+2026-10-18T07:18:13.1254265Z [==========                             ] 26% Unzipping... emulator/lib64/qt/res
+2026-10-18T07:18:13.2033035Z [==========                             ] 27% Unzipping... emulator/lib64/qt/res
+2026-10-18T07:18:13.3093607Z [==========                             ] 27% Unzipping... emulator/lib64/qt/lib
+2026-10-18T07:18:13.6943688Z [===========                            ] 28% Unzipping... emulator/lib64/qt/lib
+2026-10-18T07:18:14.0930185Z [===========                            ] 29% Unzipping... emulator/lib64/qt/lib
+2026-10-18T07:18:14.3025824Z [===========                            ] 30% Unzipping... emulator/lib64/qt/lib
+2026-10-18T07:18:14.3834887Z [============                           ] 30% Unzipping... emulator/lib64/qt/lib
+2026-10-18T07:18:14.4933583Z [============                           ] 30% Unzipping... emulator/lib64/qt/tra
+2026-10-18T07:18:14.5053474Z [============                           ] 30% Unzipping... emulator/lib64/qt/plu
+2026-10-18T07:18:14.5266585Z [============                           ] 30% Unzipping... emulator/lib64/gles_l
+2026-10-18T07:18:14.5887949Z [============                           ] 31% Unzipping... emulator/lib64/gles_l
+2026-10-18T07:18:14.9354689Z [============                           ] 31% Unzipping... emulator/lib64/vulkan
+2026-10-18T07:18:15.2574693Z [============                           ] 32% Unzipping... emulator/lib64/vulkan
+2026-10-18T07:18:15.3241404Z [============                           ] 32% Unzipping... emulator/lib64/gles_s
+2026-10-18T07:18:15.3811407Z [============                           ] 32% Unzipping... emulator/lib64/gles_a
+2026-10-18T07:18:15.4460929Z [=============                          ] 33% Unzipping... emulator/lib64/gles_a
+2026-10-18T07:18:15.8085481Z [=====================                  ] 55% Unzipping... emulator/lib64/gles_a
+2026-10-18T07:18:15.8412351Z [=====================                  ] 55% Installing Google APIs Intel x86_6
+2026-10-18T07:18:15.8721467Z [=====================                  ] 55% Downloading x86_64-26_r16.zip... e
+2026-10-18T07:18:16.0325023Z [======================                 ] 55% Downloading x86_64-26_r16.zip... e
+2026-10-18T07:18:16.3277159Z [======================                 ] 56% Downloading x86_64-26_r16.zip... e
+2026-10-18T07:18:16.6083809Z [======================                 ] 57% Downloading x86_64-26_r16.zip... e
+2026-10-18T07:18:16.8723684Z [=======================                ] 58% Downloading x86_64-26_r16.zip... e
+2026-10-18T07:18:17.1335577Z [=======================                ] 59% Downloading x86_64-26_r16.zip... e
+2026-10-18T07:18:17.2895863Z [=======================                ] 60% Downloading x86_64-26_r16.zip... e
+2026-10-18T07:18:17.4137929Z [========================               ] 60% Downloading x86_64-26_r16.zip... e
+2026-10-18T07:18:17.7455168Z [========================               ] 61% Downloading x86_64-26_r16.zip... e
+2026-10-18T07:18:18.0651351Z [========================               ] 62% Downloading x86_64-26_r16.zip... e
+2026-10-18T07:18:18.3440048Z [=========================              ] 63% Downloading x86_64-26_r16.zip... e
+2026-10-18T07:18:18.6432577Z [=========================              ] 64% Downloading x86_64-26_r16.zip... e
+2026-10-18T07:18:18.7862584Z [=========================              ] 65% Downloading x86_64-26_r16.zip... e
+2026-10-18T07:18:18.9395072Z [==========================             ] 65% Downloading x86_64-26_r16.zip... e
+2026-10-18T07:18:19.1367913Z [==========================             ] 66% Downloading x86_64-26_r16.zip... e
+2026-10-18T07:18:19.1377400Z [==========================             ] 66% Unzipping... emulator/lib64/gles_a
+2026-10-18T07:18:19.1378066Z [==========================             ] 66% Unzipping... x86_64/              
+2026-10-18T07:18:19.1380779Z [==========================             ] 66% Unzipping... x86_64/advancedFeatur
+2026-10-18T07:18:19.1501757Z [==========================             ] 66% Unzipping... x86_64/kernel-ranchu 
+2026-10-18T07:18:19.1545707Z [==========================             ] 66% Unzipping... x86_64/NOTICE.txt    
+2026-10-18T07:18:19.1547990Z [==========================             ] 66% Unzipping... x86_64/build.prop    
+2026-10-18T07:18:21.4157849Z [==========================             ] 66% Unzipping... x86_64/userdata.img  
+2026-10-18T07:18:21.4158721Z [==========================             ] 67% Unzipping... x86_64/userdata.img  
+2026-10-18T07:18:21.4159914Z [==========================             ] 67% Unzipping... x86_64/source.propert
+2026-10-18T07:18:21.4160772Z [==========================             ] 67% Unzipping... x86_64/data/         
+2026-10-18T07:18:21.4161613Z [==========================             ] 67% Unzipping... x86_64/data/misc/    
+2026-10-18T07:18:21.4164377Z [==========================             ] 67% Unzipping... x86_64/data/misc/wifi
+2026-10-18T07:18:21.4223550Z [==========================             ] 67% Unzipping... x86_64/ramdisk.img   
+2026-10-18T07:18:22.5383328Z [==========================             ] 67% Unzipping... x86_64/system.img    
+2026-10-18T07:18:23.5375984Z [===========================            ] 68% Unzipping... x86_64/system.img    
+2026-10-18T07:18:24.3675086Z [===========================            ] 69% Unzipping... x86_64/system.img    
+2026-10-18T07:18:24.9444918Z [===========================            ] 70% Unzipping... x86_64/system.img    
+2026-10-18T07:18:25.5213224Z [============================           ] 70% Unzipping... x86_64/system.img    
+2026-10-18T07:18:26.5883429Z [============================           ] 71% Unzipping... x86_64/system.img    
+2026-10-18T07:18:27.6393843Z [============================           ] 72% Unzipping... x86_64/system.img    
+2026-10-18T07:18:28.7606508Z [=============================          ] 73% Unzipping... x86_64/system.img    
+2026-10-18T07:18:29.6328261Z [=============================          ] 74% Unzipping... x86_64/system.img    
+2026-10-18T07:18:30.2300605Z [=============================          ] 75% Unzipping... x86_64/system.img    
+2026-10-18T07:18:30.7207235Z [==============================         ] 75% Unzipping... x86_64/system.img    
+2026-10-18T07:18:31.6590879Z [==============================         ] 76% Unzipping... x86_64/system.img    
+2026-10-18T07:18:34.9608625Z [==============================         ] 77% Unzipping... x86_64/system.img    
+2026-10-18T07:18:35.3642835Z [==============================         ] 77% Unzipping... x86_64/vendor.img    
+2026-10-18T07:18:35.3677601Z [==============================         ] 77% Unzipping... x86_64/encryptionkey.
+2026-10-18T07:18:35.5162864Z [==============================         ] 78% Unzipping... x86_64/encryptionkey.
+2026-10-18T07:18:35.5164917Z [=======================================] 100% Unzipping... x86_64/encryptionkey
+2026-10-18T07:18:35.5227072Z 
+2026-10-18T07:18:36.7495840Z Loading local repository...                                                     
+2026-10-18T07:18:36.7505090Z [=========                              ] 25% Loading local repository...       
+2026-10-18T07:18:36.7505799Z [=========                              ] 25% Fetch remote repository...        
+2026-10-18T07:18:36.7506454Z [=======================================] 100% Fetch remote repository...       
+2026-10-18T07:18:36.9530275Z Auto-selecting single ABI x86_64
+2026-10-18T07:18:37.2225823Z * daemon not running; starting now at tcp:5037
+2026-10-18T07:18:37.4092478Z * daemon started successfully
+2026-10-18T07:19:48.6022379Z Do you wish to create a custom hardware profile? [no] Performing Streamed Install
+2026-10-18T07:19:48.6027170Z Success
+2026-10-18T07:19:52.8525189Z Performing Streamed Install
+2026-10-18T07:19:52.8529368Z Success
+2026-10-18T07:19:59.2064882Z INSTRUMENTATION_STATUS: numtests=2
+2026-10-18T07:19:59.2065515Z INSTRUMENTATION_STATUS: stream=
+2026-10-18T07:19:59.2066196Z com.mightyoung.muyon.androidlab.FrontendServiceLoopTest:
+2026-10-18T07:19:59.2066995Z INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+2026-10-18T07:19:59.2067848Z INSTRUMENTATION_STATUS: test=invalidInputCannotDispatchAndSaveRemainsLocal
+2026-10-18T07:19:59.2069091Z INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.androidlab.FrontendServiceLoopTest
+2026-10-18T07:19:59.2069948Z INSTRUMENTATION_STATUS: current=1
+2026-10-18T07:19:59.2070487Z INSTRUMENTATION_STATUS_CODE: 1
+2026-10-18T07:20:03.5215711Z INSTRUMENTATION_STATUS: numtests=2
+2026-10-18T07:20:03.5217139Z INSTRUMENTATION_STATUS: stream=
+2026-10-18T07:20:03.5218434Z Error in invalidInputCannotDispatchAndSaveRemainsLocal(com.mightyoung.muyon.androidlab.FrontendServiceLoopTest):
+2026-10-18T07:20:03.5223322Z java.lang.AssertionError: Assert failed: The component with Text + InputText + EditableText contains '你 · 本地记录，未发送' (ignoreCase: false) is not displayed!
+2026-10-18T07:20:03.5225190Z 	at androidx.compose.ui.test.AssertionsKt.assertIsDisplayed(Assertions.kt:34)
+2026-10-18T07:20:03.5227048Z 	at com.mightyoung.muyon.androidlab.FrontendServiceLoopTest.invalidInputCannotDispatchAndSaveRemainsLocal(FrontendServiceLoopTest.kt:110)
+2026-10-18T07:20:03.5228956Z 
+2026-10-18T07:20:03.5229368Z INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+2026-10-18T07:20:03.5230519Z INSTRUMENTATION_STATUS: test=invalidInputCannotDispatchAndSaveRemainsLocal
+2026-10-18T07:20:03.5231934Z INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.androidlab.FrontendServiceLoopTest
+2026-10-18T07:20:03.5234400Z INSTRUMENTATION_STATUS: stack=java.lang.AssertionError: Assert failed: The component with Text + InputText + EditableText contains '你 · 本地记录，未发送' (ignoreCase: false) is not displayed!
+2026-10-18T07:20:03.5237487Z 	at androidx.compose.ui.test.AssertionsKt.assertIsDisplayed(Assertions.kt:34)
+2026-10-18T07:20:03.5239490Z 	at com.mightyoung.muyon.androidlab.FrontendServiceLoopTest.invalidInputCannotDispatchAndSaveRemainsLocal(FrontendServiceLoopTest.kt:110)
+2026-10-18T07:20:03.5241549Z 
+2026-10-18T07:20:03.5241963Z INSTRUMENTATION_STATUS: current=1
+2026-10-18T07:20:03.5242717Z INSTRUMENTATION_STATUS_CODE: -2
+2026-10-18T07:20:03.5246794Z INSTRUMENTATION_STATUS: numtests=2
+2026-10-18T07:20:03.5247581Z INSTRUMENTATION_STATUS: stream=
+2026-10-18T07:20:03.5248345Z INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+2026-10-18T07:20:03.5250057Z INSTRUMENTATION_STATUS: test=realPrivateServiceReadRendersSyntheticProjectionAndOriginalReceipt
+2026-10-18T07:20:03.5251691Z INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.androidlab.FrontendServiceLoopTest
+2026-10-18T07:20:03.5253401Z INSTRUMENTATION_STATUS: current=2
+2026-10-18T07:20:03.5254401Z INSTRUMENTATION_STATUS_CODE: 1
+2026-10-18T07:20:06.5259149Z INSTRUMENTATION_STATUS: numtests=2
+2026-10-18T07:20:06.5275519Z INSTRUMENTATION_STATUS: stream=
+2026-10-18T07:20:06.5276967Z Error in realPrivateServiceReadRendersSyntheticProjectionAndOriginalReceipt(com.mightyoung.muyon.androidlab.FrontendServiceLoopTest):
+2026-10-18T07:20:06.5289461Z java.lang.AssertionError: Failed to assert the following: (Text + InputText + EditableText contains 'synthetic schema12' (ignoreCase: false))
+2026-10-18T07:20:06.5291000Z Semantics of the node:
+2026-10-18T07:20:06.5291959Z Node #281 at (l=20.0, t=96.0, r=239.0, b=128.0)px, Tag: 'port-disconnected'
+2026-10-18T07:20:06.5292625Z LiveRegion = 'Polite'
+2026-10-18T07:20:06.5293526Z Text = '[私有 Service 只读联调 · synthetic schema12 副本 · 离线，无真实模型]'
+2026-10-18T07:20:06.5294692Z Actions = [ClearTextSubstitution, GetTextLayoutResult, SetTextSubstitution, ShowTextSubstitution]
+2026-10-18T07:20:06.5295611Z Has 7 siblings
+2026-10-18T07:20:06.5296021Z Selector used: (TestTag = 'port-disconnected')
+2026-10-18T07:20:06.5296402Z 
+2026-10-18T07:20:06.5296751Z 	at androidx.compose.ui.test.AssertionsKt.assert(Assertions.kt:264)
+2026-10-18T07:20:06.5297674Z 	at androidx.compose.ui.test.AssertionsKt.assert$default(Assertions.kt:254)
+2026-10-18T07:20:06.5298670Z 	at androidx.compose.ui.test.AssertionsKt.assertTextContains(Assertions.kt:208)
+2026-10-18T07:20:06.5299793Z 	at androidx.compose.ui.test.AssertionsKt.assertTextContains$default(Assertions.kt:204)
+2026-10-18T07:20:06.5301926Z 	at com.mightyoung.muyon.androidlab.FrontendServiceLoopTest.realPrivateServiceReadRendersSyntheticProjectionAndOriginalReceipt(FrontendServiceLoopTest.kt:56)
+2026-10-18T07:20:06.5303536Z 
+2026-10-18T07:20:06.5303807Z INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+2026-10-18T07:20:06.5305496Z INSTRUMENTATION_STATUS: test=realPrivateServiceReadRendersSyntheticProjectionAndOriginalReceipt
+2026-10-18T07:20:06.5306783Z INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.androidlab.FrontendServiceLoopTest
+2026-10-18T07:20:06.5308504Z INSTRUMENTATION_STATUS: stack=java.lang.AssertionError: Failed to assert the following: (Text + InputText + EditableText contains 'synthetic schema12' (ignoreCase: false))
+2026-10-18T07:20:06.5309819Z Semantics of the node:
+2026-10-18T07:20:06.5310334Z Node #281 at (l=20.0, t=96.0, r=239.0, b=128.0)px, Tag: 'port-disconnected'
+2026-10-18T07:20:06.5310999Z LiveRegion = 'Polite'
+2026-10-18T07:20:06.5311760Z Text = '[私有 Service 只读联调 · synthetic schema12 副本 · 离线，无真实模型]'
+2026-10-18T07:20:06.5313115Z Actions = [ClearTextSubstitution, GetTextLayoutResult, SetTextSubstitution, ShowTextSubstitution]
+2026-10-18T07:20:06.5314493Z Has 7 siblings
+2026-10-18T07:20:06.5314749Z Selector used: (TestTag = 'port-disconnected')
+2026-10-18T07:20:06.5314970Z 
+2026-10-18T07:20:06.5315176Z 	at androidx.compose.ui.test.AssertionsKt.assert(Assertions.kt:264)
+2026-10-18T07:20:06.5315677Z 	at androidx.compose.ui.test.AssertionsKt.assert$default(Assertions.kt:254)
+2026-10-18T07:20:06.5316283Z 	at androidx.compose.ui.test.AssertionsKt.assertTextContains(Assertions.kt:208)
+2026-10-18T07:20:06.5317485Z 	at androidx.compose.ui.test.AssertionsKt.assertTextContains$default(Assertions.kt:204)
+2026-10-18T07:20:06.5319496Z 	at com.mightyoung.muyon.androidlab.FrontendServiceLoopTest.realPrivateServiceReadRendersSyntheticProjectionAndOriginalReceipt(FrontendServiceLoopTest.kt:56)
+2026-10-18T07:20:06.5320269Z 
+2026-10-18T07:20:06.5320375Z INSTRUMENTATION_STATUS: current=2
+2026-10-18T07:20:06.5320642Z INSTRUMENTATION_STATUS_CODE: -2
+2026-10-18T07:20:06.5370139Z INSTRUMENTATION_RESULT: stream=
+2026-10-18T07:20:06.5371627Z 
+2026-10-18T07:20:06.5372569Z Time: 7.323
+2026-10-18T07:20:06.5372979Z There were 2 failures:
+2026-10-18T07:20:06.5374447Z 1) invalidInputCannotDispatchAndSaveRemainsLocal(com.mightyoung.muyon.androidlab.FrontendServiceLoopTest)
+2026-10-18T07:20:06.5376445Z java.lang.AssertionError: Assert failed: The component with Text + InputText + EditableText contains '你 · 本地记录，未发送' (ignoreCase: false) is not displayed!
+2026-10-18T07:20:06.5377838Z 	at androidx.compose.ui.test.AssertionsKt.assertIsDisplayed(Assertions.kt:34)
+2026-10-18T07:20:06.5379369Z 	at com.mightyoung.muyon.androidlab.FrontendServiceLoopTest.invalidInputCannotDispatchAndSaveRemainsLocal(FrontendServiceLoopTest.kt:110)
+2026-10-18T07:20:06.5381520Z 2) realPrivateServiceReadRendersSyntheticProjectionAndOriginalReceipt(com.mightyoung.muyon.androidlab.FrontendServiceLoopTest)
+2026-10-18T07:20:06.5383280Z java.lang.AssertionError: Failed to assert the following: (Text + InputText + EditableText contains 'synthetic schema12' (ignoreCase: false))
+2026-10-18T07:20:06.5385369Z Semantics of the node:
+2026-10-18T07:20:06.5386012Z Node #281 at (l=20.0, t=96.0, r=239.0, b=128.0)px, Tag: 'port-disconnected'
+2026-10-18T07:20:06.5386742Z LiveRegion = 'Polite'
+2026-10-18T07:20:06.5387391Z Text = '[私有 Service 只读联调 · synthetic schema12 副本 · 离线，无真实模型]'
+2026-10-18T07:20:06.5388288Z Actions = [ClearTextSubstitution, GetTextLayoutResult, SetTextSubstitution, ShowTextSubstitution]
+2026-10-18T07:20:06.5389101Z Has 7 siblings
+2026-10-18T07:20:06.5389492Z Selector used: (TestTag = 'port-disconnected')
+2026-10-18T07:20:06.5389856Z 
+2026-10-18T07:20:06.5390185Z 	at androidx.compose.ui.test.AssertionsKt.assert(Assertions.kt:264)
+2026-10-18T07:20:06.5391106Z 	at androidx.compose.ui.test.AssertionsKt.assert$default(Assertions.kt:254)
+2026-10-18T07:20:06.5392089Z 	at androidx.compose.ui.test.AssertionsKt.assertTextContains(Assertions.kt:208)
+2026-10-18T07:20:06.5393121Z 	at androidx.compose.ui.test.AssertionsKt.assertTextContains$default(Assertions.kt:204)
+2026-10-18T07:20:06.5395492Z 	at com.mightyoung.muyon.androidlab.FrontendServiceLoopTest.realPrivateServiceReadRendersSyntheticProjectionAndOriginalReceipt(FrontendServiceLoopTest.kt:56)
+2026-10-18T07:20:06.5396877Z 
+2026-10-18T07:20:06.5397027Z FAILURES!!!
+2026-10-18T07:20:06.5397409Z Tests run: 2,  Failures: 2
+2026-10-18T07:20:06.5397660Z 
+2026-10-18T07:20:06.5397666Z 
+2026-10-18T07:20:06.5397835Z INSTRUMENTATION_CODE: -1
+2026-10-18T07:20:06.6972834Z ##[error]Process completed with exit code 1.
+2026-10-18T07:20:06.7055351Z ##[group]Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+2026-10-18T07:20:06.7055778Z with:
+2026-10-18T07:20:06.7056010Z   name: immutable-supplier-device-evidence
+2026-10-18T07:20:06.7056331Z   path: /home/runner/work/_temp/device-evidence
+2026-10-18T07:20:06.7056622Z   retention-days: 7
+2026-10-18T07:20:06.7056834Z   if-no-files-found: warn
+2026-10-18T07:20:06.7057068Z   compression-level: 6
+2026-10-18T07:20:06.7057280Z   overwrite: false
+2026-10-18T07:20:06.7057684Z   include-hidden-files: false
+2026-10-18T07:20:06.7057921Z env:
+2026-10-18T07:20:06.7058146Z   SOURCE_SHA: 73a582d3c948d70450a45da4205435a715eeb6b4
+2026-10-18T07:20:06.7058452Z   PRODUCER_RUN: 39106124839
+2026-10-18T07:20:06.7058739Z   HARNESS_SHA: 210b1ddac609c5546394c66c082d2a2ebb921e92
+2026-10-18T07:20:06.7059148Z   JAVA_HOME: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.20-1/x64
+2026-10-18T07:20:06.7059649Z   JAVA_HOME_17_X64: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.20-1/x64
+2026-10-18T07:20:06.7060021Z ##[endgroup]
+2026-10-18T07:20:06.8780803Z (node:3014) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-18T07:20:06.8782361Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-18T07:20:06.8893106Z With the provided path, there will be 9 files uploaded
+2026-10-18T07:20:06.8901992Z Artifact name is valid!
+2026-10-18T07:20:06.8902769Z Root directory input is valid!
+2026-10-18T07:20:07.0825721Z Beginning upload of artifact content to blob storage
+2026-10-18T07:20:07.1185238Z (node:3014) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+2026-10-18T07:20:07.1730357Z Uploaded bytes 30883
+2026-10-18T07:20:07.1903503Z Finished uploading artifact content to blob storage!
+2026-10-18T07:20:07.1905044Z SHA256 digest of uploaded artifact zip is 34e87355bd8a4e0b74153bb2b567904a40a5a9969c2c977d33780ca57166e373
+2026-10-18T07:20:07.1906697Z Finalizing artifact upload
+2026-10-18T07:20:07.4166830Z Artifact immutable-supplier-device-evidence.zip successfully finalized. Artifact ID 12128921743
+2026-10-18T07:20:07.4168209Z Artifact immutable-supplier-device-evidence has been successfully uploaded! Final size is 30883 bytes. Artifact ID is 12128921743
+2026-10-18T07:20:07.4174043Z Artifact download URL: https://github.com/mightyoung/Muyon/actions/runs/39107132638/artifacts/12128921743
+2026-10-18T07:20:07.4362366Z Post job cleanup.
+2026-10-18T07:20:07.5649125Z (node:3026) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-18T07:20:07.5650449Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-18T07:20:07.5961564Z Post job cleanup.
+2026-10-18T07:20:07.6841022Z [command]/usr/bin/git version
+2026-10-18T07:20:07.6882354Z git version 2.55.0
+2026-10-18T07:20:07.6925399Z Temporarily overriding HOME='/home/runner/work/_temp/f08e6bc7-2238-48e3-8f46-5f3ed48001c0' before making global git config changes
+2026-10-18T07:20:07.6926708Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-18T07:20:07.6931937Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/Muyon/Muyon
+2026-10-18T07:20:07.6972834Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-18T07:20:07.7011495Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-18T07:20:07.7267074Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-18T07:20:07.7311150Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-18T07:20:07.7731584Z Cleaning up orphan processes
+2026-10-18T07:20:07.8143366Z Terminate orphan process: pid (2519) (qemu-system-x86_64-headless)
+2026-10-18T07:20:07.8179510Z Terminate orphan process: pid (2522) (adb)
+2026-10-18T07:20:07.8219358Z Terminate orphan process: pid (2532) (crashpad_handler)
+2026-10-18T07:20:07.8246716Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683, actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093, actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00, actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+

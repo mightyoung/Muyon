@@ -1,0 +1,21 @@
+{
+  "argv": [
+    "/tmp/muyon-next-office-target/debug/uniffi-bindgen",
+    "generate",
+    "--library",
+    "/tmp/muyon-next-office-target/debug/libmuyon_android_product.so",
+    "--language",
+    "kotlin",
+    "--config",
+    "muyon-android-ffi/uniffi.android.toml",
+    "--out-dir",
+    "/tmp/muyon-next-generated"
+  ],
+  "cwd": "/workspace/Muyon-post-pr101-office-bot-20261022/crates",
+  "source_sha": "bc8fea61744530c1f2e38e65b0273a434c3bd5a8",
+  "dirty_source": false,
+  "start_utc": "2026-10-22T19:07:16.182396+00:00",
+  "exit_code": 0,
+  "duration_seconds": 0.684,
+  "end_utc": "2026-10-22T19:07:16.769709+00:00"
+}

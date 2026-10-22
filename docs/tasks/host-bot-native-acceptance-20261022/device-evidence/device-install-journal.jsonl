@@ -1,0 +1,30 @@
+{"label": "device-sdk", "command": "getprop ro.build.version.sdk", "state": "DISPATCH_ONCE"}
+{"label": "device-sdk", "state": "RESPONSE", "output": "26\n"}
+{"label": "device-abi", "command": "getprop ro.product.cpu.abi", "state": "DISPATCH_ONCE"}
+{"label": "device-abi", "state": "RESPONSE", "output": "x86_64\n"}
+{"label": "device-boot", "command": "getprop sys.boot_completed", "state": "DISPATCH_ONCE"}
+{"label": "device-boot", "state": "RESPONSE", "output": "1\n"}
+{"label": "before-install", "command": "pm path com.mightyoung.muyon.product", "state": "DISPATCH_ONCE"}
+{"label": "before-install", "state": "RESPONSE", "output": ""}
+{"label": "push-app", "state": "DISPATCH_ONCE", "source": "/workspace/Muyon-host-bot-native-acceptance-20261022/apps/muyon_android/app/build/outputs/apk/debug/app-debug.apk", "sha256": "8901f7c67f548d056d0a897845a2e2cfe6a28f2f2a661be7bd92695ad7b50d28", "target": "/data/local/tmp/muyon-bot-f2f9928a-app.apk"}
+{"label": "push-app", "state": "SYNC_OKAY", "result": {"bytes": 430153964, "destination": "/data/local/tmp/muyon-bot-f2f9928a-app.apk", "sync": "OKAY"}}
+{"label": "staged-sha-app", "command": "sha256sum /data/local/tmp/muyon-bot-f2f9928a-app.apk", "state": "DISPATCH_ONCE"}
+{"label": "staged-sha-app", "state": "RESPONSE", "output": "8901f7c67f548d056d0a897845a2e2cfe6a28f2f2a661be7bd92695ad7b50d28  /data/local/tmp/muyon-bot-f2f9928a-app.apk\n"}
+{"label": "install-app", "command": "pm install -t /data/local/tmp/muyon-bot-f2f9928a-app.apk", "state": "DISPATCH_ONCE"}
+{"label": "install-app", "state": "RESPONSE", "output": "Success\n"}
+{"label": "installed-path-app", "command": "pm path com.mightyoung.muyon.product", "state": "DISPATCH_ONCE"}
+{"label": "installed-path-app", "state": "RESPONSE", "output": "package:/data/app/com.mightyoung.muyon.product-BhUJJrckG_VrKRbH1qhyAw==/base.apk\n"}
+{"label": "installed-sha-app", "command": "sha256sum /data/app/com.mightyoung.muyon.product-BhUJJrckG_VrKRbH1qhyAw==/base.apk", "state": "DISPATCH_ONCE"}
+{"label": "installed-sha-app", "state": "RESPONSE", "output": "8901f7c67f548d056d0a897845a2e2cfe6a28f2f2a661be7bd92695ad7b50d28  /data/app/com.mightyoung.muyon.product-BhUJJrckG_VrKRbH1qhyAw==/base.apk\n"}
+{"label": "installed-app", "state": "VERIFIED_APK_SHA256", "sha256": "8901f7c67f548d056d0a897845a2e2cfe6a28f2f2a661be7bd92695ad7b50d28", "path": "/data/app/com.mightyoung.muyon.product-BhUJJrckG_VrKRbH1qhyAw==/base.apk"}
+{"label": "push-test", "state": "DISPATCH_ONCE", "source": "/workspace/Muyon-host-bot-native-acceptance-20261022/apps/muyon_android/app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk", "sha256": "7285891c4b2160de15af85d505fac3d3cafada62876201ecccd2c659fd4d4726", "target": "/data/local/tmp/muyon-bot-f2f9928a-test.apk"}
+{"label": "push-test", "state": "SYNC_OKAY", "result": {"bytes": 1447024, "destination": "/data/local/tmp/muyon-bot-f2f9928a-test.apk", "sync": "OKAY"}}
+{"label": "staged-sha-test", "command": "sha256sum /data/local/tmp/muyon-bot-f2f9928a-test.apk", "state": "DISPATCH_ONCE"}
+{"label": "staged-sha-test", "state": "RESPONSE", "output": "7285891c4b2160de15af85d505fac3d3cafada62876201ecccd2c659fd4d4726  /data/local/tmp/muyon-bot-f2f9928a-test.apk\n"}
+{"label": "install-test", "command": "pm install -t /data/local/tmp/muyon-bot-f2f9928a-test.apk", "state": "DISPATCH_ONCE"}
+{"label": "install-test", "state": "RESPONSE", "output": "Success\n"}
+{"label": "installed-path-test", "command": "pm path com.mightyoung.muyon.product.test", "state": "DISPATCH_ONCE"}
+{"label": "installed-path-test", "state": "RESPONSE", "output": "package:/data/app/com.mightyoung.muyon.product.test-NivxmTu0jFJfTGEqpIyN3w==/base.apk\n"}
+{"label": "installed-sha-test", "command": "sha256sum /data/app/com.mightyoung.muyon.product.test-NivxmTu0jFJfTGEqpIyN3w==/base.apk", "state": "DISPATCH_ONCE"}
+{"label": "installed-sha-test", "state": "RESPONSE", "output": "7285891c4b2160de15af85d505fac3d3cafada62876201ecccd2c659fd4d4726  /data/app/com.mightyoung.muyon.product.test-NivxmTu0jFJfTGEqpIyN3w==/base.apk\n"}
+{"label": "installed-test", "state": "VERIFIED_APK_SHA256", "sha256": "7285891c4b2160de15af85d505fac3d3cafada62876201ecccd2c659fd4d4726", "path": "/data/app/com.mightyoung.muyon.product.test-NivxmTu0jFJfTGEqpIyN3w==/base.apk"}

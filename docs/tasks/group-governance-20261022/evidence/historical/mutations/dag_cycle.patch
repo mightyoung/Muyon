@@ -1,0 +1,11 @@
+--- baseline-module.rs
++++ dag_cycle-module.rs
+@@ -399,7 +399,7 @@
+             None => break,
+         }
+     }
+-    if visited.len() != pending.len() {
++    if false {
+         return Err(Error::InvalidPlan);
+     }
+     let next = pending

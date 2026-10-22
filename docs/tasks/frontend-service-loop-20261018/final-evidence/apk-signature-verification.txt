@@ -1,0 +1,8 @@
+verified=true
+v1=false v2=true v3=false
+errors=[]
+warnings=[]
+signer[0].subject=C=US,O=Android,CN=Android Debug
+signer[0].issuer=C=US,O=Android,CN=Android Debug
+signer[0].sha256=3d3583021b10ae085ae026ab85d4e8bec9a4cdd82712454e99d551a834005e89
+signer[0].valid_from=2026-10-18T07:25:31Z valid_until=2056-10-10T07:25:31Z

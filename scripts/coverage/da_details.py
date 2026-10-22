@@ -14,7 +14,10 @@ _contract = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(_contract)
 FILES = tuple('packages/muyon_module_api/lib/src/ui/' + name + '.dart'
               for name in ('snapshot', 'state', 'stream_compiler',
-                           'stream_protocol', 'validation', 'workspace'))
+                           'stream_protocol', 'validation', 'workspace')) + (
+    'packages/muyon_module_api/lib/src/coverage.dart',
+    'packages/muyon_module_api/lib/src/ontology.dart',
+)
 
 
 def details(root, reports):

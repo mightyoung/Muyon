@@ -1,0 +1,7 @@
+test_material_fallback_roles_are_explicit_neutral_and_contrasting (test_contrast.MaterialRoleRegressionTest.test_material_fallback_roles_are_explicit_neutral_and_contrasting) ... ok
+test_actual_light_and_dark_palette_have_accessible_text_and_boundaries (test_contrast.PaletteContrastTest.test_actual_light_and_dark_palette_have_accessible_text_and_boundaries) ... ok
+
+----------------------------------------------------------------------
+Ran 2 tests in 0.001s
+
+OK

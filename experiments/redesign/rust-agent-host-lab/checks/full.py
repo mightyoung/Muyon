@@ -9,8 +9,11 @@ import re
 CASES = json.loads(Path(__file__).with_name('cases.json').read_text())
 
 
-def rust(component, text, status):
-    expected = CASES['components'][component]
+def rust(component, text, status, *, contract=None):
+    if contract == 'combined':
+        from http_batch import contract as combined_contract
+        contract = combined_contract()
+    expected = (CASES if contract is None else contract)['components'][component]
     groups = []
     current = None
     for line in text.splitlines():
@@ -81,6 +84,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('kind', choices=['rust', 'python', 'mutants'])
     parser.add_argument('--name', required=True)
+    parser.add_argument('--contract', choices=['product', 'combined'], default='product')
     parser.add_argument('--log', type=Path, required=True)
     parser.add_argument('--status', type=int, required=True)
     parser.add_argument('--output', type=Path, required=True)
@@ -88,13 +92,17 @@ def main():
     raw = args.log.read_bytes() if args.log.is_file() else b''
     try:
         text = raw.decode('utf-8')
-        result = (rust(args.name, text, args.status) if args.kind == 'rust' else
+        result = (rust(args.name, text, args.status, contract='combined' if args.contract == 'combined' else None) if args.kind == 'rust' else
                   python_suite(args.name, text, args.status) if args.kind == 'python' else
                   mutations(json.loads(text), args.status))
     except (ValueError, KeyError, TypeError, AttributeError):
         result = dict(accepted=False, classification='INVALID', command_exit_code=args.status)
+    result['contract'] = args.contract
     result['raw_sha256'] = hashlib.sha256(raw).hexdigest()
     result['expectations_sha256'] = hashlib.sha256(Path(__file__).with_name('cases.json').read_bytes()).hexdigest()
+    if args.contract == 'combined':
+        from http_batch import contract as combined_contract
+        result['expectations_sha256'] = hashlib.sha256(json.dumps(combined_contract(), sort_keys=True).encode()).hexdigest()
     args.output.write_text(json.dumps(result, indent=2) + '\n')
     print(json.dumps(result))
     return 0 if result['accepted'] else 1

@@ -1,0 +1,84 @@
+{
+  "source": "f6af8ac4e76127cffe89f7921e1421ab55a121c6",
+  "pr": 97,
+  "final_acceptance": "BLOCKED_DEVICE_STEP_FAILURE",
+  "local_rust": {
+    "passed": 15,
+    "failed": 0,
+    "target": "ordinary_chat_controller"
+  },
+  "pure_kotlin": "PASS_NO_ANDROID_EXECUTION",
+  "runs": [
+    {
+      "id": 39198555958,
+      "source": "a2cc7dbb426ef924d77703d911dd6427b11e68c5",
+      "status": "completed",
+      "conclusion": "success",
+      "attempt": 1,
+      "jobs": [
+        {
+          "id": 117886504712,
+          "name": "native (arm64-v8a)",
+          "conclusion": "success"
+        },
+        {
+          "id": 117886504893,
+          "name": "native (x86_64)",
+          "conclusion": "success"
+        },
+        {
+          "id": 117886505177,
+          "name": "scoped",
+          "conclusion": "success"
+        },
+        {
+          "id": 117886988681,
+          "name": "package-device",
+          "conclusion": "success"
+        }
+      ]
+    },
+    {
+      "id": 39198796362,
+      "source": "f6af8ac4e76127cffe89f7921e1421ab55a121c6",
+      "status": "completed",
+      "conclusion": "failure",
+      "attempt": 1,
+      "jobs": [
+        {
+          "id": 117888565879,
+          "name": "native (arm64-v8a)",
+          "conclusion": "success"
+        },
+        {
+          "id": 117888566210,
+          "name": "native (x86_64)",
+          "conclusion": "success"
+        },
+        {
+          "id": 117888566218,
+          "name": "scoped",
+          "conclusion": "success"
+        },
+        {
+          "id": 117888967417,
+          "name": "package-device",
+          "conclusion": "failure"
+        }
+      ]
+    }
+  ],
+  "denied_own_log": {
+    "job": 117888967417,
+    "status": 403,
+    "attempts": 1,
+    "retry": false,
+    "alternate_retrieval": false
+  },
+  "raw_device_output": "UNAVAILABLE",
+  "final_individual_device_outcomes": "UNKNOWN",
+  "cause": "UNKNOWN",
+  "artifacts_downloaded": false,
+  "i04_executed": false,
+  "real_model_used": false
+}

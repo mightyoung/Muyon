@@ -1,0 +1,671 @@
+{
+  "scope": "Entire new task record excluding only root index/seal; includes nested scoped indices",
+  "a_generic_terminal": "UNKNOWN; successor must read SAME ORIGINAL run39102166368 at3f3a2368648db5e9767f11adcae4548ac5da2527",
+  "files": [
+    {
+      "path": "HANDOFF.md",
+      "bytes": 5718,
+      "sha256": "774e7a4ba683ded11ff02ac4bb40200fca75acc5043b604e46b2277b85e3b3a7"
+    },
+    {
+      "path": "NEXT-REAL-LOOP.md",
+      "bytes": 9306,
+      "sha256": "24716a785d21885868c9e89bf9d69d745181b876a624be186a86f1878d4cc55a"
+    },
+    {
+      "path": "OBSERVATION-NOTES.md",
+      "bytes": 1621,
+      "sha256": "3919baa538d81136ac5ef525327e8f9cedcf84fcc5902b942b5bb70e6a94d2e7"
+    },
+    {
+      "path": "OWNERSHIP.md",
+      "bytes": 1574,
+      "sha256": "8823051a07ad8497cdf247fbb1cc7399f333bcff5a14c0cd637a496b5ed3bc8d"
+    },
+    {
+      "path": "PIP-PATH-OWNERSHIP.md",
+      "bytes": 3618,
+      "sha256": "0f0c84aea96563218f83c8ebd32db01d29e9938b8a26d76bd3340e811ae06a1a"
+    },
+    {
+      "path": "QUEUED-EXTERNAL-WORK.md",
+      "bytes": 2719,
+      "sha256": "7bab8dc0a9a278bb058b41ee04009fd9c77944bb8925f9704d162c972235d9dd"
+    },
+    {
+      "path": "evidence/I04-BLOCKED.json",
+      "bytes": 779,
+      "sha256": "5c6ee3cd85a0df5fd6f5fcdc0333ff580d7ff2e055133c2f567c776a079a4868"
+    },
+    {
+      "path": "evidence/OWNERSHIP-READBACK.json",
+      "bytes": 1540,
+      "sha256": "b769b2c2f0b79ba4913a9c55ff66c7d88745e4458ad66f0acf1c37e7f75c0334"
+    },
+    {
+      "path": "evidence/SCOPED-DIFFS.json",
+      "bytes": 7716,
+      "sha256": "b3eb58bcec3327ebb5f45d0797053156a8b206115f18794111a70d4c7c72e5ba"
+    },
+    {
+      "path": "evidence/STOP-READBACK.json",
+      "bytes": 11205,
+      "sha256": "a8031eea4bf3f659588ea7f20ad6e94af1c034c4ff8e0490c0b9dd26167655cc"
+    },
+    {
+      "path": "evidence/a/min26/3f3a2368-android-artifacts.json",
+      "bytes": 2984,
+      "sha256": "902a98d36f20a3ad78e02ff0fcad1bd03c20ad8028a8fb19ca9aaf31250c7863"
+    },
+    {
+      "path": "evidence/a/min26/3f3a2368-android-summary.json",
+      "bytes": 12544,
+      "sha256": "5ffc027de992fb3df6a43db91cba04f33f9591961d9e2e69529e53d59508ec39"
+    },
+    {
+      "path": "evidence/a/min26/3f3a2368-android-terminal.json",
+      "bytes": 5483,
+      "sha256": "ad56e22d4b687f618f9040d83523fcbda2adfb1c045fbe52f733558216dfe238"
+    },
+    {
+      "path": "evidence/a/min26/3f3a2368-android.log.gz",
+      "bytes": 44248,
+      "sha256": "31bffa1f36d1b332b7ed83c548cd52c9a2cc8b31aeeb2a171f23dbe5f89bf8d1"
+    },
+    {
+      "path": "evidence/a/min26/HANDOFF.md",
+      "bytes": 3783,
+      "sha256": "61f672e0c522bc87d195eb4b62f22e0e00f02e11fd00902ba0c30672934fb110"
+    },
+    {
+      "path": "evidence/a/min26/android-run-current.json",
+      "bytes": 4947,
+      "sha256": "bef920379197f1408cf19be46254bfd5ebfece863f4bd56a641b5879a8f9714a"
+    },
+    {
+      "path": "evidence/a/min26/current-android-progress.json",
+      "bytes": 5343,
+      "sha256": "8f1483ff7f11cb830d42e98f176ad510d9528c58b0b1268602731c14c6783b29"
+    },
+    {
+      "path": "evidence/a/min26/e49be079-android-terminal.json",
+      "bytes": 5483,
+      "sha256": "5989130dbf04c4e1a1095611d69fa997e40b730542f64bf00cfa44d395dd8440"
+    },
+    {
+      "path": "evidence/a/min26/e49be079-android.log.gz",
+      "bytes": 38269,
+      "sha256": "8cdb1808ac725b4bc6d406ac43921a5a8930afdd1da340745d746b75a2467097"
+    },
+    {
+      "path": "evidence/a/min26/e49be079-generic-before-cancel.json",
+      "bytes": 1364,
+      "sha256": "1e7f03db32c54bb0dc763d7b43655ba5705a23ac31351f12def0ce450797a017"
+    },
+    {
+      "path": "evidence/a/min26/e49be079-generic-terminal.json",
+      "bytes": 1364,
+      "sha256": "1e7f03db32c54bb0dc763d7b43655ba5705a23ac31351f12def0ce450797a017"
+    },
+    {
+      "path": "evidence/a/min26/e49be079-generic.log.gz",
+      "bytes": 7220,
+      "sha256": "781f82e5d8b179e9d3dde1223afb11de1971c0b2b7fbd3708b43354f0ce98d55"
+    },
+    {
+      "path": "evidence/a/min26/manual-packaging-path-followup.json",
+      "bytes": 1409,
+      "sha256": "1af68d452037a42b53399161b8047dfa2f7bc36536224b5df3202e807bef27a9"
+    },
+    {
+      "path": "evidence/a/min26/pre-final-python.log",
+      "bytes": 902,
+      "sha256": "24be12dba91ed100abe9b3c36e37dbc5f1a76c9031021142b5fefa054d12526d"
+    },
+    {
+      "path": "evidence/a/min26/python-fixed-136477f4.exit",
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    {
+      "path": "evidence/a/min26/python-fixed-136477f4.log",
+      "bytes": 902,
+      "sha256": "a74720335d79c8eb0a4f0940c1518878e1a7829633bb6aa04ca60fb5de2063df"
+    },
+    {
+      "path": "evidence/a/min26/python-fixed-3f3a2368.exit",
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    {
+      "path": "evidence/a/min26/python-fixed-3f3a2368.log",
+      "bytes": 902,
+      "sha256": "0695148515a80230ab4018613afea0b268234802379c29dc647ec4213c4ccbab"
+    },
+    {
+      "path": "evidence/a/min26/python-fixed-e49be079.exit",
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    {
+      "path": "evidence/a/min26/python-fixed-e49be079.log",
+      "bytes": 902,
+      "sha256": "6c7c568aaf09fbb74b7e5d34bbc283659570b52964acdcd7911603ab00f993d3"
+    },
+    {
+      "path": "evidence/a/min26/release-plugin-regeneration-mechanism.json",
+      "bytes": 3286,
+      "sha256": "731b3c43837c2a15c14157f122c15692ccde63c7dce29e1f33fbaccb0e813a7d"
+    },
+    {
+      "path": "evidence/a/min26/source-manifest-3f3a2368.json",
+      "bytes": 2690,
+      "sha256": "5c7a6ffe16e0cb218807ab7b63fd2c3017df216e9c5b3f12f1cd06423cdb5983"
+    },
+    {
+      "path": "evidence/a/min26/source-manifest.json",
+      "bytes": 2664,
+      "sha256": "6f217c2ca744ddb0070d3eb9b2acfda30db7b46db4b50ceeb14e2939a66286eb"
+    },
+    {
+      "path": "evidence/a/min26/superseded-136477f4-android-before-cancel.json",
+      "bytes": 5217,
+      "sha256": "1f5aa41f693a9c5bc096e6a0b7c12c64d0de74225f1076885ce8a1027d0c7752"
+    },
+    {
+      "path": "evidence/a/min26/superseded-136477f4-android-terminal.json",
+      "bytes": 5493,
+      "sha256": "9d5a6cc379f84dc394f757c235471a81692aa7147ec1c09aa2a03d34387eae60"
+    },
+    {
+      "path": "evidence/a/min26/superseded-136477f4-android.log.gz",
+      "bytes": 28914,
+      "sha256": "69e1eb8acd003d877d793bf82ef2eeafe8b70741d4aed8bbb95eaa9f76ff5581"
+    },
+    {
+      "path": "evidence/a/min26/superseded-136477f4-generic-before-cancel.json",
+      "bytes": 1364,
+      "sha256": "8bb87ad4e0e86b21454b42f13cefc3aa60a5e6c02acc151f400e4786dad9dce2"
+    },
+    {
+      "path": "evidence/a/min26/superseded-136477f4-generic-terminal.json",
+      "bytes": 1364,
+      "sha256": "8bb87ad4e0e86b21454b42f13cefc3aa60a5e6c02acc151f400e4786dad9dce2"
+    },
+    {
+      "path": "evidence/a/min26/superseded-136477f4-generic.log.gz",
+      "bytes": 6829,
+      "sha256": "c2645cf30ca5db1bc597e46880379950df93515814b685e4eab53ad43dc76f27"
+    },
+    {
+      "path": "evidence/b/sqlite-author/FINAL-READBACK.json",
+      "bytes": 1406,
+      "sha256": "dc39c55885d97a3eee3e46e33319f99bd4c45cd366cb6198c71a346ef061021d"
+    },
+    {
+      "path": "evidence/b/sqlite-author/HANDOFF.md",
+      "bytes": 2217,
+      "sha256": "48fa5cc8080d1e624610eb316f4e0c31af2bca76638701b5b0bc875afc0d2e37"
+    },
+    {
+      "path": "evidence/b/sqlite-author/MANIFEST.json",
+      "bytes": 6517,
+      "sha256": "23d8e8eb61468276e151bdef47fc901a35290b2986ce36f09a7796efd6e0ea2c"
+    },
+    {
+      "path": "evidence/b/sqlite-author/RED-SCOPE.md",
+      "bytes": 662,
+      "sha256": "36424a85d65d2eb329b541c547cb7c60c47215de63294ecc16f66d5632ef6d4f"
+    },
+    {
+      "path": "evidence/b/sqlite-author/SETUP-FAILURE-INDEX.md",
+      "bytes": 2452,
+      "sha256": "95e25c5bbc9a4dd8727ad6004d91c6b708ce4deba0814da7d427ad2c679694a3"
+    },
+    {
+      "path": "evidence/b/sqlite-author/a-b-all-dart-manifests-ci.diff",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "evidence/b/sqlite-author/analyze-writable.exit",
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    {
+      "path": "evidence/b/sqlite-author/analyze-writable.log",
+      "bytes": 97,
+      "sha256": "bc220917920b592cf36d537042e2fc530d74e3e4041e5c5d149e388094f7dbf9"
+    },
+    {
+      "path": "evidence/b/sqlite-author/analyze.exit",
+      "bytes": 4,
+      "sha256": "ce8bafb38615aeb5d44ebbabe78ec14ac35a5de87bdc5ad5ea82a72656024ce4"
+    },
+    {
+      "path": "evidence/b/sqlite-author/analyze.log",
+      "bytes": 1294,
+      "sha256": "7f6438c3e5050a4fe19d5a451999f1994b59dfe50f9d4ab027fa85161d63094c"
+    },
+    {
+      "path": "evidence/b/sqlite-author/author-cleanup.json",
+      "bytes": 331,
+      "sha256": "f4e0dd5eb51f3f7f3ffa1d375859d182cc5d369d2afa08f213fdc1e5a353c724"
+    },
+    {
+      "path": "evidence/b/sqlite-author/ci-attempt-readback.json",
+      "bytes": 262,
+      "sha256": "43643bc9620a3b74395c7cac3348acddb9c85392e2037bda81363cd6a5db66fd"
+    },
+    {
+      "path": "evidence/b/sqlite-author/ci-coverage-snapshot.json",
+      "bytes": 20330,
+      "sha256": "c55a0e7f6027daaf9f1360f8a7ccb3269cd2ce76f64f8af2d36dc18edce63fe1"
+    },
+    {
+      "path": "evidence/b/sqlite-author/ci-exact-source-summary.log",
+      "bytes": 4463,
+      "sha256": "db098623a39ebb3fa785e95347da8924d0d687e879e6672843e90251daf3ced7"
+    },
+    {
+      "path": "evidence/b/sqlite-author/ci-full.log.gz",
+      "bytes": 13844,
+      "sha256": "7706c0091e622602506ad729649d5611ff8224185f5e39558ee8e5b8b27b6d94"
+    },
+    {
+      "path": "evidence/b/sqlite-author/ci-inprogress-log-probe-redacted.log",
+      "bytes": 110,
+      "sha256": "589035bd48db1574a09a8a9d8a1c0202888d04c4f0035a5b6918ebdef9556c29"
+    },
+    {
+      "path": "evidence/b/sqlite-author/ci-terminal.json",
+      "bytes": 1532,
+      "sha256": "aae5c74d727760b0bd467c8876b4baa1119849b6bed9335fcc35fbd69fb37268"
+    },
+    {
+      "path": "evidence/b/sqlite-author/collect-terminal.py",
+      "bytes": 2150,
+      "sha256": "7ca73679f37f47e425c611d5d44f696b331c37f935dec401364a1ea1fd9b647e"
+    },
+    {
+      "path": "evidence/b/sqlite-author/exact-analyze.exit",
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    {
+      "path": "evidence/b/sqlite-author/exact-analyze.log",
+      "bytes": 97,
+      "sha256": "61439815324300de94920c7644f37f46b89a8eb23b556607a25295d985fb9355"
+    },
+    {
+      "path": "evidence/b/sqlite-author/exact-analyze.sha",
+      "bytes": 41,
+      "sha256": "d247b2380aa6ad9a1f1ca8e87f5454e93197553164d7c7b204836a57b2e88927"
+    },
+    {
+      "path": "evidence/b/sqlite-author/exact-related-tests.exit",
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    {
+      "path": "evidence/b/sqlite-author/exact-related-tests.log",
+      "bytes": 2968,
+      "sha256": "913885072467d0a055e6cb32d84a68cf7df288361444df4945692ea1ab7fb3bd"
+    },
+    {
+      "path": "evidence/b/sqlite-author/exact-tests.sha",
+      "bytes": 41,
+      "sha256": "d247b2380aa6ad9a1f1ca8e87f5454e93197553164d7c7b204836a57b2e88927"
+    },
+    {
+      "path": "evidence/b/sqlite-author/format3.log",
+      "bytes": 109,
+      "sha256": "30de34dc443d04fc85d756727e5ea1bbee41b26310b5215e5dd309a94a507fa9"
+    },
+    {
+      "path": "evidence/b/sqlite-author/original-a-final-readback.json",
+      "bytes": 168,
+      "sha256": "9a0375a6420c8c33e6db3e7a40572e72dc66742c78d558a0d02fa9d6b36c6019"
+    },
+    {
+      "path": "evidence/b/sqlite-author/original-b-final-readback.json",
+      "bytes": 168,
+      "sha256": "17d88dca93584b3d802119df73967d94aa71fd76e947d09c2e0ee200aea5c6ac"
+    },
+    {
+      "path": "evidence/b/sqlite-author/pub-get.log",
+      "bytes": 2486,
+      "sha256": "16353846d5ec6ee8c1af23a89672797e1066decbc431583f183eca2e29ff7b47"
+    },
+    {
+      "path": "evidence/b/sqlite-author/related-tests-green.exit",
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    {
+      "path": "evidence/b/sqlite-author/related-tests-green.log",
+      "bytes": 1791,
+      "sha256": "50c7d5a0f7b2a89d382ca354743c773cf580f25a5cfffddf1fbbd9257a3240ee"
+    },
+    {
+      "path": "evidence/b/sqlite-author/source-hashes.json",
+      "bytes": 255,
+      "sha256": "8e073ecf0be59e760b3ca521404fb08cb00bb083005df05e3b1c73c3d53a4ead"
+    },
+    {
+      "path": "evidence/c/EVIDENCE-INDEX.json",
+      "bytes": 9774,
+      "sha256": "e934d75c92c4eff6903375f897e1f20c275ae3e53835533102562685f75e8c91"
+    },
+    {
+      "path": "evidence/c/FINAL-READBACK.json",
+      "bytes": 525,
+      "sha256": "03171382063df10646f4b47a5624be5a6db6bcc6f45b2b4536bdd6433dd65976"
+    },
+    {
+      "path": "evidence/c/HANDOFF.md",
+      "bytes": 4738,
+      "sha256": "c9fc6546e0a5447f65d150a0b721dfbb159aff2ca90a9fb2672075eb73219d39"
+    },
+    {
+      "path": "evidence/c/author/MANIFEST.json",
+      "bytes": 719123,
+      "sha256": "879c2a61a1b246960b3833469f1c5e0d93339ff9802b2c83dd4e32e9ee8841b6"
+    },
+    {
+      "path": "evidence/c/author/android-lib-check.log",
+      "bytes": 2197,
+      "sha256": "7b8c3ff32fc25a6d1730967bbbd661695df04e2405673d493bfea33e001a27c6"
+    },
+    {
+      "path": "evidence/c/author/diff-check.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "evidence/c/author/format.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "evidence/c/author/offline-service-runtime.log",
+      "bytes": 2230,
+      "sha256": "24bf1965ececa682b9a8a9e1806515da5043f9ef159eeb6b03c59d22c5972de4"
+    },
+    {
+      "path": "evidence/c/author/run-final.py",
+      "bytes": 2594,
+      "sha256": "a67c03f9d525619299916724e1193aaf14b270807241c8154e32b439d0f17150"
+    },
+    {
+      "path": "evidence/c/author/supplier-store.log",
+      "bytes": 3401,
+      "sha256": "88ad200941eb99542477a9bf4d3d22cf4c5448dc56c38730043036d0abfc9b74"
+    },
+    {
+      "path": "evidence/c/author-final/artifact-download-failure.json",
+      "bytes": 417,
+      "sha256": "ae22e9ee3372fffcd6ebfae8893d3a2049326e996399d19559bb0e5fbe796da2"
+    },
+    {
+      "path": "evidence/c/author-final/assert-exact-checkout-and-preserve-source-hashes.log",
+      "bytes": 58,
+      "sha256": "e82cb835f22ca3017ff1636b423d2a2c45b1ea71efad9e12e9af8fbbd4c1201e"
+    },
+    {
+      "path": "evidence/c/author-final/cancel-a4-generic.log",
+      "bytes": 47,
+      "sha256": "63798604cfcb9292977e6f0add9d61442c1abd3c1020f1f36b07cebb4369f9f3"
+    },
+    {
+      "path": "evidence/c/author-final/cancel-fdc-generic.log",
+      "bytes": 54,
+      "sha256": "bb3203fec356fd554e4c0c4902a97055c682a8f9ae929c1ec4cf83b3e18e27a0"
+    },
+    {
+      "path": "evidence/c/author-final/ci-artifact-metadata.json",
+      "bytes": 787,
+      "sha256": "1dc5d8ff8ea93352b494f22928abf0cbbda9cc7efbb7f515608f0de3d169596d"
+    },
+    {
+      "path": "evidence/c/author-final/ci-full.log.gz",
+      "bytes": 8913,
+      "sha256": "01ed8cb2cf6a8623c9bf33e6e7b94a83ce41f6a329371f782992c221f0ef7ed4"
+    },
+    {
+      "path": "evidence/c/author-final/ci-terminal.json",
+      "bytes": 1458,
+      "sha256": "b292d6ee8664563d8b3f9af1da3062c824f5514b09cc88197ca643415d1b6f0c"
+    },
+    {
+      "path": "evidence/c/author-final/generic-a4-terminal.json",
+      "bytes": 207,
+      "sha256": "aace8408cb80a5defbcc0676ec2f6f081183943d5050384e3520839a4f9bc174"
+    },
+    {
+      "path": "evidence/c/author-final/generic-fdc-terminal.json",
+      "bytes": 207,
+      "sha256": "02f28e8b2f557173bb4acc19ea7253cf23b4b7e61a0cd9e973d0d567233f4c15"
+    },
+    {
+      "path": "evidence/c/author-final/github-env.txt",
+      "bytes": 84,
+      "sha256": "48b7f417aa64ab54de34f969652d09300af6d9e187a05ef32a817ec5ff1b48bd"
+    },
+    {
+      "path": "evidence/c/author-final/install-pinned-tested-rust.log",
+      "bytes": 472,
+      "sha256": "6527a1aa39119aacac6b29ec8e321badc53b15454df2d5d0115c3c12bc651b73"
+    },
+    {
+      "path": "evidence/c/author-final/local-workflow-results.json",
+      "bytes": 575,
+      "sha256": "bacce89e4ee0977c244130017d0850c8d34a107ca23ef91d45409fff46257ac9"
+    },
+    {
+      "path": "evidence/c/author-final/run-workflow-local.py",
+      "bytes": 1586,
+      "sha256": "1565e63edf52fde756a475dc22114931d01e43d6677d39b1f7670a6663ada58a"
+    },
+    {
+      "path": "evidence/c/author-final/scoped-registered-business-read-and-android-compile-checks.log",
+      "bytes": 8337,
+      "sha256": "cc2759fb96fce9621c2db63e788f4ab505a38f1d096c2a35e66eade1557d819a"
+    },
+    {
+      "path": "evidence/c/author-final/verify-source-integrity-after-checks.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "evidence/c/author-final/workflow-raw/android-lib-check.log",
+      "bytes": 2197,
+      "sha256": "309009684f099f02d0b14703734e7d69c51813ac1eb2011692017e1691a0508d"
+    },
+    {
+      "path": "evidence/c/author-final/workflow-raw/offline-service-runtime.log",
+      "bytes": 2369,
+      "sha256": "80cd11a98e4cf41559e68f43ea9f0f9390a0b6e77f3cc39454f5012514273e67"
+    },
+    {
+      "path": "evidence/c/author-final/workflow-raw/results.json",
+      "bytes": 1163,
+      "sha256": "afd738356e5d55de347f2005353d0ff71b65627aad486652fd4ed0464e05ec3a"
+    },
+    {
+      "path": "evidence/c/author-final/workflow-raw/source-after.json",
+      "bytes": 358038,
+      "sha256": "87f098b821d0b3d714be4e04f010187735280bec1d7f07d7deaa71e16e78a625"
+    },
+    {
+      "path": "evidence/c/author-final/workflow-raw/source-before.json",
+      "bytes": 358017,
+      "sha256": "bdbe65a99aef1b4d8a9c7ea944d2750f63003fab55b8a87cea6b315ccc0b4b53"
+    },
+    {
+      "path": "evidence/c/author-final/workflow-raw/supplier-store.log",
+      "bytes": 3768,
+      "sha256": "2cb244356d5d2cded737d5a785c504a34e9478d10aea37947f064ced6eff1774"
+    },
+    {
+      "path": "evidence/c/author-final/workflow-raw/toolchain.log",
+      "bytes": 472,
+      "sha256": "6527a1aa39119aacac6b29ec8e321badc53b15454df2d5d0115c3c12bc651b73"
+    },
+    {
+      "path": "evidence/c/history/01-structural-red.log",
+      "bytes": 2687,
+      "sha256": "ad19f680c0180987ee60b8e1e0dbdf5a69a20cf3cb4cf618b1c481ef7d9ed2eb"
+    },
+    {
+      "path": "evidence/c/history/02-semantic-red.log",
+      "bytes": 2789,
+      "sha256": "54491d22af82f70fa4e4129a87ec8188bb6c7d542d71a6bcd0a5e00653e615b0"
+    },
+    {
+      "path": "evidence/c/history/03-initial-implementation.log",
+      "bytes": 3611,
+      "sha256": "ea80ecc8fdd18e16e586eed0a5bfa45ffe0ba7cb83e23b8918a9661e5f077e65"
+    },
+    {
+      "path": "evidence/c/history/04-first-green.log",
+      "bytes": 3977,
+      "sha256": "c793767b4fe5fd522ec5964a3f189d1b33ce218f9d3a3cc2e7ed188e7136eab2"
+    },
+    {
+      "path": "evidence/c/history/05-first-green.log",
+      "bytes": 3687,
+      "sha256": "9a445ca50e618dfd0d8a6b9d7134cc10f30dfbbca7b46fda1646e1d436628b24"
+    },
+    {
+      "path": "evidence/c/history/06-review-green.log",
+      "bytes": 2403,
+      "sha256": "5b929570f568c0afe3506a94830134eec0ff1de54e01a9073ff9a78c306f8abc"
+    },
+    {
+      "path": "evidence/c/history/07-review-green.log",
+      "bytes": 3453,
+      "sha256": "6f0e7ac9b91c0d3790f28bb3e2198246e8cba7bfa5692223130f803b13f24adc"
+    },
+    {
+      "path": "evidence/c/history/08-android-check.log",
+      "bytes": 2197,
+      "sha256": "af2ad22f0df6f6427271b1c7aaa9545fec93bf755d56d2f1f00d0cb83315428a"
+    },
+    {
+      "path": "evidence/c/history/09-fixed-5a6e637a-tests.log",
+      "bytes": 3885,
+      "sha256": "1fe1aa781977bab06a3d7a3f7cd6e18a2b42d57f77353d64133f81b977332ab1"
+    },
+    {
+      "path": "evidence/c/history/10-fixed-5a6e637a-android-check.log",
+      "bytes": 1850,
+      "sha256": "9675226676ac20f60bd0df5716fae63913f6a187c60a9d2a68ff0fee87d3b7de"
+    },
+    {
+      "path": "evidence/c/history/11-pinned-1.99.0-tests.log",
+      "bytes": 4127,
+      "sha256": "cc630203a4d5e276f7d936ed3eb3155e67faffec593554372a76da83164b06c5"
+    },
+    {
+      "path": "evidence/c/history/ci-invalid-a4f8604e.html",
+      "bytes": 188051,
+      "sha256": "d7d3b6cfb5ebd27df47817d1a323ef8867dfa7dbfd90fbd5db944cdd232151e8"
+    },
+    {
+      "path": "evidence/c/history/ci-invalid-a4f8604e.json",
+      "bytes": 11919,
+      "sha256": "d1864638d89ff16a5fb22cde63596f276f9dc639feb34bf03f5760d31e20153b"
+    },
+    {
+      "path": "reviews/a-controls-3f3a2368.log",
+      "bytes": 902,
+      "sha256": "512b86d83a7736802486696ea31704c66badbb9f9a158de3260b3d47a32ec141"
+    },
+    {
+      "path": "reviews/a-controls-e49be079.log",
+      "bytes": 902,
+      "sha256": "1835e4b198bc91b35282e6dda644310b102638f7407b8163bbc62c327af6b4f6"
+    },
+    {
+      "path": "reviews/a-review-manifest-3f3a2368.json",
+      "bytes": 411,
+      "sha256": "446326699794b23f991432283875192aad7728ba0f159ecbc664616d21a8728d"
+    },
+    {
+      "path": "reviews/a-review-manifest.json",
+      "bytes": 435,
+      "sha256": "df9b496e3353b09b6920723df03624d968ccc3d1c32f1277b9aaa4c271882c2a"
+    },
+    {
+      "path": "reviews/b-related-190477fe.log",
+      "bytes": 3012,
+      "sha256": "7c1bc3f04b3be9f6f504758b096a462eb74141f3ac87327ac646fb0b202c3875"
+    },
+    {
+      "path": "reviews/b-review-manifest.json",
+      "bytes": 153532,
+      "sha256": "a15d26ba1d33ece012db7fa4b10d4a2c5c17a14cc4706a8db76ce5180388df34"
+    },
+    {
+      "path": "reviews/b-review.md",
+      "bytes": 3181,
+      "sha256": "18774e4183a072172b639e02425f84eb6ff3d5e4095d87b74f66b36d0c399532"
+    },
+    {
+      "path": "reviews/c-android-check-5a6e637a.log",
+      "bytes": 1850,
+      "sha256": "9675226676ac20f60bd0df5716fae63913f6a187c60a9d2a68ff0fee87d3b7de"
+    },
+    {
+      "path": "reviews/c-android-check-a4f8604e.log",
+      "bytes": 2197,
+      "sha256": "1ae05bbc3d10d665ebb472c039134a1f1a347a378240bb5a43683316b4215680"
+    },
+    {
+      "path": "reviews/c-android-check-fdc9aea1.log",
+      "bytes": 1850,
+      "sha256": "9675226676ac20f60bd0df5716fae63913f6a187c60a9d2a68ff0fee87d3b7de"
+    },
+    {
+      "path": "reviews/c-review-manifest-a4f8604e.json",
+      "bytes": 1826,
+      "sha256": "e7844044de96ffb361b3a806fcb87ff1d115a0c1eeb13ee4a991f585bf84abf8"
+    },
+    {
+      "path": "reviews/c-review-manifest-fdc9aea1.json",
+      "bytes": 1826,
+      "sha256": "860664b662897538c319bbeeea1f58252e115d0789ac0e079946a3b93c37bcb5"
+    },
+    {
+      "path": "reviews/c-review-manifest.json",
+      "bytes": 1712,
+      "sha256": "fc74cc82b712f4a4d943d500ea8d9c09486c1872f17c64376b8a3798963234e3"
+    },
+    {
+      "path": "reviews/c-review.md",
+      "bytes": 5387,
+      "sha256": "eca089747139d88606a5e145ac6659e35b4ca7763fe4975e5dd899fffbdd5082"
+    },
+    {
+      "path": "reviews/c-supplier-store-5a6e637a.log",
+      "bytes": 3396,
+      "sha256": "969cdde929ca3107261f9d5b0401b31a4ce1d28240d54bbb4dc612f638382ed4"
+    },
+    {
+      "path": "reviews/c-tests-a4f8604e.log",
+      "bytes": 4117,
+      "sha256": "8d25ede06b9f1b2d76f44704e31feb4d441de21f9b8b124fcd1137d430521a7b"
+    },
+    {
+      "path": "reviews/c-tests-fdc9aea1.log",
+      "bytes": 3770,
+      "sha256": "7dde3cd9f41a609c8aa2668641d5114db0493a373e41d2eb0bac34e795d379e7"
+    },
+    {
+      "path": "reviews/contract-and-min26-review.md",
+      "bytes": 5332,
+      "sha256": "af5aebd48d6a6536d631f79f6b6b924fc5ddbe5a398b9456a43e33aa1606247d"
+    }
+  ]
+}

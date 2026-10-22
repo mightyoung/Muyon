@@ -1,0 +1,325 @@
+{
+  "actor": "author",
+  "kind": "new offline persistence API validation",
+  "started_utc": "2026-10-22T05:05:04.682664+00:00",
+  "cwd": "/workspace/bot-setup-draft",
+  "head": "49ad2a8dfe7fe65bad600d985f9e1631252191da",
+  "platform": "Linux-6.18.55-x86_64-with-glibc2.41",
+  "input_sha256": {
+    "apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupDraft.kt": "2becb6c2a44ba2fe862e3cfe3df31528c91bb37e04bc6835a749c54f4e5eb2f5",
+    "apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/agents/setup/SetupDraftArchive.kt": "5ff652109765a429fd427379a4eabaf0d82e6159ae57bceafbd4955c2f03dbc1",
+    "apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupDraftChecks.kt": "420afa32cf65542f72531d6cead970ef008f11bfe211178853709ab744f10804",
+    "apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupPersistenceChecks.kt": "8f9f8f838ddc12c1ffecab5778ea4ac3d68ba9639e37e40d90c62e933ed093d8",
+    "apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/run-offline-checks.sh": "7eeffbc77eb86f5da1ac6510700d5ba0eed7929ccb36aa4c771eb51b518c8fda"
+  },
+  "compiler_archive_sha256": "302d1d8e671e5c3207e6ed62ff11fb555462a628e22a1158254dcaaf7e7394bc",
+  "commands": [
+    {
+      "label": "java-version",
+      "argv": [
+        "java",
+        "-version"
+      ],
+      "started_utc": "2026-10-22T05:05:04.917459+00:00",
+      "ended_utc": "2026-10-22T05:05:05.007353+00:00",
+      "exit_code": 0
+    },
+    {
+      "label": "kotlin-version",
+      "argv": [
+        "/tmp/bot-setup-tools/kotlinc/bin/kotlinc",
+        "-version"
+      ],
+      "started_utc": "2026-10-22T05:05:05.007369+00:00",
+      "ended_utc": "2026-10-22T05:05:07.125659+00:00",
+      "exit_code": 0
+    },
+    {
+      "label": "baseline",
+      "argv": [
+        "/workspace/bot-setup-draft/apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/run-offline-checks.sh"
+      ],
+      "started_utc": "2026-10-22T05:05:07.125769+00:00",
+      "ended_utc": "2026-10-22T05:05:14.119190+00:00",
+      "exit_code": 0
+    },
+    {
+      "label": "schema-version-compile",
+      "argv": [
+        "/tmp/bot-setup-tools/kotlinc/bin/kotlinc",
+        "/tmp/setup-persistence-mutations-isvqc7s_/schema-version/BotSetupDraft.kt",
+        "/tmp/setup-persistence-mutations-isvqc7s_/schema-version/SetupDraftArchive.kt",
+        "/workspace/bot-setup-draft/apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupDraftChecks.kt",
+        "/workspace/bot-setup-draft/apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupPersistenceChecks.kt",
+        "-include-runtime",
+        "-d",
+        "/tmp/setup-persistence-mutations-isvqc7s_/schema-version/checks.jar"
+      ],
+      "started_utc": "2026-10-22T05:05:14.119728+00:00",
+      "ended_utc": "2026-10-22T05:05:20.836837+00:00",
+      "exit_code": 0
+    },
+    {
+      "label": "schema-version-run",
+      "argv": [
+        "java",
+        "-jar",
+        "/tmp/setup-persistence-mutations-isvqc7s_/schema-version/checks.jar"
+      ],
+      "started_utc": "2026-10-22T05:05:20.836872+00:00",
+      "ended_utc": "2026-10-22T05:05:20.970998+00:00",
+      "exit_code": 1
+    },
+    {
+      "label": "checksum-compile",
+      "argv": [
+        "/tmp/bot-setup-tools/kotlinc/bin/kotlinc",
+        "/tmp/setup-persistence-mutations-isvqc7s_/checksum/BotSetupDraft.kt",
+        "/tmp/setup-persistence-mutations-isvqc7s_/checksum/SetupDraftArchive.kt",
+        "/workspace/bot-setup-draft/apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupDraftChecks.kt",
+        "/workspace/bot-setup-draft/apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupPersistenceChecks.kt",
+        "-include-runtime",
+        "-d",
+        "/tmp/setup-persistence-mutations-isvqc7s_/checksum/checks.jar"
+      ],
+      "started_utc": "2026-10-22T05:05:20.978241+00:00",
+      "ended_utc": "2026-10-22T05:05:27.745781+00:00",
+      "exit_code": 0
+    },
+    {
+      "label": "checksum-run",
+      "argv": [
+        "java",
+        "-jar",
+        "/tmp/setup-persistence-mutations-isvqc7s_/checksum/checks.jar"
+      ],
+      "started_utc": "2026-10-22T05:05:27.745810+00:00",
+      "ended_utc": "2026-10-22T05:05:27.878888+00:00",
+      "exit_code": 1
+    },
+    {
+      "label": "creation-export-compile",
+      "argv": [
+        "/tmp/bot-setup-tools/kotlinc/bin/kotlinc",
+        "/tmp/setup-persistence-mutations-isvqc7s_/creation-export/BotSetupDraft.kt",
+        "/tmp/setup-persistence-mutations-isvqc7s_/creation-export/SetupDraftArchive.kt",
+        "/workspace/bot-setup-draft/apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupDraftChecks.kt",
+        "/workspace/bot-setup-draft/apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupPersistenceChecks.kt",
+        "-include-runtime",
+        "-d",
+        "/tmp/setup-persistence-mutations-isvqc7s_/creation-export/checks.jar"
+      ],
+      "started_utc": "2026-10-22T05:05:27.879327+00:00",
+      "ended_utc": "2026-10-22T05:05:34.457311+00:00",
+      "exit_code": 0
+    },
+    {
+      "label": "creation-export-run",
+      "argv": [
+        "java",
+        "-jar",
+        "/tmp/setup-persistence-mutations-isvqc7s_/creation-export/checks.jar"
+      ],
+      "started_utc": "2026-10-22T05:05:34.457341+00:00",
+      "ended_utc": "2026-10-22T05:05:34.572953+00:00",
+      "exit_code": 1
+    },
+    {
+      "label": "export-cas-compile",
+      "argv": [
+        "/tmp/bot-setup-tools/kotlinc/bin/kotlinc",
+        "/tmp/setup-persistence-mutations-isvqc7s_/export-cas/BotSetupDraft.kt",
+        "/tmp/setup-persistence-mutations-isvqc7s_/export-cas/SetupDraftArchive.kt",
+        "/workspace/bot-setup-draft/apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupDraftChecks.kt",
+        "/workspace/bot-setup-draft/apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupPersistenceChecks.kt",
+        "-include-runtime",
+        "-d",
+        "/tmp/setup-persistence-mutations-isvqc7s_/export-cas/checks.jar"
+      ],
+      "started_utc": "2026-10-22T05:05:34.573316+00:00",
+      "ended_utc": "2026-10-22T05:05:41.177966+00:00",
+      "exit_code": 0
+    },
+    {
+      "label": "export-cas-run",
+      "argv": [
+        "java",
+        "-jar",
+        "/tmp/setup-persistence-mutations-isvqc7s_/export-cas/checks.jar"
+      ],
+      "started_utc": "2026-10-22T05:05:41.177997+00:00",
+      "ended_utc": "2026-10-22T05:05:41.293991+00:00",
+      "exit_code": 1
+    },
+    {
+      "label": "memory-revision-compile",
+      "argv": [
+        "/tmp/bot-setup-tools/kotlinc/bin/kotlinc",
+        "/tmp/setup-persistence-mutations-isvqc7s_/memory-revision/BotSetupDraft.kt",
+        "/tmp/setup-persistence-mutations-isvqc7s_/memory-revision/SetupDraftArchive.kt",
+        "/workspace/bot-setup-draft/apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupDraftChecks.kt",
+        "/workspace/bot-setup-draft/apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupPersistenceChecks.kt",
+        "-include-runtime",
+        "-d",
+        "/tmp/setup-persistence-mutations-isvqc7s_/memory-revision/checks.jar"
+      ],
+      "started_utc": "2026-10-22T05:05:41.294351+00:00",
+      "ended_utc": "2026-10-22T05:05:47.835794+00:00",
+      "exit_code": 0
+    },
+    {
+      "label": "memory-revision-run",
+      "argv": [
+        "java",
+        "-jar",
+        "/tmp/setup-persistence-mutations-isvqc7s_/memory-revision/checks.jar"
+      ],
+      "started_utc": "2026-10-22T05:05:47.835822+00:00",
+      "ended_utc": "2026-10-22T05:05:47.950369+00:00",
+      "exit_code": 1
+    },
+    {
+      "label": "field-lock-compile",
+      "argv": [
+        "/tmp/bot-setup-tools/kotlinc/bin/kotlinc",
+        "/tmp/setup-persistence-mutations-isvqc7s_/field-lock/BotSetupDraft.kt",
+        "/tmp/setup-persistence-mutations-isvqc7s_/field-lock/SetupDraftArchive.kt",
+        "/workspace/bot-setup-draft/apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupDraftChecks.kt",
+        "/workspace/bot-setup-draft/apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupPersistenceChecks.kt",
+        "-include-runtime",
+        "-d",
+        "/tmp/setup-persistence-mutations-isvqc7s_/field-lock/checks.jar"
+      ],
+      "started_utc": "2026-10-22T05:05:47.950675+00:00",
+      "ended_utc": "2026-10-22T05:05:56.775489+00:00",
+      "exit_code": 0
+    },
+    {
+      "label": "field-lock-run",
+      "argv": [
+        "java",
+        "-jar",
+        "/tmp/setup-persistence-mutations-isvqc7s_/field-lock/checks.jar"
+      ],
+      "started_utc": "2026-10-22T05:05:56.775519+00:00",
+      "ended_utc": "2026-10-22T05:05:56.930910+00:00",
+      "exit_code": 1
+    }
+  ],
+  "mutations": [
+    {
+      "label": "schema-version",
+      "file": "SetupDraftArchive.kt",
+      "replace_before": "input.readInt() == VERSION",
+      "replace_after": "input.readInt() >= VERSION",
+      "replacement_count": 1,
+      "compile_exit_code": 0,
+      "run_exit_code": 1,
+      "mutated_source_sha256": {
+        "BotSetupDraft.kt": "2becb6c2a44ba2fe862e3cfe3df31528c91bb37e04bc6835a749c54f4e5eb2f5",
+        "SetupDraftArchive.kt": "684e2776a2e5c3182de50c5434882b7237059e2f96b4a24b71097e38c3dd9470"
+      }
+    },
+    {
+      "label": "checksum",
+      "file": "SetupDraftArchive.kt",
+      "replace_before": "require(MessageDigest.isEqual(",
+      "replace_after": "require(true || MessageDigest.isEqual(",
+      "replacement_count": 1,
+      "compile_exit_code": 0,
+      "run_exit_code": 1,
+      "mutated_source_sha256": {
+        "BotSetupDraft.kt": "2becb6c2a44ba2fe862e3cfe3df31528c91bb37e04bc6835a749c54f4e5eb2f5",
+        "SetupDraftArchive.kt": "c51ccc103f1c716dbd2151c2d74f5b729779e36c8d46d18902519f4fe42912a7"
+      }
+    },
+    {
+      "label": "creation-export",
+      "file": "BotSetupDraft.kt",
+      "replace_before": "require(creation.status in setOf(CreationStatus.NOT_REQUESTED, CreationStatus.REJECTED))",
+      "replace_after": "require(true)",
+      "replacement_count": 1,
+      "compile_exit_code": 0,
+      "run_exit_code": 1,
+      "mutated_source_sha256": {
+        "BotSetupDraft.kt": "8acb51e07177c13341f1aede8788b7f77444b5f712ebdfd19a39747942478bca",
+        "SetupDraftArchive.kt": "5ff652109765a429fd427379a4eabaf0d82e6159ae57bceafbd4955c2f03dbc1"
+      }
+    },
+    {
+      "label": "export-cas",
+      "file": "BotSetupDraft.kt",
+      "replace_before": "require(expectedRevision == revision)",
+      "replace_after": "require(true)",
+      "replacement_count": 1,
+      "compile_exit_code": 0,
+      "run_exit_code": 1,
+      "mutated_source_sha256": {
+        "BotSetupDraft.kt": "0d814eaba0166242926b2f4978c0abf78da93739245e8d2f94e6ae86e16ee070",
+        "SetupDraftArchive.kt": "5ff652109765a429fd427379a4eabaf0d82e6159ae57bceafbd4955c2f03dbc1"
+      }
+    },
+    {
+      "label": "memory-revision",
+      "file": "BotSetupDraft.kt",
+      "replace_before": "restored.name = edits.name",
+      "replace_after": "restored.revision = edits.storedRevision\n            restored.name = edits.name",
+      "replacement_count": 1,
+      "compile_exit_code": 0,
+      "run_exit_code": 1,
+      "mutated_source_sha256": {
+        "BotSetupDraft.kt": "ba487b39c1dbc7b3c534d80f9dd08e6dbfbc9855ad1a35ffba5e49efb458cabb",
+        "SetupDraftArchive.kt": "5ff652109765a429fd427379a4eabaf0d82e6159ae57bceafbd4955c2f03dbc1"
+      }
+    },
+    {
+      "label": "field-lock",
+      "file": "SetupDraftArchive.kt",
+      "replace_before": "require(field.userLocked)",
+      "replace_after": "require(true)",
+      "replacement_count": 1,
+      "compile_exit_code": 0,
+      "run_exit_code": 1,
+      "mutated_source_sha256": {
+        "BotSetupDraft.kt": "2becb6c2a44ba2fe862e3cfe3df31528c91bb37e04bc6835a749c54f4e5eb2f5",
+        "SetupDraftArchive.kt": "fcfe3351ccdcc61c5f9a4e292a708d81f1e8231f38bc3a1a67c98a5054a274be"
+      }
+    }
+  ],
+  "baseline_environment_override": {
+    "KOTLINC": "/tmp/bot-setup-tools/kotlinc/bin/kotlinc"
+  },
+  "ended_utc": "2026-10-22T05:05:56.932420+00:00",
+  "log_sha256": {
+    "baseline.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "baseline.stdout.log": "c4f13aef5453061ef4d6e011c48836bdc9b06db06221a5ba0550392560539cba",
+    "checksum-compile.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "checksum-compile.stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "checksum-run.stderr.log": "b0a5e94a01e374fdce3f00e04beddcff28ebdc5891ee653788c10219b809c3da",
+    "checksum-run.stdout.log": "85050ccd77597ef7bbe06b6bf8c27665f32d1f72aafd52ac1896651aa802a827",
+    "creation-export-compile.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "creation-export-compile.stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "creation-export-run.stderr.log": "4cd9e18007f6ccd00ae14e688f1e048b37fd1de73450fc3bfd27864c809d1ffd",
+    "creation-export-run.stdout.log": "bda75800e65d5ab2bcde1d538dedcdb266290ed648863c404cc1f1ac304268f8",
+    "export-cas-compile.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "export-cas-compile.stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "export-cas-run.stderr.log": "64d082ac39f6d5d57f01a1189a58528e5780bbdbaa477a71c036b6ab169d4be8",
+    "export-cas-run.stdout.log": "eb2b7766a5befd2e55da89e3df9c63f943f52a817829003a24c747ea47a42871",
+    "field-lock-compile.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "field-lock-compile.stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "field-lock-run.stderr.log": "03f55b058b814823662586e75bac3573c26785e1a683fc22e2abe192845c82db",
+    "field-lock-run.stdout.log": "56f6080cb663c34388ee1f3b7c0e2f43282b4cec5cfac747253fc8eb302de781",
+    "java-version.stderr.log": "bf61371a588e139353579c26bedbc9693004380fe8e053aa012cb6f7d2c43f20",
+    "java-version.stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "kotlin-version.stderr.log": "66a17105b1a6dfa2764b499aaf01107c29f15e848196c82aed2cc00d41d52458",
+    "kotlin-version.stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "memory-revision-compile.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "memory-revision-compile.stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "memory-revision-run.stderr.log": "be18d04d712bb22330b063e818c5b53730990d6963ce6d4fc40c7599a1befffb",
+    "memory-revision-run.stdout.log": "eb2b7766a5befd2e55da89e3df9c63f943f52a817829003a24c747ea47a42871",
+    "schema-version-compile.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "schema-version-compile.stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "schema-version-run.stderr.log": "10e1468a1ecc4df44f4dd0fb75e3a6a2a79fe4f2ed21ba8d0bcc817bb8a4da53",
+    "schema-version-run.stdout.log": "85050ccd77597ef7bbe06b6bf8c27665f32d1f72aafd52ac1896651aa802a827"
+  }
+}

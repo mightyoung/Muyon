@@ -1,0 +1,2 @@
+PASS chat read bounds, identity, terminal reason and immutable Service source checks; Binder/native NOT_RUN
+PASS frontend input/status/budget policy (no Android/model execution)

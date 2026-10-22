@@ -1,0 +1,7 @@
+compile	Required JVM checks and Android source compilation	2026-10-18T12:30:00.5408916Z [36;1m  for marker in '16/16 pure JVM state checks passed' '22/22 local UI state checks passed'; do[0m
+compile	Required JVM checks and Android source compilation	2026-10-18T12:31:18.7324088Z 22/22 local UI state checks passed; no model or Rust action executed
+compile	Required JVM checks and Android source compilation	2026-10-18T12:31:18.8368129Z 16/16 B liveness checks passed; real Binder death/process runtime NOT_RUN
+compile	Required JVM checks and Android source compilation	2026-10-18T12:31:18.8368636Z 16/16 pure JVM state checks passed; Compose/Android runtime NOT_RUN
+compile	Required JVM checks and Android source compilation	2026-10-18T12:32:49.2013341Z BUILD SUCCESSFUL in 2m 48s
+compile	API26 named durable admission owner tests only	2026-10-18T12:34:09.4270202Z INSTRUMENTATION_RESULT: stream=
+compile	API26 named durable admission owner tests only	2026-10-18T12:34:09.4271660Z OK (11 tests)

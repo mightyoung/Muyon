@@ -26,8 +26,8 @@ class InputTests(unittest.TestCase):
         self.inputs = self.root / 'bridge-inputs'; self.inputs.mkdir()
         self.aar = self.root / 'fixture.aar'
         self.source = 'a' * 40
-        self.value = dict(format_version=1, source_sha=self.source, build_identity=self.source,
-                          protocol=1, namespace='muyon_android_contract_bridge', min_api=24,
+        self.value = dict(format_version=2, source_sha=self.source, build_identity=self.source,
+                          protocol=1, namespace='muyon_android_contract_bridge', min_api=26,
                           android_binding_sha256=verifier.digest(self.binding),
                           android_config_sha256=verifier.digest(self.config), rust_libraries={},
                           jna={key: child['const'] for key, child in SCHEMA['properties']['jna']['properties'].items() if 'const' in child})
@@ -62,7 +62,7 @@ class InputTests(unittest.TestCase):
 
     def test_unknown_missing_wrong_types_and_constants_reject(self):
         for key, value in [('unknown', 1), ('protocol', True), ('format_version', 1.0),
-                           ('protocol', 2), ('min_api', 26), ('source_sha', 'A' * 40),
+                           ('format_version', 1), ('protocol', 2), ('min_api', 24), ('source_sha', 'A' * 40),
                            ('android_binding_sha256', '0' * 64 + '\n'), ('jna', None)]:
             with self.subTest(key=key, value=value):
                 bad = copy.deepcopy(self.value); bad[key] = value

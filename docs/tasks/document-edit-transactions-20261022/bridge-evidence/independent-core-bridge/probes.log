@@ -1,0 +1,9 @@
+
+running 4 tests
+test missing_real_pin_is_unknown_and_duplicate_cannot_repin ... ok
+test fresh_reconfirmation_cannot_replay_claim_whose_core_row_is_absent ... ok
+test cancellation_observed_after_real_seal_preserves_private_fact_without_publication ... ok
+test full_claim_and_real_core_expected_hash_are_bound ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.10s
+

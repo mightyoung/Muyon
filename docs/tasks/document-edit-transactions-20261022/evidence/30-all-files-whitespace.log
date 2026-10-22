@@ -1,0 +1,33 @@
+docs/tasks/document-edit-transactions-20261022/evidence/01-red.log:8: new blank line at EOF.
+docs/tasks/document-edit-transactions-20261022/evidence/03-path-test.log:35: new blank line at EOF.
+docs/tasks/document-edit-transactions-20261022/evidence/07-review-regression-red.log:59: new blank line at EOF.
+docs/tasks/document-edit-transactions-20261022/evidence/09-review-fixed-green.log:28: new blank line at EOF.
+docs/tasks/document-edit-transactions-20261022/evidence/10-revoked-unknown-red.log:18: new blank line at EOF.
+docs/tasks/document-edit-transactions-20261022/evidence/11-final-path-green.log:29: new blank line at EOF.
+docs/tasks/document-edit-transactions-20261022/evidence/13-exact-core-offline.log:34: trailing whitespace.
++          
+docs/tasks/document-edit-transactions-20261022/evidence/13-exact-core-offline.log:44: trailing whitespace.
++          
+docs/tasks/document-edit-transactions-20261022/evidence/14-core-adaptation-api-red.log:144: trailing whitespace.
++          
+docs/tasks/document-edit-transactions-20261022/evidence/15-core-adaptation-green.log:8: trailing whitespace.
++          
+docs/tasks/document-edit-transactions-20261022/evidence/15-core-adaptation-green.log:18: trailing whitespace.
++          
+docs/tasks/document-edit-transactions-20261022/evidence/16-combined-offline.log:82: new blank line at EOF.
+docs/tasks/document-edit-transactions-20261022/evidence/18-combined-final-green.log:58: new blank line at EOF.
+docs/tasks/document-edit-transactions-20261022/evidence/19-full-workspace-offline.log:6: new blank line at EOF.
+docs/tasks/document-edit-transactions-20261022/evidence/20-full-core-offline.log:301: new blank line at EOF.
+docs/tasks/document-edit-transactions-20261022/evidence/22-combined-final-green.log:59: new blank line at EOF.
+docs/tasks/document-edit-transactions-20261022/evidence/23-final-full-core-offline.log:301: new blank line at EOF.
+docs/tasks/document-edit-transactions-20261022/evidence/27-reproduce-combination.log:65: new blank line at EOF.
+docs/tasks/document-edit-transactions-20261022/evidence/independent-round1/compile.log:13: new blank line at EOF.
+docs/tasks/document-edit-transactions-20261022/evidence/independent-round1/probes-compile.log:36: new blank line at EOF.
+docs/tasks/document-edit-transactions-20261022/evidence/independent-round1/probes.log:11: new blank line at EOF.
+docs/tasks/document-edit-transactions-20261022/evidence/independent-round1/tests.log:22: new blank line at EOF.
+docs/tasks/document-edit-transactions-20261022/evidence/independent-round2/probes-compile.log:27: new blank line at EOF.
+docs/tasks/document-edit-transactions-20261022/evidence/independent-round2/probes.log:12: new blank line at EOF.
+docs/tasks/document-edit-transactions-20261022/evidence/independent-round2/tests.log:28: new blank line at EOF.
+docs/tasks/document-edit-transactions-20261022/evidence/independent-round3/final-tests.log:58: new blank line at EOF.
+docs/tasks/document-edit-transactions-20261022/evidence/independent-round3/probes-compile.log:27: new blank line at EOF.
+docs/tasks/document-edit-transactions-20261022/evidence/independent-round3/probes.log:11: new blank line at EOF.

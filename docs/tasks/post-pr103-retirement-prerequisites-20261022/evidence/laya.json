@@ -1,0 +1,13 @@
+{
+  "argv": [
+    "bash",
+    "scripts/check_laya_offline.sh"
+  ],
+  "cwd": "/workspace/Muyon-post-pr103-retirement-20261022",
+  "source_sha": "50ce62bf7033f63e4632e362ecd95fa7524c3ee0",
+  "dirty_source": false,
+  "start_utc": "2026-10-22T20:34:29.294171+00:00",
+  "exit_code": 0,
+  "duration_seconds": 11.281,
+  "end_utc": "2026-10-22T20:34:40.509613+00:00"
+}

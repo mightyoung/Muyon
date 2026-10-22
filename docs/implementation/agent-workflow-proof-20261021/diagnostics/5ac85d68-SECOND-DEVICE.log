@@ -1,0 +1,151 @@
+INSTRUMENTATION_STATUS: numtests=9
+INSTRUMENTATION_STATUS: stream=
+com.mightyoung.muyon.product.chat.AgentWorkflowProductTest:
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=conversationProjectAndBinderSessionIsolateAuthority
+INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.product.chat.AgentWorkflowProductTest
+INSTRUMENTATION_STATUS: current=1
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: numtests=9
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=conversationProjectAndBinderSessionIsolateAuthority
+INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.product.chat.AgentWorkflowProductTest
+INSTRUMENTATION_STATUS: current=1
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: numtests=9
+INSTRUMENTATION_STATUS: stream=
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=metadataLoadsBodyOnDemandAndDisabledSkillCannotCreateOrExecute
+INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.product.chat.AgentWorkflowProductTest
+INSTRUMENTATION_STATUS: current=2
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: numtests=9
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=metadataLoadsBodyOnDemandAndDisabledSkillCannotCreateOrExecute
+INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.product.chat.AgentWorkflowProductTest
+INSTRUMENTATION_STATUS: current=2
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: numtests=9
+INSTRUMENTATION_STATUS: stream=
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=remoteChildCannotPretendToExecuteAndRootCancellationStopsQueuedWork
+INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.product.chat.AgentWorkflowProductTest
+INSTRUMENTATION_STATUS: current=3
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: numtests=9
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=remoteChildCannotPretendToExecuteAndRootCancellationStopsQueuedWork
+INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.product.chat.AgentWorkflowProductTest
+INSTRUMENTATION_STATUS: current=3
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: numtests=9
+INSTRUMENTATION_STATUS: stream=
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=selectedSkillReadsCommittedBusinessAndPublishesOrderedToolFacts
+INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.product.chat.AgentWorkflowProductTest
+INSTRUMENTATION_STATUS: current=4
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: numtests=9
+INSTRUMENTATION_STATUS: stream=
+Error in selectedSkillReadsCommittedBusinessAndPublishesOrderedToolFacts(com.mightyoung.muyon.product.chat.AgentWorkflowProductTest):
+org.junit.ComparisonFailure: {"status":"unknown","error":"operation_unavailable","recovery_action":"query_original","request_id":"71def711-61c4-421e-9c2c-52cdc22c4399"} expected:<[ok]> but was:<[unknown]>
+	at org.junit.Assert.assertEquals(Assert.java:117)
+	at com.mightyoung.muyon.product.chat.AgentWorkflowProductTest.selectedSkillReadsCommittedBusinessAndPublishesOrderedToolFacts(AgentWorkflowProductTest.kt:126)
+
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=selectedSkillReadsCommittedBusinessAndPublishesOrderedToolFacts
+INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.product.chat.AgentWorkflowProductTest
+INSTRUMENTATION_STATUS: stack=org.junit.ComparisonFailure: {"status":"unknown","error":"operation_unavailable","recovery_action":"query_original","request_id":"71def711-61c4-421e-9c2c-52cdc22c4399"} expected:<[ok]> but was:<[unknown]>
+	at org.junit.Assert.assertEquals(Assert.java:117)
+	at com.mightyoung.muyon.product.chat.AgentWorkflowProductTest.selectedSkillReadsCommittedBusinessAndPublishesOrderedToolFacts(AgentWorkflowProductTest.kt:126)
+
+INSTRUMENTATION_STATUS: current=4
+INSTRUMENTATION_STATUS_CODE: -2
+INSTRUMENTATION_STATUS: numtests=9
+INSTRUMENTATION_STATUS: stream=
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=activityMenuCreatesAndExecutesLocalChildWithCollapsibleFacts
+INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.product.chat.AgentWorkflowProductTest
+INSTRUMENTATION_STATUS: current=5
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: numtests=9
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=activityMenuCreatesAndExecutesLocalChildWithCollapsibleFacts
+INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.product.chat.AgentWorkflowProductTest
+INSTRUMENTATION_STATUS: current=5
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: numtests=9
+INSTRUMENTATION_STATUS: stream=
+com.mightyoung.muyon.product.chat.ConversationRichTextTest:
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=longBilingualParagraphsAndMarkdownKeepTheirContent
+INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.product.chat.ConversationRichTextTest
+INSTRUMENTATION_STATUS: current=6
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: numtests=9
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=longBilingualParagraphsAndMarkdownKeepTheirContent
+INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.product.chat.ConversationRichTextTest
+INSTRUMENTATION_STATUS: current=6
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: numtests=9
+INSTRUMENTATION_STATUS: stream=
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=fencedCodeCopiesExactBodyAndTablesScrollHorizontally
+INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.product.chat.ConversationRichTextTest
+INSTRUMENTATION_STATUS: current=7
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: numtests=9
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=fencedCodeCopiesExactBodyAndTablesScrollHorizontally
+INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.product.chat.ConversationRichTextTest
+INSTRUMENTATION_STATUS: current=7
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: numtests=9
+INSTRUMENTATION_STATUS: stream=
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=actualRequestActivityUsesObservedFactsAndResetsForAnotherRequest
+INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.product.chat.ConversationRichTextTest
+INSTRUMENTATION_STATUS: current=8
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: numtests=9
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=actualRequestActivityUsesObservedFactsAndResetsForAnotherRequest
+INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.product.chat.ConversationRichTextTest
+INSTRUMENTATION_STATUS: current=8
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: numtests=9
+INSTRUMENTATION_STATUS: stream=
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=unsafeSchemesHaveNoLinksAndEmptyEventsHaveNoReasoningPlaceholder
+INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.product.chat.ConversationRichTextTest
+INSTRUMENTATION_STATUS: current=9
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: numtests=9
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=unsafeSchemesHaveNoLinksAndEmptyEventsHaveNoReasoningPlaceholder
+INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.product.chat.ConversationRichTextTest
+INSTRUMENTATION_STATUS: current=9
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_RESULT: stream=
+
+Time: 7.848
+There was 1 failure:
+1) selectedSkillReadsCommittedBusinessAndPublishesOrderedToolFacts(com.mightyoung.muyon.product.chat.AgentWorkflowProductTest)
+org.junit.ComparisonFailure: {"status":"unknown","error":"operation_unavailable","recovery_action":"query_original","request_id":"71def711-61c4-421e-9c2c-52cdc22c4399"} expected:<[ok]> but was:<[unknown]>
+	at org.junit.Assert.assertEquals(Assert.java:117)
+	at com.mightyoung.muyon.product.chat.AgentWorkflowProductTest.selectedSkillReadsCommittedBusinessAndPublishesOrderedToolFacts(AgentWorkflowProductTest.kt:126)
+
+FAILURES!!!
+Tests run: 9,  Failures: 1
+
+
+INSTRUMENTATION_CODE: -1

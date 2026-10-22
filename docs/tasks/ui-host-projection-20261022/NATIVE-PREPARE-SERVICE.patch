@@ -1,0 +1,21 @@
+--- a/apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/agentipc/ProductService.kt
++++ b/apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/agentipc/ProductService.kt
+@@ -130,7 +130,17 @@
+             // Provider7bb89 uses the generated LocalDraftPrepareRequest record.
+             // Actual fifth binding pending B; no substitute record or old scalar ABI.
+             override fun prepare(original: PreparedLocalSave): JSONObject =
+-                error("local_draft_prepare_binding_pending")
++                data(open(false).localDraftPrepareSave(com.mightyoung.muyon.productbridge.LocalDraftPrepareRequest(
++                    conversation = original.record.conversationId,
++                    project = original.record.projectId,
++                    namespaceId = original.record.namespaceId,
++                    draftId = original.record.draftId,
++                    expectedGeneration = original.record.registryGeneration.toString(),
++                    expectedStoredRevision = original.record.storedRevision.toString(),
++                    attemptId = original.attemptId,
++                    exportedMemoryRevision = original.exportedMemoryRevision.toString(),
++                    hostEditorRevision = original.exportedLocalRevision.toString(),
++                    archive = original.archive)))
+             override fun save(conversation: String, project: String?, namespace: String, draft: String, generation: String, revision: String,
+                 attempt: String, exportedMemoryRevision: String, archive: ByteArray) =
+                 data(open(false).localDraftSave(conversation, project, namespace, draft, generation, revision, attempt, exportedMemoryRevision, archive))

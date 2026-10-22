@@ -1,0 +1,33 @@
+<?xml version='1.0' encoding='utf-8'?>
+<testsuite name="original/provider-targeted" tests="26" failures="0" errors="0" skipped="0">
+  <properties>
+    <property name="origin" value="derived libtest output; invocation/binary overlaps, not independent business cases" />
+    <property name="raw_sha256" value="476e38737f2f6ce253cf3572a257f19ba909b80dfdb549e9c805e064ca5a605d" />
+  </properties>
+  <testcase classname="tests/bot_drafts.rs" name="altered_schema_workspace_and_signed_long_overflow_refuse" />
+  <testcase classname="tests/bot_drafts.rs" name="canonical_envelope_tamper_limit_revision_and_trailing_data_refuse" />
+  <testcase classname="tests/bot_drafts.rs" name="empty_archive_null_projection_survives_read_and_restart" />
+  <testcase classname="tests/bot_drafts.rs" name="exclusive_owner_and_competing_editors_do_not_lose_updates" />
+  <testcase classname="tests/bot_drafts.rs" name="exact_preparation_binding_idempotency_and_committed_editor_survive_callback_loss" />
+  <testcase classname="tests/bot_drafts.rs" name="archive_storage_null_oversize_blob_and_invalid_text_refuse" />
+  <testcase classname="tests/bot_drafts.rs" name="failed_commit_keeps_original_pointer_and_lookup_fences_queued_dispatch" />
+  <testcase classname="tests/bot_drafts.rs" name="failed_receipt_insert_rolls_back_archive_revision_and_attempt" />
+  <testcase classname="tests/bot_drafts.rs" name="legacy_receipt_without_journal_or_editor_remains_queryable_after_upgrade" />
+  <testcase classname="tests/bot_drafts.rs" name="draft_capacity_preserves_existing_records_and_receipts" />
+  <testcase classname="tests/bot_drafts.rs" name="live_project_revocation_is_checked_even_for_original_receipts" />
+  <testcase classname="tests/bot_drafts.rs" name="large_valid_canonical_archive_roundtrips_without_projection_truncation" />
+  <testcase classname="tests/bot_drafts.rs" name="original_receipt_blob_or_oversize_storage_refuses" />
+  <testcase classname="tests/bot_drafts.rs" name="partial_schema_never_resets_or_imports" />
+  <testcase classname="tests/bot_drafts.rs" name="original_receipt_is_atomic_idempotent_and_survives_callback_loss" />
+  <testcase classname="tests/bot_drafts.rs" name="original_unknown_and_reserved_ledgers_are_untouched" />
+  <testcase classname="tests/bot_drafts.rs" name="preparation_is_durable_discoverable_and_never_replays_after_restart" />
+  <testcase classname="tests/bot_drafts.rs" name="preparation_pointer_failure_rolls_back_new_original_row" />
+  <testcase classname="tests/bot_drafts.rs" name="project_query_storage_fault_is_unknown_not_scope_denial" />
+  <testcase classname="tests/bot_drafts.rs" name="preparation_scope_schema_and_foreign_pointer_fail_closed" />
+  <testcase classname="tests/bot_drafts.rs" name="receipt_and_journal_terminal_transition_are_one_commit" />
+  <testcase classname="tests/bot_drafts.rs" name="restart_and_null_project_are_real_registry_facts" />
+  <testcase classname="tests/bot_drafts.rs" name="structurally_invalid_rehashed_archive_cannot_add_fields" />
+  <testcase classname="tests/bot_drafts.rs" name="stored_archive_and_receipt_tamper_refuse" />
+  <testcase classname="tests/bot_drafts.rs" name="wrong_scope_binding_generation_lifecycle_and_missing_attempt_refuse" />
+  <testcase classname="tests/bot_drafts.rs" name="receipt_capacity_does_not_evict_originals" />
+</testsuite>

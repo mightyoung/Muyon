@@ -1,0 +1,38 @@
+{
+  "gate": "PASS",
+  "build_id": "7b063cb4089fe21fdaf82657bcf00408e3f138b1:e3e140e4584aff5a9bb8de35162e5fc42bb6e1318e96ec14d5c996c97013aaf0",
+  "required_methods": 21,
+  "runs": [
+    {
+      "log": "/private/tmp/muyon-android-refactor-20261020/docs/tasks/muyon-android-refactor/product-device/final/CORE.log",
+      "passed": 16,
+      "gate": "PASS"
+    },
+    {
+      "log": "/private/tmp/muyon-android-refactor-20261020/docs/tasks/muyon-android-refactor/product-device/final/PICKER-GENERATE.log",
+      "passed": 1,
+      "gate": "PASS"
+    },
+    {
+      "log": "/private/tmp/muyon-android-refactor-20261020/docs/tasks/muyon-android-refactor/product-device/final/PICKER-PDF.log",
+      "passed": 1,
+      "gate": "PASS"
+    },
+    {
+      "log": "/private/tmp/muyon-android-refactor-20261020/docs/tasks/muyon-android-refactor/product-device/final/PICKER-ZIP.log",
+      "passed": 1,
+      "gate": "PASS"
+    },
+    {
+      "log": "/private/tmp/muyon-android-refactor-20261020/docs/tasks/muyon-android-refactor/product-device/final/PICKER-DIRECTORY.log",
+      "passed": 1,
+      "gate": "PASS"
+    },
+    {
+      "log": "/private/tmp/muyon-android-refactor-20261020/docs/tasks/muyon-android-refactor/product-device/final/PICKER-PRIVATE-AFTER-DELETE.log",
+      "passed": 1,
+      "gate": "PASS"
+    }
+  ],
+  "boundary": "product instrumentation only; I04, production pricing proof and real provider/tool-loop remain separate gates"
+}

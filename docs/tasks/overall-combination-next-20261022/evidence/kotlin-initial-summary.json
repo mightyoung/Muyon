@@ -1,0 +1,27 @@
+[
+  {
+    "runner": "chat/persistence/run-native-codec.sh",
+    "exit": 0,
+    "log": "/tmp/muyon-next-kotlin-chat_persistence_run-native-codec.sh.log"
+  },
+  {
+    "runner": "chat/persistence/run-save-state.sh",
+    "exit": 0,
+    "log": "/tmp/muyon-next-kotlin-chat_persistence_run-save-state.sh.log"
+  },
+  {
+    "runner": "chat/persistence/run-native-session.sh",
+    "exit": 0,
+    "log": "/tmp/muyon-next-kotlin-chat_persistence_run-native-session.sh.log"
+  },
+  {
+    "runner": "chat/projection/run-offline.sh",
+    "exit": 0,
+    "log": "/tmp/muyon-next-kotlin-chat_projection_run-offline.sh.log"
+  },
+  {
+    "runner": "ui/shell/run-host-shell-checks.sh",
+    "exit": 1,
+    "log": "/tmp/muyon-next-kotlin-ui_shell_run-host-shell-checks.sh.log"
+  }
+]

@@ -1,0 +1,3 @@
+/tmp/muyon-kotlin-compile-diagnostic/Before.kt:4:68: error: unresolved reference 'O_DIRECTORY'.
+    val directory=Os.open(root,OsConstants.O_RDONLY or OsConstants.O_DIRECTORY or OsConstants.O_NOFOLLOW,0)
+                                                                   ^^^^^^^^^^^

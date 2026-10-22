@@ -1,0 +1,161 @@
+test_answer_delta_byte_limit_is_1024 (test_contract.EventTests.test_answer_delta_byte_limit_is_1024) ... ERROR
+test_binder_loss_and_unknown_only_reconcile_never_resubmit (test_contract.EventTests.test_binder_loss_and_unknown_only_reconcile_never_resubmit) ... ERROR
+test_cancel_is_request_not_fabricated_terminal (test_contract.EventTests.test_cancel_is_request_not_fabricated_terminal) ... ERROR
+test_completion_requires_durable_success_receipt (test_contract.EventTests.test_completion_requires_durable_success_receipt) ... ERROR
+test_malformed_or_unbounded_events_atomic_rejection (test_contract.EventTests.test_malformed_or_unbounded_events_atomic_rejection) ... ERROR
+test_object_schema_version_required (test_contract.EventTests.test_object_schema_version_required) ... ERROR
+test_opaque_receipt_is_utf8_not_identifier (test_contract.EventTests.test_opaque_receipt_is_utf8_not_identifier) ... ERROR
+test_order_and_replay_are_deterministic (test_contract.EventTests.test_order_and_replay_are_deterministic) ... ERROR
+test_original_receipt_and_current_projection_separate (test_contract.EventTests.test_original_receipt_and_current_projection_separate) ... ERROR
+test_projection_requires_matching_object_revision_and_original_receipt (test_contract.EventTests.test_projection_requires_matching_object_revision_and_original_receipt) ... ERROR
+test_reconnect_lookup_uses_new_lease_without_rewriting_admitted_epoch (test_contract.EventTests.test_reconnect_lookup_uses_new_lease_without_rewriting_admitted_epoch) ... ERROR
+test_wrong_identity_stale_lease_and_run_cannot_mutate (test_contract.EventTests.test_wrong_identity_stale_lease_and_run_cannot_mutate) ... ERROR
+test_authority_and_transport_fields_never_accepted (test_contract.SubmissionTests.test_authority_and_transport_fields_never_accepted) ... ok
+test_missing_wrong_type_and_overflow_rejected (test_contract.SubmissionTests.test_missing_wrong_type_and_overflow_rejected) ... ok
+test_selected_supplier_only_and_no_path_like_identifiers (test_contract.SubmissionTests.test_selected_supplier_only_and_no_path_like_identifiers) ... ok
+test_typed_bounded_submission (test_contract.SubmissionTests.test_typed_bounded_submission) ... FAIL
+
+======================================================================
+ERROR: test_answer_delta_byte_limit_is_1024 (test_contract.EventTests.test_answer_delta_byte_limit_is_1024)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/Muyon-frontend-loop/experiments/redesign/frontend-service-loop-lab/test_contract.py", line 47, in setUp
+    self.state = ProjectionState(submission(), 'run-1')
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/Muyon-frontend-loop/experiments/redesign/frontend-service-loop-lab/contract.py", line 52, in __init__
+    raise ValueError('invalid admitted identity')
+ValueError: invalid admitted identity
+
+======================================================================
+ERROR: test_binder_loss_and_unknown_only_reconcile_never_resubmit (test_contract.EventTests.test_binder_loss_and_unknown_only_reconcile_never_resubmit)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/Muyon-frontend-loop/experiments/redesign/frontend-service-loop-lab/test_contract.py", line 47, in setUp
+    self.state = ProjectionState(submission(), 'run-1')
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/Muyon-frontend-loop/experiments/redesign/frontend-service-loop-lab/contract.py", line 52, in __init__
+    raise ValueError('invalid admitted identity')
+ValueError: invalid admitted identity
+
+======================================================================
+ERROR: test_cancel_is_request_not_fabricated_terminal (test_contract.EventTests.test_cancel_is_request_not_fabricated_terminal)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/Muyon-frontend-loop/experiments/redesign/frontend-service-loop-lab/test_contract.py", line 47, in setUp
+    self.state = ProjectionState(submission(), 'run-1')
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/Muyon-frontend-loop/experiments/redesign/frontend-service-loop-lab/contract.py", line 52, in __init__
+    raise ValueError('invalid admitted identity')
+ValueError: invalid admitted identity
+
+======================================================================
+ERROR: test_completion_requires_durable_success_receipt (test_contract.EventTests.test_completion_requires_durable_success_receipt)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/Muyon-frontend-loop/experiments/redesign/frontend-service-loop-lab/test_contract.py", line 47, in setUp
+    self.state = ProjectionState(submission(), 'run-1')
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/Muyon-frontend-loop/experiments/redesign/frontend-service-loop-lab/contract.py", line 52, in __init__
+    raise ValueError('invalid admitted identity')
+ValueError: invalid admitted identity
+
+======================================================================
+ERROR: test_malformed_or_unbounded_events_atomic_rejection (test_contract.EventTests.test_malformed_or_unbounded_events_atomic_rejection)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/Muyon-frontend-loop/experiments/redesign/frontend-service-loop-lab/test_contract.py", line 47, in setUp
+    self.state = ProjectionState(submission(), 'run-1')
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/Muyon-frontend-loop/experiments/redesign/frontend-service-loop-lab/contract.py", line 52, in __init__
+    raise ValueError('invalid admitted identity')
+ValueError: invalid admitted identity
+
+======================================================================
+ERROR: test_object_schema_version_required (test_contract.EventTests.test_object_schema_version_required)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/Muyon-frontend-loop/experiments/redesign/frontend-service-loop-lab/test_contract.py", line 47, in setUp
+    self.state = ProjectionState(submission(), 'run-1')
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/Muyon-frontend-loop/experiments/redesign/frontend-service-loop-lab/contract.py", line 52, in __init__
+    raise ValueError('invalid admitted identity')
+ValueError: invalid admitted identity
+
+======================================================================
+ERROR: test_opaque_receipt_is_utf8_not_identifier (test_contract.EventTests.test_opaque_receipt_is_utf8_not_identifier)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/Muyon-frontend-loop/experiments/redesign/frontend-service-loop-lab/test_contract.py", line 47, in setUp
+    self.state = ProjectionState(submission(), 'run-1')
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/Muyon-frontend-loop/experiments/redesign/frontend-service-loop-lab/contract.py", line 52, in __init__
+    raise ValueError('invalid admitted identity')
+ValueError: invalid admitted identity
+
+======================================================================
+ERROR: test_order_and_replay_are_deterministic (test_contract.EventTests.test_order_and_replay_are_deterministic)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/Muyon-frontend-loop/experiments/redesign/frontend-service-loop-lab/test_contract.py", line 47, in setUp
+    self.state = ProjectionState(submission(), 'run-1')
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/Muyon-frontend-loop/experiments/redesign/frontend-service-loop-lab/contract.py", line 52, in __init__
+    raise ValueError('invalid admitted identity')
+ValueError: invalid admitted identity
+
+======================================================================
+ERROR: test_original_receipt_and_current_projection_separate (test_contract.EventTests.test_original_receipt_and_current_projection_separate)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/Muyon-frontend-loop/experiments/redesign/frontend-service-loop-lab/test_contract.py", line 47, in setUp
+    self.state = ProjectionState(submission(), 'run-1')
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/Muyon-frontend-loop/experiments/redesign/frontend-service-loop-lab/contract.py", line 52, in __init__
+    raise ValueError('invalid admitted identity')
+ValueError: invalid admitted identity
+
+======================================================================
+ERROR: test_projection_requires_matching_object_revision_and_original_receipt (test_contract.EventTests.test_projection_requires_matching_object_revision_and_original_receipt)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/Muyon-frontend-loop/experiments/redesign/frontend-service-loop-lab/test_contract.py", line 47, in setUp
+    self.state = ProjectionState(submission(), 'run-1')
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/Muyon-frontend-loop/experiments/redesign/frontend-service-loop-lab/contract.py", line 52, in __init__
+    raise ValueError('invalid admitted identity')
+ValueError: invalid admitted identity
+
+======================================================================
+ERROR: test_reconnect_lookup_uses_new_lease_without_rewriting_admitted_epoch (test_contract.EventTests.test_reconnect_lookup_uses_new_lease_without_rewriting_admitted_epoch)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/Muyon-frontend-loop/experiments/redesign/frontend-service-loop-lab/test_contract.py", line 47, in setUp
+    self.state = ProjectionState(submission(), 'run-1')
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/Muyon-frontend-loop/experiments/redesign/frontend-service-loop-lab/contract.py", line 52, in __init__
+    raise ValueError('invalid admitted identity')
+ValueError: invalid admitted identity
+
+======================================================================
+ERROR: test_wrong_identity_stale_lease_and_run_cannot_mutate (test_contract.EventTests.test_wrong_identity_stale_lease_and_run_cannot_mutate)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/Muyon-frontend-loop/experiments/redesign/frontend-service-loop-lab/test_contract.py", line 47, in setUp
+    self.state = ProjectionState(submission(), 'run-1')
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/Muyon-frontend-loop/experiments/redesign/frontend-service-loop-lab/contract.py", line 52, in __init__
+    raise ValueError('invalid admitted identity')
+ValueError: invalid admitted identity
+
+======================================================================
+FAIL: test_typed_bounded_submission (test_contract.SubmissionTests.test_typed_bounded_submission)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/Muyon-frontend-loop/experiments/redesign/frontend-service-loop-lab/test_contract.py", line 20, in test_typed_bounded_submission
+    self.assertTrue(validate_submission(submission()))
+AssertionError: False is not true
+
+----------------------------------------------------------------------
+Ran 16 tests in 0.002s
+
+FAILED (failures=1, errors=12)

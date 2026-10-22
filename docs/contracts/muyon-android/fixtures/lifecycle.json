@@ -1,0 +1,47 @@
+{
+  "fixture_version": 1,
+  "scope": "Synthetic contract samples. Not issued authority or proof of a committed transaction.",
+  "create": {
+    "command_file": "supplier-create.json",
+    "receipt": {
+      "protocol_version": 1, "intent_id": "intent-a",
+      "binding_digest": "d72446fe527ca67657243489bab2437955a35f7ed4203772d076ecebc511bf80",
+      "scope": {"workspace_id": "workspace-a", "project_id": null},
+      "authority": {"grant_id": "grant-a", "generation": "1", "owner_epoch": "epoch-a"},
+      "admission_id": null, "target_id": "supplier-a", "revision": "1", "status": "committed",
+      "result": {"deleted": false, "name": "é"}
+    }
+  },
+  "delete": {
+    "command": {
+      "protocol_version": 1, "business_version": 1, "intent_id": "intent-supplier_delete",
+      "scope": {"workspace_id": "workspace-a", "project_id": null}, "expected_revision": "1",
+      "authority": {"grant_id": "grant-a", "generation": "1", "owner_epoch": "epoch-a"},
+      "plan_id": "plan-supplier_delete", "plan_digest": "b78efa6382248332235dc2d91c27cee6988bf196c684753f147cfacba1068ce7",
+      "command": {"operation": "supplier_delete", "supplier_id": "supplier-a"}
+    },
+    "receipt": {
+      "protocol_version": 1, "intent_id": "intent-supplier_delete",
+      "binding_digest": "5fa704efed6b2c9b74455860018c796a97e6a8e29b1abc860359c915fb165cda",
+      "scope": {"workspace_id": "workspace-a", "project_id": null},
+      "authority": {"grant_id": "grant-a", "generation": "1", "owner_epoch": "epoch-a"},
+      "admission_id": null, "target_id": "supplier-a", "revision": "2", "status": "committed", "result": {"deleted": true}
+    }
+  },
+  "restore": {
+    "command": {
+      "protocol_version": 1, "business_version": 1, "intent_id": "intent-supplier_restore",
+      "scope": {"workspace_id": "workspace-a", "project_id": null}, "expected_revision": "2",
+      "authority": {"grant_id": "grant-a", "generation": "1", "owner_epoch": "epoch-a"},
+      "plan_id": "plan-supplier_restore", "plan_digest": "88fbff97e4e8751d9df93520b23ef7c234c60957e52770781b3605c324b22b4e",
+      "command": {"operation": "supplier_restore", "supplier_id": "supplier-a"}
+    },
+    "receipt": {
+      "protocol_version": 1, "intent_id": "intent-supplier_restore",
+      "binding_digest": "b39f388367a2f458c432ec7d7e790d504536b9c21699fa3575fd6c815ee8b4f7",
+      "scope": {"workspace_id": "workspace-a", "project_id": null},
+      "authority": {"grant_id": "grant-a", "generation": "1", "owner_epoch": "epoch-a"},
+      "admission_id": null, "target_id": "supplier-a", "revision": "3", "status": "committed", "result": {"deleted": false}
+    }
+  }
+}

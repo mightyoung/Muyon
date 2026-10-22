@@ -1,0 +1,10 @@
+
+running 3 tests
+test rejected_revision_cannot_export_or_create_rollback ... ok
+independent overflow/skip edges: 15 cases
+test max_edges_all_routes_never_wrap_or_skip ... ok
+independent numeric grid: 546 cases (plus valid retry after every rejected observation)
+test numeric_grid_all_routes_accept_only_exact_successor ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+

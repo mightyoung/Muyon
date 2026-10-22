@@ -1,0 +1,461 @@
+{
+  "source": "4b98072eda94db4c937a00adea452bd985ddc00d",
+  "targets": [
+    {
+      "target": "lib-bins",
+      "exit": 0,
+      "command": [
+        "cargo",
+        "clippy",
+        "--offline",
+        "--locked",
+        "--manifest-path",
+        "crates/Cargo.toml",
+        "-p",
+        "muyon-core",
+        "--lib",
+        "--bins",
+        "--",
+        "-D",
+        "warnings"
+      ]
+    },
+    {
+      "target": "agent_child_tools",
+      "exit": 0,
+      "command": [
+        "cargo",
+        "clippy",
+        "--offline",
+        "--locked",
+        "--manifest-path",
+        "crates/Cargo.toml",
+        "-p",
+        "muyon-core",
+        "--test",
+        "agent_child_tools",
+        "--",
+        "-D",
+        "warnings"
+      ]
+    },
+    {
+      "target": "agent_owner",
+      "exit": 0,
+      "command": [
+        "cargo",
+        "clippy",
+        "--offline",
+        "--locked",
+        "--manifest-path",
+        "crates/Cargo.toml",
+        "-p",
+        "muyon-core",
+        "--test",
+        "agent_owner",
+        "--",
+        "-D",
+        "warnings"
+      ]
+    },
+    {
+      "target": "agent_product",
+      "exit": 0,
+      "command": [
+        "cargo",
+        "clippy",
+        "--offline",
+        "--locked",
+        "--manifest-path",
+        "crates/Cargo.toml",
+        "-p",
+        "muyon-core",
+        "--test",
+        "agent_product",
+        "--",
+        "-D",
+        "warnings"
+      ]
+    },
+    {
+      "target": "agent_tools",
+      "exit": 0,
+      "command": [
+        "cargo",
+        "clippy",
+        "--offline",
+        "--locked",
+        "--manifest-path",
+        "crates/Cargo.toml",
+        "-p",
+        "muyon-core",
+        "--test",
+        "agent_tools",
+        "--",
+        "-D",
+        "warnings"
+      ]
+    },
+    {
+      "target": "agent_workflow",
+      "exit": 0,
+      "command": [
+        "cargo",
+        "clippy",
+        "--offline",
+        "--locked",
+        "--manifest-path",
+        "crates/Cargo.toml",
+        "-p",
+        "muyon-core",
+        "--test",
+        "agent_workflow",
+        "--",
+        "-D",
+        "warnings"
+      ]
+    },
+    {
+      "target": "archive",
+      "exit": 0,
+      "command": [
+        "cargo",
+        "clippy",
+        "--offline",
+        "--locked",
+        "--manifest-path",
+        "crates/Cargo.toml",
+        "-p",
+        "muyon-core",
+        "--test",
+        "archive",
+        "--",
+        "-D",
+        "warnings"
+      ]
+    },
+    {
+      "target": "blobs",
+      "exit": 0,
+      "command": [
+        "cargo",
+        "clippy",
+        "--offline",
+        "--locked",
+        "--manifest-path",
+        "crates/Cargo.toml",
+        "-p",
+        "muyon-core",
+        "--test",
+        "blobs",
+        "--",
+        "-D",
+        "warnings"
+      ]
+    },
+    {
+      "target": "bot_drafts",
+      "exit": 0,
+      "command": [
+        "cargo",
+        "clippy",
+        "--offline",
+        "--locked",
+        "--manifest-path",
+        "crates/Cargo.toml",
+        "-p",
+        "muyon-core",
+        "--test",
+        "bot_drafts",
+        "--",
+        "-D",
+        "warnings"
+      ]
+    },
+    {
+      "target": "business",
+      "exit": 0,
+      "command": [
+        "cargo",
+        "clippy",
+        "--offline",
+        "--locked",
+        "--manifest-path",
+        "crates/Cargo.toml",
+        "-p",
+        "muyon-core",
+        "--test",
+        "business",
+        "--",
+        "-D",
+        "warnings"
+      ]
+    },
+    {
+      "target": "contract",
+      "exit": 0,
+      "command": [
+        "cargo",
+        "clippy",
+        "--offline",
+        "--locked",
+        "--manifest-path",
+        "crates/Cargo.toml",
+        "-p",
+        "muyon-core",
+        "--test",
+        "contract",
+        "--",
+        "-D",
+        "warnings"
+      ]
+    },
+    {
+      "target": "contract_vectors_additional",
+      "exit": 0,
+      "command": [
+        "cargo",
+        "clippy",
+        "--offline",
+        "--locked",
+        "--manifest-path",
+        "crates/Cargo.toml",
+        "-p",
+        "muyon-core",
+        "--test",
+        "contract_vectors_additional",
+        "--",
+        "-D",
+        "warnings"
+      ]
+    },
+    {
+      "target": "document_edit_engine_protocol",
+      "exit": 0,
+      "command": [
+        "cargo",
+        "clippy",
+        "--offline",
+        "--locked",
+        "--manifest-path",
+        "crates/Cargo.toml",
+        "-p",
+        "muyon-core",
+        "--test",
+        "document_edit_engine_protocol",
+        "--",
+        "-D",
+        "warnings"
+      ]
+    },
+    {
+      "target": "document_edit_gateway",
+      "exit": 0,
+      "command": [
+        "cargo",
+        "clippy",
+        "--offline",
+        "--locked",
+        "--manifest-path",
+        "crates/Cargo.toml",
+        "-p",
+        "muyon-core",
+        "--test",
+        "document_edit_gateway",
+        "--",
+        "-D",
+        "warnings"
+      ]
+    },
+    {
+      "target": "document_edit_transactions",
+      "exit": 101,
+      "command": [
+        "cargo",
+        "clippy",
+        "--offline",
+        "--locked",
+        "--manifest-path",
+        "crates/Cargo.toml",
+        "-p",
+        "muyon-core",
+        "--test",
+        "document_edit_transactions",
+        "--",
+        "-D",
+        "warnings"
+      ]
+    },
+    {
+      "target": "document_storage",
+      "exit": 0,
+      "command": [
+        "cargo",
+        "clippy",
+        "--offline",
+        "--locked",
+        "--manifest-path",
+        "crates/Cargo.toml",
+        "-p",
+        "muyon-core",
+        "--test",
+        "document_storage",
+        "--",
+        "-D",
+        "warnings"
+      ]
+    },
+    {
+      "target": "documents",
+      "exit": 0,
+      "command": [
+        "cargo",
+        "clippy",
+        "--offline",
+        "--locked",
+        "--manifest-path",
+        "crates/Cargo.toml",
+        "-p",
+        "muyon-core",
+        "--test",
+        "documents",
+        "--",
+        "-D",
+        "warnings"
+      ]
+    },
+    {
+      "target": "evidence_local",
+      "exit": 0,
+      "command": [
+        "cargo",
+        "clippy",
+        "--offline",
+        "--locked",
+        "--manifest-path",
+        "crates/Cargo.toml",
+        "-p",
+        "muyon-core",
+        "--test",
+        "evidence_local",
+        "--",
+        "-D",
+        "warnings"
+      ]
+    },
+    {
+      "target": "group_governance",
+      "exit": 0,
+      "command": [
+        "cargo",
+        "clippy",
+        "--offline",
+        "--locked",
+        "--manifest-path",
+        "crates/Cargo.toml",
+        "-p",
+        "muyon-core",
+        "--test",
+        "group_governance",
+        "--",
+        "-D",
+        "warnings"
+      ]
+    },
+    {
+      "target": "group_runtime",
+      "exit": 0,
+      "command": [
+        "cargo",
+        "clippy",
+        "--offline",
+        "--locked",
+        "--manifest-path",
+        "crates/Cargo.toml",
+        "-p",
+        "muyon-core",
+        "--test",
+        "group_runtime",
+        "--",
+        "-D",
+        "warnings"
+      ]
+    },
+    {
+      "target": "group_runtime_store",
+      "exit": 0,
+      "command": [
+        "cargo",
+        "clippy",
+        "--offline",
+        "--locked",
+        "--manifest-path",
+        "crates/Cargo.toml",
+        "-p",
+        "muyon-core",
+        "--test",
+        "group_runtime_store",
+        "--",
+        "-D",
+        "warnings"
+      ]
+    },
+    {
+      "target": "research",
+      "exit": 0,
+      "command": [
+        "cargo",
+        "clippy",
+        "--offline",
+        "--locked",
+        "--manifest-path",
+        "crates/Cargo.toml",
+        "-p",
+        "muyon-core",
+        "--test",
+        "research",
+        "--",
+        "-D",
+        "warnings"
+      ]
+    },
+    {
+      "target": "resource_boundaries_additional",
+      "exit": 0,
+      "command": [
+        "cargo",
+        "clippy",
+        "--offline",
+        "--locked",
+        "--manifest-path",
+        "crates/Cargo.toml",
+        "-p",
+        "muyon-core",
+        "--test",
+        "resource_boundaries_additional",
+        "--",
+        "-D",
+        "warnings"
+      ]
+    },
+    {
+      "target": "store_admission_additional",
+      "exit": 0,
+      "command": [
+        "cargo",
+        "clippy",
+        "--offline",
+        "--locked",
+        "--manifest-path",
+        "crates/Cargo.toml",
+        "-p",
+        "muyon-core",
+        "--test",
+        "store_admission_additional",
+        "--",
+        "-D",
+        "warnings"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,27 @@
+HTTP/1.1 200 OK
+date: Thu, 22 Oct 2026 17:44:51 GMT
+server: envoy
+
+HTTP/2 200 
+x-amz-request-id: WE08MYFR0PSYBYDN
+x-amz-id-2: loYCfVmfspaO4DJcKOu9d1yLx1Qir1U2eKE+cpRB5Du/aZEgeF1+iwRabrtL37ovdcro8euGNs8iASHgAATlDMgfVyzv+REm
+server: envoy
+last-modified: Thu, 12 Feb 2026 20:25:19 GMT
+etag: "0572c7f62a531b33e3de2ebd61445f79"
+x-amz-version-id: s0wmAs20aZMd.MXpuMcOfEkDdCB9WNKn
+content-type: binary/octet-stream
+x-amz-server-side-encryption: AES256
+x-amz-storage-class: INTELLIGENT_TIERING
+accept-ranges: bytes
+date: Thu, 22 Oct 2026 17:44:51 GMT
+via: 1.1 varnish
+age: 59112
+x-served-by: cache-chi-kmdw8640032-CHI
+x-cache: HIT
+x-cache-hits: 4
+x-timer: S1792691091.339193,VS0,VE0
+content-length: 843718
+x-envoy-upstream-service-time: 60
+
+
+FINAL_HTTP=200

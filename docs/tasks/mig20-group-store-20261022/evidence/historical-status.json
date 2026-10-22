@@ -1,0 +1,54 @@
+{
+  "01-missing-module.log": {
+    "exit_code": 101,
+    "meaning": "missing module compile; not behavioral RED"
+  },
+  "02-scaffold-red.log": {
+    "exit_code": 101,
+    "meaning": "18 pass / 3 fail; behavior scaffold RED"
+  },
+  "03-contracts-red.log": {
+    "exit_code": 101,
+    "meaning": "18 pass / 9 fail; expanded behavior RED"
+  },
+  "04-first-implementation.log": {
+    "exit_code": 0,
+    "meaning": "27 pass: 9 group +18 source tests"
+  },
+  "05-boundaries-red.log": {
+    "exit_code": 101,
+    "meaning": "30 pass /2 fail; missing owner gate and NULL reference regression"
+  },
+  "06-review-reconcile-red.log": {
+    "exit_code": 101,
+    "meaning": "0 pass /1 fail; stop-before-original-bind regression"
+  },
+  "07-task-local-red.log": {
+    "exit_code": 101,
+    "meaning": "0 pass /1 fail; handoff altered group default"
+  },
+  "08-review-fixes-green.log": {
+    "exit_code": 0,
+    "meaning": "34 passed after recovery and task-local fixes"
+  },
+  "09-chain-fix-green.log": {
+    "exit_code": 0,
+    "meaning": "34 passed after chain lookup repair"
+  },
+  "10-root-lifetime-red.log": {
+    "exit_code": 101,
+    "meaning": "0 pass /1 fail; fresh run reset same root"
+  },
+  "11-store-final-green.log": {
+    "exit_code": 0,
+    "meaning": "35 passed after root lifetime repair"
+  },
+  "export-patch-dry-run.log": {
+    "exit_code": 0,
+    "meaning": "patch dry-run against disposable pinned core export copy"
+  },
+  "no-outbound-owner-mutations.log": {
+    "exit_code": 1,
+    "meaning": "rg no matches expected; no outbound owner mutation calls"
+  }
+}

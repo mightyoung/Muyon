@@ -1,0 +1,11 @@
+--- baseline-module.rs
++++ active_cap-module.rs
+@@ -328,7 +328,7 @@
+             )
+         })
+         .count();
+-    if active >= 2 {
++    if active >= 3 {
+         return Err(Error::ActiveLimit);
+     }
+     if authority_layers.len() != 4 || authority_layers.iter().any(|g| !valid_grant(g)) {

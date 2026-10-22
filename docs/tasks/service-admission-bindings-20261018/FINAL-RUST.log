@@ -1,0 +1,41 @@
+warning: suspicious definition of the runtime `read` symbol used by the standard library
+   --> /workspace/muyon-worker-a/experiments/redesign/core-agent-lab/core/src/host_session.rs:132:124
+    |
+132 | ...ount: usize, timeout: i32) -> i32; fn read(fd: i32, buffer: *mut u8, count: usize) -> isize; fn write(fd: i32, buffer: *const u8...
+    |                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = note: expected `unsafe extern "C" fn(i32, *mut c_void, usize) -> isize` (for the current target)
+            found    `unsafe extern "C" fn(i32, *mut u8, usize) -> isize`
+    = help: either fix the signature or remove any attributes like `#[unsafe(no_mangle)]`, `#[unsafe(export_name = "read")]`, or `#[link_name = "read"]`
+    = help: allow this lint if the signature is compatible
+    = note: `#[warn(suspicious_runtime_symbol_definitions)]` on by default
+
+warning: suspicious definition of the runtime `write` symbol used by the standard library
+   --> /workspace/muyon-worker-a/experiments/redesign/core-agent-lab/core/src/host_session.rs:132:182
+    |
+132 | ... *mut u8, count: usize) -> isize; fn write(fd: i32, buffer: *const u8, count: usize) -> isize; }
+    |                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = note: expected `unsafe extern "C" fn(i32, *const c_void, usize) -> isize` (for the current target)
+            found    `unsafe extern "C" fn(i32, *const u8, usize) -> isize`
+    = help: either fix the signature or remove any attributes like `#[unsafe(no_mangle)]`, `#[unsafe(export_name = "write")]`, or `#[link_name = "write"]`
+    = help: allow this lint if the signature is compatible
+
+warning: `muyon-core-agent-lab` (lib) generated 2 warnings
+   Compiling muyon-android-contract-bridge-lab v0.1.0 (/workspace/muyon-worker-a/experiments/redesign/android-rust-bridge-lab/core)
+    Finished `test` profile [unoptimized] target(s) in 2.61s
+     Running tests/service_host_bridge.rs (/workspace/muyon-worker-a-target/debug/deps/service_host_bridge-2650467f2e87b855)
+
+running 9 tests
+test changed_current_binding_before_final_admission_never_calls_owner_commit ... ok
+test binding_drift_during_review_or_reserve_prevents_commit ... ok
+test own_device_and_asymmetric_capabilities_survive_admission_mapping ... ok
+test owner_denial_and_invalid_ids_stop_at_the_correct_boundary ... ok
+test service_callback_maps_current_scope_and_handle_existence_without_transport ... ok
+test synthetic_owner_can_expire_reservation_before_commit ... ok
+test synthetic_owner_rejects_reused_reservation_without_claiming_durability ... ok
+test trusted_admission_callbacks_preserve_exact_binding_payload_and_budget ... ok
+test unconfigured_service_owner_fails_closed_and_is_queried_fresh ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

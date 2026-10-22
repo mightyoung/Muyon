@@ -1,0 +1,3 @@
+# Preserve runner output exactly; its final newline is part of the captured log.
+*.log whitespace=-blank-at-eof
+fead50a2-BUILD-FAIL.log whitespace=-blank-at-eof,-blank-at-eol

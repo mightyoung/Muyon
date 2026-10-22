@@ -1,0 +1,5 @@
+BEGIN {"argv": ["cargo", "build", "--offline", "--locked", "--manifest-path", "crates/Cargo.toml", "-p", "muyon-android-ffi", "--features", "bindings"], "cwd": "/workspace/Muyon-post-pr101-office-bot-20261022", "source_sha": "3e531f76077b6e2170fa7ff4ffda104935363931", "dirty_source": false, "start_utc": "2026-10-22T19:09:33.266801+00:00"}
+   Compiling muyon-office v0.1.0 (/workspace/Muyon-post-pr101-office-bot-20261022/crates/muyon-office)
+   Compiling muyon-android-ffi v0.1.0 (/workspace/Muyon-post-pr101-office-bot-20261022/crates/muyon-android-ffi)
+    Finished `dev` profile [unoptimized] target(s) in 16.80s
+END {"argv": ["cargo", "build", "--offline", "--locked", "--manifest-path", "crates/Cargo.toml", "-p", "muyon-android-ffi", "--features", "bindings"], "cwd": "/workspace/Muyon-post-pr101-office-bot-20261022", "source_sha": "3e531f76077b6e2170fa7ff4ffda104935363931", "dirty_source": false, "start_utc": "2026-10-22T19:09:33.266801+00:00", "exit_code": 0, "duration_seconds": 17.09, "end_utc": "2026-10-22T19:09:50.284028+00:00"}

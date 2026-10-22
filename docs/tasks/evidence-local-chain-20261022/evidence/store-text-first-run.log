@@ -1,0 +1,20 @@
+Actual source checkout: ec669e35a455fec6951bc53cb1192235d86d53e2
+Generated module-only harness: /tmp/muyon-evidence-store-harness-isy6j96i
+All harness dependencies match repository lock versions/sources/checksums
+   Compiling muyon-core v0.1.0 (/tmp/muyon-evidence-store-harness-isy6j96i)
+    Finished `test` profile [unoptimized] target(s) in 3.01s
+     Running unittests lib.rs (crates/target/debug/deps/muyon_core-b4ac5d1e8b153320)
+
+running 9 tests
+test evidence::store::tests::inspect_is_not_readtext_and_failure_opens_no_reader ... ok
+test evidence::store::tests::malformed_saved_text_is_failed_processing_not_saved_or_index_success ... ok
+test evidence::store::tests::corrupt_controlled_blob_never_uses_previous_cache_as_success ... ok
+test evidence::store::tests::changed_current_revision_never_rebinds_old_evidence ... ok
+test evidence::store::tests::original_unknown_intents_are_not_looked_up_retried_or_changed ... ok
+test evidence::store::tests::owner_delivery_transaction_excludes_other_sqlite_writer ... ok
+test evidence::store::tests::reader_lease_and_grant_mutation_in_same_transaction_block_delivery ... ok
+test evidence::store::tests::real_saved_text_readtext_grant_produces_processing_receipt_and_exact_quote ... ok
+test evidence::store::tests::persisted_revocation_expiry_generation_epoch_and_project_deletion_deny_cached_results ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 33 filtered out; finished in 0.05s
+

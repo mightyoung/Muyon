@@ -1,0 +1,25 @@
+   Compiling muyon-core v0.1.0 (/workspace/Muyon-combination-20261022/crates/muyon-core)
+    Finished `test` profile [unoptimized] target(s) in 5.27s
+     Running unittests src/lib.rs (/tmp/muyon-combination-target/debug/deps/muyon_core-570c1dcad7530a3a)
+
+running 17 tests
+test artifacts::tests::exact_scope_and_write_permission_are_required ... ok
+test artifacts::tests::failed_publication_rolls_back_artifact_and_document_heads ... ok
+test artifacts::tests::human_revision_is_atomic_and_generated_cannot_overwrite_it ... ok
+test artifacts::tests::invalid_sources_schema_and_oversized_rows_fail_closed ... ok
+test artifacts::tests::restart_restores_exact_snapshot_and_source_advance_fails_closed ... ok
+test artifacts::tests::revocation_deletion_wrong_project_and_missing_source_deny_history ... ok
+test artifacts::workflow_tests::catalog_requires_independent_project_grant_and_returns_inventory_only ... ok
+test artifacts::workflow_tests::effect_unknown_uses_original_lookup_without_writing_a_rejection ... ok
+test artifacts::workflow_tests::historical_output_and_source_require_explicit_core_history_policy ... ok
+test artifacts::workflow_tests::independent_project_grants_reject_expiry_generation_epoch_and_project_changes ... ok
+test artifacts::workflow_tests::own_receipt_permission_never_implies_discovery_or_another_actors_journal ... ok
+test artifacts::workflow_tests::pending_storage_failure_never_reexecutes_and_lookup_never_writes ... ok
+test artifacts::workflow_tests::receipt_tail_invalidation_rolls_back_all_effects_and_preserves_original_pending ... ok
+test artifacts::workflow_tests::receipt_write_failure_rolls_back_publication_and_keeps_pending_without_retry ... ok
+test artifacts::workflow_tests::rejected_projection_requires_a_durable_terminal_row ... ok
+test artifacts::workflow_tests::revise_receipt_is_atomic_and_survives_later_head_change ... ok
+test artifacts::workflow_tests::save_journal_duplicates_return_original_receipt_and_parameter_change_conflicts ... ok
+
+test result: ok. 17 passed; 0 failed; 0 ignored; 0 measured; 48 filtered out; finished in 0.51s
+

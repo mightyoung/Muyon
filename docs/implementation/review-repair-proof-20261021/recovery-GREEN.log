@@ -1,0 +1,19 @@
+   Compiling muyon-android-ffi v0.1.0 (/private/tmp/muyon-android-refactor-20261020/crates/muyon-android-ffi)
+    Finished `test` profile [unoptimized] target(s) in 1.40s
+     Running unittests src/lib.rs (/private/tmp/muyon-review-fixes-target/debug/deps/muyon_android_product-392c7918cb2ca5c9)
+
+running 11 tests
+test tests::imported_raw_metadata_is_preserved_but_never_an_unbounded_binder_reply ... ok
+test tests::open_never_initializes_or_wipes_missing_or_existing_store ... ok
+test tests::recovery_seal_refuses_an_already_queued_late_confirmation ... ok
+test tests::received_confirmation_and_legacy_unknown_are_never_cleared_or_replayed ... ok
+test tests::research_project_confirmation_not_received_recovers_without_a_write ... ok
+test tests::configuring_a_new_budget_never_manufactures_pricing_authority_or_sends ... ok
+test tests::another_root_and_ordinary_chat_cannot_bypass_an_unknown_child ... ok
+test tests::unreceived_confirmation_is_sealed_without_resubmitting_after_restart ... ok
+test tests::child_plan_stays_blocked_and_cannot_bypass_an_unknown_root_request ... ok
+test tests::review_is_explicit_and_duplicate_confirmation_returns_original_receipt ... ok
+test tests::long_unicode_pages_are_bounded_and_the_201st_supplier_is_accessible ... ok
+
+test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 7.49s
+

@@ -1,0 +1,49 @@
+{
+  "decision": "quarantine",
+  "dimensions": {
+    "annotation": {
+      "reason": "No engine installed or invoked",
+      "status": "not_run"
+    },
+    "formula": {
+      "reason": "No engine installed or invoked",
+      "status": "not_run"
+    },
+    "recalc": {
+      "reason": "No engine installed or invoked",
+      "status": "not_run"
+    },
+    "render": {
+      "reason": "No engine installed or invoked",
+      "status": "not_run"
+    },
+    "structure": {
+      "reason": "No engine installed or invoked",
+      "status": "not_run"
+    },
+    "visual": {
+      "reason": "No engine installed or invoked",
+      "status": "not_run"
+    }
+  },
+  "fidelity": "unknown",
+  "findings": [],
+  "format": "pdf",
+  "limitations": [
+    "Incomplete byte-marker scan; absence proves no safety",
+    "PDF parser, signature verification and rendering NOT_RUN"
+  ],
+  "limits": {
+    "max_file": 16777216,
+    "max_member": 8388608,
+    "max_members": 2048,
+    "max_ratio": 100,
+    "max_total": 33554432,
+    "max_xml_depth": 128
+  },
+  "parts": [],
+  "safety": "unknown",
+  "schema_version": 1,
+  "sha256": "affae7b5719e0a7a284e173bc6d430f9bb1be3b7092d9c8a947ee2b5ee87f00f",
+  "size": 603
+}

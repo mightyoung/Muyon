@@ -1,0 +1,5 @@
+    Checking serde_core v1.0.229
+    Checking serde v1.0.229
+    Checking serde_json v1.0.154
+    Checking muyon-core v0.1.0 (/workspace/Muyon-combination-20261022/crates/muyon-core)
+    Finished `dev` profile [unoptimized] target(s) in 8.17s

@@ -1,0 +1,15 @@
+Muyon Android UI resources
+
+UI and reply glyphs are provided by the Android platform sans/serif font families.
+No extracted Claude font file is bundled in this source revision.
+
+wb_add, wb_chat, wb_document, wb_menu and wb_send are original basic vector
+geometry authored for Muyon. Their historical resource identifiers remain for
+source compatibility; they no longer contain extracted WorkBuddy vector paths.
+
+muyon_avatar.png is the project image-tool-generated avatar documented in
+docs/design/android-reference-20261021/REFERENCES.md.
+
+Model weights and native runtimes have separate source/license notices. These
+UI resource statements do not grant permission for earlier bundled resources
+or establish model weight redistribution rights.

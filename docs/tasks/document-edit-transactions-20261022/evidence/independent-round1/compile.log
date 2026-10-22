@@ -1,0 +1,13 @@
+warning: variants `Recalculated`, `Unknown`, and `Failed` are never constructed
+  --> crates/muyon-core/tests/../src/document_edit/mod.rs:58:41
+   |
+58 | pub enum FormulaStatus { NotApplicable, Recalculated, Unknown, Failed }
+   |          -------------                  ^^^^^^^^^^^^  ^^^^^^^  ^^^^^^
+   |          |
+   |          variants in this enum
+   |
+   = note: `FormulaStatus` has derived impls for the traits `Debug` and `Clone`, but these are intentionally ignored during dead code analysis
+   = note: `#[warn(dead_code)]` on by default
+
+warning: 1 warning emitted
+

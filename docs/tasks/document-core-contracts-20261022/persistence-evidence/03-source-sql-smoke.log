@@ -1,0 +1,8 @@
+PASS: exact source schema and 17 SQL statements prepare
+PASS: committed synthetic metadata/annotation rows survive reopen
+PASS: stale document-head CAS changes zero rows
+PASS: source SQL retains history/tombstone/provenance and excludes revoked grant
+PASS: rollback preserves previous rows; foreign_key_check empty
+SQLite: 3.53.1
+Rust SQL source SHA256: 478481ec8b0d3827493c2eb92680441c4d9305c09d64db50764ae67c5c8ac039
+LIMIT: Rust compilation, authorization/body/anchor validation and actual blob publication NOT_RUN by this script

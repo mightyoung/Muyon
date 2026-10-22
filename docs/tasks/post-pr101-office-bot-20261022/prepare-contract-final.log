@@ -1,0 +1,7 @@
+BEGIN {"argv": ["python3", "-B", "apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/chat/persistence/check-prepare-binding.py"], "cwd": "/workspace/Muyon-post-pr101-office-bot-20261022", "source_sha": "3e531f76077b6e2170fa7ff4ffda104935363931", "dirty_source": false, "start_utc": "2026-10-22T19:08:07.552472+00:00"}
+...
+----------------------------------------------------------------------
+Ran 3 tests in 0.021s
+
+OK
+END {"argv": ["python3", "-B", "apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/chat/persistence/check-prepare-binding.py"], "cwd": "/workspace/Muyon-post-pr101-office-bot-20261022", "source_sha": "3e531f76077b6e2170fa7ff4ffda104935363931", "dirty_source": false, "start_utc": "2026-10-22T19:08:07.552472+00:00", "exit_code": 0, "duration_seconds": 0.578, "end_utc": "2026-10-22T19:08:07.935670+00:00"}

@@ -1,0 +1,5 @@
+UTC: 2026-10-22T04:07:00.949875+00:00
+Command: bash apps/muyon_android/gradlew -p apps/muyon_android --offline :app:testDebugUnitTest :app:compileDebugAndroidTestKotlin :app:lintDebug
+NOT_RUN: set MUYON_UI_GRADLE to the existing Gradle 8.13 executable.
+
+Exit: 2

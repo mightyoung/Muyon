@@ -1,0 +1,24 @@
+   Compiling muyon-core v0.1.0 (/private/tmp/muyon-android-refactor-20261020/crates/muyon-core)
+    Finished `test` profile [unoptimized] target(s) in 0.63s
+     Running tests/agent_owner.rs (crates/target/debug/deps/agent_owner-57661148c8d844f7)
+
+running 1 test
+test cancelled_claim_with_empty_response_never_refunds_attempt_count_after_restart ... FAILED
+
+failures:
+
+---- cancelled_claim_with_empty_response_never_refunds_attempt_count_after_restart stdout ----
+
+thread 'cancelled_claim_with_empty_response_never_refunds_attempt_count_after_restart' (10843696) panicked at muyon-core/tests/agent_owner.rs:464:5:
+assertion `left == right` failed: attempted call cannot disappear after empty/cancel settlement
+  left: 0
+ right: 1
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    cancelled_claim_with_empty_response_never_refunds_attempt_count_after_restart
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 9 filtered out; finished in 0.01s
+
+error: test failed, to rerun pass `-p muyon-core --test agent_owner`

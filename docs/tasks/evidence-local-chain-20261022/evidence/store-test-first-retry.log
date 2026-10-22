@@ -1,0 +1,4 @@
+Actual source checkout: 741274f6ef628501cc8c75c61f156b9f003c81d7
+Generated module-only harness: /tmp/muyon-evidence-store-harness-9h2pj2iq
+error: cannot update the lock file /tmp/muyon-evidence-store-harness-9h2pj2iq/Cargo.lock because --locked was passed to prevent this
+help: to generate the lock file without accessing the network, remove the --locked flag and use --offline instead.

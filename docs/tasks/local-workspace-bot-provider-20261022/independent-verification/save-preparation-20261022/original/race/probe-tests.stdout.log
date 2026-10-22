@@ -1,0 +1,9 @@
+
+running 3 tests
+test independent_save_first_keeps_captured_editor_and_original_after_later_save ... ok
+test independent_lookup_fence_is_a_write_and_rejects_late_raw_save ... ok
+observed32 mutex races: committed=0, fenced=32; finite observation, not exhaustive interleaving proof
+test independent_lookup_save_race_has_one_consistent_terminal_outcome ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 26 filtered out; finished in 0.13s
+

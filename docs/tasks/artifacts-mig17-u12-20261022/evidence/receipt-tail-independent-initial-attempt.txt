@@ -1,0 +1,12 @@
+Recorded initial independent SQL-script execution result (not Rust test output):
+
+Traceback (most recent call last):
+  File "independent_receipt_tail_sql_check.py", line 46, in <module>
+    db.execute("INSERT INTO projects VALUES('project','workspace','Synthetic','1',0)")
+sqlite3.OperationalError: no such table: projects
+
+Cause: the review script's raw-regex character class excluded literal 'n', so it
+failed to extract business CREATE TABLE statements. Corrected that script regex
+to exclude newline instead. The subsequent command passed; raw final output is
+receipt-tail-independent-sql.log. This initial failure was a review-script defect,
+not production/Rust behavior, and is retained separately from the successful run.

@@ -1,0 +1,56 @@
+   Compiling typenum v1.20.1
+   Compiling crc32fast v1.5.3
+   Compiling cfg-if v1.0.5
+   Compiling equivalent v1.0.3
+   Compiling hashbrown v0.17.1
+   Compiling zlib-rs v0.6.8
+   Compiling const-oid v0.10.2
+   Compiling typed-path v0.12.4
+   Compiling indexmap v2.14.2
+   Compiling hybrid-array v0.4.15
+   Compiling cpufeatures v0.3.1
+   Compiling memchr v2.8.3
+   Compiling block-buffer v0.12.1
+   Compiling crypto-common v0.2.2
+   Compiling digest v0.11.3
+   Compiling sha2 v0.11.1
+   Compiling flate2 v1.1.10
+   Compiling zip v9.0.5
+   Compiling muyon-office v0.1.0 (/workspace/office-rust-boundary-review/crates/muyon-office)
+    Finished `test` profile [unoptimized] target(s) in 4.82s
+     Running tests/boundaries.rs (/workspace/office-rust-boundary-fix-tools/target-review/debug/deps/boundaries-6ae2ccd92e95a42a)
+
+running 12 tests
+ZipWriter::drop: failed to finalize archive: Io(Kind(FileTooLarge))test docx_expanded_limit_counts_unchanged_parts ... ok
+test direct_rewrite_obeys_part_and_expanded_limits_and_keeps_source ... ok
+test docx_input_and_total_text_boundaries_are_not_delayed_until_readback ... ok
+test docx_multibyte_and_archive_equal_and_one_over_are_bounded ... ok
+test expanded_budget_counts_payload_even_on_directory_named_entries ... ok
+test empty_text_placeholder_obeys_the_same_reader_budget ... ok
+test replacement_view_uses_reader_text_budget_including_shared_references ... ok
+test highly_compressible_replacement_cannot_hide_expanded_or_part_overflow ... ok
+test docx_part_limit_accounts_for_escaped_bytes_before_splice ... ok
+test shared_string_rewrite_counts_every_cell_reference ... ok
+test inline_and_shared_rich_text_ignore_only_spreadsheet_phonetics_per_cell ... ok
+test xlsx_numeric_replacement_cannot_bypass_shared_part_budget ... ok
+
+test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/fidelity.rs (/workspace/office-rust-boundary-fix-tools/target-review/debug/deps/fidelity-45f854dd49f770b0)
+
+running 12 tests
+test docx_not_found_and_ambiguous_never_guess ... ok
+test docx_edit_is_deterministic_and_reopens ... ok
+test docx_complex_edit_keeps_bookmarks_comments_header_and_unknown_part ... ok
+test docx_replacement_rules ... ok
+test docx_simple_run_edit_changes_only_the_target_text ... ok
+test extract_text_covers_docx_xlsx_and_flags_formula_cache ... ok
+test wrong_format_is_unsupported ... ok
+test hostile_xml_is_rejected_not_expanded ... ok
+test xlsx_numeric_cell_edit_keeps_formula_cache_and_everything_else ... ok
+test xlsx_complex_edit_preserves_merge_comment_hidden_sheet_and_date_system ... ok
+test xlsx_refuses_what_it_cannot_prove ... ok
+test hostile_packages_are_rejected ... ok
+
+test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.95s
+

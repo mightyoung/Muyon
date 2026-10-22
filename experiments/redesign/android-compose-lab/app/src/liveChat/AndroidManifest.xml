@@ -1,0 +1,9 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" xmlns:tools="http://schemas.android.com/tools">
+    <uses-permission android:name="android.permission.INTERNET" />
+    <application android:name=".agentipc.OrdinaryChatLiveApplication" android:label="Muyon · DeepSeek chat canary"
+        android:usesCleartextTraffic="false" android:networkSecurityConfig="@xml/chat_network_security"
+        tools:replace="android:name,android:label">
+        <activity android:name=".agentipc.OrdinaryChatCredentialActivity" android:process=":agent"
+            android:exported="false" android:excludeFromRecents="true" />
+    </application>
+</manifest>

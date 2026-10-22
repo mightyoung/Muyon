@@ -1,0 +1,346 @@
+{
+  "schema_version": 1,
+  "description": "Shared CT01/CT04 vectors from contract.rs. repeat expands before real wire serialization; revisions always stay strings. Exactly one vector may confirm. This fixture carries no authority.",
+  "coverage_notes": [
+    "32 vectors cover eight supplier fields, NFC and non-BMP Unicode, normalized/raw-name and text/list boundaries, allowed/invalid ratings, unsupported merged_into, unknown payload fields, and canonical decimal revisions.",
+    "u64::MAX parses losslessly but existing command validation refuses mutation because no next revision exists; this case must return InvalidRevision during prepare. u64::MAX-1 and 2^53+1 use update proposals and must roundtrip as exact text.",
+    "Only unicode-eight-fields confirms once through the real Service. Other valid proposals are discarded; invalid inputs must return exact errors and no plan. The committed eight-field value and original receipt must survive sole-client Service close/reopen with a new epoch.",
+    "Not a complete malformed-JSON or UTF-16-fuzz corpus: duplicate keys, isolated surrogates, every optional-field raw UTF-16 limit, concurrent revocation, and model/provider metadata authority are outside these additional vectors. Existing dedicated contract and lifecycle tests retain those separate responsibilities."
+  ],
+  "base_payload": {
+    "name": "baseline",
+    "aliases": [],
+    "address": null,
+    "categories": [],
+    "notes": null,
+    "merged_into": null,
+    "rating": null,
+    "rating_note": null
+  },
+  "cases": [
+    {
+      "id": "unicode-eight-fields",
+      "revision": "0",
+      "patch": {
+        "name": " ﻿é 科研😀 ﻿",
+        "aliases": [
+          "乙",
+          "甲",
+          "甲"
+        ],
+        "address": " 实验室Ａ ",
+        "categories": [
+          " optics ",
+          "材料",
+          "optics"
+        ],
+        "notes": " \n note é \n",
+        "merged_into": null,
+        "rating": "preferred",
+        "rating_note": " ﻿审核 ﻿"
+      },
+      "confirm": true,
+      "expected": {
+        "name": "é 科研😀",
+        "aliases": [
+          "乙",
+          "甲"
+        ],
+        "address": "实验室Ａ",
+        "categories": [
+          "optics",
+          "材料"
+        ],
+        "notes": "note é",
+        "merged_into": null,
+        "rating": "preferred",
+        "rating_note": "审核"
+      }
+    },
+    {
+      "id": "name-200-codepoints",
+      "revision": "0",
+      "repeat": {
+        "field": "name",
+        "unit": "😀",
+        "count": 200,
+        "array": false,
+        "suffix": ""
+      }
+    },
+    {
+      "id": "name-201-codepoints",
+      "revision": "0",
+      "repeat": {
+        "field": "name",
+        "unit": "😀",
+        "count": 201,
+        "array": false,
+        "suffix": ""
+      },
+      "error": "TextLimit"
+    },
+    {
+      "id": "name-raw-2000",
+      "revision": "0",
+      "repeat": {
+        "field": "name",
+        "unit": " ",
+        "count": 1999,
+        "array": false,
+        "suffix": "甲"
+      }
+    },
+    {
+      "id": "name-raw-2001",
+      "revision": "0",
+      "repeat": {
+        "field": "name",
+        "unit": " ",
+        "count": 2000,
+        "array": false,
+        "suffix": "甲"
+      },
+      "error": "RawLimit"
+    },
+    {
+      "id": "address-limit",
+      "revision": "0",
+      "repeat": {
+        "field": "address",
+        "unit": "甲",
+        "count": 500,
+        "array": false,
+        "suffix": ""
+      }
+    },
+    {
+      "id": "address-overflow",
+      "revision": "0",
+      "repeat": {
+        "field": "address",
+        "unit": "甲",
+        "count": 501,
+        "array": false,
+        "suffix": ""
+      },
+      "error": "TextLimit"
+    },
+    {
+      "id": "notes-limit",
+      "revision": "0",
+      "repeat": {
+        "field": "notes",
+        "unit": "甲",
+        "count": 2000,
+        "array": false,
+        "suffix": ""
+      }
+    },
+    {
+      "id": "notes-overflow",
+      "revision": "0",
+      "repeat": {
+        "field": "notes",
+        "unit": "甲",
+        "count": 2001,
+        "array": false,
+        "suffix": ""
+      },
+      "error": "TextLimit"
+    },
+    {
+      "id": "rating_note-limit",
+      "revision": "0",
+      "repeat": {
+        "field": "rating_note",
+        "unit": "甲",
+        "count": 500,
+        "array": false,
+        "suffix": ""
+      }
+    },
+    {
+      "id": "rating_note-overflow",
+      "revision": "0",
+      "repeat": {
+        "field": "rating_note",
+        "unit": "甲",
+        "count": 501,
+        "array": false,
+        "suffix": ""
+      },
+      "error": "TextLimit"
+    },
+    {
+      "id": "aliases-20",
+      "revision": "0",
+      "repeat": {
+        "field": "aliases",
+        "unit": "alias",
+        "count": 20,
+        "array": true,
+        "suffix": ""
+      }
+    },
+    {
+      "id": "aliases-21",
+      "revision": "0",
+      "repeat": {
+        "field": "aliases",
+        "unit": "alias",
+        "count": 21,
+        "array": true,
+        "suffix": ""
+      },
+      "error": "TextLimit"
+    },
+    {
+      "id": "alias-200",
+      "revision": "0",
+      "patch": {
+        "aliases": [
+          "甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲"
+        ]
+      }
+    },
+    {
+      "id": "alias-201",
+      "revision": "0",
+      "patch": {
+        "aliases": [
+          "甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲"
+        ]
+      },
+      "error": "TextLimit"
+    },
+    {
+      "id": "categories-20",
+      "revision": "0",
+      "repeat": {
+        "field": "categories",
+        "unit": "category",
+        "count": 20,
+        "array": true,
+        "suffix": ""
+      }
+    },
+    {
+      "id": "categories-21",
+      "revision": "0",
+      "repeat": {
+        "field": "categories",
+        "unit": "category",
+        "count": 21,
+        "array": true,
+        "suffix": ""
+      },
+      "error": "TextLimit"
+    },
+    {
+      "id": "category-100",
+      "revision": "0",
+      "patch": {
+        "categories": [
+          "甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲"
+        ]
+      }
+    },
+    {
+      "id": "category-101",
+      "revision": "0",
+      "patch": {
+        "categories": [
+          "甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲"
+        ]
+      },
+      "error": "TextLimit"
+    },
+    {
+      "id": "rating-invalid",
+      "revision": "0",
+      "patch": {
+        "rating": "stars"
+      },
+      "error": "InvalidPayload"
+    },
+    {
+      "id": "rating-caution",
+      "revision": "0",
+      "patch": {
+        "rating": "caution"
+      }
+    },
+    {
+      "id": "rating-disabled",
+      "revision": "0",
+      "patch": {
+        "rating": "disabled"
+      }
+    },
+    {
+      "id": "merged-unsupported",
+      "revision": "0",
+      "patch": {
+        "merged_into": "supplier-other"
+      },
+      "error": "UnsupportedOperation"
+    },
+    {
+      "id": "unknown-field",
+      "revision": "0",
+      "patch": {
+        "future_field": "unknown"
+      },
+      "error": "InvalidPayload"
+    },
+    {
+      "id": "xml-control-invalid",
+      "revision": "0",
+      "patch": {
+        "name": "甲\u0000"
+      },
+      "error": "InvalidXml"
+    },
+    {
+      "id": "name-empty",
+      "revision": "0",
+      "patch": {
+        "name": " ﻿ "
+      },
+      "error": "Required"
+    },
+    {
+      "id": "revision-above-double",
+      "operation": "supplier_update",
+      "revision": "9007199254740993"
+    },
+    {
+      "id": "revision-u64-max",
+      "operation": "supplier_update",
+      "revision": "18446744073709551615",
+      "revision_parse_valid": true,
+      "error": "InvalidRevision"
+    },
+    {
+      "id": "revision-overflow",
+      "revision": "18446744073709551616",
+      "error": "InvalidRevision"
+    },
+    {
+      "id": "revision-leading-zero",
+      "revision": "01",
+      "error": "InvalidRevision"
+    },
+    {
+      "id": "revision-negative",
+      "revision": "-1",
+      "error": "InvalidRevision"
+    },
+    {
+      "id": "revision-u64-max-minus-one",
+      "operation": "supplier_update",
+      "revision": "18446744073709551614"
+    }
+  ]
+}

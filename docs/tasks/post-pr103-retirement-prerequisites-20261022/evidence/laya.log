@@ -1,0 +1,23 @@
+BEGIN {"argv": ["bash", "scripts/check_laya_offline.sh"], "cwd": "/workspace/Muyon-post-pr103-retirement-20261022", "source_sha": "50ce62bf7033f63e4632e362ecd95fa7524c3ee0", "dirty_source": false, "start_utc": "2026-10-22T20:34:29.294171+00:00"}
+........
+----------------------------------------------------------------------
+Ran 8 tests in 0.031s
+
+OK
+....
+----------------------------------------------------------------------
+Ran 4 tests in 8.576s
+
+OK
+........
+----------------------------------------------------------------------
+Ran 8 tests in 0.335s
+
+OK
+.....stage2 mix upload=2213 validation=554 target={'none|zh': 18, 'read|en': 12, 'read|mixed': 12, 'read|zh': 25} source={'none|en': 22, 'none|mixed': 5, 'none|zh': 168, 'read|en': 61, 'read|mixed': 89, 'read|zh': 209} unmatched={} dropped={'none|en': 22, 'none|mixed': 5}
+....
+----------------------------------------------------------------------
+Ran 9 tests in 1.128s
+
+OK
+END {"argv": ["bash", "scripts/check_laya_offline.sh"], "cwd": "/workspace/Muyon-post-pr103-retirement-20261022", "source_sha": "50ce62bf7033f63e4632e362ecd95fa7524c3ee0", "dirty_source": false, "start_utc": "2026-10-22T20:34:29.294171+00:00", "exit_code": 0, "duration_seconds": 11.281, "end_utc": "2026-10-22T20:34:40.509613+00:00"}

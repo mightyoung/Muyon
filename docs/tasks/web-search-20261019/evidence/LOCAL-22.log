@@ -1,0 +1,59 @@
+warning: suspicious definition of the runtime `read` symbol used by the standard library
+   --> /workspace/Muyon/experiments/redesign/core-agent-lab/core/src/host_session.rs:132:124
+    |
+132 | ...ount: usize, timeout: i32) -> i32; fn read(fd: i32, buffer: *mut u8, count: usize) -> isize; fn write(fd: i32, buffer: *const u8...
+    |                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = note: expected `unsafe extern "C" fn(i32, *mut c_void, usize) -> isize` (for the current target)
+            found    `unsafe extern "C" fn(i32, *mut u8, usize) -> isize`
+    = help: either fix the signature or remove any attributes like `#[unsafe(no_mangle)]`, `#[unsafe(export_name = "read")]`, or `#[link_name = "read"]`
+    = help: allow this lint if the signature is compatible
+    = note: `#[warn(suspicious_runtime_symbol_definitions)]` on by default
+
+warning: suspicious definition of the runtime `write` symbol used by the standard library
+   --> /workspace/Muyon/experiments/redesign/core-agent-lab/core/src/host_session.rs:132:182
+    |
+132 | ... *mut u8, count: usize) -> isize; fn write(fd: i32, buffer: *const u8, count: usize) -> isize; }
+    |                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = note: expected `unsafe extern "C" fn(i32, *const c_void, usize) -> isize` (for the current target)
+            found    `unsafe extern "C" fn(i32, *const u8, usize) -> isize`
+    = help: either fix the signature or remove any attributes like `#[unsafe(no_mangle)]`, `#[unsafe(export_name = "write")]`, or `#[link_name = "write"]`
+    = help: allow this lint if the signature is compatible
+
+warning: `muyon-core-agent-lab` (lib) generated 2 warnings
+   Compiling muyon-web-search-lab v0.1.0 (/workspace/Muyon/experiments/redesign/web-search-lab/core)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.56s
+     Running tests/agent_search.rs (experiments/redesign/web-search-lab/core/target/debug/deps/agent_search-7cdf3660b72a9da1)
+
+running 17 tests
+test auto_confirmation_and_hard_constraints_remain_distinct_from_full_allow_taint ... ok
+test budget_zero_does_not_send_or_use_any_chat_allowance ... ok
+test changed_config_or_rotated_handle_releases_only_held_reservation_without_send ... ok
+test configured_registered_search_reaches_actual_agent_with_sources_and_cost ... ok
+test credential_payload_refused_before_reservation ... ok
+test disabled_unconfigured_bad_endpoint_wrong_currency_or_handle_are_unavailable_without_probe ... ok
+test durable_owner_replay_tombstone_rejects_same_identity_in_another_fresh_agent_session ... ok
+test empty_success_is_tainted_success_and_zero_cost ... ok
+test generic_registration_and_agent_entry_do_not_select_a_specific_provider ... ok
+test known_errors_and_redirects_have_controlled_messages_without_raw_provider_text ... ok
+test mere_configuration_does_not_claim_an_installed_transport_or_probe_a_service ... ok
+test no_send_failure_and_duplicate_model_call_do_not_multiply_requests ... ok
+test post_exchange_cancellation_preserves_unknown_and_no_answer ... ok
+test post_exchange_receipt_write_failure_keeps_owner_evidence_and_unknown ... ok
+test post_exchange_task_persistence_failure_is_explicit_and_does_not_retry_transport ... ok
+test revocation_before_answer_disclosure_refuses_tainted_derived_output ... ok
+test unknown_and_malformed_responses_never_resend_even_when_driven_again ... ok
+
+test result: ok. 17 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.30s
+
+     Running tests/contract.rs (experiments/redesign/web-search-lab/core/target/debug/deps/contract-b45e39ba524e5044)
+
+running 5 tests
+test explicit_price_currency_and_fixed_https_endpoint ... ok
+test malformed_or_wrong_type_is_never_an_empty_success ... ok
+test null_metadata_decimal_and_unknown_authority_preserve_source_truth ... ok
+test official_search_payload_is_independent_and_does_not_leak_localization_or_history ... ok
+test unicode_query_and_count_bounds_are_not_truncated ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s

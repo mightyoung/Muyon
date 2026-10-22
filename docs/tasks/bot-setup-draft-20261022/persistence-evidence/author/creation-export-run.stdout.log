@@ -1,0 +1,14 @@
+PASS name remains a draft; stable identity and duplicate labels
+PASS rename and intervening edit invalidate late suggestions
+PASS same revision superseded request cannot publish; cancel discards late results
+PASS template proposal never mutates user fields; selection explicit and locked
+PASS manual completion, back and cancellation preserve values
+PASS no authority, cost or capability inferred from name and role
+PASS review revision binding and unknown original intent freeze duplicate creation
+PASS definite rejection preserves draft; invalid transitions rejected
+PASS explicit host choices reject unavailable and cross-scope; version change clears selection
+PASS removed choices retain reasons until explicit reconfirmation
+PASS UTF16 is bounded and malformed input rejected without state loss
+PASS persistence: roundtrip preserves edits and locks; host scope and memory CAS start fresh
+PASS persistence: template origin survives without transient suggestion or capabilities
+PASS persistence: empty and partially entered drafts roundtrip

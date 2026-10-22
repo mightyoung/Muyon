@@ -1,0 +1,15 @@
+UTC environment: Linux-6.18.55-x86_64-with-glibc2.41
+3.12.14 (main, Aug 25 2026, 14:00:49) [Clang 22.1.3 ]
+$ git rev-parse HEAD
+3ecb544ad0a47ccc38fe830777f35588b92e8afc
+ exit= 0
+$ git status --short
+?? docs/tasks/document-fidelity-harness-20261022/
+?? tools/
+ exit= 0
+$ git ls-remote --heads origin main develop codex/muyon-android-refactor task/ui-shell-20261022 task/document-fidelity-harness-20261022
+f4781e16ddf4e542b983fbd77f266a0071148255	refs/heads/codex/muyon-android-refactor
+0ab2c4f667681b9aacb017f8cd2eea6f576cf78e	refs/heads/develop
+cc7c8d14d30e3d3c4c7c6cb2bf2059a99e46e003	refs/heads/main
+b6fcc030410d1718d00fbad15627423d4f809e2f	refs/heads/task/ui-shell-20261022
+ exit= 0

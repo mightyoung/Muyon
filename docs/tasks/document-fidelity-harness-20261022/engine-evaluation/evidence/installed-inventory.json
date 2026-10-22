@@ -1,0 +1,645 @@
+{
+  "available_tools": {
+    "bwrap": "/usr/bin/bwrap",
+    "java": "/usr/bin/java",
+    "prlimit": "/usr/bin/prlimit",
+    "python3": "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+    "soffice": "/opt/codex/runtimes/codex-primary-runtime/dependencies/bin/override/soffice",
+    "timeout": "/usr/bin/timeout",
+    "unshare": "/usr/bin/unshare"
+  },
+  "distributions": {
+    "Pillow": {
+      "declared_license": null,
+      "declared_license_expression": "MIT-CMU",
+      "direct_url_present": false,
+      "evidence": [
+        {
+          "relative_path": "pillow-12.3.0.dist-info/INSTALLER",
+          "sha256": "ceebae7b8927a3227e5303cf5e0f1f7b34bb542ad7250ac03fbcde36ec2f1508",
+          "size_bytes": 4
+        },
+        {
+          "relative_path": "pillow-12.3.0.dist-info/METADATA",
+          "sha256": "8fc07146cab33ef7582361dab6eac596d340b03ec648f18217da7894f73838c8",
+          "size_bytes": 9093
+        },
+        {
+          "relative_path": "pillow-12.3.0.dist-info/RECORD",
+          "sha256": "3c8c81345169b66224a19d036e57e2ce59ff232e914c7e366f313d40e9312310",
+          "size_bytes": 16324
+        },
+        {
+          "relative_path": "pillow-12.3.0.dist-info/WHEEL",
+          "sha256": "b40ad1e4df54976de0a343902219f27fbed3bc20eb34efbef032b05c5a0f93e9",
+          "size_bytes": 152
+        },
+        {
+          "relative_path": "pillow-12.3.0.dist-info/licenses/LICENSE",
+          "sha256": "dda12a98c1979cf3d94df1cff45d27a4cb3f04a60c76f76902ac54cac03ec0ce",
+          "size_bytes": 70307
+        }
+      ],
+      "gaps": [
+        "wheel_archive_or_index_origin_unverified",
+        "installed_code_not_independently_authenticated",
+        "transitive_and_native_distribution_obligations_not_approved"
+      ],
+      "homepage": null,
+      "installation_root": "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/site-packages",
+      "installer": "pip\n",
+      "project_urls": [
+        "Release notes, https://pillow.readthedocs.io/en/stable/releasenotes/index.html",
+        "Changelog, https://github.com/python-pillow/Pillow/releases",
+        "Documentation, https://pillow.readthedocs.io",
+        "Funding, https://tidelift.com/subscription/pkg/pypi-pillow?utm_source=pypi-pillow&utm_medium=pypi",
+        "Homepage, https://python-pillow.github.io",
+        "Mastodon, https://fosstodon.org/@pillow",
+        "Source, https://github.com/python-pillow/Pillow"
+      ],
+      "requires_dist": [
+        "furo; extra == \"docs\"",
+        "olefile; extra == \"docs\"",
+        "sphinx>=8.2; extra == \"docs\"",
+        "sphinx-autobuild; extra == \"docs\"",
+        "sphinx-copybutton; extra == \"docs\"",
+        "sphinx-inline-tabs; extra == \"docs\"",
+        "sphinxext-opengraph; extra == \"docs\"",
+        "olefile; extra == \"fpx\"",
+        "olefile; extra == \"mic\"",
+        "arro3-compute; extra == \"test-arrow\"",
+        "arro3-core; extra == \"test-arrow\"",
+        "nanoarrow; extra == \"test-arrow\"",
+        "pyarrow; extra == \"test-arrow\"",
+        "coverage>=7.4.2; extra == \"tests\"",
+        "defusedxml; extra == \"tests\"",
+        "markdown2; extra == \"tests\"",
+        "olefile; extra == \"tests\"",
+        "packaging; extra == \"tests\"",
+        "pytest; extra == \"tests\"",
+        "pytest-cov; extra == \"tests\"",
+        "pytest-timeout; extra == \"tests\"",
+        "pytest-xdist; extra == \"tests\"",
+        "setuptools; extra == \"tests\"",
+        "trove-classifiers>=2024.10.12; extra == \"tests\"",
+        "defusedxml; extra == \"xmp\""
+      ],
+      "status": "installed_metadata_only",
+      "version": "12.3.0"
+    },
+    "XlsxWriter": {
+      "declared_license": "BSD-2-Clause",
+      "declared_license_expression": null,
+      "direct_url_present": false,
+      "evidence": [
+        {
+          "relative_path": "xlsxwriter-3.2.9.dist-info/INSTALLER",
+          "sha256": "ceebae7b8927a3227e5303cf5e0f1f7b34bb542ad7250ac03fbcde36ec2f1508",
+          "size_bytes": 4
+        },
+        {
+          "relative_path": "xlsxwriter-3.2.9.dist-info/LICENSE.txt",
+          "sha256": "cf08b60a4ded986b58a617cb8304373bda5c4eff42fb4e30d7597b616e116e87",
+          "size_bytes": 1349
+        },
+        {
+          "relative_path": "xlsxwriter-3.2.9.dist-info/METADATA",
+          "sha256": "10d504f188e087f07a06b9038ed0535f37ac072c232e60c075ddb0aedb7b7d78",
+          "size_bytes": 2712
+        },
+        {
+          "relative_path": "xlsxwriter-3.2.9.dist-info/RECORD",
+          "sha256": "dcdca3339f1c4faf98e0ea18212f354b18f42c0e77920022f0472075425dc758",
+          "size_bytes": 6339
+        },
+        {
+          "relative_path": "xlsxwriter-3.2.9.dist-info/WHEEL",
+          "sha256": "227f454cdc5e3fad0a9d3906c3bc24ea624f61dfdd4128c46665dd05d30223ef",
+          "size_bytes": 91
+        }
+      ],
+      "gaps": [
+        "wheel_archive_or_index_origin_unverified",
+        "installed_code_not_independently_authenticated",
+        "transitive_and_native_distribution_obligations_not_approved"
+      ],
+      "homepage": "https://github.com/jmcnamara/XlsxWriter",
+      "installation_root": "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/site-packages",
+      "installer": "pip\n",
+      "project_urls": [],
+      "requires_dist": [],
+      "status": "installed_metadata_only",
+      "version": "3.2.9"
+    },
+    "et_xmlfile": {
+      "declared_license": "MIT",
+      "declared_license_expression": null,
+      "direct_url_present": false,
+      "evidence": [
+        {
+          "relative_path": "et_xmlfile-2.0.0.dist-info/INSTALLER",
+          "sha256": "ceebae7b8927a3227e5303cf5e0f1f7b34bb542ad7250ac03fbcde36ec2f1508",
+          "size_bytes": 4
+        },
+        {
+          "relative_path": "et_xmlfile-2.0.0.dist-info/LICENCE.python",
+          "sha256": "4ccdaaebc0f44b83720ec0399bb7ab329adce067dd62f73c5535a2dc05628ab2",
+          "size_bytes": 14688
+        },
+        {
+          "relative_path": "et_xmlfile-2.0.0.dist-info/LICENCE.rst",
+          "sha256": "0c84bb42f5d367e5ebf9fc2dde35b16141df5ee0fdc189250858bc6c5560f69e",
+          "size_bytes": 1131
+        },
+        {
+          "relative_path": "et_xmlfile-2.0.0.dist-info/METADATA",
+          "sha256": "0e97d7ea909ed0fbe03d88bc8b6f58677cee1b07bd3353ce361cd2405915204e",
+          "size_bytes": 2711
+        },
+        {
+          "relative_path": "et_xmlfile-2.0.0.dist-info/RECORD",
+          "sha256": "f5d4caac240da585f132d2b01af2ba967ecca65376790111698b67c2ef555100",
+          "size_bytes": 1102
+        },
+        {
+          "relative_path": "et_xmlfile-2.0.0.dist-info/WHEEL",
+          "sha256": "1e20998f3bb2e83c3485d5f94772c214f0e6152e015a5f07fbc5b7f577e6817e",
+          "size_bytes": 91
+        }
+      ],
+      "gaps": [
+        "wheel_archive_or_index_origin_unverified",
+        "installed_code_not_independently_authenticated",
+        "transitive_and_native_distribution_obligations_not_approved"
+      ],
+      "homepage": "https://foss.heptapod.net/openpyxl/et_xmlfile",
+      "installation_root": "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/site-packages",
+      "installer": "pip\n",
+      "project_urls": [
+        "Documentation, https://openpyxl.pages.heptapod.net/et_xmlfile/",
+        "Source, https://foss.heptapod.net/openpyxl/et_xmlfile",
+        "Tracker, https://foss.heptapod.net/openpyxl/et_xmfile/-/issues"
+      ],
+      "requires_dist": [],
+      "status": "installed_metadata_only",
+      "version": "2.0.0"
+    },
+    "lxml": {
+      "declared_license": "BSD-3-Clause",
+      "declared_license_expression": null,
+      "direct_url_present": false,
+      "evidence": [
+        {
+          "relative_path": "lxml-6.1.1.dist-info/INSTALLER",
+          "sha256": "ceebae7b8927a3227e5303cf5e0f1f7b34bb542ad7250ac03fbcde36ec2f1508",
+          "size_bytes": 4
+        },
+        {
+          "relative_path": "lxml-6.1.1.dist-info/METADATA",
+          "sha256": "a9bbc00470881cf133707920044995ffd6063723e203ca68d65e2f2a25886bc7",
+          "size_bytes": 3518
+        },
+        {
+          "relative_path": "lxml-6.1.1.dist-info/RECORD",
+          "sha256": "9d1cd3b82927f6d03ca9ab758f5af74ce7f7edc7b66a53a114479e72baa2578e",
+          "size_bytes": 16806
+        },
+        {
+          "relative_path": "lxml-6.1.1.dist-info/WHEEL",
+          "sha256": "ad21f162fb68c7d580d822e0faa3cd4474f0b1c92c6e38fb084227b74fb3ce0e",
+          "size_bytes": 152
+        },
+        {
+          "relative_path": "lxml-6.1.1.dist-info/licenses/LICENSE.txt",
+          "sha256": "8fc2b568133516e46845d2147917adeee1648e70ae9ab5ed6c5417afef4ce855",
+          "size_bytes": 1507
+        },
+        {
+          "relative_path": "lxml-6.1.1.dist-info/licenses/LICENSES.txt",
+          "sha256": "41d49dd406aa0e1548a6d5f21a30d6bf638b3cd96eb7289dd348d83ed2e40392",
+          "size_bytes": 1514
+        }
+      ],
+      "gaps": [
+        "wheel_archive_or_index_origin_unverified",
+        "installed_code_not_independently_authenticated",
+        "transitive_and_native_distribution_obligations_not_approved"
+      ],
+      "homepage": "https://lxml.de/",
+      "installation_root": "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/site-packages",
+      "installer": "pip\n",
+      "project_urls": [
+        "Source, https://github.com/lxml/lxml",
+        "Bug Tracker, https://bugs.launchpad.net/lxml"
+      ],
+      "requires_dist": [
+        "cssselect>=0.7; extra == \"cssselect\"",
+        "html5lib; extra == \"html5\"",
+        "BeautifulSoup4; extra == \"htmlsoup\"",
+        "lxml_html_clean; extra == \"html-clean\""
+      ],
+      "status": "installed_metadata_only",
+      "version": "6.1.1"
+    },
+    "openpyxl": {
+      "declared_license": "MIT",
+      "declared_license_expression": null,
+      "direct_url_present": false,
+      "evidence": [
+        {
+          "relative_path": "openpyxl-3.1.5.dist-info/INSTALLER",
+          "sha256": "ceebae7b8927a3227e5303cf5e0f1f7b34bb542ad7250ac03fbcde36ec2f1508",
+          "size_bytes": 4
+        },
+        {
+          "relative_path": "openpyxl-3.1.5.dist-info/LICENCE.rst",
+          "sha256": "0c84bb42f5d367e5ebf9fc2dde35b16141df5ee0fdc189250858bc6c5560f69e",
+          "size_bytes": 1131
+        },
+        {
+          "relative_path": "openpyxl-3.1.5.dist-info/METADATA",
+          "sha256": "23f80ca9830dd89435da1710f26deda8f81e5409287e74540210c72627a4ad96",
+          "size_bytes": 2510
+        },
+        {
+          "relative_path": "openpyxl-3.1.5.dist-info/RECORD",
+          "sha256": "1c090d66dae3db301874398d4145fd12aa4b22eb7a4057d82ff73c242acf5cb9",
+          "size_bytes": 27747
+        },
+        {
+          "relative_path": "openpyxl-3.1.5.dist-info/WHEEL",
+          "sha256": "0d96a30f8a702d6b9eef40807dced86b14f5c0b51c88d06f37f4d372f5e996d1",
+          "size_bytes": 110
+        }
+      ],
+      "gaps": [
+        "wheel_archive_or_index_origin_unverified",
+        "installed_code_not_independently_authenticated",
+        "transitive_and_native_distribution_obligations_not_approved"
+      ],
+      "homepage": "https://openpyxl.readthedocs.io",
+      "installation_root": "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/site-packages",
+      "installer": "pip\n",
+      "project_urls": [
+        "Documentation, https://openpyxl.readthedocs.io/en/stable/",
+        "Source, https://foss.heptapod.net/openpyxl/openpyxl",
+        "Tracker, https://foss.heptapod.net/openpyxl/openpyxl/-/issues"
+      ],
+      "requires_dist": [
+        "et-xmlfile"
+      ],
+      "status": "installed_metadata_only",
+      "version": "3.1.5"
+    },
+    "python-docx": {
+      "declared_license": "MIT",
+      "declared_license_expression": null,
+      "direct_url_present": false,
+      "evidence": [
+        {
+          "relative_path": "python_docx-1.2.0.dist-info/INSTALLER",
+          "sha256": "ceebae7b8927a3227e5303cf5e0f1f7b34bb542ad7250ac03fbcde36ec2f1508",
+          "size_bytes": 4
+        },
+        {
+          "relative_path": "python_docx-1.2.0.dist-info/METADATA",
+          "sha256": "4c4cc819ebe6de4aca44daccfd3f9173e6f46d9ed900ad1c388ff9efb7b6b1d7",
+          "size_bytes": 2022
+        },
+        {
+          "relative_path": "python_docx-1.2.0.dist-info/RECORD",
+          "sha256": "849046fd5c3d0d1667b43abd999c0b319d6d67a0db65d00d6c219643903e972a",
+          "size_bytes": 15153
+        },
+        {
+          "relative_path": "python_docx-1.2.0.dist-info/WHEEL",
+          "sha256": "ff309ddcdd65ebd02bc724dbf2bcc4a0ff53a5b61792a44548d383e4ebb19d3b",
+          "size_bytes": 91
+        },
+        {
+          "relative_path": "python_docx-1.2.0.dist-info/licenses/LICENSE",
+          "sha256": "7652f271e46d0d533e9dc463f3b5fcbdcacf4d6a9c8d6b554d15efd0f37f6132",
+          "size_bytes": 1104
+        }
+      ],
+      "gaps": [
+        "wheel_archive_or_index_origin_unverified",
+        "installed_code_not_independently_authenticated",
+        "transitive_and_native_distribution_obligations_not_approved"
+      ],
+      "homepage": null,
+      "installation_root": "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/site-packages",
+      "installer": "pip\n",
+      "project_urls": [
+        "Changelog, https://github.com/python-openxml/python-docx/blob/master/HISTORY.rst",
+        "Documentation, https://python-docx.readthedocs.org/en/latest/",
+        "Homepage, https://github.com/python-openxml/python-docx",
+        "Repository, https://github.com/python-openxml/python-docx"
+      ],
+      "requires_dist": [
+        "lxml>=3.1.0",
+        "typing_extensions>=4.9.0"
+      ],
+      "status": "installed_metadata_only",
+      "version": "1.2.0"
+    },
+    "python-pptx": {
+      "declared_license": "MIT",
+      "declared_license_expression": null,
+      "direct_url_present": false,
+      "evidence": [
+        {
+          "relative_path": "python_pptx-1.0.2.dist-info/INSTALLER",
+          "sha256": "ceebae7b8927a3227e5303cf5e0f1f7b34bb542ad7250ac03fbcde36ec2f1508",
+          "size_bytes": 4
+        },
+        {
+          "relative_path": "python_pptx-1.0.2.dist-info/LICENSE",
+          "sha256": "7652f271e46d0d533e9dc463f3b5fcbdcacf4d6a9c8d6b554d15efd0f37f6132",
+          "size_bytes": 1104
+        },
+        {
+          "relative_path": "python_pptx-1.0.2.dist-info/METADATA",
+          "sha256": "d38c6af5f1817cc528706264d8343cd1c95dbdec5672f29b944f54f79134a3a2",
+          "size_bytes": 2503
+        },
+        {
+          "relative_path": "python_pptx-1.0.2.dist-info/RECORD",
+          "sha256": "c644b01c36e437c1f5ca7662cd8806a2d48870efbcd4c162b37ab249701105d3",
+          "size_bytes": 14231
+        },
+        {
+          "relative_path": "python_pptx-1.0.2.dist-info/WHEEL",
+          "sha256": "4749dceaa4f1ba82e4ed2840dbf63e51690df1975f0c11b607a12aa73d965dbb",
+          "size_bytes": 91
+        }
+      ],
+      "gaps": [
+        "wheel_archive_or_index_origin_unverified",
+        "installed_code_not_independently_authenticated",
+        "transitive_and_native_distribution_obligations_not_approved"
+      ],
+      "homepage": null,
+      "installation_root": "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/site-packages",
+      "installer": "pip\n",
+      "project_urls": [
+        "Changelog, https://github.com/scanny/python-pptx/blob/master/HISTORY.rst",
+        "Documentation, https://python-pptx.readthedocs.io/en/latest/",
+        "Homepage, https://github.com/scanny/python-pptx",
+        "Repository, https://github.com/scanny/python-pptx"
+      ],
+      "requires_dist": [
+        "Pillow >=3.3.2",
+        "XlsxWriter >=0.5.7",
+        "lxml >=3.1.0",
+        "typing-extensions >=4.9.0"
+      ],
+      "status": "installed_metadata_only",
+      "version": "1.0.2"
+    },
+    "typing_extensions": {
+      "declared_license": null,
+      "declared_license_expression": "PSF-2.0",
+      "direct_url_present": false,
+      "evidence": [
+        {
+          "relative_path": "typing_extensions-4.16.0.dist-info/INSTALLER",
+          "sha256": "ceebae7b8927a3227e5303cf5e0f1f7b34bb542ad7250ac03fbcde36ec2f1508",
+          "size_bytes": 4
+        },
+        {
+          "relative_path": "typing_extensions-4.16.0.dist-info/METADATA",
+          "sha256": "b05084ca1d50879865178d9fff9fabeab61bdfb1f361bfbde95421ffc8f9be46",
+          "size_bytes": 3310
+        },
+        {
+          "relative_path": "typing_extensions-4.16.0.dist-info/RECORD",
+          "sha256": "78f74ed46a377d6e1debed78b3e994ff9cfe02a529d393d7c8ab80989bd25079",
+          "size_bytes": 580
+        },
+        {
+          "relative_path": "typing_extensions-4.16.0.dist-info/WHEEL",
+          "sha256": "1b68144734c4b66791f27add5d425f3620775585718a03d0f9b110ba3a4d88db",
+          "size_bytes": 82
+        },
+        {
+          "relative_path": "typing_extensions-4.16.0.dist-info/licenses/LICENSE",
+          "sha256": "3b2f81fe21d181c499c59a256c8e1968455d6689d269aa85373bfb6af41da3bf",
+          "size_bytes": 13936
+        }
+      ],
+      "gaps": [
+        "wheel_archive_or_index_origin_unverified",
+        "installed_code_not_independently_authenticated",
+        "transitive_and_native_distribution_obligations_not_approved"
+      ],
+      "homepage": null,
+      "installation_root": "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/site-packages",
+      "installer": "pip\n",
+      "project_urls": [
+        "Bug Tracker, https://github.com/python/typing_extensions/issues",
+        "Changes, https://github.com/python/typing_extensions/blob/main/CHANGELOG.md",
+        "Documentation, https://typing-extensions.readthedocs.io/",
+        "Home, https://github.com/python/typing_extensions",
+        "Q & A, https://github.com/python/typing/discussions",
+        "Repository, https://github.com/python/typing_extensions"
+      ],
+      "requires_dist": [],
+      "status": "installed_metadata_only",
+      "version": "4.16.0"
+    }
+  },
+  "engine_execution": "not_run",
+  "integration_approved": false,
+  "isolation_proven": false,
+  "libreoffice": {
+    "evidence": [
+      {
+        "relative_path": "/opt/codex/runtimes/codex-primary-runtime/dependencies/bin/override/soffice",
+        "sha256": "35c5a2736f68e6370a7b9fe5082e66bc438c1a8de11261d6c4bc847073ced45b",
+        "size_bytes": 570
+      },
+      {
+        "relative_path": "/opt/codex/runtimes/codex-primary-runtime/dependencies/native/libreoffice-headless/libreoffice/program/versionrc",
+        "sha256": "2372c1c0631b0c78e206d15cd6d4e4a4f480030fe017ca70c5fb15ef17334c0c",
+        "size_bytes": 346
+      },
+      {
+        "relative_path": "/opt/codex/runtimes/codex-primary-runtime/dependencies/native/libreoffice-headless/libreoffice/program/bootstraprc",
+        "sha256": "ac9092a6e17b8891d5d28df582142e1600180f148f6b8e225d7dd5ae70eafba8",
+        "size_bytes": 115
+      },
+      {
+        "relative_path": "/opt/codex/runtimes/codex-primary-runtime/dependencies/native/libreoffice-headless/libreoffice/program/soffice",
+        "sha256": "d14c5c8aa975640aafc8a62474a23a67fb46cd5fa95fae3771f76b7399a04c50",
+        "size_bytes": 382
+      },
+      {
+        "relative_path": "/opt/codex/runtimes/codex-primary-runtime/dependencies/native/libreoffice-headless/libreoffice/program/soffice.bin",
+        "sha256": "d905a74dc92eaccb22481ba2de1345666a074a5f0d48322aaad1b6dc8a9e1e40",
+        "size_bytes": 16072
+      },
+      {
+        "relative_path": "/opt/codex/runtimes/codex-primary-runtime/dependencies/native/libreoffice-headless/libreoffice/LICENSE",
+        "sha256": "642896bb60b61b728de3cd962f415c2a2729870209933605336256d2f63ab495",
+        "size_bytes": 322412
+      }
+    ],
+    "executed": false,
+    "gaps": [
+      "exact_upstream_artifact_origin_unverified",
+      "distribution_and_font_license_audit_incomplete"
+    ],
+    "known_native_root": "/opt/codex/runtimes/codex-primary-runtime/dependencies/native/libreoffice-headless/libreoffice",
+    "license_component_headings": [
+      "Contents",
+      "Argon2",
+      "C++ Boost Library",
+      "Box2D",
+      "Cairo",
+      "Dragonbox",
+      "fast_float",
+      "expat XML Parser Toolkit",
+      "frozen",
+      "GLM",
+      "Graphite2",
+      "HarfBuzz",
+      "Hunspell",
+      "Hyphen",
+      "IAccessible2",
+      "ICU",
+      "libabw",
+      "libcdr",
+      "libe-book",
+      "libeot",
+      "libepubgen",
+      "libetonyek",
+      "libfixmath",
+      "libfreehand",
+      "libjpeg-turbo",
+      "liblangtag",
+      "libtiff",
+      "liborcus",
+      "libmspub",
+      "libmwaw",
+      "libnumbertext",
+      "libodfgen",
+      "libpng",
+      "libwebp",
+      "libpagemaker",
+      "libqxp",
+      "librevenge",
+      "libstaroffice",
+      "libvisio",
+      "libwpd",
+      "libwpg",
+      "libwps",
+      "libxml2",
+      "libxslt",
+      "libzmf",
+      "md4c",
+      "mdds",
+      "MyThes",
+      "Network Security Services (NSS)",
+      "OpenSSL",
+      "Pixman",
+      "Random123: a Library of Counter-Based Random Number Generators",
+      "Raptor RDF Parser Library",
+      "Rasqal RDF Query Library",
+      "Redland RDF Application Framework",
+      "SANE",
+      "SVGPathSeg polyfill",
+      "UnixODBC",
+      "XML Security Library (xmlsec)",
+      "Zstandard",
+      "zxcvbn-c",
+      "Agdasima",
+      "Alef",
+      "Amiri",
+      "Bacasime Antique",
+      "Belanosima",
+      "Caladea",
+      "Caprasimo",
+      "Carlito",
+      "Culmus",
+      "Deja Vu",
+      "Liberation",
+      "Linux Libertine G and Linux Biolinum G",
+      "Libre Hebrew",
+      "Lugrasimo",
+      "Lumanosimo",
+      "Lunasima",
+      "Noto",
+      "Reem Kufi",
+      "Scheherazade",
+      "Colibre",
+      "0. Additional Definitions.",
+      "1. Exception to Section 3 of the GNU GPL.",
+      "2. Conveying Modified Versions.",
+      "3. Object Code Incorporating Material from Library Header Files.",
+      "4. Combined Works.",
+      "5. Combined Libraries.",
+      "6. Revised Versions of the GNU Lesser General Public License.",
+      "Preamble",
+      "TERMS AND CONDITIONS FOR COPYING, DISTRIBUTION AND MODIFICATION",
+      "END OF TERMS AND CONDITIONS",
+      "How to Apply These Terms to Your New Libraries",
+      "Preamble",
+      "TERMS AND CONDITIONS FOR COPYING, DISTRIBUTION AND MODIFICATION",
+      "END OF TERMS AND CONDITIONS",
+      "How to Apply These Terms to Your New Libraries",
+      "1. Definitions.",
+      "2. Source Code License.",
+      "3. Distribution Obligations.",
+      "4. Inability to Comply Due to Statute or Regulation.",
+      "5. Application of this License.",
+      "6. Versions of the License.",
+      "7. Disclaimer of warranty",
+      "8. Termination",
+      "9. Limitation of liability",
+      "10. U.S. government end users",
+      "11. Miscellaneous",
+      "12. Responsibility for claims",
+      "13. Multiple-licensed code",
+      "Exhibit A - Mozilla Public License.",
+      "1. Definitions",
+      "2. License Grants and Conditions",
+      "3. Responsibilities",
+      "4. Inability to Comply Due to Statute or Regulation",
+      "5. Termination",
+      "6. Disclaimer of Warranty",
+      "7. Limitation of Liability",
+      "8. Litigation",
+      "9. Miscellaneous",
+      "10. Versions of the License",
+      "Exhibit A - Source Code Form License Notice",
+      "Exhibit B - \u201cIncompatible With Secondary Licenses\u201d Notice",
+      "APPENDIX: How to apply the Apache License to your work"
+    ],
+    "static_version_fields": {
+      "ProductKey": "LibreOfficeDev 26.8",
+      "UpdateID": "LibreOfficeDev_26_en-US",
+      "Vendor": "root",
+      "buildid": "2c87e51eeaa2b413ff4ae097b2705eea1995d8e5"
+    },
+    "status": "static_metadata_only",
+    "top_level_declared_license": "MPL-2.0 plus component-specific notices; not a single-license clearance",
+    "wrapper_path": "/opt/codex/runtimes/codex-primary-runtime/dependencies/bin/override/soffice"
+  },
+  "limitations": [
+    "origin_authenticity_not_verified",
+    "metadata_does_not_approve_license_or_isolation",
+    "no_engine_import_execution_installation_or_network",
+    "isolation_attempt_recorded_separately_never_retried_here"
+  ],
+  "platform": "Linux-6.18.55-x86_64-with-glibc2.41",
+  "poi": {
+    "matching_jars": [],
+    "search_roots": [
+      "/usr/share/java",
+      "/opt/codex/runtimes/codex-primary-runtime/dependencies"
+    ],
+    "status": "not_found_in_scoped_roots"
+  },
+  "schema_version": 1
+}

@@ -63,7 +63,17 @@ impl Catalog {
    if let Some(labels)=map(d)?.get("classification"){for(field,label)in map(labels)? {if !map(get(get(d,"schema")?,"properties")?)?.contains_key(field)|| !["unreviewed","none","personal","commercial","credential"].contains(&label.string().map_err(|_|"classification")?) {return Err("classification".into())}}}
    if data.insert(id(d)?,d.clone()).is_some(){return Err("duplicate_data".into())}
   }
-  let admitted_data=|reference:&str|->Result<&Json>{if let Some(d)=data.get(reference){return Ok(d)}if admitted.contains(reference){if let Some(d)=self.data.get(reference){return Ok(d)}}Err("unresolved_data".into())};
+  let admitted_data=|reference:&str|->Result<&Json>{
+   let resolve=|target:&str|->Result<&Json>{if let Some(d)=data.get(target){return Ok(d)}if admitted.contains(target){if let Some(d)=self.data.get(target){return Ok(d)}}Err("unresolved_data".into())};
+   let root=resolve(reference)?;let mut pending=vec![reference.to_owned()];let mut seen=BTreeSet::new();
+   // Discovery expands typed references. Each foreign member of that closure
+   // needs its own host admission; a reference annotation cannot admit it.
+   while let Some(target)=pending.pop(){
+    if !seen.insert(target.clone()){continue}
+    pending.extend(schema::references(get(resolve(&target)?,"schema")?)?);
+   }
+   Ok(root)
+  };
   for rel in rs {
    keys(rel,&["name","schema_version","from","field","to","many"],&["name","schema_version","from","field","to","many"])?;
    if !relation_names.insert(id(rel)?){return Err("duplicate_relation".into())}

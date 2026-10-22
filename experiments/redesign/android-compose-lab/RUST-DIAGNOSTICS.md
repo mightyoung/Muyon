@@ -1,5 +1,12 @@
 # Local Rust declaration diagnostic
 
+Current-floor amendment (2026-10-18): user-approved Android 8.0 / API 26
+supersedes the API 24 floor below for new builds. The current strict packaging
+contract is [V2](../../../docs/design/ANDROID-RUST-BRIDGE-INPUTS-V2.md),
+format_version=2/min_api=26. V1 and earlier API 24 acceptance remain historical
+records; they are not evidence for the new build SHA. All source/hash, permission
+and runtime boundaries described below continue to apply.
+
 Settings → 本地 Rust 检查 is the sole active diagnostic entry. The separate execution
 RustUiPort remains NOT_CONNECTED: sending, model/attachment and task refresh do not
 become available. User drafts/notes are never diagnostic inputs. Results are

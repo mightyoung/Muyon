@@ -168,10 +168,10 @@ internal fun RecordsLocalPage(state: LocalUiState, scroll: LazyListState, onQuer
 }
 
 @Composable
-internal fun SettingsLocalPage(state: LocalUiState, scroll: LazyListState, onTheme: (LabTheme) -> Unit, onOptions: () -> Unit, onDiagnostic: () -> Unit) {
+internal fun SettingsLocalPage(state: LocalUiState, scroll: LazyListState, onTheme: (LabTheme) -> Unit, onOptions: () -> Unit, onDiagnostic: () -> Unit, onAgent: () -> Unit = {}, searchSettings:SearchSettingsPort?=null) {
     Column(Modifier.fillMaxSize()) {
         LocalConnectionNotice()
-        LazyColumn(state = scroll, modifier = Modifier.fillMaxSize(), contentPadding = PaddingValues(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+        LazyColumn(state = scroll, modifier = Modifier.fillMaxSize().testTag("settings-list"), contentPadding = PaddingValues(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
             item { Text("设置", style = MaterialTheme.typography.headlineSmall, modifier = Modifier.semantics { heading() }) }
             item {
                 Text("界面主题", style = MaterialTheme.typography.titleMedium)
@@ -185,12 +185,14 @@ internal fun SettingsLocalPage(state: LocalUiState, scroll: LazyListState, onThe
                 Text("只影响本次界面；主题选择尚未持久化。", style = MaterialTheme.typography.bodySmall)
             }
             item { HorizontalDivider() }
+            if(searchSettings!=null)item { SearchSettingsCard(searchSettings) }
             item {
                 Text("本次本地内容", style = MaterialTheme.typography.titleMedium)
                 Text("${state.conversations.size} 个本地会话 · ${state.conversations.sumOf { it.notes.size }} 条用户记录")
                 Text("内容仅在内存中，关闭或重建应用后不保证保留。", style = MaterialTheme.typography.bodySmall)
             }
             item { TextButton(onClick = onDiagnostic, modifier = Modifier.testTag("open-rust-diagnostic")) { Text("本地 Rust 检查") } }
+            item { TextButton(onClick = onAgent, modifier = Modifier.testTag("open-agent-service")) { Text("独立进程离线运行") } }
             item { TextButton(onClick = onOptions) { Text("模型、附件与执行能力") } }
             item { Text("Muyon", style = MaterialTheme.typography.titleMedium); Text("本地模式 · 未连接执行服务", style = MaterialTheme.typography.bodySmall) }
         }

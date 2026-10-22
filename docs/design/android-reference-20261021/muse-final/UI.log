@@ -1,0 +1,81 @@
+INSTRUMENTATION_STATUS: numtests=5
+INSTRUMENTATION_STATUS: stream=
+com.mightyoung.muyon.product.agents.AgentCatalogTest:
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=escapedInstructionsCannotCommitAnUnreadableExpandedDirectory
+INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.product.agents.AgentCatalogTest
+INSTRUMENTATION_STATUS: current=1
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: numtests=5
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=escapedInstructionsCannotCommitAnUnreadableExpandedDirectory
+INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.product.agents.AgentCatalogTest
+INSTRUMENTATION_STATUS: current=1
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: numtests=5
+INSTRUMENTATION_STATUS: stream=
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=reopenedCatalogPreservesEditsAndGroupArchiveNeverDeletesAgents
+INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.product.agents.AgentCatalogTest
+INSTRUMENTATION_STATUS: current=2
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: numtests=5
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=reopenedCatalogPreservesEditsAndGroupArchiveNeverDeletesAgents
+INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.product.agents.AgentCatalogTest
+INSTRUMENTATION_STATUS: current=2
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: numtests=5
+INSTRUMENTATION_STATUS: stream=
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=invalidMembersAndCorruptDataCannotOverwritePersistedDirectory
+INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.product.agents.AgentCatalogTest
+INSTRUMENTATION_STATUS: current=3
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: numtests=5
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=invalidMembersAndCorruptDataCannotOverwritePersistedDirectory
+INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.product.agents.AgentCatalogTest
+INSTRUMENTATION_STATUS: current=3
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: numtests=5
+INSTRUMENTATION_STATUS: stream=
+com.mightyoung.muyon.product.ChatOriginPresentationTest:
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=oldRequestRecoveryShowsOriginalIdentityInsideAnotherGroup
+INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.product.ChatOriginPresentationTest
+INSTRUMENTATION_STATUS: current=4
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: numtests=5
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=oldRequestRecoveryShowsOriginalIdentityInsideAnotherGroup
+INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.product.ChatOriginPresentationTest
+INSTRUMENTATION_STATUS: current=4
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: numtests=5
+INSTRUMENTATION_STATUS: stream=
+com.mightyoung.muyon.product.WorkbenchNavigationTest:
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=agentAndGroupNavigationPreservesSeparateConversationsAndGlobalReceiptMarkers
+INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.product.WorkbenchNavigationTest
+INSTRUMENTATION_STATUS: current=5
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: numtests=5
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=agentAndGroupNavigationPreservesSeparateConversationsAndGlobalReceiptMarkers
+INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.product.WorkbenchNavigationTest
+INSTRUMENTATION_STATUS: current=5
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_RESULT: stream=
+
+Time: 10.367
+
+OK (5 tests)
+
+
+INSTRUMENTATION_CODE: -1

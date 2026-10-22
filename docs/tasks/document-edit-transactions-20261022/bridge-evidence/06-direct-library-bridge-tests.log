@@ -1,0 +1,246 @@
+Exact input archive: /tmp/muyon-document-durable-check.4MrIWpNe
+Direct test evidence: /tmp/muyon-core-bridge-direct.19symtrp
+Command: ['/workspace/document-edit-tools/toolchain/bin/cargo', 'build', '--offline', '--locked', '--manifest-path', '/tmp/muyon-document-durable-check.4MrIWpNe/crates/Cargo.toml', '-p', 'muyon-core', '--lib', '--message-format=json']
+   Compiling muyon-core v0.1.0 (/tmp/muyon-document-durable-check.4MrIWpNe/crates/muyon-core)
+    Finished `dev` profile [unoptimized] target(s) in 3.89s
+Command: ['/workspace/document-edit-tools/toolchain/bin/rustc', '--edition=2021', '--test', '/tmp/muyon-document-durable-check.4MrIWpNe/crates/muyon-core/tests/document_edit_core_bridge.rs', '-L', 'dependency=/workspace/document-edit-combination/crates/target/debug', '-L', 'native=/workspace/document-edit-tools/native', '--extern', 'muyon_core=/workspace/document-edit-combination/crates/target/debug/libmuyon_core.rlib', '--extern', 'serde_json=/workspace/document-edit-combination/crates/target/debug/deps/libserde_json-ae0abdd76423c00d.rlib', '-o', '/tmp/muyon-core-bridge-direct.19symtrp/bridge-tests']
+error[E0463]: can't find crate for `muyon_core`
+ --> /tmp/muyon-document-durable-check.4MrIWpNe/crates/muyon-core/tests/document_edit_core_bridge.rs:2:5
+  |
+2 | use muyon_core::{
+  |     ^^^^^^^^^^ can't find crate
+
+error[E0463]: can't find crate for `muyon_core`
+   --> /tmp/muyon-document-durable-check.4MrIWpNe/crates/muyon-core/tests/document_edit_core_bridge.rs:163:5
+    |
+163 | use muyon_core::documents::CandidateState;
+    |     ^^^^^^^^^^ can't find crate
+
+error[E0463]: can't find crate for `muyon_core`
+   --> /tmp/muyon-document-durable-check.4MrIWpNe/crates/muyon-core/tests/document_edit_core_bridge.rs:164:5
+    |
+164 | use muyon_core::sqlite::Db;
+    |     ^^^^^^^^^^ can't find crate
+
+error[E0432]: unresolved imports `muyon_core::blobs::BlobKind`, `muyon_core::business::BusinessStore`, `muyon_core::contract::*`, `muyon_core::document_edit::edited_candidates::*`, `muyon_core::document_edit::engine_protocol::prepare_request_trusted`, `muyon_core::document_edit::engine_protocol::NumericCellEdit`, `muyon_core::document_edit::engine_protocol::PreparedEngineRequest`, `muyon_core::document_edit::Binding`, `muyon_core::document_edit::Confirmation`, `muyon_core::documents::DocumentAccess`, `muyon_core::documents::DocumentFormat`, `muyon_core::documents::DocumentOperation`, `muyon_core::documents::DocumentRef`, `muyon_core::documents::CandidateState`, `muyon_core::sqlite::Db`
+   --> /tmp/muyon-document-durable-check.4MrIWpNe/crates/muyon-core/tests/document_edit_core_bridge.rs:3:5
+    |
+  3 |     blobs::BlobKind,
+    |     ^^^^^^^^^^^^^^^
+  4 |     business::BusinessStore,
+    |     ^^^^^^^^^^^^^^^^^^^^^^^
+  5 |     contract::*,
+    |     ^^^^^^^^^^^
+  6 |     document_edit::{
+  7 |         edited_candidates::*,
+    |         ^^^^^^^^^^^^^^^^^^^^
+  8 |         engine_protocol::{prepare_request_trusted, NumericCellEdit, PreparedEngineRequest},
+    |                           ^^^^^^^^^^^^^^^^^^^^^^^  ^^^^^^^^^^^^^^^  ^^^^^^^^^^^^^^^^^^^^^
+  9 |         Binding, Confirmation,
+    |         ^^^^^^^  ^^^^^^^^^^^^
+ 10 |     },
+ 11 |     documents::{DocumentAccess, DocumentFormat, DocumentOperation, DocumentRef},
+    |                 ^^^^^^^^^^^^^^  ^^^^^^^^^^^^^^  ^^^^^^^^^^^^^^^^^  ^^^^^^^^^^^
+...
+163 | use muyon_core::documents::CandidateState;
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+164 | use muyon_core::sqlite::Db;
+    |     ^^^^^^^^^^^^^^^^^^^^^^
+
+error[E0463]: can't find crate for `serde_json`
+   --> /tmp/muyon-document-durable-check.4MrIWpNe/crates/muyon-core/tests/document_edit_core_bridge.rs:330:22
+    |
+330 |     let mut payload: serde_json::Value =
+    |                      ^^^^^^^^^^ can't find crate
+
+error[E0463]: can't find crate for `serde_json`
+   --> /tmp/muyon-document-durable-check.4MrIWpNe/crates/muyon-core/tests/document_edit_core_bridge.rs:331:9
+    |
+331 |         serde_json::from_str(text[0][0].as_ref().unwrap()).unwrap();
+    |         ^^^^^^^^^^ can't find crate
+
+error[E0422]: cannot find struct, variant or union type `CommandEnvelope` in this scope
+  --> /tmp/muyon-document-durable-check.4MrIWpNe/crates/muyon-core/tests/document_edit_core_bridge.rs:44:21
+   |
+44 |         let mut c = CommandEnvelope {
+   |                     ^^^^^^^^^^^^^^^ not found in this scope
+
+error[E0422]: cannot find struct, variant or union type `Scope` in this scope
+  --> /tmp/muyon-document-durable-check.4MrIWpNe/crates/muyon-core/tests/document_edit_core_bridge.rs:48:20
+   |
+48 |             scope: Scope {
+   |                    ^^^^^ not found in this scope
+   |
+help: consider importing this struct
+   |
+ 2 + use std::thread::Scope;
+   |
+
+error[E0422]: cannot find struct, variant or union type `AuthorityBinding` in this scope
+  --> /tmp/muyon-document-durable-check.4MrIWpNe/crates/muyon-core/tests/document_edit_core_bridge.rs:53:24
+   |
+53 |             authority: AuthorityBinding {
+   |                        ^^^^^^^^^^^^^^^^ not found in this scope
+
+error[E0422]: cannot find struct, variant or union type `Scope` in this scope
+  --> /tmp/muyon-document-durable-check.4MrIWpNe/crates/muyon-core/tests/document_edit_core_bridge.rs:86:9
+   |
+86 |         Scope {
+   |         ^^^^^ not found in this scope
+   |
+help: consider importing this struct
+   |
+ 2 + use std::thread::Scope;
+   |
+
+error[E0422]: cannot find struct, variant or union type `AuthorityBinding` in this scope
+   --> /tmp/muyon-document-durable-check.4MrIWpNe/crates/muyon-core/tests/document_edit_core_bridge.rs:105:20
+    |
+105 |         authority: AuthorityBinding {
+    |                    ^^^^^^^^^^^^^^^^ not found in this scope
+
+error[E0412]: cannot find type `EditedCandidateJournal` in this scope
+   --> /tmp/muyon-document-durable-check.4MrIWpNe/crates/muyon-core/tests/document_edit_core_bridge.rs:145:9
+    |
+145 |     g: &EditedCandidateJournal<'_>,
+    |         ^^^^^^^^^^^^^^^^^^^^^^ not found in this scope
+
+error[E0433]: failed to resolve: use of undeclared type `Revision`
+  --> /tmp/muyon-document-durable-check.4MrIWpNe/crates/muyon-core/tests/document_edit_core_bridge.rs:52:32
+   |
+52 |             expected_revision: Revision::new(0),
+   |                                ^^^^^^^^ use of undeclared type `Revision`
+
+error[E0433]: failed to resolve: use of undeclared type `Revision`
+  --> /tmp/muyon-document-durable-check.4MrIWpNe/crates/muyon-core/tests/document_edit_core_bridge.rs:55:29
+   |
+55 |                 generation: Revision::new(1),
+   |                             ^^^^^^^^ use of undeclared type `Revision`
+
+error[E0433]: failed to resolve: use of undeclared type `ExecutionStatus`
+  --> /tmp/muyon-document-durable-check.4MrIWpNe/crates/muyon-core/tests/document_edit_core_bridge.rs:67:51
+   |
+67 |         assert_eq!(s.execute(&c).unwrap().status, ExecutionStatus::Committed);
+   |                                                   ^^^^^^^^^^^^^^^ use of undeclared type `ExecutionStatus`
+
+error[E0433]: failed to resolve: use of undeclared type `Revision`
+  --> /tmp/muyon-document-durable-check.4MrIWpNe/crates/muyon-core/tests/document_edit_core_bridge.rs:91:9
+   |
+91 |         Revision::new(revision),
+   |         ^^^^^^^^ use of undeclared type `Revision`
+
+error[E0433]: failed to resolve: use of undeclared type `Revision`
+   --> /tmp/muyon-document-durable-check.4MrIWpNe/crates/muyon-core/tests/document_edit_core_bridge.rs:107:25
+    |
+107 |             generation: Revision::new(generation),
+    |                         ^^^^^^^^ use of undeclared type `Revision`
+
+error[E0433]: failed to resolve: use of undeclared type `EditedCandidateJournal`
+   --> /tmp/muyon-document-durable-check.4MrIWpNe/crates/muyon-core/tests/document_edit_core_bridge.rs:166:13
+    |
+166 |     let g = EditedCandidateJournal::initialize_trusted(s).unwrap();
+    |             ^^^^^^^^^^^^^^^^^^^^^^ use of undeclared type `EditedCandidateJournal`
+
+error[E0433]: failed to resolve: use of undeclared type `EditedCandidateJournal`
+   --> /tmp/muyon-document-durable-check.4MrIWpNe/crates/muyon-core/tests/document_edit_core_bridge.rs:189:13
+    |
+189 |     let g = EditedCandidateJournal::initialize_trusted(&s).unwrap();
+    |             ^^^^^^^^^^^^^^^^^^^^^^ use of undeclared type `EditedCandidateJournal`
+
+error[E0433]: failed to resolve: use of undeclared type `ContractError`
+   --> /tmp/muyon-document-durable-check.4MrIWpNe/crates/muyon-core/tests/document_edit_core_bridge.rs:216:9
+    |
+216 |         ContractError::UnsupportedOperation
+    |         ^^^^^^^^^^^^^ use of undeclared type `ContractError`
+
+error[E0433]: failed to resolve: use of undeclared type `EditedCandidateJournal`
+   --> /tmp/muyon-document-durable-check.4MrIWpNe/crates/muyon-core/tests/document_edit_core_bridge.rs:228:13
+    |
+228 |     let g = EditedCandidateJournal::initialize_trusted(&s).unwrap();
+    |             ^^^^^^^^^^^^^^^^^^^^^^ use of undeclared type `EditedCandidateJournal`
+
+error[E0433]: failed to resolve: use of undeclared type `EditedCandidateJournal`
+   --> /tmp/muyon-document-durable-check.4MrIWpNe/crates/muyon-core/tests/document_edit_core_bridge.rs:238:13
+    |
+238 |     let g = EditedCandidateJournal::initialize_trusted(&s).unwrap();
+    |             ^^^^^^^^^^^^^^^^^^^^^^ use of undeclared type `EditedCandidateJournal`
+
+error[E0433]: failed to resolve: use of undeclared type `ContractError`
+   --> /tmp/muyon-document-durable-check.4MrIWpNe/crates/muyon-core/tests/document_edit_core_bridge.rs:244:9
+    |
+244 |         ContractError::InvalidAuthority
+    |         ^^^^^^^^^^^^^ use of undeclared type `ContractError`
+
+error[E0433]: failed to resolve: use of undeclared type `EditedCandidateJournal`
+   --> /tmp/muyon-document-durable-check.4MrIWpNe/crates/muyon-core/tests/document_edit_core_bridge.rs:253:13
+    |
+253 |     let g = EditedCandidateJournal::initialize_trusted(&s).unwrap();
+    |             ^^^^^^^^^^^^^^^^^^^^^^ use of undeclared type `EditedCandidateJournal`
+
+error[E0433]: failed to resolve: use of undeclared type `ContractError`
+   --> /tmp/muyon-document-durable-check.4MrIWpNe/crates/muyon-core/tests/document_edit_core_bridge.rs:258:9
+    |
+258 |         ContractError::Unknown
+    |         ^^^^^^^^^^^^^ use of undeclared type `ContractError`
+
+error[E0433]: failed to resolve: use of undeclared type `EditedCandidateJournal`
+   --> /tmp/muyon-document-durable-check.4MrIWpNe/crates/muyon-core/tests/document_edit_core_bridge.rs:273:13
+    |
+273 |     let g = EditedCandidateJournal::initialize_trusted(&s).unwrap();
+    |             ^^^^^^^^^^^^^^^^^^^^^^ use of undeclared type `EditedCandidateJournal`
+
+error[E0433]: failed to resolve: use of undeclared type `ContractError`
+   --> /tmp/muyon-document-durable-check.4MrIWpNe/crates/muyon-core/tests/document_edit_core_bridge.rs:278:9
+    |
+278 |         ContractError::Unknown
+    |         ^^^^^^^^^^^^^ use of undeclared type `ContractError`
+
+error[E0433]: failed to resolve: use of undeclared type `EditedCandidateJournal`
+   --> /tmp/muyon-document-durable-check.4MrIWpNe/crates/muyon-core/tests/document_edit_core_bridge.rs:295:17
+    |
+295 |         let g = EditedCandidateJournal::initialize_trusted(&s).unwrap();
+    |                 ^^^^^^^^^^^^^^^^^^^^^^ use of undeclared type `EditedCandidateJournal`
+
+error[E0433]: failed to resolve: use of undeclared type `ContractError`
+   --> /tmp/muyon-document-durable-check.4MrIWpNe/crates/muyon-core/tests/document_edit_core_bridge.rs:301:17
+    |
+301 |                 ContractError::Cancelled
+    |                 ^^^^^^^^^^^^^ use of undeclared type `ContractError`
+
+error[E0433]: failed to resolve: use of undeclared type `ContractError`
+   --> /tmp/muyon-document-durable-check.4MrIWpNe/crates/muyon-core/tests/document_edit_core_bridge.rs:307:17
+    |
+307 |                 ContractError::InvalidAuthority
+    |                 ^^^^^^^^^^^^^ use of undeclared type `ContractError`
+
+error[E0433]: failed to resolve: use of undeclared type `EditedCandidateJournal`
+   --> /tmp/muyon-document-durable-check.4MrIWpNe/crates/muyon-core/tests/document_edit_core_bridge.rs:321:13
+    |
+321 |     let g = EditedCandidateJournal::initialize_trusted(&s).unwrap();
+    |             ^^^^^^^^^^^^^^^^^^^^^^ use of undeclared type `EditedCandidateJournal`
+
+error[E0433]: failed to resolve: use of undeclared type `ContractError`
+   --> /tmp/muyon-document-durable-check.4MrIWpNe/crates/muyon-core/tests/document_edit_core_bridge.rs:340:9
+    |
+340 |         ContractError::BindingMismatch
+    |         ^^^^^^^^^^^^^ use of undeclared type `ContractError`
+
+error[E0433]: failed to resolve: use of undeclared type `ContractError`
+   --> /tmp/muyon-document-durable-check.4MrIWpNe/crates/muyon-core/tests/document_edit_core_bridge.rs:351:9
+    |
+351 |         ContractError::StorageCorrupt
+    |         ^^^^^^^^^^^^^ use of undeclared type `ContractError`
+
+error[E0433]: failed to resolve: use of undeclared type `Operation`
+  --> /tmp/muyon-document-durable-check.4MrIWpNe/crates/muyon-core/tests/document_edit_core_bridge.rs:60:22
+   |
+60 |             command: Operation::ProjectCreate {
+   |                      ^^^^^^^^^
+   |                      |
+   |                      use of undeclared type `Operation`
+   |                      help: an enum with a similar name exists: `Option`
+
+error: aborting due to 34 previous errors
+
+Some errors have detailed explanations: E0412, E0422, E0432, E0433, E0463.
+For more information about an error, try `rustc --explain E0412`.

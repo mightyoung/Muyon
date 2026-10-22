@@ -1,0 +1,10 @@
+{
+  "source": "a21fdbd3c70ea40048fe67e22d446de33ff79fb7",
+  "command": "cargo test --offline --locked --manifest-path crates/Cargo.toml --workspace --all-targets -- --test-threads=1",
+  "exit_code": 0,
+  "groups": 26,
+  "passed_executions": 435,
+  "failed": 0,
+  "ignored": 0,
+  "note": "435 executions include repeated module harness cases. FFI14/core421. Not additive to previous targeted/full runs."
+}

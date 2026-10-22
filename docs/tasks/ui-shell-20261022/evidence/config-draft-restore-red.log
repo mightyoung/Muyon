@@ -1,0 +1,3 @@
+Exception in thread "main" java.lang.IllegalStateException: passive local buffers must restore without replacing editor
+	at com.mightyoung.muyon.product.ui.shell.ConfigurationDraftRestoreChecksKt.main(ConfigurationDraftRestoreChecks.kt:15)
+	at com.mightyoung.muyon.product.ui.shell.ConfigurationDraftRestoreChecksKt.main(ConfigurationDraftRestoreChecks.kt)

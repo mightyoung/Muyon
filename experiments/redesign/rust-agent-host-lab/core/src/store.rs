@@ -171,7 +171,19 @@ fn validate_snapshot(receipts: &[Json], facts: &Json) -> Result<()> {
 impl NativeStore {
     pub fn create(dir: &Path) -> Result<Self> {
         store::create_dir(dir)?;
+        Self::initialize_private(dir)
+    }
+    /// Initialize only a fresh already-admitted private run directory, never reset evidence.
+    pub(crate) fn initialize_private(dir: &Path) -> Result<Self> {
+        store::validate_dir(dir)?;
+        // Hold the same exclusive lease across absence validation and first write.
+        // A caller paused before lock acquisition must never reset a completed run.
         let lock = store::lock(dir)?;
+        match std::fs::symlink_metadata(dir.join("native.db")) {
+            Ok(_) => return Err("native_store_exists".into()),
+            Err(e) if e.kind() == std::io::ErrorKind::NotFound => {}
+            Err(_) => return Err("native_store_unavailable".into()),
+        }
         let mut result = Self {
             dir: dir.into(),
             _lock: lock,
@@ -202,6 +214,34 @@ impl NativeStore {
             facts,
             poisoned: false,
         })
+    }
+    /// Bounded read-only reconciliation. Does not restore a session or permit dispatch.
+    pub fn read_service_evidence(dir: &Path) -> Result<(Vec<Json>, Json)> {
+        use std::io::Read;
+        let _lock = store::lock(dir)?;
+        let path = dir.join("native.db");
+        let m = std::fs::symlink_metadata(&path).map_err(|e| e.to_string())?;
+        if !m.is_file() || m.file_type().is_symlink() || m.len() > MAX_SNAPSHOT as u64 {
+            return Err("native_store_budget".into());
+        }
+        let mut bytes = Vec::new();
+        std::fs::File::open(path)
+            .map_err(|e| e.to_string())?
+            .take(MAX_SNAPSHOT as u64 + 1)
+            .read_to_end(&mut bytes)
+            .map_err(|e| e.to_string())?;
+        if bytes.len() > MAX_SNAPSHOT {
+            return Err("native_store_budget".into());
+        }
+        let value = parse(&bytes)?;
+        let map = keys(&value, &["version", "receipts", "facts"])?;
+        if map["version"] != string("native-read-1") {
+            return Err("native_store_version".into());
+        }
+        let receipts = map["receipts"].array()?.to_vec();
+        let facts = map["facts"].clone();
+        validate_snapshot(&receipts, &facts)?;
+        Ok((receipts, facts))
     }
     pub fn ensure_healthy(&self) -> Result<()> {
         if self.poisoned {

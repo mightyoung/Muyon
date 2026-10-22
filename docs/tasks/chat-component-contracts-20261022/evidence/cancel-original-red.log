@@ -1,0 +1,22 @@
+PASS strict schema and finite kinds
+PASS unknown and disguised actions fail closed
+PASS ordinary selection and compose never grant business authority
+PASS scope binds conversation project agent workspace and mounted generation
+PASS old component and state revisions cannot overwrite draft
+PASS double click returns original identity; pending is not committed
+PASS unknown and cancel request keep identity held cost and lookup only
+PASS only exact original authoritative receipt can commit
+PASS confirmed cancellation and rejection are not success and preserve draft
+PASS redo uses a fresh attempt and retains old receipts
+PASS snapshot restore retains unresolved identity without resubmission
+PASS source references are typed, versioned, and never executable URLs
+PASS submission decisions distinguish new, duplicate, unknown and historical outcomes
+PASS damaged restored pending identity and values cannot become authority
+PASS simultaneous double click records one identity and one state transition
+PASS malformed Unicode cannot alias a different value digest
+late-cancel probe: original=intent-1 current=intent-B before=PENDING after=CANCEL_REQUESTED
+Exception in thread "main" java.lang.IllegalStateException: Late cancellation for A mutated pending B
+	at com.mightyoung.muyon.product.chat.components.ComponentContractsTestKt.main$lambda$65(ComponentContractsTest.kt:218)
+	at com.mightyoung.muyon.product.chat.components.ComponentContractsTestKt.test(ComponentContractsTest.kt:5)
+	at com.mightyoung.muyon.product.chat.components.ComponentContractsTestKt.main(ComponentContractsTest.kt:209)
+	at com.mightyoung.muyon.product.chat.components.ComponentContractsTestKt.main(ComponentContractsTest.kt)

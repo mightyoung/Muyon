@@ -1,0 +1,18 @@
+apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/chat/persistence/HostDraftStore.kt:69:85: error: unresolved reference 'DraftStoreEdits'.
+    private fun document(owner: DraftStoreOwner, id: String, revision: Long, edits: DraftStoreEdits): JSONObject {
+                                                                                    ^^^^^^^^^^^^^^^
+apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/chat/persistence/HostDraftStore.kt:71:29: error: function invocation 'archive(...)' expected.
+        if (revision < 1 || archive.size > 32768) reject("draft_data_invalid")
+                            ^^^^^^^
+apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/chat/persistence/HostDraftStore.kt:76:49: error: function invocation 'archive(...)' expected.
+        val parsed = BotSetupDraft.restoreDraft(archive, validationScope, id)
+                                                ^^^^^^^
+apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/chat/persistence/HostDraftStore.kt:79:71: error: function invocation 'archive(...)' expected.
+            .put("archive_base64", Base64.getEncoder().encodeToString(archive))
+                                                                      ^^^^^^^
+apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/chat/persistence/HostDraftStore.kt:141:88: error: unresolved reference 'DraftStoreEdits'.
+    fun save(owner: DraftStoreOwner, id: String, expectedStoredRevision: Long?, edits: DraftStoreEdits): DraftStoreWrite {
+                                                                                       ^^^^^^^^^^^^^^^
+apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/chat/persistence/HostDraftStore.kt:142:29: error: function invocation 'archive(...)' expected.
+        val frozenArchive = archive.copyOf()
+                            ^^^^^^^

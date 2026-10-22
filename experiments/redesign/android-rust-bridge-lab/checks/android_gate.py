@@ -1,4 +1,4 @@
-"""Fresh API24 link/ELF producer; no Android runtime is exercised."""
+"""Fresh API26 link/ELF producer; no Android runtime is exercised."""
 import argparse
 import json
 import os
@@ -32,13 +32,13 @@ def symbols(raw):
     return rows
 
 
-def api24_imports(library, info, triple, ndk, readelf, evidence, env, prefix):
+def api26_imports(library, info, triple, ndk, readelf, evidence, env, prefix):
     exports = set()
     stubs = {}
     for name in info['needed']:
-        stub = ndk / 'toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/lib' / triple / '24' / name
+        stub = ndk / 'toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/lib' / triple / '26' / name
         if not stub.is_file():
-            raise RuntimeError('api24_stub_missing')
+            raise RuntimeError('api26_stub_missing')
         log = evidence / f'{prefix}-stub-{name}.log'
         run([readelf, '--dyn-syms', '--wide', stub], log, env)
         exports.update(name.split('@')[0] for binding, ndx, name in symbols(log.read_text()) if ndx != 'UND' and binding in ['GLOBAL', 'WEAK'])
@@ -48,9 +48,9 @@ def api24_imports(library, info, triple, ndk, readelf, evidence, env, prefix):
     required = {name.split('@')[0] for binding, ndx, name in symbols(log.read_text()) if ndx == 'UND' and binding == 'GLOBAL'}
     missing = sorted(required - exports)
     if missing:
-        raise RuntimeError('unresolved_api24_strong_imports:' + ','.join(missing))
-    return dict(api24_stub_hashes=stubs, strong_imports=sorted(required), missing=[],
-                evidence='named strong imports resolve against exact API24 NDK stubs; Android runtime NOT_RUN')
+        raise RuntimeError('unresolved_api26_strong_imports:' + ','.join(missing))
+    return dict(api26_stub_hashes=stubs, strong_imports=sorted(required), missing=[],
+                evidence='named strong imports resolve against exact API26 NDK stubs; Android runtime NOT_RUN')
 
 
 def ensure_sdk(evidence, env, packages):
@@ -86,9 +86,13 @@ def main():
             raise RuntimeError('ndk_version')
         triple, clang_triple = TARGETS[args.abi]
         tools = ndk / 'toolchains/llvm/prebuilt/linux-x86_64/bin'
-        linker = tools / (clang_triple + '24-clang')
+        linker = tools / (clang_triple + '26-clang')
         readelf = tools / 'llvm-readelf'
         env['CARGO_TARGET_' + triple.upper().replace('-', '_') + '_LINKER'] = str(linker)
+        # Bundled readonly SQLite is C compiled for the same public API26 ABI.
+        # cc-rs must never accidentally use the Linux host compiler for Android.
+        env['CC_' + triple.replace('-', '_')] = str(linker)
+        env['AR_' + triple.replace('-', '_')] = str(tools / 'llvm-ar')
         env['RUSTFLAGS'] = '-C link-arg=-Wl,-z,max-page-size=16384 -C link-arg=-Wl,-z,common-page-size=16384'
         run(['rustc', '--version'], evidence / 'rustc.log', env)
         if not (evidence / 'rustc.log').read_text().startswith('rustc 1.99.0 '):
@@ -101,16 +105,16 @@ def main():
         info = inspect(library.read_bytes(), args.abi)
         for option in ['--file-header', '--program-headers', '--dynamic', '--notes', '--dyn-syms']:
             run([readelf, option, '--wide', library], evidence / ('rust-' + option[2:] + '.log'), env)
-        info['api24_import_compatibility'] = api24_imports(library, info, triple, ndk, readelf, evidence, env, 'rust')
+        info['api26_import_compatibility'] = api26_imports(library, info, triple, ndk, readelf, evidence, env, 'rust')
         aar = work / 'jna.aar'; download(AAR_URL, aar, AAR_SHA)
         check_aar(aar, dict(aar_sha256=AAR_SHA, jni_sha256=JNI_SHA))
         jni = work / 'libjnidispatch.so'
         with zipfile.ZipFile(aar) as archive:
             jni.write_bytes(archive.read('jni/' + args.abi + '/libjnidispatch.so'))
         jna_info = inspect(jni.read_bytes(), args.abi, rust=False)
-        jna_info['api24_import_compatibility'] = api24_imports(jni, jna_info, triple, ndk, readelf, evidence, env, 'jna')
+        jna_info['api26_import_compatibility'] = api26_imports(jni, jna_info, triple, ndk, readelf, evidence, env, 'jna')
         result.update(classification='GREEN', source_sha=source, build_identity=source, protocol=1,
-            namespace='muyon_android_contract_bridge', min_api=24, shipping_features=[], rust_target=triple,
+            namespace='muyon_android_contract_bridge', min_api=26, shipping_features=[], rust_target=triple,
             library_sha256=sha(library), cargo_lock_sha256=sha(CORE / 'Cargo.lock'),
             android_config_sha256=sha(CORE / 'uniffi.android.toml'), ndk_version=NDK,
             ndk_properties_sha256=sha(ndk / 'source.properties'), clang_sha256=sha(linker.resolve()),

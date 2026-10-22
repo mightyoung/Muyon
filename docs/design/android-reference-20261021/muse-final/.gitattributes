@@ -1,0 +1,3 @@
+# Raw runner/Gradle logs are retained byte-for-byte.
+*.log whitespace=-blank-at-eof
+BUILD.log whitespace=-blank-at-eof,-blank-at-eol

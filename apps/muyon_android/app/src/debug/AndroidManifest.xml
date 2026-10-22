@@ -1,0 +1,6 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <application>
+        <service android:name=".agentipc.BotNativeAcceptanceService"
+            android:process=":bot_native_acceptance" android:exported="false" />
+    </application>
+</manifest>

@@ -1,0 +1,45 @@
+
+running 18 tests
+test bot_definitions::tests::tail_archive_blob_storage_rolls_back ... FAILED
+test bot_definitions::tests::tail_definition_blob_storage_rolls_back ... FAILED
+test bot_definitions::tests::tail_definition_identity_tampering_rolls_back ... FAILED
+test bot_definitions::tests::tail_definition_tampering_rolls_back ... FAILED
+test bot_definitions::tests::tail_digest_blob_storage_rolls_back ... FAILED
+test bot_definitions::tests::tail_draft_lifecycle_rolls_back ... FAILED
+test bot_definitions::tests::tail_draft_revision_rolls_back ... FAILED
+test bot_definitions::tests::tail_draft_scope_rolls_back ... FAILED
+test bot_definitions::tests::tail_frozen_blob_storage_rolls_back ... FAILED
+test bot_definitions::tests::tail_intent_identity_tampering_rolls_back ... FAILED
+test bot_definitions::tests::tail_original_intent_rename_rolls_back ... FAILED
+test bot_definitions::tests::tail_owner_epoch_rolls_back ... FAILED
+test bot_definitions::tests::tail_project_deletion_rolls_back ... FAILED
+test bot_definitions::tests::tail_receipt_blob_storage_rolls_back ... FAILED
+test bot_definitions::tests::tail_receipt_tampering_rolls_back ... FAILED
+test bot_definitions::tests::tail_source_registry_version_rolls_back ... FAILED
+test bot_definitions::tests::tail_source_registry_workspace_rolls_back ... FAILED
+test bot_definitions::tests::tail_workspace_change_rolls_back ... FAILED
+
+failures:
+
+failures:
+    bot_definitions::tests::tail_archive_blob_storage_rolls_back
+    bot_definitions::tests::tail_definition_blob_storage_rolls_back
+    bot_definitions::tests::tail_definition_identity_tampering_rolls_back
+    bot_definitions::tests::tail_definition_tampering_rolls_back
+    bot_definitions::tests::tail_digest_blob_storage_rolls_back
+    bot_definitions::tests::tail_draft_lifecycle_rolls_back
+    bot_definitions::tests::tail_draft_revision_rolls_back
+    bot_definitions::tests::tail_draft_scope_rolls_back
+    bot_definitions::tests::tail_frozen_blob_storage_rolls_back
+    bot_definitions::tests::tail_intent_identity_tampering_rolls_back
+    bot_definitions::tests::tail_original_intent_rename_rolls_back
+    bot_definitions::tests::tail_owner_epoch_rolls_back
+    bot_definitions::tests::tail_project_deletion_rolls_back
+    bot_definitions::tests::tail_receipt_blob_storage_rolls_back
+    bot_definitions::tests::tail_receipt_tampering_rolls_back
+    bot_definitions::tests::tail_source_registry_version_rolls_back
+    bot_definitions::tests::tail_source_registry_workspace_rolls_back
+    bot_definitions::tests::tail_workspace_change_rolls_back
+
+test result: FAILED. 0 passed; 18 failed; 0 ignored; 0 measured; 38 filtered out; finished in 0.12s
+

@@ -1,0 +1,11 @@
+   Compiling muyon-core v0.1.0 (/private/tmp/muyon-android-refactor-20261020/crates/muyon-core)
+    Finished `test` profile [unoptimized] target(s) in 6.97s
+     Running tests/agent_child_tools.rs (/private/tmp/muyon-review-target/debug/deps/agent_child_tools-a6fa7f6b6922095b)
+
+running 3 tests
+test child_tool_subset_is_priced_and_enforced_on_the_actual_model_response ... ok
+test preprepared_plan_cannot_bypass_a_later_unknown_request ... ok
+test confirmation_preview_contains_the_exact_prior_history_and_wire_fields ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
+

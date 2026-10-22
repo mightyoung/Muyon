@@ -1,0 +1,83 @@
+name: Muse UI candidate (isolated)
+
+on:
+  push:
+    branches: ['ui/muse-chat-candidate-20261018']
+    paths:
+      - 'experiments/redesign/android-compose-lab/**'
+      - '.github/workflows/muse-ui-candidate.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: muse-ui-candidate-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  candidate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    env:
+      LAB: experiments/redesign/android-compose-lab
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Require already installed SDK, without license changes
+        shell: bash
+        run: |
+          mkdir -p "$RUNNER_TEMP/muse-ui-evidence"
+          git rev-parse HEAD > "$RUNNER_TEMP/muse-ui-evidence/source-sha.txt"
+          sdk_root="${ANDROID_HOME:-${ANDROID_SDK_ROOT:-}}"
+          test -n "$sdk_root"
+          test -f "$sdk_root/platforms/android-36/android.jar"
+          test -x "$sdk_root/build-tools/35.0.0/apksigner"
+          printf 'ANDROID_HOME=%s\n' "$sdk_root" >> "$GITHUB_ENV"
+          printf 'GRADLE_USER_HOME=%s\n' "$RUNNER_TEMP/muse-ui-gradle" >> "$GITHUB_ENV"
+          printf 'ANDROID_USER_HOME=%s\n' "$RUNNER_TEMP/muse-ui-android-user" >> "$GITHUB_ENV"
+      - name: Verified project-pinned Gradle
+        shell: bash
+        run: |
+          curl --fail --location --retry 3 --output "$RUNNER_TEMP/gradle.zip" https://services.gradle.org/distributions/gradle-8.13-bin.zip
+          printf '20f1b1176237254a6fc204d8434196fa11a4cfb387567519c61556e8710aed78  %s\n' "$RUNNER_TEMP/gradle.zip" | sha256sum --check
+          unzip -q "$RUNNER_TEMP/gradle.zip" -d "$RUNNER_TEMP/muse-ui-tools"
+      - name: Compile UI, tests and lint
+        shell: bash
+        run: |
+          set -o pipefail
+          "$RUNNER_TEMP/muse-ui-tools/gradle-8.13/bin/gradle" --no-daemon --console=plain -Pandroid.builder.sdkDownload=false -p "$LAB" \
+            :state:check :app:assembleDebug :app:assembleDebugAndroidTest :app:lintDebug \
+            2>&1 | tee "$RUNNER_TEMP/muse-ui-evidence/build.log"
+      - name: Inspect and privately wrap installable app
+        shell: bash
+        run: |
+          evidence="$RUNNER_TEMP/muse-ui-evidence"
+          apk="$LAB/app/build/outputs/apk/debug/app-debug.apk"
+          test -f "$apk"
+          sha256sum "$apk" > "$evidence/apk.sha256"
+          "$ANDROID_HOME/build-tools/35.0.0/apksigner" verify --verbose --print-certs "$apk" > "$evidence/signature.txt"
+          "$ANDROID_HOME/build-tools/35.0.0/aapt" dump badging "$apk" > "$evidence/badging.txt"
+          unzip -l "$apk" > "$evidence/apk-entries.txt"
+          openssl rand -hex -out "$RUNNER_TEMP/candidate-key" 32
+          openssl enc -aes-256-cbc -salt -pbkdf2 -iter 200000 -in "$apk" -out "$evidence/candidate.apk.enc" -pass "file:$RUNNER_TEMP/candidate-key"
+          openssl pkeyutl -encrypt -pubin -inkey "$LAB/candidate-public.pem" -pkeyopt rsa_padding_mode:oaep -pkeyopt rsa_oaep_md:sha256 -in "$RUNNER_TEMP/candidate-key" -out "$evidence/candidate-key.enc"
+          rm "$RUNNER_TEMP/candidate-key"
+      - name: Record runtime boundary
+        if: always()
+        run: |
+          mkdir -p "$RUNNER_TEMP/muse-ui-evidence"
+          printf '%s\n' 'Android installation/rendering/IME/TalkBack=NOT_RUN' 'Muse pixel fidelity=UNVERIFIED' > "$RUNNER_TEMP/muse-ui-evidence/runtime-boundary.txt"
+      - name: Upload logs and encrypted candidate only
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: muse-ui-candidate-${{ github.sha }}
+          path: ${{ runner.temp }}/muse-ui-evidence
+          retention-days: 3
+          if-no-files-found: error

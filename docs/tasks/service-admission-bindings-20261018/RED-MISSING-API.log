@@ -1,0 +1,88 @@
+warning: suspicious definition of the runtime `read` symbol used by the standard library
+   --> /workspace/muyon-worker-a/experiments/redesign/core-agent-lab/core/src/host_session.rs:132:124
+    |
+132 | ...ount: usize, timeout: i32) -> i32; fn read(fd: i32, buffer: *mut u8, count: usize) -> isize; fn write(fd: i32, buffer: *const u8...
+    |                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = note: expected `unsafe extern "C" fn(i32, *mut c_void, usize) -> isize` (for the current target)
+            found    `unsafe extern "C" fn(i32, *mut u8, usize) -> isize`
+    = help: either fix the signature or remove any attributes like `#[unsafe(no_mangle)]`, `#[unsafe(export_name = "read")]`, or `#[link_name = "read"]`
+    = help: allow this lint if the signature is compatible
+    = note: `#[warn(suspicious_runtime_symbol_definitions)]` on by default
+
+warning: suspicious definition of the runtime `write` symbol used by the standard library
+   --> /workspace/muyon-worker-a/experiments/redesign/core-agent-lab/core/src/host_session.rs:132:182
+    |
+132 | ... *mut u8, count: usize) -> isize; fn write(fd: i32, buffer: *const u8, count: usize) -> isize; }
+    |                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = note: expected `unsafe extern "C" fn(i32, *const c_void, usize) -> isize` (for the current target)
+            found    `unsafe extern "C" fn(i32, *const u8, usize) -> isize`
+    = help: either fix the signature or remove any attributes like `#[unsafe(no_mangle)]`, `#[unsafe(export_name = "write")]`, or `#[link_name = "write"]`
+    = help: allow this lint if the signature is compatible
+
+warning: `muyon-core-agent-lab` (lib) generated 2 warnings
+   Compiling uniffi v0.32.2
+   Compiling muyon-rust-agent-host-lab v0.1.0 (/workspace/muyon-worker-a/experiments/redesign/rust-agent-host-lab/core)
+   Compiling muyon-android-contract-bridge-lab v0.1.0 (/workspace/muyon-worker-a/experiments/redesign/android-rust-bridge-lab/core)
+error[E0407]: method `review_payload` is not a member of trait `ServiceHostOwnerCallback`
+   --> tests/service_host_bridge.rs:145:5
+    |
+145 | /     fn review_payload(&self, binding: ServiceOwnerAdmissionBinding, payload: Vec<u8>) -> bool {
+146 | |         self.check_binding(&binding);
+147 | |         assert_eq!(payload, PAYLOAD);
+148 | |         self.reviews.fetch_add(1, Ordering::SeqCst);
+149 | |         if self.mode.load(Ordering::SeqCst) == 4 { self.revision.store(1, Ordering::SeqCst); }
+150 | |         self.mode.load(Ordering::SeqCst) != 1
+151 | |     }
+    | |_____^ not a member of trait `ServiceHostOwnerCallback`
+
+error[E0407]: method `reserve_budget` is not a member of trait `ServiceHostOwnerCallback`
+   --> tests/service_host_bridge.rs:152:5
+    |
+152 | /     fn reserve_budget(&self, binding: ServiceOwnerAdmissionBinding, request_id: String,
+153 | |         payload: Vec<u8>, budget: ServiceOwnerCallBudget) -> Option<String> {
+154 | |         self.check_binding(&binding);
+155 | |         assert_eq!(request_id, "exact-request");
+...   |
+166 | |     }
+    | |_____^ not a member of trait `ServiceHostOwnerCallback`
+
+error[E0407]: method `commit_admission` is not a member of trait `ServiceHostOwnerCallback`
+   --> tests/service_host_bridge.rs:167:5
+    |
+167 | /     fn commit_admission(&self, reservation: String, binding: ServiceOwnerAdmissionBinding,
+168 | |         request_id: String, payload: Vec<u8>, credential_profile_id: String, credential_ref: String) -> Option<String> {
+169 | |         self.check_binding(&binding);
+170 | |         assert_eq!(reservation, "owner-reservation");
+...   |
+184 | |     }
+    | |_____^ not a member of trait `ServiceHostOwnerCallback`
+
+error[E0425]: cannot find type `ServiceOwnerAdmissionBinding` in this scope
+   --> tests/service_host_bridge.rs:111:33
+    |
+111 |     fn check_binding(&self, b: &ServiceOwnerAdmissionBinding) {
+    |                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ not found in this scope
+
+error[E0425]: cannot find type `ServiceOwnerAdmissionBinding` in this scope
+   --> tests/service_host_bridge.rs:145:39
+    |
+145 |     fn review_payload(&self, binding: ServiceOwnerAdmissionBinding, payload: Vec<u8>) -> bool {
+    |                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ not found in this scope
+
+error[E0425]: cannot find type `ServiceOwnerAdmissionBinding` in this scope
+   --> tests/service_host_bridge.rs:152:39
+    |
+152 |     fn reserve_budget(&self, binding: ServiceOwnerAdmissionBinding, request_id: String,
+    |                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ not found in this scope
+
+error[E0425]: cannot find type `ServiceOwnerAdmissionBinding` in this scope
+   --> tests/service_host_bridge.rs:167:62
+    |
+167 |     fn commit_admission(&self, reservation: String, binding: ServiceOwnerAdmissionBinding,
+    |                                                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ not found in this scope
+
+Some errors have detailed explanations: E0407, E0425.
+For more information about an error, try `rustc --explain E0407`.
+error: could not compile `muyon-android-contract-bridge-lab` (test "service_host_bridge") due to 7 previous errors

@@ -1,0 +1,17 @@
+Exact input archive: /tmp/muyon-document-durable-check.4MrIWpNe
+Direct test evidence: /tmp/muyon-core-bridge-direct.4l37_udb
+Command: ['/workspace/document-edit-tools/toolchain/bin/cargo', 'build', '--offline', '--locked', '--manifest-path', '/tmp/muyon-document-durable-check.4MrIWpNe/crates/Cargo.toml', '-p', 'muyon-core', '--lib', '--message-format=json']
+    Finished `dev` profile [unoptimized] target(s) in 0.03s
+Command: ['/workspace/document-edit-tools/toolchain/bin/rustc', '--edition=2021', '--test', '/tmp/muyon-document-durable-check.4MrIWpNe/crates/muyon-core/tests/document_edit_core_bridge.rs', '-L', 'dependency=/workspace/document-edit-combination/crates/target/debug/deps', '-L', 'native=/workspace/document-edit-tools/native', '--extern', 'muyon_core=/workspace/document-edit-combination/crates/target/debug/libmuyon_core.rlib', '--extern', 'serde_json=/workspace/document-edit-combination/crates/target/debug/deps/libserde_json-ae0abdd76423c00d.rlib', '-o', '/tmp/muyon-core-bridge-direct.4l37_udb/bridge-tests']
+Command: ['/tmp/muyon-core-bridge-direct.4l37_udb/bridge-tests', '--nocapture']
+
+running 6 tests
+test core_late_seal_failure_retains_pin_and_unknown_is_never_replayed ... ok
+test bridge_checks_core_operation_identity_and_claim_corruption ... ok
+test cancellation_and_claim_tail_revocation_block_before_any_core_file_work ... ok
+test bridge_creates_real_private_new_bytes_pin_without_document_success ... ok
+test gateway_claim_with_no_core_reservation_stays_unknown_without_retry ... ok
+test restart_and_fresh_grant_query_original_without_confirmation_or_repreparation ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.06s
+

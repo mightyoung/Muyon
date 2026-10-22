@@ -8,6 +8,7 @@ on:
       - 'experiments/redesign/android-compose-lab/**'
       - 'experiments/redesign/core-agent-lab/**'
       - 'experiments/redesign/plugin-contract-lab/**'
+      - 'experiments/redesign/rust-agent-host-lab/**'
       - 'docs/design/ANDROID-RUST-*'
       - '.github/workflows/android-rust-bridge.yml'
   pull_request:
@@ -17,21 +18,25 @@ on:
       - 'experiments/redesign/android-compose-lab/**'
       - 'experiments/redesign/core-agent-lab/**'
       - 'experiments/redesign/plugin-contract-lab/**'
+      - 'experiments/redesign/rust-agent-host-lab/**'
       - '.github/workflows/android-rust-bridge.yml'
   workflow_dispatch:
     inputs:
       suite:
-        description: 'Full required gate or immutable compiled assertion RED'
+        description: 'Full gate, immutable assertion RED, or explicitly partial host checkpoint'
         type: choice
-        options: [full, red, rust-red, jvm-red]
+        options: [full, red, rust-red, jvm-red, service-rust-red, service-jvm-red, service-host-checkpoint, service-oracle-red, service-host-green, mapper-control-red, service-temp-red]
         default: full
+      emit_android_source:
+        description: 'Diagnostic only: bounded generated Android source in service-jvm-red ordinary logs'
+        type: boolean
+        default: false
 
 permissions:
   contents: read
 
 jobs:
   select:
-    if: github.event_name != 'pull_request' || startsWith(github.head_ref, 'lab/android-rust-bridge-')
     runs-on: ubuntu-24.04
     timeout-minutes: 2
     outputs:
@@ -40,6 +45,7 @@ jobs:
     steps:
       - id: mode
         env:
+          EVENT_NAME: ${{ github.event_name }}
           REQUESTED_SUITE: ${{ inputs.suite }}
           SOURCE_REF: ${{ github.head_ref || github.ref_name }}
         run: |
@@ -47,13 +53,21 @@ jobs:
           import json, os
           suite = os.environ['REQUESTED_SUITE']
           ref = os.environ['SOURCE_REF']
+          # Select always runs: unrelated PRs are an explicit successful no-op,
+          # while a selector error still reaches the fail-closed full aggregate.
+          scoped = (ref.startswith('lab/android-rust-bridge-')
+                    or ref == 'lab/leaderb-batch4-combined-20261018')
+          if os.environ['EVENT_NAME'] == 'pull_request' and not scoped:
+              with open(os.environ['GITHUB_OUTPUT'], 'a') as output:
+                  output.write('mode=unselected\nred=[]\n')
+              raise SystemExit(0)
           if not suite:
-              suite = next((name for name in ['rust-red', 'jvm-red'] if ref.startswith('lab/android-rust-bridge-' + name + '-')), 'full')
-          if suite not in ['full', 'red', 'rust-red', 'jvm-red']:
+              suite = next((name for name in ['rust-red', 'jvm-red', 'service-rust-red', 'service-jvm-red', 'service-host-checkpoint', 'service-oracle-red', 'service-host-green', 'mapper-control-red', 'service-temp-red'] if ref.startswith('lab/android-rust-bridge-' + name + '-')), 'full')
+          if suite not in ['full', 'red', 'rust-red', 'jvm-red', 'service-rust-red', 'service-jvm-red', 'service-host-checkpoint', 'service-oracle-red', 'service-host-green', 'mapper-control-red', 'service-temp-red']:
               raise SystemExit('invalid_suite')
-          red = ['rust-red', 'jvm-red'] if suite == 'red' else [suite] if suite.endswith('-red') else []
+          red = ['rust-red', 'jvm-red'] if suite == 'red' else [suite] if suite.endswith('-red') and suite not in ['service-oracle-red', 'service-temp-red'] else []
           with open(os.environ['GITHUB_OUTPUT'], 'a') as output:
-              output.write('mode=' + ('red' if red else 'full') + '\nred=' + json.dumps(red) + '\n')
+              output.write('mode=' + ('red' if red else suite) + '\nred=' + json.dumps(red) + '\n')
           PY
 
   compiling-red:
@@ -71,7 +85,7 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
           persist-credentials: false
       - uses: actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00
-        if: matrix.suite == 'jvm-red'
+        if: endsWith(matrix.suite, 'jvm-red') || matrix.suite == 'mapper-control-red'
         with:
           distribution: temurin
           java-version: '17'
@@ -84,17 +98,52 @@ jobs:
       - name: Required compiled reachable RED stays a CI failure
         env:
           BRIDGE_RED_MODE: ${{ matrix.suite }}
+          BRIDGE_EMIT_ANDROID_SOURCE: ${{ inputs.emit_android_source && 'true' || 'false' }}
         run: |
+          binding_args=()
+          if [[ "$BRIDGE_EMIT_ANDROID_SOURCE" == true ]]; then binding_args=(--emit-android-source); fi
           python3 -B experiments/redesign/android-rust-bridge-lab/checks/linux_gate.py \
             --mode "$BRIDGE_RED_MODE" \
             --evidence-dir "$RUNNER_TEMP/android-bridge-evidence" \
-            --work-dir "$RUNNER_TEMP/android-bridge-work"
+            --work-dir "$RUNNER_TEMP/android-bridge-work" "${binding_args[@]}"
       - name: Preserve raw setup build generation load and behavior evidence
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: android-bridge-${{ github.sha }}-${{ matrix.suite }}
           path: ${{ runner.temp }}/android-bridge-evidence/
+          retention-days: 1
+          if-no-files-found: error
+
+  service-host-checkpoint:
+    needs: select
+    if: needs.select.outputs.mode == 'service-host-checkpoint' || needs.select.outputs.mode == 'service-oracle-red' || needs.select.outputs.mode == 'service-host-green' || needs.select.outputs.mode == 'service-temp-red'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - name: Exact official Rust on temporary remote runner
+        run: |
+          rustup toolchain install 1.99.0 --profile minimal
+          dirname "$(rustup which --toolchain 1.99.0 rustc)" >> "$GITHUB_PATH"
+      - name: Independent checkpoint and existing classifier controls
+        run: python3 -B -m unittest discover -s experiments/redesign/android-rust-bridge-lab/checks -p 'test_*.py'
+      - name: Required source-fixed host checkpoint or controller oracle
+        env:
+          BRIDGE_HOST_MODE: ${{ needs.select.outputs.mode }}
+        run: |
+          python3 -B experiments/redesign/android-rust-bridge-lab/checks/linux_gate.py \
+            --mode "$BRIDGE_HOST_MODE" --evidence-dir "$RUNNER_TEMP/service-host-checkpoint-evidence" \
+            --work-dir "$RUNNER_TEMP/service-host-checkpoint-work"
+      - name: Preserve complete host checkpoint raw evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: service-host-checkpoint-${{ github.sha }}-${{ needs.select.outputs.mode }}
+          path: ${{ runner.temp }}/service-host-checkpoint-evidence/
           retention-days: 1
           if-no-files-found: error
 
@@ -156,7 +205,7 @@ jobs:
           dirname "$(rustup which --toolchain 1.99.0 rustc)" >> "$GITHUB_PATH"
       - name: Independent strict controls
         run: python3 -B -m unittest discover -s experiments/redesign/android-rust-bridge-lab/checks -p 'test_*.py'
-      - name: Required fresh API24 link ELF JNI and NDK stub compatibility
+      - name: Required fresh API26 link ELF JNI and NDK stub compatibility
         env:
           BRIDGE_ABI: ${{ matrix.abi }}
         run: |

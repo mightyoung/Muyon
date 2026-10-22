@@ -1,0 +1,37 @@
+    Blocking waiting for file lock on artifact directory
+   Compiling muyon-core v0.1.0 (/workspace/Muyon-combination-20261022/crates/muyon-core)
+   Compiling muyon-android-ffi v0.1.0 (/workspace/Muyon-combination-20261022/crates/muyon-android-ffi)
+    Finished `test` profile [unoptimized] target(s) in 8.14s
+     Running unittests src/lib.rs (/tmp/muyon-combination-target/debug/deps/muyon_android_product-19750d70153a76d3)
+
+running 14 tests
+test local_draft_bridge_tests::local_draft_bridge_registers_reads_saves_and_looks_up_original_after_restart ... FAILED
+test tests::another_root_and_ordinary_chat_cannot_bypass_an_unknown_child ... ok
+test tests::child_plan_stays_blocked_and_cannot_bypass_an_unknown_root_request ... ok
+test tests::configuring_a_new_budget_never_manufactures_pricing_authority_or_sends ... ok
+test tests::imported_raw_metadata_is_preserved_but_never_an_unbounded_binder_reply ... ok
+test tests::long_unicode_pages_are_bounded_and_the_201st_supplier_is_accessible ... ok
+test tests::open_never_initializes_or_wipes_missing_or_existing_store ... ok
+test tests::production_open_recovers_interrupted_upload_and_collects_only_unreferenced_objects ... ok
+test tests::production_startup_never_collects_unknown_uploads_or_intent_retained_pins ... ok
+test tests::received_confirmation_and_legacy_unknown_are_never_cleared_or_replayed ... ok
+test tests::recovery_seal_refuses_an_already_queued_late_confirmation ... ok
+test tests::research_project_confirmation_not_received_recovers_without_a_write ... ok
+test tests::review_is_explicit_and_duplicate_confirmation_returns_original_receipt ... ok
+test tests::unreceived_confirmation_is_sealed_without_resubmitting_after_restart ... ok
+
+failures:
+
+---- local_draft_bridge_tests::local_draft_bridge_registers_reads_saves_and_looks_up_original_after_restart stdout ----
+
+thread 'local_draft_bridge_tests::local_draft_bridge_registers_reads_saves_and_looks_up_original_after_restart' (5400) panicked at muyon-android-ffi/src/lib.rs:1704:78:
+called `Result::unwrap()` on an `Err` value: Failure { code: "local_draft_corrupt" }
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    local_draft_bridge_tests::local_draft_bridge_registers_reads_saves_and_looks_up_original_after_restart
+
+test result: FAILED. 13 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 12.00s
+
+error: test failed, to rerun pass `-p muyon-android-ffi --lib`

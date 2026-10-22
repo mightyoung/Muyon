@@ -1,0 +1,210 @@
+[
+  {
+    "name": "host",
+    "sha": "6f35eb837d88d15f50c073d7e541408e9159f758",
+    "base": "a1752fc7f3a0471413c5afd2a32bf152078b21fd",
+    "code": [
+      "apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupDraft.kt",
+      "apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/agents/setup/SetupDraftArchive.kt",
+      "apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/chat/ProductChatRuntime.kt",
+      "apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/chat/persistence/HostDraftStore.kt",
+      "apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupDraftChecks.kt",
+      "apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupPersistenceChecks.kt",
+      "apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/run-offline-checks.sh",
+      "apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/chat/persistence/HostDraftStoreChecks.kt",
+      "apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/chat/persistence/run-offline.sh",
+      "apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/chat/projection/HostContinuationChecks.kt",
+      "apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/chat/projection/run-offline.sh"
+    ],
+    "reports": [
+      "docs/tasks/ui-host-projection-20261022/HANDOFF.md",
+      "docs/tasks/ui-host-projection-20261022/PERSISTENCE-OWNER-CONTRACT.md",
+      "docs/tasks/ui-host-projection-20261022/PERSISTENCE-REPORT.md",
+      "docs/tasks/ui-host-projection-20261022/REVIEW.md"
+    ]
+  },
+  {
+    "name": "bot",
+    "sha": "53b9b597e190db6b6619a18e8746f2985f488fbc",
+    "base": "79cf88974f6a44cb8e30df0e81d827a9376303b1",
+    "code": [
+      "apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupDraft.kt",
+      "apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/agents/setup/SetupDraftArchive.kt",
+      "apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupDraftChecks.kt",
+      "apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupPersistenceChecks.kt",
+      "apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/run-offline-checks.sh"
+    ],
+    "reports": [
+      "docs/tasks/bot-setup-draft-20261022/PERSISTENCE-API.md"
+    ]
+  },
+  {
+    "name": "core",
+    "sha": "93de8ad99fad105bc3ca32036de30803d87fd6c7",
+    "base": "3ecb544ad0a47ccc38fe830777f35588b92e8afc",
+    "code": [
+      "crates/muyon-core/src/blobs.rs",
+      "crates/muyon-core/src/documents/anchor.rs",
+      "crates/muyon-core/src/documents/annotation.rs",
+      "crates/muyon-core/src/documents/capability.rs",
+      "crates/muyon-core/src/documents/identity.rs",
+      "crates/muyon-core/src/documents/mod.rs",
+      "crates/muyon-core/src/documents/storage.rs",
+      "crates/muyon-core/src/documents/storage_tests.rs",
+      "crates/muyon-core/src/lib.rs",
+      "crates/muyon-core/tests/document_storage.rs",
+      "crates/muyon-core/tests/documents.rs"
+    ],
+    "reports": [
+      "docs/tasks/document-core-contracts-20261022/COPY-CLONE-REPORT.md",
+      "docs/tasks/document-core-contracts-20261022/INDEPENDENT-REVIEW.md",
+      "docs/tasks/document-core-contracts-20261022/PERSISTENCE-REPORT.md",
+      "docs/tasks/document-core-contracts-20261022/REPORT.md",
+      "docs/tasks/document-core-contracts-20261022/TAIL-HOOK-HANDOFF.md"
+    ]
+  },
+  {
+    "name": "evidence",
+    "sha": "741274f6ef628501cc8c75c61f156b9f003c81d7",
+    "base": "3ecb544ad0a47ccc38fe830777f35588b92e8afc",
+    "code": [
+      "crates/muyon-core/src/documents/anchor.rs",
+      "crates/muyon-core/src/documents/annotation.rs",
+      "crates/muyon-core/src/documents/capability.rs",
+      "crates/muyon-core/src/documents/identity.rs",
+      "crates/muyon-core/src/documents/mod.rs",
+      "crates/muyon-core/src/documents/storage.rs",
+      "crates/muyon-core/src/documents/storage_tests.rs",
+      "crates/muyon-core/src/evidence/mod.rs",
+      "crates/muyon-core/src/lib.rs",
+      "crates/muyon-core/tests/document_storage.rs",
+      "crates/muyon-core/tests/documents.rs",
+      "crates/muyon-core/tests/evidence_local.rs"
+    ],
+    "reports": [
+      "docs/tasks/document-core-contracts-20261022/INDEPENDENT-REVIEW.md",
+      "docs/tasks/document-core-contracts-20261022/PERSISTENCE-REPORT.md",
+      "docs/tasks/document-core-contracts-20261022/REPORT.md",
+      "docs/tasks/document-core-contracts-20261022/TAIL-HOOK-HANDOFF.md",
+      "docs/tasks/evidence-local-chain-20261022/HANDOFF.md",
+      "docs/tasks/evidence-local-chain-20261022/REPORT.md",
+      "docs/tasks/evidence-local-chain-20261022/REVIEW.md"
+    ]
+  },
+  {
+    "name": "artifacts",
+    "sha": "4eec6d164e84d87c74b6bc92f45ecb1e3138f680",
+    "base": "3ecb544ad0a47ccc38fe830777f35588b92e8afc",
+    "code": [
+      "crates/muyon-core/src/artifacts/mod.rs",
+      "crates/muyon-core/src/artifacts/tests.rs",
+      "crates/muyon-core/src/documents/anchor.rs",
+      "crates/muyon-core/src/documents/annotation.rs",
+      "crates/muyon-core/src/documents/capability.rs",
+      "crates/muyon-core/src/documents/identity.rs",
+      "crates/muyon-core/src/documents/mod.rs",
+      "crates/muyon-core/src/documents/storage.rs",
+      "crates/muyon-core/src/documents/storage_tests.rs",
+      "crates/muyon-core/src/lib.rs",
+      "crates/muyon-core/tests/document_storage.rs",
+      "crates/muyon-core/tests/documents.rs"
+    ],
+    "reports": [
+      "docs/tasks/artifacts-mig17-u12-20261022/INDEPENDENT-REVIEW.md",
+      "docs/tasks/artifacts-mig17-u12-20261022/REPORT.md",
+      "docs/tasks/document-core-contracts-20261022/INDEPENDENT-REVIEW.md",
+      "docs/tasks/document-core-contracts-20261022/PERSISTENCE-REPORT.md",
+      "docs/tasks/document-core-contracts-20261022/REPORT.md",
+      "docs/tasks/document-core-contracts-20261022/TAIL-HOOK-HANDOFF.md"
+    ]
+  },
+  {
+    "name": "group",
+    "sha": "12a001deae8e49de4eba2012975539a4b234a527",
+    "base": "f4781e16ddf4e542b983fbd77f266a0071148255",
+    "code": [
+      "crates/muyon-core/src/group_governance/mod.rs",
+      "crates/muyon-core/src/group_runtime/mod.rs",
+      "crates/muyon-core/src/lib.rs",
+      "crates/muyon-core/tests/group_governance.rs",
+      "crates/muyon-core/tests/group_runtime.rs"
+    ],
+    "reports": [
+      "docs/tasks/group-governance-20261022/INDEPENDENT-REVIEW.md",
+      "docs/tasks/group-governance-20261022/REPORT.md",
+      "docs/tasks/mig20-group-runtime-20261022/INDEPENDENT-REVIEW.md",
+      "docs/tasks/mig20-group-runtime-20261022/REPORT.md"
+    ]
+  },
+  {
+    "name": "adapter",
+    "sha": "6b796c8d6e094d45ef25e28698048c21ef0ae7b3",
+    "base": "3ecb544ad0a47ccc38fe830777f35588b92e8afc",
+    "code": [
+      "tools/document_fidelity/README.md",
+      "tools/document_fidelity/adapters/docx.py",
+      "tools/document_fidelity/adapters/docx_worker.py",
+      "tools/document_fidelity/adapters/openpyxl_worker.py",
+      "tools/document_fidelity/adapters/pptx.py",
+      "tools/document_fidelity/adapters/pptx_worker.py",
+      "tools/document_fidelity/adapters/protocol.py",
+      "tools/document_fidelity/adapters/runtime.py",
+      "tools/document_fidelity/adapters/text_common.py",
+      "tools/document_fidelity/adapters/xlsx.py",
+      "tools/document_fidelity/complex_fixtures.py",
+      "tools/document_fidelity/engine_inventory.py",
+      "tools/document_fidelity/fixtures/manifest.json",
+      "tools/document_fidelity/fixtures/minimal.docx",
+      "tools/document_fidelity/fixtures/minimal.pdf",
+      "tools/document_fidelity/fixtures/minimal.pptx",
+      "tools/document_fidelity/fixtures/minimal.xlsx",
+      "tools/document_fidelity/fixtures_complex/complex.docx",
+      "tools/document_fidelity/fixtures_complex/complex.xlsx",
+      "tools/document_fidelity/fixtures_complex/manifest.json",
+      "tools/document_fidelity/fixtures_subsets/manifest.json",
+      "tools/document_fidelity/fixtures_subsets/simple-run.docx",
+      "tools/document_fidelity/fixtures_subsets/simple-shape.pptx",
+      "tools/document_fidelity/generate_fixtures.py",
+      "tools/document_fidelity/harness.py",
+      "tools/document_fidelity/subset_fixtures.py",
+      "tools/document_fidelity/tests/run_mutations.py",
+      "tools/document_fidelity/tests/test_adapter.py",
+      "tools/document_fidelity/tests/test_engine_evaluation.py",
+      "tools/document_fidelity/tests/test_harness.py",
+      "tools/document_fidelity/tests/test_text_subsets.py"
+    ],
+    "reports": [
+      "docs/tasks/document-fidelity-harness-20261022/HANDOFF.md",
+      "docs/tasks/document-fidelity-harness-20261022/REPORT.md",
+      "docs/tasks/document-fidelity-harness-20261022/REVIEW.md",
+      "docs/tasks/document-fidelity-harness-20261022/adapter-source/HANDOFF.md",
+      "docs/tasks/document-fidelity-harness-20261022/adapter-source/REPORT.md",
+      "docs/tasks/document-fidelity-harness-20261022/adapter-source/REVIEW.md",
+      "docs/tasks/document-fidelity-harness-20261022/engine-evaluation/HANDOFF.md",
+      "docs/tasks/document-fidelity-harness-20261022/engine-evaluation/REPORT.md",
+      "docs/tasks/document-fidelity-harness-20261022/engine-evaluation/REVIEW.md",
+      "docs/tasks/document-fidelity-harness-20261022/text-subsets/HANDOFF.md",
+      "docs/tasks/document-fidelity-harness-20261022/text-subsets/REPORT.md",
+      "docs/tasks/document-fidelity-harness-20261022/text-subsets/REVIEW.md"
+    ]
+  },
+  {
+    "name": "transactions",
+    "sha": "90b7a35a49f4acb09ff73a2b088df4c1d1a037a6",
+    "base": "3ecb544ad0a47ccc38fe830777f35588b92e8afc",
+    "code": [
+      "crates/muyon-core/src/document_edit/engine_protocol.rs",
+      "crates/muyon-core/src/document_edit/gateway.rs",
+      "crates/muyon-core/src/document_edit/mod.rs",
+      "crates/muyon-core/tests/document_edit_engine_protocol.rs",
+      "crates/muyon-core/tests/document_edit_gateway.rs",
+      "crates/muyon-core/tests/document_edit_transactions.rs"
+    ],
+    "reports": [
+      "docs/tasks/document-edit-transactions-20261022/DURABLE-REPORT.md",
+      "docs/tasks/document-edit-transactions-20261022/FINAL-HANDOFF.md",
+      "docs/tasks/document-edit-transactions-20261022/INDEPENDENT-REVIEW.md",
+      "docs/tasks/document-edit-transactions-20261022/REPORT.md"
+    ]
+  }
+]
