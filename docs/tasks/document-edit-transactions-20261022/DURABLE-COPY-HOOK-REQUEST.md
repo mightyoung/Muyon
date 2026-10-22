@@ -1,5 +1,13 @@
 # Minimal COPY-only atomic publication hook requested from owners
 
+Resolved and consumed: core a27f04aa2460971940d4bdf2c8263bdf81f381c2; production
+f6ab7fd78f46319cf46e9754d80c7cf0f6781205; interface
+8d6cc642086fcdd12889aa22fec77797dd6c56e2. Actual same-transaction clone replaces
+the upload route entirely. Gateway tests assert new reference/revision but no new
+upload rows or object/staging files. Different-hash edited candidates reject.
+Final grant-only recheck follows receipt write immediately before COMMIT.
+The original request and reason below are retained as history.
+
 Current integration source f043c6b9b8d850acb590a9a3e567d1f2634a95cd works for the
 metadata/receipt/grant-tail atomic transaction, but existing upload APIs own their
 own transactions. Independent review therefore does not accept staging-write grant

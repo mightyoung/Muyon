@@ -1,0 +1,22 @@
+   Compiling muyon-core v0.1.0 (/workspace/document-edit-durable-combination/crates/muyon-core)
+    Finished `test` profile [unoptimized] target(s) in 0.34s
+     Running tests/document_edit_gateway.rs (/workspace/document-edit-combination/crates/target/debug/deps/document_edit_gateway-9524898dbf45656f)
+
+running 1 test
+test reading_a_newer_different_blob_does_not_authorize_old_candidate_bytes ... FAILED
+
+failures:
+
+---- reading_a_newer_different_blob_does_not_authorize_old_candidate_bytes stdout ----
+
+thread 'reading_a_newer_different_blob_does_not_authorize_old_candidate_bytes' panicked at muyon-core/tests/document_edit_gateway.rs:770:41:
+called `Result::unwrap_err()` on an `Ok` value: [111, 114, 105, 103, 105, 110, 97, 108, 32, 115, 121, 110, 116, 104, 101, 116, 105, 99, 32, 99, 111, 112, 121, 32, 98, 121, 116, 101, 115, 59, 32, 110, 111, 32, 79, 102, 102, 105, 99, 101, 32, 101, 110, 103, 105, 110, 101, 32, 97, 99, 99, 101, 112, 116, 97, 110, 99, 101]
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    reading_a_newer_different_blob_does_not_authorize_old_candidate_bytes
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 17 filtered out; finished in 0.01s
+
+error: test failed, to rerun pass `-p muyon-core --test document_edit_gateway`

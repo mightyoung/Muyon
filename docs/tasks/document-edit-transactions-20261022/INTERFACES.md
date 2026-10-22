@@ -1,3 +1,6 @@
+> Latest durable COPY batch: see [DURABLE-REPORT.md](DURABLE-REPORT.md).
+> Earlier contract-only results and limitations below are historical.
+
 # DOC-06/08 engine-neutral observations
 
 `Binding` contains the shared immutable `documents::DocumentRef` (workspace/project,

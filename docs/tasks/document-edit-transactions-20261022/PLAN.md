@@ -1,3 +1,6 @@
+> Latest durable COPY batch: see [DURABLE-REPORT.md](DURABLE-REPORT.md).
+> Earlier contract-only results and limitations below are historical.
+
 # DOC-06/08 offline transaction contract
 
 Base: UI shell 3ecb544ad0a47ccc38fe830777f35588b92e8afc, verified remote unchanged.

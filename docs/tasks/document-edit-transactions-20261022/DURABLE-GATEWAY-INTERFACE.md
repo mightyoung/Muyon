@@ -1,5 +1,11 @@
 # DOC06/08 real host gateway — ownership and implementation batch
 
+> Current delivered COPY implementation supersedes this initial design below.
+> See DURABLE-REPORT.md. Fixed dependency: a27f04aa2460971940d4bdf2c8263bdf81f381c2.
+> Actual hooks: document_access_in_transaction, document_clone_in_transaction and
+> document_grant_in_transaction. No upload/FinishedBlob/staging path is used.
+> The initial requested signatures and upload design below are historical.
+
 Preserved reviewed base:601f562f98163429103b344aecb3d8639c890a82.
 Core persistence interface read:7c4a0664969da312208f1c0625920aae21c58948,
 `docs/tasks/document-core-contracts-20261022/PERSISTENCE-INTERFACES.md`.
