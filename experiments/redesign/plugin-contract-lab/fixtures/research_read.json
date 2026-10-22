@@ -1,0 +1,214 @@
+{
+  "module_id": "research",
+  "protocol_version": 1,
+  "data": [
+    {
+      "name": "project",
+      "schema_version": 1,
+      "schema": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "question": {
+            "type": "string"
+          },
+          "nextStep": {
+            "type": "string"
+          }
+        },
+        "required": [],
+        "additionalProperties": false
+      },
+      "classification": {
+        "title": "none",
+        "question": "none",
+        "nextStep": "none"
+      }
+    },
+    {
+      "name": "document",
+      "schema_version": 1,
+      "schema": {
+        "type": "object",
+        "properties": {
+          "relativePath": {
+            "type": "string"
+          },
+          "projectId": {
+            "type": "object",
+            "properties": {
+              "module_id": {
+                "type": "string"
+              },
+              "type": {
+                "type": "string"
+              },
+              "key": {
+                "type": "string"
+              },
+              "revision": {
+                "type": "string"
+              },
+              "schema_version": {
+                "type": "integer"
+              }
+            },
+            "required": [
+              "module_id",
+              "type",
+              "key",
+              "revision",
+              "schema_version"
+            ],
+            "additionalProperties": false,
+            "data_ref": "research/project@1"
+          }
+        },
+        "required": [],
+        "additionalProperties": false
+      },
+      "classification": {
+        "relativePath": "none",
+        "projectId": "none"
+      }
+    }
+  ],
+  "relations": [
+    {
+      "name": "document_project",
+      "schema_version": 1,
+      "from": "research/document@1",
+      "field": "projectId",
+      "to": "research/project@1",
+      "many": false
+    }
+  ],
+  "operations": [
+    {
+      "name": "read_object",
+      "schema_version": 1,
+      "effect": "read",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "project",
+              "document"
+            ]
+          },
+          "id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "id"
+        ],
+        "additionalProperties": false
+      },
+      "projection_schema": {
+        "type": "object",
+        "properties": {
+          "objects": {
+            "type": "object",
+            "properties": {
+              "project": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "module_id": {
+                      "type": "string"
+                    },
+                    "type": {
+                      "type": "string"
+                    },
+                    "key": {
+                      "type": "string"
+                    },
+                    "revision": {
+                      "type": "string"
+                    },
+                    "schema_version": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "module_id",
+                    "type",
+                    "key",
+                    "revision",
+                    "schema_version"
+                  ],
+                  "additionalProperties": false,
+                  "data_ref": "research/project@1"
+                },
+                "maxItems": 128
+              },
+              "document": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "module_id": {
+                      "type": "string"
+                    },
+                    "type": {
+                      "type": "string"
+                    },
+                    "key": {
+                      "type": "string"
+                    },
+                    "revision": {
+                      "type": "string"
+                    },
+                    "schema_version": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "module_id",
+                    "type",
+                    "key",
+                    "revision",
+                    "schema_version"
+                  ],
+                  "additionalProperties": false,
+                  "data_ref": "research/document@1"
+                },
+                "maxItems": 128
+              }
+            },
+            "required": [],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "objects"
+        ],
+        "additionalProperties": false
+      },
+      "data_refs": [
+        "research/project@1",
+        "research/document@1"
+      ],
+      "binding_id": "host-research-read"
+    }
+  ],
+  "views": [
+    {
+      "name": "read_object_details",
+      "data_refs": [
+        "research/project@1",
+        "research/document@1"
+      ],
+      "operation_refs": [
+        "research/read_object@1"
+      ]
+    }
+  ]
+}

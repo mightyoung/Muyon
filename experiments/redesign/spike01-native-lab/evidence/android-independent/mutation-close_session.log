@@ -1,0 +1,7 @@
+destructor_enter close_session pause
+destructor_return
+Traceback (most recent call last):
+  File "/workspace/Muyon-spike01-android/experiments/redesign/spike01-native-lab/tests/probe_h1.py", line 62, in <module>
+    assert native_wait_entered and not early and done.is_set() and not worker.is_alive() and not closer.is_alive(), (native_wait_entered,early,seen)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: (False, True, ['reentrant_rejected'])

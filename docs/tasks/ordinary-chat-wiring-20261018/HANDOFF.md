@@ -1,0 +1,25 @@
+# LeaderB ordinary chat wiring handoff
+
+## Verified recreation repair (2026-10-19)
+
+- Tested source **f86804cce3f54888ef0cc42b0540d12fb82e42c7**; [CI39184565190](https://github.com/mightyoung/Muyon/actions/runs/39184565190) terminal SUCCESS, attempt1, no rerun. Scoped Rust6/binding, dual ABI, APK/test APK/lint/package and all six device phases PASS; Android `OK (2 tests)`.
+- Root cause: old test skipped required explicit lookup after Activity recreation caused last-lease stop/unknown disclosure; Send Disabled was correct. Test-only repair adds unknown/no-resend and identity/count checks, waits actual old-stop completion, clicks existing query once, restores original reply/identities, then retains second Send failure and durable attempts=1 assertions. A specific budget failure code is not separately asserted. The two scoped ordinaryChat synthetic regressions now PASS; production logic unchanged.
+- New job117844503603 own output read once successfully; evidence/recreation/ and RECREATION-RESULTS.md hold exact results/remaining conditions. CI39183528428 known failure and CI39144821029 unknown cause remain retained, never relabeled. No old denied evidence, I04/suite, real model/key/fee, merge/deploy or HOLD release. PR86/dependency combination and remaining physical/production/foreign-exception items remain separate.
+
+## Earlier follow-ups (retained)
+
+## Authorized observability follow-up (2026-10-19)
+
+- Reviewed observation source **d9892a75775e507d585f3ddaa712305be30dcfac** records six device phases, exact SHA and exit codes. Seven disposable no-network tool-probe scenarios pass; red/green evidence retained. See OBSERVABILITY.md and OBSERVABILITY-REVIEW.md.
+- One explicitly authorized new [CI39183528428](https://github.com/mightyoung/Muyon/actions/runs/39183528428) reached terminal FAILURE. Producers and package/lint passed; SDK/AVD/boot/install/instrumentation exit0, result exit1. New job117841491609 own log was read successfully. No old denied log/artifact was accessed.
+- New run: owner test PASS; Compose test FAIL at OrdinaryChatServiceLoopTest.kt:56, second Send after Activity recreation was Disabled. Earlier first-answer assertions were reached/completed; entire Compose regression is still FAIL. Disabled-state cause not established. See OBSERVABILITY-RESULTS.md and evidence/observability/. No further device run or behavioral repair in this follow-up.
+- The original handoff below and CI39144821029 failure/access denial remain historical evidence; new results do not establish the old cause or old individual outcomes. All HOLD/I04/model/credential/fee restrictions remain.
+
+## Original frozen handoff
+
+- Draft [PR95](https://github.com/mightyoung/Muyon/pull/95), stacks PR94. Tested source **fbde72aa0420c522a94417f383ec17a8d0718677**; implementationcbc03836, later changes docs-only. All implementation writers stopped; no merge/HOLD release.
+- Actual ordinary Send intent now uses existing Compose→private Service→genuine UniFFI→same Rust controller/Agent drive. Workspace/task/input/context, versioned input/output checks, profile/budget, opaque handle generation and one-shot fake exchange bind to SAME durable owner. Supplier source owner remains. Default app unconfigured and denies; fake installer is compile-time only. No Dart business/UI expansion.
+- Local Rust6/6 PASS; genuine binding reproduction PASS. [CI39144821029](https://github.com/mightyoung/Muyon/actions/runs/39144821029) terminal FAILURE: scoped + both API26 ABI producers SUCCESS; APK/test APK/lint/package inspection SUCCESS; API26 device step FAILURE（包含SDK/boot/install/instrument/grep，不能确定仪表实际启动）. **Ordinary chat synthetic E2E NOT VERIFIED**, individual device test outcomes unknown. No rerun/cancel.
+- **New blocker**: raw log GET jobs/117726786359/logs tried once, redirected storage HTTP403. Stopped, no retry/alternate artifact/download route. Primary run/jobs/steps/check annotations archived, only exit1 known; no raw PID/receipt/test cause invented. RESULTS.md and evidence/LOG-READ-BLOCKED.json give exact boundary. Need new available/authorized failure evidence before diagnosis; do not start a new run to bypass the access denial.
+- Source reviews and failed local attempts retained. Remaining production parameters: real model ID, acceptance currency/spend ceiling and token/price proof; installed production authorization/profile/provenance/credential-generation owner + retention and reviewed authorized HTTPS adapter/real acceptance. Four modes/defaultAuto and FullAllow no extra taint/endpoint/reviewer asks are settled, not pending user decisions. Never claim real DeepSeek passed.
+- PR86/dependencies I04 HOLD, PR90/Dart8, seven physical-device items and real foreign exceptions remain. Do not run denied old script/implicit suite, retry old job117717160270 or old403 archive, read keys/.env, configure credentials, pay/call real model, merge main/develop, deploy, force push or delete branches. Final monitor exited at terminal; final docs/claims review only, then stop all writers.

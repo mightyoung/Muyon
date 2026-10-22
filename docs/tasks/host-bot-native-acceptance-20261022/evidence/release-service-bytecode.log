@@ -1,0 +1,6 @@
+Exact selected javap excerpt; full output /tmp/bot-release-service-javap.log
+Class SHA256 181b01a1d74891e3b8b6d6d0d87bad90b20219daf8ffadac1ebc72e63c721aac
+protected boolean localDraftPortVerifiedForBuild();
+    Code:
+       0: iconst_0
+       1: ireturn

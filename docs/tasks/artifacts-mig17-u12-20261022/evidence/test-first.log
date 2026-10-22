@@ -1,0 +1,2 @@
+/bin/bash: line 112: cargo: command not found
+EXIT=127; NOT_RUN if cargo unavailable. lib.rs remains owner-controlled; integration harness must add pub mod artifacts.

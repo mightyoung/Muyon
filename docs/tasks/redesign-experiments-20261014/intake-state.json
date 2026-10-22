@@ -1,0 +1,48 @@
+{
+  "status": "in_progress",
+  "base_sha": "1dc7678684c573f7f7e26ff8c6aa2a31f4d7c22d",
+  "first_batch_result_sha": "8f8edf95983476a8963ea4cb35ee0a3b948aa862",
+  "original_fixture_preservation": {
+    "fixtures/redesign/classification-v1": {
+      "source_sha": "7a8128ca86c583b0bbf1191c4baa4f3e732ca547",
+      "files": 33,
+      "all_source_bytes_preserved": true
+    },
+    "fixtures/redesign/recovery-minimal-v1": {
+      "source_sha": "55480f06490983a54e38908b043b06b4b02df451",
+      "files": 3,
+      "all_source_bytes_preserved": true
+    }
+  },
+  "SPIKE01": {
+    "status": "readonly_inventory_complete",
+    "native_loading": "not_run",
+    "M03": "blocked_contract",
+    "available": "Java runtime 21; cached Flutter/Dart and wrapper only",
+    "missing": [
+      "Android SDK/adb/NDK",
+      "JDK compiler",
+      "Gradle/Kotlin CLI",
+      "Rust/Cargo/Android targets",
+      "UniFFI/JNA verified dependencies",
+      "queryable device/emulator"
+    ],
+    "no_install_or_download": true,
+    "no_new_credentials_or_paid_resources": true,
+    "evidence": {
+      "inventory.md": {
+        "sha256": "e28aaf6c97da053cf4f9f4a352c14286c82eff0ad9e0beeef703d69898149096",
+        "external_evidence_path": "/workspace/reports/spike01-readonly-20261014/inventory.md"
+      },
+      "inventory.safe.json": {
+        "sha256": "18afc0dc16bae0a6fa7c6b544668ccca24972b71b223fb1d0ab7cc0311dabbd0",
+        "external_evidence_path": "/workspace/reports/spike01-readonly-20261014/inventory.safe.json"
+      }
+    }
+  },
+  "D01a": "writer_and_independent_review_in_progress",
+  "D03a": "writer_and_independent_review_in_progress",
+  "CI": "not_run_for_this_batch",
+  "runtime_gate_52": "not_run",
+  "product_schema": "unfrozen"
+}

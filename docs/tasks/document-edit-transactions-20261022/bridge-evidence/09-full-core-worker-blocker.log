@@ -1,0 +1,75 @@
+warning: method `document_publish_candidate_in_transaction` is never used
+   --> muyon-core/src/documents/candidate.rs:163:19
+    |
+ 36 | impl BusinessStore {
+    | ------------------ method in this implementation
+...
+163 |     pub(crate) fn document_publish_candidate_in_transaction(&self, tx: &Transaction<'_>, access: &DocumentAccess, candidate_id: &str) -> ...
+    |                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = note: `#[warn(dead_code)]` on by default
+
+warning: methods `historical_grant` and `document_history_access_in_transaction` are never used
+   --> muyon-core/src/documents/storage.rs:117:8
+    |
+ 88 | impl BusinessStore {
+    | ------------------ methods in this implementation
+...
+117 |     fn historical_grant(&self, current: &DocumentAccess, historical: &DocumentRef, required: &[DocumentOperation]) -> Result<()> {
+    |        ^^^^^^^^^^^^^^^^
+...
+162 |     pub(crate) fn document_history_access_in_transaction(&self, tx: &Transaction<'_>, current: &DocumentAccess, historical: &DocumentRef,...
+    |                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+   Compiling muyon-core v0.1.0 (/tmp/muyon-document-durable-check.4MrIWpNe/crates/muyon-core)
+warning: `muyon-core` (lib) generated 2 warnings
+error[E0599]: no method named `document_candidate_upload_retained` found for reference `&BusinessStore` in the current scope
+   --> muyon-core/src/bin/../blobs.rs:860:21
+    |
+860 |             if self.document_candidate_upload_retained(cell(row, 0)?)? {
+    |                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+help: there is a method `candidate_upload_is_pinned` with a similar name, but with different arguments
+   --> muyon-core/src/bin/../blobs.rs:444:5
+    |
+444 | /     pub(crate) fn candidate_upload_is_pinned(
+445 | |         &self,
+446 | |         upload_id: &str,
+447 | |         project_id: &str,
+448 | |         expected: &BlobRef,
+449 | |     ) -> Result<bool> {
+    | |_____________________^
+
+error[E0599]: no method named `document_candidate_reserves_digest` found for reference `&BusinessStore` in the current scope
+   --> muyon-core/src/bin/../blobs.rs:896:28
+    |
+896 |                 match self.document_candidate_reserves_digest(upload, digest)? {
+    |                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ method not found in `&BusinessStore`
+
+error[E0599]: no method named `document_candidate_upload_retained` found for reference `&business::BusinessStore` in the current scope
+   --> muyon-core/src/bin/../blobs.rs:860:21
+    |
+860 |             if self.document_candidate_upload_retained(cell(row, 0)?)? {
+    |                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+help: there is a method `candidate_upload_is_pinned` with a similar name, but with different arguments
+   --> muyon-core/src/bin/../blobs.rs:444:5
+    |
+444 | /     pub(crate) fn candidate_upload_is_pinned(
+445 | |         &self,
+446 | |         upload_id: &str,
+447 | |         project_id: &str,
+448 | |         expected: &BlobRef,
+449 | |     ) -> Result<bool> {
+    | |_____________________^
+
+error[E0599]: no method named `document_candidate_reserves_digest` found for reference `&business::BusinessStore` in the current scope
+   --> muyon-core/src/bin/../blobs.rs:896:28
+    |
+896 |                 match self.document_candidate_reserves_digest(upload, digest)? {
+    |                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ method not found in `&business::BusinessStore`
+
+For more information about this error, try `rustc --explain E0599`.
+error: could not compile `muyon-core` (bin "business_worker") due to 2 previous errors
+warning: build failed, waiting for other jobs to finish...
+error: could not compile `muyon-core` (bin "business_worker" test) due to 2 previous errors

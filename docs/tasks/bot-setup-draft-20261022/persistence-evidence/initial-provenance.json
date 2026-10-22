@@ -1,0 +1,11 @@
+{
+  "record_kind": "Initial API RED and initial GREEN raw files retained; exact initial start/end times were not recorded; final author and independent reruns have full metadata.",
+  "recorded_utc": "2026-10-22T05:06:32.519324+00:00",
+  "red_evidence": "Compiler diagnostics for missing exportDraft/restoreDraft before implementation; tool reported exit1.",
+  "files": {
+    "red.stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "red.stderr.log": "effd751c539fb1bb8b9d53a3babefd9d35a2ec69e8e6451eb341c5f52333839c",
+    "initial-green/stdout.log": "c4f13aef5453061ef4d6e011c48836bdc9b06db06221a5ba0550392560539cba",
+    "initial-green/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

@@ -1,0 +1,28 @@
+Base source head 3a625b34ca6468bb9c1c9338b087ad43d9db04b6
+core a27f04aa2460971940d4bdf2c8263bdf81f381c2
+adapter protocol6b796c8d6e094d45ef25e28698048c21ef0ae7b3
+combo /tmp/muyon-document-durable-check.CR18lK1F
+2e811039c45e4055b66cfa8ea86b96a177b2721c2ce2521cc40dfa3dea6e4b4d crates/muyon-core/src/document_edit/edited_candidates.rs
+a6a8d43186ecdf26756a8fb4e81657aeabe5d5cd055c0a63f231eb5b4d19b49a crates/muyon-core/src/document_edit/engine_protocol.rs
+337ae2c1b5d2ddb1e86d0d51f9e4572a3d75daaa26c8fe12465aaf7b3acdee62 crates/muyon-core/src/document_edit/fingerprint.rs
+4e31314e592bdc024911434c4bb463e8930a9c067b848b7741732d834ff6e942 crates/muyon-core/src/document_edit/gateway.rs
+8ca638b74b79259b251e6a23ca696f9d08f6b1645df711b3dd07f49731aee158 crates/muyon-core/src/document_edit/mod.rs
+04ba412d87355f56bb08eab3fe1cc1219dbdbca9c1017d5c3286272291566c83 crates/muyon-core/src/document_edit/text_protocol.rs
+1f47307a5d190a5244ebf0708a4fc2f34b98465559de66276b6b8725b9ca30c4 crates/muyon-core/tests/document_edit_candidates.rs
+2caf103f88bd61086856010ab1cac7750ee6cd8f62cc3d6f9e4a97892ca46d68 crates/muyon-core/tests/document_edit_engine_protocol.rs
+a31fca38e9d2433ba933ed9fd9908c886baeb7a31f357a420b03a598b288d34b crates/muyon-core/tests/document_edit_gateway.rs
+aed2497dc9fd586006a1f140b2c138a28b6b10fdd64721998635255804a0b1ee crates/muyon-core/tests/document_edit_policy_epoch.rs
+e2fedeca94cb2a7f4cb167d6d400b1365a033c25a2efc1341956f7be9cfb1383 crates/muyon-core/tests/document_edit_schema2.rs
+643fba35df0834a28fb28d9497df9198cea71d926d4a9185060e630ace7e66d6 crates/muyon-core/tests/document_edit_transactions.rs
+375e05e2c6744eaa95ebbc53a30b88bbd3ca8d7d441608f3dccf622b336e765c crates/muyon-core/tests/document_edit_tree_goldens.json
+$ /workspace/document-edit-tools/toolchain/bin/rustc --version
+rustc 1.90.0 (1159e78c4 2025-09-14)
+exit=0
+$ /workspace/document-edit-tools/toolchain/bin/cargo --version
+cargo 1.90.0 (840b83a10 2025-07-30)
+exit=0
+$ git ls-remote origin refs/heads/main refs/heads/develop refs/heads/task/document-edit-transactions-20261022
+0ab2c4f667681b9aacb017f8cd2eea6f576cf78e	refs/heads/develop
+cc7c8d14d30e3d3c4c7c6cb2bf2059a99e46e003	refs/heads/main
+3a625b34ca6468bb9c1c9338b087ad43d9db04b6	refs/heads/task/document-edit-transactions-20261022
+exit=0

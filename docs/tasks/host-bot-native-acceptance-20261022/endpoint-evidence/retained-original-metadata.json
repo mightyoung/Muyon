@@ -1,0 +1,28 @@
+{
+  "collection": "post-run read-only existing artifacts; no launch or device calls",
+  "files": [
+    {
+      "original_path": "/workspace/host-bot-native-tools/avd/host-bot-api26.avd/emu-launch-params.txt",
+      "archive": "emu-launch-params.txt",
+      "size": 302,
+      "mtime_ns": 1792698976289902966,
+      "sha256": "2b876ba1f214269928b7ffca59447dc28bd057c9bf096a86d20aa86f1d28abe6"
+    },
+    {
+      "original_path": "/workspace/host-bot-native-tools/avd/host-bot-api26.avd/config.ini",
+      "archive": "avd-config.ini",
+      "size": 473,
+      "mtime_ns": 1792698617510871345,
+      "sha256": "57b4e20993335b6c6a8c10c9a7448c3a5465cb9ecbf57db278b63a9e7e119dee"
+    },
+    {
+      "original_path": "/workspace/host-bot-native-tools/avd/host-bot-api26.ini",
+      "archive": "avd-pointer.ini",
+      "size": 102,
+      "mtime_ns": 1792698535090882526,
+      "sha256": "626a58bb73acd421c92ccf21947562ef0a9964ea4f2e80e5c026f5168b796f6c"
+    }
+  ],
+  "recorded_pid_17275_currently_absent": true,
+  "boundary": "mtime is file metadata, not independently authenticated historical timestamp; no saved PID-to-socket inode mapping"
+}

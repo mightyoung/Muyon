@@ -1,0 +1,83 @@
+{
+  "status": "provisional_host_only",
+  "Android_actual_load": "NOT_RUN",
+  "M03": "blocked_contract",
+  "base": "b17ac548f7a8d2d6151cbdaf6af527722c67ee50",
+  "results": {
+    "initial_red": {
+      "exit": 101,
+      "passed": 3,
+      "assertion_failures": 12
+    },
+    "green": {
+      "exit": 0,
+      "tests": 15
+    },
+    "reconnect_red": {
+      "exit": 101,
+      "tests": 19,
+      "assertion_failures": 1
+    },
+    "restored_green": {
+      "exit": 0,
+      "tests": 19
+    },
+    "d03a_regression": {
+      "exit": 0,
+      "tests": 24
+    }
+  },
+  "mutation_evidence": {
+    "source_sha256": "8ed5f0b6c28944d739c4f206f8708f9ec69c7c1c7af5d1c252fc96514864e0db",
+    "restored": true,
+    "mutations": [
+      {
+        "name": "wrong_domain",
+        "test": "all_three_domain_fields_are_required",
+        "exit": 101,
+        "assertion_failed": true
+      },
+      {
+        "name": "epoch_erases_receipts",
+        "test": "epoch_is_only_display_fence",
+        "exit": 101,
+        "assertion_failed": true
+      },
+      {
+        "name": "new_intent_erases_unknown",
+        "test": "unknown_survives_reconnect_and_new_intent",
+        "exit": 101,
+        "assertion_failed": true
+      }
+    ]
+  },
+  "logs": {
+    "d03a-regression.log": "13ace5feb1e27247fbfb3dd622cdc535083e9a5a23fbf2e134476c5563e992da",
+    "epoch_erases_receipts.log": "3c6300f030f83937fee3eaf52693476fefaa4246330b851a335f158aa8d5ba1f",
+    "final-green.log": "aed806dfaf84c4a9118d69d1c8107d36d5e1f0b586cb1c4262a95350a34692b0",
+    "green.log": "078d700b6bd4005ec23ebce85eed89b20626bdf09a9cd864a111c415c23a32a7",
+    "new_intent_erases_unknown.log": "b61aeb52c60805a224cc4fcc8ea4adb1623865698201ab5835a934bd524a3898",
+    "reconnect-red.log": "41fc6f632e8f9f5c63a9a06a01d62ea895e04ec649e505f4d44dbfac4b19a82a",
+    "red.log": "a3df88d45b6b9c800791c902394dfe3aac580a3bc90c113a578c32d2933c2f0d",
+    "restored-green.log": "c5bb2b55ce2cd0441debaff0570d27b3876fa84aec9834bd1f66107e4b6d60b5",
+    "wrong_domain.log": "1135f572d5af13db8707111f870a933e7b883c0cc5bd3d936ca70c621a52a7d3"
+  },
+  "source_hashes": {
+    ".gitignore": "02e7b40893c74a993a139de7b0f85d8cf2eaea57d544effd576920a514872af4",
+    "Cargo.lock": "29bc18ee34e2e16ad3f6526ae070bf5ffaa1f11e3646c7f346ef98f6c8d7e236",
+    "Cargo.toml": "d5d3bb70253d585bc44223d764ccdc306738b611973c7cf13937311dd90e98ba",
+    "README.md": "6204acc702070c421cf9cd22dd798acf015671990251a672003f4e1a63a5844f",
+    "mutations.py": "c353c2e4464b149e063670fd03fe13f04787fac4fa3389aa85a3b26b84c33ef8",
+    "src/lib.rs": "8ed5f0b6c28944d739c4f206f8708f9ec69c7c1c7af5d1c252fc96514864e0db",
+    "tests/reducer.rs": "b860e4c407478c9bd3c56a60ec39099c92cdd1e0e8ff1835e7427eafb189d3d2"
+  },
+  "limitations": [
+    "in_memory_commit_not_physical_durability",
+    "synthetic_ledger_exact_equality_not_source_authentication_or_digest_protocol",
+    "no_executor_no_real_dispatch_evidence",
+    "synthetic_trust_seam_not_production_user_provenance",
+    "no_product_schema_freeze",
+    "no_snapshot_parser_installation_or_permission_verifier",
+    "original_fixture_states_unchanged"
+  ]
+}

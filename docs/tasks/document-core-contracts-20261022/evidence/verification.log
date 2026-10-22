@@ -1,0 +1,5 @@
+Thu Oct 22 04:22:21 UTC 2026
+/bin/bash: line 1: cargo: command not found
+exit=127
+/bin/bash: line 1: cargo: command not found
+fmt_exit=127

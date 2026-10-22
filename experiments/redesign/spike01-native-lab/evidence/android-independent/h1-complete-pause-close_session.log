@@ -1,0 +1,3 @@
+destructor_enter close_session pause
+destructor_return
+H1_PASS close_session pause ['reentrant_rejected']

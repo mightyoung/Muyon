@@ -1,0 +1,116 @@
+{
+  "base_sha": "b62980bbc91bbc78c0b765118d2221ffd536f45e",
+  "status": "provisional_actual_synthetic_memory_pipeline",
+  "android_actual_load": "NOT_RUN",
+  "M03": "blocked_contract",
+  "results": {
+    "initial_red": {
+      "exit": 1,
+      "tests": 16,
+      "assertion_failures": 12,
+      "passed": 4
+    },
+    "initial_green": {
+      "exit": 0,
+      "tests": 16
+    },
+    "protocol_red": {
+      "exit": 1,
+      "tests": 22,
+      "assertion_failures": 2
+    },
+    "budget_red": {
+      "exit": 1,
+      "tests": 1,
+      "assertion_failures": 1,
+      "actual_reply_bytes": 34182
+    },
+    "budget_recovery_red": {
+      "exit": 1,
+      "tests": 1,
+      "assertion_failures": 1
+    },
+    "restored_green": {
+      "exit": 0,
+      "passed": 24,
+      "failed": 0,
+      "skipped": 0
+    },
+    "cargo_test": {
+      "exit": 0,
+      "tests": 0
+    }
+  },
+  "mutations": {
+    "source_sha256": "d56307a404aa93978505dde8e75ee66d8769973f2356d6d8b74ca37a32341081",
+    "restored": true,
+    "mutants": [
+      {
+        "mutant": "duplicate_replay_disabled",
+        "test": "test_duplicate_original_command_is_oneeffect",
+        "build_exit": 0,
+        "test_exit": 1,
+        "assertion_detected": true
+      },
+      {
+        "mutant": "cas_uses_current_instead_of_original",
+        "test": "test_stale_cas_plan_cannot_write",
+        "build_exit": 0,
+        "test_exit": 1,
+        "assertion_detected": true
+      },
+      {
+        "mutant": "unknown_lookup_dispatches",
+        "test": "test_lookup_absent_is_unknown_noeffect",
+        "build_exit": 0,
+        "test_exit": 1,
+        "assertion_detected": true
+      },
+      {
+        "mutant": "old_receipt_regresses_projection",
+        "test": "test_oldreceipt_independent_ofepoch_no_projection_regression",
+        "build_exit": 0,
+        "test_exit": 1,
+        "assertion_detected": true
+      }
+    ]
+  },
+  "binary_sha256": "eb697e57d445f2b437bd16877177be56a6c5d6b8c9dc5ee9f2f205597e8efa40",
+  "source_hashes": {
+    "Cargo.toml": "7e740be392af452c57ce8c99e33af04e88433cf54fdd16bd2c7e84f2654d0b27",
+    "Cargo.lock": "88674128dcd4621e31267009fed3b54f964c5406ad3bd22c9e85f12bc4ab0003",
+    "src/main.rs": "d56307a404aa93978505dde8e75ee66d8769973f2356d6d8b74ca37a32341081",
+    "tests/process.py": "7e3e8895b75431df5b9ef5bf7a5094b0effae150b3da5584365fda687c72caab",
+    "mutations.py": "411ccb012067cbf7c24f4ddd0bb77a201069e523ccd25dcf6c1a3a4374a65478"
+  },
+  "logs_sha256": {
+    "duplicate_replay_disabled-build.log": "5c4f132a6fe6256df91654979f3b1e294e36518902d1c47c65914b36704205d9",
+    "budget-recovery-red.log": "e0f42d792db8c40d33130b2c7b3497bbd8dc5f88a85e9b1e81f13215bfe276e2",
+    "build-final.log": "0c8b3ddb76dc6f025cabca347d257d1e10a35b1d2b12cb1fa11d77ac59f14b94",
+    "reply-budget-red.log": "9d3584c878624b85c206adcb356f22b52c7e69148fdf3ec5dc34adb1ee08ccc4",
+    "final-green.log": "e319548d479dafe1830b408bd26fd7cf64f56da636ceb56d3672b7f43bc264ec",
+    "cas_uses_current_instead_of_original.log": "41275500544783f17c8fb627f963bace6bd307b148a75057349ab368796a76c6",
+    "red.log": "c28646882781ca82480195fbc5be3198b36c576db37565114d3ba38d2d6e3d4b",
+    "protocol-green.log": "f4713c46295599194fdb13df78b1b8a4de7bcb6786c28127d54e79b8f3e059c4",
+    "green.log": "ce7383b1ccdb4316eeb4d7c9c19bb3815b39229df6df5bbb00c1e99c6067215c",
+    "duplicate_replay_disabled.log": "d653fcda3f830d9dc041c091b3d3d76d5e8293ad391c0341147ad3f3d6480cec",
+    "protocol-red.log": "2271906d4bad4b034144c1e3f5f01459cce24304f104124f5b54aac428a92837",
+    "unknown_lookup_dispatches-build.log": "6715d52e615840d938b7ac93af8b2b593b6c8837bbc426206db2fdb990bab499",
+    "build-red.log": "1e60387e891b74b76a415a3546c56e9f4d0eab2129fc285d4083f78392022de9",
+    "build-green.log": "df419637f642d4fd00a95928d07e023e6d91c6c91986fefd72a0ad71fcd2282b",
+    "old_receipt_regresses_projection-build.log": "10cb3c5661838bb3ce56f04fdad4673dff304bbb0a9524bd04d13b539a97dc0e",
+    "cargo-test-final.log": "f4adbbdfc2eb9fc3696b554811e514d53d73905e8bc2abb65aa6b9f63d8523c6",
+    "build-protocol-green.log": "db3674699fbfb060ac0a21c183c2a7e99a42c492c0a5a0a4435e08033dca7779",
+    "cas_uses_current_instead_of_original-build.log": "36157b77284baf6e853cdeb867c329ebd254904b80d1076247711394199d69a8",
+    "unknown_lookup_dispatches.log": "d517a86f9766a2c3e679111cd02e9d0e2385f11d2a8344c7a4f4306f654d3029",
+    "restored-green.log": "042b969a0a501398d62e6ef63941a7a1337ff93e2ae7f7e090cab7dfbf5adbc7",
+    "old_receipt_regresses_projection.log": "e188b6deb9395628c2bc3854373bfc28c6cba256ebda02f7ec708fbcf7b8013c"
+  },
+  "limitations": [
+    "memory_swap_not_database_durability",
+    "synthetic_seed_not_real_authority",
+    "no_process_restart_ledger_preservation",
+    "no_real_user_or_model_device",
+    "no_product_M03_freeze"
+  ]
+}

@@ -1,0 +1,126 @@
+INSTRUMENTATION_STATUS: numtests=5
+INSTRUMENTATION_STATUS: stream=
+com.mightyoung.muyon.product.agents.AgentCatalogTest:
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=escapedInstructionsCannotCommitAnUnreadableExpandedDirectory
+INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.product.agents.AgentCatalogTest
+INSTRUMENTATION_STATUS: current=1
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: numtests=5
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=escapedInstructionsCannotCommitAnUnreadableExpandedDirectory
+INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.product.agents.AgentCatalogTest
+INSTRUMENTATION_STATUS: current=1
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: numtests=5
+INSTRUMENTATION_STATUS: stream=
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=reopenedCatalogPreservesEditsAndGroupArchiveNeverDeletesAgents
+INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.product.agents.AgentCatalogTest
+INSTRUMENTATION_STATUS: current=2
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: numtests=5
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=reopenedCatalogPreservesEditsAndGroupArchiveNeverDeletesAgents
+INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.product.agents.AgentCatalogTest
+INSTRUMENTATION_STATUS: current=2
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: numtests=5
+INSTRUMENTATION_STATUS: stream=
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=invalidMembersAndCorruptDataCannotOverwritePersistedDirectory
+INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.product.agents.AgentCatalogTest
+INSTRUMENTATION_STATUS: current=3
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: numtests=5
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=invalidMembersAndCorruptDataCannotOverwritePersistedDirectory
+INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.product.agents.AgentCatalogTest
+INSTRUMENTATION_STATUS: current=3
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: numtests=5
+INSTRUMENTATION_STATUS: stream=
+com.mightyoung.muyon.product.ChatOriginPresentationTest:
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=oldRequestRecoveryShowsOriginalIdentityInsideAnotherGroup
+INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.product.ChatOriginPresentationTest
+INSTRUMENTATION_STATUS: current=4
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: numtests=5
+INSTRUMENTATION_STATUS: stream=
+Error in oldRequestRecoveryShowsOriginalIdentityInsideAnotherGroup(com.mightyoung.muyon.product.ChatOriginPresentationTest):
+java.lang.AssertionError: Failed to assert the following: (Text + InputText + EditableText contains '原始助手A' (ignoreCase: false))
+Semantics of the node:
+Node #18 at (l=32.0, t=329.0, r=194.0, b=364.0)px, Tag: 'chat-original-origin'
+Text = '[原请求 · 原始助手A · 会话 agent:original-a]'
+Actions = [ClearTextSubstitution, GetTextLayoutResult, SetTextSubstitution, ShowTextSubstitution]
+Has 2 siblings
+Selector used: (TestTag = 'chat-original-origin')
+
+	at androidx.compose.ui.test.AssertionsKt.assert(Assertions.kt:264)
+	at androidx.compose.ui.test.AssertionsKt.assert$default(Assertions.kt:254)
+	at androidx.compose.ui.test.AssertionsKt.assertTextContains(Assertions.kt:208)
+	at androidx.compose.ui.test.AssertionsKt.assertTextContains$default(Assertions.kt:204)
+	at com.mightyoung.muyon.product.ChatOriginPresentationTest.oldRequestRecoveryShowsOriginalIdentityInsideAnotherGroup(ChatOriginPresentationTest.kt:47)
+
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=oldRequestRecoveryShowsOriginalIdentityInsideAnotherGroup
+INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.product.ChatOriginPresentationTest
+INSTRUMENTATION_STATUS: stack=java.lang.AssertionError: Failed to assert the following: (Text + InputText + EditableText contains '原始助手A' (ignoreCase: false))
+Semantics of the node:
+Node #18 at (l=32.0, t=329.0, r=194.0, b=364.0)px, Tag: 'chat-original-origin'
+Text = '[原请求 · 原始助手A · 会话 agent:original-a]'
+Actions = [ClearTextSubstitution, GetTextLayoutResult, SetTextSubstitution, ShowTextSubstitution]
+Has 2 siblings
+Selector used: (TestTag = 'chat-original-origin')
+
+	at androidx.compose.ui.test.AssertionsKt.assert(Assertions.kt:264)
+	at androidx.compose.ui.test.AssertionsKt.assert$default(Assertions.kt:254)
+	at androidx.compose.ui.test.AssertionsKt.assertTextContains(Assertions.kt:208)
+	at androidx.compose.ui.test.AssertionsKt.assertTextContains$default(Assertions.kt:204)
+	at com.mightyoung.muyon.product.ChatOriginPresentationTest.oldRequestRecoveryShowsOriginalIdentityInsideAnotherGroup(ChatOriginPresentationTest.kt:47)
+
+INSTRUMENTATION_STATUS: current=4
+INSTRUMENTATION_STATUS_CODE: -2
+INSTRUMENTATION_STATUS: numtests=5
+INSTRUMENTATION_STATUS: stream=
+com.mightyoung.muyon.product.WorkbenchNavigationTest:
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=agentAndGroupNavigationPreservesSeparateConversationsAndGlobalReceiptMarkers
+INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.product.WorkbenchNavigationTest
+INSTRUMENTATION_STATUS: current=5
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: numtests=5
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=agentAndGroupNavigationPreservesSeparateConversationsAndGlobalReceiptMarkers
+INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.product.WorkbenchNavigationTest
+INSTRUMENTATION_STATUS: current=5
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_RESULT: stream=
+
+Time: 8.926
+There was 1 failure:
+1) oldRequestRecoveryShowsOriginalIdentityInsideAnotherGroup(com.mightyoung.muyon.product.ChatOriginPresentationTest)
+java.lang.AssertionError: Failed to assert the following: (Text + InputText + EditableText contains '原始助手A' (ignoreCase: false))
+Semantics of the node:
+Node #18 at (l=32.0, t=329.0, r=194.0, b=364.0)px, Tag: 'chat-original-origin'
+Text = '[原请求 · 原始助手A · 会话 agent:original-a]'
+Actions = [ClearTextSubstitution, GetTextLayoutResult, SetTextSubstitution, ShowTextSubstitution]
+Has 2 siblings
+Selector used: (TestTag = 'chat-original-origin')
+
+	at androidx.compose.ui.test.AssertionsKt.assert(Assertions.kt:264)
+	at androidx.compose.ui.test.AssertionsKt.assert$default(Assertions.kt:254)
+	at androidx.compose.ui.test.AssertionsKt.assertTextContains(Assertions.kt:208)
+	at androidx.compose.ui.test.AssertionsKt.assertTextContains$default(Assertions.kt:204)
+	at com.mightyoung.muyon.product.ChatOriginPresentationTest.oldRequestRecoveryShowsOriginalIdentityInsideAnotherGroup(ChatOriginPresentationTest.kt:47)
+
+FAILURES!!!
+Tests run: 5,  Failures: 1
+
+
+INSTRUMENTATION_CODE: -1

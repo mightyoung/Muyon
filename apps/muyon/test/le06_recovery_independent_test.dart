@@ -9,6 +9,8 @@ import 'package:muyon/platform/storage_manager.dart';
 import 'package:muyon_module_api/muyon_module_api.dart';
 import 'package:sqlite3/sqlite3.dart';
 
+import 'support/isolated_flutter_project.dart';
+
 const _file = 'test/le06_recovery_independent_test.dart';
 const _pathCanary = '/synthetic/LE06_PATH_91dfe';
 const _uriCanary = 'content://synthetic/LE06_URI_a32cb';
@@ -61,16 +63,25 @@ Matcher _error(String code) => throwsA(
 
 // A child is a separate Flutter tester OS process with a separately opened
 // SQLite connection. No inherited ledger, issuer, or in-memory running map.
-Future<Process> _child(Directory dir, String mode, String name) =>
-    Process.start(
-      Platform.environment['LE06_FLUTTER'] ?? 'flutter',
-      ['test', '--no-pub', _file, '--plain-name', 'child process fixture'],
-      environment: {
-        'LE06_CHILD_DIR': dir.path,
-        'LE06_CHILD_MODE': mode,
-        'LE06_CHILD_NAME': name,
-      },
-    );
+Future<Process> _child(Directory dir, String mode, String name) async {
+  final project = IsolatedFlutterProject.create();
+  addTearDown(project.dispose);
+  final process = await Process.start(
+    Platform.environment['LE06_FLUTTER'] ?? 'flutter',
+    ['test', '--no-pub', _file, '--plain-name', 'child process fixture'],
+    workingDirectory: project.directory.path,
+    environment: {
+      'LE06_CHILD_DIR': dir.path,
+      'LE06_CHILD_MODE': mode,
+      'LE06_CHILD_NAME': name,
+    },
+  );
+  addTearDown(() async {
+    process.kill(ProcessSignal.sigkill);
+    await process.exitCode;
+  });
+  return process;
+}
 
 Future<void> _finish(Process process) async {
   final output = process.stdout.transform(utf8.decoder).join();
@@ -110,6 +121,28 @@ void main() {
     final mode = Platform.environment['LE06_CHILD_MODE']!;
     final name = Platform.environment['LE06_CHILD_NAME']!;
     final db = ManagedConnection(sqlite3.open('$root/ledger.sqlite'));
+    final projectRoot = Directory.current.absolute.uri;
+    final nativeManifest = File(
+      'build/unit_test_assets/NativeAssetsManifest.json',
+    );
+    final assetMap =
+        (jsonDecode(nativeManifest.readAsStringSync())
+                as Map<String, dynamic>)['native-assets']
+            as Map<String, dynamic>;
+    final libraryPaths = assetMap.values
+        .cast<Map<String, dynamic>>()
+        .expand((target) => target.values)
+        .cast<List<dynamic>>()
+        .map((entry) => entry.last as String)
+        .toList();
+    File('$root/project-$name.json').writeAsStringSync(
+      jsonEncode({
+        'root': projectRoot.toFilePath(),
+        'manifest': nativeManifest.absolute.path,
+        'libraries': libraryPaths,
+        'config': File('.dart_tool/package_config.json').absolute.path,
+      }),
+    );
     final issuer = LocalExportTargetIssuer();
     final ledger = LocalExportLedger(db);
     var calls = 0;
@@ -333,58 +366,104 @@ local_export_attempts BEGIN SELECT RAISE(ABORT, '$_uriCanary'); END''');
     },
   );
 
-  test(
-    'two independently gated processes contend for one pending reservation',
-    () async {
-      LocalExportLedger.createTables(db.raw);
-      await db.close();
-      final first = await _child(dir, 'race', 'first');
-      final firstDone = _finish(first);
-      // Serialize Flutter's native-asset build, then release both *database*
-      // contenders together. Concurrent builders share generated dylibs.
-      await _waitFor(File('${dir.path}/ready-first'));
-      final second = await _child(dir, 'race', 'second');
-      final secondDone = _finish(second);
-      try {
-        await Future.wait([
-          _waitFor(File('${dir.path}/ready-first')),
-          _waitFor(File('${dir.path}/ready-second')),
-        ]);
-        File('${dir.path}/go').writeAsStringSync('start both');
-        final deadline = DateTime.now().add(const Duration(seconds: 90));
-        while (!File('${dir.path}/result-first.json').existsSync() &&
-            !File('${dir.path}/result-second.json').existsSync()) {
-          if (DateTime.now().isAfter(deadline)) {
-            fail('No losing process result');
-          }
-          await Future<void>.delayed(const Duration(milliseconds: 20));
+  test('child Flutter runner leaves parent native asset manifest untouched', () async {
+    final manifest = File('build/unit_test_assets/NativeAssetsManifest.json');
+    expect(manifest.existsSync(), isTrue);
+    final before = manifest.statSync();
+    final contents = manifest.readAsBytesSync();
+    await _finish(await _child(dir, 'pending-failure', 'isolated-assets'));
+    final project = jsonDecode(
+      File('${dir.path}/project-isolated-assets.json').readAsStringSync(),
+    ) as Map<String, dynamic>;
+    final privateRoot = project['root'] as String;
+    expect(privateRoot, isNot(Directory.current.absolute.path));
+    expect(project['manifest'], startsWith(privateRoot));
+    expect(project['config'], startsWith(privateRoot));
+    expect(project['libraries'], isNotEmpty);
+    for (final library in project['libraries'] as List<dynamic>) {
+      expect(library, startsWith(privateRoot));
+      expect(File(library as String).existsSync(), isTrue);
+    }
+    // ignore: avoid_print
+    print('LE06-ASSET-ISOLATION ${jsonEncode(project)}');
+    expect(manifest.readAsBytesSync(), contents);
+    expect(
+      manifest.statSync().modified,
+      before.modified,
+      reason:
+          'nested Flutter builders must not rewrite assets used by other tests',
+    );
+  });
+
+  test('two independently gated processes contend for one pending reservation', () async {
+    LocalExportLedger.createTables(db.raw);
+    await db.close();
+    final first = await _child(dir, 'race', 'first');
+    final firstDone = _finish(first);
+    // Each child has private build assets. Release both independent database
+    // contenders together after their separate SQLite connections are ready.
+    await _waitFor(File('${dir.path}/ready-first'));
+    final second = await _child(dir, 'race', 'second');
+    final secondDone = _finish(second);
+    try {
+      await Future.wait([
+        _waitFor(File('${dir.path}/ready-first')),
+        _waitFor(File('${dir.path}/ready-second')),
+      ]);
+      File('${dir.path}/go').writeAsStringSync('start both');
+      final deadline = DateTime.now().add(const Duration(seconds: 90));
+      while (!File('${dir.path}/result-first.json').existsSync() &&
+          !File('${dir.path}/result-second.json').existsSync()) {
+        if (DateTime.now().isAfter(deadline)) {
+          fail('No losing process result');
         }
-      } finally {
-        File('${dir.path}/release').writeAsStringSync('release winner');
-        await Future.wait([firstDone, secondDone]);
-        db = ManagedConnection(sqlite3.open('${dir.path}/ledger.sqlite'));
-        ledger = LocalExportLedger(db);
+        await Future<void>.delayed(const Duration(milliseconds: 20));
       }
-      final results = [result('first'), result('second')];
-      expect(results.map((r) => r['calls']).reduce((a, b) => a + b), 1);
-      expect(results.where((r) => r['state'] == 'succeeded'), hasLength(1));
-      final loser = results.singleWhere((r) => r['calls'] == 0);
-      // SQLite may reject a lock contender; no automatic retry is promised.
-      expect(
-        loser['state'] == 'unknown' ||
-            loser['error'] == 'ledger_pending_failed',
-        isTrue,
-      );
-      expect(
-        db.raw.select('SELECT * FROM local_export_attempts'),
-        hasLength(1),
-      );
-      expect(
-        ledger.read('independent')!.generate!.state,
-        LocalExportLedgerState.succeeded,
-      );
-    },
-  );
+    } finally {
+      File('${dir.path}/release').writeAsStringSync('release winner');
+      await Future.wait([firstDone, secondDone]);
+      db = ManagedConnection(sqlite3.open('${dir.path}/ledger.sqlite'));
+      ledger = LocalExportLedger(db);
+    }
+    final firstProject = jsonDecode(
+      File('${dir.path}/project-first.json').readAsStringSync(),
+    ) as Map<String, dynamic>;
+    final secondProject = jsonDecode(
+      File('${dir.path}/project-second.json').readAsStringSync(),
+    ) as Map<String, dynamic>;
+    expect(firstProject['root'], isNot(secondProject['root']));
+    expect(firstProject['config'], isNot(secondProject['config']));
+    expect(firstProject['manifest'], isNot(secondProject['manifest']));
+    // ignore: avoid_print
+    print('LE06-CHILD-PROJECTS ${jsonEncode([firstProject, secondProject])}');
+    final results = [result('first'), result('second')];
+    // LE06-RACE evidence: print both child outcomes before asserting.
+    // ignore: avoid_print
+    print('LE06-RACE results=${jsonEncode(results)}');
+    expect(
+      results.map((r) => r['calls']).reduce((a, b) => a + b),
+      1,
+      reason: 'LE06-RACE results=${jsonEncode(results)}',
+    );
+    expect(
+      results.where((r) => r['state'] == 'succeeded'),
+      hasLength(1),
+      reason: 'LE06-RACE results=${jsonEncode(results)}',
+    );
+    final loser = results.singleWhere((r) => r['calls'] == 0);
+    // SQLite may reject a lock contender; no automatic retry is promised.
+    expect(
+      loser['state'] == 'unknown' || loser['error'] == 'ledger_pending_failed',
+      isTrue,
+      reason:
+          'LE06-RACE loser=${jsonEncode(loser)} results=${jsonEncode(results)}',
+    );
+    expect(db.raw.select('SELECT * FROM local_export_attempts'), hasLength(1));
+    expect(
+      ledger.read('independent')!.generate!.state,
+      LocalExportLedgerState.succeeded,
+    );
+  });
 
   test('nested audits stay frozen on disk and all model error projections redact canaries', () async {
     final nested = <String, Object?>{

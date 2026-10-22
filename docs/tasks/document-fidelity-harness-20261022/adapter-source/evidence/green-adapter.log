@@ -1,0 +1,14 @@
+test_bad_hash_precondition_and_unknown_request_field_never_dispatch (tools.document_fidelity.tests.test_adapter.AdapterTests.test_bad_hash_precondition_and_unknown_request_field_never_dispatch) ... ok
+test_cache_other_cell_and_noop_fail (tools.document_fidelity.tests.test_adapter.AdapterTests.test_cache_other_cell_and_noop_fail) ... ok
+test_disabled_worker_entry_does_not_import_engine (tools.document_fidelity.tests.test_adapter.AdapterTests.test_disabled_worker_entry_does_not_import_engine) ... ok
+test_executor_timeout_exit_missing_oversize_logs_symlink_source_and_sidefile_fail (tools.document_fidelity.tests.test_adapter.AdapterTests.test_executor_timeout_exit_missing_oversize_logs_symlink_source_and_sidefile_fail) ... ok
+test_fixed_launch_and_readonly_distinct_copy_and_simulation_labels (tools.document_fidelity.tests.test_adapter.AdapterTests.test_fixed_launch_and_readonly_distinct_copy_and_simulation_labels) ... ok
+test_formula_merged_and_hidden_targets_reject (tools.document_fidelity.tests.test_adapter.AdapterTests.test_formula_merged_and_hidden_targets_reject) ... ok
+test_missing_admission_is_hold (tools.document_fidelity.tests.test_adapter.AdapterTests.test_missing_admission_is_hold) ... ok
+test_real_runtime_is_always_held_even_forged_pass_flags (tools.document_fidelity.tests.test_adapter.AdapterTests.test_real_runtime_is_always_held_even_forged_pass_flags) ... ok
+test_unknown_loss_rewrite_and_added_parts_fail (tools.document_fidelity.tests.test_adapter.AdapterTests.test_unknown_loss_rewrite_and_added_parts_fail) ... ok
+
+----------------------------------------------------------------------
+Ran 9 tests in 0.083s
+
+OK

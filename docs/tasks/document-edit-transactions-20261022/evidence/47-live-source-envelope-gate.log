@@ -1,0 +1,9 @@
+   Compiling muyon-core v0.1.0 (/workspace/document-edit-durable-combination/crates/muyon-core)
+    Finished `test` profile [unoptimized] target(s) in 0.27s
+     Running tests/document_edit_gateway.rs (/workspace/document-edit-combination/crates/target/debug/deps/document_edit_gateway-9524898dbf45656f)
+
+running 1 test
+test live_engine_envelope_cannot_be_confused_with_a_validated_copy_intent ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 13 filtered out; finished in 0.01s
+

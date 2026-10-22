@@ -1,0 +1,4 @@
+Exception in thread "main" java.lang.IllegalStateException: read-only terminal lookup must preserve the original failure reason
+	at com.mightyoung.muyon.androidlab.ChatReadChecksKt.runChatReadChecks(ChatReadChecks.kt:23)
+	at com.mightyoung.muyon.androidlab.Muyon_chat_probeKt.main(muyon-chat-probe.kt:2)
+	at com.mightyoung.muyon.androidlab.Muyon_chat_probeKt.main(muyon-chat-probe.kt)

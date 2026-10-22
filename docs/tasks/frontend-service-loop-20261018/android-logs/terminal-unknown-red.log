@@ -1,0 +1,15 @@
+experiments/redesign/android-compose-lab/state/src/test/kotlin/com/mightyoung/muyon/androidlab/ChatReadChecks.kt:16:90: error: unresolved reference 'finishEnvelope'.
+    val disclosureDenied=original.copy(status="unknown",reason="DISCLOSURE_UNAVAILABLE").finishEnvelope(true,0)
+                                                                                         ^^^^^^^^^^^^^^
+experiments/redesign/android-compose-lab/state/src/test/kotlin/com/mightyoung/muyon/androidlab/ChatReadChecks.kt:19:11: error: cannot infer type for type parameter 'R'. Specify it explicitly.
+    check(runCatching{original.copy(status="unknown").finishEnvelope(true,1)}.isFailure)
+          ^^^^^^^^^^^
+experiments/redesign/android-compose-lab/state/src/test/kotlin/com/mightyoung/muyon/androidlab/ChatReadChecks.kt:19:55: error: unresolved reference 'finishEnvelope'.
+    check(runCatching{original.copy(status="unknown").finishEnvelope(true,1)}.isFailure)
+                                                      ^^^^^^^^^^^^^^
+experiments/redesign/android-compose-lab/state/src/test/kotlin/com/mightyoung/muyon/androidlab/ChatReadChecks.kt:20:11: error: cannot infer type for type parameter 'R'. Specify it explicitly.
+    check(runCatching{original.copy(status="events").finishEnvelope(true,0)}.isFailure)
+          ^^^^^^^^^^^
+experiments/redesign/android-compose-lab/state/src/test/kotlin/com/mightyoung/muyon/androidlab/ChatReadChecks.kt:20:54: error: unresolved reference 'finishEnvelope'.
+    check(runCatching{original.copy(status="events").finishEnvelope(true,0)}.isFailure)
+                                                     ^^^^^^^^^^^^^^

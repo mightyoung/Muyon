@@ -1,0 +1,31 @@
+{
+  "version": 1,
+  "fixed_contract_commit": "de83e44758ba036b94779cc00d439224b1d06973",
+  "author_test_commit": "9a7e02adec28f764477e1893387c8699142ec528",
+  "manifest": "experiments/redesign/rust-agent-host-lab/core/Cargo.toml",
+  "test_file": "experiments/redesign/rust-agent-host-lab/core/tests/service_controller.rs",
+  "test_blob_sha": "5c4851f455b4e5c3f25b9f8787f5f3c0a06cc08a",
+  "test_sha256": "5c9541e6124bb08faef857c9948117d8161e75810467657b6f8fe0d023b5ee19",
+  "test_names": [
+    "service_controller_executes_registered_read",
+    "controller_is_send_sync_without_moving_native_session",
+    "build_identity_is_explicit_without_host_build_environment",
+    "zero_client_initialization_retirement_requires_real_settlement"
+  ],
+  "fixture": {
+    "request_id": "read_1",
+    "variant": "Equipment",
+    "platform_client_key": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "stub_service_state": "Initializing",
+    "stub_snapshot_revision": 0
+  },
+  "red": {
+    "target": "service_controller",
+    "test": "service_controller_executes_registered_read",
+    "filtered": 3,
+    "native_reach": "AGENT_SERVICE_STUB_REACHED code=internal_failure",
+    "rust_assert": "AGENT_SERVICE_RED: admitted run must complete the registered physical read",
+    "jvm_reach": "AGENT_SERVICE_JVM_STUB_REACHED request=read_1 code=internal_failure",
+    "jvm_assert": "AGENT_SERVICE_JVM_RED: admitted run must complete the registered physical read"
+  }
+}

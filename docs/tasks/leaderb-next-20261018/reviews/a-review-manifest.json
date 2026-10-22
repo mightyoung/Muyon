@@ -1,0 +1,9 @@
+{
+  "source_sha": "e49be079eb6f3367df9b5c6d5eb1f29b74c989ae",
+  "status_after": "",
+  "command": "python3 -B -m unittest discover -s experiments/redesign/android-rust-bridge-lab/checks -p 'test_*.py'",
+  "exit": 0,
+  "passed": 71,
+  "log_sha256": "1835e4b198bc91b35282e6dda644310b102638f7407b8163bbc62c327af6b4f6",
+  "note": "Evidence-capture repeat of already-passed independent same-SHA controls; no full app build/runtime claim."
+}

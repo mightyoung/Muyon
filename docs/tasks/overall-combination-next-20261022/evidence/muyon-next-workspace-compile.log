@@ -1,0 +1,53 @@
+   Compiling muyon-core-agent-lab v0.1.0 (/workspace/Muyon-combination-next-20261022/experiments/redesign/core-agent-lab/core)
+   Compiling muyon-plugin-contract-lab v0.1.0 (/workspace/Muyon-combination-next-20261022/experiments/redesign/plugin-contract-lab/core)
+   Compiling muyon-rust-agent-host-lab v0.1.0 (/workspace/Muyon-combination-next-20261022/experiments/redesign/rust-agent-host-lab/core)
+   Compiling muyon-web-search-lab v0.1.0 (/workspace/Muyon-combination-next-20261022/experiments/redesign/web-search-lab/core)
+   Compiling muyon-core v0.1.0 (/workspace/Muyon-combination-next-20261022/crates/muyon-core)
+warning: method `document_publish_candidate_in_transaction` is never used
+   --> muyon-core/src/documents/candidate.rs:297:19
+    |
+ 62 | impl BusinessStore {
+    | ------------------ method in this implementation
+...
+297 |     pub(crate) fn document_publish_candidate_in_transaction(
+    |                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: `muyon-core` (lib) generated 1 warning
+error[E0599]: no method named `document_candidate_upload_retained` found for reference `&business::BusinessStore` in the current scope
+   --> muyon-core/tests/../src/blobs.rs:875:21
+    |
+875 |             if self.document_candidate_upload_retained(cell(row, 0)?)? {
+    |                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+help: there is a method `candidate_upload_is_pinned` with a similar name, but with different arguments
+   --> muyon-core/tests/../src/blobs.rs:451:5
+    |
+451 | /     pub(crate) fn candidate_upload_is_pinned(
+452 | |         &self,
+453 | |         upload_id: &str,
+454 | |         project_id: &str,
+455 | |         expected: &BlobRef,
+456 | |     ) -> Result<bool> {
+    | |_____________________^
+
+error[E0599]: no method named `document_candidate_reserves_digest` found for reference `&business::BusinessStore` in the current scope
+   --> muyon-core/tests/../src/blobs.rs:915:28
+    |
+915 |                 match self.document_candidate_reserves_digest(upload, digest)? {
+    |                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ method not found in `&business::BusinessStore`
+
+warning: unused import: `CandidateStatus`
+  --> muyon-core/src/bin/../documents/mod.rs:19:37
+   |
+19 | pub use candidate::{CandidateState, CandidateStatus};
+   |                                     ^^^^^^^^^^^^^^^
+   |
+   = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+   Compiling muyon-android-ffi v0.1.0 (/workspace/Muyon-combination-next-20261022/crates/muyon-android-ffi)
+For more information about this error, try `rustc --explain E0599`.
+error: could not compile `muyon-core` (test "group_runtime_store") due to 2 previous errors
+warning: build failed, waiting for other jobs to finish...
+warning: `muyon-core` (bin "business_worker" test) generated 1 warning (run `cargo fix --bin "business_worker" -p muyon-core --tests` to apply 1 suggestion)

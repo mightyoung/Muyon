@@ -1,0 +1,79 @@
+{
+  "base": "1bbba1fa73ab95e66168bc75e8a2d07d4c6384b9",
+  "fixed_domain": "bb0c77cb83684e5e8e053465f463fe4d887d342c",
+  "fixed_recovery": "44b54efd7ebcf2f3221f8509ad331ad98a42e779",
+  "commands": [
+    {
+      "label": "rust-domain",
+      "command": [
+        "cargo",
+        "+1.99.0",
+        "test",
+        "--offline",
+        "--locked",
+        "--manifest-path",
+        "experiments/redesign/device-deferred/rust-domain/Cargo.toml"
+      ],
+      "exit": 0
+    },
+    {
+      "label": "rust-recovery",
+      "command": [
+        "cargo",
+        "+1.99.0",
+        "test",
+        "--offline",
+        "--locked",
+        "--manifest-path",
+        "experiments/redesign/device-deferred/rust-recovery/Cargo.toml"
+      ],
+      "exit": 0
+    },
+    {
+      "label": "d01a",
+      "command": [
+        "python3",
+        "-B",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "experiments/redesign/d01a-contract",
+        "-p",
+        "test_*.py",
+        "-v"
+      ],
+      "exit": 0
+    },
+    {
+      "label": "d03a",
+      "command": [
+        "python3",
+        "-B",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "experiments/redesign/d03a-contract/tests",
+        "-v"
+      ],
+      "exit": 0
+    }
+  ],
+  "counts": {
+    "Rust_domain": 12,
+    "Rust_recovery": 19,
+    "D01a_dependency": 33,
+    "D03a_dependency": 24
+  },
+  "UI_sources_included": false,
+  "Android_actual_load": "NOT_RUN",
+  "M03": "blocked_contract",
+  "raw_logs_external": "/workspace/reports/device-deferred-rust-combination-20261014",
+  "log_sha256": {
+    "rust-domain.log": "afad76ce8fd89d5b08bf50ac6144dcd44160acbdf36bf52c5ca55e98ef92dbe3",
+    "d01a.log": "80ce30d0d59abdf1ab1e7c06a0830950ad2f105f61d73a51435cd499c18eee07",
+    "d03a.log": "9da682df57ad05a1c1fdc5ccc04aeab0024fc41735317303c3f82f0e36955179",
+    "rust-recovery.log": "d467d27d80b075f25eec3a6a9097e09df69632388c08d990c02d4cc5a6c2b839"
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "run_id": 39102209762,
+  "source_sha": "fdc9aea120925229aa592c3551efab9b3f67a825",
+  "action": "gh run download --repo mightyoung/Muyon --dir ci-artifacts",
+  "outcome": "HTTP403 from GitHub artifact blob; artifact exists/upload succeeded; not locally downloaded",
+  "fallback": "full authenticated workflow log retained verbatim gzip; local exact workflow raw evidence separate",
+  "credential_changes": false
+}

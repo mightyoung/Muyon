@@ -1,0 +1,16 @@
+{
+  "source_sha": "708570d59ea51024ee69bb62c97f63380d490f78",
+  "directory": "/workspace/ui-shell-tools/deliverables/708570d59ea51024ee69bb62c97f63380d490f78",
+  "apk": {
+    "path": "/workspace/ui-shell-tools/deliverables/708570d59ea51024ee69bb62c97f63380d490f78/Muyon-708570d59ea51024ee69bb62c97f63380d490f78-debug.apk",
+    "size_bytes": 426369208,
+    "sha256": "f1cc240fd981a1ea08841f3964c6422e5b240268984447022406428723ddeb0b"
+  },
+  "bundle": {
+    "path": "/workspace/ui-shell-tools/deliverables/Muyon-708570d59ea51024ee69bb62c97f63380d490f78-debug-with-notices.zip",
+    "size_bytes": 426435555,
+    "sha256": "624602da28f84fbaf25c2ebe2c031ddbb5a8dc8d2323e6d94e2541a800fa246e"
+  },
+  "license_text_files": 11,
+  "uploaded": false
+}

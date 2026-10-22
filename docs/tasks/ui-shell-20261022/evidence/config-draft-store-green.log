@@ -1,0 +1,1 @@
+PASS config draft real-files: process restore, immutable receipts, idempotency, stale CAS, scope isolation, malformed input, post-publication unknown lookup, corrupt-data preservation

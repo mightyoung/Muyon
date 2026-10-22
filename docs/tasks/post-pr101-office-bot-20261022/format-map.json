@@ -1,0 +1,37 @@
+[
+  {
+    "path": "crates/muyon-android-ffi/src/lib.rs",
+    "before": "7ac3c0ab4613b65ef9ec268287cca81bf018d366cc60d2e8d4f9a905b35a78b0",
+    "rustfmt": "241a69ca996ed80b72f6f0433ff22b303a4dc218dc4e0d56f32a8129b07ac09b"
+  },
+  {
+    "path": "crates/muyon-office/src/edit.rs",
+    "before": "6a0a3ff02e87ed2e9df92ec2b56f33f6ded4134e091ced72c3a54192e915f1ef",
+    "rustfmt": "ca12c0592ade85d7c91a4a9f419bc8f49ac9d1a3fdd71e32952046f505b9dd82"
+  },
+  {
+    "path": "crates/muyon-office/src/package.rs",
+    "before": "994c59e94dbcf41071dc35b68173b69c90e6728c9c4f63fd3d2f549c249cc377",
+    "rustfmt": "7cebe97095af0134387c37ced6051fcc62408e183cc805c2a404e779fca8ee6f"
+  },
+  {
+    "path": "crates/muyon-office/src/text.rs",
+    "before": "12fc4940bd8200b4dfb6ed8735afff5e3d2a87f106d57ffd17ab84bbb5e6419c",
+    "rustfmt": "4751b5d3396b7cc23ea50925a4d125059bcb3c7bc5e657d027c624e77cb6caa4"
+  },
+  {
+    "path": "crates/muyon-office/src/xml.rs",
+    "before": "837884647fd4568137f9ca27f417cf6350d29de6cf1caa1383772a51f8d3c122",
+    "rustfmt": "bce9dc6159d8c90c8c0777922cfa7316f18991afc4b9d82ca5640b655a363be9"
+  },
+  {
+    "path": "crates/muyon-office/tests/boundaries.rs",
+    "before": "c714b67f7874f7b941a61690cdee5858894488fab936fb29da79cba7c01112d2",
+    "rustfmt": "8c394bf52b93ad9e8d397ac454d5a2a10b2ddab4dccf4c4bf05828af83403ae6"
+  },
+  {
+    "path": "crates/muyon-office/tests/fidelity.rs",
+    "before": "18e0572d4634f4b7485f262e9cbf8f68426d78ff5fd03e911c51576c0ef6752b",
+    "rustfmt": "bccfde3d815d3c541caf51c83cccdc44c9a49360cfbe8b259da55b8d2ee90aa3"
+  }
+]

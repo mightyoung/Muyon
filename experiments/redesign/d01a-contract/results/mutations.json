@@ -1,0 +1,49 @@
+{
+  "kind": "experimental_semantic_inverse_mutations",
+  "mutations": [
+    {
+      "name": "bypass_actual_value_check",
+      "exit": 1,
+      "tests_run": 32,
+      "assertion_failures": 1,
+      "failure_names": [
+        "test_none_field_does_not_replace_actual_value_check"
+      ],
+      "required_failure_name": "test_none_field_does_not_replace_actual_value_check",
+      "killed": true,
+      "log_path": "/workspace/reports/redesign-d01a-experiment-20261014/mutations/bypass_actual_value_check.log",
+      "log_sha256": "8e8227094d894ddb32833ba41477133c84bbd6c59fa62ad283694dfca0a574a9"
+    },
+    {
+      "name": "require_Auto_rule_in_FullAllow",
+      "exit": 1,
+      "tests_run": 32,
+      "assertion_failures": 4,
+      "failure_names": [
+        "test_FullAllow_missing_Auto_rule_is_not_a_contract_block",
+        "test_expected_access_occurs_after_DUT_invocation",
+        "test_expected_and_identity_never_enter_DUT",
+        "test_wrong_expected_is_detected_without_changing_DUT_result"
+      ],
+      "required_failure_name": "test_FullAllow_missing_Auto_rule_is_not_a_contract_block",
+      "killed": true,
+      "log_path": "/workspace/reports/redesign-d01a-experiment-20261014/mutations/require_Auto_rule_in_FullAllow.log",
+      "log_sha256": "fc0cb9cb2dda7ecdf34eacc257e87f3b04a0184a80624752b0177effb2a134ed"
+    },
+    {
+      "name": "downgrade_commercial_lineage",
+      "exit": 1,
+      "tests_run": 32,
+      "assertion_failures": 1,
+      "failure_names": [
+        "test_none_target_does_not_downgrade_commercial_source"
+      ],
+      "required_failure_name": "test_none_target_does_not_downgrade_commercial_source",
+      "killed": true,
+      "log_path": "/workspace/reports/redesign-d01a-experiment-20261014/mutations/downgrade_commercial_lineage.log",
+      "log_sha256": "2a3eb1f12d91fa3418b3bebb003518beedcc98ec2f4d873c960e276e0e962a3e"
+    }
+  ],
+  "product_or_fixture_originals_mutated": false,
+  "all_killed": true
+}

@@ -1,0 +1,6 @@
+apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/ui/shell/RequestCandidates.kt:43:60: error: argument type mismatch: actual type is 'Any?', but 'String!' was expected.
+                keys.all { key -> jsonValuesEqual(left.opt(key), right.opt(key)) }
+                                                           ^^^
+apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/ui/shell/RequestCandidates.kt:43:76: error: argument type mismatch: actual type is 'Any?', but 'String!' was expected.
+                keys.all { key -> jsonValuesEqual(left.opt(key), right.opt(key)) }
+                                                                           ^^^

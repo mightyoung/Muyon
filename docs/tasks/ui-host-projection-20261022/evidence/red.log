@@ -1,0 +1,3 @@
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/chat/projection/HostProjectionChecks.kt:35:24: error: unresolved reference 'readSnapshot'.
+        call { runtime.readSnapshot(session, "workspace", conversation, request, project, generation, it) }
+                       ^^^^^^^^^^^^

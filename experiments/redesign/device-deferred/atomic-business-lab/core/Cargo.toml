@@ -1,0 +1,13 @@
+[package]
+name = "rd-p07-atomic"
+version = "0.0.0"
+edition = "2021"
+publish = false
+[dependencies]
+serde = {version="=1.0.229",features=["derive"]}
+serde_json = "=1.0.154"
+sha2 = "=0.11.1"
+rd_p01_domain_experiment = {path="../../rust-domain"}
+[profile.dev]
+debug=0
+incremental=false

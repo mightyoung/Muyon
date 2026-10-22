@@ -1,0 +1,14 @@
+{
+  "argv": [
+    "cmp",
+    "/tmp/muyon-post102-ui-generated/com/mightyoung/muyon/productbridge/muyon_android_product.kt",
+    "apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/productbridge/muyon_android_product.kt"
+  ],
+  "cwd": "/workspace/Muyon-post-pr102-ui-a11y-20261022",
+  "source_sha": "c0ab1fc36cecf28da002a5766b79bd209a24fde7",
+  "dirty_source": false,
+  "start_utc": "2026-10-22T19:42:29.841571+00:00",
+  "exit_code": 0,
+  "duration_seconds": 0.12,
+  "end_utc": "2026-10-22T19:42:29.850412+00:00"
+}

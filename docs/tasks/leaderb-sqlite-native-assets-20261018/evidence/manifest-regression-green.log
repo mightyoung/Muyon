@@ -1,0 +1,19 @@
+00:00 +0: loading /workspace/leaderb-sqlite/apps/muyon/test/le06_recovery_independent_test.dart
+00:00 +0: child Flutter runner leaves parent native asset manifest untouched
+00:00 +0 -1: child Flutter runner leaves parent native asset manifest untouched [E]
+  Expected: <0>
+    Actual: <1>
+  
+  Flutter failed to read file at "/tmp/le06-flutter-project-GZLKBS/.dart_tool/package_graph.json". The file or directory could not be found.
+  PathNotFoundException: Cannot open file, path = '/tmp/le06-flutter-project-GZLKBS/.dart_tool/package_graph.json' (OS Error: No such file or directory, errno = 2)
+  This can sometimes happen if the file was deleted or moved while the tool was running. Try running "flutter clean" and try again.
+  
+  
+  package:matcher                                     expect
+  package:flutter_test/src/widget_tester.dart 473:18  expect
+  test/le06_recovery_independent_test.dart 90:3       _finish
+  
+00:00 +0 -1: Some tests failed.
+
+Failing tests:
+  /workspace/leaderb-sqlite/apps/muyon/test/le06_recovery_independent_test.dart: child Flutter runner leaves parent native asset manifest untouched

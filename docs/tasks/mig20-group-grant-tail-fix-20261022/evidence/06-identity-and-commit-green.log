@@ -1,0 +1,97 @@
+warning: suspicious definition of the runtime `read` symbol used by the standard library
+   --> /workspace/mig20/experiments/redesign/core-agent-lab/core/src/host_session.rs:132:124
+    |
+132 | ...ount: usize, timeout: i32) -> i32; fn read(fd: i32, buffer: *mut u8, count: usize) -> isize; fn write(fd: i32, buffer: *const u8...
+    |                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = note: expected `unsafe extern "C" fn(i32, *mut c_void, usize) -> isize` (for the current target)
+            found    `unsafe extern "C" fn(i32, *mut u8, usize) -> isize`
+    = help: either fix the signature or remove any attributes like `#[unsafe(no_mangle)]`, `#[unsafe(export_name = "read")]`, or `#[link_name = "read"]`
+    = help: allow this lint if the signature is compatible
+    = note: `#[warn(suspicious_runtime_symbol_definitions)]` on by default
+
+warning: suspicious definition of the runtime `write` symbol used by the standard library
+   --> /workspace/mig20/experiments/redesign/core-agent-lab/core/src/host_session.rs:132:182
+    |
+132 | ... *mut u8, count: usize) -> isize; fn write(fd: i32, buffer: *const u8, count: usize) -> isize; }
+    |                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = note: expected `unsafe extern "C" fn(i32, *const c_void, usize) -> isize` (for the current target)
+            found    `unsafe extern "C" fn(i32, *const u8, usize) -> isize`
+    = help: either fix the signature or remove any attributes like `#[unsafe(no_mangle)]`, `#[unsafe(export_name = "write")]`, or `#[link_name = "write"]`
+    = help: allow this lint if the signature is compatible
+
+warning: `muyon-core-agent-lab` (lib) generated 2 warnings
+   Compiling muyon-core v0.1.0 (/workspace/mig20/crates/muyon-core)
+    Finished `test` profile [unoptimized] target(s) in 4.34s
+     Running tests/group_runtime_store.rs (/tmp/mig20-target/debug/deps/group_runtime_store-7a92c651c84a9a04)
+
+running 65 tests
+test blobs::tests::failed_ledger_after_solidification_keeps_staging_and_object_independent ... ok
+test blobs::tests::deleting_rejects_new_read_or_same_digest_upload ... ok
+test blobs::tests::file_and_upload_logical_length_quotas_precede_hashing_and_writing ... ok
+test a_new_run_id_cannot_reset_the_same_registered_root_lifetime ... ok
+test blobs::tests::kill_fixture ... ok
+test blobs::tests::corrupt_existing_object_and_dangling_symlink_are_never_replaced ... ok
+test blobs::tests::gc_and_publish_barrier_preserves_either_upload_pin_or_reference ... ok
+test blobs::tests::gc_and_reader_barrier_covers_reader_after_upload_pin_release ... ok
+test blobs::tests::pinned_state_alone_does_not_replace_a_durable_upload_pin ... ok
+test blobs::tests::publication_binds_expected_bytes_project_revision_and_real_transaction ... ok
+test blobs::tests::partial_publication_copy_is_not_reused_and_unknown_uploads_are_not_cleaned ... ok
+test blobs::tests::rename_then_failed_pin_commit_can_retry_existing_target_without_overwrite ... ok
+test blobs::tests::pending_unknown_never_expire_and_lookup_does_not_recover ... ok
+test business_commit_failure_rolls_back_receipt_event_stop_and_grant ... ok
+test changed_pending_does_not_return_rejected_without_a_persisted_terminal_receipt ... ok
+test consume_tail_admission_id_is_checked ... ok
+test blobs::tests::real_paper_effect_receipt_and_blob_reference_survive_or_roll_back_together ... ok
+test consume_tail_epoch_is_checked_after_this_transaction_consumption ... ok
+test consume_tail_expiry_is_checked_after_this_transaction_consumption ... ok
+test consume_tail_grant_readmission_is_checked ... ok
+test consume_tail_generation_is_checked_after_this_transaction_consumption ... ok
+test consume_tail_group_scope_is_checked_after_this_transaction_consumption ... ok
+test consume_tail_project_is_checked_after_this_transaction_consumption ... ok
+test events_tail_epoch_change_revokes_local_commit ... ok
+test events_tail_expiry_revokes_local_commit ... ok
+test events_tail_generation_change_revokes_local_commit ... ok
+test events_tail_group_scope_change_revokes_local_commit ... ok
+test events_tail_project_delete_revokes_local_commit ... ok
+test events_tail_revoke_is_not_mistaken_for_this_transaction_consumption ... ok
+test existing_original_can_be_registered_for_reconciliation_after_stop ... ok
+test grant_revocation_and_changed_payload_do_not_create_business_facts ... ok
+test failed_request_chain_read_keeps_original_unknown_and_local_observation_pending ... ok
+test failed_request_chain_read_during_handoff_is_inconclusive_not_rejected ... ok
+test handoff_requires_original_owner_even_before_any_node_is_bound ... ok
+test handoff_narrowing_is_task_local_and_does_not_silently_change_group_defaults ... ok
+test handoff_and_stop_cas_survive_reopen_and_do_not_replay ... ok
+test original_identity_storage_failure_is_pending_not_definitive_not_found ... ok
+test real_original_unknown_is_scoped_query_only_and_holds_are_unchanged ... ok
+test observed_dissent_and_original_artifact_survive_unknown_resolution_and_restart ... ok
+test receipt_tail_epoch_change_revokes_local_commit ... ok
+test receipt_tail_binding_change_is_checked ... ok
+test receipt_tail_failure_rolls_back_epoch_count_revision_grant_and_event ... ok
+test receipt_tail_generation_change_revokes_local_commit ... ok
+test receipt_tail_expiry_revokes_local_commit ... ok
+test receipt_tail_group_scope_change_revokes_local_commit ... ok
+test receipt_tail_project_delete_revokes_local_commit ... ok
+test receipt_tail_revoke_is_not_mistaken_for_this_transaction_consumption ... ok
+test registration_is_real_durable_scoped_fact_and_not_an_account_or_execution_grant ... ok
+test rejected_commit_failure_is_pending_without_committing_rejected_receipt ... ok
+test register_tail_checks_the_newly_persisted_group_scope ... ok
+test rejected_receipt_tail_tampering_returns_original_pending_instead_of_fabricated_rejection ... ok
+test rejected_update_ignored_returns_original_pending_instead_of_fabricated_rejection ... ok
+test review_lifecycle::tests::committed_claims_are_preserved_and_partial_committed_schema_is_refused ... ok
+test review_lifecycle::tests::empty_file_from_interrupted_creation_initializes_without_replacement ... ok
+test review_lifecycle::tests::uncommitted_ddl_reopens_and_initializes_the_original_database ... ok
+test rejected_write_sql_failure_is_pending_without_a_terminal_receipt ... ok
+test schedule_is_only_durable_pending_advice_and_grants_are_consumed ... ok
+test stale_revision_and_failed_sql_leave_no_partial_group_effect ... ok
+test stop_does_not_cancel_original_request_or_free_hold ... ok
+test stale_source_version_cannot_enter_persisted_summary ... ok
+test blobs::tests::real_sigkill_and_reopen_at_twelve_cross_media_windows ... ok
+test wire_claim_without_persisted_grant_and_member_management_are_denied ... ok
+test two_unsubmitted_nodes_can_be_invalidated_atomically_on_handoff ... ok
+test wrong_conversation_cannot_be_linked_and_memory_capabilities_cannot_expand_grants ... ok
+test research::resource_tests::real_opaque_uploads_are_not_aggregated_when_sealing_or_importing ... ok
+
+test result: ok. 65 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.16s
+

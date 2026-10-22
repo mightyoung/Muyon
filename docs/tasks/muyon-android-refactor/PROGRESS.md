@@ -1,0 +1,72 @@
+# Execution ledger — local implementation delivered; overall acceptance HOLD
+
+## Current handoff — 2026-10-21
+
+Latest installed source is `79dca05ba6ff84dbc8a60d0838951aec6720227a`, including
+offline OCR/embedding and scoped child workflows/skills. The complete latest
+candidate passes54/54 device methods; Rust verification records143 executions
+across16 suites. [Latest candidate and evidence](../../implementation/agent-workflow-proof-20261021/README.md).
+Earlier candidate counts and source IDs below are historical checkpoints.
+Overall36-scenario acceptance remains PARTIAL/HOLD. The user's subsequent push
+request authorizes publishing this feature branch, without merging into develop.
+[Claude whole-branch review checklist](../../reviews/2026-10-21-claude-android-refactor-checklist.md).
+
+Branch: codex/muyon-android-refactor. Latest installed UI/product/test source:
+`07fd4509fb4653a67435957c4ba021a2c142af00`. The earlier business checkpoint below
+is `7b063cb4089fe21fdaf82657bcf00408e3f138b1`.
+
+## Latest UI supplement — 2026-10-21
+
+User correction applied: complete Muse component/color/interaction treatment,
+Claude Sans/Serif resources, and quiet chat with settings/actions in the plus menu.
+Durable agent/group management and separate conversation namespaces are included.
+The final same-candidate suite passes26/26 required device methods, plus two
+additional large-font/wide-dark executions, build/lint/package gates and4 Python
+gate tests. [APK,24 actual screenshots and evidence](../../design/android-reference-20261021/muse-final/README.md).
+Overall36-scenario acceptance, I04 and live pricing/provider limitations remain HOLD.
+
+Rust/Compose implements supplier CRUD/delete/restore, research projects, immutable directory/ZIP snapshots, manual PDF metadata/private attachments, and guarded agent/tool coordination. The original develop checkout and existing xcconfig edits were retained. No merge, push, publication or historical Flutter migration occurred; new data and original unknown identities were preserved.
+
+## Historical business checkpoint — verified local result
+
+- 21/21 API26 methods PASS: one input-generation setup and 20 behavior methods, same APK/test APK, emulator-5556, SDK26, arm64-v8a, SELinux Enforcing. No required method is omitted or skipped.
+- 127 Rust executions PASS (15 unit cases compiled in two targets; not 127 unique cases). Tested Rust tree c0bcc4306721dc39f75062c078319ec87931f1fa is identical in the test snapshot and installed candidate; crates/ and reused experiments/ did not change. Shared contract tests also traverse 32 vectors.
+- Android APK/test build and lint, strict Clippy, scoped formatting of both changed product packages, and four Python gate tests PASS. Full cargo fmt --all also visits pre-existing laboratory formatting differences; unrelated files were retained.
+- Packaging gate PASS: both product ABIs, bundled SQLite, generated bridge byte equality, native digests, ELF/APK 16KiB alignment and device runtime build ID. x86_64 was cross-built, not device-run.
+- Suite gate PASS: source/build ID, APK/test-APK hashes, individual original-log hashes and complete test inventory agree. Missing, failed, skipped, altered or mixed-build results are refused.
+
+Durable evidence: [final results and reproduction](product-device/final/README.md). The [36-scenario matrix](ACCEPTANCE-MATRIX.md) distinguishes method results from compound and live acceptance.
+
+## Task disposition
+
+| Task | State | Evidence or remaining boundary |
+| --- | --- | --- |
+| P00 | SEALED_LOCAL | Fixed candidate, two APK hashes, original logs and source ancestry retained. |
+| P01 | LOCAL_DEVICE_PASS | Strict contract/schema; same 32 cross-end vectors, eight fields, Unicode and exact large revisions. |
+| P02 | BUILT_PACKAGED_DEVICE_PASS | Real product and both native ABIs; actual API26 ARM64 runtime. |
+| D01 | VERIFIED_ORIGINAL_TARGET | 944e18b0/7039175c; two original API26 Settings→Send cases and targeted RED/GREEN checks. Reused lab scope, not new-product live proof. |
+| D02 | BLOCKED_HOLD | Historical I04 platform denial and missing original behavioral evidence; read-only audit, zero equivalent retry. |
+| P03 | LOCAL_PASS_WITH_BOUNDARIES | Real atomic SQLite effects/history/receipt, process recovery, SQL-stage refusal and OS write failure; exact SQLITE_FULL remains distinct. |
+| P04 | INTEGRATED_DEVICE_PASS | Private Service leases/epochs, predecessor drain, stale callback isolation and visible confirmation. |
+| P05 | LOCAL_REVIEW_DEVICE_PASS | Private copy/fsync/rename, durable pins/recovery, enforcing Android; no hardlink or security-policy bypass. |
+| A01 | LOCAL_REVIEW_DEVICE_PASS | Restricted ZIP32/CRC/length admission; platform DEFLATE and real ZIP/tree pickers. |
+| S01/S02 | LOCAL_DEVICE_PASS | Full supplier fields/CRUD/delete/restore, persistent IDs/revisions, original receipts and reference policy. |
+| R01/R02/R03 | LOCAL_DEVICE_PASS | Source-bound immutable snapshots/raw records and revision semantics; manual PDF/private attachments. |
+| U01 | DEVICE_METHODS_PASS | Actual supplier UI→Service→Rust→SQLite, paging, draft/rotation and receipts. |
+| U02a/U02b | DEVICE_METHODS_PASS | Real PDF/ZIP/tree selection; PDF cancellation zero-publish; source deletion then new-Activity private read. |
+| C01 | IMPLEMENTED_LOCAL_REVIEW_PASS; LIVE_BLOCKED | Durable budget/attempt ledger, strict transport/tool loop, exact disclosure/P04 review, scope/cancel guards and independent receipt recovery. Production price verifiers remain None. |
+| V01 | DEVICE_METHODS_PASS | Complete same-candidate 21-method inventory and package/runtime identity. |
+| V02 | PARTIAL_EVIDENCE | Actual SQL/file/process-kill and lost-callback recovery; remaining compound windows/resource limits stay explicit. |
+| V03 | OVERALL_HOLD | I04 and live model/search/current-price evidence remain missing; no release acceptance asserted. |
+
+## Repairs and retained negative evidence
+
+Actual Android findings were fixed rather than hidden: SELinux-denied hardlink publication; incomplete schema1 admission (explicit schema2/product-v2 namespace, old pending identities retained); malformed UTF16 leaking a generated UniFFI handle (guarded before lowering, generated bytes unchanged); immediate close/rebind owner race (frozen predecessor drains); and restart receipt lookup depending on a lost tool origin (independent local original-intent query).
+
+Eight same-PID close/rebind cycles require the first health read to succeed without retries. A real write is independently observed committed in SQLite, its client callback is lost, the Service is killed, and actual Supplier/Assistant UIs recover the same original receipt with revision/history remaining one. The test explicitly journals through its own real P04 client; it does not fabricate a model turn or claim the UI confirm button was clicked during the held-looper window.
+
+All actual picker failures, test-navigation races and the API26 executable-vs-shell precondition crash remain recorded separately from successful final runs.
+
+## Stop boundary
+
+No new real provider calls, real credential reads, paid requests, refunds of old reservations or I04 reruns occurred. Chat/search are visibly blocked without trusted current pricing proofs. Exact disk-full errno, inaccessible cancellation windows, complete device-scale resource proofs and the full Android model-tool dialog chain remain limited as recorded in the matrix. These local evidence limits are separate from I04/live blockers and are not claimed complete.

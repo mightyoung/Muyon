@@ -1,0 +1,50 @@
+{
+  "kind": "new_release_independent_tail_recheck",
+  "head": "a132ebe5447fc65f9bc2a0c7afbc3ce1e23a3d17",
+  "head_after": "a132ebe5447fc65f9bc2a0c7afbc3ce1e23a3d17",
+  "dependency": "098d9aca214e6642c1b3ffde64921ebedbae335d",
+  "dependency_sha256": "6514165380738130e639d4be1ab5440e1bcb09c7d82fd0184b22b986e0d3c678",
+  "registry_ddl_verbatim_matches_dependency": true,
+  "command": [
+    "python3",
+    "docs/tasks/bot-setup-draft-20261022/run-creation-checks.py"
+  ],
+  "cwd": "/workspace/bot-setup-draft",
+  "utc_start": "2026-10-22T06:40:10.943165Z",
+  "utc_end": "2026-10-22T06:40:20.288432Z",
+  "exit_code": 0,
+  "versions": {
+    "rustc": {
+      "command": [
+        "/tmp/bot-cargo/bin/rustc",
+        "--version"
+      ],
+      "exit_code": 0
+    },
+    "python": {
+      "command": [
+        "python3",
+        "--version"
+      ],
+      "exit_code": 0
+    }
+  },
+  "source_sha256_before": {
+    "crates/muyon-core/src/bot_definitions.rs": "3d6452678f668d5de7018d3f6c3f83c2be09ce49342d15bf04e65e47638cd4e0",
+    "crates/muyon-core/src/bot_definitions/tests.rs": "87f5f210db6acd256770f212a904332d4a712df74811d8f5b06129e3fe693564",
+    "docs/tasks/bot-setup-draft-20261022/run-creation-checks.py": "ebba19d7e67093b2a80436adecea5d4be54b4c42c050b5de10763d3513327ba4"
+  },
+  "source_sha256_after": {
+    "crates/muyon-core/src/bot_definitions.rs": "3d6452678f668d5de7018d3f6c3f83c2be09ce49342d15bf04e65e47638cd4e0",
+    "crates/muyon-core/src/bot_definitions/tests.rs": "87f5f210db6acd256770f212a904332d4a712df74811d8f5b06129e3fe693564",
+    "docs/tasks/bot-setup-draft-20261022/run-creation-checks.py": "ebba19d7e67093b2a80436adecea5d4be54b4c42c050b5de10763d3513327ba4"
+  },
+  "logs_sha256": {
+    "rustc-version.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "python-version.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "rustc-version.stdout.log": "8dc912acd5bfeafc70b01b1d2a2afb0844afa02f5dba2f1ae8d5c212d005afb6",
+    "stderr.log": "7182a4609b79f7d52b11efb5c0d549d0fa3a5130616d1dac6884e73a97eb6b03",
+    "stdout.log": "855c752605e824ead5b1e76152223348d5e76e11ca7cabd00575fd21f8dec83d",
+    "python-version.stdout.log": "4c3569f5da09975434dd9fd9a91fadbc4367a91d8f3c3fab59e9241ab9ee4bd8"
+  }
+}

@@ -279,6 +279,8 @@ class _UiStreamTaskViewState extends State<UiStreamTaskView> {
         !identical(widget.agent.uiStreamProgress(widget.taskId), progress)) {
       return const SizedBox.shrink();
     }
+    // A complete stream without a failure code is not an incomplete one.
+    final received = progress.view.complete && progress.failureCode == null;
     return Column(
       key: ValueKey('ui-stream-preview-${widget.taskId}'),
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -286,15 +288,17 @@ class _UiStreamTaskViewState extends State<UiStreamTaskView> {
         Text(
           progress.view.phase == UiStreamPhase.streaming
               ? '界面接收中 · 动作尚不可用'
+              : received
+              ? '界面已接收 · 待宿主确认，动作尚不可用'
               : '界面未完成 · 只读，动作不可用',
         ),
-        if (progress.view.phase != UiStreamPhase.streaming)
+        if (!received && progress.view.phase != UiStreamPhase.streaming)
           Text(
             UiPlanningReason.host(progress.failureCode ?? 'incomplete')
                 .description,
           ),
         readOnlyPreview(progress),
-        if (progress.view.phase != UiStreamPhase.streaming)
+        if (!received && progress.view.phase != UiStreamPhase.streaming)
           snapshotFallback(progress.request.snapshot, progress.request.intent),
       ],
     );

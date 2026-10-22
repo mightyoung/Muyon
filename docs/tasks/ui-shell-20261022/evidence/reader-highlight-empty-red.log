@@ -1,0 +1,11 @@
+command=["/workspace/ui-shell-tools/kotlin-2.2.20/kotlinc/bin/kotlinc", "-Werror", "-jvm-target", "17", "/tmp/muyon-reader-fixed-t3goyk58/DocumentReaderModels.kt", "/tmp/muyon-reader-fixed-t3goyk58/OfficeTextPreview.kt", "/tmp/muyon-reader-fixed-t3goyk58/DocumentReaderChecks.kt", "-include-runtime", "-d", "/tmp/muyon-reader-fixed-t3goyk58/checks.jar"]
+sources={"DocumentReaderModels.kt": "3490ae6294d954c606dbf89d5beba6f62ed1cee4551f0eb5bab3cf33b32c8cf9", "OfficeTextPreview.kt": "37efc87a9dbee0172e8c4ee68599820ebbd6c6a72a86bf8fd4114989c8c1fc23", "DocumentReaderChecks.kt": "30b9695fb135a43cb069cb1a9c97c741e6639a712a3855faaeb75a275b94040f"}
+models_commit=3d2be1e783652735b79e9b58f6461d88ce131dc4
+parser_commit=8d2b7931fa6b9194338ec81f1add8110075b92bc
+checks_commit=8d2b7931fa6b9194338ec81f1add8110075b92bc
+isolated_shared_probe=False
+compile_exit=0
+runner_exit=1
+Exception in thread "main" java.lang.IllegalStateException: Check failed.
+	at com.mightyoung.muyon.product.ui.documents.DocumentReaderChecksKt.main(DocumentReaderChecks.kt:47)
+	at com.mightyoung.muyon.product.ui.documents.DocumentReaderChecksKt.main(DocumentReaderChecks.kt)

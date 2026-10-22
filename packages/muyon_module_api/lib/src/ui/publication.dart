@@ -25,6 +25,11 @@ final class UiRecomputeRequest {
   final int _epoch;
 }
 
+/// Freshness of one computed value, a second axis beside FactState trust.
+/// previous: the value belongs to the last accepted publication while a
+/// recompute is pending, after it failed, or after it was cancelled.
+enum UiValueFreshness { current, previous }
+
 /// Isolated host publication boundary, not a session or event executor.
 ///
 /// Only this object's validated S/I/P bundle is atomically replaced. A surface
@@ -50,6 +55,14 @@ final class UiPublicationCoordinator {
   bool get recomputing => _recomputing;
   bool get outdated => _outdated;
   List<String> get publicationErrors => _publicationErrors;
+
+  /// Every computed value of the accepted bundle is previous while it is not
+  /// the product of a successful publication; publication restores current.
+  UiValueFreshness freshnessOf(String computedId) =>
+      (_recomputing || _outdated) &&
+          _current.snapshot.computations.containsKey(computedId)
+      ? UiValueFreshness.previous
+      : UiValueFreshness.current;
 
   UiPublishOutcome _invalid(List<String> errors) {
     _publicationErrors = List.unmodifiable(errors);
@@ -233,7 +246,14 @@ final class UiPublicationCoordinator {
     required bool readOnly,
     required bool pending,
   }) {
-    if (_disposed || readOnly || (_outdated && !_recomputing)) return false;
+    if (_disposed || readOnly) return false;
+    if (_outdated && !_recomputing) {
+      // Plan A: after a failed or superseded recompute, only a local editField
+      // may start the next recompute. Business, confirmation and semantic
+      // events stay refused until a recompute publishes.
+      return action.route == UiActionRoute.local &&
+          action.localAction == UiLocalAction.editField;
+    }
     if (action.route == UiActionRoute.business && (_recomputing || pending)) {
       return false;
     }

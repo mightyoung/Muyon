@@ -1,0 +1,46 @@
+warning: suspicious definition of the runtime `read` symbol used by the standard library
+   --> /workspace/Muyon/experiments/redesign/core-agent-lab/core/src/host_session.rs:132:124
+    |
+132 | ...ount: usize, timeout: i32) -> i32; fn read(fd: i32, buffer: *mut u8, count: usize) -> isize; fn write(fd: i32, buffer: *const u8...
+    |                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = note: expected `unsafe extern "C" fn(i32, *mut c_void, usize) -> isize` (for the current target)
+            found    `unsafe extern "C" fn(i32, *mut u8, usize) -> isize`
+    = help: either fix the signature or remove any attributes like `#[unsafe(no_mangle)]`, `#[unsafe(export_name = "read")]`, or `#[link_name = "read"]`
+    = help: allow this lint if the signature is compatible
+    = note: `#[warn(suspicious_runtime_symbol_definitions)]` on by default
+
+warning: suspicious definition of the runtime `write` symbol used by the standard library
+   --> /workspace/Muyon/experiments/redesign/core-agent-lab/core/src/host_session.rs:132:182
+    |
+132 | ... *mut u8, count: usize) -> isize; fn write(fd: i32, buffer: *const u8, count: usize) -> isize; }
+    |                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = note: expected `unsafe extern "C" fn(i32, *const c_void, usize) -> isize` (for the current target)
+            found    `unsafe extern "C" fn(i32, *const u8, usize) -> isize`
+    = help: either fix the signature or remove any attributes like `#[unsafe(no_mangle)]`, `#[unsafe(export_name = "write")]`, or `#[link_name = "write"]`
+    = help: allow this lint if the signature is compatible
+
+warning: `muyon-core-agent-lab` (lib) generated 2 warnings
+   Compiling muyon-rust-agent-host-lab v0.1.0 (/workspace/Muyon/experiments/redesign/rust-agent-host-lab/core)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.60s
+     Running tests/ordinary_chat_controller.rs (/tmp/muyon-chat-target/debug/deps/ordinary_chat_controller-e37b20c53b723d77)
+
+running 14 tests
+test changed_completed_source_between_freeze_and_admission_denies_without_retry ... ok
+test changed_frozen_usage_or_profile_evidence_cannot_disclose_completed_answer ... ok
+test completed_same_conversation_pair_is_frozen_in_the_next_agent_request ... ok
+test completed_source_corruption_or_missing_source_cannot_become_empty_history ... ok
+test compose_contract_reaches_same_agent_with_frozen_plain_text_and_no_supplier_authority ... ok
+test credential_failed_input_and_other_conversation_never_enter_history ... ok
+test credentials_and_generation_rotation_never_reach_fake_transport ... ok
+test explicit_legacy_single_turn_record_is_usable_but_partial_new_fields_are_not_legacy ... ok
+test full_history_budget_denies_without_dropping_pairs_or_using_another_call ... ok
+test lost_response_is_unknown_and_polling_or_duplicate_never_retries ... ok
+test missing_owner_and_revoked_grant_deny_without_supplier_lookup ... ok
+test output_signals_post_commit_rotation_and_quota_preserve_no_retry_boundary ... ok
+test oversized_history_evidence_fails_explicitly_instead_of_truncating ... ok
+test revoked_ancestor_and_revocation_after_freeze_prevent_send_and_disclosure ... ok
+
+test result: ok. 14 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.13s
+

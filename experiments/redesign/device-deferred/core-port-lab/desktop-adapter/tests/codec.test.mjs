@@ -1,0 +1,12 @@
+import test from 'node:test';import assert from 'node:assert/strict';
+import {rawUtf16,decimal,validateReply,ReplyFrames} from '../codec.mjs';
+const domain={store:'lab-store-1',scope:'lab-scope-1',stream:'lab-stream-1'};
+const reply=()=>({protocol:0,request_id:'q1',kind:'hello',reason:null,domain,display_epoch:'epoch-0',display_admission:'current',snapshot:{cursor:{...domain,seq:'0'},suppliers:[{id:'supplier-a',name:'合成',revision:'9007199254740993'}]},plan:null,receipt:null});
+const meta={request_id:'q1',domain,display_epoch:'epoch-0'};
+test('raw preserves UTF16 whitespace combining controls surrogate halves',()=>assert.deepEqual(rawUtf16(' e\u0301\u000b\ud800😀 '),[32,101,769,11,55296,55357,56832,32]));
+test('decimal strings preserve >53bit and u64max exactly',()=>{assert.equal(decimal('9007199254740993'),'9007199254740993');assert.equal(decimal('18446744073709551615'),'18446744073709551615');});
+test('decimal rejects floats bool leading zero negative overflow',()=>{for(const v of [1,true,'01','-1','1.0','18446744073709551616'])assert.throws(()=>decimal(v));});
+test('bounded NDJSON decoder accepts fragmented unicode UTF8 and multiple frames',()=>{const bytes=Buffer.from(JSON.stringify(reply())+'\n'+JSON.stringify(reply())+'\n');const d=new ReplyFrames();let frames=[];for(const b of bytes)frames.push(...d.push(Buffer.from([b])));assert.equal(frames.length,2);assert.equal(frames[0].snapshot.suppliers[0].name,'合成');d.finish();});
+test('decoder rejects overlimit invalid UTF8 and truncated EOF',()=>{assert.throws(()=>new ReplyFrames().push(Buffer.alloc(32769,65)));assert.throws(()=>new ReplyFrames().push(Buffer.from([255,10])));const d=new ReplyFrames();d.push(Buffer.from('{'));assert.throws(()=>d.finish());});
+test('metadata rejects wrong request version domain epoch unknownkind and fields',()=>{for(const patch of [{request_id:'other'},{protocol:1},{domain:{...domain,scope:'wrong'}},{display_epoch:'wrong'},{kind:'fake'},{extra:true}])assert.throws(()=>validateReply({...reply(),...patch},meta));});
+test('snapshot rejects numeric counter and crossdomain cursor',()=>{const a=reply();a.snapshot.cursor.seq=0;assert.throws(()=>validateReply(a,meta));const b=reply();b.snapshot.cursor.store='other';assert.throws(()=>validateReply(b,meta));});

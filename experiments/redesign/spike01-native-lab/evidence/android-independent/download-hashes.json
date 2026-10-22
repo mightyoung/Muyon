@@ -1,0 +1,42 @@
+[
+  {
+    "name": "addon.xml",
+    "bytes": 109906,
+    "sha256": "0205e6ac93d411cd22ed3ea541834c4d16fd1693e493ca4fe68c780f0fa9852c"
+  },
+  {
+    "name": "cmdline.zip",
+    "bytes": 164760899,
+    "sha256": "7ec965280a073311c339e571cd5de778b9975026cfcbe79f2b1cdcb1e15317ee"
+  },
+  {
+    "name": "coroutines.jar",
+    "bytes": 1479317,
+    "sha256": "5ca175b38df331fd64155b35cd8cae1251fa9ee369709b36d42e0a288ccce3fd"
+  },
+  {
+    "name": "jna-jvm.jar",
+    "bytes": 1950853,
+    "sha256": "4fb141dd8ef6b0585ffceea4bc49602fbc6312fa977e2c488794ea3e6aafecae"
+  },
+  {
+    "name": "jna.aar",
+    "bytes": 525093,
+    "sha256": "b57125cb7d16253f0d65a80f7d3a4c3664effa711b8bdbb7f87fb572ce1624ed"
+  },
+  {
+    "name": "kotlin.zip",
+    "bytes": 78709601,
+    "sha256": "81f0264c9073b5cbbdb3ff8418cf2c5dac076879fc156fa1a6462f5a5acc4420"
+  },
+  {
+    "name": "repository.xml",
+    "bytes": 377036,
+    "sha256": "9c6014fd13f460b2eff2a241f1fa4f8881a8a2c4ed8c2a6a2886697c660b4af8"
+  },
+  {
+    "name": "rustup-init.sh",
+    "bytes": 29915,
+    "sha256": "7d0ea0f8eba7fa1ebfe998091cd7ec4501e33ec5ca6b884eb4d894d7da5170af"
+  }
+]

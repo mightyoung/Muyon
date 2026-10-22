@@ -1,0 +1,85 @@
+{
+  "status": "all_new_license_acceptance_and_extra_installation_stopped",
+  "command": "set -o pipefail\nexport ANDROID_USER_HOME=/workspace/spike01-tools/android-user\nmkdir -p \"$ANDROID_USER_HOME\"\nyes | /workspace/spike01-tools/android/cmdline-tools/19.0/bin/sdkmanager --sdk_root=/workspace/spike01-tools/android --licenses > /workspace/spike01-evidence/android-licenses.log 2>&1",
+  "time_evidence": "license log birth 2026-10-14 06:54:46.927056621 UTC; last write 06:54:49.538906676 UTC; times are filesystem evidence, not captured wall-clock at subprocess spawn",
+  "exit": 1,
+  "exit_reason": "sdkmanager accepted all; yes received SIGPIPE under pipefail",
+  "extra_terms": [
+    {
+      "id": "android-googletv-license",
+      "name": "Google TV Add-on for Android SDK License Agreement",
+      "official_source": "https://dl.google.com/android/repository/addon2-1.xml#android-googletv-license",
+      "local_acceptance_utc": "2026-10-14 06:54:49.515119",
+      "local_file_sha256": "bf71f76846c291bd5b06faea6946279bbf07d257fca68d8be4e634540e24bed5"
+    },
+    {
+      "id": "android-googlexr-license",
+      "name": "Android XR Emulator System Image SDK License Agreement",
+      "official_source": "https://dl.google.com/android/repository/sys-img/android/sys-img2-1.xml#android-googlexr-license",
+      "local_acceptance_utc": "2026-10-14 06:54:49.519119",
+      "local_file_sha256": "315d89d7d8648ae07a4b1d304dcd3b76fac16a01fea0927545ed4f97204d2a79"
+    },
+    {
+      "id": "android-sdk-arm-dbt-license",
+      "name": "Android SDK License Agreement (ARM DBT license ID)",
+      "official_source": "https://dl.google.com/android/repository/sys-img/android/sys-img2-1.xml#android-sdk-arm-dbt-license",
+      "local_acceptance_utc": "2026-10-14 06:54:49.523119",
+      "local_file_sha256": "9dce0be88e239ee0d4fad023badcfaf4b8d6c54cedd45139dd463875229a4a15"
+    },
+    {
+      "id": "android-sdk-preview-license",
+      "name": "Android SDK Preview License Agreement",
+      "official_source": "https://dl.google.com/android/repository/repository2-1.xml#android-sdk-preview-license",
+      "local_acceptance_utc": "2026-10-14 06:54:49.532899",
+      "local_file_sha256": "c6cc28fe55c00a86dbe57488393190915403695044e1173c4a28105e2db84407"
+    },
+    {
+      "id": "google-gdk-license",
+      "name": "Glass Development Kit License Agreement",
+      "official_source": "https://dl.google.com/android/repository/addon2-1.xml#google-gdk-license",
+      "local_acceptance_utc": "2026-10-14 06:54:49.536462",
+      "local_file_sha256": "62a7bc9d8641aa16c5510babdbe4bceabd061030d45dde463b3cc1b7ea480e92"
+    },
+    {
+      "id": "microxr-sysimage-license",
+      "name": "microXR Emulator System Image SDK License Agreement",
+      "official_source": "https://dl.google.com/android/repository/sys-img/android/sys-img2-1.xml#microxr-sysimage-license",
+      "local_acceptance_utc": "2026-10-14 06:54:49.537263",
+      "local_file_sha256": "0f090bd5e73cf18cf91f7131b563d70a859dbe54b3d5f931e0ee01ee6706d802"
+    },
+    {
+      "id": "mips-android-sysimage-license",
+      "name": "MIPS Internal Evaluation License Agreement for MIPS Android System Images",
+      "official_source": "https://dl.google.com/android/repository/sys-img/android/sys-img2-1.xml#mips-android-sysimage-license",
+      "local_acceptance_utc": "2026-10-14 06:54:49.538907",
+      "local_file_sha256": "1ed4c83beca7c3c2523c6c1e836d32f62cd6240aa5478ed42d5dba8bbfa7a860"
+    }
+  ],
+  "network_acceptance_transmission": "UNKNOWN. No packet capture or request-level network trace was retained. Local files prove local acceptance; tool did fetch official Google metadata and subsequently download approved components. No evidence establishes an acceptance POST to Google, and absence of log is not proof it did not occur. No login/account/new credentials configured.",
+  "components": [
+    {
+      "path": "build-tools/35.0.0",
+      "properties": "Pkg.UserSrc=false\nPkg.Revision=35.0.0\n#Pkg.Revision=35.0.0 rc4\n"
+    },
+    {
+      "path": "cmdline-tools/19.0",
+      "properties": "Pkg.Revision=19.0\nPkg.Path=cmdline-tools;19.0\nPkg.Desc=Android SDK Command-line Tools\n"
+    },
+    {
+      "path": "ndk/28.2.13676358",
+      "properties": "Pkg.Desc = Android NDK\nPkg.Revision = 28.2.13676358\nPkg.BaseRevision = 28.2.13676358\nPkg.ReleaseName = r28c\n"
+    },
+    {
+      "path": "platform-tools",
+      "properties": "Pkg.UserSrc=false\nPkg.Revision=37.0.1\n"
+    },
+    {
+      "path": "platforms/android-35",
+      "properties": "Pkg.Desc=Android SDK Platform 15\nPkg.UserSrc=false\nPlatform.Version=15\nPlatform.CodeName=\nPkg.Revision=2\nAndroidVersion.ApiLevel=35\nAndroidVersion.ExtensionLevel=13\nAndroidVersion.IsBaseSdk=true\nLayoutlib.Api=15\nLayoutlib.Revision=1\nPlatform.MinToolsRev=22\n"
+    }
+  ],
+  "extra_component_use": "None downloaded or used: no Google TV, XR/microXR images, ARM DBT, Preview SDK, GDK, MIPS images installed. Standard NDK/platform-tools/platform35/build-tools35 all reference android-sdk-license.",
+  "other_official_dependencies": "Rust/rustup and two Android Rust std targets; JetBrains Kotlin2.2.20; Maven Central JNA5.19.1 AAR+JAR and coroutines1.10.2; Cargo.lock crates; existing Debian OpenJDK21 used. Downloads and source hashes in previous evidence. Gradle/JDK17 not installed.",
+  "local_quarantine": "Extra files moved to /workspace/spike01-evidence/extra-license-records at about 07:04:28 UTC. This only disables their use as local acceptance cache; no legal rescission is claimed.",
+  "runner": "Readonly only: ANDROID_SERIAL, ADB_SERVER_SOCKET, ANDROID_ADB_SERVER_PORT unset; no listener on TCP5037; /home/agent/.android absent; repository/shared config search no authorized runner/serial. No adb server/key/connection setup. Android actual load NOT_RUN."
+}

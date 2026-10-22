@@ -1,0 +1,18 @@
+{
+  "protocol_version": 1,
+  "business_version": 1,
+  "intent_id": "intent-a",
+  "scope": { "workspace_id": "workspace-a", "project_id": null },
+  "expected_revision": "0",
+  "authority": { "grant_id": "grant-a", "generation": "1", "owner_epoch": "epoch-a" },
+  "plan_id": "plan-a",
+  "plan_digest": "693c10fd6a5f5c63556b6886e480cef7c8d375d47b91a4285a0c2cd2059e5637",
+  "command": {
+    "operation": "supplier_create",
+    "supplier_id": "supplier-a",
+    "payload": {
+      "name": "  é  ", "aliases": ["乙", "甲", "甲"], "address": null,
+      "categories": [], "notes": null, "merged_into": null, "rating": null, "rating_note": null
+    }
+  }
+}

@@ -1,0 +1,8 @@
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/chat/persistence/HostLocalDraftSessionChecks.kt:6:9: error: class 'SyntheticLocalPort' is not abstract and does not implement abstract member:
+fun prepare(conversation: String, project: String?, namespace: String, draft: String, generation: String, revision: String, attempt: String, exportedMemoryRevision: String, hostEditorRevision: String, archive: ByteArray): JSONObject
+private class SyntheticLocalPort : ProductLocalDraftPort {
+        ^^^^^^^^^^^^^^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/chat/persistence/HostLocalDraftSessionChecks.kt:45:5: error: 'prepare' overrides nothing. Potential signatures for overriding:
+fun prepare(conversation: String, project: String?, namespace: String, draft: String, generation: String, revision: String, attempt: String, exportedMemoryRevision: String, hostEditorRevision: String, archive: ByteArray): JSONObject
+    override fun prepare(original: PreparedLocalSave): JSONObject {
+    ^^^^^^^^

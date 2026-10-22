@@ -1,0 +1,50 @@
+INSTRUMENTATION_STATUS: numtests=1
+INSTRUMENTATION_STATUS: stream=
+com.mightyoung.muyon.product.SystemPickerProductTest:
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=pdfSystemPickerManualReviewAndPrivateAttachment
+INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.product.SystemPickerProductTest
+INSTRUMENTATION_STATUS: current=1
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: numtests=1
+INSTRUMENTATION_STATUS: stream=
+Error in pdfSystemPickerManualReviewAndPrivateAttachment(com.mightyoung.muyon.product.SystemPickerProductTest):
+java.lang.AssertionError: Timed out waiting for DocumentsUI control [picker-paper.pdf]; actual accessibility tree: [com.android.documentsui|null|null|null][com.android.documentsui|null|null|null][com.android.documentsui|null|null|android:id/content][com.android.documentsui|null|null|com.android.documentsui:id/coordinator_layout][com.android.documentsui|null|null|com.android.documentsui:id/drawer_layout][com.android.documentsui|null|null|null][com.android.documentsui|null|null|com.android.documentsui:id/toolbar][com.android.documentsui|null|Show roots|null][com.android.documentsui|Downloads|null|null][com.android.documentsui|null|null|null][com.android.documentsui|null|Search|com.android.documentsui:id/menu_search][com.android.documentsui|null|List view|com.android.documentsui:id/menu_list][com.android.documentsui|null|More options|null][com.android.documentsui|null|null|null][com.android.documentsui|null|null|null][com.android.documentsui|null|null|com.android.documentsui:id/dropdown_sort_widget][com.android.documentsui|Modified|null|com.android.documentsui:id/sort_dimen_dropdown][com.android.documentsui|null|Descending|com.android.documentsui:id/sort_arrow][com.android.documentsui|null|null|com.android.documentsui:id/container_directory][com.android.documentsui|null|null|null][com.android.documentsui|null|null|com.android.documentsui:id/refresh_layout][com.android.documentsui|null|null|null][com.android.documentsui|null|null|com.android.documentsui:id/file_list][com.android.documentsui|null|null|com.android.documentsui:id/dir_list][com.android.documentsui|null|null|null][com.android.documentsui|null|null|null][com.android.documentsui|null|null|null][com.android.documentsui|null|null|null][com.android.documentsui|null|null|null][com.android.documentsui|null|null|com.android.documentsui:id/icon_check][com.android.documentsui|null|null|com.android.documentsui:id/icon_mime_sm][com.android.documentsui|MuyonRefactorFixtures|null|android:id/title][com.android.documentsui|null|null|com.android.documentsui:id/debug_info][com.android.documentsui|null|null|com.android.documentsui:id/container_save][com.android.documentsui|null|null|com.android.documentsui:id/drawer_edge][com.android.documentsui|null|null|android:id/statusBarBackground]
+	at org.junit.Assert.fail(Assert.java:89)
+	at com.mightyoung.muyon.product.SystemPickerProductTest.waitSystem(SystemPickerProductTest.kt:374)
+	at com.mightyoung.muyon.product.SystemPickerProductTest.systemClick(SystemPickerProductTest.kt:309)
+	at com.mightyoung.muyon.product.SystemPickerProductTest.systemClick$default(SystemPickerProductTest.kt:308)
+	at com.mightyoung.muyon.product.SystemPickerProductTest.chooseDocument(SystemPickerProductTest.kt:265)
+	at com.mightyoung.muyon.product.SystemPickerProductTest.pdfSystemPickerManualReviewAndPrivateAttachment(SystemPickerProductTest.kt:76)
+
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=pdfSystemPickerManualReviewAndPrivateAttachment
+INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.product.SystemPickerProductTest
+INSTRUMENTATION_STATUS: stack=java.lang.AssertionError: Timed out waiting for DocumentsUI control [picker-paper.pdf]; actual accessibility tree: [com.android.documentsui|null|null|null][com.android.documentsui|null|null|null][com.android.documentsui|null|null|android:id/content][com.android.documentsui|null|null|com.android.documentsui:id/coordinator_layout][com.android.documentsui|null|null|com.android.documentsui:id/drawer_layout][com.android.documentsui|null|null|null][com.android.documentsui|null|null|com.android.documentsui:id/toolbar][com.android.documentsui|null|Show roots|null][com.android.documentsui|Downloads|null|null][com.android.documentsui|null|null|null][com.android.documentsui|null|Search|com.android.documentsui:id/menu_search][com.android.documentsui|null|List view|com.android.documentsui:id/menu_list][com.android.documentsui|null|More options|null][com.android.documentsui|null|null|null][com.android.documentsui|null|null|null][com.android.documentsui|null|null|com.android.documentsui:id/dropdown_sort_widget][com.android.documentsui|Modified|null|com.android.documentsui:id/sort_dimen_dropdown][com.android.documentsui|null|Descending|com.android.documentsui:id/sort_arrow][com.android.documentsui|null|null|com.android.documentsui:id/container_directory][com.android.documentsui|null|null|null][com.android.documentsui|null|null|com.android.documentsui:id/refresh_layout][com.android.documentsui|null|null|null][com.android.documentsui|null|null|com.android.documentsui:id/file_list][com.android.documentsui|null|null|com.android.documentsui:id/dir_list][com.android.documentsui|null|null|null][com.android.documentsui|null|null|null][com.android.documentsui|null|null|null][com.android.documentsui|null|null|null][com.android.documentsui|null|null|null][com.android.documentsui|null|null|com.android.documentsui:id/icon_check][com.android.documentsui|null|null|com.android.documentsui:id/icon_mime_sm][com.android.documentsui|MuyonRefactorFixtures|null|android:id/title][com.android.documentsui|null|null|com.android.documentsui:id/debug_info][com.android.documentsui|null|null|com.android.documentsui:id/container_save][com.android.documentsui|null|null|com.android.documentsui:id/drawer_edge][com.android.documentsui|null|null|android:id/statusBarBackground]
+	at org.junit.Assert.fail(Assert.java:89)
+	at com.mightyoung.muyon.product.SystemPickerProductTest.waitSystem(SystemPickerProductTest.kt:374)
+	at com.mightyoung.muyon.product.SystemPickerProductTest.systemClick(SystemPickerProductTest.kt:309)
+	at com.mightyoung.muyon.product.SystemPickerProductTest.systemClick$default(SystemPickerProductTest.kt:308)
+	at com.mightyoung.muyon.product.SystemPickerProductTest.chooseDocument(SystemPickerProductTest.kt:265)
+	at com.mightyoung.muyon.product.SystemPickerProductTest.pdfSystemPickerManualReviewAndPrivateAttachment(SystemPickerProductTest.kt:76)
+
+INSTRUMENTATION_STATUS: current=1
+INSTRUMENTATION_STATUS_CODE: -2
+INSTRUMENTATION_RESULT: stream=
+
+Time: 21.142
+There was 1 failure:
+1) pdfSystemPickerManualReviewAndPrivateAttachment(com.mightyoung.muyon.product.SystemPickerProductTest)
+java.lang.AssertionError: Timed out waiting for DocumentsUI control [picker-paper.pdf]; actual accessibility tree: [com.android.documentsui|null|null|null][com.android.documentsui|null|null|null][com.android.documentsui|null|null|android:id/content][com.android.documentsui|null|null|com.android.documentsui:id/coordinator_layout][com.android.documentsui|null|null|com.android.documentsui:id/drawer_layout][com.android.documentsui|null|null|null][com.android.documentsui|null|null|com.android.documentsui:id/toolbar][com.android.documentsui|null|Show roots|null][com.android.documentsui|Downloads|null|null][com.android.documentsui|null|null|null][com.android.documentsui|null|Search|com.android.documentsui:id/menu_search][com.android.documentsui|null|List view|com.android.documentsui:id/menu_list][com.android.documentsui|null|More options|null][com.android.documentsui|null|null|null][com.android.documentsui|null|null|null][com.android.documentsui|null|null|com.android.documentsui:id/dropdown_sort_widget][com.android.documentsui|Modified|null|com.android.documentsui:id/sort_dimen_dropdown][com.android.documentsui|null|Descending|com.android.documentsui:id/sort_arrow][com.android.documentsui|null|null|com.android.documentsui:id/container_directory][com.android.documentsui|null|null|null][com.android.documentsui|null|null|com.android.documentsui:id/refresh_layout][com.android.documentsui|null|null|null][com.android.documentsui|null|null|com.android.documentsui:id/file_list][com.android.documentsui|null|null|com.android.documentsui:id/dir_list][com.android.documentsui|null|null|null][com.android.documentsui|null|null|null][com.android.documentsui|null|null|null][com.android.documentsui|null|null|null][com.android.documentsui|null|null|null][com.android.documentsui|null|null|com.android.documentsui:id/icon_check][com.android.documentsui|null|null|com.android.documentsui:id/icon_mime_sm][com.android.documentsui|MuyonRefactorFixtures|null|android:id/title][com.android.documentsui|null|null|com.android.documentsui:id/debug_info][com.android.documentsui|null|null|com.android.documentsui:id/container_save][com.android.documentsui|null|null|com.android.documentsui:id/drawer_edge][com.android.documentsui|null|null|android:id/statusBarBackground]
+	at org.junit.Assert.fail(Assert.java:89)
+	at com.mightyoung.muyon.product.SystemPickerProductTest.waitSystem(SystemPickerProductTest.kt:374)
+	at com.mightyoung.muyon.product.SystemPickerProductTest.systemClick(SystemPickerProductTest.kt:309)
+	at com.mightyoung.muyon.product.SystemPickerProductTest.systemClick$default(SystemPickerProductTest.kt:308)
+	at com.mightyoung.muyon.product.SystemPickerProductTest.chooseDocument(SystemPickerProductTest.kt:265)
+	at com.mightyoung.muyon.product.SystemPickerProductTest.pdfSystemPickerManualReviewAndPrivateAttachment(SystemPickerProductTest.kt:76)
+
+FAILURES!!!
+Tests run: 1,  Failures: 1
+
+
+INSTRUMENTATION_CODE: -1

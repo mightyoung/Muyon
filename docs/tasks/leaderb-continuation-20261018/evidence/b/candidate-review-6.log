@@ -1,0 +1,72 @@
+PASS deterministic regeneration
+PASS four invalid-fixture mutations rejected (fixture consistency only; DUT_runs=0)
+{
+  "source_sha256": {
+    "build_fixtures.py": "3e187ca322bf51bdd0ef1f5e1b4704781cb3fe18095dba58685a5b1ea5c0ad03",
+    "diff-index.json": "2e466179678318637349011f4cbf7bd633c8e51d0c8836c36f32e142c2c22ead",
+    "validate_fixtures.py": "6be3b099d002440e42d0e7259cc2cbd488c6c6ab3fd365eedd43369ef99fa7c7",
+    "writer.json": "05c3b5fc755ede3f2794b283558ab65b10fbd0246c5e07fdb53fdd257c49e10b"
+  },
+  "runs": [
+    {
+      "command": [
+        "python3",
+        "/tmp/hy-fixture-review-s27taef6/fixtures/validate_fixtures.py"
+      ],
+      "exit": 0,
+      "stdout": "PASS fixture consistency: writer=20 diff=16; model_calls=0; DUT_runs=0; benefit=UNVERIFIED\n",
+      "stderr": "",
+      "expected": "PASS"
+    },
+    {
+      "command": [
+        "python3",
+        "/tmp/hy-fixture-review-s27taef6/fixtures/build_fixtures.py"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "",
+      "expected": "PASS"
+    },
+    {
+      "command": [
+        "python3",
+        "/tmp/hy-fixture-review-s27taef6/fixtures/validate_fixtures.py"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "Traceback (most recent call last):\n  File \"/tmp/hy-fixture-review-s27taef6/fixtures/validate_fixtures.py\", line 90, in <module>\n    validate()\n  File \"/tmp/hy-fixture-review-s27taef6/fixtures/validate_fixtures.py\", line 79, in validate\n    check(expected is not None and case['expected_status'] == expected, case['id'] + ': oracle label')\n  File \"/tmp/hy-fixture-review-s27taef6/fixtures/validate_fixtures.py\", line 11, in check\n    raise ValueError(message)\nValueError: missing_base: oracle label\n",
+      "expected": "REJECT"
+    },
+    {
+      "command": [
+        "python3",
+        "/tmp/hy-fixture-review-s27taef6/fixtures/validate_fixtures.py"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "Traceback (most recent call last):\n  File \"/tmp/hy-fixture-review-s27taef6/fixtures/validate_fixtures.py\", line 90, in <module>\n    validate()\n  File \"/tmp/hy-fixture-review-s27taef6/fixtures/validate_fixtures.py\", line 55, in validate\n    check(digest(obj['content']) == obj['content_digest'], 'content corruption')\n  File \"/tmp/hy-fixture-review-s27taef6/fixtures/validate_fixtures.py\", line 11, in check\n    raise ValueError(message)\nValueError: content corruption\n",
+      "expected": "REJECT"
+    },
+    {
+      "command": [
+        "python3",
+        "/tmp/hy-fixture-review-s27taef6/fixtures/validate_fixtures.py"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "Traceback (most recent call last):\n  File \"/tmp/hy-fixture-review-s27taef6/fixtures/validate_fixtures.py\", line 90, in <module>\n    validate()\n  File \"/tmp/hy-fixture-review-s27taef6/fixtures/validate_fixtures.py\", line 67, in validate\n    check(all(event.get(k) == v for k,v in ref.items()), arm + ': frozen ref mismatch')\n  File \"/tmp/hy-fixture-review-s27taef6/fixtures/validate_fixtures.py\", line 11, in check\n    raise ValueError(message)\nValueError: sidecar_candidate_refs: frozen ref mismatch\n",
+      "expected": "REJECT"
+    },
+    {
+      "command": [
+        "python3",
+        "/tmp/hy-fixture-review-s27taef6/fixtures/validate_fixtures.py"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "Traceback (most recent call last):\n  File \"/tmp/hy-fixture-review-s27taef6/fixtures/validate_fixtures.py\", line 90, in <module>\n    validate()\n  File \"/tmp/hy-fixture-review-s27taef6/fixtures/validate_fixtures.py\", line 48, in validate\n    check(case['expected_business_writes'] == int(expected == 'COMMIT_CANDIDATE'),\n  File \"/tmp/hy-fixture-review-s27taef6/fixtures/validate_fixtures.py\", line 11, in check\n    raise ValueError(message)\nValueError: duplicate_delivery: duplicate or unsafe write label\n",
+      "expected": "REJECT"
+    }
+  ]
+}

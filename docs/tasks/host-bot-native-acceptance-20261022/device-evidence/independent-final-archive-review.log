@@ -1,0 +1,13 @@
+FINAL READ-ONLY ARCHIVE REVIEW — can archive; no new Important found
+Worktree /workspace/Muyon-host-bot-native-acceptance-20261022, source f2f9928a0a35afeb2d5956d3bc2d69406adcc503
+DEVICE-REPORT.md SHA256 794f516bed90e92586cc606a4c8f50fdbeee220c445704ce45099dabe3fb4d58
+Archived verify_device_identity.py SHA256 1298bc5cea099a28226e261fd42de1ec4f87573970c6cd2d7cf85a3e1c56bde7
+
+Report accurately states one actual disposable API26 x86_64 emulator, three specified methods status0, OK(3 tests),109.46s,terminal-1. Legacy shell exit status remains null. It does not conflate78 Gradle tasks with device cases or claim official adb restoration.
+It retains exact three-case boundaries: known committed response before process death; actual prepared fixture then explicit fence; deliberately undelivered native committed result followed by historical original query and explicit restore. No concurrent CAS, kill-in-flight/Binder packet-loss, arm64 runtime, Reader, full production/root or visual acceptance claim. Default production verified=false unchanged; apps/crates source diff to HEAD empty.
+Source276-file seal, installed app/test APK identity, four native packaged entries and native health identity remain accurately reported from prior independently verified execution/live reads. This final review did NOT reopen emulator, reinstall, rerun instrumentation or mutate business state.
+
+Corrected verifier now asserts BOTH installed-app and installed-test hash values against independent host APK hashes AND exactly one actual installed-sha RESPONSE for each package. Reviewer independently reproduced these assertions on archived journal: PASS. Previous unused-expected/count-only weakness is repaired.
+Archived device-tools SHA256SUMS all5 items OK.57 common original evidence files are byte-equal to task-local originals. toolchain-components-final.json intentionally adds ONLY sdk_agreement_reference metadata; remaining JSON equals original and added license hash matches previously independently reviewed SDK agreement evidence. This is an additive summary, not alteration of raw execution logs.
+Original path Important and pre-upload strict regex repair/framing checks are retained and described. Standard raw platform transport is accurately distinguished from Product ABI/mock and official adb client. Terminal execution and post-review emulator shutdown are separate facts; emulator exit138 is not a test status.
+Diff check passes. No report correction required. No repository files modified by reviewer. Candidate can be archived within its independent branch; no production gate/merge/deploy decision implied.

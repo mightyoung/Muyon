@@ -1,0 +1,38 @@
+{
+  "verdict": "C0_experimental_intake_only",
+  "fixed_sha": "eef7561289421c58e88896fa69c868403ca1d3c5",
+  "reviewer_is_non_author": true,
+  "review_path": "/workspace/reports/redesign-d03a-experiment-independent-20261014/review.md",
+  "review_sha256": "3571d8595f8ad6d14d22ab47fec23c06e1b40628f6b24aa714ce27d5190a4d02",
+  "actual_unit_tests": 24,
+  "actual_physical_sqlite_crash_tests": 2,
+  "actual_inverse_mutations": 3,
+  "all_mutation_exits_nonzero_behavioral": true,
+  "restored_clean": true,
+  "fixed72_summary": {
+    "partial": 63,
+    "not_run": 9
+  },
+  "complete72_scenario_pass": 0,
+  "matched_assertions": 274,
+  "mismatched_assertions": 0,
+  "actual_oracle_isolation_cases": 72,
+  "wrong_oracle_mismatches_after_execution": 63,
+  "additional_non_author_actual_checks": 6,
+  "fixed_source_and_report_hashes_verified": 7,
+  "external_author_raw_log_hashes_verified": 12,
+  "original_v1_bytes_and_not_run_nulls_preserved": true,
+  "product_runtime": "not_run",
+  "M03": "blocked_contract",
+  "required_stop_conditions": [
+    "actual_projection_body_and_digest",
+    "real_snapshot_parser_proof_and_schema",
+    "authority_receipt_identity_digest_verifier",
+    "actual_compression_draft_ipc_dedup_and_body_restart",
+    "individual_authorization_scope_capability_CAS_business_executor",
+    "production_signed_user_unknown_association",
+    "Rust_IPC_native_transport_evidence"
+  ],
+  "remaining_important_review_findings": [],
+  "source_restored_sha256": "6c270f56c043ac85810e20902435c3a52a2e29aa353f1078407fbe1dfec5a5d0"
+}

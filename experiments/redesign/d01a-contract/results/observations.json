@@ -1,0 +1,2512 @@
+{
+  "artifact_kind": "experimental_seam_observations_not_product_acceptance",
+  "input_base": "1dc7678684c573f7f7e26ff8c6aa2a31f4d7c22d",
+  "status": "experimental",
+  "case_count": 29,
+  "variant_count": 77,
+  "rules": "14 proposed_unfrozen",
+  "main_acceptance": "52 not_run",
+  "whole_case_pass_count": 0,
+  "real_credential_scans": 0,
+  "real_model_requests": 0,
+  "real_dispatches": 0,
+  "M03_frozen": false,
+  "counts": {
+    "partial_experimental": 61,
+    "not_run": 16,
+    "partial_comparison_mismatches": 0
+  },
+  "expected_only_negative_control": false,
+  "source_hashes": [
+    {
+      "path": "fixtures/redesign/classification-v1/U01.json",
+      "sha256": "46bd002e4f5df54c795891d2226f39dcab890260fc730c94c314809c51ade4c3"
+    },
+    {
+      "path": "fixtures/redesign/classification-v1/U02.json",
+      "sha256": "9382c2377899b073a59030e698e22331cb9c49a56424a36988fdcc9d6a3da6c5"
+    },
+    {
+      "path": "fixtures/redesign/classification-v1/U03.json",
+      "sha256": "046fbd44d2b3be504b1d852dca07567922440221a0f4a38a638ad0009b63ec5f"
+    },
+    {
+      "path": "fixtures/redesign/classification-v1/A01.json",
+      "sha256": "662592575d10c5673c25c09889b7262da3b9faf43fe8d18d35c3a887258653a5"
+    },
+    {
+      "path": "fixtures/redesign/classification-v1/A02.json",
+      "sha256": "38968fc72f024177f87a97a28e36d9bdea080385cf0d311f8d178f32800baf2f"
+    },
+    {
+      "path": "fixtures/redesign/classification-v1/P01.json",
+      "sha256": "0f94a2b62a8c2c316b76cc4b1a378e5278c64d0dc7cce72b5330de6e365e37fd"
+    },
+    {
+      "path": "fixtures/redesign/classification-v1/P02.json",
+      "sha256": "2b55fb2f3f87e338a0aa06b30ea4f9138b2171d936161d8167c2d579f56da993"
+    },
+    {
+      "path": "fixtures/redesign/classification-v1/D01.json",
+      "sha256": "1abe6498f06c6e1b1c9e6646cd245df93fac39487149703e55122f5c4e4aab20"
+    },
+    {
+      "path": "fixtures/redesign/classification-v1/D02.json",
+      "sha256": "81bbbbe7f47239d9b00c19b55ec7fa0dd7576fec1ee8182a4d2f536f4f691ba2"
+    },
+    {
+      "path": "fixtures/redesign/classification-v1/M01.json",
+      "sha256": "b9a2724a91da544985d033b558e024f5f4ef156c96d81c5672221e839c275a25"
+    },
+    {
+      "path": "fixtures/redesign/classification-v1/M02.json",
+      "sha256": "7a69e070ac2c3cf7f252deb281b90264d3c8772b66ad8e28950bc453fa89f475"
+    },
+    {
+      "path": "fixtures/redesign/classification-v1/F01.json",
+      "sha256": "203b4b80c1ce45f2c48983535a1894a167d69b3e5f7bb95ed9f9b42de4de3ebd"
+    },
+    {
+      "path": "fixtures/redesign/classification-v1/F02.json",
+      "sha256": "7ee0aa5a6e5709f84b31c7e6c55dc7e456c6dd9b35e5238ea7234fdd23a8994e"
+    },
+    {
+      "path": "fixtures/redesign/classification-v1/F03.json",
+      "sha256": "945add0abff0175cb4a78c65a1d18d98e16fceaa1d120b1d2fab495671a012f9"
+    },
+    {
+      "path": "fixtures/redesign/classification-v1/F04.json",
+      "sha256": "efe6c03494d53c654400829295baf6e8c958155a0676caad99c79da855059115"
+    },
+    {
+      "path": "fixtures/redesign/classification-v1/F05.json",
+      "sha256": "1158e616cffdc2168f840b9177f90ef0bf022270193e437254e3db2a70f88a33"
+    },
+    {
+      "path": "fixtures/redesign/classification-v1/F06.json",
+      "sha256": "6e155a4565f984ed4e8ba7ca8bf81c783fcb917afeb8280eae83b745431b1a4f"
+    },
+    {
+      "path": "fixtures/redesign/classification-v1/F07.json",
+      "sha256": "0b4d62793a4218063f814dfa06e61f7e62e860206f7f040a22a47a415f37c04d"
+    },
+    {
+      "path": "fixtures/redesign/classification-v1/F08.json",
+      "sha256": "c92a6373c093f8010ae318c8ef7f1e0a32928995e781c1446fee242d6ec8ee49"
+    },
+    {
+      "path": "fixtures/redesign/classification-v1/F09.json",
+      "sha256": "c52dea6cfde7b4531eadaefc9033338e4142efa21446c8bab468b407adb57a5b"
+    },
+    {
+      "path": "fixtures/redesign/classification-v1/F10.json",
+      "sha256": "5a759a4e3f9b1d5bd6dee3770222e4ce9ea6bc893df73e8a369093c6596346f5"
+    },
+    {
+      "path": "fixtures/redesign/classification-v1/F11.json",
+      "sha256": "16ed6d0d45981bc70aa7877d32778322fb0a99e0fda275a1e390f067a646fae5"
+    },
+    {
+      "path": "fixtures/redesign/classification-v1/C01.json",
+      "sha256": "9ebeac3bcee6386ed6c116eadbbfa3631a6fc2a82d207d4c9be6e1d52f76ca22"
+    },
+    {
+      "path": "fixtures/redesign/classification-v1/C02.json",
+      "sha256": "89795a6eb3e639ec9aee1487f05c6e6041d25491c4dbd38c757d4cd058d1de13"
+    },
+    {
+      "path": "fixtures/redesign/classification-v1/C03.json",
+      "sha256": "a06e6fe9249c8e7369ea0e16c5b2db2c5089505d97c78e18a97e0acb87f204af"
+    },
+    {
+      "path": "fixtures/redesign/classification-v1/C04.json",
+      "sha256": "7b90dce669ff73d32bee34fcf432e25340073d946447c5517ce73cf2184ba6a3"
+    },
+    {
+      "path": "fixtures/redesign/classification-v1/N01.json",
+      "sha256": "36f142b3d7fb00bf01a7cddfde59beaa684a7b2b79397bb8eef77eb81914f05a"
+    },
+    {
+      "path": "fixtures/redesign/classification-v1/N02.json",
+      "sha256": "7ced6f903d469c5c435150c858208752352fe5f559d017085426b991cf42f138"
+    },
+    {
+      "path": "fixtures/redesign/classification-v1/N03.json",
+      "sha256": "35a1e54246564c5860f3af4a1d7fd37bd5d9f71246cfb2d18b5eccc4a677d64b"
+    }
+  ],
+  "cases": [
+    {
+      "case_id": "V131-T02/U01",
+      "original_case_status": "not_run",
+      "whole_case_acceptance": "not_run",
+      "variants": [
+        {
+          "variant_id": "unicode_clean",
+          "whole_variant_acceptance": "not_run",
+          "experimental_status": "partial_experimental",
+          "comparison": "matched_partial_facets",
+          "actual": {
+            "material": {
+              "purpose": "model_request",
+              "state": "eligible",
+              "noncurrent": "not_applicable"
+            },
+            "route": {
+              "state": "eligible",
+              "reason": "FullAllow_current_scope_assumption"
+            },
+            "sensitivity_context": "personal",
+            "attempt": "complete",
+            "attempt_terminal": true,
+            "dispatch_performed": false,
+            "status": "partial_experimental",
+            "coverage": "admission/routing of supplied host assumptions; not actual classification/scanning"
+          },
+          "oracle": {
+            "purpose": "model_request",
+            "eligible": true,
+            "noncurrent": "not_applicable"
+          },
+          "mismatches": []
+        }
+      ]
+    },
+    {
+      "case_id": "V131-T02/U02",
+      "original_case_status": "not_run",
+      "whole_case_acceptance": "not_run",
+      "variants": [
+        {
+          "variant_id": "known_hit_assumption",
+          "whole_variant_acceptance": "not_run",
+          "experimental_status": "partial_experimental",
+          "comparison": "matched_partial_facets",
+          "actual": {
+            "material": {
+              "purpose": "model_request",
+              "state": "ineligible",
+              "noncurrent": "not_applicable"
+            },
+            "route": {
+              "state": "rejected",
+              "reason": "credential_body_prohibited"
+            },
+            "sensitivity_context": "credential",
+            "attempt": "complete",
+            "attempt_terminal": true,
+            "dispatch_performed": false,
+            "status": "partial_experimental",
+            "coverage": "admission/routing of supplied host assumptions; not actual classification/scanning"
+          },
+          "oracle": {
+            "purpose": "model_request",
+            "eligible": false,
+            "noncurrent": "not_applicable"
+          },
+          "mismatches": []
+        },
+        {
+          "variant_id": "suspected_assumption",
+          "whole_variant_acceptance": "not_run",
+          "experimental_status": "partial_experimental",
+          "comparison": "matched_partial_facets",
+          "actual": {
+            "material": {
+              "purpose": "model_request",
+              "state": "ineligible",
+              "noncurrent": "not_applicable"
+            },
+            "route": {
+              "state": "rejected",
+              "reason": "suspected_credential"
+            },
+            "sensitivity_context": "unreviewed",
+            "attempt": "incomplete",
+            "attempt_terminal": true,
+            "dispatch_performed": false,
+            "status": "partial_experimental",
+            "coverage": "admission/routing of supplied host assumptions; not actual classification/scanning"
+          },
+          "oracle": {
+            "purpose": "model_request",
+            "eligible": false,
+            "noncurrent": "not_applicable"
+          },
+          "mismatches": []
+        }
+      ]
+    },
+    {
+      "case_id": "V131-T02/U03",
+      "original_case_status": "not_run",
+      "whole_case_acceptance": "not_run",
+      "variants": [
+        {
+          "variant_id": "not_executed",
+          "whole_variant_acceptance": "not_run",
+          "experimental_status": "partial_experimental",
+          "comparison": "matched_partial_facets",
+          "actual": {
+            "material": {
+              "purpose": "model_request",
+              "state": "blocked_contract",
+              "noncurrent": "not_applicable"
+            },
+            "route": {
+              "state": "blocked_contract",
+              "reason": "current_purpose_rule_coverage_missing"
+            },
+            "sensitivity_context": "unreviewed",
+            "attempt": "no_coverage",
+            "attempt_terminal": true,
+            "dispatch_performed": false,
+            "status": "partial_experimental",
+            "coverage": "admission/routing of supplied host assumptions; not actual classification/scanning"
+          },
+          "oracle": {
+            "purpose": "model_request",
+            "eligible": false,
+            "noncurrent": "not_applicable"
+          },
+          "mismatches": []
+        },
+        {
+          "variant_id": "scan_error",
+          "whole_variant_acceptance": "not_run",
+          "experimental_status": "partial_experimental",
+          "comparison": "matched_partial_facets",
+          "actual": {
+            "material": {
+              "purpose": "model_request",
+              "state": "blocked_contract",
+              "noncurrent": "not_applicable"
+            },
+            "route": {
+              "state": "blocked_contract",
+              "reason": "current_purpose_rule_coverage_missing"
+            },
+            "sensitivity_context": "unreviewed",
+            "attempt": "no_coverage",
+            "attempt_terminal": true,
+            "dispatch_performed": false,
+            "status": "partial_experimental",
+            "coverage": "admission/routing of supplied host assumptions; not actual classification/scanning"
+          },
+          "oracle": {
+            "purpose": "model_request",
+            "eligible": false,
+            "noncurrent": "not_applicable"
+          },
+          "mismatches": []
+        },
+        {
+          "variant_id": "truncated",
+          "whole_variant_acceptance": "not_run",
+          "experimental_status": "partial_experimental",
+          "comparison": "matched_partial_facets",
+          "actual": {
+            "material": {
+              "purpose": "model_request",
+              "state": "blocked_contract",
+              "noncurrent": "not_applicable"
+            },
+            "route": {
+              "state": "blocked_contract",
+              "reason": "current_purpose_rule_coverage_missing"
+            },
+            "sensitivity_context": "unreviewed",
+            "attempt": "no_coverage",
+            "attempt_terminal": true,
+            "dispatch_performed": false,
+            "status": "partial_experimental",
+            "coverage": "admission/routing of supplied host assumptions; not actual classification/scanning"
+          },
+          "oracle": {
+            "purpose": "model_request",
+            "eligible": false,
+            "noncurrent": "not_applicable"
+          },
+          "mismatches": []
+        },
+        {
+          "variant_id": "parse_incomplete",
+          "whole_variant_acceptance": "not_run",
+          "experimental_status": "partial_experimental",
+          "comparison": "matched_partial_facets",
+          "actual": {
+            "material": {
+              "purpose": "model_request",
+              "state": "blocked_contract",
+              "noncurrent": "not_applicable"
+            },
+            "route": {
+              "state": "blocked_contract",
+              "reason": "current_purpose_rule_coverage_missing"
+            },
+            "sensitivity_context": "unreviewed",
+            "attempt": "no_coverage",
+            "attempt_terminal": true,
+            "dispatch_performed": false,
+            "status": "partial_experimental",
+            "coverage": "admission/routing of supplied host assumptions; not actual classification/scanning"
+          },
+          "oracle": {
+            "purpose": "model_request",
+            "eligible": false,
+            "noncurrent": "not_applicable"
+          },
+          "mismatches": []
+        },
+        {
+          "variant_id": "unknown_sensitivity_enum",
+          "whole_variant_acceptance": "not_run",
+          "experimental_status": "partial_experimental",
+          "comparison": "matched_partial_facets",
+          "actual": {
+            "material": {
+              "purpose": "model_request",
+              "state": "blocked_contract",
+              "noncurrent": "not_applicable"
+            },
+            "route": {
+              "state": "blocked_contract",
+              "reason": "current_purpose_rule_coverage_missing"
+            },
+            "sensitivity_context": "unreviewed",
+            "attempt": "no_coverage",
+            "attempt_terminal": true,
+            "dispatch_performed": false,
+            "status": "partial_experimental",
+            "coverage": "admission/routing of supplied host assumptions; not actual classification/scanning"
+          },
+          "oracle": {
+            "purpose": "model_request",
+            "eligible": false,
+            "noncurrent": "not_applicable"
+          },
+          "mismatches": []
+        }
+      ]
+    },
+    {
+      "case_id": "V131-T02/A01",
+      "original_case_status": "not_run",
+      "whole_case_acceptance": "not_run",
+      "variants": [
+        {
+          "variant_id": "page2_only",
+          "whole_variant_acceptance": "not_run",
+          "experimental_status": "partial_experimental",
+          "comparison": "matched_partial_facets",
+          "actual": {
+            "material": {
+              "purpose": "model_request",
+              "state": "eligible",
+              "noncurrent": "not_applicable"
+            },
+            "route": {
+              "state": "eligible",
+              "reason": "FullAllow_current_scope_assumption"
+            },
+            "sensitivity_context": "personal",
+            "attempt": "complete",
+            "attempt_terminal": true,
+            "dispatch_performed": false,
+            "status": "partial_experimental",
+            "coverage": "admission/routing of supplied host assumptions; not actual classification/scanning"
+          },
+          "oracle": {
+            "purpose": "model_request",
+            "eligible": true,
+            "noncurrent": "not_applicable"
+          },
+          "mismatches": []
+        }
+      ]
+    },
+    {
+      "case_id": "V131-T02/A02",
+      "original_case_status": "not_run",
+      "whole_case_acceptance": "not_run",
+      "variants": [
+        {
+          "variant_id": "full_document",
+          "whole_variant_acceptance": "not_run",
+          "experimental_status": "partial_experimental",
+          "comparison": "matched_partial_facets",
+          "actual": {
+            "material": {
+              "purpose": "model_request",
+              "state": "blocked_contract",
+              "noncurrent": "not_applicable"
+            },
+            "route": {
+              "state": "blocked_contract",
+              "reason": "current_purpose_rule_coverage_missing"
+            },
+            "sensitivity_context": "unreviewed",
+            "attempt": "no_coverage",
+            "attempt_terminal": true,
+            "dispatch_performed": false,
+            "status": "partial_experimental",
+            "coverage": "admission/routing of supplied host assumptions; not actual classification/scanning"
+          },
+          "oracle": {
+            "purpose": "model_request",
+            "eligible": false,
+            "noncurrent": "not_applicable"
+          },
+          "mismatches": []
+        }
+      ]
+    },
+    {
+      "case_id": "V131-T02/P01",
+      "original_case_status": "not_run",
+      "whole_case_acceptance": "not_run",
+      "variants": [
+        {
+          "variant_id": "registered_field",
+          "whole_variant_acceptance": "not_run",
+          "experimental_status": "not_run",
+          "comparison": "not_run",
+          "actual": {
+            "material": {
+              "purpose": "model_request",
+              "state": "not_run",
+              "noncurrent": "not_applicable"
+            },
+            "route": {
+              "state": "not_run",
+              "reason": "non_supplier_field_registry_not_supplied"
+            },
+            "sensitivity_context": "unreviewed",
+            "attempt": "complete",
+            "attempt_terminal": true,
+            "dispatch_performed": false,
+            "status": "not_run",
+            "coverage": "admission/routing of supplied host assumptions; not actual classification/scanning"
+          },
+          "oracle": null,
+          "mismatches": []
+        },
+        {
+          "variant_id": "unregistered_free_text",
+          "whole_variant_acceptance": "not_run",
+          "experimental_status": "not_run",
+          "comparison": "not_run",
+          "actual": {
+            "material": {
+              "purpose": "model_request",
+              "state": "not_run",
+              "noncurrent": "not_applicable"
+            },
+            "route": {
+              "state": "not_run",
+              "reason": "non_supplier_field_registry_not_supplied"
+            },
+            "sensitivity_context": "unreviewed",
+            "attempt": "complete",
+            "attempt_terminal": true,
+            "dispatch_performed": false,
+            "status": "not_run",
+            "coverage": "admission/routing of supplied host assumptions; not actual classification/scanning"
+          },
+          "oracle": null,
+          "mismatches": []
+        }
+      ]
+    },
+    {
+      "case_id": "V131-T02/P02",
+      "original_case_status": "not_run",
+      "whole_case_acceptance": "not_run",
+      "variants": [
+        {
+          "variant_id": "tool_result",
+          "whole_variant_acceptance": "not_run",
+          "experimental_status": "partial_experimental",
+          "comparison": "matched_partial_facets",
+          "actual": {
+            "material": {
+              "purpose": "model_request",
+              "state": "blocked_contract",
+              "noncurrent": "not_applicable"
+            },
+            "route": {
+              "state": "blocked_contract",
+              "reason": "current_purpose_rule_coverage_missing"
+            },
+            "sensitivity_context": "unreviewed",
+            "attempt": "no_coverage",
+            "attempt_terminal": true,
+            "dispatch_performed": false,
+            "status": "partial_experimental",
+            "coverage": "admission/routing of supplied host assumptions; not actual classification/scanning"
+          },
+          "oracle": {
+            "purpose": "model_request",
+            "eligible": false,
+            "noncurrent": "not_applicable"
+          },
+          "mismatches": []
+        },
+        {
+          "variant_id": "model_generated",
+          "whole_variant_acceptance": "not_run",
+          "experimental_status": "partial_experimental",
+          "comparison": "matched_partial_facets",
+          "actual": {
+            "material": {
+              "purpose": "model_request",
+              "state": "blocked_contract",
+              "noncurrent": "not_applicable"
+            },
+            "route": {
+              "state": "blocked_contract",
+              "reason": "current_purpose_rule_coverage_missing"
+            },
+            "sensitivity_context": "unreviewed",
+            "attempt": "no_coverage",
+            "attempt_terminal": true,
+            "dispatch_performed": false,
+            "status": "partial_experimental",
+            "coverage": "admission/routing of supplied host assumptions; not actual classification/scanning"
+          },
+          "oracle": {
+            "purpose": "model_request",
+            "eligible": false,
+            "noncurrent": "not_applicable"
+          },
+          "mismatches": []
+        }
+      ]
+    },
+    {
+      "case_id": "V131-T02/D01",
+      "original_case_status": "not_run",
+      "whole_case_acceptance": "not_run",
+      "variants": [
+        {
+          "variant_id": "summary",
+          "whole_variant_acceptance": "not_run",
+          "experimental_status": "not_run",
+          "comparison": "not_run",
+          "actual": {
+            "material": {
+              "purpose": "model_request",
+              "state": "not_run",
+              "noncurrent": "not_applicable"
+            },
+            "route": {
+              "state": "not_run",
+              "reason": "transform_or_retention_execution_evidence_not_supplied"
+            },
+            "sensitivity_context": "unreviewed",
+            "attempt": "complete",
+            "attempt_terminal": true,
+            "dispatch_performed": false,
+            "status": "not_run",
+            "coverage": "admission/routing of supplied host assumptions; not actual classification/scanning"
+          },
+          "oracle": null,
+          "mismatches": []
+        },
+        {
+          "variant_id": "copy",
+          "whole_variant_acceptance": "not_run",
+          "experimental_status": "not_run",
+          "comparison": "not_run",
+          "actual": {
+            "material": {
+              "purpose": "model_request",
+              "state": "not_run",
+              "noncurrent": "not_applicable"
+            },
+            "route": {
+              "state": "not_run",
+              "reason": "transform_or_retention_execution_evidence_not_supplied"
+            },
+            "sensitivity_context": "unreviewed",
+            "attempt": "complete",
+            "attempt_terminal": true,
+            "dispatch_performed": false,
+            "status": "not_run",
+            "coverage": "admission/routing of supplied host assumptions; not actual classification/scanning"
+          },
+          "oracle": null,
+          "mismatches": []
+        },
+        {
+          "variant_id": "OCR",
+          "whole_variant_acceptance": "not_run",
+          "experimental_status": "not_run",
+          "comparison": "not_run",
+          "actual": {
+            "material": {
+              "purpose": "model_request",
+              "state": "not_run",
+              "noncurrent": "not_applicable"
+            },
+            "route": {
+              "state": "not_run",
+              "reason": "transform_or_retention_execution_evidence_not_supplied"
+            },
+            "sensitivity_context": "unreviewed",
+            "attempt": "complete",
+            "attempt_terminal": true,
+            "dispatch_performed": false,
+            "status": "not_run",
+            "coverage": "admission/routing of supplied host assumptions; not actual classification/scanning"
+          },
+          "oracle": null,
+          "mismatches": []
+        },
+        {
+          "variant_id": "chunk",
+          "whole_variant_acceptance": "not_run",
+          "experimental_status": "not_run",
+          "comparison": "not_run",
+          "actual": {
+            "material": {
+              "purpose": "model_request",
+              "state": "not_run",
+              "noncurrent": "not_applicable"
+            },
+            "route": {
+              "state": "not_run",
+              "reason": "transform_or_retention_execution_evidence_not_supplied"
+            },
+            "sensitivity_context": "unreviewed",
+            "attempt": "complete",
+            "attempt_terminal": true,
+            "dispatch_performed": false,
+            "status": "not_run",
+            "coverage": "admission/routing of supplied host assumptions; not actual classification/scanning"
+          },
+          "oracle": null,
+          "mismatches": []
+        }
+      ]
+    },
+    {
+      "case_id": "V131-T02/D02",
+      "original_case_status": "not_run",
+      "whole_case_acceptance": "not_run",
+      "variants": [
+        {
+          "variant_id": "source_revoked",
+          "whole_variant_acceptance": "not_run",
+          "experimental_status": "partial_experimental",
+          "comparison": "matched_partial_facets",
+          "actual": {
+            "material": {
+              "purpose": "model_request",
+              "state": "ineligible",
+              "noncurrent": "not_applicable"
+            },
+            "route": {
+              "state": "rejected",
+              "reason": "source_rights_unavailable"
+            },
+            "sensitivity_context": "commercial",
+            "attempt": "invalidated",
+            "attempt_terminal": true,
+            "dispatch_performed": false,
+            "status": "partial_experimental",
+            "coverage": "admission/routing of supplied host assumptions; not actual classification/scanning"
+          },
+          "oracle": {
+            "purpose": "model_request",
+            "eligible": false,
+            "noncurrent": "not_applicable"
+          },
+          "mismatches": []
+        },
+        {
+          "variant_id": "source_forgotten",
+          "whole_variant_acceptance": "not_run",
+          "experimental_status": "partial_experimental",
+          "comparison": "matched_partial_facets",
+          "actual": {
+            "material": {
+              "purpose": "model_request",
+              "state": "ineligible",
+              "noncurrent": "not_applicable"
+            },
+            "route": {
+              "state": "rejected",
+              "reason": "source_rights_unavailable"
+            },
+            "sensitivity_context": "commercial",
+            "attempt": "invalidated",
+            "attempt_terminal": true,
+            "dispatch_performed": false,
+            "status": "partial_experimental",
+            "coverage": "admission/routing of supplied host assumptions; not actual classification/scanning"
+          },
+          "oracle": {
+            "purpose": "model_request",
+            "eligible": false,
+            "noncurrent": "not_applicable"
+          },
+          "mismatches": []
+        },
+        {
+          "variant_id": "purpose_changed",
+          "whole_variant_acceptance": "not_run",
+          "experimental_status": "partial_experimental",
+          "comparison": "matched_partial_facets",
+          "actual": {
+            "material": {
+              "purpose": "model_request",
+              "state": "ineligible",
+              "noncurrent": "not_applicable"
+            },
+            "route": {
+              "state": "rejected",
+              "reason": "stale_content_evidence"
+            },
+            "sensitivity_context": "unreviewed",
+            "attempt": "invalidated",
+            "attempt_terminal": true,
+            "dispatch_performed": false,
+            "status": "partial_experimental",
+            "coverage": "admission/routing of supplied host assumptions; not actual classification/scanning"
+          },
+          "oracle": {
+            "purpose": "model_request",
+            "eligible": false,
+            "noncurrent": "not_applicable"
+          },
+          "mismatches": []
+        },
+        {
+          "variant_id": "rule_revised",
+          "whole_variant_acceptance": "not_run",
+          "experimental_status": "partial_experimental",
+          "comparison": "matched_partial_facets",
+          "actual": {
+            "material": {
+              "purpose": "model_request",
+              "state": "ineligible",
+              "noncurrent": "not_applicable"
+            },
+            "route": {
+              "state": "rejected",
+              "reason": "stale_content_evidence"
+            },
+            "sensitivity_context": "unreviewed",
+            "attempt": "invalidated",
+            "attempt_terminal": true,
+            "dispatch_performed": false,
+            "status": "partial_experimental",
+            "coverage": "admission/routing of supplied host assumptions; not actual classification/scanning"
+          },
+          "oracle": {
+            "purpose": "model_request",
+            "eligible": false,
+            "noncurrent": "not_applicable"
+          },
+          "mismatches": []
+        }
+      ]
+    },
+    {
+      "case_id": "V131-T02/M01",
+      "original_case_status": "not_run",
+      "whole_case_acceptance": "not_run",
+      "variants": [
+        {
+          "variant_id": "filename",
+          "whole_variant_acceptance": "not_run",
+          "experimental_status": "partial_experimental",
+          "comparison": "matched_partial_facets",
+          "actual": {
+            "material": {
+              "purpose": "model_request",
+              "state": "ineligible",
+              "noncurrent": "not_applicable"
+            },
+            "route": {
+              "state": "rejected",
+              "reason": "credential_body_prohibited"
+            },
+            "sensitivity_context": "credential",
+            "attempt": "complete",
+            "attempt_terminal": true,
+            "dispatch_performed": false,
+            "status": "partial_experimental",
+            "coverage": "admission/routing of supplied host assumptions; not actual classification/scanning"
+          },
+          "oracle": {
+            "purpose": "model_request",
+            "eligible": false,
+            "noncurrent": "not_applicable"
+          },
+          "mismatches": []
+        },
+        {
+          "variant_id": "title",
+          "whole_variant_acceptance": "not_run",
+          "experimental_status": "partial_experimental",
+          "comparison": "matched_partial_facets",
+          "actual": {
+            "material": {
+              "purpose": "model_request",
+              "state": "ineligible",
+              "noncurrent": "not_applicable"
+            },
+            "route": {
+              "state": "rejected",
+              "reason": "credential_body_prohibited"
+            },
+            "sensitivity_context": "credential",
+            "attempt": "complete",
+            "attempt_terminal": true,
+            "dispatch_performed": false,
+            "status": "partial_experimental",
+            "coverage": "admission/routing of supplied host assumptions; not actual classification/scanning"
+          },
+          "oracle": {
+            "purpose": "model_request",
+            "eligible": false,
+            "noncurrent": "not_applicable"
+          },
+          "mismatches": []
+        },
+        {
+          "variant_id": "URL",
+          "whole_variant_acceptance": "not_run",
+          "experimental_status": "partial_experimental",
+          "comparison": "matched_partial_facets",
+          "actual": {
+            "material": {
+              "purpose": "model_request",
+              "state": "ineligible",
+              "noncurrent": "not_applicable"
+            },
+            "route": {
+              "state": "rejected",
+              "reason": "credential_body_prohibited"
+            },
+            "sensitivity_context": "credential",
+            "attempt": "complete",
+            "attempt_terminal": true,
+            "dispatch_performed": false,
+            "status": "partial_experimental",
+            "coverage": "admission/routing of supplied host assumptions; not actual classification/scanning"
+          },
+          "oracle": {
+            "purpose": "model_request",
+            "eligible": false,
+            "noncurrent": "not_applicable"
+          },
+          "mismatches": []
+        },
+        {
+          "variant_id": "tool_history",
+          "whole_variant_acceptance": "not_run",
+          "experimental_status": "partial_experimental",
+          "comparison": "matched_partial_facets",
+          "actual": {
+            "material": {
+              "purpose": "model_request",
+              "state": "ineligible",
+              "noncurrent": "not_applicable"
+            },
+            "route": {
+              "state": "rejected",
+              "reason": "credential_body_prohibited"
+            },
+            "sensitivity_context": "credential",
+            "attempt": "complete",
+            "attempt_terminal": true,
+            "dispatch_performed": false,
+            "status": "partial_experimental",
+            "coverage": "admission/routing of supplied host assumptions; not actual classification/scanning"
+          },
+          "oracle": {
+            "purpose": "model_request",
+            "eligible": false,
+            "noncurrent": "not_applicable"
+          },
+          "mismatches": []
+        },
+        {
+          "variant_id": "error",
+          "whole_variant_acceptance": "not_run",
+          "experimental_status": "partial_experimental",
+          "comparison": "matched_partial_facets",
+          "actual": {
+            "material": {
+              "purpose": "model_request",
+              "state": "ineligible",
+              "noncurrent": "not_applicable"
+            },
+            "route": {
+              "state": "rejected",
+              "reason": "credential_body_prohibited"
+            },
+            "sensitivity_context": "credential",
+            "attempt": "complete",
+            "attempt_terminal": true,
+            "dispatch_performed": false,
+            "status": "partial_experimental",
+            "coverage": "admission/routing of supplied host assumptions; not actual classification/scanning"
+          },
+          "oracle": {
+            "purpose": "model_request",
+            "eligible": false,
+            "noncurrent": "not_applicable"
+          },
+          "mismatches": []
+        },
+        {
+          "variant_id": "log",
+          "whole_variant_acceptance": "not_run",
+          "experimental_status": "partial_experimental",
+          "comparison": "matched_partial_facets",
+          "actual": {
+            "material": {
+              "purpose": "model_request",
+              "state": "ineligible",
+              "noncurrent": "not_applicable"
+            },
+            "route": {
+              "state": "rejected",
+              "reason": "credential_body_prohibited"
+            },
+            "sensitivity_context": "credential",
+            "attempt": "complete",
+            "attempt_terminal": true,
+            "dispatch_performed": false,
+            "status": "partial_experimental",
+            "coverage": "admission/routing of supplied host assumptions; not actual classification/scanning"
+          },
+          "oracle": {
+            "purpose": "model_request",
+            "eligible": false,
+            "noncurrent": "not_applicable"
+          },
+          "mismatches": []
+        },
+        {
+          "variant_id": "notification",
+          "whole_variant_acceptance": "not_run",
+          "experimental_status": "partial_experimental",
+          "comparison": "matched_partial_facets",
+          "actual": {
+            "material": {
+              "purpose": "model_request",
+              "state": "ineligible",
+              "noncurrent": "not_applicable"
+            },
+            "route": {
+              "state": "rejected",
+              "reason": "credential_body_prohibited"
+            },
+            "sensitivity_context": "credential",
+            "attempt": "complete",
+            "attempt_terminal": true,
+            "dispatch_performed": false,
+            "status": "partial_experimental",
+            "coverage": "admission/routing of supplied host assumptions; not actual classification/scanning"
+          },
+          "oracle": {
+            "purpose": "model_request",
+            "eligible": false,
+            "noncurrent": "not_applicable"
+          },
+          "mismatches": []
+        }
+      ]
+    },
+    {
+      "case_id": "V131-T02/M02",
+      "original_case_status": "not_run",
+      "whole_case_acceptance": "not_run",
+      "variants": [
+        {
+          "variant_id": "controlled_constant",
+          "whole_variant_acceptance": "not_run",
+          "experimental_status": "not_run",
+          "comparison": "not_run",
+          "actual": {
+            "material": {
+              "purpose": "model_request",
+              "state": "not_run",
+              "noncurrent": "not_applicable"
+            },
+            "route": {
+              "state": "not_run",
+              "reason": "trusted_template_registry_not_supplied"
+            },
+            "sensitivity_context": "unreviewed",
+            "attempt": "complete",
+            "attempt_terminal": true,
+            "dispatch_performed": false,
+            "status": "not_run",
+            "coverage": "admission/routing of supplied host assumptions; not actual classification/scanning"
+          },
+          "oracle": null,
+          "mismatches": []
+        },
+        {
+          "variant_id": "dynamic_user_slot",
+          "whole_variant_acceptance": "not_run",
+          "experimental_status": "not_run",
+          "comparison": "not_run",
+          "actual": {
+            "material": {
+              "purpose": "model_request",
+              "state": "not_run",
+              "noncurrent": "not_applicable"
+            },
+            "route": {
+              "state": "not_run",
+              "reason": "trusted_template_registry_not_supplied"
+            },
+            "sensitivity_context": "unreviewed",
+            "attempt": "complete",
+            "attempt_terminal": true,
+            "dispatch_performed": false,
+            "status": "not_run",
+            "coverage": "admission/routing of supplied host assumptions; not actual classification/scanning"
+          },
+          "oracle": null,
+          "mismatches": []
+        }
+      ]
+    },
+    {
+      "case_id": "V131-T02/F01",
+      "original_case_status": "not_run",
+      "whole_case_acceptance": "not_run",
+      "variants": [
+        {
+          "variant_id": "local_supplier_name_write",
+          "whole_variant_acceptance": "not_run",
+          "experimental_status": "partial_experimental",
+          "comparison": "matched_partial_facets",
+          "actual": {
+            "material": {
+              "purpose": "local_supplier_name_write",
+              "state": "eligible",
+              "noncurrent": "not_applicable"
+            },
+            "route": {
+              "state": "eligible",
+              "reason": "FullAllow_current_scope_assumption"
+            },
+            "sensitivity_context": "none",
+            "attempt": "complete",
+            "attempt_terminal": true,
+            "dispatch_performed": false,
+            "status": "partial_experimental",
+            "coverage": "admission/routing of supplied host assumptions; not actual classification/scanning"
+          },
+          "oracle": {
+            "purpose": "local_supplier_name_write",
+            "eligible": true,
+            "noncurrent": "not_applicable"
+          },
+          "mismatches": []
+        },
+        {
+          "variant_id": "model_request",
+          "whole_variant_acceptance": "not_run",
+          "experimental_status": "partial_experimental",
+          "comparison": "matched_partial_facets",
+          "actual": {
+            "material": {
+              "purpose": "model_request",
+              "state": "eligible",
+              "noncurrent": "not_applicable"
+            },
+            "route": {
+              "state": "eligible",
+              "reason": "FullAllow_current_scope_assumption"
+            },
+            "sensitivity_context": "none",
+            "attempt": "complete",
+            "attempt_terminal": true,
+            "dispatch_performed": false,
+            "status": "partial_experimental",
+            "coverage": "admission/routing of supplied host assumptions; not actual classification/scanning"
+          },
+          "oracle": {
+            "purpose": "model_request",
+            "eligible": true,
+            "noncurrent": "not_applicable"
+          },
+          "mismatches": []
+        },
+        {
+          "variant_id": "business_outbound",
+          "whole_variant_acceptance": "not_run",
+          "experimental_status": "partial_experimental",
+          "comparison": "matched_partial_facets",
+          "actual": {
+            "material": {
+              "purpose": "business_outbound",
+              "state": "eligible",
+              "noncurrent": "not_applicable"
+            },
+            "route": {
+              "state": "eligible",
+              "reason": "FullAllow_current_scope_assumption"
+            },
+            "sensitivity_context": "none",
+            "attempt": "complete",
+            "attempt_terminal": true,
+            "dispatch_performed": false,
+            "status": "partial_experimental",
+            "coverage": "admission/routing of supplied host assumptions; not actual classification/scanning"
+          },
+          "oracle": {
+            "purpose": "business_outbound",
+            "eligible": true,
+            "noncurrent": "not_applicable"
+          },
+          "mismatches": []
+        }
+      ]
+    },
+    {
+      "case_id": "V131-T02/F02",
+      "original_case_status": "not_run",
+      "whole_case_acceptance": "not_run",
+      "variants": [
+        {
+          "variant_id": "generated_credential",
+          "whole_variant_acceptance": "not_run",
+          "experimental_status": "partial_experimental",
+          "comparison": "matched_partial_facets",
+          "actual": {
+            "material": {
+              "purpose": "local_supplier_name_write",
+              "state": "ineligible",
+              "noncurrent": "not_applicable"
+            },
+            "route": {
+              "state": "rejected",
+              "reason": "credential_body_prohibited"
+            },
+            "sensitivity_context": "credential",
+            "attempt": "complete",
+            "attempt_terminal": true,
+            "dispatch_performed": false,
+            "status": "partial_experimental",
+            "coverage": "admission/routing of supplied host assumptions; not actual classification/scanning"
+          },
+          "oracle": {
+            "purpose": "local_supplier_name_write",
+            "eligible": false,
+            "noncurrent": "not_applicable"
+          },
+          "mismatches": []
+        }
+      ]
+    },
+    {
+      "case_id": "V131-T02/F03",
+      "original_case_status": "not_run",
+      "whole_case_acceptance": "not_run",
+      "variants": [
+        {
+          "variant_id": "provider",
+          "whole_variant_acceptance": "not_run",
+          "experimental_status": "partial_experimental",
+          "comparison": "matched_partial_facets",
+          "actual": {
+            "material": {
+              "purpose": "local_supplier_name_write",
+              "state": "blocked_contract",
+              "noncurrent": "not_applicable"
+            },
+            "route": {
+              "state": "blocked_contract",
+              "reason": "current_purpose_rule_coverage_missing"
+            },
+            "sensitivity_context": "unreviewed",
+            "attempt": "no_coverage",
+            "attempt_terminal": true,
+            "dispatch_performed": false,
+            "status": "partial_experimental",
+            "coverage": "admission/routing of supplied host assumptions; not actual classification/scanning"
+          },
+          "oracle": {
+            "purpose": "local_supplier_name_write",
+            "eligible": false,
+            "noncurrent": "not_applicable"
+          },
+          "mismatches": []
+        },
+        {
+          "variant_id": "schema",
+          "whole_variant_acceptance": "not_run",
+          "experimental_status": "partial_experimental",
+          "comparison": "matched_partial_facets",
+          "actual": {
+            "material": {
+              "purpose": "local_supplier_name_write",
+              "state": "blocked_contract",
+              "noncurrent": "not_applicable"
+            },
+            "route": {
+              "state": "blocked_contract",
+              "reason": "current_purpose_rule_coverage_missing"
+            },
+            "sensitivity_context": "unreviewed",
+            "attempt": "no_coverage",
+            "attempt_terminal": true,
+            "dispatch_performed": false,
+            "status": "partial_experimental",
+            "coverage": "admission/routing of supplied host assumptions; not actual classification/scanning"
+          },
+          "oracle": {
+            "purpose": "local_supplier_name_write",
+            "eligible": false,
+            "noncurrent": "not_applicable"
+          },
+          "mismatches": []
+        },
+        {
+          "variant_id": "value_type",
+          "whole_variant_acceptance": "not_run",
+          "experimental_status": "partial_experimental",
+          "comparison": "matched_partial_facets",
+          "actual": {
+            "material": {
+              "purpose": "local_supplier_name_write",
+              "state": "blocked_contract",
+              "noncurrent": "not_applicable"
+            },
+            "route": {
+              "state": "blocked_contract",
+              "reason": "current_purpose_rule_coverage_missing"
+            },
+            "sensitivity_context": "unreviewed",
+            "attempt": "no_coverage",
+            "attempt_terminal": true,
+            "dispatch_performed": false,
+            "status": "partial_experimental",
+            "coverage": "admission/routing of supplied host assumptions; not actual classification/scanning"
+          },
+          "oracle": {
+            "purpose": "local_supplier_name_write",
+            "eligible": false,
+            "noncurrent": "not_applicable"
+          },
+          "mismatches": []
+        }
+      ]
+    },
+    {
+      "case_id": "V131-T02/F04",
+      "original_case_status": "not_run",
+      "whole_case_acceptance": "not_run",
+      "variants": [
+        {
+          "variant_id": "undeclared_name_alias",
+          "whole_variant_acceptance": "not_run",
+          "experimental_status": "partial_experimental",
+          "comparison": "matched_partial_facets",
+          "actual": {
+            "material": {
+              "purpose": "local_supplier_name_write",
+              "state": "ineligible",
+              "noncurrent": "not_applicable"
+            },
+            "route": {
+              "state": "rejected",
+              "reason": "unknown_field"
+            },
+            "sensitivity_context": "unreviewed",
+            "attempt": "no_coverage",
+            "attempt_terminal": true,
+            "dispatch_performed": false,
+            "status": "partial_experimental",
+            "coverage": "admission/routing of supplied host assumptions; not actual classification/scanning"
+          },
+          "oracle": {
+            "purpose": "local_supplier_name_write",
+            "eligible": false,
+            "noncurrent": "not_applicable"
+          },
+          "mismatches": []
+        },
+        {
+          "variant_id": "unknown_sensitivity_enum",
+          "whole_variant_acceptance": "not_run",
+          "experimental_status": "partial_experimental",
+          "comparison": "matched_partial_facets",
+          "actual": {
+            "material": {
+              "purpose": "local_supplier_name_write",
+              "state": "ineligible",
+              "noncurrent": "not_applicable"
+            },
+            "route": {
+              "state": "rejected",
+              "reason": "trusted_field_declaration_missing"
+            },
+            "sensitivity_context": "unreviewed",
+            "attempt": "no_coverage",
+            "attempt_terminal": true,
+            "dispatch_performed": false,
+            "status": "partial_experimental",
+            "coverage": "admission/routing of supplied host assumptions; not actual classification/scanning"
+          },
+          "oracle": {
+            "purpose": "local_supplier_name_write",
+            "eligible": false,
+            "noncurrent": "not_applicable"
+          },
+          "mismatches": []
+        }
+      ]
+    },
+    {
+      "case_id": "V131-T02/F05",
+      "original_case_status": "not_run",
+      "whole_case_acceptance": "not_run",
+      "variants": [
+        {
+          "variant_id": "checked_user_prompt",
+          "whole_variant_acceptance": "not_run",
+          "experimental_status": "partial_experimental",
+          "comparison": "matched_partial_facets",
+          "actual": {
+            "material": {
+              "purpose": "local_supplier_name_write",
+              "state": "ineligible",
+              "noncurrent": "not_applicable"
+            },
+            "route": {
+              "state": "rejected",
+              "reason": "actual_new_value_version_mismatch"
+            },
+            "sensitivity_context": "unreviewed",
+            "attempt": "invalidated",
+            "attempt_terminal": true,
+            "dispatch_performed": false,
+            "status": "partial_experimental",
+            "coverage": "admission/routing of supplied host assumptions; not actual classification/scanning"
+          },
+          "oracle": {
+            "purpose": "local_supplier_name_write",
+            "eligible": false,
+            "noncurrent": "not_applicable"
+          },
+          "mismatches": []
+        },
+        {
+          "variant_id": "checked_old_name",
+          "whole_variant_acceptance": "not_run",
+          "experimental_status": "partial_experimental",
+          "comparison": "matched_partial_facets",
+          "actual": {
+            "material": {
+              "purpose": "local_supplier_name_write",
+              "state": "ineligible",
+              "noncurrent": "not_applicable"
+            },
+            "route": {
+              "state": "rejected",
+              "reason": "actual_new_value_version_mismatch"
+            },
+            "sensitivity_context": "unreviewed",
+            "attempt": "invalidated",
+            "attempt_terminal": true,
+            "dispatch_performed": false,
+            "status": "partial_experimental",
+            "coverage": "admission/routing of supplied host assumptions; not actual classification/scanning"
+          },
+          "oracle": {
+            "purpose": "local_supplier_name_write",
+            "eligible": false,
+            "noncurrent": "not_applicable"
+          },
+          "mismatches": []
+        }
+      ]
+    },
+    {
+      "case_id": "V131-T02/F06",
+      "original_case_status": "not_run",
+      "whole_case_acceptance": "not_run",
+      "variants": [
+        {
+          "variant_id": "name_changed",
+          "whole_variant_acceptance": "not_run",
+          "experimental_status": "partial_experimental",
+          "comparison": "matched_partial_facets",
+          "actual": {
+            "material": {
+              "purpose": "local_supplier_name_write",
+              "state": "ineligible",
+              "noncurrent": "not_applicable"
+            },
+            "route": {
+              "state": "rejected",
+              "reason": "stale_content_evidence"
+            },
+            "sensitivity_context": "unreviewed",
+            "attempt": "invalidated",
+            "attempt_terminal": true,
+            "dispatch_performed": false,
+            "status": "partial_experimental",
+            "coverage": "admission/routing of supplied host assumptions; not actual classification/scanning"
+          },
+          "oracle": {
+            "purpose": "local_supplier_name_write",
+            "eligible": false,
+            "noncurrent": "not_applicable"
+          },
+          "mismatches": []
+        },
+        {
+          "variant_id": "encoding_changed",
+          "whole_variant_acceptance": "not_run",
+          "experimental_status": "partial_experimental",
+          "comparison": "matched_partial_facets",
+          "actual": {
+            "material": {
+              "purpose": "local_supplier_name_write",
+              "state": "ineligible",
+              "noncurrent": "not_applicable"
+            },
+            "route": {
+              "state": "rejected",
+              "reason": "stale_content_evidence"
+            },
+            "sensitivity_context": "unreviewed",
+            "attempt": "invalidated",
+            "attempt_terminal": true,
+            "dispatch_performed": false,
+            "status": "partial_experimental",
+            "coverage": "admission/routing of supplied host assumptions; not actual classification/scanning"
+          },
+          "oracle": {
+            "purpose": "local_supplier_name_write",
+            "eligible": false,
+            "noncurrent": "not_applicable"
+          },
+          "mismatches": []
+        },
+        {
+          "variant_id": "nested_string_added",
+          "whole_variant_acceptance": "not_run",
+          "experimental_status": "partial_experimental",
+          "comparison": "matched_partial_facets",
+          "actual": {
+            "material": {
+              "purpose": "local_supplier_name_write",
+              "state": "ineligible",
+              "noncurrent": "not_applicable"
+            },
+            "route": {
+              "state": "rejected",
+              "reason": "stale_content_evidence"
+            },
+            "sensitivity_context": "unreviewed",
+            "attempt": "invalidated",
+            "attempt_terminal": true,
+            "dispatch_performed": false,
+            "status": "partial_experimental",
+            "coverage": "admission/routing of supplied host assumptions; not actual classification/scanning"
+          },
+          "oracle": {
+            "purpose": "local_supplier_name_write",
+            "eligible": false,
+            "noncurrent": "not_applicable"
+          },
+          "mismatches": []
+        },
+        {
+          "variant_id": "serialization_sentinel_added",
+          "whole_variant_acceptance": "not_run",
+          "experimental_status": "partial_experimental",
+          "comparison": "matched_partial_facets",
+          "actual": {
+            "material": {
+              "purpose": "local_supplier_name_write",
+              "state": "ineligible",
+              "noncurrent": "not_applicable"
+            },
+            "route": {
+              "state": "rejected",
+              "reason": "stale_content_evidence"
+            },
+            "sensitivity_context": "unreviewed",
+            "attempt": "invalidated",
+            "attempt_terminal": true,
+            "dispatch_performed": false,
+            "status": "partial_experimental",
+            "coverage": "admission/routing of supplied host assumptions; not actual classification/scanning"
+          },
+          "oracle": {
+            "purpose": "local_supplier_name_write",
+            "eligible": false,
+            "noncurrent": "not_applicable"
+          },
+          "mismatches": []
+        }
+      ]
+    },
+    {
+      "case_id": "V131-T02/F07",
+      "original_case_status": "not_run",
+      "whole_case_acceptance": "not_run",
+      "variants": [
+        {
+          "variant_id": "commercial_allowed_current_purpose",
+          "whole_variant_acceptance": "not_run",
+          "experimental_status": "partial_experimental",
+          "comparison": "matched_partial_facets",
+          "actual": {
+            "material": {
+              "purpose": "local_supplier_name_write",
+              "state": "eligible",
+              "noncurrent": "not_applicable"
+            },
+            "route": {
+              "state": "eligible",
+              "reason": "FullAllow_current_scope_assumption"
+            },
+            "sensitivity_context": "commercial",
+            "attempt": "complete",
+            "attempt_terminal": true,
+            "dispatch_performed": false,
+            "status": "partial_experimental",
+            "coverage": "admission/routing of supplied host assumptions; not actual classification/scanning"
+          },
+          "oracle": {
+            "purpose": "local_supplier_name_write",
+            "eligible": true,
+            "noncurrent": "not_applicable"
+          },
+          "mismatches": []
+        },
+        {
+          "variant_id": "commercial_purpose_forbidden",
+          "whole_variant_acceptance": "not_run",
+          "experimental_status": "partial_experimental",
+          "comparison": "matched_partial_facets",
+          "actual": {
+            "material": {
+              "purpose": "local_supplier_name_write",
+              "state": "ineligible",
+              "noncurrent": "not_applicable"
+            },
+            "route": {
+              "state": "rejected",
+              "reason": "current_source_purpose_forbidden"
+            },
+            "sensitivity_context": "commercial",
+            "attempt": "complete",
+            "attempt_terminal": true,
+            "dispatch_performed": false,
+            "status": "partial_experimental",
+            "coverage": "admission/routing of supplied host assumptions; not actual classification/scanning"
+          },
+          "oracle": {
+            "purpose": "local_supplier_name_write",
+            "eligible": false,
+            "noncurrent": "not_applicable"
+          },
+          "mismatches": []
+        },
+        {
+          "variant_id": "source_revoked",
+          "whole_variant_acceptance": "not_run",
+          "experimental_status": "partial_experimental",
+          "comparison": "matched_partial_facets",
+          "actual": {
+            "material": {
+              "purpose": "local_supplier_name_write",
+              "state": "ineligible",
+              "noncurrent": "not_applicable"
+            },
+            "route": {
+              "state": "rejected",
+              "reason": "source_rights_unavailable"
+            },
+            "sensitivity_context": "commercial",
+            "attempt": "invalidated",
+            "attempt_terminal": true,
+            "dispatch_performed": false,
+            "status": "partial_experimental",
+            "coverage": "admission/routing of supplied host assumptions; not actual classification/scanning"
+          },
+          "oracle": {
+            "purpose": "local_supplier_name_write",
+            "eligible": false,
+            "noncurrent": "not_applicable"
+          },
+          "mismatches": []
+        }
+      ]
+    },
+    {
+      "case_id": "V131-T02/F08",
+      "original_case_status": "not_run",
+      "whole_case_acceptance": "not_run",
+      "variants": [
+        {
+          "variant_id": "local_minimal_complete_global_uncovered",
+          "whole_variant_acceptance": "not_run",
+          "experimental_status": "partial_experimental",
+          "comparison": "matched_partial_facets",
+          "actual": {
+            "material": {
+              "purpose": "local_supplier_name_write",
+              "state": "eligible",
+              "noncurrent": "not_applicable"
+            },
+            "route": {
+              "state": "eligible",
+              "reason": "FullAllow_current_scope_assumption"
+            },
+            "sensitivity_context": "none",
+            "attempt": "complete",
+            "attempt_terminal": true,
+            "dispatch_performed": false,
+            "status": "partial_experimental",
+            "coverage": "admission/routing of supplied host assumptions; not actual classification/scanning"
+          },
+          "oracle": {
+            "purpose": "local_supplier_name_write",
+            "eligible": true,
+            "noncurrent": "not_applicable"
+          },
+          "mismatches": []
+        },
+        {
+          "variant_id": "local_actual_check_missing",
+          "whole_variant_acceptance": "not_run",
+          "experimental_status": "partial_experimental",
+          "comparison": "matched_partial_facets",
+          "actual": {
+            "material": {
+              "purpose": "local_supplier_name_write",
+              "state": "blocked_contract",
+              "noncurrent": "not_applicable"
+            },
+            "route": {
+              "state": "blocked_contract",
+              "reason": "current_purpose_rule_coverage_missing"
+            },
+            "sensitivity_context": "unreviewed",
+            "attempt": "no_coverage",
+            "attempt_terminal": true,
+            "dispatch_performed": false,
+            "status": "partial_experimental",
+            "coverage": "admission/routing of supplied host assumptions; not actual classification/scanning"
+          },
+          "oracle": {
+            "purpose": "local_supplier_name_write",
+            "eligible": false,
+            "noncurrent": "not_applicable"
+          },
+          "mismatches": []
+        },
+        {
+          "variant_id": "local_unknown_source",
+          "whole_variant_acceptance": "not_run",
+          "experimental_status": "partial_experimental",
+          "comparison": "matched_partial_facets",
+          "actual": {
+            "material": {
+              "purpose": "local_supplier_name_write",
+              "state": "ineligible",
+              "noncurrent": "not_applicable"
+            },
+            "route": {
+              "state": "rejected",
+              "reason": "trusted_source_proof_missing"
+            },
+            "sensitivity_context": "none",
+            "attempt": "incomplete",
+            "attempt_terminal": true,
+            "dispatch_performed": false,
+            "status": "partial_experimental",
+            "coverage": "admission/routing of supplied host assumptions; not actual classification/scanning"
+          },
+          "oracle": {
+            "purpose": "local_supplier_name_write",
+            "eligible": false,
+            "noncurrent": "not_applicable"
+          },
+          "mismatches": []
+        },
+        {
+          "variant_id": "Auto_risk_rule_unfrozen",
+          "whole_variant_acceptance": "not_run",
+          "experimental_status": "partial_experimental",
+          "comparison": "matched_partial_facets",
+          "actual": {
+            "material": {
+              "purpose": "local_supplier_name_write",
+              "state": "eligible",
+              "noncurrent": "not_applicable"
+            },
+            "route": {
+              "state": "blocked_contract",
+              "reason": "Auto_risk_rule_unfrozen"
+            },
+            "sensitivity_context": "none",
+            "attempt": "complete",
+            "attempt_terminal": true,
+            "dispatch_performed": false,
+            "status": "partial_experimental",
+            "coverage": "admission/routing of supplied host assumptions; not actual classification/scanning"
+          },
+          "oracle": {
+            "purpose": "local_supplier_name_write",
+            "eligible": true,
+            "noncurrent": "not_applicable"
+          },
+          "mismatches": []
+        },
+        {
+          "variant_id": "FullAllow_risk_rule_unfrozen",
+          "whole_variant_acceptance": "not_run",
+          "experimental_status": "partial_experimental",
+          "comparison": "matched_partial_facets",
+          "actual": {
+            "material": {
+              "purpose": "local_supplier_name_write",
+              "state": "eligible",
+              "noncurrent": "not_applicable"
+            },
+            "route": {
+              "state": "eligible",
+              "reason": "FullAllow_current_scope_assumption"
+            },
+            "sensitivity_context": "none",
+            "attempt": "complete",
+            "attempt_terminal": true,
+            "dispatch_performed": false,
+            "status": "partial_experimental",
+            "coverage": "admission/routing of supplied host assumptions; not actual classification/scanning"
+          },
+          "oracle": {
+            "purpose": "local_supplier_name_write",
+            "eligible": true,
+            "noncurrent": "not_applicable"
+          },
+          "mismatches": []
+        }
+      ]
+    },
+    {
+      "case_id": "V131-T02/F09",
+      "original_case_status": "not_run",
+      "whole_case_acceptance": "not_run",
+      "variants": [
+        {
+          "variant_id": "v2_not_rechecked",
+          "whole_variant_acceptance": "not_run",
+          "experimental_status": "partial_experimental",
+          "comparison": "matched_partial_facets",
+          "actual": {
+            "material": {
+              "purpose": "local_supplier_name_write",
+              "state": "ineligible",
+              "noncurrent": "not_applicable"
+            },
+            "route": {
+              "state": "rejected",
+              "reason": "stale_content_evidence"
+            },
+            "sensitivity_context": "unreviewed",
+            "attempt": "invalidated",
+            "attempt_terminal": true,
+            "dispatch_performed": false,
+            "status": "partial_experimental",
+            "coverage": "admission/routing of supplied host assumptions; not actual classification/scanning"
+          },
+          "oracle": {
+            "purpose": "local_supplier_name_write",
+            "eligible": false,
+            "noncurrent": "not_applicable"
+          },
+          "mismatches": []
+        },
+        {
+          "variant_id": "v2_rechecked",
+          "whole_variant_acceptance": "not_run",
+          "experimental_status": "partial_experimental",
+          "comparison": "matched_partial_facets",
+          "actual": {
+            "material": {
+              "purpose": "local_supplier_name_write",
+              "state": "eligible",
+              "noncurrent": "not_applicable"
+            },
+            "route": {
+              "state": "eligible",
+              "reason": "FullAllow_current_scope_assumption"
+            },
+            "sensitivity_context": "none",
+            "attempt": "complete",
+            "attempt_terminal": true,
+            "dispatch_performed": false,
+            "status": "partial_experimental",
+            "coverage": "admission/routing of supplied host assumptions; not actual classification/scanning"
+          },
+          "oracle": {
+            "purpose": "local_supplier_name_write",
+            "eligible": true,
+            "noncurrent": "not_applicable"
+          },
+          "mismatches": []
+        }
+      ]
+    },
+    {
+      "case_id": "V131-T02/F10",
+      "original_case_status": "not_run",
+      "whole_case_acceptance": "not_run",
+      "variants": [
+        {
+          "variant_id": "low",
+          "whole_variant_acceptance": "not_run",
+          "experimental_status": "partial_experimental",
+          "comparison": "matched_partial_facets",
+          "actual": {
+            "material": {
+              "purpose": "local_supplier_name_write",
+              "state": "eligible",
+              "noncurrent": "not_applicable"
+            },
+            "route": {
+              "state": "eligible",
+              "reason": "Auto_low_assumed_rule"
+            },
+            "sensitivity_context": "none",
+            "attempt": "complete",
+            "attempt_terminal": true,
+            "dispatch_performed": false,
+            "status": "partial_experimental",
+            "coverage": "admission/routing of supplied host assumptions; not actual classification/scanning"
+          },
+          "oracle": {
+            "purpose": "local_supplier_name_write",
+            "eligible": true,
+            "noncurrent": "not_applicable"
+          },
+          "mismatches": []
+        },
+        {
+          "variant_id": "high",
+          "whole_variant_acceptance": "not_run",
+          "experimental_status": "partial_experimental",
+          "comparison": "matched_partial_facets",
+          "actual": {
+            "material": {
+              "purpose": "local_supplier_name_write",
+              "state": "eligible",
+              "noncurrent": "not_applicable"
+            },
+            "route": {
+              "state": "await_confirmation",
+              "reason": "Auto_high_assumed_rule"
+            },
+            "sensitivity_context": "none",
+            "attempt": "complete",
+            "attempt_terminal": true,
+            "dispatch_performed": false,
+            "status": "partial_experimental",
+            "coverage": "admission/routing of supplied host assumptions; not actual classification/scanning"
+          },
+          "oracle": {
+            "purpose": "local_supplier_name_write",
+            "eligible": true,
+            "noncurrent": "not_applicable"
+          },
+          "mismatches": []
+        },
+        {
+          "variant_id": "prohibited_risk",
+          "whole_variant_acceptance": "not_run",
+          "experimental_status": "partial_experimental",
+          "comparison": "matched_partial_facets",
+          "actual": {
+            "material": {
+              "purpose": "local_supplier_name_write",
+              "state": "eligible",
+              "noncurrent": "not_applicable"
+            },
+            "route": {
+              "state": "rejected",
+              "reason": "Auto_prohibited_assumed_rule"
+            },
+            "sensitivity_context": "none",
+            "attempt": "complete",
+            "attempt_terminal": true,
+            "dispatch_performed": false,
+            "status": "partial_experimental",
+            "coverage": "admission/routing of supplied host assumptions; not actual classification/scanning"
+          },
+          "oracle": {
+            "purpose": "local_supplier_name_write",
+            "eligible": true,
+            "noncurrent": "not_applicable"
+          },
+          "mismatches": []
+        },
+        {
+          "variant_id": "unfrozen",
+          "whole_variant_acceptance": "not_run",
+          "experimental_status": "partial_experimental",
+          "comparison": "matched_partial_facets",
+          "actual": {
+            "material": {
+              "purpose": "local_supplier_name_write",
+              "state": "eligible",
+              "noncurrent": "not_applicable"
+            },
+            "route": {
+              "state": "blocked_contract",
+              "reason": "Auto_risk_rule_unfrozen"
+            },
+            "sensitivity_context": "none",
+            "attempt": "complete",
+            "attempt_terminal": true,
+            "dispatch_performed": false,
+            "status": "partial_experimental",
+            "coverage": "admission/routing of supplied host assumptions; not actual classification/scanning"
+          },
+          "oracle": {
+            "purpose": "local_supplier_name_write",
+            "eligible": true,
+            "noncurrent": "not_applicable"
+          },
+          "mismatches": []
+        }
+      ]
+    },
+    {
+      "case_id": "V131-T02/F11",
+      "original_case_status": "not_run",
+      "whole_case_acceptance": "not_run",
+      "variants": [
+        {
+          "variant_id": "scope_changed",
+          "whole_variant_acceptance": "not_run",
+          "experimental_status": "partial_experimental",
+          "comparison": "matched_partial_facets",
+          "actual": {
+            "material": {
+              "purpose": "local_supplier_name_write",
+              "state": "eligible",
+              "noncurrent": "not_applicable"
+            },
+            "route": {
+              "state": "rejected",
+              "reason": "hard_constraint_scope"
+            },
+            "sensitivity_context": "none",
+            "attempt": "complete",
+            "attempt_terminal": true,
+            "dispatch_performed": false,
+            "status": "partial_experimental",
+            "coverage": "admission/routing of supplied host assumptions; not actual classification/scanning"
+          },
+          "oracle": {
+            "purpose": "local_supplier_name_write",
+            "eligible": true,
+            "noncurrent": "not_applicable"
+          },
+          "mismatches": []
+        },
+        {
+          "variant_id": "revision_changed",
+          "whole_variant_acceptance": "not_run",
+          "experimental_status": "partial_experimental",
+          "comparison": "matched_partial_facets",
+          "actual": {
+            "material": {
+              "purpose": "local_supplier_name_write",
+              "state": "eligible",
+              "noncurrent": "not_applicable"
+            },
+            "route": {
+              "state": "rejected",
+              "reason": "hard_constraint_cas"
+            },
+            "sensitivity_context": "none",
+            "attempt": "complete",
+            "attempt_terminal": true,
+            "dispatch_performed": false,
+            "status": "partial_experimental",
+            "coverage": "admission/routing of supplied host assumptions; not actual classification/scanning"
+          },
+          "oracle": {
+            "purpose": "local_supplier_name_write",
+            "eligible": true,
+            "noncurrent": "not_applicable"
+          },
+          "mismatches": []
+        },
+        {
+          "variant_id": "plan_expired",
+          "whole_variant_acceptance": "not_run",
+          "experimental_status": "partial_experimental",
+          "comparison": "matched_partial_facets",
+          "actual": {
+            "material": {
+              "purpose": "local_supplier_name_write",
+              "state": "eligible",
+              "noncurrent": "not_applicable"
+            },
+            "route": {
+              "state": "rejected",
+              "reason": "hard_constraint_plan_revision"
+            },
+            "sensitivity_context": "none",
+            "attempt": "complete",
+            "attempt_terminal": true,
+            "dispatch_performed": false,
+            "status": "partial_experimental",
+            "coverage": "admission/routing of supplied host assumptions; not actual classification/scanning"
+          },
+          "oracle": {
+            "purpose": "local_supplier_name_write",
+            "eligible": true,
+            "noncurrent": "not_applicable"
+          },
+          "mismatches": []
+        },
+        {
+          "variant_id": "same_intent_replay",
+          "whole_variant_acceptance": "not_run",
+          "experimental_status": "not_run",
+          "comparison": "not_run",
+          "actual": {
+            "material": {
+              "purpose": "local_supplier_name_write",
+              "state": "not_run",
+              "noncurrent": "not_applicable"
+            },
+            "route": {
+              "state": "not_run",
+              "reason": "new_attempt_or_authoritative_replay_evidence_not_supplied"
+            },
+            "sensitivity_context": "unreviewed",
+            "attempt": "complete",
+            "attempt_terminal": true,
+            "dispatch_performed": false,
+            "status": "not_run",
+            "coverage": "admission/routing of supplied host assumptions; not actual classification/scanning"
+          },
+          "oracle": null,
+          "mismatches": []
+        }
+      ]
+    },
+    {
+      "case_id": "V131-T02/C01",
+      "original_case_status": "not_run",
+      "whole_case_acceptance": "not_run",
+      "variants": [
+        {
+          "variant_id": "trim_nonessential_secret",
+          "whole_variant_acceptance": "not_run",
+          "experimental_status": "not_run",
+          "comparison": "not_run",
+          "actual": {
+            "material": {
+              "purpose": "model_request",
+              "state": "not_run",
+              "noncurrent": "not_applicable"
+            },
+            "route": {
+              "state": "not_run",
+              "reason": "transform_or_retention_execution_evidence_not_supplied"
+            },
+            "sensitivity_context": "unreviewed",
+            "attempt": "complete",
+            "attempt_terminal": true,
+            "dispatch_performed": false,
+            "status": "not_run",
+            "coverage": "admission/routing of supplied host assumptions; not actual classification/scanning"
+          },
+          "oracle": null,
+          "mismatches": []
+        }
+      ]
+    },
+    {
+      "case_id": "V131-T02/C02",
+      "original_case_status": "not_run",
+      "whole_case_acceptance": "not_run",
+      "variants": [
+        {
+          "variant_id": "necessary_secret",
+          "whole_variant_acceptance": "not_run",
+          "experimental_status": "not_run",
+          "comparison": "not_run",
+          "actual": {
+            "material": {
+              "purpose": "model_request",
+              "state": "not_run",
+              "noncurrent": "not_applicable"
+            },
+            "route": {
+              "state": "not_run",
+              "reason": "transform_or_retention_execution_evidence_not_supplied"
+            },
+            "sensitivity_context": "unreviewed",
+            "attempt": "complete",
+            "attempt_terminal": true,
+            "dispatch_performed": false,
+            "status": "not_run",
+            "coverage": "admission/routing of supplied host assumptions; not actual classification/scanning"
+          },
+          "oracle": null,
+          "mismatches": []
+        }
+      ]
+    },
+    {
+      "case_id": "V131-T02/C03",
+      "original_case_status": "not_run",
+      "whole_case_acceptance": "not_run",
+      "variants": [
+        {
+          "variant_id": "no_body_retention",
+          "whole_variant_acceptance": "not_run",
+          "experimental_status": "not_run",
+          "comparison": "not_run",
+          "actual": {
+            "material": {
+              "purpose": "model_request",
+              "state": "not_run",
+              "noncurrent": "not_applicable"
+            },
+            "route": {
+              "state": "not_run",
+              "reason": "transform_or_retention_execution_evidence_not_supplied"
+            },
+            "sensitivity_context": "unreviewed",
+            "attempt": "complete",
+            "attempt_terminal": true,
+            "dispatch_performed": false,
+            "status": "not_run",
+            "coverage": "admission/routing of supplied host assumptions; not actual classification/scanning"
+          },
+          "oracle": null,
+          "mismatches": []
+        }
+      ]
+    },
+    {
+      "case_id": "V131-T02/C04",
+      "original_case_status": "not_run",
+      "whole_case_acceptance": "not_run",
+      "variants": [
+        {
+          "variant_id": "source_changed",
+          "whole_variant_acceptance": "not_run",
+          "experimental_status": "not_run",
+          "comparison": "not_run",
+          "actual": {
+            "material": {
+              "purpose": "model_request",
+              "state": "not_run",
+              "noncurrent": "not_applicable"
+            },
+            "route": {
+              "state": "not_run",
+              "reason": "transform_or_retention_execution_evidence_not_supplied"
+            },
+            "sensitivity_context": "unreviewed",
+            "attempt": "complete",
+            "attempt_terminal": true,
+            "dispatch_performed": false,
+            "status": "not_run",
+            "coverage": "admission/routing of supplied host assumptions; not actual classification/scanning"
+          },
+          "oracle": null,
+          "mismatches": []
+        },
+        {
+          "variant_id": "purpose_changed",
+          "whole_variant_acceptance": "not_run",
+          "experimental_status": "not_run",
+          "comparison": "not_run",
+          "actual": {
+            "material": {
+              "purpose": "model_request",
+              "state": "not_run",
+              "noncurrent": "not_applicable"
+            },
+            "route": {
+              "state": "not_run",
+              "reason": "transform_or_retention_execution_evidence_not_supplied"
+            },
+            "sensitivity_context": "unreviewed",
+            "attempt": "complete",
+            "attempt_terminal": true,
+            "dispatch_performed": false,
+            "status": "not_run",
+            "coverage": "admission/routing of supplied host assumptions; not actual classification/scanning"
+          },
+          "oracle": null,
+          "mismatches": []
+        }
+      ]
+    },
+    {
+      "case_id": "V131-T02/N01",
+      "original_case_status": "not_run",
+      "whole_case_acceptance": "not_run",
+      "variants": [
+        {
+          "variant_id": "unregistered_tool_free_text",
+          "whole_variant_acceptance": "not_run",
+          "experimental_status": "partial_experimental",
+          "comparison": "matched_partial_facets",
+          "actual": {
+            "material": {
+              "purpose": "model_request",
+              "state": "blocked_contract",
+              "noncurrent": "not_applicable"
+            },
+            "route": {
+              "state": "blocked_contract",
+              "reason": "current_purpose_rule_coverage_missing"
+            },
+            "sensitivity_context": "unreviewed",
+            "attempt": "no_coverage",
+            "attempt_terminal": true,
+            "dispatch_performed": false,
+            "status": "partial_experimental",
+            "coverage": "admission/routing of supplied host assumptions; not actual classification/scanning"
+          },
+          "oracle": {
+            "purpose": "model_request",
+            "eligible": false,
+            "noncurrent": "not_applicable"
+          },
+          "mismatches": []
+        },
+        {
+          "variant_id": "unsupported_encrypted_page",
+          "whole_variant_acceptance": "not_run",
+          "experimental_status": "partial_experimental",
+          "comparison": "matched_partial_facets",
+          "actual": {
+            "material": {
+              "purpose": "model_request",
+              "state": "blocked_contract",
+              "noncurrent": "not_applicable"
+            },
+            "route": {
+              "state": "blocked_contract",
+              "reason": "current_purpose_rule_coverage_missing"
+            },
+            "sensitivity_context": "unreviewed",
+            "attempt": "no_coverage",
+            "attempt_terminal": true,
+            "dispatch_performed": false,
+            "status": "partial_experimental",
+            "coverage": "admission/routing of supplied host assumptions; not actual classification/scanning"
+          },
+          "oracle": {
+            "purpose": "model_request",
+            "eligible": false,
+            "noncurrent": "not_applicable"
+          },
+          "mismatches": []
+        }
+      ]
+    },
+    {
+      "case_id": "V131-T02/N02",
+      "original_case_status": "not_run",
+      "whole_case_acceptance": "not_run",
+      "variants": [
+        {
+          "variant_id": "wait_only",
+          "whole_variant_acceptance": "not_run",
+          "experimental_status": "partial_experimental",
+          "comparison": "matched_partial_facets",
+          "actual": {
+            "material": {
+              "purpose": "model_request",
+              "state": "blocked_contract",
+              "noncurrent": "not_applicable"
+            },
+            "route": {
+              "state": "blocked_contract",
+              "reason": "current_purpose_rule_coverage_missing"
+            },
+            "sensitivity_context": "unreviewed",
+            "attempt": "no_coverage",
+            "attempt_terminal": true,
+            "dispatch_performed": false,
+            "status": "partial_experimental",
+            "coverage": "admission/routing of supplied host assumptions; not actual classification/scanning"
+          },
+          "oracle": {
+            "purpose": "model_request",
+            "eligible": false,
+            "noncurrent": "not_applicable"
+          },
+          "mismatches": []
+        },
+        {
+          "variant_id": "switch_FullAllow",
+          "whole_variant_acceptance": "not_run",
+          "experimental_status": "partial_experimental",
+          "comparison": "matched_partial_facets",
+          "actual": {
+            "material": {
+              "purpose": "model_request",
+              "state": "blocked_contract",
+              "noncurrent": "not_applicable"
+            },
+            "route": {
+              "state": "blocked_contract",
+              "reason": "current_purpose_rule_coverage_missing"
+            },
+            "sensitivity_context": "unreviewed",
+            "attempt": "no_coverage",
+            "attempt_terminal": true,
+            "dispatch_performed": false,
+            "status": "partial_experimental",
+            "coverage": "admission/routing of supplied host assumptions; not actual classification/scanning"
+          },
+          "oracle": {
+            "purpose": "model_request",
+            "eligible": false,
+            "noncurrent": "not_applicable"
+          },
+          "mismatches": []
+        },
+        {
+          "variant_id": "ordinary_confirm",
+          "whole_variant_acceptance": "not_run",
+          "experimental_status": "partial_experimental",
+          "comparison": "matched_partial_facets",
+          "actual": {
+            "material": {
+              "purpose": "model_request",
+              "state": "blocked_contract",
+              "noncurrent": "not_applicable"
+            },
+            "route": {
+              "state": "blocked_contract",
+              "reason": "current_purpose_rule_coverage_missing"
+            },
+            "sensitivity_context": "unreviewed",
+            "attempt": "no_coverage",
+            "attempt_terminal": true,
+            "dispatch_performed": false,
+            "status": "partial_experimental",
+            "coverage": "admission/routing of supplied host assumptions; not actual classification/scanning"
+          },
+          "oracle": {
+            "purpose": "model_request",
+            "eligible": false,
+            "noncurrent": "not_applicable"
+          },
+          "mismatches": []
+        },
+        {
+          "variant_id": "model_claim_reviewed",
+          "whole_variant_acceptance": "not_run",
+          "experimental_status": "partial_experimental",
+          "comparison": "matched_partial_facets",
+          "actual": {
+            "material": {
+              "purpose": "model_request",
+              "state": "blocked_contract",
+              "noncurrent": "not_applicable"
+            },
+            "route": {
+              "state": "blocked_contract",
+              "reason": "current_purpose_rule_coverage_missing"
+            },
+            "sensitivity_context": "unreviewed",
+            "attempt": "no_coverage",
+            "attempt_terminal": true,
+            "dispatch_performed": false,
+            "status": "partial_experimental",
+            "coverage": "admission/routing of supplied host assumptions; not actual classification/scanning"
+          },
+          "oracle": {
+            "purpose": "model_request",
+            "eligible": false,
+            "noncurrent": "not_applicable"
+          },
+          "mismatches": []
+        }
+      ]
+    },
+    {
+      "case_id": "V131-T02/N03",
+      "original_case_status": "not_run",
+      "whole_case_acceptance": "not_run",
+      "variants": [
+        {
+          "variant_id": "readable_new_content",
+          "whole_variant_acceptance": "not_run",
+          "experimental_status": "not_run",
+          "comparison": "not_run",
+          "actual": {
+            "material": {
+              "purpose": "model_request",
+              "state": "not_run",
+              "noncurrent": "not_applicable"
+            },
+            "route": {
+              "state": "not_run",
+              "reason": "new_attempt_or_authoritative_replay_evidence_not_supplied"
+            },
+            "sensitivity_context": "unreviewed",
+            "attempt": "complete",
+            "attempt_terminal": true,
+            "dispatch_performed": false,
+            "status": "not_run",
+            "coverage": "admission/routing of supplied host assumptions; not actual classification/scanning"
+          },
+          "oracle": null,
+          "mismatches": []
+        },
+        {
+          "variant_id": "available_new_rule",
+          "whole_variant_acceptance": "not_run",
+          "experimental_status": "not_run",
+          "comparison": "not_run",
+          "actual": {
+            "material": {
+              "purpose": "model_request",
+              "state": "not_run",
+              "noncurrent": "not_applicable"
+            },
+            "route": {
+              "state": "not_run",
+              "reason": "new_attempt_or_authoritative_replay_evidence_not_supplied"
+            },
+            "sensitivity_context": "unreviewed",
+            "attempt": "complete",
+            "attempt_terminal": true,
+            "dispatch_performed": false,
+            "status": "not_run",
+            "coverage": "admission/routing of supplied host assumptions; not actual classification/scanning"
+          },
+          "oracle": null,
+          "mismatches": []
+        }
+      ]
+    }
+  ]
+}

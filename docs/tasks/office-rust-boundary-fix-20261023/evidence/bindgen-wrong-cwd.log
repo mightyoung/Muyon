@@ -1,0 +1,5 @@
+error running cargo metadata
+
+Caused by:
+    `cargo metadata` exited with an error: error: could not find `Cargo.toml` in `/workspace/office-rust-boundary-fix` or any parent directory
+    

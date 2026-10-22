@@ -78,8 +78,27 @@ class UiAdapterContext {
         ? fact?.sourceRefs
         : computed?.sourceRefs;
     return '${state(ref)?.name ?? "unknown"}${unit(ref) == null ? "" : " · ${unit(ref)}"}'
-        '${sources == null || sources.isEmpty ? " · 来源未提供" : " · 来源 ${sources.join('、')}"}';
+        '${sources == null || sources.isEmpty ? " · 来源未提供" : " · 来源 ${sources.join('、')}"}'
+        '${freshness(ref) == UiValueFreshness.previous ? _previousResultLabel : ""}';
   }
+
+  UiValueFreshness freshness(BindingRef ref) => controller.freshnessOf(ref);
+}
+
+/// Shown beside every value that is not from the current publication.
+const _previousResultLabel = ' · 旧结果（上次计算）';
+
+/// One fact or computed value line. A previous value is one semantics node
+/// whose label carries the old-result marker, never a bare current value.
+Widget _valueLine(UiAdapterContext context, BindingRef ref) {
+  final line =
+      '${ref.id}: ${context.text(context.session.resolve(ref))} · ${context.evidence(ref)}';
+  if (context.freshness(ref) == UiValueFreshness.current) return Text(line);
+  return Semantics(
+    container: true,
+    label: line,
+    child: ExcludeSemantics(child: Text(line)),
+  );
 }
 
 Widget renderLibrary2Component(UiAdapterContext context) {
@@ -101,9 +120,7 @@ Widget renderLibrary2Component(UiAdapterContext context) {
       uiComponentAdapters[node.component]!(context),
       for (final ref in refs)
         if (ref.kind == BindingKind.fact || ref.kind == BindingKind.computed)
-          Text(
-            '${ref.id}: ${context.text(context.session.resolve(ref))} · ${context.evidence(ref)}',
-          ),
+          _valueLine(context, ref),
       for (final ref in refs.where((ref) => ref.kind == BindingKind.uiState))
         if (context.session.userOverrides.containsKey(ref.id) ||
             context.session.selectionOverrides.contains(ref.id))

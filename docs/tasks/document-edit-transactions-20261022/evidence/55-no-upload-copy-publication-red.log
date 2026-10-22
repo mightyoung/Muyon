@@ -1,0 +1,24 @@
+   Compiling muyon-core v0.1.0 (/workspace/document-edit-durable-combination/crates/muyon-core)
+    Finished `test` profile [unoptimized] target(s) in 0.31s
+     Running tests/document_edit_gateway.rs (/workspace/document-edit-combination/crates/target/debug/deps/document_edit_gateway-9524898dbf45656f)
+
+running 1 test
+test copy_publication_uses_new_metadata_reference_without_new_upload_or_staging_files ... FAILED
+
+failures:
+
+---- copy_publication_uses_new_metadata_reference_without_new_upload_or_staging_files stdout ----
+
+thread 'copy_publication_uses_new_metadata_reference_without_new_upload_or_staging_files' panicked at muyon-core/tests/document_edit_gateway.rs:727:5:
+assertion `left == right` failed
+  left: [[Some("2")]]
+ right: [[Some("1")]]
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    copy_publication_uses_new_metadata_reference_without_new_upload_or_staging_files
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 16 filtered out; finished in 0.01s
+
+error: test failed, to rerun pass `-p muyon-core --test document_edit_gateway`

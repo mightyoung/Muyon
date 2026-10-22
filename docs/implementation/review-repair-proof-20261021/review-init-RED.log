@@ -1,0 +1,30 @@
+   Compiling muyon-core v0.1.0 (/private/tmp/muyon-android-refactor-20261020/crates/muyon-core)
+    Finished `test` profile [unoptimized] target(s) in 6.39s
+     Running unittests src/lib.rs (/private/tmp/muyon-review-fixes-target/debug/deps/muyon_core-48d1ff86322ef0c2)
+
+running 3 tests
+test review_lifecycle::tests::empty_file_from_interrupted_creation_initializes_without_replacement ... FAILED
+test review_lifecycle::tests::uncommitted_ddl_reopens_and_initializes_the_original_database ... FAILED
+test review_lifecycle::tests::committed_claims_are_preserved_and_partial_committed_schema_is_refused ... ok
+
+failures:
+
+---- review_lifecycle::tests::empty_file_from_interrupted_creation_initializes_without_replacement stdout ----
+
+thread 'review_lifecycle::tests::empty_file_from_interrupted_creation_initializes_without_replacement' (12180356) panicked at muyon-core/src/review_lifecycle.rs:115:98:
+called `Result::unwrap()` on an `Err` value: InvalidVersion
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+---- review_lifecycle::tests::uncommitted_ddl_reopens_and_initializes_the_original_database stdout ----
+
+thread 'review_lifecycle::tests::uncommitted_ddl_reopens_and_initializes_the_original_database' (12180357) panicked at muyon-core/src/review_lifecycle.rs:115:98:
+called `Result::unwrap()` on an `Err` value: InvalidVersion
+
+
+failures:
+    review_lifecycle::tests::empty_file_from_interrupted_creation_initializes_without_replacement
+    review_lifecycle::tests::uncommitted_ddl_reopens_and_initializes_the_original_database
+
+test result: FAILED. 1 passed; 2 failed; 0 ignored; 0 measured; 15 filtered out; finished in 0.12s
+
+error: test failed, to rerun pass `-p muyon-core --lib`

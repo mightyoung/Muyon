@@ -1,0 +1,14 @@
+{
+  "format": "core-wire-service-v1",
+  "turns": [
+    {
+      "response": "turn-1.sse"
+    },
+    {
+      "response": "turn-2.sse"
+    },
+    {
+      "answer_from_tool": true
+    }
+  ]
+}

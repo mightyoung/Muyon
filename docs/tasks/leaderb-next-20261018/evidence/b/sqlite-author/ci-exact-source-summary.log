@@ -1,0 +1,24 @@
+ci	Run actions/checkout@v4	2026-10-18T05:51:54.9702244Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +190477fe0e5008d473508e45d2d835ddd5e0c09c:refs/remotes/origin/task/leaderb-sqlite-investigation-20261018
+ci	Run actions/checkout@v4	2026-10-18T05:51:57.3423411Z  * [new ref]         190477fe0e5008d473508e45d2d835ddd5e0c09c -> origin/task/leaderb-sqlite-investigation-20261018
+ci	Run actions/checkout@v4	2026-10-18T05:51:57.7056197Z [command]/usr/bin/git log -1 --format=%H
+ci	Run actions/checkout@v4	2026-10-18T05:51:57.7082466Z 190477fe0e5008d473508e45d2d835ddd5e0c09c
+ci	Run subosito/flutter-action@v2	2026-10-18T05:51:58.2649529Z Cache not found for input keys: flutter-linux-stable-3.47.5-x64-6a19cca56475dbfba1478ee68d7bd0c2ef891da1
+ci	Run subosito/flutter-action@v2	2026-10-18T05:51:58.6338388Z Cache not found for input keys: flutter-pub-linux-stable-3.47.5-x64-6a19cca56475dbfba1478ee68d7bd0c2ef891da1-b45685280e4ac6350911355a02429502a20d0af656a27490ac4d99efcc97ddec
+ci	Analyze and test every package	2026-10-18T05:53:00.5931554Z analyze  packages/muyon_module_api: ok
+ci	Analyze and test every package	2026-10-18T05:53:06.0915072Z analyze  packages/muyon_ui: ok
+ci	Analyze and test every package	2026-10-18T05:53:11.4387425Z analyze  packages/prototype_module: ok
+ci	Analyze and test every package	2026-10-18T05:53:22.0635155Z analyze  packages/research_module: ok
+ci	Analyze and test every package	2026-10-18T05:53:25.8317962Z analyze  packages/supplier_core: ok
+ci	Analyze and test every package	2026-10-18T05:53:34.1420743Z analyze  packages/inquiry_module: ok
+ci	Analyze and test every package	2026-10-18T05:53:47.1748600Z analyze  apps/muyon: ok
+ci	Analyze and test every package	2026-10-18T05:53:48.6884967Z analyze  apps/muyon_ui_preview: ok
+ci	Analyze and test every package	2026-10-18T05:54:12.1656810Z test     module_api: ok  +276: All tests passed!                                                                                                                                                                          
+ci	Analyze and test every package	2026-10-18T05:54:52.9463187Z test     muyon_ui: ok  +392 ~152: All other tests passed!                                                                                                                                                               
+ci	Analyze and test every package	2026-10-18T05:55:05.4043896Z test     prototype: ok  +39 ~1: All other tests passed!                                                                                                                                                                  
+ci	Analyze and test every package	2026-10-18T05:56:10.3447080Z test     research: ok  +365: All tests passed!                                                                                                                                                                          
+ci	Analyze and test every package	2026-10-18T05:57:36.9824792Z test     supplier_core: ok  +498 ~4: All other tests passed!                                                                                                                                                                 
+ci	Analyze and test every package	2026-10-18T06:07:49.2083172Z test     host: ok  +2313 ~3: All other tests passed!                                                                                                                                                                
+ci	Analyze and test every package	2026-10-18T06:08:01.5977584Z test     ui_preview: ok  +15: All tests passed!                                                                                                                                                                           
+ci	Analyze and test every package	2026-10-18T06:09:31.6408117Z test     inquiry: ok  +302 ~47: All other tests passed!                                                                                                                                                                
+ci	Post Run subosito/flutter-action@v2	2026-10-18T06:09:39.5106276Z Cache saved with key: flutter-pub-linux-stable-3.47.5-x64-6a19cca56475dbfba1478ee68d7bd0c2ef891da1-b45685280e4ac6350911355a02429502a20d0af656a27490ac4d99efcc97ddec
+ci	Post Run subosito/flutter-action@v2	2026-10-18T06:09:46.7259411Z Cache saved with key: flutter-linux-stable-3.47.5-x64-6a19cca56475dbfba1478ee68d7bd0c2ef891da1

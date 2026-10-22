@@ -1,0 +1,7 @@
+Fresh fix verification
+UTC: 2026-10-22T04:06:10.841107+00:00
+CardModels SHA256: 0de0ce85b1d59301190aec7d88a539d81edc3b19025b460423a2f559b4442331
+Command: KOTLINC=/tmp/action-cards-tools/kotlinc/bin/kotlinc bash apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/ui/cards/run-offline.sh
+PASS: 45 action-card projection and safety checks; no host/network invoked
+
+Exit: 0

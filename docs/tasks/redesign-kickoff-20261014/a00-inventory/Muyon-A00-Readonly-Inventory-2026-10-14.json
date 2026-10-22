@@ -1,0 +1,2914 @@
+{
+  "metadata": {
+    "schema_version": 1,
+    "report_id": "MUYON-A00-READONLY-20261014",
+    "recipient": "Leader B",
+    "created_utc": "2026-10-13T23:31:07.834367+00:00",
+    "fixed_product_sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+    "fixed_design_sha": "58fe9c62612d74a973614c41677e62a54332e6d6",
+    "design_md_sha256": "705a642fc7ec7b2e46e4c84e4e4990a4e9fe12628eaadbdbb526b833a12d16f9",
+    "handbook_md_sha256": "9e0b44c55d05d4c22ac5255a77fe773706d0369fc861093358559370c2fd5608",
+    "prior_ownership_preflight_reused": {
+      "observation_end_utc": "2026-10-13T23:19:56Z",
+      "remote_branch_heads_checked": 167,
+      "open_prs_checked": 16,
+      "adr_0006_0007_or_m01_a00_path_reservations_found": 0,
+      "scope": "remote committed tree snapshots; not private worktrees, unpushed edits or active-agent state",
+      "rescanned_in_this_report": false
+    },
+    "history_relation": {
+      "develop_sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+      "design_sha": "58fe9c62612d74a973614c41677e62a54332e6d6",
+      "design_ahead": 6,
+      "design_behind": 0,
+      "added_doc_files": 95
+    },
+    "ci_last_observed": {
+      "develop": [
+        {
+          "run_id": 38279219941,
+          "head_sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "run_id": 38265618988,
+          "head_sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ],
+      "design": [
+        {
+          "run_id": 38439338859,
+          "head_sha": "58fe9c62612d74a973614c41677e62a54332e6d6",
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ],
+      "boundary": "reused exact-SHA CI evidence; does not execute 52 new design acceptance cases"
+    },
+    "leadership": {
+      "repository_history": {
+        "latest_record": "Oct12 Leader A sole integrator",
+        "source": {
+          "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+          "path": "docs/adr/0001-leadership-and-scope-freeze.md",
+          "line": 123,
+          "end_line": 123,
+          "git_blob_sha": "2be377fb6588b8f7eb9db69cf7994beb28cd4674",
+          "url": "https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/docs/adr/0001-leadership-and-scope-freeze.md#L123",
+          "verification": "fixed_git_blob_and_anchor_read; no runtime test"
+        },
+        "stale_handover_heading": {
+          "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+          "path": "docs/tasks/HANDOVER-LEADER.md",
+          "line": 1,
+          "end_line": 3,
+          "git_blob_sha": "ce166b279a845cc948b52a216f0bb9d4fb5585ad",
+          "url": "https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/docs/tasks/HANDOVER-LEADER.md#L1",
+          "verification": "fixed_git_blob_and_anchor_read; no runtime test"
+        }
+      },
+      "latest_user_override": {
+        "received_in_parent_delegation": "Oct14 Leader A quota exhausted, all responsibilities to Leader B; start redesign development",
+        "evidence_ids": [
+          "Sentinel_3b08b7b589a4819184fd7c9f3323bad5",
+          "Sentinel_e6ce5e0c57808191920e687495a03d35"
+        ],
+        "sole_integration_thread_from_parent": "01a12a9b-e1ca-760e-89af-fa274c469012",
+        "not_yet_written_to_repository": true
+      },
+      "this_report_thread_role": "read-only inventory/report only; not an integrator"
+    },
+    "execution_limits": [
+      "no repository source or entry edits",
+      "no commit/push/merge",
+      "no real DB/model/device experiment",
+      "no active-writer inference from a branch or PR",
+      "ownership not frozen"
+    ]
+  },
+  "production_modules": [
+    {
+      "id": "inquiry",
+      "class": "InquiryBusinessModule",
+      "package": "inquiry_module + host adapter",
+      "registered": true,
+      "source": [
+        {
+          "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+          "path": "apps/muyon/lib/app/bootstrap.dart",
+          "line": 245,
+          "end_line": 251,
+          "git_blob_sha": "1d64427457d227047c9e56af946bde755ca7ac21",
+          "url": "https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/lib/app/bootstrap.dart#L245",
+          "verification": "fixed_git_blob_and_anchor_read; no runtime test"
+        },
+        {
+          "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+          "path": "apps/muyon/lib/app/adapters/inquiry_module.dart",
+          "line": 32,
+          "end_line": 59,
+          "git_blob_sha": "43fe0d205cc8a72c04f9a6b5e8b0d009cd344d1e",
+          "url": "https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/lib/app/adapters/inquiry_module.dart#L32",
+          "verification": "fixed_git_blob_and_anchor_read; no runtime test"
+        },
+        {
+          "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+          "path": "apps/muyon/lib/app/legacy_module_bridge.dart",
+          "line": 53,
+          "end_line": 67,
+          "git_blob_sha": "a339afe1d62c1edbbdbb337e623c29b26bb37175",
+          "url": "https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/lib/app/legacy_module_bridge.dart#L53",
+          "verification": "fixed_git_blob_and_anchor_read; no runtime test"
+        }
+      ],
+      "section_id": "inquiry",
+      "unit_ids": [
+        "U01",
+        "U03",
+        "U04",
+        "U05"
+      ]
+    },
+    {
+      "id": "research",
+      "class": "ResearchModule",
+      "package": "research_module",
+      "registered": true,
+      "source": [
+        {
+          "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+          "path": "apps/muyon/lib/app/module_catalog.dart",
+          "line": 8,
+          "end_line": 10,
+          "git_blob_sha": "e30669f1324af75e9916648d28aade27f6535b8d",
+          "url": "https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/lib/app/module_catalog.dart#L8",
+          "verification": "fixed_git_blob_and_anchor_read; no runtime test"
+        },
+        {
+          "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+          "path": "packages/research_module/lib/src/research_module.dart",
+          "line": 24,
+          "end_line": 39,
+          "git_blob_sha": "e7cf6d95df77ad6c3666f562b324f1d9d75faa6e",
+          "url": "https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/research_module/lib/src/research_module.dart#L24",
+          "verification": "fixed_git_blob_and_anchor_read; no runtime test"
+        },
+        {
+          "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+          "path": "packages/research_module/lib/src/research_module.dart",
+          "line": 101,
+          "end_line": 111,
+          "git_blob_sha": "e7cf6d95df77ad6c3666f562b324f1d9d75faa6e",
+          "url": "https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/research_module/lib/src/research_module.dart#L101",
+          "verification": "fixed_git_blob_and_anchor_read; no runtime test"
+        }
+      ],
+      "section_id": "research",
+      "unit_ids": [
+        "U01",
+        "U03",
+        "U06",
+        "U07"
+      ]
+    },
+    {
+      "id": "prototype",
+      "class": "PrototypeModule",
+      "package": "prototype_module",
+      "registered": true,
+      "source": [
+        {
+          "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+          "path": "apps/muyon/lib/app/module_catalog.dart",
+          "line": 8,
+          "end_line": 10,
+          "git_blob_sha": "e30669f1324af75e9916648d28aade27f6535b8d",
+          "url": "https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/lib/app/module_catalog.dart#L8",
+          "verification": "fixed_git_blob_and_anchor_read; no runtime test"
+        },
+        {
+          "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+          "path": "packages/prototype_module/lib/src/prototype_module.dart",
+          "line": 15,
+          "end_line": 21,
+          "git_blob_sha": "6a0b4de84339f27b6803b744c5c36e43803175a3",
+          "url": "https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/prototype_module/lib/src/prototype_module.dart#L15",
+          "verification": "fixed_git_blob_and_anchor_read; no runtime test"
+        },
+        {
+          "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+          "path": "packages/prototype_module/lib/src/prototype_module.dart",
+          "line": 49,
+          "end_line": 54,
+          "git_blob_sha": "6a0b4de84339f27b6803b744c5c36e43803175a3",
+          "url": "https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/prototype_module/lib/src/prototype_module.dart#L49",
+          "verification": "fixed_git_blob_and_anchor_read; no runtime test"
+        }
+      ],
+      "section_id": "prototype",
+      "menu_visibility": "showInModuleMenu=false",
+      "unit_ids": [
+        "U01",
+        "U03",
+        "U22"
+      ]
+    }
+  ],
+  "entrypoints": [
+    {
+      "path": "apps/muyon/lib/main.dart",
+      "kind": "production Flutter host application",
+      "units": [
+        "U01"
+      ],
+      "evidence": {
+        "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+        "path": "apps/muyon/lib/main.dart",
+        "line": 1,
+        "end_line": null,
+        "git_blob_sha": "c4d7ebf12d7824b03b647f3abac4f4a5be0b3443",
+        "url": "https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/lib/main.dart#L1",
+        "verification": "fixed_git_blob_and_anchor_read; no runtime test"
+      }
+    },
+    {
+      "path": "packages/supplier_core/bin/siq_mcp.dart",
+      "kind": "standalone read-only stdio MCP CLI; not automatically the in-app HTTP client",
+      "units": [
+        "U23"
+      ],
+      "evidence": {
+        "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+        "path": "packages/supplier_core/bin/siq_mcp.dart",
+        "line": 1,
+        "end_line": null,
+        "git_blob_sha": "43b9dacd310508226b76b529099b05f285fa00b2",
+        "url": "https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/supplier_core/bin/siq_mcp.dart#L1",
+        "verification": "fixed_git_blob_and_anchor_read; no runtime test"
+      }
+    },
+    {
+      "path": "apps/muyon_ui_preview/lib/main.dart",
+      "kind": "UI fixture/preview app, excluded from production BusinessModule count",
+      "units": [
+        "U09",
+        "U10"
+      ],
+      "evidence": {
+        "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+        "path": "apps/muyon_ui_preview/lib/main.dart",
+        "line": 10,
+        "end_line": null,
+        "git_blob_sha": "9b00d2436bf241c3f38e7da793248d0f911795c2",
+        "url": "https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon_ui_preview/lib/main.dart#L10",
+        "verification": "fixed_git_blob_and_anchor_read; no runtime test"
+      }
+    }
+  ],
+  "workspace_manifests": [
+    "apps/muyon/pubspec.yaml",
+    "apps/muyon_ui_preview/pubspec.yaml",
+    "packages/inquiry_module/pubspec.yaml",
+    "packages/muyon_module_api/pubspec.yaml",
+    "packages/muyon_ui/pubspec.yaml",
+    "packages/prototype_module/pubspec.yaml",
+    "packages/research_module/pubspec.yaml",
+    "packages/supplier_core/pubspec.yaml",
+    "pubspec.yaml"
+  ],
+  "new_page_ids": [
+    "A01",
+    "A01.1",
+    "A02",
+    "A03",
+    "D01",
+    "D01.1",
+    "D01.2",
+    "D01.3",
+    "Q01",
+    "Q02",
+    "Q03",
+    "Q04",
+    "Q05",
+    "Q06",
+    "R01",
+    "R02",
+    "R03",
+    "R04",
+    "R05",
+    "R06",
+    "R07",
+    "R08",
+    "S01",
+    "S01.1",
+    "S02",
+    "S03",
+    "S03.1",
+    "S04",
+    "S05",
+    "S05.1",
+    "S06",
+    "S07",
+    "T01",
+    "T01.1",
+    "T02",
+    "T03",
+    "W01",
+    "W01.1"
+  ],
+  "legacy_section_mapping": [
+    {
+      "family": "inquiry.Section",
+      "source_key": "home",
+      "pages": [
+        "W01",
+        "Q01"
+      ],
+      "evidence": {
+        "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+        "path": "packages/inquiry_module/lib/src/app/shell.dart",
+        "line": 24,
+        "end_line": 85,
+        "git_blob_sha": "f73ae1b35803cb7862b6f8ef98e1d588cf0d1760",
+        "url": "https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/inquiry_module/lib/src/app/shell.dart#L24",
+        "verification": "fixed_git_blob_and_anchor_read; no runtime test"
+      },
+      "units": [
+        "U05"
+      ],
+      "note": ""
+    },
+    {
+      "family": "inquiry.Section",
+      "source_key": "projects",
+      "pages": [
+        "Q01"
+      ],
+      "evidence": {
+        "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+        "path": "packages/inquiry_module/lib/src/app/shell.dart",
+        "line": 24,
+        "end_line": 85,
+        "git_blob_sha": "f73ae1b35803cb7862b6f8ef98e1d588cf0d1760",
+        "url": "https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/inquiry_module/lib/src/app/shell.dart#L24",
+        "verification": "fixed_git_blob_and_anchor_read; no runtime test"
+      },
+      "units": [
+        "U05"
+      ],
+      "note": ""
+    },
+    {
+      "family": "inquiry.Section",
+      "source_key": "quotes",
+      "pages": [
+        "Q04"
+      ],
+      "evidence": {
+        "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+        "path": "packages/inquiry_module/lib/src/app/shell.dart",
+        "line": 24,
+        "end_line": 85,
+        "git_blob_sha": "f73ae1b35803cb7862b6f8ef98e1d588cf0d1760",
+        "url": "https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/inquiry_module/lib/src/app/shell.dart#L24",
+        "verification": "fixed_git_blob_and_anchor_read; no runtime test"
+      },
+      "units": [
+        "U05"
+      ],
+      "note": ""
+    },
+    {
+      "family": "inquiry.Section",
+      "source_key": "suppliers",
+      "pages": [
+        "D01.1"
+      ],
+      "evidence": {
+        "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+        "path": "packages/inquiry_module/lib/src/app/shell.dart",
+        "line": 24,
+        "end_line": 85,
+        "git_blob_sha": "f73ae1b35803cb7862b6f8ef98e1d588cf0d1760",
+        "url": "https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/inquiry_module/lib/src/app/shell.dart#L24",
+        "verification": "fixed_git_blob_and_anchor_read; no runtime test"
+      },
+      "units": [
+        "U05"
+      ],
+      "note": ""
+    },
+    {
+      "family": "inquiry.Section",
+      "source_key": "products",
+      "pages": [
+        "D01.2"
+      ],
+      "evidence": {
+        "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+        "path": "packages/inquiry_module/lib/src/app/shell.dart",
+        "line": 24,
+        "end_line": 85,
+        "git_blob_sha": "f73ae1b35803cb7862b6f8ef98e1d588cf0d1760",
+        "url": "https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/inquiry_module/lib/src/app/shell.dart#L24",
+        "verification": "fixed_git_blob_and_anchor_read; no runtime test"
+      },
+      "units": [
+        "U05"
+      ],
+      "note": ""
+    },
+    {
+      "family": "inquiry.Section",
+      "source_key": "ask",
+      "pages": [
+        "A01"
+      ],
+      "evidence": {
+        "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+        "path": "packages/inquiry_module/lib/src/app/shell.dart",
+        "line": 24,
+        "end_line": 85,
+        "git_blob_sha": "f73ae1b35803cb7862b6f8ef98e1d588cf0d1760",
+        "url": "https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/inquiry_module/lib/src/app/shell.dart#L24",
+        "verification": "fixed_git_blob_and_anchor_read; no runtime test"
+      },
+      "units": [
+        "U05"
+      ],
+      "note": "hosted ask is suppressed in legacy shell and served through host assistant"
+    },
+    {
+      "family": "inquiry.Section",
+      "source_key": "exchange",
+      "pages": [
+        "S05.1",
+        "S05"
+      ],
+      "evidence": {
+        "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+        "path": "packages/inquiry_module/lib/src/app/shell.dart",
+        "line": 24,
+        "end_line": 85,
+        "git_blob_sha": "f73ae1b35803cb7862b6f8ef98e1d588cf0d1760",
+        "url": "https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/inquiry_module/lib/src/app/shell.dart#L24",
+        "verification": "fixed_git_blob_and_anchor_read; no runtime test"
+      },
+      "units": [
+        "U05",
+        "U17"
+      ],
+      "note": ""
+    },
+    {
+      "family": "inquiry.Section",
+      "source_key": "data",
+      "pages": [
+        "D01"
+      ],
+      "evidence": {
+        "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+        "path": "packages/inquiry_module/lib/src/app/shell.dart",
+        "line": 24,
+        "end_line": 85,
+        "git_blob_sha": "f73ae1b35803cb7862b6f8ef98e1d588cf0d1760",
+        "url": "https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/inquiry_module/lib/src/app/shell.dart#L24",
+        "verification": "fixed_git_blob_and_anchor_read; no runtime test"
+      },
+      "units": [
+        "U05"
+      ],
+      "note": ""
+    },
+    {
+      "family": "inquiry.Section",
+      "source_key": "settings",
+      "pages": [
+        "S01",
+        "S02",
+        "S03"
+      ],
+      "evidence": {
+        "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+        "path": "packages/inquiry_module/lib/src/app/shell.dart",
+        "line": 24,
+        "end_line": 85,
+        "git_blob_sha": "f73ae1b35803cb7862b6f8ef98e1d588cf0d1760",
+        "url": "https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/inquiry_module/lib/src/app/shell.dart#L24",
+        "verification": "fixed_git_blob_and_anchor_read; no runtime test"
+      },
+      "units": [
+        "U05"
+      ],
+      "note": ""
+    },
+    {
+      "family": "inquiry.Section",
+      "source_key": "aiTasks",
+      "pages": [
+        "T01",
+        "T02"
+      ],
+      "evidence": {
+        "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+        "path": "packages/inquiry_module/lib/src/app/shell.dart",
+        "line": 24,
+        "end_line": 85,
+        "git_blob_sha": "f73ae1b35803cb7862b6f8ef98e1d588cf0d1760",
+        "url": "https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/inquiry_module/lib/src/app/shell.dart#L24",
+        "verification": "fixed_git_blob_and_anchor_read; no runtime test"
+      },
+      "units": [
+        "U05",
+        "U08",
+        "U20"
+      ],
+      "note": ""
+    },
+    {
+      "family": "inquiry.Section",
+      "source_key": "hub",
+      "pages": [
+        "D01.3",
+        "S03"
+      ],
+      "evidence": {
+        "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+        "path": "packages/inquiry_module/lib/src/app/shell.dart",
+        "line": 24,
+        "end_line": 85,
+        "git_blob_sha": "f73ae1b35803cb7862b6f8ef98e1d588cf0d1760",
+        "url": "https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/inquiry_module/lib/src/app/shell.dart#L24",
+        "verification": "fixed_git_blob_and_anchor_read; no runtime test"
+      },
+      "units": [
+        "U05"
+      ],
+      "note": "remote company Hub, not merely local company form"
+    },
+    {
+      "family": "research.workbench.section",
+      "source_key": 0,
+      "source_title": "overview",
+      "pages": [
+        "R01"
+      ],
+      "units": [
+        "U06",
+        "U07"
+      ],
+      "evidence": {
+        "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+        "path": "packages/research_module/lib/src/app/workbench_app.dart",
+        "line": 474,
+        "end_line": 486,
+        "git_blob_sha": "5b186e58792d1caaef7e0dd301cd3d4b4053aaad",
+        "url": "https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/research_module/lib/src/app/workbench_app.dart#L474",
+        "verification": "fixed_git_blob_and_anchor_read; no runtime test"
+      },
+      "note": "numeric legacy page switch; target correspondence is synthesized"
+    },
+    {
+      "family": "research.workbench.section",
+      "source_key": 1,
+      "source_title": "library",
+      "pages": [
+        "R01",
+        "R02",
+        "R03",
+        "R04",
+        "R05"
+      ],
+      "units": [
+        "U06",
+        "U07"
+      ],
+      "evidence": {
+        "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+        "path": "packages/research_module/lib/src/app/workbench_app.dart",
+        "line": 474,
+        "end_line": 486,
+        "git_blob_sha": "5b186e58792d1caaef7e0dd301cd3d4b4053aaad",
+        "url": "https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/research_module/lib/src/app/workbench_app.dart#L474",
+        "verification": "fixed_git_blob_and_anchor_read; no runtime test"
+      },
+      "note": "numeric legacy page switch; target correspondence is synthesized"
+    },
+    {
+      "family": "research.workbench.section",
+      "source_key": 2,
+      "source_title": "taskPage",
+      "pages": [
+        "R06",
+        "R07",
+        "T01",
+        "T02"
+      ],
+      "units": [
+        "U06",
+        "U07"
+      ],
+      "evidence": {
+        "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+        "path": "packages/research_module/lib/src/app/workbench_app.dart",
+        "line": 474,
+        "end_line": 486,
+        "git_blob_sha": "5b186e58792d1caaef7e0dd301cd3d4b4053aaad",
+        "url": "https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/research_module/lib/src/app/workbench_app.dart#L474",
+        "verification": "fixed_git_blob_and_anchor_read; no runtime test"
+      },
+      "note": "numeric legacy page switch; target correspondence is synthesized"
+    },
+    {
+      "family": "research.workbench.section",
+      "source_key": 3,
+      "source_title": "runPage",
+      "pages": [
+        "R06",
+        "R07",
+        "T02"
+      ],
+      "units": [
+        "U06",
+        "U07"
+      ],
+      "evidence": {
+        "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+        "path": "packages/research_module/lib/src/app/workbench_app.dart",
+        "line": 474,
+        "end_line": 486,
+        "git_blob_sha": "5b186e58792d1caaef7e0dd301cd3d4b4053aaad",
+        "url": "https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/research_module/lib/src/app/workbench_app.dart#L474",
+        "verification": "fixed_git_blob_and_anchor_read; no runtime test"
+      },
+      "note": "numeric legacy page switch; target correspondence is synthesized"
+    },
+    {
+      "family": "research.workbench.section",
+      "source_key": 4,
+      "source_title": "writing",
+      "pages": [
+        "R08"
+      ],
+      "units": [
+        "U06",
+        "U07"
+      ],
+      "evidence": {
+        "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+        "path": "packages/research_module/lib/src/app/workbench_app.dart",
+        "line": 474,
+        "end_line": 486,
+        "git_blob_sha": "5b186e58792d1caaef7e0dd301cd3d4b4053aaad",
+        "url": "https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/research_module/lib/src/app/workbench_app.dart#L474",
+        "verification": "fixed_git_blob_and_anchor_read; no runtime test"
+      },
+      "note": "numeric legacy page switch; target correspondence is synthesized"
+    },
+    {
+      "family": "research.workbench.section",
+      "source_key": 5,
+      "source_title": "RelationsPage",
+      "pages": [
+        "R01",
+        "R05",
+        "R08"
+      ],
+      "units": [
+        "U06",
+        "U07"
+      ],
+      "evidence": {
+        "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+        "path": "packages/research_module/lib/src/app/workbench_app.dart",
+        "line": 474,
+        "end_line": 486,
+        "git_blob_sha": "5b186e58792d1caaef7e0dd301cd3d4b4053aaad",
+        "url": "https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/research_module/lib/src/app/workbench_app.dart#L474",
+        "verification": "fixed_git_blob_and_anchor_read; no runtime test"
+      },
+      "note": "numeric legacy page switch; target correspondence is synthesized"
+    },
+    {
+      "family": "host.ConversationDestination",
+      "source_key": "assistant",
+      "pages": [
+        "A01",
+        "A02",
+        "A03"
+      ],
+      "units": [
+        "U01",
+        "U08",
+        "U20",
+        "U21"
+      ],
+      "evidence": {
+        "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+        "path": "apps/muyon/lib/screens/platform_shell.dart",
+        "line": 45,
+        "end_line": 54,
+        "git_blob_sha": "54e5b0f202ab5348218fdaf05c783a591cb9be97",
+        "url": "https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/lib/screens/platform_shell.dart#L45",
+        "verification": "fixed_git_blob_and_anchor_read; no runtime test"
+      },
+      "note": "new pages do not imply existing independent routes"
+    },
+    {
+      "family": "host.ConversationDestination",
+      "source_key": "tasks",
+      "pages": [
+        "T01",
+        "T01.1",
+        "T02",
+        "T03"
+      ],
+      "units": [
+        "U01",
+        "U08",
+        "U20",
+        "U21"
+      ],
+      "evidence": {
+        "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+        "path": "apps/muyon/lib/screens/platform_shell.dart",
+        "line": 45,
+        "end_line": 54,
+        "git_blob_sha": "54e5b0f202ab5348218fdaf05c783a591cb9be97",
+        "url": "https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/lib/screens/platform_shell.dart#L45",
+        "verification": "fixed_git_blob_and_anchor_read; no runtime test"
+      },
+      "note": "new pages do not imply existing independent routes"
+    },
+    {
+      "family": "host.ConversationDestination",
+      "source_key": "data",
+      "pages": [
+        "W01",
+        "D01",
+        "R01"
+      ],
+      "units": [
+        "U01",
+        "U08",
+        "U20",
+        "U21"
+      ],
+      "evidence": {
+        "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+        "path": "apps/muyon/lib/screens/platform_shell.dart",
+        "line": 45,
+        "end_line": 54,
+        "git_blob_sha": "54e5b0f202ab5348218fdaf05c783a591cb9be97",
+        "url": "https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/lib/screens/platform_shell.dart#L45",
+        "verification": "fixed_git_blob_and_anchor_read; no runtime test"
+      },
+      "note": "new pages do not imply existing independent routes"
+    },
+    {
+      "family": "host.ConversationDestination",
+      "source_key": "settings",
+      "pages": [
+        "S01",
+        "S02",
+        "S03",
+        "S04",
+        "S05",
+        "S06",
+        "S07"
+      ],
+      "units": [
+        "U01",
+        "U08",
+        "U20",
+        "U21"
+      ],
+      "evidence": {
+        "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+        "path": "apps/muyon/lib/screens/platform_shell.dart",
+        "line": 45,
+        "end_line": 54,
+        "git_blob_sha": "54e5b0f202ab5348218fdaf05c783a591cb9be97",
+        "url": "https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/lib/screens/platform_shell.dart#L45",
+        "verification": "fixed_git_blob_and_anchor_read; no runtime test"
+      },
+      "note": "new pages do not imply existing independent routes"
+    },
+    {
+      "family": "ModuleSection",
+      "source_key": "prototype",
+      "pages": [
+        "W01.1"
+      ],
+      "units": [
+        "U22"
+      ],
+      "evidence": {
+        "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+        "path": "packages/prototype_module/lib/src/prototype_module.dart",
+        "line": 49,
+        "end_line": 54,
+        "git_blob_sha": "6a0b4de84339f27b6803b744c5c36e43803175a3",
+        "url": "https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/prototype_module/lib/src/prototype_module.dart#L49",
+        "verification": "fixed_git_blob_and_anchor_read; no runtime test"
+      },
+      "note": "present and registered, hidden in module menu"
+    }
+  ],
+  "migration_units": [
+    {
+      "id": "U01",
+      "design_unit_number": 1,
+      "title": "宿主启动、模块注册与关闭",
+      "design_reference": {
+        "sha": "58fe9c62612d74a973614c41677e62a54332e6d6",
+        "path": "docs/design/redesign-v1.3.2-20261014/Muyon-Redesign-Plan-v1.3.2-2026-10-14.md",
+        "line": 195
+      },
+      "source_evidence": [
+        {
+          "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+          "path": "apps/muyon/lib/app/bootstrap.dart",
+          "line": 227,
+          "end_line": null,
+          "git_blob_sha": "1d64427457d227047c9e56af946bde755ca7ac21",
+          "url": "https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/lib/app/bootstrap.dart#L227",
+          "verification": "fixed_git_blob_and_anchor_read; no runtime test"
+        },
+        {
+          "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+          "path": "apps/muyon/lib/app/module_host.dart",
+          "line": 308,
+          "end_line": null,
+          "git_blob_sha": "c27d265d35f284b56da42ffe9d2eec46c4a2d2ec",
+          "url": "https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/lib/app/module_host.dart#L308",
+          "verification": "fixed_git_blob_and_anchor_read; no runtime test"
+        },
+        {
+          "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+          "path": "apps/muyon/lib/main.dart",
+          "line": 1,
+          "end_line": null,
+          "git_blob_sha": "c4d7ebf12d7824b03b647f3abac4f4a5be0b3443",
+          "url": "https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/lib/main.dart#L1",
+          "verification": "fixed_git_blob_and_anchor_read; no runtime test"
+        }
+      ],
+      "registered_module_ids_affected": [
+        "inquiry",
+        "research",
+        "prototype"
+      ],
+      "module_mapping_kind": "responsibility mapping; host-wide rows do not claim each module invokes every path",
+      "source_packages": [],
+      "primary_old_section_or_host_entry": "Host boot/module activation/close",
+      "target_page_ids": [
+        "W01",
+        "S05"
+      ],
+      "target_page_mapping_kind": "design correspondence, not already implemented routes",
+      "rust_target_responsibility": "Rust RuntimeOwner负责启动状态机、唯一服务/数据库寿命、ShutdownBarrier；Electron主进程与Android宿主只提供PlatformPorts与宿主生命周期事件。UI订阅RuntimeReady/ModuleStateChanged，不持有模块runtime对象。",
+      "rust_target_status": "design only; no new Rust crate claimed",
+      "binaries": [],
+      "current_writer": null,
+      "writer_status": "not confirmed; branch/task claims are separate evidence",
+      "runtime_verification": "not_run"
+    },
+    {
+      "id": "U02",
+      "design_unit_number": 2,
+      "title": "存储所有权、事务队列与schema迁移",
+      "design_reference": {
+        "sha": "58fe9c62612d74a973614c41677e62a54332e6d6",
+        "path": "docs/design/redesign-v1.3.2-20261014/Muyon-Redesign-Plan-v1.3.2-2026-10-14.md",
+        "line": 205
+      },
+      "source_evidence": [
+        {
+          "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+          "path": "apps/muyon/lib/platform/storage_manager.dart",
+          "line": 13,
+          "end_line": null,
+          "git_blob_sha": "1d675450f99b7a1b2ca94a980432fc9e3d810c6c",
+          "url": "https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/lib/platform/storage_manager.dart#L13",
+          "verification": "fixed_git_blob_and_anchor_read; no runtime test"
+        },
+        {
+          "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+          "path": "packages/muyon_module_api/lib/src/storage.dart",
+          "line": 1,
+          "end_line": null,
+          "git_blob_sha": "816af202c981308eb7fc81408ccb81290e9eb7bb",
+          "url": "https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/muyon_module_api/lib/src/storage.dart#L1",
+          "verification": "fixed_git_blob_and_anchor_read; no runtime test"
+        },
+        {
+          "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+          "path": "apps/muyon/lib/platform/host_schema_compatibility.dart",
+          "line": 1,
+          "end_line": null,
+          "git_blob_sha": "db6599d3af8b2da06183d167c22aaad2fff8e99a",
+          "url": "https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/lib/platform/host_schema_compatibility.dart#L1",
+          "verification": "fixed_git_blob_and_anchor_read; no runtime test"
+        }
+      ],
+      "registered_module_ids_affected": [
+        "inquiry",
+        "research",
+        "prototype"
+      ],
+      "module_mapping_kind": "responsibility mapping; host-wide rows do not claim each module invokes every path",
+      "source_packages": [
+        "muyon_module_api"
+      ],
+      "primary_old_section_or_host_entry": "All module database lifetimes/schema/restore",
+      "target_page_ids": [
+        "D01",
+        "S05"
+      ],
+      "target_page_mapping_kind": "design correspondence, not already implemented routes",
+      "rust_target_responsibility": "Rust storage crate拥有连接池/单writer、短事务与migration registry；跨端只暴露typed queries/commands与revision，禁止renderer/Kotlin传SQL或raw database handle。先保持schema版本/digest校验与拒绝超前等兼容语义；首期在隔离测试库工作，物理schema与历史库转换作为后置迁移单独验证，不预设必须保留原物理表。",
+      "rust_target_status": "design only; no new Rust crate claimed",
+      "binaries": [],
+      "current_writer": null,
+      "writer_status": "not confirmed; branch/task claims are separate evidence",
+      "runtime_verification": "not_run"
+    },
+    {
+      "id": "U03",
+      "design_unit_number": 3,
+      "title": "module_api合同与插件边界",
+      "design_reference": {
+        "sha": "58fe9c62612d74a973614c41677e62a54332e6d6",
+        "path": "docs/design/redesign-v1.3.2-20261014/Muyon-Redesign-Plan-v1.3.2-2026-10-14.md",
+        "line": 215
+      },
+      "source_evidence": [
+        {
+          "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+          "path": "packages/muyon_module_api/lib/src/module_v2.dart",
+          "line": 10,
+          "end_line": null,
+          "git_blob_sha": "321454fbf50731524aa52783b9db678125189f8d",
+          "url": "https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/muyon_module_api/lib/src/module_v2.dart#L10",
+          "verification": "fixed_git_blob_and_anchor_read; no runtime test"
+        },
+        {
+          "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+          "path": "packages/muyon_module_api/lib/src/module.dart",
+          "line": 1,
+          "end_line": null,
+          "git_blob_sha": "869946bd7f104ec9b445d623220822c1a431f807",
+          "url": "https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/muyon_module_api/lib/src/module.dart#L1",
+          "verification": "fixed_git_blob_and_anchor_read; no runtime test"
+        },
+        {
+          "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+          "path": "packages/muyon_module_api/lib/src/optional_capabilities.dart",
+          "line": 1,
+          "end_line": null,
+          "git_blob_sha": "73328c7bb9a20eab93b2993d63d4f262571eaa94",
+          "url": "https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/muyon_module_api/lib/src/optional_capabilities.dart#L1",
+          "verification": "fixed_git_blob_and_anchor_read; no runtime test"
+        },
+        {
+          "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+          "path": "packages/muyon_module_api/lib/src/tool_registrar.dart",
+          "line": 1,
+          "end_line": null,
+          "git_blob_sha": "453bc848191cdf5d80b579cf7e67a02c11b41845",
+          "url": "https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/muyon_module_api/lib/src/tool_registrar.dart#L1",
+          "verification": "fixed_git_blob_and_anchor_read; no runtime test"
+        }
+      ],
+      "registered_module_ids_affected": [
+        "inquiry",
+        "research",
+        "prototype"
+      ],
+      "module_mapping_kind": "responsibility mapping; host-wide rows do not claim each module invokes every path",
+      "source_packages": [
+        "muyon_module_api"
+      ],
+      "primary_old_section_or_host_entry": "ModuleSection inquiry/research/prototype and typed contracts",
+      "target_page_ids": [
+        "W01",
+        "D01",
+        "S03"
+      ],
+      "target_page_mapping_kind": "design correspondence, not already implemented routes",
+      "rust_target_responsibility": "拆为Rust domain contracts、版本化wire DTO/IDL、端侧screen registry三层。SectionId/ObjectPageRoute替代Widget builder；Query/Command能力替代runtime泛型和raw DB；业务模块仍需声明能力与操作覆盖，不能把manifest当授权。",
+      "rust_target_status": "design only; no new Rust crate claimed",
+      "binaries": [],
+      "current_writer": null,
+      "writer_status": "not confirmed; branch/task claims are separate evidence",
+      "runtime_verification": "not_run"
+    },
+    {
+      "id": "U04",
+      "design_unit_number": 4,
+      "title": "supplier_core商业域：记录、价格、预算、比价",
+      "design_reference": {
+        "sha": "58fe9c62612d74a973614c41677e62a54332e6d6",
+        "path": "docs/design/redesign-v1.3.2-20261014/Muyon-Redesign-Plan-v1.3.2-2026-10-14.md",
+        "line": 225
+      },
+      "source_evidence": [
+        {
+          "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+          "path": "packages/supplier_core/lib/src/store.dart",
+          "line": 378,
+          "end_line": null,
+          "git_blob_sha": "6499d3afdbc394ab333bcbb0b41ed7eb537c92b2",
+          "url": "https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/supplier_core/lib/src/store.dart#L378",
+          "verification": "fixed_git_blob_and_anchor_read; no runtime test"
+        },
+        {
+          "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+          "path": "packages/supplier_core/lib/src/pricing.dart",
+          "line": 1,
+          "end_line": null,
+          "git_blob_sha": "af66f43b7e20ae5c3b0ad446840eda9e666f7428",
+          "url": "https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/supplier_core/lib/src/pricing.dart#L1",
+          "verification": "fixed_git_blob_and_anchor_read; no runtime test"
+        },
+        {
+          "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+          "path": "packages/supplier_core/lib/src/compare.dart",
+          "line": 75,
+          "end_line": null,
+          "git_blob_sha": "a17260553498ffa7df5d50b3b9421ada5c398b96",
+          "url": "https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/supplier_core/lib/src/compare.dart#L75",
+          "verification": "fixed_git_blob_and_anchor_read; no runtime test"
+        },
+        {
+          "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+          "path": "packages/supplier_core/lib/src/budget.dart",
+          "line": 1,
+          "end_line": null,
+          "git_blob_sha": "c4ca2ef14a1eaebc650fdccb4f1407c8fca0cec5",
+          "url": "https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/supplier_core/lib/src/budget.dart#L1",
+          "verification": "fixed_git_blob_and_anchor_read; no runtime test"
+        },
+        {
+          "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+          "path": "packages/supplier_core/lib/src/spec_match.dart",
+          "line": 1,
+          "end_line": null,
+          "git_blob_sha": "8a755a01309bd22eb3529f7fc7802b867659e270",
+          "url": "https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/supplier_core/lib/src/spec_match.dart#L1",
+          "verification": "fixed_git_blob_and_anchor_read; no runtime test"
+        }
+      ],
+      "registered_module_ids_affected": [
+        "inquiry"
+      ],
+      "module_mapping_kind": "responsibility mapping; host-wide rows do not claim each module invokes every path",
+      "source_packages": [
+        "supplier_core"
+      ],
+      "primary_old_section_or_host_entry": "inquiry suppliers/products/quotes/projects",
+      "target_page_ids": [
+        "Q01",
+        "Q04",
+        "Q05",
+        "Q06",
+        "D01.1",
+        "D01.2"
+      ],
+      "target_page_mapping_kind": "design correspondence, not already implemented routes",
+      "rust_target_responsibility": "Rust supplier-domain + storage repositories。价格/数量使用Decimal6或等价定点类型，wire用规范十进制字符串；运算、有效性与比较排序为唯一核心实现，两端只格式化和输入。",
+      "rust_target_status": "design only; no new Rust crate claimed",
+      "binaries": [],
+      "current_writer": null,
+      "writer_status": "not confirmed; branch/task claims are separate evidence",
+      "runtime_verification": "not_run"
+    },
+    {
+      "id": "U05",
+      "design_unit_number": 5,
+      "title": "Folio询价应用状态、导入与业务页面",
+      "design_reference": {
+        "sha": "58fe9c62612d74a973614c41677e62a54332e6d6",
+        "path": "docs/design/redesign-v1.3.2-20261014/Muyon-Redesign-Plan-v1.3.2-2026-10-14.md",
+        "line": 235
+      },
+      "source_evidence": [
+        {
+          "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+          "path": "packages/inquiry_module/lib/src/app/app_state.dart",
+          "line": 25,
+          "end_line": null,
+          "git_blob_sha": "43f09e0c9d46fd24deb6829186ae292a73c3f675",
+          "url": "https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/inquiry_module/lib/src/app/app_state.dart#L25",
+          "verification": "fixed_git_blob_and_anchor_read; no runtime test"
+        },
+        {
+          "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+          "path": "packages/inquiry_module/lib/src/app/shell.dart",
+          "line": 24,
+          "end_line": null,
+          "git_blob_sha": "f73ae1b35803cb7862b6f8ef98e1d588cf0d1760",
+          "url": "https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/inquiry_module/lib/src/app/shell.dart#L24",
+          "verification": "fixed_git_blob_and_anchor_read; no runtime test"
+        },
+        {
+          "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+          "path": "packages/inquiry_module/lib/src/features/ai/import_pipeline.dart",
+          "line": 1,
+          "end_line": null,
+          "git_blob_sha": "3efc6a2623242ba3345d7dbc24924319d166f7c2",
+          "url": "https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/inquiry_module/lib/src/features/ai/import_pipeline.dart#L1",
+          "verification": "fixed_git_blob_and_anchor_read; no runtime test"
+        },
+        {
+          "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+          "path": "apps/muyon/lib/app/adapters/inquiry_module.dart",
+          "line": 32,
+          "end_line": null,
+          "git_blob_sha": "43fe0d205cc8a72c04f9a6b5e8b0d009cd344d1e",
+          "url": "https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/lib/app/adapters/inquiry_module.dart#L32",
+          "verification": "fixed_git_blob_and_anchor_read; no runtime test"
+        },
+        {
+          "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+          "path": "packages/supplier_core/lib/src/hub.dart",
+          "line": 13,
+          "end_line": 16,
+          "git_blob_sha": "7e196ed0c567132bb1067dad3de3f1d8953a3a51",
+          "url": "https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/supplier_core/lib/src/hub.dart#L13",
+          "verification": "fixed_git_blob_and_anchor_read; no runtime test"
+        }
+      ],
+      "registered_module_ids_affected": [
+        "inquiry"
+      ],
+      "module_mapping_kind": "responsibility mapping; host-wide rows do not claim each module invokes every path",
+      "source_packages": [
+        "inquiry_module",
+        "supplier_core"
+      ],
+      "primary_old_section_or_host_entry": "All 11 inquiry Section values including remote Hub",
+      "target_page_ids": [
+        "W01",
+        "Q01",
+        "Q02",
+        "Q03",
+        "Q04",
+        "Q05",
+        "Q06",
+        "D01",
+        "D01.1",
+        "D01.2",
+        "D01.3",
+        "S03",
+        "S05"
+      ],
+      "target_page_mapping_kind": "design correspondence, not already implemented routes",
+      "rust_target_responsibility": "把Store读写、导入流程、job协调和settings domain移到Rust；两端分别重建SupplierViewModel/ProjectViewModel/QuoteEditorState。输入焦点和临时编辑缓冲留在UI；需要恢复或跨页共用的草稿由内核持久化并版本化，正式业务验证与写入在core。",
+      "rust_target_status": "design only; no new Rust crate claimed",
+      "binaries": [],
+      "current_writer": null,
+      "writer_status": "not confirmed; branch/task claims are separate evidence",
+      "runtime_verification": "not_run"
+    },
+    {
+      "id": "U06",
+      "design_unit_number": 6,
+      "title": "科研对象、卡片、大纲、人工运行",
+      "design_reference": {
+        "sha": "58fe9c62612d74a973614c41677e62a54332e6d6",
+        "path": "docs/design/redesign-v1.3.2-20261014/Muyon-Redesign-Plan-v1.3.2-2026-10-14.md",
+        "line": 245
+      },
+      "source_evidence": [
+        {
+          "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+          "path": "packages/research_module/lib/src/core/store.dart",
+          "line": 16,
+          "end_line": null,
+          "git_blob_sha": "de97742607f57b3c1a90f09754e79e0bac11c176",
+          "url": "https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/research_module/lib/src/core/store.dart#L16",
+          "verification": "fixed_git_blob_and_anchor_read; no runtime test"
+        },
+        {
+          "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+          "path": "packages/research_module/lib/src/core/outline_store.dart",
+          "line": 29,
+          "end_line": null,
+          "git_blob_sha": "a4b0a3b0e788b59d1ac824f8a8240db670577aff",
+          "url": "https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/research_module/lib/src/core/outline_store.dart#L29",
+          "verification": "fixed_git_blob_and_anchor_read; no runtime test"
+        },
+        {
+          "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+          "path": "packages/research_module/lib/src/cards/card_store.dart",
+          "line": 1,
+          "end_line": null,
+          "git_blob_sha": "ed9183e71eca165ce9aeb18ed740f9ad41f6a357",
+          "url": "https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/research_module/lib/src/cards/card_store.dart#L1",
+          "verification": "fixed_git_blob_and_anchor_read; no runtime test"
+        },
+        {
+          "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+          "path": "packages/research_module/lib/src/module_tools.dart",
+          "line": 1,
+          "end_line": null,
+          "git_blob_sha": "aa08f9ae3bdee64c092c9a19047ed22565e1a9a8",
+          "url": "https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/research_module/lib/src/module_tools.dart#L1",
+          "verification": "fixed_git_blob_and_anchor_read; no runtime test"
+        }
+      ],
+      "registered_module_ids_affected": [
+        "research"
+      ],
+      "module_mapping_kind": "responsibility mapping; host-wide rows do not claim each module invokes every path",
+      "source_packages": [
+        "research_module"
+      ],
+      "primary_old_section_or_host_entry": "Research workbench overview/library/tasks/runs/writing/relations",
+      "target_page_ids": [
+        "R01",
+        "R05",
+        "R06",
+        "R07",
+        "R08"
+      ],
+      "target_page_mapping_kind": "design correspondence, not already implemented routes",
+      "rust_target_responsibility": "Rust research-domain统一版本、关系、删除影响与保存；两端NativeResearchViews消费route与snapshot。保留人工运行记录与未来执行器能力的独立状态，不把“已记录”显示成“已运行”。",
+      "rust_target_status": "design only; no new Rust crate claimed",
+      "binaries": [],
+      "current_writer": null,
+      "writer_status": "not confirmed; branch/task claims are separate evidence",
+      "runtime_verification": "not_run"
+    },
+    {
+      "id": "U07",
+      "design_unit_number": 7,
+      "title": "PDF阅读、来源锚点与引用定位",
+      "design_reference": {
+        "sha": "58fe9c62612d74a973614c41677e62a54332e6d6",
+        "path": "docs/design/redesign-v1.3.2-20261014/Muyon-Redesign-Plan-v1.3.2-2026-10-14.md",
+        "line": 255
+      },
+      "source_evidence": [
+        {
+          "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+          "path": "packages/research_module/lib/src/reader/source_locator.dart",
+          "line": 1,
+          "end_line": null,
+          "git_blob_sha": "97375d84ab9d542929de99f44bc3d8bc28a6f8a4",
+          "url": "https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/research_module/lib/src/reader/source_locator.dart#L1",
+          "verification": "fixed_git_blob_and_anchor_read; no runtime test"
+        },
+        {
+          "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+          "path": "packages/research_module/lib/src/core/citation_resolver.dart",
+          "line": 40,
+          "end_line": null,
+          "git_blob_sha": "be65c0968191d5211df5702269904b871a0c7f26",
+          "url": "https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/research_module/lib/src/core/citation_resolver.dart#L40",
+          "verification": "fixed_git_blob_and_anchor_read; no runtime test"
+        },
+        {
+          "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+          "path": "packages/research_module/lib/src/reader/reader_page.dart",
+          "line": 1,
+          "end_line": null,
+          "git_blob_sha": "b8ffae3004eb57051ce6cf4b579281000fdae1ad",
+          "url": "https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/research_module/lib/src/reader/reader_page.dart#L1",
+          "verification": "fixed_git_blob_and_anchor_read; no runtime test"
+        },
+        {
+          "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+          "path": "packages/research_module/lib/src/source_ref.dart",
+          "line": 1,
+          "end_line": null,
+          "git_blob_sha": "03a15ef260bde83062ba52a4d30f8e8700b4da39",
+          "url": "https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/research_module/lib/src/source_ref.dart#L1",
+          "verification": "fixed_git_blob_and_anchor_read; no runtime test"
+        }
+      ],
+      "registered_module_ids_affected": [
+        "research"
+      ],
+      "module_mapping_kind": "responsibility mapping; host-wide rows do not claim each module invokes every path",
+      "source_packages": [
+        "research_module"
+      ],
+      "primary_old_section_or_host_entry": "Research reader/source citation navigation",
+      "target_page_ids": [
+        "R02",
+        "R03",
+        "R04",
+        "R05"
+      ],
+      "target_page_mapping_kind": "design correspondence, not already implemented routes",
+      "rust_target_responsibility": "Rust保留SourceRef、digest/revision检查、消歧和归一化几何DTO；DocumentTextPort提供页文本与字形rect。Electron PDF viewer与Android PDF原生view各自实现视口、选择、缩放/旋转坐标映射。",
+      "rust_target_status": "design only; no new Rust crate claimed",
+      "binaries": [],
+      "current_writer": null,
+      "writer_status": "not confirmed; branch/task claims are separate evidence",
+      "runtime_verification": "not_run"
+    },
+    {
+      "id": "U08",
+      "design_unit_number": 8,
+      "title": "PersonalAgent执行、模型回合与工具调度",
+      "design_reference": {
+        "sha": "58fe9c62612d74a973614c41677e62a54332e6d6",
+        "path": "docs/design/redesign-v1.3.2-20261014/Muyon-Redesign-Plan-v1.3.2-2026-10-14.md",
+        "line": 265
+      },
+      "source_evidence": [
+        {
+          "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+          "path": "apps/muyon/lib/assistant/personal_agent.dart",
+          "line": 59,
+          "end_line": null,
+          "git_blob_sha": "eef0a6fee9ccbe6d6cb30daba41046401d41cb37",
+          "url": "https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/lib/assistant/personal_agent.dart#L59",
+          "verification": "fixed_git_blob_and_anchor_read; no runtime test"
+        },
+        {
+          "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+          "path": "apps/muyon/lib/assistant/agent_model_turn.dart",
+          "line": 586,
+          "end_line": null,
+          "git_blob_sha": "8c79929f4ba9f8060f61128eb5a634d38ed7ea00",
+          "url": "https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/lib/assistant/agent_model_turn.dart#L586",
+          "verification": "fixed_git_blob_and_anchor_read; no runtime test"
+        },
+        {
+          "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+          "path": "apps/muyon/lib/assistant/agent_dispatch.dart",
+          "line": 645,
+          "end_line": null,
+          "git_blob_sha": "fa0be0675e7bd4d15dab21861734e8db4fc9dc3f",
+          "url": "https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/lib/assistant/agent_dispatch.dart#L645",
+          "verification": "fixed_git_blob_and_anchor_read; no runtime test"
+        },
+        {
+          "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+          "path": "apps/muyon/lib/assistant/execution_store.dart",
+          "line": 1,
+          "end_line": null,
+          "git_blob_sha": "63330b0d69d9d9d39db8d09d416ce47e6f2110b5",
+          "url": "https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/lib/assistant/execution_store.dart#L1",
+          "verification": "fixed_git_blob_and_anchor_read; no runtime test"
+        }
+      ],
+      "registered_module_ids_affected": [
+        "inquiry",
+        "research",
+        "prototype"
+      ],
+      "module_mapping_kind": "responsibility mapping; host-wide rows do not claim each module invokes every path",
+      "source_packages": [],
+      "primary_old_section_or_host_entry": "Host assistant/task execution shared across modules",
+      "target_page_ids": [
+        "A01",
+        "A01.1",
+        "A03",
+        "T01",
+        "T02",
+        "T03"
+      ],
+      "target_page_mapping_kind": "design correspondence, not already implemented routes",
+      "rust_target_responsibility": "Rust AgentRuntime + durable task/event store拥有执行和恢复；UI直接处理纯本地展示交互；需要业务执行时发送明确Command，渲染TaskSnapshot/TaskEvent，理解或重规划才新建模型轮次。模型流、工具流、UI规划流分类型，不把所有流塞到无类型JSON日志。",
+      "rust_target_status": "design only; no new Rust crate claimed",
+      "binaries": [],
+      "current_writer": null,
+      "writer_status": "not confirmed; branch/task claims are separate evidence",
+      "runtime_verification": "not_run"
+    },
+    {
+      "id": "U09",
+      "design_unit_number": 9,
+      "title": "语义UI合同、流编译、session与publication",
+      "design_reference": {
+        "sha": "58fe9c62612d74a973614c41677e62a54332e6d6",
+        "path": "docs/design/redesign-v1.3.2-20261014/Muyon-Redesign-Plan-v1.3.2-2026-10-14.md",
+        "line": 275
+      },
+      "source_evidence": [
+        {
+          "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+          "path": "packages/muyon_module_api/lib/ui_contract.dart",
+          "line": 1,
+          "end_line": null,
+          "git_blob_sha": "3b5d438a54ab1ed20e21910605573c28532e06a0",
+          "url": "https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/muyon_module_api/lib/ui_contract.dart#L1",
+          "verification": "fixed_git_blob_and_anchor_read; no runtime test"
+        },
+        {
+          "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+          "path": "packages/muyon_module_api/lib/src/ui/validation.dart",
+          "line": 1,
+          "end_line": null,
+          "git_blob_sha": "2386d211b069ea04f436f1912dcd105510c3652a",
+          "url": "https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/muyon_module_api/lib/src/ui/validation.dart#L1",
+          "verification": "fixed_git_blob_and_anchor_read; no runtime test"
+        },
+        {
+          "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+          "path": "packages/muyon_module_api/lib/src/ui/state.dart",
+          "line": 41,
+          "end_line": null,
+          "git_blob_sha": "22c976a6c19ba3e4f224a0abc69cb6d597e70fda",
+          "url": "https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/muyon_module_api/lib/src/ui/state.dart#L41",
+          "verification": "fixed_git_blob_and_anchor_read; no runtime test"
+        },
+        {
+          "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+          "path": "packages/muyon_module_api/lib/src/ui/publication.dart",
+          "line": 38,
+          "end_line": null,
+          "git_blob_sha": "bb1e15f3ae4a1704737ede697e7d196cbb63cdfe",
+          "url": "https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/muyon_module_api/lib/src/ui/publication.dart#L38",
+          "verification": "fixed_git_blob_and_anchor_read; no runtime test"
+        },
+        {
+          "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+          "path": "packages/muyon_module_api/lib/src/ui/stream_compiler.dart",
+          "line": 63,
+          "end_line": null,
+          "git_blob_sha": "ee900cf501b88923413e5996c27c1ca533372c37",
+          "url": "https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/muyon_module_api/lib/src/ui/stream_compiler.dart#L63",
+          "verification": "fixed_git_blob_and_anchor_read; no runtime test"
+        }
+      ],
+      "registered_module_ids_affected": [
+        "inquiry",
+        "research",
+        "prototype"
+      ],
+      "module_mapping_kind": "responsibility mapping; host-wide rows do not claim each module invokes every path",
+      "source_packages": [
+        "muyon_module_api"
+      ],
+      "primary_old_section_or_host_entry": "Shared semantic cards/session/publication",
+      "target_page_ids": [
+        "A01",
+        "W01",
+        "T03",
+        "R05",
+        "Q05"
+      ],
+      "target_page_mapping_kind": "design correspondence, not already implemented routes",
+      "rust_target_responsibility": "Rust ui-semantics/plan-validator/session-owner统一验证、dispatch准入、publication与draft revision。IDL生成只读DTO；ValidatedUiPlan等权限句柄不由UI构造；需业务语义的事件提交event与opaque lease，纯本地展示交互由前端直接处理，不一律送模型。",
+      "rust_target_status": "design only; no new Rust crate claimed",
+      "binaries": [],
+      "current_writer": null,
+      "writer_status": "not confirmed; branch/task claims are separate evidence",
+      "runtime_verification": "not_run"
+    },
+    {
+      "id": "U10",
+      "design_unit_number": 10,
+      "title": "动态UI renderer、controller与公式重算接线",
+      "design_reference": {
+        "sha": "58fe9c62612d74a973614c41677e62a54332e6d6",
+        "path": "docs/design/redesign-v1.3.2-20261014/Muyon-Redesign-Plan-v1.3.2-2026-10-14.md",
+        "line": 285
+      },
+      "source_evidence": [
+        {
+          "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+          "path": "packages/muyon_ui/lib/src/dynamic/surface.dart",
+          "line": 81,
+          "end_line": null,
+          "git_blob_sha": "980874339ca44d49b13181eb2cd7ec628dfcc0a3",
+          "url": "https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/muyon_ui/lib/src/dynamic/surface.dart#L81",
+          "verification": "fixed_git_blob_and_anchor_read; no runtime test"
+        },
+        {
+          "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+          "path": "packages/muyon_ui/lib/src/dynamic/component_adapter.dart",
+          "line": 24,
+          "end_line": null,
+          "git_blob_sha": "88f8e80b07c01610487ba5b80ee29384902794de",
+          "url": "https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/muyon_ui/lib/src/dynamic/component_adapter.dart#L24",
+          "verification": "fixed_git_blob_and_anchor_read; no runtime test"
+        },
+        {
+          "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+          "path": "apps/muyon/lib/platform/ui_recompute_adapter.dart",
+          "line": 28,
+          "end_line": null,
+          "git_blob_sha": "e37b3b916e63a35862a8b7cefd049aa44dfcb6fd",
+          "url": "https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/lib/platform/ui_recompute_adapter.dart#L28",
+          "verification": "fixed_git_blob_and_anchor_read; no runtime test"
+        },
+        {
+          "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+          "path": "apps/muyon/lib/platform/ui_formula_registry.dart",
+          "line": 1,
+          "end_line": null,
+          "git_blob_sha": "29ab0dc60cd8271e360ecd1f9ca56b0cfb3e94b2",
+          "url": "https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/lib/platform/ui_formula_registry.dart#L1",
+          "verification": "fixed_git_blob_and_anchor_read; no runtime test"
+        }
+      ],
+      "registered_module_ids_affected": [
+        "inquiry",
+        "research",
+        "prototype"
+      ],
+      "module_mapping_kind": "responsibility mapping; host-wide rows do not claim each module invokes every path",
+      "source_packages": [
+        "muyon_ui"
+      ],
+      "primary_old_section_or_host_entry": "Shared renderers/visualization preference and formula adapters",
+      "target_page_ids": [
+        "A01",
+        "W01",
+        "S01.1",
+        "R05",
+        "Q05",
+        "Q06"
+      ],
+      "target_page_mapping_kind": "design correspondence, not already implemented routes",
+      "rust_target_responsibility": "React renderer与Compose renderer各自实现组件、布局、焦点、可访问性与本地输入；controller内的权限/原子状态搬到Rust；catalog schema抽成无视觉依赖的版本化共享数据，公式仅由Rust执行。",
+      "rust_target_status": "design only; no new Rust crate claimed",
+      "binaries": [],
+      "current_writer": null,
+      "writer_status": "not confirmed; branch/task claims are separate evidence",
+      "runtime_verification": "not_run"
+    },
+    {
+      "id": "U11",
+      "design_unit_number": 11,
+      "title": "权限、scope、taint与实时撤销",
+      "design_reference": {
+        "sha": "58fe9c62612d74a973614c41677e62a54332e6d6",
+        "path": "docs/design/redesign-v1.3.2-20261014/Muyon-Redesign-Plan-v1.3.2-2026-10-14.md",
+        "line": 295
+      },
+      "source_evidence": [
+        {
+          "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+          "path": "apps/muyon/lib/platform/grants/host_scope_authority.dart",
+          "line": 1,
+          "end_line": null,
+          "git_blob_sha": "f041b8d8b742de5aec050087859de577f309e99f",
+          "url": "https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/lib/platform/grants/host_scope_authority.dart#L1",
+          "verification": "fixed_git_blob_and_anchor_read; no runtime test"
+        },
+        {
+          "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+          "path": "apps/muyon/lib/platform/grants/host_authorization_facts.dart",
+          "line": 55,
+          "end_line": null,
+          "git_blob_sha": "1112f18fc27ba7bdbc775ef3b7a622f62677d38f",
+          "url": "https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/lib/platform/grants/host_authorization_facts.dart#L55",
+          "verification": "fixed_git_blob_and_anchor_read; no runtime test"
+        },
+        {
+          "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+          "path": "apps/muyon/lib/platform/grants/host_model_authorization.dart",
+          "line": 32,
+          "end_line": null,
+          "git_blob_sha": "54698b7daba0815ec94f839919d5b4157473e035",
+          "url": "https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/lib/platform/grants/host_model_authorization.dart#L32",
+          "verification": "fixed_git_blob_and_anchor_read; no runtime test"
+        },
+        {
+          "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+          "path": "apps/muyon/lib/platform/tool_registry.dart",
+          "line": 348,
+          "end_line": null,
+          "git_blob_sha": "451d5af07b9dfbeb8971dac8867289ad9c5224cd",
+          "url": "https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/lib/platform/tool_registry.dart#L348",
+          "verification": "fixed_git_blob_and_anchor_read; no runtime test"
+        }
+      ],
+      "registered_module_ids_affected": [
+        "inquiry",
+        "research",
+        "prototype"
+      ],
+      "module_mapping_kind": "responsibility mapping; host-wide rows do not claim each module invokes every path",
+      "source_packages": [],
+      "primary_old_section_or_host_entry": "Host access/grant/scope/revocation; old authorization distinct from presentation",
+      "target_page_ids": [
+        "S04",
+        "A03",
+        "T02",
+        "T03"
+      ],
+      "target_page_mapping_kind": "design correspondence, not already implemented routes",
+      "rust_target_responsibility": "Rust AuthorityService形成唯一policy/grant owner；事件总线代替ChangeNotifier但保留先锁存后持久化的保守顺序；UI持有短寿命approval presentation ID，不接收可重建的内部permission对象。",
+      "rust_target_status": "design only; no new Rust crate claimed",
+      "binaries": [],
+      "current_writer": null,
+      "writer_status": "not confirmed; branch/task claims are separate evidence",
+      "runtime_verification": "not_run"
+    },
+    {
+      "id": "U12",
+      "design_unit_number": 12,
+      "title": "业务写入、CAS、幂等与回执完整性",
+      "design_reference": {
+        "sha": "58fe9c62612d74a973614c41677e62a54332e6d6",
+        "path": "docs/design/redesign-v1.3.2-20261014/Muyon-Redesign-Plan-v1.3.2-2026-10-14.md",
+        "line": 307
+      },
+      "source_evidence": [
+        {
+          "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+          "path": "apps/muyon/lib/platform/inquiry_write_tools.dart",
+          "line": 1,
+          "end_line": null,
+          "git_blob_sha": "8dcdabe2f6c7da2d3d1e4045485846d71a3d6820",
+          "url": "https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/lib/platform/inquiry_write_tools.dart#L1",
+          "verification": "fixed_git_blob_and_anchor_read; no runtime test"
+        },
+        {
+          "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+          "path": "apps/muyon/lib/platform/inquiry_write_receipts.dart",
+          "line": 23,
+          "end_line": null,
+          "git_blob_sha": "c32ba45beb7edf573144115234e28ce0e7047b98",
+          "url": "https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/lib/platform/inquiry_write_receipts.dart#L23",
+          "verification": "fixed_git_blob_and_anchor_read; no runtime test"
+        },
+        {
+          "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+          "path": "apps/muyon/lib/platform/inquiry_receipt_lookup.dart",
+          "line": 1,
+          "end_line": null,
+          "git_blob_sha": "3a8a1ae70bcc2d8e68690defadf2c2ba810a41ac",
+          "url": "https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/lib/platform/inquiry_receipt_lookup.dart#L1",
+          "verification": "fixed_git_blob_and_anchor_read; no runtime test"
+        },
+        {
+          "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+          "path": "packages/muyon_module_api/lib/src/business_receipts.dart",
+          "line": 1,
+          "end_line": null,
+          "git_blob_sha": "680a2f2e06313e9f705d26cc12deec510c9872eb",
+          "url": "https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/muyon_module_api/lib/src/business_receipts.dart#L1",
+          "verification": "fixed_git_blob_and_anchor_read; no runtime test"
+        },
+        {
+          "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+          "path": "packages/muyon_module_api/lib/src/atomic_batch_write.dart",
+          "line": 1,
+          "end_line": null,
+          "git_blob_sha": "6de1112159fe816ea13af1ccd2c68267e6ab3fe6",
+          "url": "https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/muyon_module_api/lib/src/atomic_batch_write.dart#L1",
+          "verification": "fixed_git_blob_and_anchor_read; no runtime test"
+        }
+      ],
+      "registered_module_ids_affected": [
+        "inquiry",
+        "research"
+      ],
+      "module_mapping_kind": "responsibility mapping; host-wide rows do not claim each module invokes every path",
+      "source_packages": [
+        "muyon_module_api"
+      ],
+      "primary_old_section_or_host_entry": "Business write commands/CAS/receipt; module write surfaces remain declared",
+      "target_page_ids": [
+        "D01.1",
+        "R07",
+        "R08",
+        "Q04",
+        "T02",
+        "T03"
+      ],
+      "target_page_mapping_kind": "design correspondence, not already implemented routes",
+      "rust_target_responsibility": "Rust CommandExecutor以expected revision+idempotency key为入口，在同事务完成业务、change log与receipt；结果区分applied/alreadyApplied/conflict/unknown。NativeReceiptProjection与ModelReceiptProjection分别定义。",
+      "rust_target_status": "design only; no new Rust crate claimed",
+      "binaries": [],
+      "current_writer": null,
+      "writer_status": "not confirmed; branch/task claims are separate evidence",
+      "runtime_verification": "not_run"
+    },
+    {
+      "id": "U13",
+      "design_unit_number": 13,
+      "title": "模型gateway、SSE、超时与外发账本",
+      "design_reference": {
+        "sha": "58fe9c62612d74a973614c41677e62a54332e6d6",
+        "path": "docs/design/redesign-v1.3.2-20261014/Muyon-Redesign-Plan-v1.3.2-2026-10-14.md",
+        "line": 317
+      },
+      "source_evidence": [
+        {
+          "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+          "path": "apps/muyon/lib/services/models/model_gateway.dart",
+          "line": 156,
+          "end_line": null,
+          "git_blob_sha": "13695f90832788c5c2a3682b561d61b57662d157",
+          "url": "https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/lib/services/models/model_gateway.dart#L156",
+          "verification": "fixed_git_blob_and_anchor_read; no runtime test"
+        },
+        {
+          "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+          "path": "apps/muyon/lib/services/models/openai_compat_provider.dart",
+          "line": 1,
+          "end_line": null,
+          "git_blob_sha": "a7a63ed635ef634b03cf76dbeadd5c4821c13578",
+          "url": "https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/lib/services/models/openai_compat_provider.dart#L1",
+          "verification": "fixed_git_blob_and_anchor_read; no runtime test"
+        },
+        {
+          "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+          "path": "apps/muyon/lib/services/models/model_provider.dart",
+          "line": 1,
+          "end_line": null,
+          "git_blob_sha": "b59c26ae9a81c6a9f390ea7ed23b998aa8b3676b",
+          "url": "https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/lib/services/models/model_provider.dart#L1",
+          "verification": "fixed_git_blob_and_anchor_read; no runtime test"
+        },
+        {
+          "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+          "path": "apps/muyon/lib/platform/outbound_ledger.dart",
+          "line": 1,
+          "end_line": null,
+          "git_blob_sha": "f09f6abe48df40feb01590464f076059b5c10de8",
+          "url": "https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/lib/platform/outbound_ledger.dart#L1",
+          "verification": "fixed_git_blob_and_anchor_read; no runtime test"
+        }
+      ],
+      "registered_module_ids_affected": [
+        "inquiry",
+        "research"
+      ],
+      "module_mapping_kind": "responsibility mapping; host-wide rows do not claim each module invokes every path",
+      "source_packages": [],
+      "primary_old_section_or_host_entry": "Host/model configuration and optional business model paths",
+      "target_page_ids": [
+        "S02",
+        "A01",
+        "T02"
+      ],
+      "target_page_mapping_kind": "design correspondence, not already implemented routes",
+      "rust_target_responsibility": "Rust model-runtime负责HTTP、SSE parser、payload-finalization、ledger和取消；UI只获允许的draft与typed event。一个request ID贯穿authorization、wire payload hash、ledger、tool-call assembly和telemetry。",
+      "rust_target_status": "design only; no new Rust crate claimed",
+      "binaries": [],
+      "current_writer": null,
+      "writer_status": "not confirmed; branch/task claims are separate evidence",
+      "runtime_verification": "not_run"
+    },
+    {
+      "id": "U14",
+      "design_unit_number": 14,
+      "title": "模型披露与本机展示分层",
+      "design_reference": {
+        "sha": "58fe9c62612d74a973614c41677e62a54332e6d6",
+        "path": "docs/design/redesign-v1.3.2-20261014/Muyon-Redesign-Plan-v1.3.2-2026-10-14.md",
+        "line": 327
+      },
+      "source_evidence": [
+        {
+          "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+          "path": "apps/muyon/lib/platform/inquiry_ui_planning_source.dart",
+          "line": 19,
+          "end_line": null,
+          "git_blob_sha": "1c00bba0f35627d0293f797a5ffebe6657618889",
+          "url": "https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/lib/platform/inquiry_ui_planning_source.dart#L19",
+          "verification": "fixed_git_blob_and_anchor_read; no runtime test"
+        },
+        {
+          "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+          "path": "packages/research_module/lib/src/core/section_delete_preview.dart",
+          "line": 32,
+          "end_line": null,
+          "git_blob_sha": "192bba21966f4b2b090a010f9a9dda28f8d2818a",
+          "url": "https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/research_module/lib/src/core/section_delete_preview.dart#L32",
+          "verification": "fixed_git_blob_and_anchor_read; no runtime test"
+        },
+        {
+          "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+          "path": "apps/muyon/lib/assistant/request_view.dart",
+          "line": 1,
+          "end_line": null,
+          "git_blob_sha": "ad66290b37859d7ce3ef5a510f4fe1a04ddf7f8d",
+          "url": "https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/lib/assistant/request_view.dart#L1",
+          "verification": "fixed_git_blob_and_anchor_read; no runtime test"
+        },
+        {
+          "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+          "path": "apps/muyon/lib/services/models/credential_redaction.dart",
+          "line": 27,
+          "end_line": null,
+          "git_blob_sha": "c7820ee10dc33501ef7ee2840a3af52372287b24",
+          "url": "https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/lib/services/models/credential_redaction.dart#L27",
+          "verification": "fixed_git_blob_and_anchor_read; no runtime test"
+        }
+      ],
+      "registered_module_ids_affected": [
+        "inquiry",
+        "research",
+        "prototype"
+      ],
+      "module_mapping_kind": "responsibility mapping; host-wide rows do not claim each module invokes every path",
+      "source_packages": [
+        "research_module"
+      ],
+      "primary_old_section_or_host_entry": "Purpose-limited model/native/audit projections",
+      "target_page_ids": [
+        "A03",
+        "S04",
+        "R05",
+        "T02"
+      ],
+      "target_page_mapping_kind": "design correspondence, not already implemented routes",
+      "rust_target_responsibility": "Rust强类型NativeView、ModelView、AuditView与DisclosureContext；每次最终payload封包前检查allowlist及source proof。UI只提交披露选择，不自行把raw对象serialize到模型。secret redaction与数据披露规则分别处理。",
+      "rust_target_status": "design only; no new Rust crate claimed",
+      "binaries": [],
+      "current_writer": null,
+      "writer_status": "not confirmed; branch/task claims are separate evidence",
+      "runtime_verification": "not_run"
+    },
+    {
+      "id": "U15",
+      "design_unit_number": 15,
+      "title": "文档解析、知识索引、OCR与搜索",
+      "design_reference": {
+        "sha": "58fe9c62612d74a973614c41677e62a54332e6d6",
+        "path": "docs/design/redesign-v1.3.2-20261014/Muyon-Redesign-Plan-v1.3.2-2026-10-14.md",
+        "line": 337
+      },
+      "source_evidence": [
+        {
+          "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+          "path": "apps/muyon/lib/services/documents/document_parser.dart",
+          "line": 14,
+          "end_line": null,
+          "git_blob_sha": "247c9fe3f12fdb7618d4c8420da8bb7b320a641f",
+          "url": "https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/lib/services/documents/document_parser.dart#L14",
+          "verification": "fixed_git_blob_and_anchor_read; no runtime test"
+        },
+        {
+          "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+          "path": "apps/muyon/lib/services/knowledge/knowledge_service.dart",
+          "line": 49,
+          "end_line": null,
+          "git_blob_sha": "39fa5495a9b029b359356c5f802802fe6ec444f3",
+          "url": "https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/lib/services/knowledge/knowledge_service.dart#L49",
+          "verification": "fixed_git_blob_and_anchor_read; no runtime test"
+        },
+        {
+          "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+          "path": "apps/muyon/lib/services/ocr/paddle_ocr_service.dart",
+          "line": 56,
+          "end_line": null,
+          "git_blob_sha": "ea46abbbbc552f2366205d59f919289642a547ec",
+          "url": "https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/lib/services/ocr/paddle_ocr_service.dart#L56",
+          "verification": "fixed_git_blob_and_anchor_read; no runtime test"
+        },
+        {
+          "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+          "path": "apps/muyon/lib/services/search/search_service.dart",
+          "line": 1,
+          "end_line": null,
+          "git_blob_sha": "3e3f96b6af1373901e1c71c5bbfd5247575e0373",
+          "url": "https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/lib/services/search/search_service.dart#L1",
+          "verification": "fixed_git_blob_and_anchor_read; no runtime test"
+        }
+      ],
+      "registered_module_ids_affected": [
+        "research",
+        "inquiry"
+      ],
+      "module_mapping_kind": "responsibility mapping; host-wide rows do not claim each module invokes every path",
+      "source_packages": [],
+      "primary_old_section_or_host_entry": "Knowledge/search/OCR; libraries/capability ports, not a new BusinessModule",
+      "target_page_ids": [
+        "A02",
+        "R01",
+        "R02",
+        "A03"
+      ],
+      "target_page_mapping_kind": "design correspondence, not already implemented routes",
+      "rust_target_responsibility": "Rust knowledge-domain负责索引身份、chunk/metadata、digest、query/ranking与失效；DocumentText/OcrInference ports承担引擎调用。可用Rust原生后端或平台native adapter，需先验证分发包、线程、内存与模型许可。",
+      "rust_target_status": "design only; no new Rust crate claimed",
+      "binaries": [],
+      "current_writer": null,
+      "writer_status": "not confirmed; branch/task claims are separate evidence",
+      "runtime_verification": "not_run"
+    },
+    {
+      "id": "U16",
+      "design_unit_number": 16,
+      "title": "导入冻结、工作区激活与备份恢复",
+      "design_reference": {
+        "sha": "58fe9c62612d74a973614c41677e62a54332e6d6",
+        "path": "docs/design/redesign-v1.3.2-20261014/Muyon-Redesign-Plan-v1.3.2-2026-10-14.md",
+        "line": 347
+      },
+      "source_evidence": [
+        {
+          "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+          "path": "apps/muyon/lib/platform/file_gateway.dart",
+          "line": 26,
+          "end_line": null,
+          "git_blob_sha": "a37997af5227877d3cc195ad9f324946531b545e",
+          "url": "https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/lib/platform/file_gateway.dart#L26",
+          "verification": "fixed_git_blob_and_anchor_read; no runtime test"
+        },
+        {
+          "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+          "path": "apps/muyon/lib/workspace/import_coordinator.dart",
+          "line": 8,
+          "end_line": null,
+          "git_blob_sha": "5ff67e50ababc0fd592e058726d6e77f0817f0cd",
+          "url": "https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/lib/workspace/import_coordinator.dart#L8",
+          "verification": "fixed_git_blob_and_anchor_read; no runtime test"
+        },
+        {
+          "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+          "path": "apps/muyon/lib/platform/backup_service.dart",
+          "line": 1,
+          "end_line": null,
+          "git_blob_sha": "33e818a071c4d953a5337aa4304888041164b355",
+          "url": "https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/lib/platform/backup_service.dart#L1",
+          "verification": "fixed_git_blob_and_anchor_read; no runtime test"
+        },
+        {
+          "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+          "path": "apps/muyon/lib/app/app_shell.dart",
+          "line": 137,
+          "end_line": null,
+          "git_blob_sha": "7885791c17293b61d259184e740383fab420c980",
+          "url": "https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/lib/app/app_shell.dart#L137",
+          "verification": "fixed_git_blob_and_anchor_read; no runtime test"
+        }
+      ],
+      "registered_module_ids_affected": [
+        "inquiry",
+        "research",
+        "prototype"
+      ],
+      "module_mapping_kind": "responsibility mapping; host-wide rows do not claim each module invokes every path",
+      "source_packages": [],
+      "primary_old_section_or_host_entry": "Import/file freeze, workspace activation and restore",
+      "target_page_ids": [
+        "S05",
+        "S05.1",
+        "R01",
+        "D01",
+        "Q01",
+        "W01"
+      ],
+      "target_page_mapping_kind": "design correspondence, not already implemented routes",
+      "rust_target_responsibility": "平台PickerPort返回短寿命FileGrant；Rust snapshot/verify/import/backup协调；UI负责unsaved input提示、视图detach与rebind，但核心restore barrier和导入幂等统一。",
+      "rust_target_status": "design only; no new Rust crate claimed",
+      "binaries": [],
+      "current_writer": null,
+      "writer_status": "not confirmed; branch/task claims are separate evidence",
+      "runtime_verification": "not_run"
+    },
+    {
+      "id": "U17",
+      "design_unit_number": 17,
+      "title": "LAN传输、任务信封、聊天与文件夹同步",
+      "design_reference": {
+        "sha": "58fe9c62612d74a973614c41677e62a54332e6d6",
+        "path": "docs/design/redesign-v1.3.2-20261014/Muyon-Redesign-Plan-v1.3.2-2026-10-14.md",
+        "line": 359
+      },
+      "source_evidence": [
+        {
+          "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+          "path": "apps/muyon/lib/services/transfer/transfer_service.dart",
+          "line": 65,
+          "end_line": null,
+          "git_blob_sha": "889675898feb47c650bd16478a0cb4bf80288390",
+          "url": "https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/lib/services/transfer/transfer_service.dart#L65",
+          "verification": "fixed_git_blob_and_anchor_read; no runtime test"
+        },
+        {
+          "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+          "path": "apps/muyon/lib/services/transfer/task_coordinator.dart",
+          "line": 8,
+          "end_line": null,
+          "git_blob_sha": "84416c84f277d52667a689646dafea93eddc6e64",
+          "url": "https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/lib/services/transfer/task_coordinator.dart#L8",
+          "verification": "fixed_git_blob_and_anchor_read; no runtime test"
+        },
+        {
+          "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+          "path": "packages/supplier_core/lib/src/lan.dart",
+          "line": 1,
+          "end_line": null,
+          "git_blob_sha": "d7af1184645e560f4050ab04583e2e171bd27394",
+          "url": "https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/supplier_core/lib/src/lan.dart#L1",
+          "verification": "fixed_git_blob_and_anchor_read; no runtime test"
+        },
+        {
+          "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+          "path": "packages/supplier_core/lib/src/folder_sync.dart",
+          "line": 44,
+          "end_line": null,
+          "git_blob_sha": "2579a050029c3ead878d9a52d6a431485852b4b4",
+          "url": "https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/supplier_core/lib/src/folder_sync.dart#L44",
+          "verification": "fixed_git_blob_and_anchor_read; no runtime test"
+        },
+        {
+          "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+          "path": "apps/muyon/lib/screens/devices_page.dart",
+          "line": 74,
+          "end_line": 123,
+          "git_blob_sha": "a88b09f727aeced94de5b3e80454403951ff5d3c",
+          "url": "https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/lib/screens/devices_page.dart#L74",
+          "verification": "fixed_git_blob_and_anchor_read; no runtime test"
+        },
+        {
+          "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+          "path": "apps/muyon/lib/app/research_task_bridge.dart",
+          "line": 145,
+          "end_line": 205,
+          "git_blob_sha": "341ed83a482d8983cfa97d52318d5a5f9a65b0fe",
+          "url": "https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/lib/app/research_task_bridge.dart#L145",
+          "verification": "fixed_git_blob_and_anchor_read; no runtime test"
+        }
+      ],
+      "registered_module_ids_affected": [
+        "inquiry",
+        "research"
+      ],
+      "module_mapping_kind": "responsibility mapping; host-wide rows do not claim each module invokes every path",
+      "source_packages": [
+        "supplier_core"
+      ],
+      "primary_old_section_or_host_entry": "inquiry exchange plus host DevicesPage and ResearchTaskBridge",
+      "target_page_ids": [
+        "S05.1",
+        "T01.1",
+        "T02",
+        "R01"
+      ],
+      "target_page_mapping_kind": "design correspondence, not already implemented routes",
+      "rust_target_responsibility": "Rust transport/sync/runtime + PlatformSecretPort、NetworkAvailabilityPort；端侧权限提示和前后台联网政策由平台adapter处理。Envelope schema、device identity、replay protection与acceptance state统一。本条是终局能力盘点，不等于本期全量开放。[devices_page](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/lib/screens/devices_page.dart#L74-L123)及[ResearchTaskBridge](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/lib/app/research_task_bridge.dart#L145-L205)有生产接线，不构成上线或运行通过证据。S05.1/W5显式承接设备消息和既有研究任务交换：offer/accept与真正本人授权导入研究说明分开，ResearchTaskBridge不自动完成研究，结果由用户形成并提交/导入科研。迁入新端或明确暂留旧端的排期待决，未实现显示未提供且保留旧入口；新增自动执行、审批同步和全局一致性另立方案。",
+      "rust_target_status": "design only; no new Rust crate claimed",
+      "binaries": [],
+      "current_writer": null,
+      "writer_status": "not confirmed; branch/task claims are separate evidence",
+      "runtime_verification": "not_run"
+    },
+    {
+      "id": "U18",
+      "design_unit_number": 18,
+      "title": "凭据与平台安全存储",
+      "design_reference": {
+        "sha": "58fe9c62612d74a973614c41677e62a54332e6d6",
+        "path": "docs/design/redesign-v1.3.2-20261014/Muyon-Redesign-Plan-v1.3.2-2026-10-14.md",
+        "line": 369
+      },
+      "source_evidence": [
+        {
+          "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+          "path": "apps/muyon/lib/services/models/secret_store.dart",
+          "line": 9,
+          "end_line": null,
+          "git_blob_sha": "442f182af125067643531e7c0483102ba6c8685f",
+          "url": "https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/lib/services/models/secret_store.dart#L9",
+          "verification": "fixed_git_blob_and_anchor_read; no runtime test"
+        },
+        {
+          "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+          "path": "packages/inquiry_module/lib/src/app/secret_store.dart",
+          "line": 1,
+          "end_line": null,
+          "git_blob_sha": "16fd86da148ce0921f91b97a083148ecd7119115",
+          "url": "https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/inquiry_module/lib/src/app/secret_store.dart#L1",
+          "verification": "fixed_git_blob_and_anchor_read; no runtime test"
+        },
+        {
+          "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+          "path": "apps/muyon/lib/services/transfer/transfer_service.dart",
+          "line": 22,
+          "end_line": null,
+          "git_blob_sha": "889675898feb47c650bd16478a0cb4bf80288390",
+          "url": "https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/lib/services/transfer/transfer_service.dart#L22",
+          "verification": "fixed_git_blob_and_anchor_read; no runtime test"
+        }
+      ],
+      "registered_module_ids_affected": [
+        "inquiry",
+        "research"
+      ],
+      "module_mapping_kind": "responsibility mapping; host-wide rows do not claim each module invokes every path",
+      "source_packages": [
+        "inquiry_module"
+      ],
+      "primary_old_section_or_host_entry": "Host/Folio/LAN credential namespaces and platform ports",
+      "target_page_ids": [
+        "S02",
+        "S03",
+        "S03.1",
+        "S05.1"
+      ],
+      "target_page_mapping_kind": "design correspondence, not already implemented routes",
+      "rust_target_responsibility": "Rust只持有SecretRef并在受控IO发送阶段调用SecretPort；Electron主进程/受信helper与Android Keystore adapter完成安全存储；renderer与Compose screen state不接收读回的明文key。",
+      "rust_target_status": "design only; no new Rust crate claimed",
+      "binaries": [],
+      "current_writer": null,
+      "writer_status": "not confirmed; branch/task claims are separate evidence",
+      "runtime_verification": "not_run"
+    },
+    {
+      "id": "U19",
+      "design_unit_number": 19,
+      "title": "本机导出：冻结准备、分阶段授权、账本与保存适配",
+      "design_reference": {
+        "sha": "58fe9c62612d74a973614c41677e62a54332e6d6",
+        "path": "docs/design/redesign-v1.3.2-20261014/Muyon-Redesign-Plan-v1.3.2-2026-10-14.md",
+        "line": 379
+      },
+      "source_evidence": [
+        {
+          "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+          "path": "packages/muyon_module_api/lib/src/local_export.dart",
+          "line": 1,
+          "end_line": null,
+          "git_blob_sha": "4afde1d645c19ccf51443b6697144826351b228e",
+          "url": "https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/muyon_module_api/lib/src/local_export.dart#L1",
+          "verification": "fixed_git_blob_and_anchor_read; no runtime test"
+        },
+        {
+          "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+          "path": "packages/research_module/lib/src/core/exchange.dart",
+          "line": 1132,
+          "end_line": null,
+          "git_blob_sha": "0fcdd0f88794c6fb3bd50aa8a9706f7244e37aa0",
+          "url": "https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/research_module/lib/src/core/exchange.dart#L1132",
+          "verification": "fixed_git_blob_and_anchor_read; no runtime test"
+        },
+        {
+          "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+          "path": "packages/research_module/lib/src/core/claim_draft_preparation.dart",
+          "line": 71,
+          "end_line": null,
+          "git_blob_sha": "4283c5c92aeaede68dd843b9bc0ce20f75b3bd08",
+          "url": "https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/research_module/lib/src/core/claim_draft_preparation.dart#L71",
+          "verification": "fixed_git_blob_and_anchor_read; no runtime test"
+        },
+        {
+          "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+          "path": "apps/muyon/lib/platform/local_export_ledger.dart",
+          "line": 235,
+          "end_line": null,
+          "git_blob_sha": "5c9807ecfbaa75cbc375b774ec3d1b5830679ba8",
+          "url": "https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/lib/platform/local_export_ledger.dart#L235",
+          "verification": "fixed_git_blob_and_anchor_read; no runtime test"
+        },
+        {
+          "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+          "path": "apps/muyon/lib/platform/grants/local_export_target.dart",
+          "line": 52,
+          "end_line": null,
+          "git_blob_sha": "4fe4f9a26dfc62436e7954d3f00e6b0384a4d27f",
+          "url": "https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/lib/platform/grants/local_export_target.dart#L52",
+          "verification": "fixed_git_blob_and_anchor_read; no runtime test"
+        }
+      ],
+      "registered_module_ids_affected": [
+        "research"
+      ],
+      "module_mapping_kind": "responsibility mapping; host-wide rows do not claim each module invokes every path",
+      "source_packages": [
+        "muyon_module_api",
+        "research_module"
+      ],
+      "primary_old_section_or_host_entry": "Research export prepare/claim-draft/ledger; production full-chain wiring not proved",
+      "target_page_ids": [
+        "R07",
+        "S05",
+        "T02",
+        "T03"
+      ],
+      "target_page_mapping_kind": "design correspondence, not already implemented routes",
+      "rust_target_responsibility": "Rust ExportCoordinator拥有frozen preparation、identity、审批revision、ledger；DesktopFilePort/AndroidDocumentPort持有系统授予handle；生成成功、保存成功、用户取消、cleanup residue与unknown分别投影。",
+      "rust_target_status": "design only; no new Rust crate claimed",
+      "binaries": [],
+      "current_writer": null,
+      "writer_status": "not confirmed; branch/task claims are separate evidence",
+      "runtime_verification": "not_run"
+    },
+    {
+      "id": "U20",
+      "design_unit_number": 20,
+      "title": "持久通知、任务事件与后台作业",
+      "design_reference": {
+        "sha": "58fe9c62612d74a973614c41677e62a54332e6d6",
+        "path": "docs/design/redesign-v1.3.2-20261014/Muyon-Redesign-Plan-v1.3.2-2026-10-14.md",
+        "line": 389
+      },
+      "source_evidence": [
+        {
+          "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+          "path": "apps/muyon/lib/platform/foundation_repository.dart",
+          "line": 997,
+          "end_line": null,
+          "git_blob_sha": "f767a69cc273d750073dab4e806e5107d7fc3adc",
+          "url": "https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/lib/platform/foundation_repository.dart#L997",
+          "verification": "fixed_git_blob_and_anchor_read; no runtime test"
+        },
+        {
+          "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+          "path": "apps/muyon/lib/platform/task_records.dart",
+          "line": 1,
+          "end_line": null,
+          "git_blob_sha": "4b643af7fc0c0f86aa8497067e99acdf11efdad2",
+          "url": "https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/lib/platform/task_records.dart#L1",
+          "verification": "fixed_git_blob_and_anchor_read; no runtime test"
+        },
+        {
+          "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+          "path": "packages/supplier_core/lib/src/ai_jobs.dart",
+          "line": 32,
+          "end_line": null,
+          "git_blob_sha": "6cab6fc5b8fca152580aa5051fa277bc98538eb2",
+          "url": "https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/supplier_core/lib/src/ai_jobs.dart#L32",
+          "verification": "fixed_git_blob_and_anchor_read; no runtime test"
+        },
+        {
+          "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+          "path": "packages/supplier_core/lib/src/background.dart",
+          "line": 13,
+          "end_line": null,
+          "git_blob_sha": "0d869557b2c7217cbae97b8ce74433396943009e",
+          "url": "https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/supplier_core/lib/src/background.dart#L13",
+          "verification": "fixed_git_blob_and_anchor_read; no runtime test"
+        }
+      ],
+      "registered_module_ids_affected": [
+        "inquiry",
+        "research",
+        "prototype"
+      ],
+      "module_mapping_kind": "responsibility mapping; host-wide rows do not claim each module invokes every path",
+      "source_packages": [
+        "supplier_core"
+      ],
+      "primary_old_section_or_host_entry": "Host task events/notifications and supplier jobs",
+      "target_page_ids": [
+        "T01",
+        "T01.1",
+        "T02",
+        "A01"
+      ],
+      "target_page_mapping_kind": "design correspondence, not already implemented routes",
+      "rust_target_responsibility": "Rust JobScheduler/EventLog/NotificationInbox统一持久化；OSNotificationPort是可选adapter，只接收已脱敏通知摘要；React/Compose订阅序号化delta并支持snapshot重同步。",
+      "rust_target_status": "design only; no new Rust crate claimed",
+      "binaries": [],
+      "current_writer": null,
+      "writer_status": "not confirmed; branch/task claims are separate evidence",
+      "runtime_verification": "not_run"
+    },
+    {
+      "id": "U21",
+      "design_unit_number": 21,
+      "title": "记忆 经验与整理",
+      "design_reference": {
+        "sha": "58fe9c62612d74a973614c41677e62a54332e6d6",
+        "path": "docs/design/redesign-v1.3.2-20261014/Muyon-Redesign-Plan-v1.3.2-2026-10-14.md",
+        "line": 401
+      },
+      "source_evidence": [
+        {
+          "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+          "path": "apps/muyon/lib/platform/foundation_repository.dart",
+          "line": 35,
+          "end_line": 81,
+          "git_blob_sha": "f767a69cc273d750073dab4e806e5107d7fc3adc",
+          "url": "https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/lib/platform/foundation_repository.dart#L35",
+          "verification": "fixed_git_blob_and_anchor_read; no runtime test"
+        },
+        {
+          "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+          "path": "apps/muyon/lib/platform/foundation_repository.dart",
+          "line": 403,
+          "end_line": 674,
+          "git_blob_sha": "f767a69cc273d750073dab4e806e5107d7fc3adc",
+          "url": "https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/lib/platform/foundation_repository.dart#L403",
+          "verification": "fixed_git_blob_and_anchor_read; no runtime test"
+        },
+        {
+          "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+          "path": "apps/muyon/lib/workspace/workspace_repository.dart",
+          "line": 100,
+          "end_line": 142,
+          "git_blob_sha": "0fd649df6a1d361593eea8ec92ad2b10a56f7f0e",
+          "url": "https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/lib/workspace/workspace_repository.dart#L100",
+          "verification": "fixed_git_blob_and_anchor_read; no runtime test"
+        },
+        {
+          "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+          "path": "apps/muyon/lib/assistant/dream/dream_service.dart",
+          "line": 38,
+          "end_line": 246,
+          "git_blob_sha": "ac5f52c9c567fb87881fa85190b85ecdf9a0c56d",
+          "url": "https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/lib/assistant/dream/dream_service.dart#L38",
+          "verification": "fixed_git_blob_and_anchor_read; no runtime test"
+        },
+        {
+          "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+          "path": "apps/muyon/lib/screens/memory_page.dart",
+          "line": 1,
+          "end_line": null,
+          "git_blob_sha": "7afbf1a8ade140ed80a60bd8cb1b9ae1dccd2faf",
+          "url": "https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/lib/screens/memory_page.dart#L1",
+          "verification": "fixed_git_blob_and_anchor_read; no runtime test"
+        },
+        {
+          "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+          "path": "apps/muyon/lib/platform/memory_review.dart",
+          "line": 1,
+          "end_line": null,
+          "git_blob_sha": "1ea50057c588bcb4afa4c12f9ae10d28df2ea643",
+          "url": "https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/lib/platform/memory_review.dart#L1",
+          "verification": "fixed_git_blob_and_anchor_read; no runtime test"
+        }
+      ],
+      "registered_module_ids_affected": [
+        "inquiry",
+        "research",
+        "prototype"
+      ],
+      "module_mapping_kind": "responsibility mapping; host-wide rows do not claim each module invokes every path",
+      "source_packages": [],
+      "primary_old_section_or_host_entry": "Host MemoryPage/Dream and scope-limited shared memory; D11 separate target",
+      "target_page_ids": [
+        "S06",
+        "A02",
+        "A03"
+      ],
+      "target_page_mapping_kind": "design correspondence, not already implemented routes",
+      "rust_target_responsibility": "Rust memory-domain/memory-application负责记录、核实、范围收窄、lineage、提案、回滚及用途投影；S06重设计为记忆/经验/整理三子区。新增CAS、自动记忆独立开关和恢复域外遗忘凭据，具体字段见第5章。",
+      "rust_target_status": "design only; no new Rust crate claimed",
+      "binaries": [],
+      "current_writer": null,
+      "writer_status": "not confirmed; branch/task claims are separate evidence",
+      "runtime_verification": "not_run"
+    },
+    {
+      "id": "U22",
+      "design_unit_number": 22,
+      "title": "受限原型 页面版本与反馈",
+      "design_reference": {
+        "sha": "58fe9c62612d74a973614c41677e62a54332e6d6",
+        "path": "docs/design/redesign-v1.3.2-20261014/Muyon-Redesign-Plan-v1.3.2-2026-10-14.md",
+        "line": 412
+      },
+      "source_evidence": [
+        {
+          "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+          "path": "apps/muyon/lib/app/module_catalog.dart",
+          "line": 8,
+          "end_line": 10,
+          "git_blob_sha": "e30669f1324af75e9916648d28aade27f6535b8d",
+          "url": "https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/lib/app/module_catalog.dart#L8",
+          "verification": "fixed_git_blob_and_anchor_read; no runtime test"
+        },
+        {
+          "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+          "path": "packages/prototype_module/lib/src/prototype_module.dart",
+          "line": 14,
+          "end_line": 117,
+          "git_blob_sha": "6a0b4de84339f27b6803b744c5c36e43803175a3",
+          "url": "https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/prototype_module/lib/src/prototype_module.dart#L14",
+          "verification": "fixed_git_blob_and_anchor_read; no runtime test"
+        },
+        {
+          "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+          "path": "packages/prototype_module/lib/src/web_guard.dart",
+          "line": 14,
+          "end_line": 39,
+          "git_blob_sha": "3d746f8a1677870e6a73dc1592a7993013a15d63",
+          "url": "https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/prototype_module/lib/src/web_guard.dart#L14",
+          "verification": "fixed_git_blob_and_anchor_read; no runtime test"
+        },
+        {
+          "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+          "path": "packages/prototype_module/lib/src/resource_policy.dart",
+          "line": 1,
+          "end_line": null,
+          "git_blob_sha": "d013e82e7ef0d20e2701df7fbaa2e3d777eba99d",
+          "url": "https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/prototype_module/lib/src/resource_policy.dart#L1",
+          "verification": "fixed_git_blob_and_anchor_read; no runtime test"
+        },
+        {
+          "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+          "path": "packages/prototype_module/lib/src/scheme_loader.dart",
+          "line": 1,
+          "end_line": null,
+          "git_blob_sha": "f29bccf16ceb4e787379e42829f4bb637ef453fb",
+          "url": "https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/prototype_module/lib/src/scheme_loader.dart#L1",
+          "verification": "fixed_git_blob_and_anchor_read; no runtime test"
+        }
+      ],
+      "registered_module_ids_affected": [
+        "prototype"
+      ],
+      "module_mapping_kind": "responsibility mapping; host-wide rows do not claim each module invokes every path",
+      "source_packages": [
+        "prototype_module"
+      ],
+      "primary_old_section_or_host_entry": "Declared prototype ModuleSection; hidden module-menu entry does not imply unused",
+      "target_page_ids": [
+        "W01.1"
+      ],
+      "target_page_mapping_kind": "design correspondence, not already implemented routes",
+      "rust_target_responsibility": "Rust拥有原型身份/版本/资源manifest/反馈；平台提供隔离沙箱与受限资源scheme。Electron独立sandboxed WebContents，Android受控WebView；文档中的脚本产物不进入可信主renderer。只允许注册桥接进入同一Rust授权路径，默认无任意网络、文件、secret或IPC能力。",
+      "rust_target_status": "design only; no new Rust crate claimed",
+      "binaries": [],
+      "current_writer": null,
+      "writer_status": "not confirmed; branch/task claims are separate evidence",
+      "runtime_verification": "not_run"
+    },
+    {
+      "id": "U23",
+      "design_unit_number": 23,
+      "title": "MCP客户端与本机只读服务",
+      "design_reference": {
+        "sha": "58fe9c62612d74a973614c41677e62a54332e6d6",
+        "path": "docs/design/redesign-v1.3.2-20261014/Muyon-Redesign-Plan-v1.3.2-2026-10-14.md",
+        "line": 420
+      },
+      "source_evidence": [
+        {
+          "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+          "path": "apps/muyon/lib/platform/mcp_adapter.dart",
+          "line": 15,
+          "end_line": 45,
+          "git_blob_sha": "ba12bbe08c05e8b07986b4b456c7ef2f31fcbfc4",
+          "url": "https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/lib/platform/mcp_adapter.dart#L15",
+          "verification": "fixed_git_blob_and_anchor_read; no runtime test"
+        },
+        {
+          "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+          "path": "apps/muyon/lib/platform/mcp_adapter.dart",
+          "line": 137,
+          "end_line": 226,
+          "git_blob_sha": "ba12bbe08c05e8b07986b4b456c7ef2f31fcbfc4",
+          "url": "https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/lib/platform/mcp_adapter.dart#L137",
+          "verification": "fixed_git_blob_and_anchor_read; no runtime test"
+        },
+        {
+          "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+          "path": "apps/muyon/lib/screens/mcp_servers_page.dart",
+          "line": 113,
+          "end_line": 126,
+          "git_blob_sha": "8828b952a6d2df4c799ae665fb1bf04e6d399bbb",
+          "url": "https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/lib/screens/mcp_servers_page.dart#L113",
+          "verification": "fixed_git_blob_and_anchor_read; no runtime test"
+        },
+        {
+          "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+          "path": "packages/supplier_core/lib/src/mcp_server.dart",
+          "line": 14,
+          "end_line": 165,
+          "git_blob_sha": "217a8b73cd1cd6ee6a955588b0f216a126d9326b",
+          "url": "https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/supplier_core/lib/src/mcp_server.dart#L14",
+          "verification": "fixed_git_blob_and_anchor_read; no runtime test"
+        },
+        {
+          "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+          "path": "packages/supplier_core/bin/siq_mcp.dart",
+          "line": 1,
+          "end_line": null,
+          "git_blob_sha": "43b9dacd310508226b76b529099b05f285fa00b2",
+          "url": "https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/supplier_core/bin/siq_mcp.dart#L1",
+          "verification": "fixed_git_blob_and_anchor_read; no runtime test"
+        },
+        {
+          "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+          "path": "packages/inquiry_module/lib/src/features/data_center/ai_tab.dart",
+          "line": 216,
+          "end_line": 245,
+          "git_blob_sha": "be2c78de07140ddc89529f6ddd4d4acb29d83ce3",
+          "url": "https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/inquiry_module/lib/src/features/data_center/ai_tab.dart#L216",
+          "verification": "fixed_git_blob_and_anchor_read; no runtime test"
+        }
+      ],
+      "registered_module_ids_affected": [
+        "inquiry",
+        "research",
+        "prototype"
+      ],
+      "module_mapping_kind": "responsibility mapping; host-wide rows do not claim each module invokes every path",
+      "source_packages": [
+        "inquiry_module",
+        "supplier_core"
+      ],
+      "primary_old_section_or_host_entry": "Host HTTP MCP client; separate supplier_core standalone stdio MCP service",
+      "target_page_ids": [
+        "S03.1",
+        "D01"
+      ],
+      "target_page_mapping_kind": "design correspondence, not already implemented routes",
+      "rust_target_responsibility": "HTTP客户端归Rust agent/platform的受控网络适配，工具映射进入统一registry、目的地/凭据引用、content_review与outbound账本；UI只配置和显示支持状态。桌面只读MCP服务迁为单独CLI或受控bridge，schema转换后通过有版本查询合同读取，不能偷开旧schema假兼容。若使用子进程由可信Electron main按固定清单启动并监督，Rust负责协议/数据投影；Android不默认承诺桌面CLI托管。",
+      "rust_target_status": "design only; no new Rust crate claimed",
+      "binaries": [
+        "packages/supplier_core/bin/siq_mcp.dart"
+      ],
+      "current_writer": null,
+      "writer_status": "not confirmed; branch/task claims are separate evidence",
+      "runtime_verification": "not_run"
+    }
+  ],
+  "focus_checks": {
+    "hub": {
+      "existing": "remote Hub client/config/search/detail/history/preview/publish/reconcile and explicit import, production UI calls exist; no live service tested",
+      "target": "U05/U04/U11/U14/U16/U17; D01.3+S03, W3/W5",
+      "evidence": [
+        {
+          "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+          "path": "packages/supplier_core/lib/src/hub.dart",
+          "line": 67,
+          "end_line": 73,
+          "git_blob_sha": "7e196ed0c567132bb1067dad3de3f1d8953a3a51",
+          "url": "https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/supplier_core/lib/src/hub.dart#L67",
+          "verification": "fixed_git_blob_and_anchor_read; no runtime test"
+        },
+        {
+          "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+          "path": "packages/inquiry_module/lib/src/features/hub/hub_page.dart",
+          "line": 46,
+          "end_line": 67,
+          "git_blob_sha": "01a437c18ab3473d5c5700b6a88814b25e45ea0a",
+          "url": "https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/inquiry_module/lib/src/features/hub/hub_page.dart#L46",
+          "verification": "fixed_git_blob_and_anchor_read; no runtime test"
+        },
+        {
+          "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+          "path": "packages/inquiry_module/lib/src/features/hub/hub_page.dart",
+          "line": 317,
+          "end_line": 334,
+          "git_blob_sha": "01a437c18ab3473d5c5700b6a88814b25e45ea0a",
+          "url": "https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/inquiry_module/lib/src/features/hub/hub_page.dart#L317",
+          "verification": "fixed_git_blob_and_anchor_read; no runtime test"
+        },
+        {
+          "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+          "path": "packages/inquiry_module/lib/src/features/hub/hub_publish.dart",
+          "line": 97,
+          "end_line": 120,
+          "git_blob_sha": "f49dd2ca1c0ebc6310f770aede8df48bcafecbc9",
+          "url": "https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/inquiry_module/lib/src/features/hub/hub_publish.dart#L97",
+          "verification": "fixed_git_blob_and_anchor_read; no runtime test"
+        },
+        {
+          "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+          "path": "packages/inquiry_module/lib/src/app/app_state.dart",
+          "line": 656,
+          "end_line": 691,
+          "git_blob_sha": "43f09e0c9d46fd24deb6829186ae292a73c3f675",
+          "url": "https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/inquiry_module/lib/src/app/app_state.dart#L656",
+          "verification": "fixed_git_blob_and_anchor_read; no runtime test"
+        }
+      ],
+      "unassigned": "external Hub server source/owner not in this repository tree; client migration ownership unconfirmed"
+    },
+    "device_messages_and_research_exchange": {
+      "existing": "bootstrap wires TaskCoordinator executor to ResearchTaskBridge.start, transfer onTaskEnvelope to tasks.receive; offer/accept/import/manual work/result are distinct",
+      "target": "U17+U06+U16+U20; S05.1 and T01.1/T02; preserve old exchange, no new task/approval sync promise",
+      "evidence": [
+        {
+          "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+          "path": "apps/muyon/lib/app/bootstrap.dart",
+          "line": 360,
+          "end_line": 377,
+          "git_blob_sha": "1d64427457d227047c9e56af946bde755ca7ac21",
+          "url": "https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/lib/app/bootstrap.dart#L360",
+          "verification": "fixed_git_blob_and_anchor_read; no runtime test"
+        },
+        {
+          "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+          "path": "apps/muyon/lib/app/research_task_bridge.dart",
+          "line": 15,
+          "end_line": 21,
+          "git_blob_sha": "341ed83a482d8983cfa97d52318d5a5f9a65b0fe",
+          "url": "https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/lib/app/research_task_bridge.dart#L15",
+          "verification": "fixed_git_blob_and_anchor_read; no runtime test"
+        },
+        {
+          "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+          "path": "apps/muyon/lib/app/research_task_bridge.dart",
+          "line": 145,
+          "end_line": 177,
+          "git_blob_sha": "341ed83a482d8983cfa97d52318d5a5f9a65b0fe",
+          "url": "https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/lib/app/research_task_bridge.dart#L145",
+          "verification": "fixed_git_blob_and_anchor_read; no runtime test"
+        },
+        {
+          "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+          "path": "apps/muyon/lib/screens/devices_page.dart",
+          "line": 74,
+          "end_line": 123,
+          "git_blob_sha": "a88b09f727aeced94de5b3e80454403951ff5d3c",
+          "url": "https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/lib/screens/devices_page.dart#L74",
+          "verification": "fixed_git_blob_and_anchor_read; no runtime test"
+        }
+      ],
+      "unassigned": "new-client delivery order vs temporary legacy retention remains a scoped scheduling decision"
+    },
+    "memory_existing_vs_new": {
+      "existing": [
+        "messages persisted by foundation repository",
+        "scope-limited memories and verified experiences enter context",
+        "five record types: memories/experiences/memory_tombstones/dream_runs/dream_proposals",
+        "MemoryPage manual management and Dream proposals/rollback"
+      ],
+      "new_design": [
+        "D11 automatic conversation memory extraction; first/upgrade default off",
+        "D11 cross-conversation assistant search; independent switch, default off",
+        "expectedRevision CAS, MemoryControlPolicy, lineage conflict rules and recovery-domain-external forgetting proof",
+        "S07 identity page and disclosure controls are new target design, not an existing grant issuer"
+      ],
+      "evidence": [
+        {
+          "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+          "path": "apps/muyon/lib/platform/foundation_repository.dart",
+          "line": 304,
+          "end_line": 305,
+          "git_blob_sha": "f767a69cc273d750073dab4e806e5107d7fc3adc",
+          "url": "https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/lib/platform/foundation_repository.dart#L304",
+          "verification": "fixed_git_blob_and_anchor_read; no runtime test"
+        },
+        {
+          "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+          "path": "apps/muyon/lib/platform/foundation_repository.dart",
+          "line": 357,
+          "end_line": 363,
+          "git_blob_sha": "f767a69cc273d750073dab4e806e5107d7fc3adc",
+          "url": "https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/lib/platform/foundation_repository.dart#L357",
+          "verification": "fixed_git_blob_and_anchor_read; no runtime test"
+        },
+        {
+          "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+          "path": "apps/muyon/lib/workspace/workspace_repository.dart",
+          "line": 100,
+          "end_line": 142,
+          "git_blob_sha": "0fd649df6a1d361593eea8ec92ad2b10a56f7f0e",
+          "url": "https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/lib/workspace/workspace_repository.dart#L100",
+          "verification": "fixed_git_blob_and_anchor_read; no runtime test"
+        },
+        {
+          "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+          "path": "apps/muyon/lib/assistant/agent_context.dart",
+          "line": 99,
+          "end_line": 116,
+          "git_blob_sha": "a1bb5dceb2ec59f3888a503c917c62e14a48efdb",
+          "url": "https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/lib/assistant/agent_context.dart#L99",
+          "verification": "fixed_git_blob_and_anchor_read; no runtime test"
+        },
+        {
+          "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+          "path": "apps/muyon/lib/app/bootstrap.dart",
+          "line": 360,
+          "end_line": 364,
+          "git_blob_sha": "1d64427457d227047c9e56af946bde755ca7ac21",
+          "url": "https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/lib/app/bootstrap.dart#L360",
+          "verification": "fixed_git_blob_and_anchor_read; no runtime test"
+        },
+        {
+          "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+          "path": "apps/muyon/lib/screens/platform_shell_personal.dart",
+          "line": 199,
+          "end_line": 206,
+          "git_blob_sha": "5afeecd2c240528f24ce568abb6d7174a5d3a82a",
+          "url": "https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/lib/screens/platform_shell_personal.dart#L199",
+          "verification": "fixed_git_blob_and_anchor_read; no runtime test"
+        }
+      ],
+      "target": "U21+U08+U15+U14; S06/A02/A03, D05/D06/D11; S07/D07 must name a writer",
+      "unassigned": "D11 producers/retrieval wiring and S07 profile owner not frozen"
+    },
+    "sensitivity": {
+      "existing": "five field categories and unreviewed default exist; field ontology is not a complete payload-classification proof",
+      "target": "U03/U11/U14/U18; S04/A03; v1.3.2 trusted local classification and purpose projection remain implementation contracts",
+      "evidence": [
+        {
+          "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+          "path": "packages/muyon_module_api/lib/src/ontology.dart",
+          "line": 6,
+          "end_line": 10,
+          "git_blob_sha": "f0b769eec5023d6adee2a639fcc0aaa0e8805b1c",
+          "url": "https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/muyon_module_api/lib/src/ontology.dart#L6",
+          "verification": "fixed_git_blob_and_anchor_read; no runtime test"
+        },
+        {
+          "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+          "path": "packages/muyon_module_api/lib/src/ontology.dart",
+          "line": 28,
+          "end_line": 47,
+          "git_blob_sha": "f0b769eec5023d6adee2a639fcc0aaa0e8805b1c",
+          "url": "https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/muyon_module_api/lib/src/ontology.dart#L28",
+          "verification": "fixed_git_blob_and_anchor_read; no runtime test"
+        }
+      ],
+      "decision": "readonly/everyask/Auto/FullAllow; fresh Auto. FullAllow personal/commercial allowed within current task purpose and existing rights, including new destinations; credentials stay out of business/model bodies, authentication channel separate; unreviewed must be trusted-classified",
+      "unassigned": "trusted classifier/purpose projector owner, schema and negative fixtures need D01b/M03 assignment"
+    },
+    "mcp_split": {
+      "existing_http_client": [
+        {
+          "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+          "path": "apps/muyon/lib/platform/mcp_adapter.dart",
+          "line": 15,
+          "end_line": 45,
+          "git_blob_sha": "ba12bbe08c05e8b07986b4b456c7ef2f31fcbfc4",
+          "url": "https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/lib/platform/mcp_adapter.dart#L15",
+          "verification": "fixed_git_blob_and_anchor_read; no runtime test"
+        },
+        {
+          "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+          "path": "apps/muyon/lib/screens/mcp_servers_page.dart",
+          "line": 113,
+          "end_line": 126,
+          "git_blob_sha": "8828b952a6d2df4c799ae665fb1bf04e6d399bbb",
+          "url": "https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/lib/screens/mcp_servers_page.dart#L113",
+          "verification": "fixed_git_blob_and_anchor_read; no runtime test"
+        }
+      ],
+      "existing_stdio_binary": [
+        {
+          "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+          "path": "packages/supplier_core/bin/siq_mcp.dart",
+          "line": 1,
+          "end_line": 38,
+          "git_blob_sha": "43b9dacd310508226b76b529099b05f285fa00b2",
+          "url": "https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/supplier_core/bin/siq_mcp.dart#L1",
+          "verification": "fixed_git_blob_and_anchor_read; no runtime test"
+        },
+        {
+          "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+          "path": "packages/supplier_core/lib/src/mcp_server.dart",
+          "line": 127,
+          "end_line": 150,
+          "git_blob_sha": "217a8b73cd1cd6ee6a955588b0f216a126d9326b",
+          "url": "https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/supplier_core/lib/src/mcp_server.dart#L127",
+          "verification": "fixed_git_blob_and_anchor_read; no runtime test"
+        }
+      ],
+      "target": "U23/S03.1; HTTP client and standalone read-only service have separate lifecycle/schema/capability matrices; no Android CLI hosting promise",
+      "unassigned": "desktop service lifecycle/old DB-schema adaptation/platform support owner not frozen"
+    }
+  },
+  "conflict_candidates": [
+    {
+      "id": "C01",
+      "candidate": "E01 task/e01-le04-bounded-20261012@923e556d78a98dfe8ce696a9c1244cbb3011e6df and PR56",
+      "units": [
+        "U19",
+        "U18"
+      ],
+      "paths": [
+        "apps/muyon/lib/platform/export_file_system.dart",
+        "apps/muyon/lib/platform/local_export_staging.dart"
+      ],
+      "declared_owner": "grokbot in Oct12 E01 task; historical",
+      "active_writer_proved": false,
+      "action": "read candidate and retained containment hold; coordinate writer before any shared-file implementation"
+    },
+    {
+      "id": "C02",
+      "candidate": "E02 task/e02-export-frozen-facts-20261012@285c107e3973e84d911719e6de1356fcdd9e09b4 and PR59/63",
+      "units": [
+        "U19",
+        "U11",
+        "U12"
+      ],
+      "paths": [
+        "apps/muyon/lib/platform/grants/host_effect_intent.dart",
+        "apps/muyon/lib/platform/grants/local_export_target.dart",
+        "apps/muyon/lib/platform/local_export_ledger.dart"
+      ],
+      "declared_owner": "grokbot in Oct12 E02 task; historical",
+      "active_writer_proved": false,
+      "action": "inventory frozen identity and ledger variants; no duplicate execution/ledger owner"
+    },
+    {
+      "id": "C03",
+      "candidate": "PR30; task/lib2-postreview-fix-20261012@9bf7eb109f7ff5a4fd1819107625f040bb800f82",
+      "units": [
+        "U09",
+        "U10"
+      ],
+      "paths": [
+        "packages/muyon_module_api/lib/src/ui/publication.dart"
+      ],
+      "active_writer_proved": false,
+      "action": "typed session/publication contract and source fixtures reviewed together before M03"
+    },
+    {
+      "id": "C04",
+      "candidate": "PR65/57/58, model disclosure/provenance test candidates",
+      "units": [
+        "U14",
+        "U10"
+      ],
+      "paths": [
+        "apps/muyon/test/ui_disclosure_independent_test.dart",
+        "apps/muyon/test/lib2_provenance_independent_test.dart",
+        "apps/muyon/test/cf2_independent_production_paths_test.dart"
+      ],
+      "active_writer_proved": false,
+      "action": "keep original negatives, distinguish same blob/integrated paths from new tests"
+    },
+    {
+      "id": "C05",
+      "candidate": "PR67/68/62 platform/packaging evidence",
+      "units": [
+        "U01",
+        "U02",
+        "U07",
+        "U18"
+      ],
+      "active_writer_proved": false,
+      "action": "read platform evidence; no automatic duplicate packaging/real device work"
+    },
+    {
+      "id": "C06",
+      "candidate": "legacy feat/p0-ci-llm-baseline and task/p0-j1-env-doctor README variants",
+      "units": [
+        "U01"
+      ],
+      "paths": [
+        "docs/tasks/README.md"
+      ],
+      "active_writer_proved": false,
+      "action": "historical branches far behind develop; not evidence of a current entry-switch writer"
+    }
+  ],
+  "unassigned_items": [
+    {
+      "id": "O01",
+      "scope": "all 23 unit writers and reviewer assignments",
+      "kind": "ownership_not_frozen",
+      "action": "Leader B fixes task branch, paths, dependencies and author/non-author review; this inventory does not assign them"
+    },
+    {
+      "id": "O02",
+      "scope": "remote Hub backend source/service owner",
+      "units": [
+        "U05"
+      ],
+      "kind": "external_component_not_in_repo",
+      "action": "register external service/contract responsibility; no inference from client methods"
+    },
+    {
+      "id": "O03",
+      "scope": "D11 extraction/history retrieval and S07 identity profile",
+      "units": [
+        "U21",
+        "U15",
+        "U08",
+        "U14"
+      ],
+      "kind": "new_design_cross_unit_assignment",
+      "action": "separate existing persistence/manual management from new producers and independent budget; name writer"
+    },
+    {
+      "id": "O04",
+      "scope": "standalone MCP CLI platform lifecycle and DB-schema compatibility",
+      "units": [
+        "U23"
+      ],
+      "kind": "platform_assignment_pending",
+      "action": "keep HTTP client and stdio service matrices separate"
+    },
+    {
+      "id": "O05",
+      "scope": "existing device exchange rollout/legacy retention",
+      "units": [
+        "U17"
+      ],
+      "kind": "local_schedule_pending",
+      "action": "do not drop existing messages/research exchange or add global task synchronization"
+    },
+    {
+      "id": "O06",
+      "scope": "V132-I01 and S01–S03 follow-up fixtures",
+      "kind": "fixture_tracking_pending",
+      "action": "carry into A00/M04–M05; not a request to rewrite the two design books"
+    }
+  ],
+  "completion": {
+    "units_mapped": 23,
+    "registered_modules_checked": 3,
+    "standalone_production_bin_checked": 1,
+    "legacy_inquiry_sections_mapped": 11,
+    "legacy_research_switch_cases_mapped": 6,
+    "host_destinations_mapped": 4,
+    "new_main_pages": 29,
+    "new_explicit_subpages": 9,
+    "a00_document_inventory_ready": true,
+    "a00_owner_freeze_passed": false,
+    "engineering_gate_passed": false,
+    "design_cases_run": 0,
+    "design_cases_defined": 52,
+    "conclusion": "A00 mapping/report materials only; responsibility and task ownership must still be frozen by Leader B"
+  }
+}

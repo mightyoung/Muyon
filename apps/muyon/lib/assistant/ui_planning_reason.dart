@@ -137,7 +137,9 @@ final class UiPlanningReason {
 
   static UiPlanningReason host(String code) {
     final reason = forCode(code);
-    return reason.category == _model
+    // model_no_card is the one model-category code the host itself may judge:
+    // a stream that ended without drawing any node. Callers pass only literals.
+    return reason.category == _model && code != 'model_no_card'
         ? _reasons['planner_unavailable']!
         : reason;
   }

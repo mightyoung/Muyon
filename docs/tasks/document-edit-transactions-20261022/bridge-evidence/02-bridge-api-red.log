@@ -1,0 +1,308 @@
+   Compiling muyon-core v0.1.0 (/tmp/muyon-document-durable-check.z4C3HfMK/crates/muyon-core)
+warning: method `document_publish_candidate_in_transaction` is never used
+   --> muyon-core/src/documents/candidate.rs:163:19
+    |
+ 36 | impl BusinessStore {
+    | ------------------ method in this implementation
+...
+163 |     pub(crate) fn document_publish_candidate_in_transaction(&self, tx: &Transaction<'_>, access: &DocumentAccess, candidate_id: &str) -> ...
+    |                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = note: `#[warn(dead_code)]` on by default
+
+warning: methods `historical_grant` and `document_history_access_in_transaction` are never used
+   --> muyon-core/src/documents/storage.rs:117:8
+    |
+ 88 | impl BusinessStore {
+    | ------------------ methods in this implementation
+...
+117 |     fn historical_grant(&self, current: &DocumentAccess, historical: &DocumentRef, required: &[DocumentOperation]) -> Result<()> {
+    |        ^^^^^^^^^^^^^^^^
+...
+162 |     pub(crate) fn document_history_access_in_transaction(&self, tx: &Transaction<'_>, current: &DocumentAccess, historical: &DocumentRef,...
+    |                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: `muyon-core` (lib) generated 2 warnings
+warning: unused import: `gateway::DocumentEditGateway`
+ --> muyon-core/tests/document_edit_core_bridge.rs:9:9
+  |
+9 |         gateway::DocumentEditGateway,
+  |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |
+  = note: `#[warn(unused_imports)]` on by default
+
+error[E0599]: no method named `prepare_core_candidate_trusted` found for struct `muyon_core::document_edit::edited_candidates::EditedCandidateJournal` in the current scope
+   --> muyon-core/tests/document_edit_core_bridge.rs:175:13
+    |
+175 |  let core=g.prepare_core_candidate_trusted(&b,&a).unwrap();assert_eq!(core.state,CandidateState::SealedUnvalidated);assert_eq!(core.origi...
+    |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+help: there is a method `stage_candidate_trusted` with a similar name, but with different arguments
+   --> /tmp/muyon-document-durable-check.z4C3HfMK/crates/muyon-core/src/document_edit/edited_candidates.rs:340:5
+    |
+340 | /     pub fn stage_candidate_trusted(
+341 | |         &self,
+342 | |         b: &Binding,
+343 | |         a: &DocumentAccess,
+344 | |         data: &[u8],
+345 | |     ) -> Result<EditedCandidatePreparation> {
+    | |___________________________________________^
+
+error[E0599]: no method named `prepare_core_candidate_trusted` found for struct `muyon_core::document_edit::edited_candidates::EditedCandidateJournal` in the current scope
+   --> muyon-core/tests/document_edit_core_bridge.rs:179:18
+    |
+179 |  let duplicate=g.prepare_core_candidate_trusted(&b,&a).unwrap();assert_eq!(duplicate,core);assert_eq!(count(&db,"blob_uploads"),uploads+1);
+    |                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+help: there is a method `stage_candidate_trusted` with a similar name, but with different arguments
+   --> /tmp/muyon-document-durable-check.z4C3HfMK/crates/muyon-core/src/document_edit/edited_candidates.rs:340:5
+    |
+340 | /     pub fn stage_candidate_trusted(
+341 | |         &self,
+342 | |         b: &Binding,
+343 | |         a: &DocumentAccess,
+344 | |         data: &[u8],
+345 | |     ) -> Result<EditedCandidatePreparation> {
+    | |___________________________________________^
+
+error[E0599]: no method named `prepare_core_candidate_trusted` found for struct `muyon_core::document_edit::edited_candidates::EditedCandidateJournal` in the current scope
+   --> muyon-core/tests/document_edit_core_bridge.rs:183:187
+    |
+183 | ...nal::initialize_trusted(&s).unwrap();let original=g.prepare_core_candidate_trusted(&b,&a).unwrap();drop(g);drop(s);
+    |                                                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+help: there is a method `stage_candidate_trusted` with a similar name, but with different arguments
+   --> /tmp/muyon-document-durable-check.z4C3HfMK/crates/muyon-core/src/document_edit/edited_candidates.rs:340:5
+    |
+340 | /     pub fn stage_candidate_trusted(
+341 | |         &self,
+342 | |         b: &Binding,
+343 | |         a: &DocumentAccess,
+344 | |         data: &[u8],
+345 | |     ) -> Result<EditedCandidatePreparation> {
+    | |___________________________________________^
+
+error[E0599]: no method named `lookup_core_candidate` found for struct `muyon_core::document_edit::edited_candidates::EditedCandidateJournal` in the current scope
+   --> muyon-core/tests/document_edit_core_bridge.rs:185:15
+    |
+185 |  assert_eq!(g.lookup_core_candidate(&b,&a).unwrap(),original);assert_eq!(g.prepare_core_candidate_trusted(&b,&a).unwrap(),original);asser...
+    |               ^^^^^^^^^^^^^^^^^^^^^
+    |
+help: there is a method `lookup_original` with a similar name
+    |
+185 -  assert_eq!(g.lookup_core_candidate(&b,&a).unwrap(),original);assert_eq!(g.prepare_core_candidate_trusted(&b,&a).unwrap(),original);assert_eq!(count(&db(&f),"blob_uploads"),2);
+185 +  assert_eq!(g.lookup_original(&b,&a).unwrap(),original);assert_eq!(g.prepare_core_candidate_trusted(&b,&a).unwrap(),original);assert_eq!(count(&db(&f),"blob_uploads"),2);
+    |
+
+error[E0599]: no method named `prepare_core_candidate_trusted` found for struct `muyon_core::document_edit::edited_candidates::EditedCandidateJournal` in the current scope
+   --> muyon-core/tests/document_edit_core_bridge.rs:185:76
+    |
+185 |  assert_eq!(g.lookup_core_candidate(&b,&a).unwrap(),original);assert_eq!(g.prepare_core_candidate_trusted(&b,&a).unwrap(),original);asser...
+    |                                                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+help: there is a method `stage_candidate_trusted` with a similar name, but with different arguments
+   --> /tmp/muyon-document-durable-check.z4C3HfMK/crates/muyon-core/src/document_edit/edited_candidates.rs:340:5
+    |
+340 | /     pub fn stage_candidate_trusted(
+341 | |         &self,
+342 | |         b: &Binding,
+343 | |         a: &DocumentAccess,
+344 | |         data: &[u8],
+345 | |     ) -> Result<EditedCandidatePreparation> {
+    | |___________________________________________^
+
+error[E0599]: no method named `prepare_core_candidate_trusted` found for struct `muyon_core::document_edit::edited_candidates::EditedCandidateJournal` in the current scope
+   --> muyon-core/tests/document_edit_core_bridge.rs:191:176
+    |
+191 | ... reserve failure'); END",&[]).unwrap();assert_eq!(g.prepare_core_candidate_trusted(&b,&a).unwrap_err(),ContractError::Unknown);assert_...
+    |                                                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+help: there is a method `stage_candidate_trusted` with a similar name, but with different arguments
+   --> /tmp/muyon-document-durable-check.z4C3HfMK/crates/muyon-core/src/document_edit/edited_candidates.rs:340:5
+    |
+340 | /     pub fn stage_candidate_trusted(
+341 | |         &self,
+342 | |         b: &Binding,
+343 | |         a: &DocumentAccess,
+344 | |         data: &[u8],
+345 | |     ) -> Result<EditedCandidatePreparation> {
+    | |___________________________________________^
+
+error[E0599]: no method named `lookup_core_candidate` found for struct `muyon_core::document_edit::edited_candidates::EditedCandidateJournal` in the current scope
+   --> muyon-core/tests/document_edit_core_bridge.rs:192:70
+    |
+192 |  db.exec("DROP TRIGGER fail_core_reserve",&[]).unwrap();let status=g.lookup_core_candidate(&b,&a).unwrap();assert_eq!(status.state,Candid...
+    |                                                                      ^^^^^^^^^^^^^^^^^^^^^
+    |
+help: there is a method `lookup_original` with a similar name
+    |
+192 -  db.exec("DROP TRIGGER fail_core_reserve",&[]).unwrap();let status=g.lookup_core_candidate(&b,&a).unwrap();assert_eq!(status.state,CandidateState::PreparationUnknown);assert_eq!(g.prepare_core_candidate_trusted(&b,&a).unwrap(),status);assert_eq!(count(&db,"blob_uploads"),1);
+192 +  db.exec("DROP TRIGGER fail_core_reserve",&[]).unwrap();let status=g.lookup_original(&b,&a).unwrap();assert_eq!(status.state,CandidateState::PreparationUnknown);assert_eq!(g.prepare_core_candidate_trusted(&b,&a).unwrap(),status);assert_eq!(count(&db,"blob_uploads"),1);
+    |
+
+error[E0599]: no method named `prepare_core_candidate_trusted` found for struct `muyon_core::document_edit::edited_candidates::EditedCandidateJournal` in the current scope
+   --> muyon-core/tests/document_edit_core_bridge.rs:192:181
+    |
+192 | ...te,CandidateState::PreparationUnknown);assert_eq!(g.prepare_core_candidate_trusted(&b,&a).unwrap(),status);assert_eq!(count(&db,"blob_...
+    |                                                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+help: there is a method `stage_candidate_trusted` with a similar name, but with different arguments
+   --> /tmp/muyon-document-durable-check.z4C3HfMK/crates/muyon-core/src/document_edit/edited_candidates.rs:340:5
+    |
+340 | /     pub fn stage_candidate_trusted(
+341 | |         &self,
+342 | |         b: &Binding,
+343 | |         a: &DocumentAccess,
+344 | |         data: &[u8],
+345 | |     ) -> Result<EditedCandidatePreparation> {
+    | |___________________________________________^
+
+error[E0599]: no method named `prepare_core_candidate_trusted` found for struct `muyon_core::document_edit::edited_candidates::EditedCandidateJournal` in the current scope
+   --> muyon-core/tests/document_edit_core_bridge.rs:197:208
+    |
+197 | ...hetic seal fault'); END",&[]).unwrap();assert_eq!(g.prepare_core_candidate_trusted(&b,&a).unwrap_err(),ContractError::Unknown);assert_...
+    |                                                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+help: there is a method `stage_candidate_trusted` with a similar name, but with different arguments
+   --> /tmp/muyon-document-durable-check.z4C3HfMK/crates/muyon-core/src/document_edit/edited_candidates.rs:340:5
+    |
+340 | /     pub fn stage_candidate_trusted(
+341 | |         &self,
+342 | |         b: &Binding,
+343 | |         a: &DocumentAccess,
+344 | |         data: &[u8],
+345 | |     ) -> Result<EditedCandidatePreparation> {
+    | |___________________________________________^
+
+error[E0599]: no method named `lookup_core_candidate` found for struct `muyon_core::document_edit::edited_candidates::EditedCandidateJournal` in the current scope
+   --> muyon-core/tests/document_edit_core_bridge.rs:198:67
+    |
+198 |  db.exec("DROP TRIGGER fail_core_seal",&[]).unwrap();let status=g.lookup_core_candidate(&b,&a).unwrap();assert_eq!(status.state,Candidate...
+    |                                                                   ^^^^^^^^^^^^^^^^^^^^^
+    |
+help: there is a method `lookup_original` with a similar name
+    |
+198 -  db.exec("DROP TRIGGER fail_core_seal",&[]).unwrap();let status=g.lookup_core_candidate(&b,&a).unwrap();assert_eq!(status.state,CandidateState::PreparationUnknown);assert_eq!(g.prepare_core_candidate_trusted(&b,&a).unwrap(),status);assert_eq!(count(&db,"blob_uploads"),2);assert_eq!(count(&db,"document_revisions"),1);
+198 +  db.exec("DROP TRIGGER fail_core_seal",&[]).unwrap();let status=g.lookup_original(&b,&a).unwrap();assert_eq!(status.state,CandidateState::PreparationUnknown);assert_eq!(g.prepare_core_candidate_trusted(&b,&a).unwrap(),status);assert_eq!(count(&db,"blob_uploads"),2);assert_eq!(count(&db,"document_revisions"),1);
+    |
+
+error[E0599]: no method named `prepare_core_candidate_trusted` found for struct `muyon_core::document_edit::edited_candidates::EditedCandidateJournal` in the current scope
+   --> muyon-core/tests/document_edit_core_bridge.rs:198:178
+    |
+198 | ...te,CandidateState::PreparationUnknown);assert_eq!(g.prepare_core_candidate_trusted(&b,&a).unwrap(),status);assert_eq!(count(&db,"blob_...
+    |                                                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+help: there is a method `stage_candidate_trusted` with a similar name, but with different arguments
+   --> /tmp/muyon-document-durable-check.z4C3HfMK/crates/muyon-core/src/document_edit/edited_candidates.rs:340:5
+    |
+340 | /     pub fn stage_candidate_trusted(
+341 | |         &self,
+342 | |         b: &Binding,
+343 | |         a: &DocumentAccess,
+344 | |         data: &[u8],
+345 | |     ) -> Result<EditedCandidatePreparation> {
+    | |___________________________________________^
+
+error[E0599]: no method named `prepare_core_candidate_trusted` found for struct `muyon_core::document_edit::edited_candidates::EditedCandidateJournal` in the current scope
+   --> muyon-core/tests/document_edit_core_bridge.rs:203:55
+    |
+203 |  if cancel{g.cancel_trusted(&b).unwrap();assert_eq!(g.prepare_core_candidate_trusted(&b,&a).unwrap_err(),ContractError::Cancelled);}else{...
+    |                                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+help: there is a method `stage_candidate_trusted` with a similar name, but with different arguments
+   --> /tmp/muyon-document-durable-check.z4C3HfMK/crates/muyon-core/src/document_edit/edited_candidates.rs:340:5
+    |
+340 | /     pub fn stage_candidate_trusted(
+341 | |         &self,
+342 | |         b: &Binding,
+343 | |         a: &DocumentAccess,
+344 | |         data: &[u8],
+345 | |     ) -> Result<EditedCandidatePreparation> {
+    | |___________________________________________^
+
+error[E0599]: no method named `prepare_core_candidate_trusted` found for struct `muyon_core::document_edit::edited_candidates::EditedCandidateJournal` in the current scope
+   --> muyon-core/tests/document_edit_core_bridge.rs:203:320
+    |
+203 | ...rant_id='original'; END",&[]).unwrap();assert_eq!(g.prepare_core_candidate_trusted(&b,&a).unwrap_err(),ContractError::InvalidAuthority);}
+    |                                                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+help: there is a method `stage_candidate_trusted` with a similar name, but with different arguments
+   --> /tmp/muyon-document-durable-check.z4C3HfMK/crates/muyon-core/src/document_edit/edited_candidates.rs:340:5
+    |
+340 | /     pub fn stage_candidate_trusted(
+341 | |         &self,
+342 | |         b: &Binding,
+343 | |         a: &DocumentAccess,
+344 | |         data: &[u8],
+345 | |     ) -> Result<EditedCandidatePreparation> {
+    | |___________________________________________^
+
+error[E0599]: no method named `prepare_core_candidate_trusted` found for struct `muyon_core::document_edit::edited_candidates::EditedCandidateJournal` in the current scope
+   --> muyon-core/tests/document_edit_core_bridge.rs:208:184
+    |
+208 | ...Journal::initialize_trusted(&s).unwrap();let core=g.prepare_core_candidate_trusted(&b,&a).unwrap();let db=db(&f);
+    |                                                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+help: there is a method `stage_candidate_trusted` with a similar name, but with different arguments
+   --> /tmp/muyon-document-durable-check.z4C3HfMK/crates/muyon-core/src/document_edit/edited_candidates.rs:340:5
+    |
+340 | /     pub fn stage_candidate_trusted(
+341 | |         &self,
+342 | |         b: &Binding,
+343 | |         a: &DocumentAccess,
+344 | |         data: &[u8],
+345 | |     ) -> Result<EditedCandidatePreparation> {
+    | |___________________________________________^
+
+error[E0599]: no method named `lookup_core_candidate` found for struct `muyon_core::document_edit::edited_candidates::EditedCandidateJournal` in the current scope
+   --> muyon-core/tests/document_edit_core_bridge.rs:209:402
+    |
+209 | ....to_string(),&core.candidate_id]).unwrap();assert_eq!(g.lookup_core_candidate(&b,&a).unwrap_err(),ContractError::BindingMismatch);
+    |                                                            ^^^^^^^^^^^^^^^^^^^^^
+    |
+help: there is a method `lookup_original` with a similar name
+    |
+209 -  let text=db.query("SELECT payload FROM document_candidates_v1 WHERE candidate_id=?",&[&core.candidate_id]).unwrap();let mut payload:serde_json::Value=serde_json::from_str(text[0][0].as_ref().unwrap()).unwrap();payload["operation_id"]="wrong-operation".into();db.exec("UPDATE document_candidates_v1 SET payload=? WHERE candidate_id=?",&[&payload.to_string(),&core.candidate_id]).unwrap();assert_eq!(g.lookup_core_candidate(&b,&a).unwrap_err(),ContractError::BindingMismatch);
+209 +  let text=db.query("SELECT payload FROM document_candidates_v1 WHERE candidate_id=?",&[&core.candidate_id]).unwrap();let mut payload:serde_json::Value=serde_json::from_str(text[0][0].as_ref().unwrap()).unwrap();payload["operation_id"]="wrong-operation".into();db.exec("UPDATE document_candidates_v1 SET payload=? WHERE candidate_id=?",&[&payload.to_string(),&core.candidate_id]).unwrap();assert_eq!(g.lookup_original(&b,&a).unwrap_err(),ContractError::BindingMismatch);
+    |
+
+error[E0599]: no method named `lookup_core_candidate` found for struct `muyon_core::document_edit::edited_candidates::EditedCandidateJournal` in the current scope
+   --> muyon-core/tests/document_edit_core_bridge.rs:210:312
+    |
+210 | ... WHERE intent_id='identity'",&[]).unwrap();assert_eq!(g.lookup_core_candidate(&b,&a).unwrap_err(),ContractError::StorageCorrupt);
+    |                                                            ^^^^^^^^^^^^^^^^^^^^^
+    |
+help: there is a method `lookup_original` with a similar name
+    |
+210 -  payload["operation_id"]=core.operation_id.into();db.exec("UPDATE document_candidates_v1 SET payload=? WHERE candidate_id=?",&[&payload.to_string(),&core.candidate_id]).unwrap();db.exec("UPDATE edit_candidate_core_claims SET candidate_id='wrong-candidate' WHERE intent_id='identity'",&[]).unwrap();assert_eq!(g.lookup_core_candidate(&b,&a).unwrap_err(),ContractError::StorageCorrupt);
+210 +  payload["operation_id"]=core.operation_id.into();db.exec("UPDATE document_candidates_v1 SET payload=? WHERE candidate_id=?",&[&payload.to_string(),&core.candidate_id]).unwrap();db.exec("UPDATE edit_candidate_core_claims SET candidate_id='wrong-candidate' WHERE intent_id='identity'",&[]).unwrap();assert_eq!(g.lookup_original(&b,&a).unwrap_err(),ContractError::StorageCorrupt);
+    |
+
+For more information about this error, try `rustc --explain E0599`.
+warning: `muyon-core` (test "document_edit_core_bridge") generated 1 warning
+error: could not compile `muyon-core` (test "document_edit_core_bridge") due to 16 previous errors; 1 warning emitted
+warning: build failed, waiting for other jobs to finish...
+error[E0599]: no method named `document_candidate_upload_retained` found for reference `&BusinessStore` in the current scope
+   --> muyon-core/src/bin/../blobs.rs:860:21
+    |
+860 |             if self.document_candidate_upload_retained(cell(row, 0)?)? {
+    |                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+help: there is a method `candidate_upload_is_pinned` with a similar name, but with different arguments
+   --> muyon-core/src/bin/../blobs.rs:444:5
+    |
+444 | /     pub(crate) fn candidate_upload_is_pinned(
+445 | |         &self,
+446 | |         upload_id: &str,
+447 | |         project_id: &str,
+448 | |         expected: &BlobRef,
+449 | |     ) -> Result<bool> {
+    | |_____________________^
+
+error[E0599]: no method named `document_candidate_reserves_digest` found for reference `&BusinessStore` in the current scope
+   --> muyon-core/src/bin/../blobs.rs:896:28
+    |
+896 |                 match self.document_candidate_reserves_digest(upload, digest)? {
+    |                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ method not found in `&BusinessStore`
+
+error: could not compile `muyon-core` (bin "business_worker") due to 2 previous errors

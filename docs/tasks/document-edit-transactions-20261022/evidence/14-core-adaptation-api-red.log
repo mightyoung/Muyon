@@ -1,0 +1,146 @@
+   Compiling muyon-core v0.1.0 (/workspace/document-edit-combination/crates/muyon-core)
+error[E0560]: struct `document_edit::Binding` has no field named `document`
+  --> muyon-core/tests/document_edit_transactions.rs:13:9
+   |
+13 |         document: document("project-a", 1),
+   |         ^^^^^^^^ `document_edit::Binding` does not have this field
+   |
+   = note: available fields are: `document_id`, `source_revision`, `scope`
+
+error[E0609]: no field `document` on type `&document_edit::Binding`
+  --> muyon-core/tests/document_edit_transactions.rs:22:29
+   |
+22 |         current_revision: b.document.revision().clone(),
+   |                             ^^^^^^^^ unknown field
+   |
+   = note: available fields are: `document_id`, `source_revision`, `scope`, `patch_digest`, `intent_id`, `rollback_target`
+
+error[E0308]: mismatched types
+  --> muyon-core/tests/document_edit_transactions.rs:25:25
+   |
+25 |             generation: Revision::new(1),
+   |                         ^^^^^^^^^^^^^^^^ expected `u64`, found `Revision`
+
+error[E0609]: no field `document` on type `&document_edit::Binding`
+  --> muyon-core/tests/document_edit_transactions.rs:86:30
+   |
+86 |         previous_revision: b.document.revision().clone(),
+   |                              ^^^^^^^^ unknown field
+   |
+   = note: available fields are: `document_id`, `source_revision`, `scope`, `patch_digest`, `intent_id`, `rollback_target`
+
+error[E0308]: mismatched types
+  --> muyon-core/tests/document_edit_transactions.rs:87:29
+   |
+87 |         committed_revision: Revision::new(2),
+   |                             ^^^^^^^^^^^^^^^^ expected `String`, found `Revision`
+
+error[E0609]: no field `document` on type `document_edit::Binding`
+   --> muyon-core/tests/document_edit_transactions.rs:127:7
+    |
+127 |     b.document = document("project-a", 0);
+    |       ^^^^^^^^ unknown field
+    |
+    = note: available fields are: `document_id`, `source_revision`, `scope`, `patch_digest`, `intent_id`, `rollback_target`
+
+error[E0609]: no field `document` on type `document_edit::Binding`
+   --> muyon-core/tests/document_edit_transactions.rs:147:15
+    |
+147 |     f.binding.document = document("project-b", 1);
+    |               ^^^^^^^^ unknown field
+    |
+    = note: available fields are: `document_id`, `source_revision`, `scope`, `patch_digest`, `intent_id`, `rollback_target`
+
+error[E0308]: mismatched types
+   --> muyon-core/tests/document_edit_transactions.rs:167:48
+    |
+167 |     f.authority.as_mut().unwrap().generation = Revision::new(2);
+    |     ----------------------------------------   ^^^^^^^^^^^^^^^^ expected `u64`, found `Revision`
+    |     |
+    |     expected due to the type of this binding
+
+error[E0308]: mismatched types
+   --> muyon-core/tests/document_edit_transactions.rs:266:26
+    |
+266 |     f.current_revision = Revision::new(3);
+    |     ------------------   ^^^^^^^^^^^^^^^^ expected `String`, found `Revision`
+    |     |
+    |     expected due to the type of this binding
+
+error[E0560]: struct `document_edit::Binding` has no field named `document`
+   --> muyon-core/tests/document_edit_transactions.rs:353:9
+    |
+353 |         document: document("project-a", 2),
+    |         ^^^^^^^^ `document_edit::Binding` does not have this field
+    |
+    = note: available fields are: `document_id`, `source_revision`, `scope`
+
+error[E0308]: mismatched types
+   --> muyon-core/tests/document_edit_transactions.rs:356:31
+    |
+356 |         rollback_target: Some(Revision::new(1)),
+    |                          ---- ^^^^^^^^^^^^^^^^ expected `String`, found `Revision`
+    |                          |
+    |                          arguments to this enum variant are incorrect
+    |
+help: the type constructed contains `Revision` due to the type of the argument passed
+   --> muyon-core/tests/document_edit_transactions.rs:356:26
+    |
+356 |         rollback_target: Some(Revision::new(1)),
+    |                          ^^^^^----------------^
+    |                               |
+    |                               this argument influences the type of `Some`
+note: tuple variant defined here
+   --> /rustc/1159e78c4747b02ef996e55082b704c09b970588/library/core/src/option.rs:601:5
+
+error[E0308]: mismatched types
+   --> muyon-core/tests/document_edit_transactions.rs:377:19
+    |
+377 |         revision: Revision::new(2),
+    |                   ^^^^^^^^^^^^^^^^ expected `String`, found `Revision`
+
+error[E0308]: mismatched types
+   --> muyon-core/tests/document_edit_transactions.rs:388:22
+    |
+388 |     wrong.revision = Revision::new(1);
+    |     --------------   ^^^^^^^^^^^^^^^^ expected `String`, found `Revision`
+    |     |
+    |     expected due to the type of this binding
+
+error[E0308]: mismatched types
+   --> muyon-core/tests/document_edit_transactions.rs:455:52
+    |
+455 |     fresh.authority.as_mut().unwrap().generation = Revision::new(2);
+    |     --------------------------------------------   ^^^^^^^^^^^^^^^^ expected `u64`, found `Revision`
+    |     |
+    |     expected due to the type of this binding
+
+error[E0308]: mismatched types
+   --> muyon-core/tests/document_edit_transactions.rs:457:30
+    |
+457 |     fresh.current_revision = Revision::new(2);
+    |     ----------------------   ^^^^^^^^^^^^^^^^ expected `String`, found `Revision`
+    |     |
+    |     expected due to the type of this binding
+
+error[E0308]: mismatched types
+   --> muyon-core/tests/document_edit_transactions.rs:543:56
+    |
+543 |         fresh.authority.as_mut().unwrap().generation = Revision::new(2);
+    |         --------------------------------------------   ^^^^^^^^^^^^^^^^ expected `u64`, found `Revision`
+    |         |
+    |         expected due to the type of this binding
+
+Some errors have detailed explanations: E0308, E0560, E0609.
+For more information about an error, try `rustc --explain E0308`.
+error: could not compile `muyon-core` (test "document_edit_transactions") due to 16 previous errors
+warning: build failed, waiting for other jobs to finish...
+error: linking with `cc` failed: exit status: 1
+  |
+  = note:  "cc" "-m64" "/tmp/rustckLY4sV/symbols.o" "<17 object files omitted>" "-Wl,--as-needed" "-Wl,-Bdynamic" "-lsqlite3" "-Wl,-Bstatic" "/workspace/document-edit-combination/crates/target/debug/deps/{libserde_json-53424405649d1c77,libmemchr-8fad5e910abe8671,libitoa-830b883e8ab2cc8c,libzmij-1d80abfed3e8e90f,libserde-ac6a56216a03fbcc,libserde_core-a0a68bc6c5fdbf4a,libunicode_normalization-f357d004cb420cbb,libtinyvec-0354a9180c19fc8c,libsha2-d34ec51b56c91cca,libcpufeatures-a1f25528876b16d6,libcfg_if-1ce7accba6f7000b,libdigest-5b6fb2965363e697,libconst_oid-4bca5ffae5cecfa6,libcrypto_common-ef05a5ae6d62299b,libblock_buffer-8f2ce66bdc00c1c8,libhybrid_array-d2c1a95348307a57,libtypenum-49738fa857f82d83}.rlib" "<sysroot>/lib/rustlib/x86_64-unknown-linux-gnu/lib/{libstd-*,libpanic_unwind-*,libobject-*,libmemchr-*,libaddr2line-*,libgimli-*,librustc_demangle-*,libstd_detect-*,libhashbrown-*,librustc_std_workspace_alloc-*,libminiz_oxide-*,libadler2-*,libunwind-*,libcfg_if-*,liblibc-*,librustc_std_workspace_core-*,liballoc-*,libcore-*,libcompiler_builtins-*}.rlib" "-Wl,-Bdynamic" "-lgcc_s" "-lutil" "-lrt" "-lpthread" "-lm" "-ldl" "-lc" "-L" "/tmp/rustckLY4sV/raw-dylibs" "-B<sysroot>/lib/rustlib/x86_64-unknown-linux-gnu/bin/gcc-ld" "-fuse-ld=lld" "-Wl,--eh-frame-hdr" "-Wl,-z,noexecstack" "-L" "<sysroot>/lib/rustlib/x86_64-unknown-linux-gnu/lib" "-o" "/workspace/document-edit-combination/crates/target/debug/deps/business_worker-17f66e97f27d4617" "-Wl,--gc-sections" "-pie" "-Wl,-z,relro,-z,now" "-Wl,--strip-debug" "-nodefaultlibs"
+  = note: some arguments are omitted. use `--verbose` to show all linker arguments
+  = note: rust-lld: error: unable to find library -lsqlite3
+          collect2: error: ld returned 1 exit status
+          
+
+error: could not compile `muyon-core` (bin "business_worker") due to 1 previous error

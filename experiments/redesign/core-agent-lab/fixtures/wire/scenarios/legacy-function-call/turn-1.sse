@@ -1,0 +1,6 @@
+data: {"choices":[{"index":0,"delta":{"function_call":{"name":"fixture__record","arguments":"{\"value\":\"wire-value\"}"}}}]}
+
+data: {"choices":[{"index":0,"delta":{},"finish_reason":"stop"}]}
+
+data: [DONE]
+

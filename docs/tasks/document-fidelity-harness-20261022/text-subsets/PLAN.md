@@ -1,0 +1,13 @@
+# Short source slices: target preview and narrow text subsets
+
+Base77a000bcb59dd5de3e40887f03fb612622c09e9e. Same task branch and tools/document_fidelity ownership; no Rust/Android edits. User now requires hidden row/column targets rejected, superseding previous visibility-only ruling. Real engine runtime stays unconditionally HOLD; no third-party imports/execution, sandbox retry, installation or configuration changes.
+
+- [x] Slice1 TDD XLSX preview sheet/row/column hidden, effective protection/merge, old/new lexical value; hidden/protected/merged/ambiguous defaults unsupported. No numeric5.0→5 equivalence relaxation. Existing v1 numeric request remains syntactically compatible, preview gate tightens policy.
+- [x] Slice2 explicit schema2 text requests: common identity/source envelope retained, operations replace_docx_run_text or replace_pptx_shape_text; v1 text rejected, v1 numeric unchanged. Original simple DOCX/PPTX fixtures, strict namespace/layout/feature screening first, stable source-revision-bound index/shape locator+expected text. Preview returns unsupported before executor for complex features. All non-target parts byte invariant; exactly one target text node changes in otherwise identical XML tree and document-level special-node positions. No style/structure/unknown-part loss allowed.
+- [x] Slice3 fixed per-format inert launch specs and dormant worker sources, common fake-only runtime dispatch and per-format independent oracle. Safe file extension/format cross-check maintained. Fake executor candidates not real round-trip. Real run always HOLD even forged grants. Update host protocol version/migration/remaining4-format list, all test/source logs, independent review/fix pass, commit/push task branch.
+
+Ledger ruling: text subsets reject whole document/slide structures outside a small allowlist rather than trying to normalize complex layouts. Cost: many valid but complex documents unsupported, no fidelity promise. Existing rich DOCX fixture should be unsupported (comments/bookmarks/header); new simple fixture demonstrates only narrow source subset.
+
+Independent review of82f63055:3 P2 boundary gaps; one TDD fix pass adds duplicate format/row rejection, all-text/style leaf grammar and complete presentation-size grammar. RED3 methods/6 failures→GREEN60 full tests; original independent probes rerun by author now reject all3 before dispatch. No second independent60-test claim. No deferred minor findings.
+
+Final code b3574ae3d4e69a9e60e9c4c6fb34388f11451251; final-author-tests60/60,8 corpus/base invariants. Only source/fake scope complete; publication verified separately by final command. No deferred minors.

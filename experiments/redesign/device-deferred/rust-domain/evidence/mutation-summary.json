@@ -1,0 +1,18 @@
+{
+  "baseline_source_sha256": "29df28d6cdc34dcefc66586f80c53131700343d768ed665ae14c835189d2b759",
+  "restored": true,
+  "mutants": [
+    {
+      "mutant": "remove-raw-limit",
+      "target_assertion": "raw_limit_before_trim",
+      "exit": 101,
+      "detected": true
+    },
+    {
+      "mutant": "xml-after-trim",
+      "target_assertion": "xml_before_trim",
+      "exit": 101,
+      "detected": true
+    }
+  ]
+}

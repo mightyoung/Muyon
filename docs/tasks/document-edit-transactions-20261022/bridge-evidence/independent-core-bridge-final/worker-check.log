@@ -1,0 +1,34 @@
+warning: method `document_publish_candidate_in_transaction` is never used
+   --> muyon-core/src/documents/candidate.rs:297:19
+    |
+ 62 | impl BusinessStore {
+    | ------------------ method in this implementation
+...
+297 |     pub(crate) fn document_publish_candidate_in_transaction(
+    |                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = note: `#[warn(dead_code)]` on by default
+
+warning: methods `historical_grant` and `document_history_access_in_transaction` are never used
+   --> muyon-core/src/documents/storage.rs:138:8
+    |
+ 94 | impl BusinessStore {
+    | ------------------ methods in this implementation
+...
+138 |     fn historical_grant(
+    |        ^^^^^^^^^^^^^^^^
+...
+212 |     pub(crate) fn document_history_access_in_transaction(
+    |                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: `muyon-core` (lib) generated 2 warnings
+warning: unused imports: `CandidateState` and `CandidateStatus`
+  --> muyon-core/src/bin/../documents/mod.rs:19:21
+   |
+19 | pub use candidate::{CandidateState, CandidateStatus};
+   |                     ^^^^^^^^^^^^^^  ^^^^^^^^^^^^^^^
+   |
+   = note: `#[warn(unused_imports)]` on by default
+
+warning: `muyon-core` (bin "business_worker") generated 1 warning (run `cargo fix --bin "business_worker"` to apply 1 suggestion)
+    Finished `dev` profile [unoptimized] target(s) in 0.02s

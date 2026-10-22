@@ -1,0 +1,3 @@
+destructor_enter unsubscribe pause
+destructor_return
+H1_PASS unsubscribe pause ['reentrant_rejected']

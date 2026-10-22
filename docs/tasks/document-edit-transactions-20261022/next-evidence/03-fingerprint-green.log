@@ -1,0 +1,10 @@
+   Compiling muyon-core v0.1.0 (/tmp/muyon-document-durable-check.HuqkpAc8/crates/muyon-core)
+    Finished `test` profile [unoptimized] target(s) in 5.36s
+     Running tests/document_edit_schema2.rs (/workspace/document-edit-combination/crates/target/debug/deps/document_edit_schema2-9eaa099629d29e40)
+
+running 2 tests
+test expanded_tree_matches_python_ascii_json_bytes_and_hashes ... ok
+test duplicate_attributes_limits_and_tree_identity_fail_closed ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+

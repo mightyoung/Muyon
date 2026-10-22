@@ -1,0 +1,7 @@
+{
+  "action": "GET repos/mightyoung/Muyon/actions/jobs/117874458587/logs",
+  "attempts": 1,
+  "exit_code": 1,
+  "error": "Get \"[storage-redirect-redacted]\": Forbidden\n",
+  "retry_or_alternate_route": false
+}

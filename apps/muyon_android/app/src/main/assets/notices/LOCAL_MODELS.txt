@@ -1,0 +1,34 @@
+Muyon local research models
+
+PP-OCRv5 mobile detector and recognizer: PaddlePaddle, Apache-2.0.
+Fixed official revisions: detector e6f4fa85f00e168c862bc462aebca69eef9b3d3d;
+recognizer ed152b8b495f84de93cda5709d768548a9127622.
+https://huggingface.co/PaddlePaddle/PP-OCRv5_mobile_det_onnx
+https://huggingface.co/PaddlePaddle/PP-OCRv5_mobile_rec_onnx
+
+Embedding weight: ggml-org/embeddinggemma-2-GGUF, fixed revision
+58faf90940886df2d62be555c8765d00dac362c5, embeddinggemma-2-Q8_0.gguf,
+309855456 bytes, SHA256
+2188ac1deca4b77dffefd603c2776a9d76d9d74ec01841392982ebb840b09135.
+https://huggingface.co/ggml-org/embeddinggemma-2-GGUF/tree/58faf90940886df2d62be555c8765d00dac362c5
+The pinned GGUF model card declares google/embeddinggemma-2 as the base,
+Apache-2.0, and automatic ggml-org/convert conversion. The actual converter
+revision and source-model revision used for that conversion are not recorded.
+Google model card separately retained at revision
+914f7f89142e33e77833254d9c9b90c3cef7303b declares Apache-2.0:
+https://huggingface.co/google/embeddinggemma-2/tree/914f7f89142e33e77833254d9c9b90c3cef7303b
+Google license reference: https://ai.google.dev/gemma/apache_2
+Pinned model cards, standard Apache-2.0 text and complete artifact provenance
+are retained separately in APK assets/notices, including REVIEWED_MODEL_PROVENANCE.txt.
+The earlier user-supplied local GGUF, SHA256
+6f1bd4ac6c5df7444f9cca7ca36cafe6cfa34cd6f49fefb1e0b4be8143aed8bc,
+is a different artifact, remains untouched, and is not claimed to share this provenance.
+Only text inference is included; no multimodal encoder is bundled.
+
+Runtime: llama.cpp b11763, MIT, commit
+a01ce9ffc64cf370439d6f861a534a65100133ae.
+Runtime: Microsoft ONNX Runtime Android 1.23.0, MIT.
+Full runtime and Apache license texts accompany this file in APK assets/notices.
+Model assets are embedded in this APK and verified before private installation.
+Inference and the derived research index are local. No model download, network
+fallback, telemetry initialization or remote content disclosure is added here.

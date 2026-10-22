@@ -1,0 +1,12 @@
+...ANDROID_BRIDGE_APK_NATIVE_MISMATCH {"path": "lib/x86_64/libmuyon_android_contract_bridge.so", "expected_sha256": "0000000000000000000000000000000000000000000000000000000000000000", "actual_sha256": "068a9920c39c6a4dd2354143843d2fcac5accd55e86018fead76da3a09f1b5f4", "compression": 0}
+ANDROID_BRIDGE_APK_NATIVE_MISMATCH {"path": "lib/arm64-v8a/libandroidx.graphics.path.so", "expected_sha256": "d246edfab65c44792f3d3114bc32e7ff6b453446497678371afc38c212b0afb4", "actual_sha256": "2ad9939df14dc9511d34279fc02a111e1601273b9eb84d9867ef0dea6d682ab2", "compression": 0}
+.....................behavior.log: exit=101 timeout=False forced_cleanup=False
+setup.log: exit=1 timeout=False forced_cleanup=False
+
+.timeout.log: exit=124 timeout=True forced_cleanup=True
+
+..............................................
+----------------------------------------------------------------------
+Ran 71 tests in 1.277s
+
+OK

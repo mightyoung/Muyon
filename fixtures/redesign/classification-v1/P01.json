@@ -1,0 +1,318 @@
+{
+  "artifact_kind": "fixture_semantic_record_not_product_DTO",
+  "case_id": "V131-T02/P01",
+  "parent_case": "V131-T02",
+  "status": "draft",
+  "execution_status": "not_run",
+  "catalog_group": "P",
+  "title": "工具schema范围与自由文本",
+  "source_catalog_section": "5.1",
+  "rule_ids": [
+    "CLS-PROVIDER-001",
+    "CLS-DECL-001",
+    "CLS-CREDENTIAL-001",
+    "CLS-PURPOSE-001"
+  ],
+  "all_rules_status": "proposed_unfrozen",
+  "variants": [
+    {
+      "variant_id": "registered_field",
+      "input": {
+        "clean_text": "合成普通内容",
+        "opaque_secret_refs": [],
+        "mutations": [],
+        "provider_claimed_sensitivity": "none",
+        "provider_schema": "provider.synthetic/schema-v1"
+      },
+      "source_inheritance": {
+        "unit_ref": "unit.synthetic.1",
+        "source_kind": "tool_result",
+        "trusted_event_ref": "host.synthetic.event.1",
+        "source_version": "source-v1",
+        "claimed_source_kind": null,
+        "inherited_sensitivity_units": [],
+        "inherited_purpose_restrictions": [],
+        "source_rights": "valid_assumption",
+        "taint": "none_assumption",
+        "verification": "not_a_classification_or_authorization_fact",
+        "field_path": "registered.synthetic.label",
+        "trusted_field_base": "none",
+        "field_declaration_version": "product-01e56cc2d729dab70e1b1def05c3aa93b28f421a"
+      },
+      "current_version": {
+        "input": "content-v1",
+        "normalized": "content-v1-normalized",
+        "checked": "content-v1-normalized",
+        "final": "content-v1-normalized",
+        "normalization": "fixture-NFC-example; production Unicode/trim equivalence not frozen",
+        "evidence_current": true
+      },
+      "purpose": {
+        "current": "model_request",
+        "task_ref": "task.synthetic.1",
+        "scope_ref": "scope.synthetic.1",
+        "required_units": [
+          "unit.synthetic.1"
+        ],
+        "partial_result_allowed": false,
+        "actual_range": [
+          "unit.synthetic.1"
+        ]
+      },
+      "rule_coverage": [
+        {
+          "rule_id": "CLS-PROVIDER-001",
+          "status": "proposed_unfrozen",
+          "synthetic_version": "fixture-rule-v1-not-registered",
+          "assumed_current_purpose_coverage": "complete",
+          "assumed_covered_units": [
+            "unit.synthetic.1"
+          ]
+        },
+        {
+          "rule_id": "CLS-DECL-001",
+          "status": "proposed_unfrozen",
+          "synthetic_version": "fixture-rule-v1-not-registered",
+          "assumed_current_purpose_coverage": "complete",
+          "assumed_covered_units": [
+            "unit.synthetic.1"
+          ]
+        },
+        {
+          "rule_id": "CLS-CREDENTIAL-001",
+          "status": "proposed_unfrozen",
+          "synthetic_version": "fixture-rule-v1-not-registered",
+          "assumed_current_purpose_coverage": "complete",
+          "assumed_covered_units": [
+            "unit.synthetic.1"
+          ]
+        },
+        {
+          "rule_id": "CLS-PURPOSE-001",
+          "status": "proposed_unfrozen",
+          "synthetic_version": "fixture-rule-v1-not-registered",
+          "assumed_current_purpose_coverage": "complete",
+          "assumed_covered_units": [
+            "unit.synthetic.1"
+          ]
+        }
+      ],
+      "actual_value_check": {
+        "role": "host_check_assumption_not_classifier_result",
+        "target_ref": "content-v1-normalized",
+        "target_is_actual_new_value": true,
+        "state": "complete_assumption",
+        "signal": "none_assumption",
+        "rule_id": "CLS-CREDENTIAL-001",
+        "rule_status": "proposed_unfrozen",
+        "secret_plaintext_in_artifact": false
+      },
+      "mode_facts": {
+        "mode": "FullAllow",
+        "mode_grant": "valid_finite_synthetic_assumption",
+        "grant_created_at": "2026-10-14T00:00:00Z",
+        "expires_at": "2026-10-14T00:10:00Z",
+        "evaluated_at": "2026-10-14T00:01:00Z",
+        "fixture_expiry_is_product_default": false,
+        "auto_risk_rule": "unfrozen_not_required_by_FullAllow",
+        "risk": "high_advice_assumption",
+        "new_endpoint": true,
+        "extra_risk_confirmation_is_required": false
+      },
+      "execution_prerequisites": {
+        "scope": "valid_assumption",
+        "read_right": "valid_assumption",
+        "write_right": "valid_assumption",
+        "identity": "valid_assumption",
+        "tls": "valid_assumption_if_transport",
+        "capability": "valid_assumption",
+        "plan_revision": "valid_assumption",
+        "cas": "valid_assumption",
+        "business_validity": "valid_assumption",
+        "ledger": "valid_assumption",
+        "capability_hold": "absent_assumption"
+      },
+      "expected": {
+        "classification": {
+          "unit_sensitivity": "none",
+          "attempt_result": "classified_expected",
+          "terminal": true,
+          "no_infinite_wait": true
+        },
+        "action_result": "eligible_under_fixture_assumptions_not_executed",
+        "local_body_allowed": true,
+        "model_body_allowed": true,
+        "business_outbound_allowed": true,
+        "extra_risk_confirmations": 0,
+        "real_model_requests": 0,
+        "real_external_sends": 0,
+        "database_changes": "not_observed_not_run",
+        "receipt": "not_observed_not_run",
+        "runtime_payload": "not_captured_not_run",
+        "safe_observation": "only minimal permitted metadata; no secret body/log copies",
+        "body_allowance_scope": "current scenario and stated purpose only; not a global local-write ban or outbound grant",
+        "disallowed_secret_copies": [
+          "model body",
+          "business body",
+          "logs",
+          "diagnostics",
+          "notifications"
+        ]
+      }
+    },
+    {
+      "variant_id": "unregistered_free_text",
+      "input": {
+        "clean_text": "合成普通内容",
+        "opaque_secret_refs": [],
+        "mutations": [],
+        "provider_claimed_sensitivity": "none",
+        "provider_schema": "provider.synthetic/schema-v1"
+      },
+      "source_inheritance": {
+        "unit_ref": "unit.synthetic.1",
+        "source_kind": "tool_result",
+        "trusted_event_ref": "host.synthetic.event.1",
+        "source_version": "source-v1",
+        "claimed_source_kind": null,
+        "inherited_sensitivity_units": [],
+        "inherited_purpose_restrictions": [],
+        "source_rights": "valid_assumption",
+        "taint": "none_assumption",
+        "verification": "not_a_classification_or_authorization_fact",
+        "field_path": "extra_free_text",
+        "trusted_field_base": null,
+        "field_declaration_version": "product-01e56cc2d729dab70e1b1def05c3aa93b28f421a"
+      },
+      "current_version": {
+        "input": "content-v1",
+        "normalized": "content-v1-normalized",
+        "checked": "content-v1-normalized",
+        "final": "content-v1-normalized",
+        "normalization": "fixture-NFC-example; production Unicode/trim equivalence not frozen",
+        "evidence_current": true
+      },
+      "purpose": {
+        "current": "model_request",
+        "task_ref": "task.synthetic.1",
+        "scope_ref": "scope.synthetic.1",
+        "required_units": [
+          "unit.synthetic.1"
+        ],
+        "partial_result_allowed": false,
+        "actual_range": [
+          "unit.synthetic.1"
+        ]
+      },
+      "rule_coverage": [
+        {
+          "rule_id": "CLS-PROVIDER-001",
+          "status": "proposed_unfrozen",
+          "synthetic_version": "fixture-rule-v1-not-registered",
+          "assumed_current_purpose_coverage": "none",
+          "assumed_covered_units": []
+        },
+        {
+          "rule_id": "CLS-DECL-001",
+          "status": "proposed_unfrozen",
+          "synthetic_version": "fixture-rule-v1-not-registered",
+          "assumed_current_purpose_coverage": "complete",
+          "assumed_covered_units": [
+            "unit.synthetic.1"
+          ]
+        },
+        {
+          "rule_id": "CLS-CREDENTIAL-001",
+          "status": "proposed_unfrozen",
+          "synthetic_version": "fixture-rule-v1-not-registered",
+          "assumed_current_purpose_coverage": "complete",
+          "assumed_covered_units": [
+            "unit.synthetic.1"
+          ]
+        },
+        {
+          "rule_id": "CLS-PURPOSE-001",
+          "status": "proposed_unfrozen",
+          "synthetic_version": "fixture-rule-v1-not-registered",
+          "assumed_current_purpose_coverage": "complete",
+          "assumed_covered_units": [
+            "unit.synthetic.1"
+          ]
+        }
+      ],
+      "actual_value_check": {
+        "role": "host_check_assumption_not_classifier_result",
+        "target_ref": "content-v1-normalized",
+        "target_is_actual_new_value": true,
+        "state": "complete_assumption",
+        "signal": "none_assumption",
+        "rule_id": "CLS-CREDENTIAL-001",
+        "rule_status": "proposed_unfrozen",
+        "secret_plaintext_in_artifact": false
+      },
+      "mode_facts": {
+        "mode": "FullAllow",
+        "mode_grant": "valid_finite_synthetic_assumption",
+        "grant_created_at": "2026-10-14T00:00:00Z",
+        "expires_at": "2026-10-14T00:10:00Z",
+        "evaluated_at": "2026-10-14T00:01:00Z",
+        "fixture_expiry_is_product_default": false,
+        "auto_risk_rule": "unfrozen_not_required_by_FullAllow",
+        "risk": "high_advice_assumption",
+        "new_endpoint": true,
+        "extra_risk_confirmation_is_required": false
+      },
+      "execution_prerequisites": {
+        "scope": "valid_assumption",
+        "read_right": "valid_assumption",
+        "write_right": "valid_assumption",
+        "identity": "valid_assumption",
+        "tls": "valid_assumption_if_transport",
+        "capability": "valid_assumption",
+        "plan_revision": "valid_assumption",
+        "cas": "valid_assumption",
+        "business_validity": "valid_assumption",
+        "ledger": "valid_assumption",
+        "capability_hold": "absent_assumption"
+      },
+      "expected": {
+        "classification": {
+          "unit_sensitivity": "unreviewed",
+          "attempt_result": "no_coverage_expected",
+          "terminal": true,
+          "no_infinite_wait": true
+        },
+        "action_result": "blocked_unreviewed_outbound",
+        "local_body_allowed": false,
+        "model_body_allowed": false,
+        "business_outbound_allowed": false,
+        "extra_risk_confirmations": 0,
+        "real_model_requests": 0,
+        "real_external_sends": 0,
+        "database_changes": "not_observed_not_run",
+        "receipt": "not_observed_not_run",
+        "runtime_payload": "not_captured_not_run",
+        "safe_observation": "only minimal permitted metadata; no secret body/log copies",
+        "expected_new_effects": 0,
+        "body_allowance_scope": "current scenario and stated purpose only; not a global local-write ban or outbound grant",
+        "disallowed_secret_copies": [
+          "model body",
+          "business body",
+          "logs",
+          "diagnostics",
+          "notifications"
+        ]
+      }
+    }
+  ],
+  "notes": "提供方自报none不构成宿主规则；已注册只是假覆盖前提。",
+  "evidence_required_not_yet_available": [
+    "real implementation SHA and command",
+    "host current-purpose ValueCheck and coverage evidence",
+    "source/permission/version evidence",
+    "final model/tool payload capture where applicable",
+    "authoritative receipt and database diff where applicable",
+    "independent review"
+  ],
+  "runtime_acceptance_claim": false
+}

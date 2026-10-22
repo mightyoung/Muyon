@@ -1,0 +1,3895 @@
+{
+  "fixture_format": "d03a-recovery-minimal-test-inputs-v1",
+  "format_scope": "declarative offline test facts/stimuli/expected observations; not product DTO, protocol or M03 schema",
+  "product_source_sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+  "design_source_sha": "58fe9c62612d74a973614c41677e62a54332e6d6",
+  "contract_source_sha": "40f3cddb6e62baa2374bde288120d2385cb14c3f",
+  "worktree_base_sha": "bc5b2c37a98bfa417c0f35f5383b76dfb03be85a",
+  "execution_status": "not_run",
+  "actual_runtime_evidence": null,
+  "golden": null,
+  "scope": "supplier-name read/write minimal recovery semantics; no runtime implementation",
+  "trusted_fixture_evidence_notice": "trusted_issuer/evidence_valid/permission refs are synthetic test injection requirements, never production authority proofs or renderer-approved booleans",
+  "placeholder_notice": "all IDs, digests, policies, revisions and bodies are metadata placeholders; body plaintext is never materialized; no real credentials or user data",
+  "seq_notice": "seq strings denote authorized projection stream order only; no original audit seq or hidden event count is provided or inferable as product fact",
+  "type_notice": "field names here are test facts and observations; enum labels, proof types, digest domains, wire mappings and error codes await M03 single source",
+  "all_expected_are_proposed_semantics_not_observed_goldens": true,
+  "primary_acceptance_case_count_changed": false,
+  "A00_classification_cases_execution": "not_run",
+  "source_references": {
+    "design-recovery": {
+      "commit_sha": "58fe9c62612d74a973614c41677e62a54332e6d6",
+      "path": "docs/design/redesign-v1.3.2-20261014/Muyon-Redesign-Plan-v1.3.2-2026-10-14.md",
+      "section": "5 recovery; D03a; M12"
+    },
+    "handbook-recovery": {
+      "commit_sha": "58fe9c62612d74a973614c41677e62a54332e6d6",
+      "path": "docs/design/redesign-v1.3.2-20261014/Muyon-Page-Design-Handbook-v1.3.2-2026-10-14.md",
+      "section": "public recovery; PendingInput; T02"
+    },
+    "contract-group-1": {
+      "commit_sha": "40f3cddb6e62baa2374bde288120d2385cb14c3f",
+      "path": "docs/contracts/redesign-v1.3.2/recovery-minimal-contract.md",
+      "section": "8",
+      "fixture_group": "D03A-01"
+    },
+    "contract-group-2": {
+      "commit_sha": "40f3cddb6e62baa2374bde288120d2385cb14c3f",
+      "path": "docs/contracts/redesign-v1.3.2/recovery-minimal-contract.md",
+      "section": "8",
+      "fixture_group": "D03A-02"
+    },
+    "contract-group-3": {
+      "commit_sha": "40f3cddb6e62baa2374bde288120d2385cb14c3f",
+      "path": "docs/contracts/redesign-v1.3.2/recovery-minimal-contract.md",
+      "section": "8",
+      "fixture_group": "D03A-03"
+    },
+    "contract-group-4": {
+      "commit_sha": "40f3cddb6e62baa2374bde288120d2385cb14c3f",
+      "path": "docs/contracts/redesign-v1.3.2/recovery-minimal-contract.md",
+      "section": "8",
+      "fixture_group": "D03A-04"
+    },
+    "contract-group-5": {
+      "commit_sha": "40f3cddb6e62baa2374bde288120d2385cb14c3f",
+      "path": "docs/contracts/redesign-v1.3.2/recovery-minimal-contract.md",
+      "section": "8",
+      "fixture_group": "D03A-05"
+    },
+    "contract-group-6": {
+      "commit_sha": "40f3cddb6e62baa2374bde288120d2385cb14c3f",
+      "path": "docs/contracts/redesign-v1.3.2/recovery-minimal-contract.md",
+      "section": "8",
+      "fixture_group": "D03A-06"
+    },
+    "contract-group-7": {
+      "commit_sha": "40f3cddb6e62baa2374bde288120d2385cb14c3f",
+      "path": "docs/contracts/redesign-v1.3.2/recovery-minimal-contract.md",
+      "section": "8",
+      "fixture_group": "D03A-07"
+    },
+    "contract-group-8": {
+      "commit_sha": "40f3cddb6e62baa2374bde288120d2385cb14c3f",
+      "path": "docs/contracts/redesign-v1.3.2/recovery-minimal-contract.md",
+      "section": "8",
+      "fixture_group": "D03A-08"
+    },
+    "contract-group-9": {
+      "commit_sha": "40f3cddb6e62baa2374bde288120d2385cb14c3f",
+      "path": "docs/contracts/redesign-v1.3.2/recovery-minimal-contract.md",
+      "section": "8",
+      "fixture_group": "D03A-09"
+    },
+    "contract-group-10": {
+      "commit_sha": "40f3cddb6e62baa2374bde288120d2385cb14c3f",
+      "path": "docs/contracts/redesign-v1.3.2/recovery-minimal-contract.md",
+      "section": "8",
+      "fixture_group": "D03A-10"
+    },
+    "contract-group-11": {
+      "commit_sha": "40f3cddb6e62baa2374bde288120d2385cb14c3f",
+      "path": "docs/contracts/redesign-v1.3.2/recovery-minimal-contract.md",
+      "section": "8",
+      "fixture_group": "D03A-11"
+    },
+    "contract-group-12": {
+      "commit_sha": "40f3cddb6e62baa2374bde288120d2385cb14c3f",
+      "path": "docs/contracts/redesign-v1.3.2/recovery-minimal-contract.md",
+      "section": "8",
+      "fixture_group": "D03A-12"
+    },
+    "contract-group-13": {
+      "commit_sha": "40f3cddb6e62baa2374bde288120d2385cb14c3f",
+      "path": "docs/contracts/redesign-v1.3.2/recovery-minimal-contract.md",
+      "section": "8",
+      "fixture_group": "D03A-13"
+    },
+    "contract-group-14": {
+      "commit_sha": "40f3cddb6e62baa2374bde288120d2385cb14c3f",
+      "path": "docs/contracts/redesign-v1.3.2/recovery-minimal-contract.md",
+      "section": "8",
+      "fixture_group": "D03A-14"
+    },
+    "contract-group-15": {
+      "commit_sha": "40f3cddb6e62baa2374bde288120d2385cb14c3f",
+      "path": "docs/contracts/redesign-v1.3.2/recovery-minimal-contract.md",
+      "section": "8",
+      "fixture_group": "D03A-15"
+    },
+    "contract-group-16": {
+      "commit_sha": "40f3cddb6e62baa2374bde288120d2385cb14c3f",
+      "path": "docs/contracts/redesign-v1.3.2/recovery-minimal-contract.md",
+      "section": "8",
+      "fixture_group": "D03A-16"
+    },
+    "contract-group-17": {
+      "commit_sha": "40f3cddb6e62baa2374bde288120d2385cb14c3f",
+      "path": "docs/contracts/redesign-v1.3.2/recovery-minimal-contract.md",
+      "section": "8",
+      "fixture_group": "D03A-17"
+    },
+    "contract-group-18": {
+      "commit_sha": "40f3cddb6e62baa2374bde288120d2385cb14c3f",
+      "path": "docs/contracts/redesign-v1.3.2/recovery-minimal-contract.md",
+      "section": "8",
+      "fixture_group": "D03A-18"
+    },
+    "contract-group-19": {
+      "commit_sha": "40f3cddb6e62baa2374bde288120d2385cb14c3f",
+      "path": "docs/contracts/redesign-v1.3.2/recovery-minimal-contract.md",
+      "section": "8",
+      "fixture_group": "D03A-19"
+    }
+  },
+  "groups": [
+    {
+      "group_id": "D03A-01",
+      "source_refs": [
+        "contract-group-1",
+        "design-recovery",
+        "handbook-recovery"
+      ],
+      "existing_acceptance_refs": [
+        "M12",
+        "N-R08",
+        "V131-T08"
+      ],
+      "cases": [
+        {
+          "case_id": "D03A-01-same-domain",
+          "polarity": "positive",
+          "execution_status": "not_run",
+          "input": {
+            "initial_test_facts": {
+              "active_cursor": {
+                "store_id": "synthetic-store-A",
+                "scope_id": "synthetic-scope-S",
+                "stream_id": "synthetic-stream-X",
+                "seq": "10"
+              },
+              "process_epoch": "synthetic-E2",
+              "authority_revision": "synthetic-authority-current",
+              "permission_facts_ref": "synthetic-current-readable-scope"
+            },
+            "stimuli": [
+              {
+                "test_action": "receive_authorized_projection_event",
+                "cursor": {
+                  "store_id": "synthetic-store-A",
+                  "scope_id": "synthetic-scope-S",
+                  "stream_id": "synthetic-stream-X",
+                  "seq": "11"
+                },
+                "event_ref": "synthetic-event-11"
+              }
+            ]
+          },
+          "expected": {
+            "required_observations": {
+              "applied_cursor": {
+                "store_id": "synthetic-store-A",
+                "scope_id": "synthetic-scope-S",
+                "stream_id": "synthetic-stream-X",
+                "seq": "11"
+              },
+              "cross_domain_comparisons": 0
+            },
+            "forbidden_observations": {
+              "business_reexecution": true
+            }
+          },
+          "actual": null,
+          "golden": null
+        },
+        {
+          "case_id": "D03A-01-wrong-store",
+          "polarity": "negative",
+          "execution_status": "not_run",
+          "input": {
+            "initial_test_facts": {
+              "active_cursor": {
+                "store_id": "synthetic-store-A",
+                "scope_id": "synthetic-scope-S",
+                "stream_id": "synthetic-stream-X",
+                "seq": "10"
+              },
+              "process_epoch": "synthetic-E2",
+              "authority_revision": "synthetic-authority-current",
+              "permission_facts_ref": "synthetic-current-readable-scope"
+            },
+            "stimuli": [
+              {
+                "test_action": "receive_projection_event",
+                "cursor": {
+                  "store_id": "synthetic-store-B",
+                  "scope_id": "synthetic-scope-S",
+                  "stream_id": "synthetic-stream-X",
+                  "seq": "999"
+                }
+              }
+            ]
+          },
+          "expected": {
+            "required_observations": {
+              "applied_cursor": {
+                "store_id": "synthetic-store-A",
+                "scope_id": "synthetic-scope-S",
+                "stream_id": "synthetic-stream-X",
+                "seq": "10"
+              },
+              "event_applications": 0,
+              "cursor_advancements": 0
+            },
+            "forbidden_observations": {
+              "larger_seq_overrides_domain": true
+            }
+          },
+          "actual": null,
+          "golden": null
+        },
+        {
+          "case_id": "D03A-01-wrong-scope",
+          "polarity": "negative",
+          "execution_status": "not_run",
+          "input": {
+            "initial_test_facts": {
+              "active_cursor": {
+                "store_id": "synthetic-store-A",
+                "scope_id": "synthetic-scope-S",
+                "stream_id": "synthetic-stream-X",
+                "seq": "10"
+              },
+              "process_epoch": "synthetic-E2",
+              "authority_revision": "synthetic-authority-current",
+              "permission_facts_ref": "synthetic-current-readable-scope"
+            },
+            "stimuli": [
+              {
+                "test_action": "receive_projection_event",
+                "cursor": {
+                  "store_id": "synthetic-store-A",
+                  "scope_id": "synthetic-scope-T",
+                  "stream_id": "synthetic-stream-X",
+                  "seq": "999"
+                }
+              }
+            ]
+          },
+          "expected": {
+            "required_observations": {
+              "applied_cursor": {
+                "store_id": "synthetic-store-A",
+                "scope_id": "synthetic-scope-S",
+                "stream_id": "synthetic-stream-X",
+                "seq": "10"
+              },
+              "event_applications": 0,
+              "cursor_advancements": 0
+            },
+            "forbidden_observations": {
+              "larger_seq_overrides_domain": true
+            }
+          },
+          "actual": null,
+          "golden": null
+        },
+        {
+          "case_id": "D03A-01-wrong-stream",
+          "polarity": "negative",
+          "execution_status": "not_run",
+          "input": {
+            "initial_test_facts": {
+              "active_cursor": {
+                "store_id": "synthetic-store-A",
+                "scope_id": "synthetic-scope-S",
+                "stream_id": "synthetic-stream-X",
+                "seq": "10"
+              },
+              "process_epoch": "synthetic-E2",
+              "authority_revision": "synthetic-authority-current",
+              "permission_facts_ref": "synthetic-current-readable-scope"
+            },
+            "stimuli": [
+              {
+                "test_action": "receive_projection_event",
+                "cursor": {
+                  "store_id": "synthetic-store-A",
+                  "scope_id": "synthetic-scope-S",
+                  "stream_id": "synthetic-stream-Y",
+                  "seq": "999"
+                }
+              }
+            ]
+          },
+          "expected": {
+            "required_observations": {
+              "applied_cursor": {
+                "store_id": "synthetic-store-A",
+                "scope_id": "synthetic-scope-S",
+                "stream_id": "synthetic-stream-X",
+                "seq": "10"
+              },
+              "event_applications": 0,
+              "cursor_advancements": 0
+            },
+            "forbidden_observations": {
+              "larger_seq_overrides_domain": true
+            }
+          },
+          "actual": null,
+          "golden": null
+        }
+      ]
+    },
+    {
+      "group_id": "D03A-02",
+      "source_refs": [
+        "contract-group-2",
+        "design-recovery",
+        "handbook-recovery"
+      ],
+      "existing_acceptance_refs": [
+        "M12",
+        "N-R08"
+      ],
+      "cases": [
+        {
+          "case_id": "D03A-02-restart",
+          "polarity": "positive",
+          "execution_status": "not_run",
+          "input": {
+            "initial_test_facts": {
+              "active_cursor": {
+                "store_id": "synthetic-store-A",
+                "scope_id": "synthetic-scope-S",
+                "stream_id": "synthetic-stream-X",
+                "seq": "10"
+              },
+              "process_epoch": "synthetic-E2",
+              "authority_revision": "synthetic-authority-current",
+              "permission_facts_ref": "synthetic-current-readable-scope"
+            },
+            "stimuli": [
+              {
+                "test_action": "restart_connection",
+                "old_epoch": "synthetic-E2",
+                "new_epoch": "synthetic-E3"
+              }
+            ]
+          },
+          "expected": {
+            "required_observations": {
+              "persistent_domain": {
+                "store_id": "synthetic-store-A",
+                "scope_id": "synthetic-scope-S",
+                "stream_id": "synthetic-stream-X",
+                "seq": "10"
+              },
+              "resume_from_seq": "10",
+              "stable_intent_ref": "synthetic-intent-original",
+              "stable_key_ref": "synthetic-key-original"
+            },
+            "forbidden_observations": {
+              "seq_reset": true,
+              "epoch_numeric_order": true,
+              "rekey_original_operation": true
+            }
+          },
+          "actual": null,
+          "golden": null
+        },
+        {
+          "case_id": "D03A-02-stream-rebuild",
+          "polarity": "positive",
+          "execution_status": "not_run",
+          "input": {
+            "initial_test_facts": {
+              "active_cursor": {
+                "store_id": "synthetic-store-A",
+                "scope_id": "synthetic-scope-S",
+                "stream_id": "synthetic-stream-X",
+                "seq": "10"
+              },
+              "process_epoch": "synthetic-E2",
+              "authority_revision": "synthetic-authority-current",
+              "permission_facts_ref": "synthetic-current-readable-scope"
+            },
+            "stimuli": [
+              {
+                "test_action": "log_lineage_rebuild",
+                "new_stream": "synthetic-stream-Y"
+              },
+              {
+                "test_action": "trusted_full_snapshot_bootstrap",
+                "cursor": {
+                  "store_id": "synthetic-store-A",
+                  "scope_id": "synthetic-scope-S",
+                  "stream_id": "synthetic-stream-Y",
+                  "seq": "4"
+                }
+              }
+            ]
+          },
+          "expected": {
+            "required_observations": {
+              "old_stream_mixed": false,
+              "new_stream_requires_full_snapshot": true,
+              "stable_intent_ref": "synthetic-intent-original",
+              "stable_key_ref": "synthetic-key-original"
+            },
+            "forbidden_observations": {
+              "cross_stream_seq_compare": true,
+              "automatic_old_command_replay": true
+            }
+          },
+          "actual": null,
+          "golden": null
+        },
+        {
+          "case_id": "D03A-02-old-stream-after-rebuild",
+          "polarity": "negative",
+          "execution_status": "not_run",
+          "input": {
+            "initial_test_facts": {
+              "active_cursor": {
+                "store_id": "synthetic-store-A",
+                "scope_id": "synthetic-scope-S",
+                "stream_id": "synthetic-stream-Y",
+                "seq": "4"
+              },
+              "process_epoch": "synthetic-E2",
+              "authority_revision": "synthetic-authority-current",
+              "permission_facts_ref": "synthetic-current-readable-scope"
+            },
+            "stimuli": [
+              {
+                "test_action": "receive_projection_event",
+                "cursor": {
+                  "store_id": "synthetic-store-A",
+                  "scope_id": "synthetic-scope-S",
+                  "stream_id": "synthetic-stream-X",
+                  "seq": "999"
+                }
+              }
+            ]
+          },
+          "expected": {
+            "required_observations": {
+              "event_applications": 0,
+              "applied_cursor": {
+                "store_id": "synthetic-store-A",
+                "scope_id": "synthetic-scope-S",
+                "stream_id": "synthetic-stream-Y",
+                "seq": "4"
+              }
+            },
+            "forbidden_observations": {
+              "old_stream_mix": true
+            }
+          },
+          "actual": null,
+          "golden": null
+        }
+      ]
+    },
+    {
+      "group_id": "D03A-03",
+      "source_refs": [
+        "contract-group-3",
+        "design-recovery",
+        "handbook-recovery"
+      ],
+      "existing_acceptance_refs": [
+        "REC-F3",
+        "REC-F14",
+        "N-R03"
+      ],
+      "cases": [
+        {
+          "case_id": "D03A-03-snapshot-buffer",
+          "polarity": "positive",
+          "execution_status": "not_run",
+          "input": {
+            "initial_test_facts": {
+              "active_cursor": {
+                "store_id": "synthetic-store-A",
+                "scope_id": "synthetic-scope-S",
+                "stream_id": "synthetic-stream-X",
+                "seq": "8"
+              },
+              "process_epoch": "synthetic-E2",
+              "authority_revision": "synthetic-authority-current",
+              "permission_facts_ref": "synthetic-current-readable-scope",
+              "independent_draft_ref": "synthetic-draft-r2"
+            },
+            "stimuli": [
+              {
+                "test_action": "buffer_events",
+                "events": [
+                  {
+                    "cursor": {
+                      "store_id": "synthetic-store-A",
+                      "scope_id": "synthetic-scope-S",
+                      "stream_id": "synthetic-stream-X",
+                      "seq": "9"
+                    },
+                    "event_ref": "synthetic-event-9"
+                  },
+                  {
+                    "cursor": {
+                      "store_id": "synthetic-store-A",
+                      "scope_id": "synthetic-scope-S",
+                      "stream_id": "synthetic-stream-X",
+                      "seq": "10"
+                    },
+                    "event_ref": "synthetic-event-10"
+                  },
+                  {
+                    "cursor": {
+                      "store_id": "synthetic-store-A",
+                      "scope_id": "synthetic-scope-S",
+                      "stream_id": "synthetic-stream-X",
+                      "seq": "11"
+                    },
+                    "event_ref": "synthetic-event-11"
+                  }
+                ]
+              },
+              {
+                "test_action": "install_snapshot_candidate",
+                "domain": {
+                  "store_id": "synthetic-store-A",
+                  "scope_id": "synthetic-scope-S",
+                  "stream_id": "synthetic-stream-X",
+                  "seq": "10"
+                },
+                "covered_through_seq": "10",
+                "state_ref": "synthetic-projection-at-10",
+                "projection_revision": "opaque-projection-rA",
+                "schema_ref": "synthetic-compatible",
+                "authority_ref": "synthetic-authority-current",
+                "integrity": "valid"
+              }
+            ]
+          },
+          "expected": {
+            "required_observations": {
+              "atomic_snapshot_durable_boundary": {
+                "store_id": "synthetic-store-A",
+                "scope_id": "synthetic-scope-S",
+                "stream_id": "synthetic-stream-X",
+                "seq": "10"
+              },
+              "post_snapshot_events_applied": [
+                "synthetic-event-11"
+              ],
+              "final_applied_cursor": {
+                "store_id": "synthetic-store-A",
+                "scope_id": "synthetic-scope-S",
+                "stream_id": "synthetic-stream-X",
+                "seq": "11"
+              },
+              "covered_buffer_events_reapplied": 0,
+              "draft_ref": "synthetic-draft-r2"
+            },
+            "forbidden_observations": {
+              "snapshot_claims_executor_alive": true,
+              "draft_overwritten": true
+            }
+          },
+          "actual": null,
+          "golden": null
+        },
+        {
+          "case_id": "D03A-03-slow-old-snapshot",
+          "polarity": "negative",
+          "execution_status": "not_run",
+          "input": {
+            "initial_test_facts": {
+              "active_cursor": {
+                "store_id": "synthetic-store-A",
+                "scope_id": "synthetic-scope-S",
+                "stream_id": "synthetic-stream-X",
+                "seq": "11"
+              },
+              "process_epoch": "synthetic-E2",
+              "authority_revision": "synthetic-authority-current",
+              "permission_facts_ref": "synthetic-current-readable-scope"
+            },
+            "stimuli": [
+              {
+                "test_action": "late_snapshot_candidate",
+                "cursor": {
+                  "store_id": "synthetic-store-A",
+                  "scope_id": "synthetic-scope-S",
+                  "stream_id": "synthetic-stream-X",
+                  "seq": "8"
+                },
+                "arrival_order": "later",
+                "projection_revision": "opaque-label-not-ordered"
+              }
+            ]
+          },
+          "expected": {
+            "required_observations": {
+              "applied_cursor": {
+                "store_id": "synthetic-store-A",
+                "scope_id": "synthetic-scope-S",
+                "stream_id": "synthetic-stream-X",
+                "seq": "11"
+              },
+              "candidate_activations": 0
+            },
+            "forbidden_observations": {
+              "arrival_time_orders_versions": true
+            }
+          },
+          "actual": null,
+          "golden": null
+        },
+        {
+          "case_id": "D03A-03-equal-watermark-fork",
+          "polarity": "negative",
+          "execution_status": "not_run",
+          "input": {
+            "initial_test_facts": {
+              "active_cursor": {
+                "store_id": "synthetic-store-A",
+                "scope_id": "synthetic-scope-S",
+                "stream_id": "synthetic-stream-X",
+                "seq": "10"
+              },
+              "process_epoch": "synthetic-E2",
+              "authority_revision": "synthetic-authority-current",
+              "permission_facts_ref": "synthetic-current-readable-scope",
+              "state_ref": "synthetic-state-A"
+            },
+            "stimuli": [
+              {
+                "test_action": "snapshot_candidate",
+                "cursor": {
+                  "store_id": "synthetic-store-A",
+                  "scope_id": "synthetic-scope-S",
+                  "stream_id": "synthetic-stream-X",
+                  "seq": "10"
+                },
+                "state_ref": "synthetic-state-B",
+                "digest_relation": "different"
+              }
+            ]
+          },
+          "expected": {
+            "required_observations": {
+              "candidate_activations": 0,
+              "next_operation": "isolate_and_reconcile"
+            },
+            "forbidden_observations": {
+              "same_seq_proves_same_state": true
+            }
+          },
+          "actual": null,
+          "golden": null
+        }
+      ]
+    },
+    {
+      "group_id": "D03A-04",
+      "source_refs": [
+        "contract-group-4",
+        "design-recovery",
+        "handbook-recovery"
+      ],
+      "existing_acceptance_refs": [
+        "N-R01",
+        "M20",
+        "V131-T08"
+      ],
+      "cases": [
+        {
+          "case_id": "D03A-04-after_receive",
+          "polarity": "negative",
+          "execution_status": "not_run",
+          "input": {
+            "initial_test_facts": {
+              "active_cursor": {
+                "store_id": "synthetic-store-A",
+                "scope_id": "synthetic-scope-S",
+                "stream_id": "synthetic-stream-X",
+                "seq": "10"
+              },
+              "process_epoch": "synthetic-E2",
+              "authority_revision": "synthetic-authority-current",
+              "permission_facts_ref": "synthetic-current-readable-scope",
+              "durable_cursor": {
+                "store_id": "synthetic-store-A",
+                "scope_id": "synthetic-scope-S",
+                "stream_id": "synthetic-stream-X",
+                "seq": "10"
+              },
+              "durable_state_ref": "synthetic-state-10",
+              "received_cursor": {
+                "store_id": "synthetic-store-A",
+                "scope_id": "synthetic-scope-S",
+                "stream_id": "synthetic-stream-X",
+                "seq": "10"
+              },
+              "applied_cursor": {
+                "store_id": "synthetic-store-A",
+                "scope_id": "synthetic-scope-S",
+                "stream_id": "synthetic-stream-X",
+                "seq": "10"
+              }
+            },
+            "stimuli": [
+              {
+                "test_action": "receive_event",
+                "cursor": {
+                  "store_id": "synthetic-store-A",
+                  "scope_id": "synthetic-scope-S",
+                  "stream_id": "synthetic-stream-X",
+                  "seq": "11"
+                }
+              },
+              {
+                "test_action": "inject_process_death",
+                "boundary": "after_receive",
+                "transaction_atomicity": "required"
+              }
+            ]
+          },
+          "expected": {
+            "required_observations": {
+              "recovery_cursor": {
+                "store_id": "synthetic-store-A",
+                "scope_id": "synthetic-scope-S",
+                "stream_id": "synthetic-stream-X",
+                "seq": "10"
+              },
+              "recovery_state_ref": "synthetic-state-10",
+              "same_commit_state_and_cursor": true,
+              "projection_applications_on_resume": 1,
+              "second_business_writes": 0
+            },
+            "forbidden_observations": {
+              "resume_from_received_only": true,
+              "cursor_ahead_of_persisted_state": true,
+              "mixed_snapshot_activation": true
+            }
+          },
+          "actual": null,
+          "golden": null
+        },
+        {
+          "case_id": "D03A-04-before_apply",
+          "polarity": "negative",
+          "execution_status": "not_run",
+          "input": {
+            "initial_test_facts": {
+              "active_cursor": {
+                "store_id": "synthetic-store-A",
+                "scope_id": "synthetic-scope-S",
+                "stream_id": "synthetic-stream-X",
+                "seq": "10"
+              },
+              "process_epoch": "synthetic-E2",
+              "authority_revision": "synthetic-authority-current",
+              "permission_facts_ref": "synthetic-current-readable-scope",
+              "durable_cursor": {
+                "store_id": "synthetic-store-A",
+                "scope_id": "synthetic-scope-S",
+                "stream_id": "synthetic-stream-X",
+                "seq": "10"
+              },
+              "durable_state_ref": "synthetic-state-10",
+              "received_cursor": {
+                "store_id": "synthetic-store-A",
+                "scope_id": "synthetic-scope-S",
+                "stream_id": "synthetic-stream-X",
+                "seq": "10"
+              },
+              "applied_cursor": {
+                "store_id": "synthetic-store-A",
+                "scope_id": "synthetic-scope-S",
+                "stream_id": "synthetic-stream-X",
+                "seq": "10"
+              }
+            },
+            "stimuli": [
+              {
+                "test_action": "receive_event",
+                "cursor": {
+                  "store_id": "synthetic-store-A",
+                  "scope_id": "synthetic-scope-S",
+                  "stream_id": "synthetic-stream-X",
+                  "seq": "11"
+                }
+              },
+              {
+                "test_action": "inject_process_death",
+                "boundary": "before_apply",
+                "transaction_atomicity": "required"
+              }
+            ]
+          },
+          "expected": {
+            "required_observations": {
+              "recovery_cursor": {
+                "store_id": "synthetic-store-A",
+                "scope_id": "synthetic-scope-S",
+                "stream_id": "synthetic-stream-X",
+                "seq": "10"
+              },
+              "recovery_state_ref": "synthetic-state-10",
+              "same_commit_state_and_cursor": true,
+              "projection_applications_on_resume": 1,
+              "second_business_writes": 0
+            },
+            "forbidden_observations": {
+              "resume_from_received_only": true,
+              "cursor_ahead_of_persisted_state": true,
+              "mixed_snapshot_activation": true
+            }
+          },
+          "actual": null,
+          "golden": null
+        },
+        {
+          "case_id": "D03A-04-after_apply_before_durable",
+          "polarity": "negative",
+          "execution_status": "not_run",
+          "input": {
+            "initial_test_facts": {
+              "active_cursor": {
+                "store_id": "synthetic-store-A",
+                "scope_id": "synthetic-scope-S",
+                "stream_id": "synthetic-stream-X",
+                "seq": "10"
+              },
+              "process_epoch": "synthetic-E2",
+              "authority_revision": "synthetic-authority-current",
+              "permission_facts_ref": "synthetic-current-readable-scope",
+              "durable_cursor": {
+                "store_id": "synthetic-store-A",
+                "scope_id": "synthetic-scope-S",
+                "stream_id": "synthetic-stream-X",
+                "seq": "10"
+              },
+              "durable_state_ref": "synthetic-state-10",
+              "received_cursor": {
+                "store_id": "synthetic-store-A",
+                "scope_id": "synthetic-scope-S",
+                "stream_id": "synthetic-stream-X",
+                "seq": "10"
+              },
+              "applied_cursor": {
+                "store_id": "synthetic-store-A",
+                "scope_id": "synthetic-scope-S",
+                "stream_id": "synthetic-stream-X",
+                "seq": "10"
+              }
+            },
+            "stimuli": [
+              {
+                "test_action": "receive_event",
+                "cursor": {
+                  "store_id": "synthetic-store-A",
+                  "scope_id": "synthetic-scope-S",
+                  "stream_id": "synthetic-stream-X",
+                  "seq": "11"
+                }
+              },
+              {
+                "test_action": "inject_process_death",
+                "boundary": "after_apply_before_durable",
+                "transaction_atomicity": "required"
+              }
+            ]
+          },
+          "expected": {
+            "required_observations": {
+              "recovery_cursor": {
+                "store_id": "synthetic-store-A",
+                "scope_id": "synthetic-scope-S",
+                "stream_id": "synthetic-stream-X",
+                "seq": "10"
+              },
+              "recovery_state_ref": "synthetic-state-10",
+              "same_commit_state_and_cursor": true,
+              "projection_applications_on_resume": 1,
+              "second_business_writes": 0
+            },
+            "forbidden_observations": {
+              "resume_from_received_only": true,
+              "cursor_ahead_of_persisted_state": true,
+              "mixed_snapshot_activation": true
+            }
+          },
+          "actual": null,
+          "golden": null
+        },
+        {
+          "case_id": "D03A-04-after_projection_write_before_commit",
+          "polarity": "negative",
+          "execution_status": "not_run",
+          "input": {
+            "initial_test_facts": {
+              "active_cursor": {
+                "store_id": "synthetic-store-A",
+                "scope_id": "synthetic-scope-S",
+                "stream_id": "synthetic-stream-X",
+                "seq": "10"
+              },
+              "process_epoch": "synthetic-E2",
+              "authority_revision": "synthetic-authority-current",
+              "permission_facts_ref": "synthetic-current-readable-scope",
+              "durable_cursor": {
+                "store_id": "synthetic-store-A",
+                "scope_id": "synthetic-scope-S",
+                "stream_id": "synthetic-stream-X",
+                "seq": "10"
+              },
+              "durable_state_ref": "synthetic-state-10",
+              "received_cursor": {
+                "store_id": "synthetic-store-A",
+                "scope_id": "synthetic-scope-S",
+                "stream_id": "synthetic-stream-X",
+                "seq": "10"
+              },
+              "applied_cursor": {
+                "store_id": "synthetic-store-A",
+                "scope_id": "synthetic-scope-S",
+                "stream_id": "synthetic-stream-X",
+                "seq": "10"
+              }
+            },
+            "stimuli": [
+              {
+                "test_action": "receive_event",
+                "cursor": {
+                  "store_id": "synthetic-store-A",
+                  "scope_id": "synthetic-scope-S",
+                  "stream_id": "synthetic-stream-X",
+                  "seq": "11"
+                }
+              },
+              {
+                "test_action": "inject_process_death",
+                "boundary": "after_projection_write_before_commit",
+                "transaction_atomicity": "required"
+              }
+            ]
+          },
+          "expected": {
+            "required_observations": {
+              "recovery_cursor": {
+                "store_id": "synthetic-store-A",
+                "scope_id": "synthetic-scope-S",
+                "stream_id": "synthetic-stream-X",
+                "seq": "10"
+              },
+              "recovery_state_ref": "synthetic-state-10",
+              "same_commit_state_and_cursor": true,
+              "projection_applications_on_resume": 1,
+              "second_business_writes": 0
+            },
+            "forbidden_observations": {
+              "resume_from_received_only": true,
+              "cursor_ahead_of_persisted_state": true,
+              "mixed_snapshot_activation": true
+            }
+          },
+          "actual": null,
+          "golden": null
+        },
+        {
+          "case_id": "D03A-04-after_cursor_write_before_commit",
+          "polarity": "negative",
+          "execution_status": "not_run",
+          "input": {
+            "initial_test_facts": {
+              "active_cursor": {
+                "store_id": "synthetic-store-A",
+                "scope_id": "synthetic-scope-S",
+                "stream_id": "synthetic-stream-X",
+                "seq": "10"
+              },
+              "process_epoch": "synthetic-E2",
+              "authority_revision": "synthetic-authority-current",
+              "permission_facts_ref": "synthetic-current-readable-scope",
+              "durable_cursor": {
+                "store_id": "synthetic-store-A",
+                "scope_id": "synthetic-scope-S",
+                "stream_id": "synthetic-stream-X",
+                "seq": "10"
+              },
+              "durable_state_ref": "synthetic-state-10",
+              "received_cursor": {
+                "store_id": "synthetic-store-A",
+                "scope_id": "synthetic-scope-S",
+                "stream_id": "synthetic-stream-X",
+                "seq": "10"
+              },
+              "applied_cursor": {
+                "store_id": "synthetic-store-A",
+                "scope_id": "synthetic-scope-S",
+                "stream_id": "synthetic-stream-X",
+                "seq": "10"
+              }
+            },
+            "stimuli": [
+              {
+                "test_action": "receive_event",
+                "cursor": {
+                  "store_id": "synthetic-store-A",
+                  "scope_id": "synthetic-scope-S",
+                  "stream_id": "synthetic-stream-X",
+                  "seq": "11"
+                }
+              },
+              {
+                "test_action": "inject_process_death",
+                "boundary": "after_cursor_write_before_commit",
+                "transaction_atomicity": "required"
+              }
+            ]
+          },
+          "expected": {
+            "required_observations": {
+              "recovery_cursor": {
+                "store_id": "synthetic-store-A",
+                "scope_id": "synthetic-scope-S",
+                "stream_id": "synthetic-stream-X",
+                "seq": "10"
+              },
+              "recovery_state_ref": "synthetic-state-10",
+              "same_commit_state_and_cursor": true,
+              "projection_applications_on_resume": 1,
+              "second_business_writes": 0
+            },
+            "forbidden_observations": {
+              "resume_from_received_only": true,
+              "cursor_ahead_of_persisted_state": true,
+              "mixed_snapshot_activation": true
+            }
+          },
+          "actual": null,
+          "golden": null
+        },
+        {
+          "case_id": "D03A-04-before_transaction_commit",
+          "polarity": "negative",
+          "execution_status": "not_run",
+          "input": {
+            "initial_test_facts": {
+              "active_cursor": {
+                "store_id": "synthetic-store-A",
+                "scope_id": "synthetic-scope-S",
+                "stream_id": "synthetic-stream-X",
+                "seq": "10"
+              },
+              "process_epoch": "synthetic-E2",
+              "authority_revision": "synthetic-authority-current",
+              "permission_facts_ref": "synthetic-current-readable-scope",
+              "durable_cursor": {
+                "store_id": "synthetic-store-A",
+                "scope_id": "synthetic-scope-S",
+                "stream_id": "synthetic-stream-X",
+                "seq": "10"
+              },
+              "durable_state_ref": "synthetic-state-10",
+              "received_cursor": {
+                "store_id": "synthetic-store-A",
+                "scope_id": "synthetic-scope-S",
+                "stream_id": "synthetic-stream-X",
+                "seq": "10"
+              },
+              "applied_cursor": {
+                "store_id": "synthetic-store-A",
+                "scope_id": "synthetic-scope-S",
+                "stream_id": "synthetic-stream-X",
+                "seq": "10"
+              }
+            },
+            "stimuli": [
+              {
+                "test_action": "receive_event",
+                "cursor": {
+                  "store_id": "synthetic-store-A",
+                  "scope_id": "synthetic-scope-S",
+                  "stream_id": "synthetic-stream-X",
+                  "seq": "11"
+                }
+              },
+              {
+                "test_action": "inject_process_death",
+                "boundary": "before_transaction_commit",
+                "transaction_atomicity": "required"
+              }
+            ]
+          },
+          "expected": {
+            "required_observations": {
+              "recovery_cursor": {
+                "store_id": "synthetic-store-A",
+                "scope_id": "synthetic-scope-S",
+                "stream_id": "synthetic-stream-X",
+                "seq": "10"
+              },
+              "recovery_state_ref": "synthetic-state-10",
+              "same_commit_state_and_cursor": true,
+              "projection_applications_on_resume": 1,
+              "second_business_writes": 0
+            },
+            "forbidden_observations": {
+              "resume_from_received_only": true,
+              "cursor_ahead_of_persisted_state": true,
+              "mixed_snapshot_activation": true
+            }
+          },
+          "actual": null,
+          "golden": null
+        },
+        {
+          "case_id": "D03A-04-after_transaction_commit_before_notify",
+          "polarity": "negative",
+          "execution_status": "not_run",
+          "input": {
+            "initial_test_facts": {
+              "active_cursor": {
+                "store_id": "synthetic-store-A",
+                "scope_id": "synthetic-scope-S",
+                "stream_id": "synthetic-stream-X",
+                "seq": "10"
+              },
+              "process_epoch": "synthetic-E2",
+              "authority_revision": "synthetic-authority-current",
+              "permission_facts_ref": "synthetic-current-readable-scope",
+              "durable_cursor": {
+                "store_id": "synthetic-store-A",
+                "scope_id": "synthetic-scope-S",
+                "stream_id": "synthetic-stream-X",
+                "seq": "10"
+              },
+              "durable_state_ref": "synthetic-state-10",
+              "received_cursor": {
+                "store_id": "synthetic-store-A",
+                "scope_id": "synthetic-scope-S",
+                "stream_id": "synthetic-stream-X",
+                "seq": "10"
+              },
+              "applied_cursor": {
+                "store_id": "synthetic-store-A",
+                "scope_id": "synthetic-scope-S",
+                "stream_id": "synthetic-stream-X",
+                "seq": "10"
+              }
+            },
+            "stimuli": [
+              {
+                "test_action": "receive_event",
+                "cursor": {
+                  "store_id": "synthetic-store-A",
+                  "scope_id": "synthetic-scope-S",
+                  "stream_id": "synthetic-stream-X",
+                  "seq": "11"
+                }
+              },
+              {
+                "test_action": "inject_process_death",
+                "boundary": "after_transaction_commit_before_notify",
+                "transaction_atomicity": "required"
+              }
+            ]
+          },
+          "expected": {
+            "required_observations": {
+              "recovery_cursor": {
+                "store_id": "synthetic-store-A",
+                "scope_id": "synthetic-scope-S",
+                "stream_id": "synthetic-stream-X",
+                "seq": "11"
+              },
+              "recovery_state_ref": "synthetic-state-11",
+              "same_commit_state_and_cursor": true,
+              "projection_applications_on_resume": 0,
+              "second_business_writes": 0
+            },
+            "forbidden_observations": {
+              "resume_from_received_only": true,
+              "cursor_ahead_of_persisted_state": true,
+              "mixed_snapshot_activation": true
+            }
+          },
+          "actual": null,
+          "golden": null
+        },
+        {
+          "case_id": "D03A-04-inplace-two-transaction-candidate",
+          "polarity": "negative",
+          "execution_status": "not_run",
+          "input": {
+            "initial_test_facts": {
+              "active_cursor": {
+                "store_id": "synthetic-store-A",
+                "scope_id": "synthetic-scope-S",
+                "stream_id": "synthetic-stream-X",
+                "seq": "10"
+              },
+              "process_epoch": "synthetic-E2",
+              "authority_revision": "synthetic-authority-current",
+              "permission_facts_ref": "synthetic-current-readable-scope"
+            },
+            "stimuli": [
+              {
+                "test_action": "snapshot_layout_candidate",
+                "layout": "in_place_content_then_pointer_in_separate_transactions",
+                "fault": "between_content_and_pointer"
+              }
+            ]
+          },
+          "expected": {
+            "required_observations": {
+              "candidate_activations": 0,
+              "consistency_evidence_required": true
+            },
+            "forbidden_observations": {
+              "head_pointer_alone_proves_atomicity": true
+            }
+          },
+          "actual": null,
+          "golden": null
+        }
+      ]
+    },
+    {
+      "group_id": "D03A-05",
+      "source_refs": [
+        "contract-group-5",
+        "design-recovery",
+        "handbook-recovery"
+      ],
+      "existing_acceptance_refs": [
+        "REC-F1",
+        "REC-F2",
+        "N-R03"
+      ],
+      "cases": [
+        {
+          "case_id": "D03A-05-duplicate",
+          "polarity": "positive",
+          "execution_status": "not_run",
+          "input": {
+            "initial_test_facts": {
+              "active_cursor": {
+                "store_id": "synthetic-store-A",
+                "scope_id": "synthetic-scope-S",
+                "stream_id": "synthetic-stream-X",
+                "seq": "11"
+              },
+              "process_epoch": "synthetic-E2",
+              "authority_revision": "synthetic-authority-current",
+              "permission_facts_ref": "synthetic-current-readable-scope",
+              "event_identity": "synthetic-event-11",
+              "payload_ref": "synthetic-payload-A"
+            },
+            "stimuli": [
+              {
+                "test_action": "redeliver_event",
+                "cursor": {
+                  "store_id": "synthetic-store-A",
+                  "scope_id": "synthetic-scope-S",
+                  "stream_id": "synthetic-stream-X",
+                  "seq": "11"
+                },
+                "event_ref": "synthetic-event-11",
+                "payload_ref": "synthetic-payload-A"
+              }
+            ]
+          },
+          "expected": {
+            "required_observations": {
+              "additional_applications": 0,
+              "additional_notifications": 0,
+              "applied_cursor": {
+                "store_id": "synthetic-store-A",
+                "scope_id": "synthetic-scope-S",
+                "stream_id": "synthetic-stream-X",
+                "seq": "11"
+              }
+            },
+            "forbidden_observations": {
+              "duplicate_business_dispatch": true
+            }
+          },
+          "actual": null,
+          "golden": null
+        },
+        {
+          "case_id": "D03A-05-same-identity-fork",
+          "polarity": "negative",
+          "execution_status": "not_run",
+          "input": {
+            "initial_test_facts": {
+              "active_cursor": {
+                "store_id": "synthetic-store-A",
+                "scope_id": "synthetic-scope-S",
+                "stream_id": "synthetic-stream-X",
+                "seq": "10"
+              },
+              "process_epoch": "synthetic-E2",
+              "authority_revision": "synthetic-authority-current",
+              "permission_facts_ref": "synthetic-current-readable-scope",
+              "event_identity": "synthetic-event-11",
+              "payload_ref": "synthetic-payload-A"
+            },
+            "stimuli": [
+              {
+                "test_action": "redeliver_event",
+                "cursor": {
+                  "store_id": "synthetic-store-A",
+                  "scope_id": "synthetic-scope-S",
+                  "stream_id": "synthetic-stream-X",
+                  "seq": "11"
+                },
+                "event_ref": "synthetic-event-11",
+                "payload_ref": "synthetic-payload-B"
+              }
+            ]
+          },
+          "expected": {
+            "required_observations": {
+              "event_applications": 0,
+              "result": "isolate_and_reconcile"
+            },
+            "forbidden_observations": {
+              "silent_payload_overwrite": true
+            }
+          },
+          "actual": null,
+          "golden": null
+        },
+        {
+          "case_id": "D03A-05-gap",
+          "polarity": "negative",
+          "execution_status": "not_run",
+          "input": {
+            "initial_test_facts": {
+              "active_cursor": {
+                "store_id": "synthetic-store-A",
+                "scope_id": "synthetic-scope-S",
+                "stream_id": "synthetic-stream-X",
+                "seq": "11"
+              },
+              "process_epoch": "synthetic-E2",
+              "authority_revision": "synthetic-authority-current",
+              "permission_facts_ref": "synthetic-current-readable-scope",
+              "durable_cursor": {
+                "store_id": "synthetic-store-A",
+                "scope_id": "synthetic-scope-S",
+                "stream_id": "synthetic-stream-X",
+                "seq": "11"
+              }
+            },
+            "stimuli": [
+              {
+                "test_action": "receive_event_without_advance_evidence",
+                "cursor": {
+                  "store_id": "synthetic-store-A",
+                  "scope_id": "synthetic-scope-S",
+                  "stream_id": "synthetic-stream-X",
+                  "seq": "13"
+                }
+              }
+            ]
+          },
+          "expected": {
+            "required_observations": {
+              "durable_cursor": {
+                "store_id": "synthetic-store-A",
+                "scope_id": "synthetic-scope-S",
+                "stream_id": "synthetic-stream-X",
+                "seq": "11"
+              },
+              "incremental_apply": "paused",
+              "repair_from": {
+                "store_id": "synthetic-store-A",
+                "scope_id": "synthetic-scope-S",
+                "stream_id": "synthetic-stream-X",
+                "seq": "11"
+              },
+              "buffer": "bounded"
+            },
+            "forbidden_observations": {
+              "skip_missing_projection_event": true
+            }
+          },
+          "actual": null,
+          "golden": null
+        }
+      ]
+    },
+    {
+      "group_id": "D03A-06",
+      "source_refs": [
+        "contract-group-6",
+        "design-recovery",
+        "handbook-recovery"
+      ],
+      "existing_acceptance_refs": [
+        "REC-F2",
+        "M12",
+        "M19"
+      ],
+      "cases": [
+        {
+          "case_id": "D03A-06-permitted-advance",
+          "polarity": "positive",
+          "execution_status": "not_run",
+          "input": {
+            "initial_test_facts": {
+              "active_cursor": {
+                "store_id": "synthetic-store-A",
+                "scope_id": "synthetic-scope-S",
+                "stream_id": "synthetic-stream-X",
+                "seq": "10"
+              },
+              "process_epoch": "synthetic-E2",
+              "authority_revision": "synthetic-authority-current",
+              "permission_facts_ref": "synthetic-current-readable-scope"
+            },
+            "stimuli": [
+              {
+                "test_action": "receive_authorized_projection_advance",
+                "from_cursor": {
+                  "store_id": "synthetic-store-A",
+                  "scope_id": "synthetic-scope-S",
+                  "stream_id": "synthetic-stream-X",
+                  "seq": "10"
+                },
+                "next_cursor": {
+                  "store_id": "synthetic-store-A",
+                  "scope_id": "synthetic-scope-S",
+                  "stream_id": "synthetic-stream-X",
+                  "seq": "13"
+                },
+                "evidence_ref": "synthetic-core-verified-advance",
+                "evidence_valid": true
+              }
+            ]
+          },
+          "expected": {
+            "required_observations": {
+              "applied_cursor": {
+                "store_id": "synthetic-store-A",
+                "scope_id": "synthetic-scope-S",
+                "stream_id": "synthetic-stream-X",
+                "seq": "13"
+              },
+              "audit_counter_exposed": false,
+              "hidden_event_types_exposed": false
+            },
+            "forbidden_observations": {
+              "infer_hidden_audit_count_from_delta": true,
+              "apply_original_audit_seq_plus_one_rule": true
+            }
+          },
+          "actual": null,
+          "golden": null
+        },
+        {
+          "case_id": "D03A-06-unproved-advance",
+          "polarity": "negative",
+          "execution_status": "not_run",
+          "input": {
+            "initial_test_facts": {
+              "active_cursor": {
+                "store_id": "synthetic-store-A",
+                "scope_id": "synthetic-scope-S",
+                "stream_id": "synthetic-stream-X",
+                "seq": "10"
+              },
+              "process_epoch": "synthetic-E2",
+              "authority_revision": "synthetic-authority-current",
+              "permission_facts_ref": "synthetic-current-readable-scope"
+            },
+            "stimuli": [
+              {
+                "test_action": "receive_projection_jump",
+                "next_cursor": {
+                  "store_id": "synthetic-store-A",
+                  "scope_id": "synthetic-scope-S",
+                  "stream_id": "synthetic-stream-X",
+                  "seq": "13"
+                },
+                "advance_evidence": null
+              }
+            ]
+          },
+          "expected": {
+            "required_observations": {
+              "applied_cursor": {
+                "store_id": "synthetic-store-A",
+                "scope_id": "synthetic-scope-S",
+                "stream_id": "synthetic-stream-X",
+                "seq": "10"
+              },
+              "repair": "bounded_pull_or_snapshot"
+            },
+            "forbidden_observations": {
+              "treat_unproved_gap_as_contiguous": true
+            }
+          },
+          "actual": null,
+          "golden": null
+        },
+        {
+          "case_id": "D03A-06-permission-narrowed",
+          "polarity": "negative",
+          "execution_status": "not_run",
+          "input": {
+            "initial_test_facts": {
+              "active_cursor": {
+                "store_id": "synthetic-store-A",
+                "scope_id": "synthetic-scope-S",
+                "stream_id": "synthetic-stream-X",
+                "seq": "10"
+              },
+              "process_epoch": "synthetic-E2",
+              "authority_revision": "synthetic-authority-current",
+              "permission_facts_ref": "synthetic-current-readable-scope"
+            },
+            "stimuli": [
+              {
+                "test_action": "trusted_read_permission_narrows",
+                "new_authority_ref": "synthetic-authority-narrowed"
+              },
+              {
+                "test_action": "receive_old_permission_projection",
+                "cursor": {
+                  "store_id": "synthetic-store-A",
+                  "scope_id": "synthetic-scope-S",
+                  "stream_id": "synthetic-stream-X",
+                  "seq": "11"
+                }
+              },
+              {
+                "test_action": "request_current_permission_snapshot",
+                "new_stream": "synthetic-permission-stream-Y"
+              }
+            ]
+          },
+          "expected": {
+            "required_observations": {
+              "operation_order": [
+                "clear_affected_projection",
+                "request_current_permission_snapshot"
+              ],
+              "old_projection_applications": 0,
+              "restricted_body_exposed": false,
+              "different_permission_streams_mixed": false
+            },
+            "forbidden_observations": {
+              "reveal_hidden_audit_types_or_counts": true,
+              "stale_read_permission_reactivated": true
+            }
+          },
+          "actual": null,
+          "golden": null
+        }
+      ]
+    },
+    {
+      "group_id": "D03A-07",
+      "source_refs": [
+        "contract-group-7",
+        "design-recovery",
+        "handbook-recovery"
+      ],
+      "existing_acceptance_refs": [
+        "REC-F3",
+        "REC-F4",
+        "N-R01"
+      ],
+      "cases": [
+        {
+          "case_id": "D03A-07-pull_failed",
+          "polarity": "negative",
+          "execution_status": "not_run",
+          "input": {
+            "initial_test_facts": {
+              "active_cursor": {
+                "store_id": "synthetic-store-A",
+                "scope_id": "synthetic-scope-S",
+                "stream_id": "synthetic-stream-X",
+                "seq": "10"
+              },
+              "process_epoch": "synthetic-E2",
+              "authority_revision": "synthetic-authority-current",
+              "permission_facts_ref": "synthetic-current-readable-scope",
+              "known_receipt_ref": "synthetic-authoritative-success-receipt"
+            },
+            "stimuli": [
+              {
+                "test_action": "repair_attempt",
+                "fault": "pull_failed"
+              }
+            ]
+          },
+          "expected": {
+            "required_observations": {
+              "invalid_snapshot_activations": 0,
+              "history_completeness_one_of": [
+                "partial",
+                "unavailable"
+              ],
+              "safe_reason_present": true,
+              "resync_path_present": true,
+              "known_receipt_ref": "synthetic-authoritative-success-receipt"
+            },
+            "forbidden_observations": {
+              "fabricate_complete_history": true,
+              "erase_known_success": true
+            }
+          },
+          "actual": null,
+          "golden": null
+        },
+        {
+          "case_id": "D03A-07-cursor_expired",
+          "polarity": "negative",
+          "execution_status": "not_run",
+          "input": {
+            "initial_test_facts": {
+              "active_cursor": {
+                "store_id": "synthetic-store-A",
+                "scope_id": "synthetic-scope-S",
+                "stream_id": "synthetic-stream-X",
+                "seq": "10"
+              },
+              "process_epoch": "synthetic-E2",
+              "authority_revision": "synthetic-authority-current",
+              "permission_facts_ref": "synthetic-current-readable-scope",
+              "known_receipt_ref": "synthetic-authoritative-success-receipt"
+            },
+            "stimuli": [
+              {
+                "test_action": "repair_attempt",
+                "fault": "cursor_expired"
+              }
+            ]
+          },
+          "expected": {
+            "required_observations": {
+              "invalid_snapshot_activations": 0,
+              "history_completeness_one_of": [
+                "partial",
+                "unavailable"
+              ],
+              "safe_reason_present": true,
+              "resync_path_present": true,
+              "known_receipt_ref": "synthetic-authoritative-success-receipt"
+            },
+            "forbidden_observations": {
+              "fabricate_complete_history": true,
+              "erase_known_success": true
+            }
+          },
+          "actual": null,
+          "golden": null
+        },
+        {
+          "case_id": "D03A-07-snapshot_incomplete",
+          "polarity": "negative",
+          "execution_status": "not_run",
+          "input": {
+            "initial_test_facts": {
+              "active_cursor": {
+                "store_id": "synthetic-store-A",
+                "scope_id": "synthetic-scope-S",
+                "stream_id": "synthetic-stream-X",
+                "seq": "10"
+              },
+              "process_epoch": "synthetic-E2",
+              "authority_revision": "synthetic-authority-current",
+              "permission_facts_ref": "synthetic-current-readable-scope",
+              "known_receipt_ref": "synthetic-authoritative-success-receipt"
+            },
+            "stimuli": [
+              {
+                "test_action": "repair_attempt",
+                "fault": "snapshot_incomplete"
+              }
+            ]
+          },
+          "expected": {
+            "required_observations": {
+              "invalid_snapshot_activations": 0,
+              "history_completeness_one_of": [
+                "partial",
+                "unavailable"
+              ],
+              "safe_reason_present": true,
+              "resync_path_present": true,
+              "known_receipt_ref": "synthetic-authoritative-success-receipt"
+            },
+            "forbidden_observations": {
+              "fabricate_complete_history": true,
+              "erase_known_success": true
+            }
+          },
+          "actual": null,
+          "golden": null
+        },
+        {
+          "case_id": "D03A-07-snapshot_cycle",
+          "polarity": "negative",
+          "execution_status": "not_run",
+          "input": {
+            "initial_test_facts": {
+              "active_cursor": {
+                "store_id": "synthetic-store-A",
+                "scope_id": "synthetic-scope-S",
+                "stream_id": "synthetic-stream-X",
+                "seq": "10"
+              },
+              "process_epoch": "synthetic-E2",
+              "authority_revision": "synthetic-authority-current",
+              "permission_facts_ref": "synthetic-current-readable-scope",
+              "known_receipt_ref": "synthetic-authoritative-success-receipt"
+            },
+            "stimuli": [
+              {
+                "test_action": "repair_attempt",
+                "fault": "snapshot_cycle"
+              }
+            ]
+          },
+          "expected": {
+            "required_observations": {
+              "invalid_snapshot_activations": 0,
+              "history_completeness_one_of": [
+                "partial",
+                "unavailable"
+              ],
+              "safe_reason_present": true,
+              "resync_path_present": true,
+              "known_receipt_ref": "synthetic-authoritative-success-receipt"
+            },
+            "forbidden_observations": {
+              "fabricate_complete_history": true,
+              "erase_known_success": true
+            }
+          },
+          "actual": null,
+          "golden": null
+        },
+        {
+          "case_id": "D03A-07-snapshot_digest_mismatch",
+          "polarity": "negative",
+          "execution_status": "not_run",
+          "input": {
+            "initial_test_facts": {
+              "active_cursor": {
+                "store_id": "synthetic-store-A",
+                "scope_id": "synthetic-scope-S",
+                "stream_id": "synthetic-stream-X",
+                "seq": "10"
+              },
+              "process_epoch": "synthetic-E2",
+              "authority_revision": "synthetic-authority-current",
+              "permission_facts_ref": "synthetic-current-readable-scope",
+              "known_receipt_ref": "synthetic-authoritative-success-receipt"
+            },
+            "stimuli": [
+              {
+                "test_action": "repair_attempt",
+                "fault": "snapshot_digest_mismatch"
+              }
+            ]
+          },
+          "expected": {
+            "required_observations": {
+              "invalid_snapshot_activations": 0,
+              "history_completeness_one_of": [
+                "partial",
+                "unavailable"
+              ],
+              "safe_reason_present": true,
+              "resync_path_present": true,
+              "known_receipt_ref": "synthetic-authoritative-success-receipt"
+            },
+            "forbidden_observations": {
+              "fabricate_complete_history": true,
+              "erase_known_success": true
+            }
+          },
+          "actual": null,
+          "golden": null
+        },
+        {
+          "case_id": "D03A-07-snapshot_schema_incompatible",
+          "polarity": "negative",
+          "execution_status": "not_run",
+          "input": {
+            "initial_test_facts": {
+              "active_cursor": {
+                "store_id": "synthetic-store-A",
+                "scope_id": "synthetic-scope-S",
+                "stream_id": "synthetic-stream-X",
+                "seq": "10"
+              },
+              "process_epoch": "synthetic-E2",
+              "authority_revision": "synthetic-authority-current",
+              "permission_facts_ref": "synthetic-current-readable-scope",
+              "known_receipt_ref": "synthetic-authoritative-success-receipt"
+            },
+            "stimuli": [
+              {
+                "test_action": "repair_attempt",
+                "fault": "snapshot_schema_incompatible"
+              }
+            ]
+          },
+          "expected": {
+            "required_observations": {
+              "invalid_snapshot_activations": 0,
+              "history_completeness_one_of": [
+                "partial",
+                "unavailable"
+              ],
+              "safe_reason_present": true,
+              "resync_path_present": true,
+              "known_receipt_ref": "synthetic-authoritative-success-receipt"
+            },
+            "forbidden_observations": {
+              "fabricate_complete_history": true,
+              "erase_known_success": true
+            }
+          },
+          "actual": null,
+          "golden": null
+        }
+      ]
+    },
+    {
+      "group_id": "D03A-08",
+      "source_refs": [
+        "contract-group-8",
+        "design-recovery",
+        "handbook-recovery"
+      ],
+      "existing_acceptance_refs": [
+        "M12",
+        "REC-F4"
+      ],
+      "cases": [
+        {
+          "case_id": "D03A-08-slow-budget",
+          "polarity": "negative",
+          "execution_status": "not_run",
+          "input": {
+            "initial_test_facts": {
+              "active_cursor": {
+                "store_id": "synthetic-store-A",
+                "scope_id": "synthetic-scope-S",
+                "stream_id": "synthetic-stream-X",
+                "seq": "10"
+              },
+              "process_epoch": "synthetic-E2",
+              "authority_revision": "synthetic-authority-current",
+              "permission_facts_ref": "synthetic-current-readable-scope",
+              "test_buffer_limit": {
+                "event_count": 2,
+                "bytes": 64,
+                "product_default": false
+              }
+            },
+            "stimuli": [
+              {
+                "test_action": "slow_subscription_receives",
+                "event_count": 3,
+                "total_bytes": 96
+              },
+              {
+                "test_action": "coincident_facts",
+                "refs": [
+                  "synthetic-task-terminal",
+                  "synthetic-authority-result",
+                  "synthetic-effect-receipt"
+                ],
+                "progress_ref": "synthetic-ephemeral-progress"
+              }
+            ]
+          },
+          "expected": {
+            "required_observations": {
+              "buffer_peak_events_max": 2,
+              "buffer_peak_bytes_max": 64,
+              "subscription_action_one_of": [
+                "pause",
+                "disconnect"
+              ],
+              "safe_resync_reason_present": true,
+              "authoritative_facts_persisted_first": true,
+              "business_reexecutions": 0
+            },
+            "forbidden_observations": {
+              "unbounded_buffer": true,
+              "drop_terminal_authority_or_receipt": true,
+              "silent_skip": true
+            }
+          },
+          "actual": null,
+          "golden": null
+        },
+        {
+          "case_id": "D03A-08-under-budget",
+          "polarity": "positive",
+          "execution_status": "not_run",
+          "input": {
+            "initial_test_facts": {
+              "active_cursor": {
+                "store_id": "synthetic-store-A",
+                "scope_id": "synthetic-scope-S",
+                "stream_id": "synthetic-stream-X",
+                "seq": "10"
+              },
+              "process_epoch": "synthetic-E2",
+              "authority_revision": "synthetic-authority-current",
+              "permission_facts_ref": "synthetic-current-readable-scope",
+              "test_buffer_limit": {
+                "event_count": 2,
+                "bytes": 64,
+                "product_default": false
+              }
+            },
+            "stimuli": [
+              {
+                "test_action": "receive_authorized_projection_event",
+                "cursor": {
+                  "store_id": "synthetic-store-A",
+                  "scope_id": "synthetic-scope-S",
+                  "stream_id": "synthetic-stream-X",
+                  "seq": "11"
+                },
+                "test_size_bytes": 24
+              }
+            ]
+          },
+          "expected": {
+            "required_observations": {
+              "event_applications": 1,
+              "buffer_within_budget": true
+            },
+            "forbidden_observations": {
+              "ack_proves_business_success": true
+            }
+          },
+          "actual": null,
+          "golden": null
+        }
+      ]
+    },
+    {
+      "group_id": "D03A-09",
+      "source_refs": [
+        "contract-group-9",
+        "design-recovery",
+        "handbook-recovery"
+      ],
+      "existing_acceptance_refs": [
+        "N-R04",
+        "V131-T08",
+        "M11"
+      ],
+      "cases": [
+        {
+          "case_id": "D03A-09-old-display-and-retract",
+          "polarity": "negative",
+          "execution_status": "not_run",
+          "input": {
+            "initial_test_facts": {
+              "active_cursor": {
+                "store_id": "synthetic-store-A",
+                "scope_id": "synthetic-scope-S",
+                "stream_id": "synthetic-stream-X",
+                "seq": "10"
+              },
+              "process_epoch": "synthetic-E2",
+              "authority_revision": "synthetic-authority-current",
+              "permission_facts_ref": "synthetic-current-readable-scope",
+              "current_fragment_ref": "synthetic-E2-fragment-r2",
+              "draft_ref": "synthetic-draft-r3"
+            },
+            "stimuli": [
+              {
+                "test_action": "old_display_callback",
+                "epoch": "synthetic-E1",
+                "fragment_ref": "synthetic-E1-fragment-r1"
+              },
+              {
+                "test_action": "old_retract",
+                "epoch": "synthetic-E1",
+                "scope_ref": "synthetic-scope-S",
+                "fragment_ref": "synthetic-E1-fragment-r1"
+              }
+            ]
+          },
+          "expected": {
+            "required_observations": {
+              "display_updates": 0,
+              "current_fragment_ref": "synthetic-E2-fragment-r2",
+              "draft_ref": "synthetic-draft-r3",
+              "receipt_deletions": 0
+            },
+            "forbidden_observations": {
+              "old_retract_deletes_new_fragment": true
+            }
+          },
+          "actual": null,
+          "golden": null
+        },
+        {
+          "case_id": "D03A-09-old-real-receipt",
+          "polarity": "positive",
+          "execution_status": "not_run",
+          "input": {
+            "initial_test_facts": {
+              "active_cursor": {
+                "store_id": "synthetic-store-A",
+                "scope_id": "synthetic-scope-S",
+                "stream_id": "synthetic-stream-X",
+                "seq": "10"
+              },
+              "process_epoch": "synthetic-E2",
+              "authority_revision": "synthetic-authority-current",
+              "permission_facts_ref": "synthetic-current-readable-scope",
+              "operation_ref": "synthetic-original-operation"
+            },
+            "stimuli": [
+              {
+                "test_action": "old_receipt_hint",
+                "epoch": "synthetic-E1",
+                "intent_ref": "synthetic-original-intent",
+                "operation_ref": "synthetic-original-operation",
+                "attempt_ref": "synthetic-original-attempt",
+                "payload_digest_ref": "synthetic-normalized-digest-A",
+                "source_ref": "synthetic-core-ledger"
+              },
+              {
+                "test_action": "current_connection_readonly_receipt_lookup",
+                "epoch": "synthetic-E2",
+                "matching_identity_and_digest": true,
+                "authoritative_outcome": "succeeded"
+              }
+            ]
+          },
+          "expected": {
+            "required_observations": {
+              "original_effect": "succeeded",
+              "receipt_ref": "synthetic-original-receipt",
+              "old_display_updates": 0,
+              "additional_business_dispatches": 0
+            },
+            "forbidden_observations": {
+              "discard_real_effect_only_due_epoch": true,
+              "hint_alone_generates_authoritative_receipt": true
+            }
+          },
+          "actual": null,
+          "golden": null
+        },
+        {
+          "case_id": "D03A-09-renderer-fake-success",
+          "polarity": "negative",
+          "execution_status": "not_run",
+          "input": {
+            "initial_test_facts": {
+              "active_cursor": {
+                "store_id": "synthetic-store-A",
+                "scope_id": "synthetic-scope-S",
+                "stream_id": "synthetic-stream-X",
+                "seq": "10"
+              },
+              "process_epoch": "synthetic-E2",
+              "authority_revision": "synthetic-authority-current",
+              "permission_facts_ref": "synthetic-current-readable-scope"
+            },
+            "stimuli": [
+              {
+                "test_action": "renderer_receipt_claim",
+                "claimed_outcome": "succeeded",
+                "ledger_match": false
+              }
+            ]
+          },
+          "expected": {
+            "required_observations": {
+              "authoritative_receipts_created": 0,
+              "effect_success_proven": false
+            },
+            "forbidden_observations": {
+              "renderer_claim_is_execution_proof": true
+            }
+          },
+          "actual": null,
+          "golden": null
+        }
+      ]
+    },
+    {
+      "group_id": "D03A-10",
+      "source_refs": [
+        "contract-group-10",
+        "design-recovery",
+        "handbook-recovery"
+      ],
+      "existing_acceptance_refs": [
+        "M19",
+        "N-R04"
+      ],
+      "cases": [
+        {
+          "case_id": "D03A-10-revoked-and-later-object",
+          "polarity": "negative",
+          "execution_status": "not_run",
+          "input": {
+            "initial_test_facts": {
+              "active_cursor": {
+                "store_id": "synthetic-store-A",
+                "scope_id": "synthetic-scope-S",
+                "stream_id": "synthetic-stream-X",
+                "seq": "10"
+              },
+              "process_epoch": "synthetic-E2",
+              "authority_revision": "synthetic-authority-current",
+              "permission_facts_ref": "synthetic-current-readable-scope",
+              "current_supplier_revision": "3",
+              "read_permission": "revoked"
+            },
+            "stimuli": [
+              {
+                "test_action": "old_receipt_hint",
+                "epoch": "synthetic-E1",
+                "effect_revision": "2"
+              },
+              {
+                "test_action": "current_minimal_ledger_lookup",
+                "matching_identity_and_digest": true,
+                "authorized_minimal_audit": true,
+                "outcome": "succeeded"
+              }
+            ]
+          },
+          "expected": {
+            "required_observations": {
+              "restricted_body_exposed": false,
+              "current_supplier_revision": "3",
+              "historical_effect_revision": "2",
+              "historical_effect_preserved": true
+            },
+            "forbidden_observations": {
+              "receipt_regrants_body_read": true,
+              "old_effect_overwrites_current_revision": true
+            }
+          },
+          "actual": null,
+          "golden": null
+        }
+      ]
+    },
+    {
+      "group_id": "D03A-11",
+      "source_refs": [
+        "contract-group-11",
+        "design-recovery",
+        "handbook-recovery"
+      ],
+      "existing_acceptance_refs": [
+        "MEM-E2",
+        "REC-F3",
+        "A01"
+      ],
+      "cases": [
+        {
+          "case_id": "D03A-11-body-permitted",
+          "polarity": "positive",
+          "execution_status": "not_run",
+          "input": {
+            "initial_test_facts": {
+              "active_cursor": {
+                "store_id": "synthetic-store-A",
+                "scope_id": "synthetic-scope-S",
+                "stream_id": "synthetic-stream-X",
+                "seq": "10"
+              },
+              "process_epoch": "synthetic-E2",
+              "authority_revision": "synthetic-authority-current",
+              "permission_facts_ref": "synthetic-current-readable-scope",
+              "pending_input": {
+                "client_message_ref": "synthetic-message-1",
+                "submission_intent_ref": "synthetic-submission-1",
+                "delivery_state_label": "unsent",
+                "draft_revision": "opaque-draft-r2",
+                "body_placeholder_ref": "synthetic-placeholder-body-not-materialized"
+              },
+              "effective_policy": {
+                "chat_retention_policy_ref": "synthetic-retention-authorized",
+                "draft_body_persistence_permitted": true,
+                "minimal_non_body_identity_audit_permitted": true
+              }
+            },
+            "stimuli": [
+              {
+                "test_action": "compression_and_snapshot_replace_projection"
+              },
+              {
+                "test_action": "process_exit_then_restart"
+              }
+            ]
+          },
+          "expected": {
+            "required_observations": {
+              "pending_identity_preserved": true,
+              "snapshot_does_not_overwrite_independent_draft": true,
+              "body_recovery_promised": true,
+              "nonrecoverable_body_notice_required": false,
+              "retention_duration_created": false
+            },
+            "forbidden_observations": {
+              "restore_unpermitted_body": true,
+              "new_retention_switch_or_default": true,
+              "submission_intent_recreated": true
+            }
+          },
+          "actual": null,
+          "golden": null
+        },
+        {
+          "case_id": "D03A-11-body-not-permitted",
+          "polarity": "negative",
+          "execution_status": "not_run",
+          "input": {
+            "initial_test_facts": {
+              "active_cursor": {
+                "store_id": "synthetic-store-A",
+                "scope_id": "synthetic-scope-S",
+                "stream_id": "synthetic-stream-X",
+                "seq": "10"
+              },
+              "process_epoch": "synthetic-E2",
+              "authority_revision": "synthetic-authority-current",
+              "permission_facts_ref": "synthetic-current-readable-scope",
+              "pending_input": {
+                "client_message_ref": "synthetic-message-1",
+                "submission_intent_ref": "synthetic-submission-1",
+                "delivery_state_label": "unsent",
+                "draft_revision": "opaque-draft-r2",
+                "body_placeholder_ref": "synthetic-placeholder-body-not-materialized"
+              },
+              "effective_policy": {
+                "chat_retention_policy_ref": "synthetic-retention-body-not-authorized",
+                "draft_body_persistence_permitted": false,
+                "minimal_non_body_identity_audit_permitted": true
+              }
+            },
+            "stimuli": [
+              {
+                "test_action": "compression_and_snapshot_replace_projection"
+              },
+              {
+                "test_action": "process_exit_then_restart"
+              }
+            ]
+          },
+          "expected": {
+            "required_observations": {
+              "pending_identity_preserved": true,
+              "snapshot_does_not_overwrite_independent_draft": true,
+              "body_recovery_promised": false,
+              "nonrecoverable_body_notice_required": true,
+              "retention_duration_created": false
+            },
+            "forbidden_observations": {
+              "restore_unpermitted_body": true,
+              "new_retention_switch_or_default": true,
+              "submission_intent_recreated": true
+            }
+          },
+          "actual": null,
+          "golden": null
+        }
+      ]
+    },
+    {
+      "group_id": "D03A-12",
+      "source_refs": [
+        "contract-group-12",
+        "design-recovery",
+        "handbook-recovery"
+      ],
+      "existing_acceptance_refs": [
+        "REC-F1",
+        "D03",
+        "M12"
+      ],
+      "cases": [
+        {
+          "case_id": "D03A-12-accepted",
+          "polarity": "positive",
+          "execution_status": "not_run",
+          "input": {
+            "initial_test_facts": {
+              "active_cursor": {
+                "store_id": "synthetic-store-A",
+                "scope_id": "synthetic-scope-S",
+                "stream_id": "synthetic-stream-X",
+                "seq": "10"
+              },
+              "process_epoch": "synthetic-E2",
+              "authority_revision": "synthetic-authority-current",
+              "permission_facts_ref": "synthetic-current-readable-scope",
+              "pending_identity": {
+                "client_message_ref": "synthetic-message-1",
+                "submission_intent_ref": "synthetic-submission-1",
+                "draft_revision": "opaque-draft-r2"
+              }
+            },
+            "stimuli": [
+              {
+                "test_action": "submission_timeout"
+              },
+              {
+                "test_action": "query_original_acceptance_identity",
+                "trusted_result": "accepted"
+              },
+              {
+                "test_action": "duplicate_ipc_delivery"
+              }
+            ]
+          },
+          "expected": {
+            "required_observations": {
+              "delivery_state_label": "confirmed_accepted",
+              "original_confirmed_message_count": 1,
+              "additional_duplicate_confirmed_messages": 0,
+              "new_submission_intents": 0,
+              "new_model_turns": 0,
+              "automatic_resends": 0
+            },
+            "forbidden_observations": {
+              "timeout_means_failed": true,
+              "query_without_evidence_means_delivered": true
+            }
+          },
+          "actual": null,
+          "golden": null
+        },
+        {
+          "case_id": "D03A-12-no_evidence",
+          "polarity": "negative",
+          "execution_status": "not_run",
+          "input": {
+            "initial_test_facts": {
+              "active_cursor": {
+                "store_id": "synthetic-store-A",
+                "scope_id": "synthetic-scope-S",
+                "stream_id": "synthetic-stream-X",
+                "seq": "10"
+              },
+              "process_epoch": "synthetic-E2",
+              "authority_revision": "synthetic-authority-current",
+              "permission_facts_ref": "synthetic-current-readable-scope",
+              "pending_identity": {
+                "client_message_ref": "synthetic-message-1",
+                "submission_intent_ref": "synthetic-submission-1",
+                "draft_revision": "opaque-draft-r2"
+              }
+            },
+            "stimuli": [
+              {
+                "test_action": "submission_timeout"
+              },
+              {
+                "test_action": "query_original_acceptance_identity",
+                "trusted_result": "no_evidence"
+              },
+              {
+                "test_action": "duplicate_ipc_delivery"
+              }
+            ]
+          },
+          "expected": {
+            "required_observations": {
+              "delivery_state_label": "delivery_unknown",
+              "original_confirmed_message_count": 0,
+              "additional_duplicate_confirmed_messages": 0,
+              "new_submission_intents": 0,
+              "new_model_turns": 0,
+              "automatic_resends": 0
+            },
+            "forbidden_observations": {
+              "timeout_means_failed": true,
+              "query_without_evidence_means_delivered": true
+            }
+          },
+          "actual": null,
+          "golden": null
+        }
+      ]
+    },
+    {
+      "group_id": "D03A-13",
+      "source_refs": [
+        "contract-group-13",
+        "design-recovery",
+        "handbook-recovery"
+      ],
+      "existing_acceptance_refs": [
+        "M10",
+        "M20",
+        "N-R05",
+        "M02-R01",
+        "M02-R02",
+        "M02-R04"
+      ],
+      "cases": [
+        {
+          "case_id": "D03A-13-lost-response-receipt",
+          "polarity": "positive",
+          "execution_status": "not_run",
+          "input": {
+            "initial_test_facts": {
+              "active_cursor": {
+                "store_id": "synthetic-store-A",
+                "scope_id": "synthetic-scope-S",
+                "stream_id": "synthetic-stream-X",
+                "seq": "10"
+              },
+              "process_epoch": "synthetic-E2",
+              "authority_revision": "synthetic-authority-current",
+              "permission_facts_ref": "synthetic-current-readable-scope",
+              "supplier_ref": "synthetic-U",
+              "supplier_revision": "1",
+              "intent_ref": "synthetic-intent-original",
+              "key_ref": "synthetic-key-original"
+            },
+            "stimuli": [
+              {
+                "test_action": "atomic_update_commit",
+                "new_revision": "2",
+                "receipt_ref": "synthetic-original-receipt"
+              },
+              {
+                "test_action": "drop_response"
+              },
+              {
+                "test_action": "readonly_receipt_lookup",
+                "identity_and_digest_match": true
+              },
+              {
+                "test_action": "repeat_original_intent",
+                "new_attempt_ref": "synthetic-new-attempt"
+              },
+              {
+                "test_action": "restart_and_repeat_original_intent"
+              }
+            ]
+          },
+          "expected": {
+            "required_observations": {
+              "supplier_revision": "2",
+              "business_write_count_total": 1,
+              "receipt_count_total": 1,
+              "receipt_ref": "synthetic-original-receipt",
+              "lookup_requires_resubmitting_expired_cas_plan": false
+            },
+            "forbidden_observations": {
+              "weaken_selection_guard_to_lookup_receipt": true,
+              "new_attempt_rekeys_original": true
+            }
+          },
+          "actual": null,
+          "golden": null
+        },
+        {
+          "case_id": "D03A-13-same-key-different-name_digest",
+          "polarity": "negative",
+          "execution_status": "not_run",
+          "input": {
+            "initial_test_facts": {
+              "active_cursor": {
+                "store_id": "synthetic-store-A",
+                "scope_id": "synthetic-scope-S",
+                "stream_id": "synthetic-stream-X",
+                "seq": "10"
+              },
+              "process_epoch": "synthetic-E2",
+              "authority_revision": "synthetic-authority-current",
+              "permission_facts_ref": "synthetic-current-readable-scope",
+              "key_ref": "synthetic-key-original",
+              "known_payload_digest_ref": "synthetic-digest-A"
+            },
+            "stimuli": [
+              {
+                "test_action": "reuse_key_with_changed_binding",
+                "changed_binding": "name_digest"
+              }
+            ]
+          },
+          "expected": {
+            "required_observations": {
+              "result": "idempotency_conflict",
+              "additional_business_writes": 0,
+              "automatic_new_keys": 0
+            },
+            "forbidden_observations": {
+              "key_conflict_auto_new_intent": true
+            }
+          },
+          "actual": null,
+          "golden": null
+        },
+        {
+          "case_id": "D03A-13-same-key-different-scope",
+          "polarity": "negative",
+          "execution_status": "not_run",
+          "input": {
+            "initial_test_facts": {
+              "active_cursor": {
+                "store_id": "synthetic-store-A",
+                "scope_id": "synthetic-scope-S",
+                "stream_id": "synthetic-stream-X",
+                "seq": "10"
+              },
+              "process_epoch": "synthetic-E2",
+              "authority_revision": "synthetic-authority-current",
+              "permission_facts_ref": "synthetic-current-readable-scope",
+              "key_ref": "synthetic-key-original",
+              "known_payload_digest_ref": "synthetic-digest-A"
+            },
+            "stimuli": [
+              {
+                "test_action": "reuse_key_with_changed_binding",
+                "changed_binding": "scope"
+              }
+            ]
+          },
+          "expected": {
+            "required_observations": {
+              "result": "idempotency_conflict",
+              "additional_business_writes": 0,
+              "automatic_new_keys": 0
+            },
+            "forbidden_observations": {
+              "key_conflict_auto_new_intent": true
+            }
+          },
+          "actual": null,
+          "golden": null
+        }
+      ]
+    },
+    {
+      "group_id": "D03A-14",
+      "source_refs": [
+        "contract-group-14",
+        "design-recovery",
+        "handbook-recovery"
+      ],
+      "existing_acceptance_refs": [
+        "M02-R03a",
+        "M02-R03b",
+        "M02-R03c",
+        "M10"
+      ],
+      "cases": [
+        {
+          "case_id": "D03A-14-credible-new-same-name",
+          "polarity": "positive",
+          "execution_status": "not_run",
+          "input": {
+            "initial_test_facts": {
+              "active_cursor": {
+                "store_id": "synthetic-store-A",
+                "scope_id": "synthetic-scope-S",
+                "stream_id": "synthetic-stream-X",
+                "seq": "10"
+              },
+              "process_epoch": "synthetic-E2",
+              "authority_revision": "synthetic-authority-current",
+              "permission_facts_ref": "synthetic-current-readable-scope",
+              "supplier_ref": "synthetic-U",
+              "supplier_revision": "2",
+              "canonical_name_placeholder": "synthetic-name-B",
+              "valid_current_cas": true
+            },
+            "stimuli": [
+              {
+                "test_action": "trusted_user_new_instruction",
+                "instruction_ref": "synthetic-user-message-new",
+                "new_intent_ref": "synthetic-intent-new",
+                "raw_name_description": "space + same canonical placeholder + space"
+              },
+              {
+                "test_action": "repeat_same_new_intent"
+              }
+            ]
+          },
+          "expected": {
+            "required_observations": {
+              "supplier_revision": "3",
+              "new_intent_business_write_count": 1,
+              "new_receipt_ref": "synthetic-receipt-new",
+              "repeat_additional_writes": 0,
+              "other_fields_unchanged": true
+            },
+            "forbidden_observations": {
+              "same_canonical_name_implies_no_new_effect_for_new_intent": true
+            }
+          },
+          "actual": null,
+          "golden": null
+        },
+        {
+          "case_id": "D03A-14-key-change-is-not-new-intent",
+          "polarity": "negative",
+          "execution_status": "not_run",
+          "input": {
+            "initial_test_facts": {
+              "active_cursor": {
+                "store_id": "synthetic-store-A",
+                "scope_id": "synthetic-scope-S",
+                "stream_id": "synthetic-stream-X",
+                "seq": "10"
+              },
+              "process_epoch": "synthetic-E2",
+              "authority_revision": "synthetic-authority-current",
+              "permission_facts_ref": "synthetic-current-readable-scope",
+              "original_effect": "outcome_unknown"
+            },
+            "stimuli": [
+              {
+                "test_action": "untrusted_claim_new_intent",
+                "evidence": "only_changed_key"
+              }
+            ]
+          },
+          "expected": {
+            "required_observations": {
+              "new_business_dispatches": 0,
+              "original_effect": "outcome_unknown",
+              "next_operation": "reconcile_original_receipt"
+            },
+            "forbidden_observations": {
+              "changed_key_is_user_instruction": true
+            }
+          },
+          "actual": null,
+          "golden": null
+        }
+      ]
+    },
+    {
+      "group_id": "D03A-15",
+      "source_refs": [
+        "contract-group-15",
+        "design-recovery",
+        "handbook-recovery"
+      ],
+      "existing_acceptance_refs": [
+        "REC-F7",
+        "M11",
+        "M20"
+      ],
+      "cases": [
+        {
+          "case_id": "D03A-15-cancel-before-commit",
+          "polarity": "positive",
+          "execution_status": "not_run",
+          "input": {
+            "initial_test_facts": {
+              "active_cursor": {
+                "store_id": "synthetic-store-A",
+                "scope_id": "synthetic-scope-S",
+                "stream_id": "synthetic-stream-X",
+                "seq": "10"
+              },
+              "process_epoch": "synthetic-E2",
+              "authority_revision": "synthetic-authority-current",
+              "permission_facts_ref": "synthetic-current-readable-scope"
+            },
+            "stimuli": [
+              {
+                "test_action": "trusted_cancel_received_before_commit",
+                "zero_effect_proven": true
+              }
+            ]
+          },
+          "expected": {
+            "required_observations": {
+              "business_writes": 0,
+              "cancellation_terminal_requires_evidence": true
+            },
+            "forbidden_observations": {
+              "cancel_request_alone_proves_cancelled": true
+            }
+          },
+          "actual": null,
+          "golden": null
+        },
+        {
+          "case_id": "D03A-15-cancel-after-commit",
+          "polarity": "negative",
+          "execution_status": "not_run",
+          "input": {
+            "initial_test_facts": {
+              "active_cursor": {
+                "store_id": "synthetic-store-A",
+                "scope_id": "synthetic-scope-S",
+                "stream_id": "synthetic-stream-X",
+                "seq": "10"
+              },
+              "process_epoch": "synthetic-E2",
+              "authority_revision": "synthetic-authority-current",
+              "permission_facts_ref": "synthetic-current-readable-scope"
+            },
+            "stimuli": [
+              {
+                "test_action": "update_committed",
+                "receipt_ref": "synthetic-committed-receipt"
+              },
+              {
+                "test_action": "cancel_requested"
+              },
+              {
+                "test_action": "navigate_close_view"
+              },
+              {
+                "test_action": "late_success_receipt"
+              }
+            ]
+          },
+          "expected": {
+            "required_observations": {
+              "committed_effect": "succeeded",
+              "receipt_ref": "synthetic-committed-receipt",
+              "business_rollbacks": 0,
+              "process_stop_and_effect_independent": true
+            },
+            "forbidden_observations": {
+              "navigation_means_business_rollback": true,
+              "erase_committed_receipt": true,
+              "claim_cancelled_from_request_only": true
+            }
+          },
+          "actual": null,
+          "golden": null
+        }
+      ]
+    },
+    {
+      "group_id": "D03A-16",
+      "source_refs": [
+        "contract-group-16",
+        "design-recovery",
+        "handbook-recovery"
+      ],
+      "existing_acceptance_refs": [
+        "REC-F5",
+        "REC-F6",
+        "N-R06"
+      ],
+      "cases": [
+        {
+          "case_id": "D03A-16-proven-undispatched",
+          "polarity": "positive",
+          "execution_status": "not_run",
+          "input": {
+            "initial_test_facts": {
+              "active_cursor": {
+                "store_id": "synthetic-store-A",
+                "scope_id": "synthetic-scope-S",
+                "stream_id": "synthetic-stream-X",
+                "seq": "10"
+              },
+              "process_epoch": "synthetic-E2",
+              "authority_revision": "synthetic-authority-current",
+              "permission_facts_ref": "synthetic-current-readable-scope",
+              "mode_label": "FullAllow"
+            },
+            "stimuli": [
+              {
+                "test_action": "recover_claimed_operation",
+                "unique_execution_entry": true,
+                "durable_dispatch_boundary_proves_zero_dispatch": true
+              }
+            ]
+          },
+          "expected": {
+            "required_observations": {
+              "effect_phase_label": "not_dispatched",
+              "continuation_requires_current_scope_capability_business_cas": true,
+              "additional_pure_risk_confirmations": 0
+            },
+            "forbidden_observations": {
+              "claim_alone_implies_dispatched": true
+            }
+          },
+          "actual": null,
+          "golden": null
+        },
+        {
+          "case_id": "D03A-16-claim_only",
+          "polarity": "negative",
+          "execution_status": "not_run",
+          "input": {
+            "initial_test_facts": {
+              "active_cursor": {
+                "store_id": "synthetic-store-A",
+                "scope_id": "synthetic-scope-S",
+                "stream_id": "synthetic-stream-X",
+                "seq": "10"
+              },
+              "process_epoch": "synthetic-E2",
+              "authority_revision": "synthetic-authority-current",
+              "permission_facts_ref": "synthetic-current-readable-scope",
+              "mode_label": "FullAllow"
+            },
+            "stimuli": [
+              {
+                "test_action": "recover_operation",
+                "evidence_label": "claim_only",
+                "zero_dispatch_proof": false
+              },
+              {
+                "test_action": "reconcile_original",
+                "reliable_effect_evidence": false
+              }
+            ]
+          },
+          "expected": {
+            "required_observations": {
+              "effect_outcome_label": "outcome_unknown",
+              "automatic_dispatches": 0,
+              "additional_pure_risk_confirmations": 0,
+              "receipt_id_precreated": false
+            },
+            "forbidden_observations": {
+              "unknown_is_failed": true,
+              "not_found_proves_never_executed": true,
+              "ordinary_confirm_resolves_unknown": true
+            }
+          },
+          "actual": null,
+          "golden": null
+        },
+        {
+          "case_id": "D03A-16-possibly_dispatched_receipt_missing",
+          "polarity": "negative",
+          "execution_status": "not_run",
+          "input": {
+            "initial_test_facts": {
+              "active_cursor": {
+                "store_id": "synthetic-store-A",
+                "scope_id": "synthetic-scope-S",
+                "stream_id": "synthetic-stream-X",
+                "seq": "10"
+              },
+              "process_epoch": "synthetic-E2",
+              "authority_revision": "synthetic-authority-current",
+              "permission_facts_ref": "synthetic-current-readable-scope",
+              "mode_label": "FullAllow"
+            },
+            "stimuli": [
+              {
+                "test_action": "recover_operation",
+                "evidence_label": "possibly_dispatched_receipt_missing",
+                "zero_dispatch_proof": false
+              },
+              {
+                "test_action": "reconcile_original",
+                "reliable_effect_evidence": false
+              }
+            ]
+          },
+          "expected": {
+            "required_observations": {
+              "effect_outcome_label": "outcome_unknown",
+              "automatic_dispatches": 0,
+              "additional_pure_risk_confirmations": 0,
+              "receipt_id_precreated": false
+            },
+            "forbidden_observations": {
+              "unknown_is_failed": true,
+              "not_found_proves_never_executed": true,
+              "ordinary_confirm_resolves_unknown": true
+            }
+          },
+          "actual": null,
+          "golden": null
+        },
+        {
+          "case_id": "D03A-16-lookup_not_found",
+          "polarity": "negative",
+          "execution_status": "not_run",
+          "input": {
+            "initial_test_facts": {
+              "active_cursor": {
+                "store_id": "synthetic-store-A",
+                "scope_id": "synthetic-scope-S",
+                "stream_id": "synthetic-stream-X",
+                "seq": "10"
+              },
+              "process_epoch": "synthetic-E2",
+              "authority_revision": "synthetic-authority-current",
+              "permission_facts_ref": "synthetic-current-readable-scope",
+              "mode_label": "FullAllow"
+            },
+            "stimuli": [
+              {
+                "test_action": "recover_operation",
+                "evidence_label": "lookup_not_found",
+                "zero_dispatch_proof": false
+              },
+              {
+                "test_action": "reconcile_original",
+                "reliable_effect_evidence": false
+              }
+            ]
+          },
+          "expected": {
+            "required_observations": {
+              "effect_outcome_label": "outcome_unknown",
+              "automatic_dispatches": 0,
+              "additional_pure_risk_confirmations": 0,
+              "receipt_id_precreated": false
+            },
+            "forbidden_observations": {
+              "unknown_is_failed": true,
+              "not_found_proves_never_executed": true,
+              "ordinary_confirm_resolves_unknown": true
+            }
+          },
+          "actual": null,
+          "golden": null
+        },
+        {
+          "case_id": "D03A-16-lookup_unreadable",
+          "polarity": "negative",
+          "execution_status": "not_run",
+          "input": {
+            "initial_test_facts": {
+              "active_cursor": {
+                "store_id": "synthetic-store-A",
+                "scope_id": "synthetic-scope-S",
+                "stream_id": "synthetic-stream-X",
+                "seq": "10"
+              },
+              "process_epoch": "synthetic-E2",
+              "authority_revision": "synthetic-authority-current",
+              "permission_facts_ref": "synthetic-current-readable-scope",
+              "mode_label": "FullAllow"
+            },
+            "stimuli": [
+              {
+                "test_action": "recover_operation",
+                "evidence_label": "lookup_unreadable",
+                "zero_dispatch_proof": false
+              },
+              {
+                "test_action": "reconcile_original",
+                "reliable_effect_evidence": false
+              }
+            ]
+          },
+          "expected": {
+            "required_observations": {
+              "effect_outcome_label": "outcome_unknown",
+              "automatic_dispatches": 0,
+              "additional_pure_risk_confirmations": 0,
+              "receipt_id_precreated": false
+            },
+            "forbidden_observations": {
+              "unknown_is_failed": true,
+              "not_found_proves_never_executed": true,
+              "ordinary_confirm_resolves_unknown": true
+            }
+          },
+          "actual": null,
+          "golden": null
+        }
+      ]
+    },
+    {
+      "group_id": "D03A-17",
+      "source_refs": [
+        "contract-group-17",
+        "design-recovery",
+        "handbook-recovery"
+      ],
+      "existing_acceptance_refs": [
+        "V131-T05",
+        "N-R06"
+      ],
+      "cases": [
+        {
+          "case_id": "D03A-17-trusted-new-user-intent",
+          "polarity": "positive",
+          "execution_status": "not_run",
+          "input": {
+            "initial_test_facts": {
+              "active_cursor": {
+                "store_id": "synthetic-store-A",
+                "scope_id": "synthetic-scope-S",
+                "stream_id": "synthetic-stream-X",
+                "seq": "10"
+              },
+              "process_epoch": "synthetic-E2",
+              "authority_revision": "synthetic-authority-current",
+              "permission_facts_ref": "synthetic-current-readable-scope",
+              "mode_label": "FullAllow",
+              "old_outcome": "outcome_unknown",
+              "all_hard_prerequisites_valid": true
+            },
+            "stimuli": [
+              {
+                "test_action": "trusted_explicit_user_do_again",
+                "bindings": {
+                  "user_instruction_ref": "synthetic-authentic-user-message",
+                  "original_unknown_action_ref": "synthetic-old-action",
+                  "original_record_version_ref": "synthetic-old-record-r1",
+                  "display_revision_ref": "synthetic-display-r2",
+                  "scope_ref": "synthetic-scope-S",
+                  "action_type_ref": "synthetic-supplier-name-update",
+                  "normalized_target_ref": "synthetic-target-U",
+                  "normalized_parameter_digest_ref": "synthetic-digest-A",
+                  "new_intent_ref": "synthetic-new-intent",
+                  "new_plan_digest_ref": "synthetic-new-plan-digest"
+                },
+                "host_link_ref": "synthetic-acknowledged-unknown-link",
+                "trusted_issuer_fixture": true
+              },
+              {
+                "test_action": "new_operation_succeeds",
+                "new_receipt_ref": "synthetic-new-receipt"
+              }
+            ]
+          },
+          "expected": {
+            "required_observations": {
+              "old_outcome": "outcome_unknown",
+              "new_outcome": "succeeded",
+              "old_and_new_receipts_independent": true,
+              "inline_possible_duplicate_notice": true,
+              "additional_pure_risk_confirmations": 0,
+              "new_intent_ref": "synthetic-new-intent"
+            },
+            "forbidden_observations": {
+              "link_ref_is_authorization_token": true,
+              "new_success_resolves_old_unknown": true
+            }
+          },
+          "actual": null,
+          "golden": null
+        },
+        {
+          "case_id": "D03A-17-renderer_self_ref",
+          "polarity": "negative",
+          "execution_status": "not_run",
+          "input": {
+            "initial_test_facts": {
+              "active_cursor": {
+                "store_id": "synthetic-store-A",
+                "scope_id": "synthetic-scope-S",
+                "stream_id": "synthetic-stream-X",
+                "seq": "10"
+              },
+              "process_epoch": "synthetic-E2",
+              "authority_revision": "synthetic-authority-current",
+              "permission_facts_ref": "synthetic-current-readable-scope",
+              "old_outcome": "outcome_unknown"
+            },
+            "stimuli": [
+              {
+                "test_action": "claim_do_again",
+                "origin": "renderer_self_ref",
+                "authentic_user_instruction_evidence": false
+              }
+            ]
+          },
+          "expected": {
+            "required_observations": {
+              "new_business_dispatches": 0,
+              "old_outcome": "outcome_unknown",
+              "host_link_issued": false
+            },
+            "forbidden_observations": {
+              "non_user_event_is_new_intent": true
+            }
+          },
+          "actual": null,
+          "golden": null
+        },
+        {
+          "case_id": "D03A-17-model_retry",
+          "polarity": "negative",
+          "execution_status": "not_run",
+          "input": {
+            "initial_test_facts": {
+              "active_cursor": {
+                "store_id": "synthetic-store-A",
+                "scope_id": "synthetic-scope-S",
+                "stream_id": "synthetic-stream-X",
+                "seq": "10"
+              },
+              "process_epoch": "synthetic-E2",
+              "authority_revision": "synthetic-authority-current",
+              "permission_facts_ref": "synthetic-current-readable-scope",
+              "old_outcome": "outcome_unknown"
+            },
+            "stimuli": [
+              {
+                "test_action": "claim_do_again",
+                "origin": "model_retry",
+                "authentic_user_instruction_evidence": false
+              }
+            ]
+          },
+          "expected": {
+            "required_observations": {
+              "new_business_dispatches": 0,
+              "old_outcome": "outcome_unknown",
+              "host_link_issued": false
+            },
+            "forbidden_observations": {
+              "non_user_event_is_new_intent": true
+            }
+          },
+          "actual": null,
+          "golden": null
+        },
+        {
+          "case_id": "D03A-17-external_text",
+          "polarity": "negative",
+          "execution_status": "not_run",
+          "input": {
+            "initial_test_facts": {
+              "active_cursor": {
+                "store_id": "synthetic-store-A",
+                "scope_id": "synthetic-scope-S",
+                "stream_id": "synthetic-stream-X",
+                "seq": "10"
+              },
+              "process_epoch": "synthetic-E2",
+              "authority_revision": "synthetic-authority-current",
+              "permission_facts_ref": "synthetic-current-readable-scope",
+              "old_outcome": "outcome_unknown"
+            },
+            "stimuli": [
+              {
+                "test_action": "claim_do_again",
+                "origin": "external_text",
+                "authentic_user_instruction_evidence": false
+              }
+            ]
+          },
+          "expected": {
+            "required_observations": {
+              "new_business_dispatches": 0,
+              "old_outcome": "outcome_unknown",
+              "host_link_issued": false
+            },
+            "forbidden_observations": {
+              "non_user_event_is_new_intent": true
+            }
+          },
+          "actual": null,
+          "golden": null
+        },
+        {
+          "case_id": "D03A-17-network_reconnect",
+          "polarity": "negative",
+          "execution_status": "not_run",
+          "input": {
+            "initial_test_facts": {
+              "active_cursor": {
+                "store_id": "synthetic-store-A",
+                "scope_id": "synthetic-scope-S",
+                "stream_id": "synthetic-stream-X",
+                "seq": "10"
+              },
+              "process_epoch": "synthetic-E2",
+              "authority_revision": "synthetic-authority-current",
+              "permission_facts_ref": "synthetic-current-readable-scope",
+              "old_outcome": "outcome_unknown"
+            },
+            "stimuli": [
+              {
+                "test_action": "claim_do_again",
+                "origin": "network_reconnect",
+                "authentic_user_instruction_evidence": false
+              }
+            ]
+          },
+          "expected": {
+            "required_observations": {
+              "new_business_dispatches": 0,
+              "old_outcome": "outcome_unknown",
+              "host_link_issued": false
+            },
+            "forbidden_observations": {
+              "non_user_event_is_new_intent": true
+            }
+          },
+          "actual": null,
+          "golden": null
+        },
+        {
+          "case_id": "D03A-17-ordinary_confirmation",
+          "polarity": "negative",
+          "execution_status": "not_run",
+          "input": {
+            "initial_test_facts": {
+              "active_cursor": {
+                "store_id": "synthetic-store-A",
+                "scope_id": "synthetic-scope-S",
+                "stream_id": "synthetic-stream-X",
+                "seq": "10"
+              },
+              "process_epoch": "synthetic-E2",
+              "authority_revision": "synthetic-authority-current",
+              "permission_facts_ref": "synthetic-current-readable-scope",
+              "old_outcome": "outcome_unknown"
+            },
+            "stimuli": [
+              {
+                "test_action": "claim_do_again",
+                "origin": "ordinary_confirmation",
+                "authentic_user_instruction_evidence": false
+              }
+            ]
+          },
+          "expected": {
+            "required_observations": {
+              "new_business_dispatches": 0,
+              "old_outcome": "outcome_unknown",
+              "host_link_issued": false
+            },
+            "forbidden_observations": {
+              "non_user_event_is_new_intent": true
+            }
+          },
+          "actual": null,
+          "golden": null
+        },
+        {
+          "case_id": "D03A-17-timeout",
+          "polarity": "negative",
+          "execution_status": "not_run",
+          "input": {
+            "initial_test_facts": {
+              "active_cursor": {
+                "store_id": "synthetic-store-A",
+                "scope_id": "synthetic-scope-S",
+                "stream_id": "synthetic-stream-X",
+                "seq": "10"
+              },
+              "process_epoch": "synthetic-E2",
+              "authority_revision": "synthetic-authority-current",
+              "permission_facts_ref": "synthetic-current-readable-scope",
+              "old_outcome": "outcome_unknown"
+            },
+            "stimuli": [
+              {
+                "test_action": "claim_do_again",
+                "origin": "timeout",
+                "authentic_user_instruction_evidence": false
+              }
+            ]
+          },
+          "expected": {
+            "required_observations": {
+              "new_business_dispatches": 0,
+              "old_outcome": "outcome_unknown",
+              "host_link_issued": false
+            },
+            "forbidden_observations": {
+              "non_user_event_is_new_intent": true
+            }
+          },
+          "actual": null,
+          "golden": null
+        },
+        {
+          "case_id": "D03A-17-mode_switch",
+          "polarity": "negative",
+          "execution_status": "not_run",
+          "input": {
+            "initial_test_facts": {
+              "active_cursor": {
+                "store_id": "synthetic-store-A",
+                "scope_id": "synthetic-scope-S",
+                "stream_id": "synthetic-stream-X",
+                "seq": "10"
+              },
+              "process_epoch": "synthetic-E2",
+              "authority_revision": "synthetic-authority-current",
+              "permission_facts_ref": "synthetic-current-readable-scope",
+              "old_outcome": "outcome_unknown"
+            },
+            "stimuli": [
+              {
+                "test_action": "claim_do_again",
+                "origin": "mode_switch",
+                "authentic_user_instruction_evidence": false
+              }
+            ]
+          },
+          "expected": {
+            "required_observations": {
+              "new_business_dispatches": 0,
+              "old_outcome": "outcome_unknown",
+              "host_link_issued": false
+            },
+            "forbidden_observations": {
+              "non_user_event_is_new_intent": true
+            }
+          },
+          "actual": null,
+          "golden": null
+        }
+      ]
+    },
+    {
+      "group_id": "D03A-18",
+      "source_refs": [
+        "contract-group-18",
+        "design-recovery",
+        "handbook-recovery"
+      ],
+      "existing_acceptance_refs": [
+        "V131-T05",
+        "M19"
+      ],
+      "cases": [
+        {
+          "case_id": "D03A-18-changed-original_record_version",
+          "polarity": "negative",
+          "execution_status": "not_run",
+          "input": {
+            "initial_test_facts": {
+              "active_cursor": {
+                "store_id": "synthetic-store-A",
+                "scope_id": "synthetic-scope-S",
+                "stream_id": "synthetic-stream-X",
+                "seq": "10"
+              },
+              "process_epoch": "synthetic-E2",
+              "authority_revision": "synthetic-authority-current",
+              "permission_facts_ref": "synthetic-current-readable-scope",
+              "mode_label": "FullAllow",
+              "previous_link_ref": "synthetic-old-link",
+              "old_outcome": "outcome_unknown"
+            },
+            "stimuli": [
+              {
+                "test_action": "binding_changes_before_dispatch",
+                "changed_binding": "original_record_version"
+              }
+            ]
+          },
+          "expected": {
+            "required_observations": {
+              "stale_link_dispatches": 0,
+              "next_operation": "reconcile_and_refresh_plan_and_display",
+              "additional_pure_risk_confirmations": 0,
+              "old_outcome": "outcome_unknown"
+            },
+            "forbidden_observations": {
+              "blind_dispatch_under_stale_link": true
+            }
+          },
+          "actual": null,
+          "golden": null
+        },
+        {
+          "case_id": "D03A-18-changed-display_revision",
+          "polarity": "negative",
+          "execution_status": "not_run",
+          "input": {
+            "initial_test_facts": {
+              "active_cursor": {
+                "store_id": "synthetic-store-A",
+                "scope_id": "synthetic-scope-S",
+                "stream_id": "synthetic-stream-X",
+                "seq": "10"
+              },
+              "process_epoch": "synthetic-E2",
+              "authority_revision": "synthetic-authority-current",
+              "permission_facts_ref": "synthetic-current-readable-scope",
+              "mode_label": "FullAllow",
+              "previous_link_ref": "synthetic-old-link",
+              "old_outcome": "outcome_unknown"
+            },
+            "stimuli": [
+              {
+                "test_action": "binding_changes_before_dispatch",
+                "changed_binding": "display_revision"
+              }
+            ]
+          },
+          "expected": {
+            "required_observations": {
+              "stale_link_dispatches": 0,
+              "next_operation": "reconcile_and_refresh_plan_and_display",
+              "additional_pure_risk_confirmations": 0,
+              "old_outcome": "outcome_unknown"
+            },
+            "forbidden_observations": {
+              "blind_dispatch_under_stale_link": true
+            }
+          },
+          "actual": null,
+          "golden": null
+        },
+        {
+          "case_id": "D03A-18-changed-normalized_parameters",
+          "polarity": "negative",
+          "execution_status": "not_run",
+          "input": {
+            "initial_test_facts": {
+              "active_cursor": {
+                "store_id": "synthetic-store-A",
+                "scope_id": "synthetic-scope-S",
+                "stream_id": "synthetic-stream-X",
+                "seq": "10"
+              },
+              "process_epoch": "synthetic-E2",
+              "authority_revision": "synthetic-authority-current",
+              "permission_facts_ref": "synthetic-current-readable-scope",
+              "mode_label": "FullAllow",
+              "previous_link_ref": "synthetic-old-link",
+              "old_outcome": "outcome_unknown"
+            },
+            "stimuli": [
+              {
+                "test_action": "binding_changes_before_dispatch",
+                "changed_binding": "normalized_parameters"
+              }
+            ]
+          },
+          "expected": {
+            "required_observations": {
+              "stale_link_dispatches": 0,
+              "next_operation": "reconcile_and_refresh_plan_and_display",
+              "additional_pure_risk_confirmations": 0,
+              "old_outcome": "outcome_unknown"
+            },
+            "forbidden_observations": {
+              "blind_dispatch_under_stale_link": true
+            }
+          },
+          "actual": null,
+          "golden": null
+        },
+        {
+          "case_id": "D03A-18-changed-scope",
+          "polarity": "negative",
+          "execution_status": "not_run",
+          "input": {
+            "initial_test_facts": {
+              "active_cursor": {
+                "store_id": "synthetic-store-A",
+                "scope_id": "synthetic-scope-S",
+                "stream_id": "synthetic-stream-X",
+                "seq": "10"
+              },
+              "process_epoch": "synthetic-E2",
+              "authority_revision": "synthetic-authority-current",
+              "permission_facts_ref": "synthetic-current-readable-scope",
+              "mode_label": "FullAllow",
+              "previous_link_ref": "synthetic-old-link",
+              "old_outcome": "outcome_unknown"
+            },
+            "stimuli": [
+              {
+                "test_action": "binding_changes_before_dispatch",
+                "changed_binding": "scope"
+              }
+            ]
+          },
+          "expected": {
+            "required_observations": {
+              "stale_link_dispatches": 0,
+              "next_operation": "reconcile_and_refresh_plan_and_display",
+              "additional_pure_risk_confirmations": 0,
+              "old_outcome": "outcome_unknown"
+            },
+            "forbidden_observations": {
+              "blind_dispatch_under_stale_link": true
+            }
+          },
+          "actual": null,
+          "golden": null
+        },
+        {
+          "case_id": "D03A-18-changed-expected_revision",
+          "polarity": "negative",
+          "execution_status": "not_run",
+          "input": {
+            "initial_test_facts": {
+              "active_cursor": {
+                "store_id": "synthetic-store-A",
+                "scope_id": "synthetic-scope-S",
+                "stream_id": "synthetic-stream-X",
+                "seq": "10"
+              },
+              "process_epoch": "synthetic-E2",
+              "authority_revision": "synthetic-authority-current",
+              "permission_facts_ref": "synthetic-current-readable-scope",
+              "mode_label": "FullAllow",
+              "previous_link_ref": "synthetic-old-link",
+              "old_outcome": "outcome_unknown"
+            },
+            "stimuli": [
+              {
+                "test_action": "binding_changes_before_dispatch",
+                "changed_binding": "expected_revision"
+              }
+            ]
+          },
+          "expected": {
+            "required_observations": {
+              "stale_link_dispatches": 0,
+              "next_operation": "reconcile_and_refresh_plan_and_display",
+              "additional_pure_risk_confirmations": 0,
+              "old_outcome": "outcome_unknown"
+            },
+            "forbidden_observations": {
+              "blind_dispatch_under_stale_link": true
+            }
+          },
+          "actual": null,
+          "golden": null
+        },
+        {
+          "case_id": "D03A-18-pure-risk-only",
+          "polarity": "positive",
+          "execution_status": "not_run",
+          "input": {
+            "initial_test_facts": {
+              "active_cursor": {
+                "store_id": "synthetic-store-A",
+                "scope_id": "synthetic-scope-S",
+                "stream_id": "synthetic-stream-X",
+                "seq": "10"
+              },
+              "process_epoch": "synthetic-E2",
+              "authority_revision": "synthetic-authority-current",
+              "permission_facts_ref": "synthetic-current-readable-scope",
+              "mode_label": "FullAllow",
+              "high_risk_label": true,
+              "all_scope_purpose_capability_business_cas_valid": true,
+              "credible_new_intent": true
+            },
+            "stimuli": [
+              {
+                "test_action": "evaluate_current_new_intent_plan"
+              }
+            ]
+          },
+          "expected": {
+            "required_observations": {
+              "additional_pure_risk_confirmations": 0,
+              "pure_risk_pause": false,
+              "hard_prerequisites_checked": true
+            },
+            "forbidden_observations": {
+              "risk_only_hidden_hold": true
+            }
+          },
+          "actual": null,
+          "golden": null
+        },
+        {
+          "case_id": "D03A-18-scope_unauthorized",
+          "polarity": "negative",
+          "execution_status": "not_run",
+          "input": {
+            "initial_test_facts": {
+              "active_cursor": {
+                "store_id": "synthetic-store-A",
+                "scope_id": "synthetic-scope-S",
+                "stream_id": "synthetic-stream-X",
+                "seq": "10"
+              },
+              "process_epoch": "synthetic-E2",
+              "authority_revision": "synthetic-authority-current",
+              "permission_facts_ref": "synthetic-current-readable-scope",
+              "mode_label": "FullAllow",
+              "credible_new_intent": true
+            },
+            "stimuli": [
+              {
+                "test_action": "hard_prerequisite_fails",
+                "reason": "scope_unauthorized"
+              }
+            ]
+          },
+          "expected": {
+            "required_observations": {
+              "business_writes": 0,
+              "result": "reject_or_replan_with_true_reason",
+              "additional_pure_risk_confirmations": 0
+            },
+            "forbidden_observations": {
+              "FullAllow_overrides_hard_prerequisite": true
+            }
+          },
+          "actual": null,
+          "golden": null
+        },
+        {
+          "case_id": "D03A-18-capability_unavailable",
+          "polarity": "negative",
+          "execution_status": "not_run",
+          "input": {
+            "initial_test_facts": {
+              "active_cursor": {
+                "store_id": "synthetic-store-A",
+                "scope_id": "synthetic-scope-S",
+                "stream_id": "synthetic-stream-X",
+                "seq": "10"
+              },
+              "process_epoch": "synthetic-E2",
+              "authority_revision": "synthetic-authority-current",
+              "permission_facts_ref": "synthetic-current-readable-scope",
+              "mode_label": "FullAllow",
+              "credible_new_intent": true
+            },
+            "stimuli": [
+              {
+                "test_action": "hard_prerequisite_fails",
+                "reason": "capability_unavailable"
+              }
+            ]
+          },
+          "expected": {
+            "required_observations": {
+              "business_writes": 0,
+              "result": "reject_or_replan_with_true_reason",
+              "additional_pure_risk_confirmations": 0
+            },
+            "forbidden_observations": {
+              "FullAllow_overrides_hard_prerequisite": true
+            }
+          },
+          "actual": null,
+          "golden": null
+        },
+        {
+          "case_id": "D03A-18-business_illegal",
+          "polarity": "negative",
+          "execution_status": "not_run",
+          "input": {
+            "initial_test_facts": {
+              "active_cursor": {
+                "store_id": "synthetic-store-A",
+                "scope_id": "synthetic-scope-S",
+                "stream_id": "synthetic-stream-X",
+                "seq": "10"
+              },
+              "process_epoch": "synthetic-E2",
+              "authority_revision": "synthetic-authority-current",
+              "permission_facts_ref": "synthetic-current-readable-scope",
+              "mode_label": "FullAllow",
+              "credible_new_intent": true
+            },
+            "stimuli": [
+              {
+                "test_action": "hard_prerequisite_fails",
+                "reason": "business_illegal"
+              }
+            ]
+          },
+          "expected": {
+            "required_observations": {
+              "business_writes": 0,
+              "result": "reject_or_replan_with_true_reason",
+              "additional_pure_risk_confirmations": 0
+            },
+            "forbidden_observations": {
+              "FullAllow_overrides_hard_prerequisite": true
+            }
+          },
+          "actual": null,
+          "golden": null
+        },
+        {
+          "case_id": "D03A-18-cas_conflict",
+          "polarity": "negative",
+          "execution_status": "not_run",
+          "input": {
+            "initial_test_facts": {
+              "active_cursor": {
+                "store_id": "synthetic-store-A",
+                "scope_id": "synthetic-scope-S",
+                "stream_id": "synthetic-stream-X",
+                "seq": "10"
+              },
+              "process_epoch": "synthetic-E2",
+              "authority_revision": "synthetic-authority-current",
+              "permission_facts_ref": "synthetic-current-readable-scope",
+              "mode_label": "FullAllow",
+              "credible_new_intent": true
+            },
+            "stimuli": [
+              {
+                "test_action": "hard_prerequisite_fails",
+                "reason": "cas_conflict"
+              }
+            ]
+          },
+          "expected": {
+            "required_observations": {
+              "business_writes": 0,
+              "result": "reject_or_replan_with_true_reason",
+              "additional_pure_risk_confirmations": 0
+            },
+            "forbidden_observations": {
+              "FullAllow_overrides_hard_prerequisite": true
+            }
+          },
+          "actual": null,
+          "golden": null
+        }
+      ]
+    },
+    {
+      "group_id": "D03A-19",
+      "source_refs": [
+        "contract-group-19",
+        "design-recovery",
+        "handbook-recovery"
+      ],
+      "existing_acceptance_refs": [
+        "N-R08",
+        "D03",
+        "D06",
+        "P3"
+      ],
+      "cases": [
+        {
+          "case_id": "D03A-19-preserved_dispatch_evidence",
+          "polarity": "negative",
+          "execution_status": "not_run",
+          "input": {
+            "initial_test_facts": {
+              "active_cursor": {
+                "store_id": "synthetic-store-A",
+                "scope_id": "synthetic-scope-S",
+                "stream_id": "synthetic-stream-X",
+                "seq": "10"
+              },
+              "process_epoch": "synthetic-E2",
+              "authority_revision": "synthetic-authority-current",
+              "permission_facts_ref": "synthetic-current-readable-scope",
+              "backup_row_phase": "prepared",
+              "backup_status": "historical_unreconciled",
+              "original_intent_ref": "synthetic-original-intent",
+              "original_key_ref": "synthetic-original-key",
+              "coverage_phase": "later_D03_D06_P3_not_first_slice_implementation"
+            },
+            "stimuli": [
+              {
+                "test_action": "restore_backup_with_new_stream",
+                "new_cursor": {
+                  "store_id": "synthetic-store-A",
+                  "scope_id": "synthetic-scope-S",
+                  "stream_id": "synthetic-restored-stream-Y",
+                  "seq": "1"
+                }
+              },
+              {
+                "test_action": "check_current_preserved_ledger_or_provider",
+                "evidence": "preserved_dispatch_evidence",
+                "reliable_final_receipt": false
+              }
+            ]
+          },
+          "expected": {
+            "required_observations": {
+              "effect_outcome_label": "outcome_unknown",
+              "automatic_dispatches": 0,
+              "intent_ref": "synthetic-original-intent",
+              "key_ref": "synthetic-original-key",
+              "historical_prepared_proves_zero_dispatch": false
+            },
+            "forbidden_observations": {
+              "stream_change_grants_another_execution": true,
+              "backup_rolls_back_external_world": true
+            }
+          },
+          "actual": null,
+          "golden": null
+        },
+        {
+          "case_id": "D03A-19-current_ledger_missing",
+          "polarity": "negative",
+          "execution_status": "not_run",
+          "input": {
+            "initial_test_facts": {
+              "active_cursor": {
+                "store_id": "synthetic-store-A",
+                "scope_id": "synthetic-scope-S",
+                "stream_id": "synthetic-stream-X",
+                "seq": "10"
+              },
+              "process_epoch": "synthetic-E2",
+              "authority_revision": "synthetic-authority-current",
+              "permission_facts_ref": "synthetic-current-readable-scope",
+              "backup_row_phase": "prepared",
+              "backup_status": "historical_unreconciled",
+              "original_intent_ref": "synthetic-original-intent",
+              "original_key_ref": "synthetic-original-key",
+              "coverage_phase": "later_D03_D06_P3_not_first_slice_implementation"
+            },
+            "stimuli": [
+              {
+                "test_action": "restore_backup_with_new_stream",
+                "new_cursor": {
+                  "store_id": "synthetic-store-A",
+                  "scope_id": "synthetic-scope-S",
+                  "stream_id": "synthetic-restored-stream-Y",
+                  "seq": "1"
+                }
+              },
+              {
+                "test_action": "check_current_preserved_ledger_or_provider",
+                "evidence": "current_ledger_missing",
+                "reliable_final_receipt": false
+              }
+            ]
+          },
+          "expected": {
+            "required_observations": {
+              "effect_outcome_label": "outcome_unknown",
+              "automatic_dispatches": 0,
+              "intent_ref": "synthetic-original-intent",
+              "key_ref": "synthetic-original-key",
+              "historical_prepared_proves_zero_dispatch": false
+            },
+            "forbidden_observations": {
+              "stream_change_grants_another_execution": true,
+              "backup_rolls_back_external_world": true
+            }
+          },
+          "actual": null,
+          "golden": null
+        }
+      ]
+    }
+  ]
+}

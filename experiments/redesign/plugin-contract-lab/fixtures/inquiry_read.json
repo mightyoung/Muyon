@@ -1,0 +1,314 @@
+{
+  "module_id": "inquiry",
+  "protocol_version": 1,
+  "data": [
+    {
+      "name": "supplier",
+      "schema_version": 1,
+      "schema": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "address": {
+            "type": "string"
+          },
+          "notes": {
+            "type": "string"
+          },
+          "rating_note": {
+            "type": "string"
+          },
+          "aliases": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 20
+          },
+          "categories": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 128
+          },
+          "merged_into": {
+            "type": "object",
+            "properties": {
+              "module_id": {
+                "type": "string"
+              },
+              "type": {
+                "type": "string"
+              },
+              "key": {
+                "type": "string"
+              },
+              "revision": {
+                "type": "string"
+              },
+              "schema_version": {
+                "type": "integer"
+              }
+            },
+            "required": [
+              "module_id",
+              "type",
+              "key",
+              "revision",
+              "schema_version"
+            ],
+            "additionalProperties": false,
+            "data_ref": "inquiry/supplier@1"
+          },
+          "rating": {
+            "type": "string",
+            "enum": [
+              "preferred",
+              "caution",
+              "disabled"
+            ]
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "additionalProperties": false
+      },
+      "classification": {
+        "name": "none",
+        "address": "none",
+        "notes": "none",
+        "rating_note": "none",
+        "aliases": "none",
+        "categories": "none",
+        "merged_into": "none",
+        "rating": "none"
+      }
+    },
+    {
+      "name": "product",
+      "schema_version": 1,
+      "schema": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "unit": {
+            "type": "string"
+          },
+          "brand": {
+            "type": "string"
+          },
+          "model": {
+            "type": "string"
+          },
+          "specification": {
+            "type": "string"
+          },
+          "category": {
+            "type": "string"
+          },
+          "notes": {
+            "type": "string"
+          },
+          "spec_class": {
+            "type": "string"
+          },
+          "merged_into": {
+            "type": "object",
+            "properties": {
+              "module_id": {
+                "type": "string"
+              },
+              "type": {
+                "type": "string"
+              },
+              "key": {
+                "type": "string"
+              },
+              "revision": {
+                "type": "string"
+              },
+              "schema_version": {
+                "type": "integer"
+              }
+            },
+            "required": [
+              "module_id",
+              "type",
+              "key",
+              "revision",
+              "schema_version"
+            ],
+            "additionalProperties": false,
+            "data_ref": "inquiry/product@1"
+          }
+        },
+        "required": [
+          "name",
+          "unit"
+        ],
+        "additionalProperties": false
+      },
+      "classification": {
+        "name": "none",
+        "unit": "none",
+        "brand": "none",
+        "model": "none",
+        "specification": "none",
+        "category": "none",
+        "notes": "none",
+        "spec_class": "none",
+        "merged_into": "none"
+      }
+    }
+  ],
+  "relations": [
+    {
+      "name": "supplier_merged_into",
+      "schema_version": 1,
+      "from": "inquiry/supplier@1",
+      "field": "merged_into",
+      "to": "inquiry/supplier@1",
+      "many": false
+    },
+    {
+      "name": "product_merged_into",
+      "schema_version": 1,
+      "from": "inquiry/product@1",
+      "field": "merged_into",
+      "to": "inquiry/product@1",
+      "many": false
+    }
+  ],
+  "operations": [
+    {
+      "name": "object",
+      "schema_version": 1,
+      "effect": "read",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "supplier",
+              "product"
+            ]
+          },
+          "id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "id"
+        ],
+        "additionalProperties": false
+      },
+      "projection_schema": {
+        "type": "object",
+        "properties": {
+          "objects": {
+            "type": "object",
+            "properties": {
+              "supplier": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "module_id": {
+                      "type": "string"
+                    },
+                    "type": {
+                      "type": "string"
+                    },
+                    "key": {
+                      "type": "string"
+                    },
+                    "revision": {
+                      "type": "string"
+                    },
+                    "schema_version": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "module_id",
+                    "type",
+                    "key",
+                    "revision",
+                    "schema_version"
+                  ],
+                  "additionalProperties": false,
+                  "data_ref": "inquiry/supplier@1"
+                },
+                "maxItems": 128
+              },
+              "product": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "module_id": {
+                      "type": "string"
+                    },
+                    "type": {
+                      "type": "string"
+                    },
+                    "key": {
+                      "type": "string"
+                    },
+                    "revision": {
+                      "type": "string"
+                    },
+                    "schema_version": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "module_id",
+                    "type",
+                    "key",
+                    "revision",
+                    "schema_version"
+                  ],
+                  "additionalProperties": false,
+                  "data_ref": "inquiry/product@1"
+                },
+                "maxItems": 128
+              }
+            },
+            "required": [],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "objects"
+        ],
+        "additionalProperties": false
+      },
+      "data_refs": [
+        "inquiry/supplier@1",
+        "inquiry/product@1"
+      ],
+      "binding_id": "host-inquiry-read"
+    }
+  ],
+  "views": [
+    {
+      "name": "object_details",
+      "data_refs": [
+        "inquiry/supplier@1",
+        "inquiry/product@1"
+      ],
+      "operation_refs": [
+        "inquiry/object@1"
+      ]
+    }
+  ]
+}

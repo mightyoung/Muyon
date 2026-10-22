@@ -1,0 +1,13 @@
+   Compiling muyon-core v0.1.0 (/private/tmp/muyon-android-refactor-20261020/crates/muyon-core)
+    Finished `test` profile [unoptimized] target(s) in 2.55s
+     Running tests/agent_product.rs (crates/target/debug/deps/agent_product-089e83d2421d9f59)
+
+running 6 tests
+test missing_live_owners_are_explicitly_unavailable_without_synthetic_fallback ... ok
+test response_requires_full_terminal_answer_and_usage_not_http_success ... ok
+test tools_reject_writes_scope_injection_duplicate_keys_and_unbounded_pages ... ok
+test old_epoch_read_scope_cannot_be_reused_after_service_restart ... ok
+test suppliers_are_current_database_reads_and_deleted_records_are_not_context ... ok
+test newly_added_paper_is_read_from_selected_project_without_raw_json_or_blob_path ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.09s

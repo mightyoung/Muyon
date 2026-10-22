@@ -1,0 +1,113 @@
+{
+  "source": "d1df23200df0ffaccac6edddd3b2115aaa6cfb42",
+  "pr": 97,
+  "final_acceptance": "PASS_DEDICATED_API26_CI_NATIVE_RESULT_GATES",
+  "verification_scope": "Synthetic offline only; native job/step metadata, no individual test stdout downloaded",
+  "local_request_wait": "PASS_SYNTHETIC_POLICY_ONLY",
+  "local_device_evidence_probe": "PASS_FAKE_TOOLS_ONLY",
+  "historical_result": "RESULT-f6af8ac4.json",
+  "runs": [
+    {
+      "id": 39198555958,
+      "source": "a2cc7dbb426ef924d77703d911dd6427b11e68c5",
+      "status": "completed",
+      "conclusion": "success",
+      "attempt": 1,
+      "jobs": [
+        {
+          "id": 117886504712,
+          "name": "native (arm64-v8a)",
+          "conclusion": "success"
+        },
+        {
+          "id": 117886504893,
+          "name": "native (x86_64)",
+          "conclusion": "success"
+        },
+        {
+          "id": 117886505177,
+          "name": "scoped",
+          "conclusion": "success"
+        },
+        {
+          "id": 117886988681,
+          "name": "package-device",
+          "conclusion": "success"
+        }
+      ]
+    },
+    {
+      "id": 39198796362,
+      "source": "f6af8ac4e76127cffe89f7921e1421ab55a121c6",
+      "status": "completed",
+      "conclusion": "failure",
+      "attempt": 1,
+      "jobs": [
+        {
+          "id": 117888565879,
+          "name": "native (arm64-v8a)",
+          "conclusion": "success"
+        },
+        {
+          "id": 117888566210,
+          "name": "native (x86_64)",
+          "conclusion": "success"
+        },
+        {
+          "id": 117888566218,
+          "name": "scoped",
+          "conclusion": "success"
+        },
+        {
+          "id": 117888967417,
+          "name": "package-device",
+          "conclusion": "failure"
+        }
+      ]
+    },
+    {
+      "id": 39214397484,
+      "source": "d1df23200df0ffaccac6edddd3b2115aaa6cfb42",
+      "status": "completed",
+      "conclusion": "success",
+      "attempt": 1,
+      "jobs": [
+        {
+          "id": 117934779670,
+          "name": "native (x86_64)",
+          "conclusion": "success"
+        },
+        {
+          "id": 117934779992,
+          "name": "scoped",
+          "conclusion": "success"
+        },
+        {
+          "id": 117934780077,
+          "name": "native (arm64-v8a)",
+          "conclusion": "success"
+        },
+        {
+          "id": 117935307330,
+          "name": "package-device",
+          "conclusion": "success"
+        }
+      ]
+    }
+  ],
+  "new_denied_own_log": {
+    "job": 117934779992,
+    "status": 403,
+    "attempts": 1,
+    "retry": false,
+    "alternate_retrieval": false
+  },
+  "raw_device_output": "NOT_RETRIEVED",
+  "individual_device_stdout": "NOT_OBTAINED",
+  "cause": "Second-request assertion could observe first-request completed rendering while real snapshot had new submitting request with empty answer; exact request terminal synchronization added",
+  "artifacts_downloaded": false,
+  "i04_executed": false,
+  "real_model_used": false,
+  "merge_performed": false,
+  "pr86_dependency_hold": "UNCHANGED"
+}

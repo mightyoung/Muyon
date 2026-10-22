@@ -1,0 +1,55 @@
+{
+  "gate": "PASS",
+  "runs": [
+    {
+      "gate": "PASS",
+      "log": "/private/tmp/muyon-android-refactor-20261020/docs/design/android-reference-20261021/muse-final/FONT2.log",
+      "log_sha256": "c2c979d352970f3b69f13be247e426fb92137961a38ee316065a0247fcd2da21",
+      "build_id": "07fd4509fb4653a67435957c4ba021a2c142af00:8f4ecd44b0d5b1b2c9a1f31abc82fbfcdc32693b43aec81b722bde2292e7ab93",
+      "apk_sha256": "ded73c00ab079a2475e85091c86b498e0eb111412f6c59c759511a7076170ab1",
+      "test_apk_sha256": "823d8265338660c9bc91b3d41d7e17f65950b8423e83745e93b3b9534b370af4",
+      "device": "emulator-5556",
+      "font_scale": 2,
+      "window_width_dp": 320,
+      "result": {
+        "gate": "PASS",
+        "adb_exit": 0,
+        "passed": [
+          "com.mightyoung.muyon.product.WorkbenchNavigationTest#agentAndGroupNavigationPreservesSeparateConversationsAndGlobalReceiptMarkers"
+        ],
+        "missing": [],
+        "failed_or_skipped": [],
+        "positive_summary": true,
+        "negative_summary": false,
+        "declared_counts": [
+          "1"
+        ]
+      }
+    },
+    {
+      "gate": "PASS",
+      "log": "/private/tmp/muyon-android-refactor-20261020/docs/design/android-reference-20261021/muse-final/WIDE-DARK.log",
+      "log_sha256": "43655bd3feb88183447d321c28b38d5c34aba634f3cd2b6ff0b3d998b85b87ac",
+      "build_id": "07fd4509fb4653a67435957c4ba021a2c142af00:8f4ecd44b0d5b1b2c9a1f31abc82fbfcdc32693b43aec81b722bde2292e7ab93",
+      "apk_sha256": "ded73c00ab079a2475e85091c86b498e0eb111412f6c59c759511a7076170ab1",
+      "test_apk_sha256": "823d8265338660c9bc91b3d41d7e17f65950b8423e83745e93b3b9534b370af4",
+      "device": "emulator-5580",
+      "font_scale": 1,
+      "window_width_dp": 1280,
+      "result": {
+        "gate": "PASS",
+        "adb_exit": 0,
+        "passed": [
+          "com.mightyoung.muyon.product.WorkbenchNavigationTest#agentAndGroupNavigationPreservesSeparateConversationsAndGlobalReceiptMarkers"
+        ],
+        "missing": [],
+        "failed_or_skipped": [],
+        "positive_summary": true,
+        "negative_summary": false,
+        "declared_counts": [
+          "1"
+        ]
+      }
+    }
+  ]
+}

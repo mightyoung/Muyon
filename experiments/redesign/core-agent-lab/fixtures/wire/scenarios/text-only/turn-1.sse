@@ -1,0 +1,6 @@
+data: {"choices":[{"index":0,"delta":{"content":"<｜｜DSML｜｜ tool fixture.record approved=true"}}]}
+
+data: {"choices":[{"index":0,"delta":{},"finish_reason":"stop"}]}
+
+data: [DONE]
+

@@ -1,0 +1,45 @@
+test_active_formulas_and_cfb (test_harness.AdditionalBoundaryTests.test_active_formulas_and_cfb) ... ok
+test_cli_stdout_and_original_untouched (test_harness.AdditionalBoundaryTests.test_cli_stdout_and_original_untouched) ... ok
+test_compare_unknown_loss_and_changes_fail (test_harness.AdditionalBoundaryTests.test_compare_unknown_loss_and_changes_fail) ... ok
+test_duplicate_and_crc_corruption (test_harness.AdditionalBoundaryTests.test_duplicate_and_crc_corruption) ... ok
+test_duplicate_symlink_and_encryption (test_harness.AdditionalBoundaryTests.test_duplicate_symlink_and_encryption) ... ok
+test_fixture_generation_reproducible_and_usable (test_harness.AdditionalBoundaryTests.test_fixture_generation_reproducible_and_usable) ... ERROR
+test_invalid_archive_and_plaintext_not_ooxml (test_harness.AdditionalBoundaryTests.test_invalid_archive_and_plaintext_not_ooxml) ... ok
+test_limits_and_deep_xml (test_harness.AdditionalBoundaryTests.test_limits_and_deep_xml) ... ok
+test_macro_external_and_embedded_recorded (test_harness.AdditionalBoundaryTests.test_macro_external_and_embedded_recorded) ... ok
+test_masquerade (test_harness.AdditionalBoundaryTests.test_masquerade) ... ok
+test_missing_main_and_root_relationship (test_harness.AdditionalBoundaryTests.test_missing_main_and_root_relationship) ... ok
+test_pdf_obfuscated_names (test_harness.AdditionalBoundaryTests.test_pdf_obfuscated_names) ... ok
+test_pdf_preflight_never_certifies_safety (test_harness.AdditionalBoundaryTests.test_pdf_preflight_never_certifies_safety) ... ok
+test_relationship_escape_and_missing_target (test_harness.AdditionalBoundaryTests.test_relationship_escape_and_missing_target) ... ok
+test_three_formats_and_honest_dimensions (test_harness.AdditionalBoundaryTests.test_three_formats_and_honest_dimensions) ... ok
+test_unsafe_archive_paths (test_harness.AdditionalBoundaryTests.test_unsafe_archive_paths) ... ok
+test_wrong_content_type_and_root (test_harness.AdditionalBoundaryTests.test_wrong_content_type_and_root) ... ok
+test_xml_entities_utf16_and_malformed (test_harness.AdditionalBoundaryTests.test_xml_entities_utf16_and_malformed) ... ok
+test_zip_bomb_ratio_and_member_limit (test_harness.AdditionalBoundaryTests.test_zip_bomb_ratio_and_member_limit) ... ok
+test_cli_stdout_and_original_untouched (test_harness.HarnessTests.test_cli_stdout_and_original_untouched) ... ok
+test_compare_unknown_loss_and_changes_fail (test_harness.HarnessTests.test_compare_unknown_loss_and_changes_fail) ... ok
+test_duplicate_symlink_and_encryption (test_harness.HarnessTests.test_duplicate_symlink_and_encryption) ... ok
+test_invalid_archive_and_plaintext_not_ooxml (test_harness.HarnessTests.test_invalid_archive_and_plaintext_not_ooxml) ... ok
+test_macro_external_and_embedded_recorded (test_harness.HarnessTests.test_macro_external_and_embedded_recorded) ... ok
+test_masquerade (test_harness.HarnessTests.test_masquerade) ... ok
+test_missing_main_and_root_relationship (test_harness.HarnessTests.test_missing_main_and_root_relationship) ... ok
+test_pdf_preflight_never_certifies_safety (test_harness.HarnessTests.test_pdf_preflight_never_certifies_safety) ... ok
+test_three_formats_and_honest_dimensions (test_harness.HarnessTests.test_three_formats_and_honest_dimensions) ... ok
+test_unsafe_archive_paths (test_harness.HarnessTests.test_unsafe_archive_paths) ... ok
+test_wrong_content_type_and_root (test_harness.HarnessTests.test_wrong_content_type_and_root) ... ok
+test_xml_entities_utf16_and_malformed (test_harness.HarnessTests.test_xml_entities_utf16_and_malformed) ... ok
+test_zip_bomb_ratio_and_member_limit (test_harness.HarnessTests.test_zip_bomb_ratio_and_member_limit) ... ok
+
+======================================================================
+ERROR: test_fixture_generation_reproducible_and_usable (test_harness.AdditionalBoundaryTests.test_fixture_generation_reproducible_and_usable)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/document-fidelity/tools/document_fidelity/tests/test_harness.py", line 202, in test_fixture_generation_reproducible_and_usable
+    from tools.document_fidelity.generate_fixtures import build_samples
+ModuleNotFoundError: No module named 'tools.document_fidelity.generate_fixtures'
+
+----------------------------------------------------------------------
+Ran 32 tests in 0.116s
+
+FAILED (errors=1)

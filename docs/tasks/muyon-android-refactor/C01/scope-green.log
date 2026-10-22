@@ -1,0 +1,35 @@
+WARNING: A terminally deprecated method in sun.misc.Unsafe has been called
+WARNING: sun.misc.Unsafe::objectFieldOffset has been called by org.jetbrains.kotlin.com.intellij.util.containers.Unsafe (file:/Users/muyi/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-compiler-embeddable/2.2.20/bb8331b7585e36ea311825b01a1c06860c055fd1/kotlin-compiler-embeddable-2.2.20.jar)
+WARNING: Please consider reporting this to the maintainers of class org.jetbrains.kotlin.com.intellij.util.containers.Unsafe
+WARNING: sun.misc.Unsafe::objectFieldOffset will be removed in a future release
+transport_compile_exit 0
+PASS content-length-one-post
+PASS search-fixed-endpoint-path
+PASS chunked-repeated-unrelated-headers
+PASS duplicate-length-rejected
+PASS ambiguous-framing-rejected
+PASS non-success-status-rejected
+PASS truncated-body-rejected
+PASS unsupported-purpose-rejected
+PASS cancelled-before-write-no-bytes
+PASS repeated-authorize-cannot-write-twice
+PASS deadline-watchdog-closes
+PASS cancel-before-write-zero-bytes
+PASS write-before-cancel-serialized
+PASS configuration-before-write-zero-bytes
+PASS write-before-configuration-serialized
+PASS release-before-write-zero-bytes
+PASS write-before-release-serialized
+PASS close-before-write-zero-bytes
+PASS write-before-close-serialized
+PASS scope-before-write-zero-bytes
+PASS write-before-scope-serialized
+PASS released-session-cannot-register-late
+PASS scope-away-and-back-never-restores-old-generation
+RESULT 23 passed; 0 failed; no network
+transport_run_exit 0
+WARNING: A terminally deprecated method in sun.misc.Unsafe has been called
+WARNING: sun.misc.Unsafe::objectFieldOffset has been called by org.jetbrains.kotlin.com.intellij.util.containers.Unsafe (file:/Users/muyi/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-compiler-embeddable/2.2.20/bb8331b7585e36ea311825b01a1c06860c055fd1/kotlin-compiler-embeddable-2.2.20.jar)
+WARNING: Please consider reporting this to the maintainers of class org.jetbrains.kotlin.com.intellij.util.containers.Unsafe
+WARNING: sun.misc.Unsafe::objectFieldOffset will be removed in a future release
+runtime_compile_exit 0

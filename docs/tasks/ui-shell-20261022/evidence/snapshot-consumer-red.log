@@ -1,0 +1,3 @@
+Exception in thread "main" java.lang.IllegalStateException: valid original scoped snapshot must remain visible
+	at com.mightyoung.muyon.product.ui.shell.ReadOnlySnapshotChecksKt.main(ReadOnlySnapshotChecks.kt:16)
+	at com.mightyoung.muyon.product.ui.shell.ReadOnlySnapshotChecksKt.main(ReadOnlySnapshotChecks.kt)

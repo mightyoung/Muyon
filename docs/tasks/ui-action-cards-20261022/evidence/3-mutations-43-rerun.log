@@ -1,0 +1,27 @@
+Fresh rerun; NOT an earlier original log
+UTC: 2026-10-22T04:05:11.758324+00:00
+Source HEAD: 0519403abdf0f23e9104a022c3c4c8629ef1e1f3
+CardModels SHA256: 63861186694aba10e7a926995389732ef6891538c296f23a8683719fafe58038
+Checks SHA256: 9c125c757038b7bd68a6c48b10a22b61d1eb964b3ba54992f188b84e3e47553c
+unknown-cancellable compile exit: 0
+unknown-cancellable runtime exit: 1
+Exception in thread "main" java.lang.IllegalStateException: Check failed.
+	at com.mightyoung.muyon.product.ui.cards.CardProjectionChecksKt.verify(CardProjectionChecks.kt:4)
+	at com.mightyoung.muyon.product.ui.cards.CardProjectionChecksKt.main(CardProjectionChecks.kt:16)
+	at com.mightyoung.muyon.product.ui.cards.CardProjectionChecksKt.main(CardProjectionChecks.kt)
+unknown-cancellable: KILLED (runtime assertion)
+unknown-draft-editable compile exit: 0
+unknown-draft-editable runtime exit: 1
+Exception in thread "main" java.lang.IllegalStateException: Check failed.
+	at com.mightyoung.muyon.product.ui.cards.CardProjectionChecksKt.verify(CardProjectionChecks.kt:4)
+	at com.mightyoung.muyon.product.ui.cards.CardProjectionChecksKt.main(CardProjectionChecks.kt:71)
+	at com.mightyoung.muyon.product.ui.cards.CardProjectionChecksKt.main(CardProjectionChecks.kt)
+unknown-draft-editable: KILLED (runtime assertion)
+conflict-can-save compile exit: 0
+conflict-can-save runtime exit: 1
+Exception in thread "main" java.lang.IllegalStateException: Check failed.
+	at com.mightyoung.muyon.product.ui.cards.CardProjectionChecksKt.verify(CardProjectionChecks.kt:4)
+	at com.mightyoung.muyon.product.ui.cards.CardProjectionChecksKt.main(CardProjectionChecks.kt:75)
+	at com.mightyoung.muyon.product.ui.cards.CardProjectionChecksKt.main(CardProjectionChecks.kt)
+conflict-can-save: KILLED (runtime assertion)
+PASS: 3/3 safety mutants killed

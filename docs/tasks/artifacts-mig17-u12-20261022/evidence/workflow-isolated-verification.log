@@ -1,0 +1,2 @@
+NOT_RUN: cargo not installed; no installation attempted
+HISTORY_WORKFLOW_ISOLATED_VERIFICATION_EXIT=127

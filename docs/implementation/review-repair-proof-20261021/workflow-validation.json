@@ -1,0 +1,66 @@
+{
+  "workflow_sha256": "5be8cc21382ceebe3538587966e8d57c6828ed6bed056c3ad2e0d129665f5f62",
+  "actionlint_version": "1.7.12",
+  "actionlint_archive_sha256": "aba9ced2dee8d27fecca3dc7feb1a7f9a52caefa1eb46f3271ea66b6e0e6953f",
+  "old_context_errors": 3,
+  "old_exit": 1,
+  "fixed_exit": 0,
+  "scope": "actionlint syntax/expression checks with optional shellcheck and pyflakes disabled; inline bash syntax checked separately",
+  "bash_steps": [
+    {
+      "job": "rust-and-checkers",
+      "step": "Record exact source and install fixed toolchain",
+      "bash_syntax_exit": 0
+    },
+    {
+      "job": "rust-and-checkers",
+      "step": "Provision locked Cargo dependencies",
+      "bash_syntax_exit": 0
+    },
+    {
+      "job": "rust-and-checkers",
+      "step": "Required offline production tests and strict Clippy",
+      "bash_syntax_exit": 0
+    },
+    {
+      "job": "android-product",
+      "step": "Record exact source and require provisioned model source",
+      "bash_syntax_exit": 0
+    },
+    {
+      "job": "android-product",
+      "step": "Provision fixed toolchains and locked dependencies",
+      "bash_syntax_exit": 0
+    },
+    {
+      "job": "android-product",
+      "step": "Provision and independently revalidate fixed offline model assets",
+      "bash_syntax_exit": 0
+    },
+    {
+      "job": "android-product",
+      "step": "Build real two-ABI product and embedding libraries",
+      "bash_syntax_exit": 0
+    },
+    {
+      "job": "android-product",
+      "step": "Generate Android bridge from current Rust source",
+      "bash_syntax_exit": 0
+    },
+    {
+      "job": "android-product",
+      "step": "Provision Maven artifacts by compiling the actual product",
+      "bash_syntax_exit": 0
+    },
+    {
+      "job": "android-product",
+      "step": "Required clean offline product build, instrumentation compilation and lint",
+      "bash_syntax_exit": 0
+    },
+    {
+      "job": "required-product",
+      "step": "Fail closed unless both real product gates succeeded",
+      "bash_syntax_exit": 0
+    }
+  ]
+}

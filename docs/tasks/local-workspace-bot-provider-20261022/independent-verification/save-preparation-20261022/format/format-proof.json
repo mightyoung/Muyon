@@ -1,0 +1,39 @@
+{
+  "base_combination": "b0d3d952355e4f0ed6547b5a25acd7f8787b64a8",
+  "provider_source": "098d9aca214e6642c1b3ffde64921ebedbae335d",
+  "argv": [
+    "/tmp/muyon-rust/bin/rustfmt",
+    "--edition",
+    "2021",
+    "/tmp/muyon-provider-preparation-format-expected/crates/muyon-core/src/bot_drafts.rs",
+    "/tmp/muyon-provider-preparation-format-expected/crates/muyon-core/tests/bot_drafts.rs",
+    "/tmp/muyon-provider-preparation-format-expected/crates/muyon-android-ffi/src/lib.rs"
+  ],
+  "start_utc": "2026-10-22T06:26:40.502927+00:00",
+  "end_utc": "2026-10-22T06:26:40.556061+00:00",
+  "exit_status": 0,
+  "files": [
+    {
+      "path": "crates/muyon-core/src/bot_drafts.rs",
+      "before_sha256": "6514165380738130e639d4be1ab5440e1bcb09c7d82fd0184b22b986e0d3c678",
+      "expected_sha256": "04e326766840fb1341c8b68661e69aaab5f50270536dee3c00cd4c2d58532668"
+    },
+    {
+      "path": "crates/muyon-core/tests/bot_drafts.rs",
+      "before_sha256": "3a220688234b765578167fda4c48e3d6de342f2e0187b2eb23db3493f931462e",
+      "expected_sha256": "99c0ebe9c9d39a7aa5452d08469cc51d6ddfa98b52d603ecb8fb168cbd857302"
+    },
+    {
+      "path": "crates/muyon-android-ffi/src/lib.rs",
+      "before_sha256": "ef9ee96b960319e71a2d96a56eea79e2a2f17eb03888f2182cbef1c0a81f9d84",
+      "expected_sha256": "7eceb441400b23d7862716d2daa9c354c4f0ff868fa2967c8ffcbdb7d596f6db"
+    }
+  ],
+  "scope": "Only exact rustfmt output; no logic or test expectation edits. FFI is still uncompiled due offline cache.",
+  "format_commit": "111e51178645bdcf147a8a24a0caf3a76755db39",
+  "changed_paths": [
+    "crates/muyon-android-ffi/src/lib.rs",
+    "crates/muyon-core/src/bot_drafts.rs",
+    "crates/muyon-core/tests/bot_drafts.rs"
+  ]
+}

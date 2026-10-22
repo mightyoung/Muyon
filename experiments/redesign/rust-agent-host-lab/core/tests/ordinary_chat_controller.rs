@@ -1,0 +1,276 @@
+//! New-root, no-network ordinary chat acceptance. Never invokes old HTTP/reopen paths.
+use muyon_plugin_contract_lab::{parse, string, Json};
+use muyon_rust_agent_host_lab::{service_controller::AgentServiceController, service_host::*, service_provider::*, service_types::*, ordinary_chat::*};
+use std::{collections::{BTreeSet,BTreeMap}, path::PathBuf, rc::Rc, sync::{Arc, Mutex, Condvar}};
+type Result<T> = std::result::Result<T,String>;
+#[derive(Default)]
+struct Facts { revoked: bool, generation: u64, sends: usize, held: BTreeSet<String>, used: BTreeSet<String>, payloads: Vec<Vec<u8>>, lose: bool, rotate_on_reserve: bool, rotate_on_commit:bool, output_secret:bool, profile_drift:bool, contexts:BTreeMap<String,Json>, attempts:BTreeSet<String>, call_limit:usize, denied_inputs:BTreeSet<String>, revoke_after_reserve:Option<String>, change_after_reserve:Option<PathBuf>, exchange_gate:Option<Arc<(Mutex<(bool,bool)>,Condvar)>> }
+struct Owner(Arc<Mutex<Facts>>);
+fn binding() -> ProviderBinding {
+    ProviderBinding { profile: ConfiguredProfile { id:"fixture-profile".into(),endpoint:"https://ordinary-chat.invalid/v1/chat/completions".into(),endpoint_identity:"fixture-endpoint".into(),provider:"synthetic".into(),model:"fixture-chat-model".into(),location:ModelLocation::OwnDevice,purpose:ModelPurpose::Chat,credential_ref:"fixture-handle".into(),declared:Capabilities{tool_calls:false,streaming:false},tested:Capabilities{tool_calls:false,streaming:false}},profile_revision:"p1".into(),policy_revision:"policy1".into(),grant_revision:"grant1".into(),authorization_owner:"fixture-owner".into(),model_allowed:true,outbound_allowed:true,budget:ProviderBudget{revision:"synthetic-epoch1".into(),quota_proof:"synthetic-total-byte-bound1".into(),remaining_calls:2,remaining_tokens:16384,remaining_micros:2} }
+}
+impl ServiceHostOwner for Owner {
+    fn current_scope(&self)->Result<ServiceHostScope> { panic!("ordinary chat must not invent supplier scope") }
+    fn provider(&self)->Result<ServiceProviderBridge> { Ok(ServiceProviderBridge::new(Rc::new(Owner(self.0.clone())))) }
+    fn chat_authority(&self, conversation:&str, text:&str)->Result<ChatAuthority> {
+        let f=self.0.lock().unwrap();
+        Ok(ChatAuthority { workspace:"fixture-workspace".into(), conversation:conversation.into(), owner:"fixture-owner".into(), mode:"full-allow".into(), policy_revision:"policy1".into(), grant_revision:"grant1".into(), rule_revision:"USER-TEXT-v1".into(), restriction_revision:"source1".into(), sensitivity:"personal".into(), active:!f.revoked && !f.denied_inputs.contains(text), model_allowed:true, outbound_allowed:true, inherited_allowed:true, synthetic:true })
+    }
+}
+impl ServiceProviderHost for Owner {
+    fn current_binding(&self)->Result<Option<ProviderBinding>> {let mut b=binding();let f=self.0.lock().unwrap();if f.profile_drift{b.profile_revision="changed".into()}if f.call_limit>0{b.budget.remaining_calls=f.call_limit as u64;b.budget.remaining_tokens=8192*f.call_limit as u64;b.budget.remaining_micros=f.call_limit as u64;}Ok(Some(b)) }
+    fn credential_handle(&self,p:&ConfiguredProfile)->Result<Option<CredentialHandle>> { let f=self.0.lock().unwrap();Ok(Some(CredentialHandle::with_generation(&p.id,&p.credential_ref,&format!("fixture-generation-{}",f.generation),f.generation+1)?)) }
+    fn review_payload(&self,_:&ProviderBinding,p:&[u8])->Result<()> { if self.0.lock().unwrap().revoked || p.is_empty(){Err("denied".into())}else{Ok(())} }
+    fn reserve_budget(&self,_:&ProviderBinding,id:&str,_:&[u8],_:&CallBudget)->Result<String> { let mut f=self.0.lock().unwrap();if f.used.contains(id)||f.held.contains(id)||f.used.len()+f.held.len()>=if f.call_limit==0{2}else{f.call_limit}{return Err("quota".into())}f.held.insert(id.into());if f.rotate_on_reserve{f.generation+=1;}
+        if let Some(input)=f.revoke_after_reserve.take(){f.denied_inputs.insert(input);}
+        if let Some(dir)=f.change_after_reserve.take(){
+            let source=dir.join("source.db");let send=dir.join("ordinary-send-v1.db");
+            let mut a=parse(&std::fs::read(&source).unwrap()).unwrap();let mut b=parse(&std::fs::read(&send).unwrap()).unwrap();
+            if let Json::Object(fields)=&mut a {if let Some(Json::Array(events))=fields.get_mut("events") {if let Json::Object(event)=&mut events[0] {event.insert("payload".into(),muyon_plugin_contract_lab::object([("text",string("changed allowed answer"))]));}}}
+            if let Json::Object(fields)=&mut b {fields.insert("answer".into(),string("changed allowed answer"));if let Some(Json::Object(usage))=fields.get_mut("usage"){usage.insert("output".into(),Json::Number("22".into()));}}
+            std::fs::write(source,a.encode()).unwrap();std::fs::write(send,b.encode()).unwrap();
+        }
+        Ok(id.into()) }
+    fn release_reservation(&self,id:&str)->Result<()> {let mut f=self.0.lock().unwrap();f.held.remove(id);f.used.insert(id.into());Ok(())}
+    fn commit_admission(&self,r:&str,_:&ProviderBinding,_:&str,_:&[u8],_:&CredentialHandle)->Result<String>{let mut f=self.0.lock().unwrap();if !f.held.remove(r)||f.revoked{return Err("denied".into())}f.used.insert(r.into());if f.rotate_on_commit{f.generation+=1;}Ok(format!("admission-{r}"))}
+    fn bind_chat_context(&self,reservation:&str,_:&ProviderBinding,_:&str,_:&[u8],_:&CredentialHandle,context:&Json)->Result<()> {
+        let mut f=self.0.lock().unwrap();if !f.held.contains(reservation)||f.contexts.insert(format!("admission-{reservation}"),context.clone()).is_some(){return Err("context".into())}Ok(())
+    }
+    fn exchange_chat(&self,admission:&ProviderAdmission,context:&Json)->Result<ChatResponse>{let mut f=self.0.lock().unwrap();if f.revoked || admission.credential_handle().identity()!=format!("fixture-generation-{}",f.generation) || admission.credential_handle().generation()!=Some(f.generation+1) || f.contexts.get(admission.record_id())!=Some(context) || !f.attempts.insert(admission.record_id().into()){return Err("changed".into())}assert_eq!(context.object()?["workspace"],string("fixture-workspace"));f.sends+=1;f.payloads.push(admission.payload().to_vec());if f.lose{return Err("lost".into())}let answer:String=if f.output_secret{"Bearer synthetic-output-canary".into()}else{"离线普通文本响应".into()};let gate=f.exchange_gate.clone();drop(f);if let Some(gate)=gate {let (lock,signal)=&*gate;let mut state=lock.lock().unwrap();state.0=true;signal.notify_all();while !state.1{state=signal.wait(state).unwrap();}}Ok(ChatResponse{input_tokens:admission.payload().len() as u64,output_tokens:answer.len() as u64,answer,synthetic:true})}
+}
+fn open(facts:Arc<Mutex<Facts>>)->(PathBuf,AgentServiceController,AgentClientRef) {
+    let path=std::env::temp_dir().join(format!("ordinary-chat-new-{}-{}",std::process::id(),std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).unwrap().as_nanos()));
+    muyon_core_agent_lab::store::create_dir(&path).unwrap();
+    let ports=Arc::new(ServiceHostPorts::new(Arc::new(Owner(facts)),ServiceHostMode::ConfiguredChat,CallBudget{max_tokens:8192,max_micros:1,requires_tools:false,requires_streaming:false}));
+    let c=AgentServiceController::new_with_host(AgentHostServiceConfig{protocol:1,private_root:path.to_string_lossy().into(),build_identity:"a".repeat(40)},ports).unwrap();c.await_settled();
+    let reply=c.connect(AgentConnectRequest{protocol:1,platform_client_key:"b".repeat(32)});let AgentConnectOutcome::Connected{client_lease,..}=reply.outcome else {panic!("connect")};
+    let client=AgentClientRef{protocol:1,expected_service_epoch:reply.meta.service_epoch,client_lease};c.set_visibility(AgentVisibilityRequest{client:client.clone(),observation_generation:1,visible:true});(path,c,client)
+}
+fn submit(c:&AgentServiceController,client:&AgentClientRef,id:&str,text:&str)->Json {
+    submit_in(c,client,id,"conversation-current",text)
+}
+fn submit_in(c:&AgentServiceController,client:&AgentClientRef,id:&str,conversation:&str,text:&str)->Json {
+    c.submit_ordinary_chat(client.clone(),id.into(),conversation.into(),text.into());c.await_settled();parse(c.supplier_read_events(client.clone(),id.into(),0).as_bytes()).unwrap()
+}
+fn clean(path:PathBuf,c:AgentServiceController){c.retire_service();c.await_settled();drop(c);std::fs::remove_dir_all(path).unwrap();}
+#[test]
+fn compose_contract_reaches_same_agent_with_frozen_plain_text_and_no_supplier_authority(){
+    let f=Arc::new(Mutex::new(Facts::default()));let(path,c,client)=open(f.clone());let reply=submit(&c,&client,"chat1","请概括普通文本");
+    assert_eq!(reply.object().unwrap()["terminal"],Json::Bool(true));let events=reply.object().unwrap()["events"].array().unwrap();assert_eq!(events.len(),3,"{}",reply.encode());assert_eq!(events[0].object().unwrap()["payload"].object().unwrap()["text"],string("离线普通文本响应"));assert!(!reply.encode().contains("supplier_projection"));assert!(reply.encode().contains("provider_receipt"));assert!(reply.encode().contains("completed"));
+    let run=reply.object().unwrap()["run_id"].string().unwrap();let dir=path.join("native-agent-service-v1").join(run);assert!(dir.join("ordinary-agent-v1.db").is_file());assert!(!dir.join("task.db").exists());assert!(!dir.join("native.db").exists());
+    let frozen=parse(&std::fs::read(dir.join("ordinary-send-v1.db")).unwrap()).unwrap();assert_eq!(frozen.object().unwrap()["context"].object().unwrap()["conversation"],string("conversation-current"));assert!(frozen.encode().contains("USER-TEXT-v1"));
+    let sent=f.lock().unwrap().payloads[0].clone();assert_eq!(parse(&sent).unwrap().object().unwrap()["model"],string("fixture-chat-model"));assert_eq!(parse(&sent).unwrap().object().unwrap()["messages"].array().unwrap()[0].object().unwrap()["content"],string("请概括普通文本"));assert_eq!(frozen.object().unwrap()["payload"],parse(&sent).unwrap());
+    let duplicate=submit(&c,&client,"chat1","请概括普通文本");assert!(duplicate.encode().contains("completed"));assert_eq!(f.lock().unwrap().sends,1);
+    f.lock().unwrap().revoked=true;let denied=c.supplier_read_events(client,"chat1".into(),0);assert!(denied.contains("DISCLOSURE_UNAVAILABLE"));assert!(!denied.contains("离线普通文本响应"));clean(path,c);
+}
+#[test]
+fn credentials_and_generation_rotation_never_reach_fake_transport(){
+    let f=Arc::new(Mutex::new(Facts::default()));let(path,c,client)=open(f.clone());let reply=submit(&c,&client,"secret1","Bearer synthetic-canary-do-not-send");assert!(!reply.encode().contains("synthetic-canary"));assert!(!reply.encode().contains("completed"));assert_eq!(f.lock().unwrap().sends,0);clean(path,c);
+    let f=Arc::new(Mutex::new(Facts{rotate_on_reserve:true,..Facts::default()}));let(path,c,client)=open(f.clone());let reply=submit(&c,&client,"rotate1","hello");assert!(!reply.encode().contains("completed"));assert_eq!(f.lock().unwrap().sends,0);clean(path,c);
+}
+#[test]
+fn lost_response_is_unknown_and_polling_or_duplicate_never_retries(){
+    let f=Arc::new(Mutex::new(Facts{lose:true,..Facts::default()}));let(path,c,client)=open(f.clone());let reply=submit(&c,&client,"lost1","hello");assert!(reply.encode().contains("outcome_unknown"));for _ in 0..3 {let _=submit(&c,&client,"lost1","hello");}assert_eq!(f.lock().unwrap().sends,1);clean(path,c);
+}
+
+#[test]
+fn output_signals_post_commit_rotation_and_quota_preserve_no_retry_boundary(){
+    for facts in [Facts{output_secret:true,..Facts::default()},Facts{rotate_on_commit:true,..Facts::default()}] {
+        let f=Arc::new(Mutex::new(facts));let(path,c,client)=open(f.clone());let reply=submit(&c,&client,"bounded1","hello");assert!(reply.encode().contains("outcome_unknown"));assert!(!reply.encode().contains("synthetic-output-canary"));let sent=f.lock().unwrap().sends;submit(&c,&client,"bounded1","hello");assert_eq!(f.lock().unwrap().sends,sent);clean(path,c);
+    }
+    let f=Arc::new(Mutex::new(Facts::default()));let(path,c,client)=open(f.clone());
+    let first=submit(&c,&client,"quota1","first ordinary input");
+    let second=submit(&c,&client,"quota2","second ordinary input");
+    let mut contexts=Vec::new();let mut receipts=Vec::new();
+    for (index,(reply,request,text)) in [(&first,"quota1","first ordinary input"),(&second,"quota2","second ordinary input")].into_iter().enumerate() {
+        assert_eq!(reply.object().unwrap()["terminal"],Json::Bool(true));
+        let events=reply.object().unwrap()["events"].array().unwrap();assert_eq!(events.len(),3);
+        assert_eq!(events[0].object().unwrap()["kind"],string("answer_delta"));
+        assert_eq!(events[2].object().unwrap()["payload"].object().unwrap()["state"],string("completed"));
+        let run=reply.object().unwrap()["run_id"].string().unwrap();
+        let frozen=parse(&std::fs::read(path.join("native-agent-service-v1").join(run).join("ordinary-send-v1.db")).unwrap()).unwrap();
+        let context=frozen.object().unwrap()["context"].clone();
+        assert_eq!(context.object().unwrap()["conversation"],string("conversation-current"));
+        assert_eq!(context.object().unwrap()["input_ref"],string(format!("{run}:{request}")));
+        let wire=&frozen.object().unwrap()["payload"];
+        let messages=wire.object().unwrap()["messages"].array().unwrap();assert_eq!(messages.len(),1+2*index);
+        assert_eq!(messages.last().unwrap().object().unwrap()["content"],string(text));
+        contexts.push(context);receipts.push(frozen.object().unwrap()["admission"].clone());
+    }
+    assert_ne!(first.object().unwrap()["run_id"],second.object().unwrap()["run_id"]);
+    assert_eq!(first.object().unwrap()["admitted_service_epoch"],second.object().unwrap()["admitted_service_epoch"]);
+    assert_ne!(contexts[0].object().unwrap()["task"],contexts[1].object().unwrap()["task"]);
+    assert_ne!(contexts[0].object().unwrap()["attempt"],contexts[1].object().unwrap()["attempt"]);
+    assert_ne!(receipts[0],receipts[1]);
+    let third=submit(&c,&client,"quota3","third ordinary input");
+    let events=third.object().unwrap()["events"].array().unwrap();assert_eq!(events.len(),1);
+    assert_eq!(events[0].object().unwrap()["kind"],string("terminal"));
+    let terminal=events[0].object().unwrap()["payload"].object().unwrap();
+    assert_eq!(terminal["state"],string("failed"));
+    assert_eq!(terminal["reason"],string("provider_budget_reservation_failed"));
+    let replay=submit(&c,&client,"quota3","third ordinary input");assert_eq!(third,replay);
+    for _ in 0..2 {
+        let lookup=parse(c.supplier_read_events(client.clone(),"quota3".into(),1).as_bytes()).unwrap();
+        assert_eq!(lookup.object().unwrap()["terminal"],Json::Bool(true));
+        assert!(lookup.object().unwrap()["events"].array().unwrap().is_empty());
+        assert_eq!(lookup.object().unwrap()["next_cursor"],Json::Number("1".into()));
+        for key in ["request_id","run_id","admitted_service_epoch"] {assert_eq!(lookup.object().unwrap()[key],third.object().unwrap()[key]);}
+    }
+    let facts=f.lock().unwrap();assert_eq!(facts.sends,2);assert_eq!(facts.attempts.len(),2);assert_eq!(facts.payloads.len(),2);drop(facts);
+    clean(path,c);
+}
+#[test]
+fn changed_frozen_usage_or_profile_evidence_cannot_disclose_completed_answer(){
+    for change in ["usage","profile"] {
+        let f=Arc::new(Mutex::new(Facts::default()));let(path,c,client)=open(f);let reply=submit(&c,&client,"evidence1","hello");
+        let run=reply.object().unwrap()["run_id"].string().unwrap();let file=path.join("native-agent-service-v1").join(run).join("ordinary-send-v1.db");let mut data=parse(&std::fs::read(&file).unwrap()).unwrap();
+        if let Json::Object(fields)=&mut data {if change=="usage"{fields.insert("usage".into(),parse(br#"{"input":1,"output":999999,"counting_rule":"synthetic-byte-bound-v1"}"#).unwrap());}else if let Some(Json::Object(provider))=fields.get_mut("provider"){provider.remove("endpoint");}}
+        std::fs::write(file,data.encode()).unwrap();let denied=c.supplier_read_events(client,"evidence1".into(),0);assert!(denied.contains("DISCLOSURE_UNAVAILABLE"));assert!(!denied.contains("离线普通文本响应"));clean(path,c);
+    }
+}
+#[test]
+fn missing_owner_and_revoked_grant_deny_without_supplier_lookup(){
+    let f=Arc::new(Mutex::new(Facts{revoked:true,..Facts::default()}));let(path,c,client)=open(f.clone());let reply=submit(&c,&client,"revoked1","hello");assert!(!reply.encode().contains("completed"));assert_eq!(f.lock().unwrap().sends,0);clean(path,c);
+    // New dedicated root only. Constructor without host cannot select a supplier fallback for chat.
+    let path=std::env::temp_dir().join(format!("ordinary-unconfigured-{}",std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).unwrap().as_nanos()));muyon_core_agent_lab::store::create_dir(&path).unwrap();
+    let c=AgentServiceController::new(AgentHostServiceConfig{protocol:1,private_root:path.to_string_lossy().into(),build_identity:"a".repeat(40)}).unwrap();c.await_settled();let reply=c.connect(AgentConnectRequest{protocol:1,platform_client_key:"c".repeat(32)});let AgentConnectOutcome::Connected{client_lease,..}=reply.outcome else{panic!("connect")};let client=AgentClientRef{protocol:1,expected_service_epoch:reply.meta.service_epoch,client_lease};c.set_visibility(AgentVisibilityRequest{client:client.clone(),observation_generation:1,visible:true});let reply=submit(&c,&client,"missing1","hello");assert!(reply.encode().contains("chat_owner_unconfigured"));assert!(!reply.encode().contains("supplier_projection"));clean(path,c);
+}
+
+#[test]
+fn completed_same_conversation_pair_is_frozen_in_the_next_agent_request() {
+    let f=Arc::new(Mutex::new(Facts::default()));let(path,c,client)=open(f.clone());
+    let first=submit(&c,&client,"history1","第一轮允许的输入");
+    let second=submit(&c,&client,"history2","第二轮不同的输入");
+    assert_eq!(second.object().unwrap()["terminal"],Json::Bool(true));
+    let facts=f.lock().unwrap();assert_eq!(facts.sends,2);
+    let body=parse(&facts.payloads[1]).unwrap();let messages=body.object().unwrap()["messages"].array().unwrap();
+    assert_eq!(messages.len(),3,"second wire must retain the completed user/assistant pair: {}",body.encode());
+    assert_eq!(messages[0].object().unwrap()["role"],string("user"));
+    assert_eq!(messages[0].object().unwrap()["content"],string("第一轮允许的输入"));
+    assert_eq!(messages[1].object().unwrap()["role"],string("assistant"));
+    assert_eq!(messages[1].object().unwrap()["content"],string("离线普通文本响应"));
+    assert_eq!(messages[2].object().unwrap()["role"],string("user"));
+    assert_eq!(messages[2].object().unwrap()["content"],string("第二轮不同的输入"));
+    drop(facts);
+    let run=second.object().unwrap()["run_id"].string().unwrap();
+    let record=parse(&std::fs::read(path.join("native-agent-service-v1").join(run).join("ordinary-send-v1.db")).unwrap()).unwrap();
+    let context=record.object().unwrap()["context"].object().unwrap();
+    assert_eq!(context["history_version"],string("ordinary-context-v1"));
+    let history=context["history"].array().unwrap();assert_eq!(history.len(),1);
+    assert_eq!(history[0].object().unwrap()["request"],string("history1"));
+    assert_eq!(history[0].object().unwrap()["run"],first.object().unwrap()["run_id"]);
+    let duplicate=submit(&c,&client,"history2","第二轮不同的输入");assert_eq!(second,duplicate);
+    assert_eq!(f.lock().unwrap().sends,2);clean(path,c);
+}
+
+fn completed(reply:&Json)->bool {
+    reply.object().unwrap()["events"].array().unwrap().last().and_then(|e|e.object().ok()).and_then(|e|e.get("payload")).and_then(|p|p.object().ok()).and_then(|p|p.get("state"))==Some(&string("completed"))
+}
+fn reason(reply:&Json)->&str {
+    reply.object().unwrap()["events"].array().unwrap().last().unwrap().object().unwrap()["payload"].object().unwrap()["reason"].string().unwrap()
+}
+fn source_dir(path:&std::path::Path,reply:&Json)->PathBuf {path.join("native-agent-service-v1").join(reply.object().unwrap()["run_id"].string().unwrap())}
+
+#[test]
+fn credential_failed_input_and_other_conversation_never_enter_history() {
+    let f=Arc::new(Mutex::new(Facts::default()));let(path,c,client)=open(f.clone());
+    let denied=submit(&c,&client,"credential_history","Bearer synthetic-history-canary");assert!(!completed(&denied));
+    let first=submit(&c,&client,"scope_a","allowed first conversation");assert!(completed(&first));
+    let other=submit_in(&c,&client,"scope_b","other-conversation","different conversation input");assert!(completed(&other));
+    let facts=f.lock().unwrap();assert_eq!(facts.sends,2);
+    for bytes in &facts.payloads {let wire=parse(bytes).unwrap();assert_eq!(wire.object().unwrap()["messages"].array().unwrap().len(),1);assert!(!wire.encode().contains("synthetic-history-canary"));}
+    assert!(!parse(&facts.payloads[1]).unwrap().encode().contains("allowed first conversation"));drop(facts);clean(path,c);
+}
+#[test]
+fn full_history_budget_denies_without_dropping_pairs_or_using_another_call() {
+    let f=Arc::new(Mutex::new(Facts::default()));let(path,c,client)=open(f.clone());let large="x".repeat(4096);
+    assert!(completed(&submit(&c,&client,"large1",&large)));
+    let denied=submit(&c,&client,"large2",&large);assert!(!completed(&denied));assert_eq!(reason(&denied),"chat_context_budget_exceeded");assert_eq!(f.lock().unwrap().sends,1);
+    assert_eq!(denied,submit(&c,&client,"large2",&large));
+    let other=submit_in(&c,&client,"large3","other-conversation",&large);assert!(completed(&other));
+    let facts=f.lock().unwrap();assert_eq!(facts.sends,2);assert_eq!(facts.used.len(),2);assert_eq!(parse(&facts.payloads[1]).unwrap().object().unwrap()["messages"].array().unwrap().len(),1);drop(facts);clean(path,c);
+}
+#[test]
+fn revoked_ancestor_and_revocation_after_freeze_prevent_send_and_disclosure() {
+    let f=Arc::new(Mutex::new(Facts{call_limit:4,..Facts::default()}));let(path,c,client)=open(f.clone());
+    assert!(completed(&submit(&c,&client,"ancestor_a","ancestor input")));
+    assert!(completed(&submit(&c,&client,"ancestor_b","middle input")));
+    f.lock().unwrap().denied_inputs.insert("ancestor input".into());
+    let third=submit(&c,&client,"ancestor_c","current input");assert!(!completed(&third));assert_eq!(reason(&third),"chat_history_unavailable");assert_eq!(f.lock().unwrap().sends,2);
+    let lookup=c.supplier_read_events(client.clone(),"ancestor_b".into(),0);assert!(lookup.contains("DISCLOSURE_UNAVAILABLE"));assert!(!lookup.contains("离线普通文本响应"));clean(path,c);
+    let f=Arc::new(Mutex::new(Facts::default()));let(path,c,client)=open(f.clone());assert!(completed(&submit(&c,&client,"frozen_a","ancestor input")));
+    f.lock().unwrap().revoke_after_reserve=Some("ancestor input".into());
+    let reply=submit(&c,&client,"frozen_b","current input");assert!(!completed(&reply));assert_eq!(reason(&reply),"chat_history_unavailable");assert_eq!(f.lock().unwrap().sends,1);clean(path,c);
+}
+#[test]
+fn completed_source_corruption_or_missing_source_cannot_become_empty_history() {
+    for change in ["receipt","user","answer","partial_version","missing"] {
+        let f=Arc::new(Mutex::new(Facts::default()));let(path,c,client)=open(f.clone());let first=submit(&c,&client,"source_a","allowed source");assert!(completed(&first));
+        let dir=source_dir(&path,&first);let source=dir.join("source.db");let send=dir.join("ordinary-send-v1.db");
+        let mut a=parse(&std::fs::read(&source).unwrap()).unwrap();let mut b=parse(&std::fs::read(&send).unwrap()).unwrap();
+        if let Json::Object(fields)=&mut a {
+            if change=="user" {if let Some(Json::Object(payload))=fields.get_mut("payload"){payload.insert("text".into(),string("Bearer synthetic-history-canary"));}}
+            if change=="answer" {if let Some(Json::Array(events))=fields.get_mut("events"){if let Json::Object(event)=&mut events[0]{event.insert("payload".into(),muyon_plugin_contract_lab::object([("text",string("Bearer synthetic-history-canary"))]));}}}
+            if change=="partial_version" {if let Some(Json::Object(context))=fields.get_mut("binding"){context.remove("history_version");}}
+        }
+        if let Json::Object(fields)=&mut b {
+            if change=="receipt"{fields.insert("admission".into(),string("unrelated-receipt"));}
+            if change=="partial_version"{if let Some(Json::Object(context))=fields.get_mut("context"){context.remove("history_version");}}
+        }
+        if change=="missing"{std::fs::remove_file(source).unwrap();}else{std::fs::write(source,a.encode()).unwrap();}
+        std::fs::write(send,b.encode()).unwrap();
+        let second=submit(&c,&client,"source_b","current safe text");assert!(!completed(&second),"{change}");assert_eq!(reason(&second),"chat_history_unavailable","{change}");assert!(!second.encode().contains("synthetic-history-canary"));assert_eq!(f.lock().unwrap().sends,1);clean(path,c);
+    }
+}
+#[test]
+fn changed_completed_source_between_freeze_and_admission_denies_without_retry() {
+    let f=Arc::new(Mutex::new(Facts::default()));let(path,c,client)=open(f.clone());let first=submit(&c,&client,"change_a","source input");assert!(completed(&first));
+    f.lock().unwrap().change_after_reserve=Some(source_dir(&path,&first));
+    let second=submit(&c,&client,"change_b","current input");assert!(!completed(&second));assert_eq!(reason(&second),"chat_history_unavailable");assert_eq!(f.lock().unwrap().sends,1);
+    assert_eq!(second,submit(&c,&client,"change_b","current input"));assert_eq!(f.lock().unwrap().sends,1);clean(path,c);
+}
+#[test]
+fn explicit_legacy_single_turn_record_is_usable_but_partial_new_fields_are_not_legacy() {
+    let f=Arc::new(Mutex::new(Facts::default()));let(path,c,client)=open(f.clone());let first=submit(&c,&client,"legacy_a","old single message");assert!(completed(&first));
+    let dir=source_dir(&path,&first);
+    for (name,key) in [("source.db","binding"),("ordinary-send-v1.db","context")] {
+        let file=dir.join(name);let mut record=parse(&std::fs::read(&file).unwrap()).unwrap();
+        if let Json::Object(fields)=&mut record {
+            if let Some(Json::Object(context))=fields.get_mut(key){context.remove("history_version");context.remove("history");}
+            if let Some(Json::Object(usage))=fields.get_mut("usage"){usage.insert("input".into(),Json::Number("32".into()));usage.insert("output".into(),Json::Number("32".into()));}
+        }
+        std::fs::write(file,record.encode()).unwrap();
+    }
+    let second=submit(&c,&client,"legacy_b","new current message");assert!(completed(&second),"{}",second.encode());let facts=f.lock().unwrap();assert_eq!(facts.sends,2);assert_eq!(parse(&facts.payloads[1]).unwrap().object().unwrap()["messages"].array().unwrap().len(),3);drop(facts);clean(path,c);
+}
+#[test]
+fn oversized_history_evidence_fails_explicitly_instead_of_truncating() {
+    let f=Arc::new(Mutex::new(Facts::default()));let(path,c,client)=open(f.clone());let first=submit(&c,&client,"limit_a","allowed input");assert!(completed(&first));
+    let dir=source_dir(&path,&first);
+    for (name,key) in [("source.db","binding"),("ordinary-send-v1.db","context")] {
+        let file=dir.join(name);let mut record=parse(&std::fs::read(&file).unwrap()).unwrap();
+        if let Json::Object(fields)=&mut record {if let Some(Json::Object(context))=fields.get_mut(key){context.insert("history".into(),Json::Array(vec![Json::Null;9]));}}
+        std::fs::write(file,record.encode()).unwrap();
+    }
+    let denied=submit(&c,&client,"limit_b","current input");assert!(!completed(&denied));assert_eq!(reason(&denied),"chat_context_limit");assert_eq!(f.lock().unwrap().sends,1);clean(path,c);
+}
+
+#[test]
+fn cancellation_after_history_handoff_discards_late_answer_and_never_resends(){
+    let f=Arc::new(Mutex::new(Facts::default()));let(path,c,client)=open(f.clone());
+    let first=submit(&c,&client,"cancel-first","first permitted turn");assert!(first.encode().contains("completed"));
+    let gate=Arc::new((Mutex::new((false,false)),Condvar::new()));f.lock().unwrap().exchange_gate=Some(gate.clone());
+    c.submit_ordinary_chat(client.clone(),"cancel-second".into(),"conversation-current".into(),"distinct current turn".into());
+    let (lock,signal)=&*gate;
+    let state=lock.lock().unwrap();let (mut state,timeout)=signal.wait_timeout_while(state,std::time::Duration::from_secs(10),|s|!s.0).unwrap();
+    let entered=state.0 && !timeout.timed_out();drop(state);
+    let cancellation=c.cancel(AgentCancelRequest{client:client.clone(),run:AgentRunRef{request_id:"cancel-second".into(),variant:AgentReadVariant::Inquiry,run_id:None}});
+    state=lock.lock().unwrap();state.1=true;signal.notify_all();drop(state);c.await_settled();
+    assert!(entered,"synthetic handoff must enter before cancellation");assert!(matches!(cancellation.outcome,AgentControlOutcome::Requested));
+    let result=parse(c.supplier_read_events(client.clone(),"cancel-second".into(),0).as_bytes()).unwrap();
+    assert!(result.encode().contains("outcome_unknown"));assert!(!result.encode().contains("离线普通文本响应"));
+    for _ in 0..3{let replay=submit(&c,&client,"cancel-second","distinct current turn");assert_eq!(replay,result);}
+    let facts=f.lock().unwrap();assert_eq!(facts.sends,2);assert_eq!(facts.attempts.len(),2);
+    let wire=parse(&facts.payloads[1]).unwrap();let messages=wire.object().unwrap()["messages"].array().unwrap();assert_eq!(messages.len(),3);
+    assert_eq!(messages[0].object().unwrap()["content"],string("first permitted turn"));assert_eq!(messages[2].object().unwrap()["content"],string("distinct current turn"));drop(facts);clean(path,c);
+}

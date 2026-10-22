@@ -1,0 +1,8 @@
+scoped	Exact lifecycle tests and genuine binding reproduction	2026-10-18T12:58:37.4501836Z test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+scoped	Exact lifecycle tests and genuine binding reproduction	2026-10-18T12:58:37.4539244Z test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+scoped	Exact lifecycle tests and genuine binding reproduction	2026-10-18T12:58:46.1159326Z test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+scoped	Exact lifecycle tests and genuine binding reproduction	2026-10-18T12:58:46.1239585Z test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+package-device	Stage producer names and build actual combined APK	2026-10-18T13:03:14.0127920Z LIFECYCLE_NATIVE_COMPOSE_PACKAGE_PASS source=f8d3bfea3606d187479ed6d16621b342eca74760
+package-device	API26 actual private Service metadata lifecycle	2026-10-18T13:03:14.0264142Z grep -F 'OK (1 test)' "$evidence/instrumentation.log"
+package-device	API26 actual private Service metadata lifecycle	2026-10-18T13:05:12.3997561Z OK (1 test)
+package-device	API26 actual private Service metadata lifecycle	2026-10-18T13:05:12.5418593Z OK (1 test)

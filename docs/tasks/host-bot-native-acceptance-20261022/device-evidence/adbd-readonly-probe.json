@@ -1,0 +1,9 @@
+{
+  "endpoint": "127.0.0.1:5581",
+  "security_changed": false,
+  "credentials_used": false,
+  "command": "CNXN",
+  "arg0": 16777216,
+  "arg1": 4096,
+  "body": "device::ro.product.name=sdk_phone_x86_64;ro.product.model=Android SDK built for x86_64;ro.product.device=generic_x86_64;features=cmd,stat_v2,shell_v2"
+}

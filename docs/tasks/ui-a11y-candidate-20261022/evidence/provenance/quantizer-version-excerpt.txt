@@ -1,0 +1,3 @@
+Excerpt from fixed upstream convert.log; original LF lines 1472-1473; full digest in sources.json
+version: 0.6.0-dev (build 11451, commit 1e91a0b05)
+built with GNU 14.2.0 for Linux x86_64

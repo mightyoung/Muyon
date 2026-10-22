@@ -1,0 +1,356 @@
+{
+  "artifact_kind": "fixture_semantic_record_not_product_DTO",
+  "case_id": "V131-T02/C04",
+  "parent_case": "V131-T02",
+  "status": "draft",
+  "execution_status": "not_run",
+  "catalog_group": "C",
+  "title": "历史已使用与当前可用分开",
+  "source_catalog_section": "5.3",
+  "rule_ids": [
+    "CLS-REUSE-001",
+    "CLS-CREDENTIAL-001",
+    "CLS-PURPOSE-001"
+  ],
+  "all_rules_status": "proposed_unfrozen",
+  "variants": [
+    {
+      "variant_id": "source_changed",
+      "input": {
+        "clean_text": null,
+        "opaque_secret_refs": [
+          {
+            "symbol": "SENTINEL_CREDENTIAL_01",
+            "placement": "required unit; symbolic fixture metadata only",
+            "materialization": "never materialized or printed by this artifact"
+          }
+        ],
+        "mutations": [
+          "source_changed"
+        ],
+        "transform": "remove_symbolic_secret_segment",
+        "processed_clean_text": "裁剪后的完整合成任务内容",
+        "retention_policy": "body_disabled_or_not_authorized",
+        "previously_used_version": "content-v2-normalized"
+      },
+      "source_inheritance": {
+        "unit_ref": "unit.synthetic.1",
+        "source_kind": "user_input",
+        "trusted_event_ref": "host.synthetic.event.1",
+        "source_version": "source-v1",
+        "claimed_source_kind": null,
+        "inherited_sensitivity_units": [],
+        "inherited_purpose_restrictions": [],
+        "source_rights": "valid_assumption",
+        "taint": "none_assumption",
+        "verification": "not_a_classification_or_authorization_fact",
+        "field_path": null,
+        "trusted_field_base": "personal",
+        "field_declaration_version": null
+      },
+      "current_version": {
+        "input": "content-v1",
+        "normalized": "content-v2-normalized",
+        "checked": "content-v2-normalized",
+        "final": "content-v2-normalized",
+        "normalization": "fixture-NFC-example; production Unicode/trim equivalence not frozen",
+        "evidence_current": false
+      },
+      "purpose": {
+        "current": "model_request",
+        "task_ref": "task.synthetic.1",
+        "scope_ref": "scope.synthetic.1",
+        "required_units": [
+          "unit.synthetic.1"
+        ],
+        "partial_result_allowed": false,
+        "actual_range": [
+          "unit.synthetic.1"
+        ],
+        "required_secret_segment": false
+      },
+      "rule_coverage": [
+        {
+          "rule_id": "CLS-REUSE-001",
+          "status": "proposed_unfrozen",
+          "synthetic_version": "fixture-rule-v1-not-registered",
+          "assumed_current_purpose_coverage": "complete",
+          "assumed_covered_units": [
+            "unit.synthetic.1"
+          ]
+        },
+        {
+          "rule_id": "CLS-CREDENTIAL-001",
+          "status": "proposed_unfrozen",
+          "synthetic_version": "fixture-rule-v1-not-registered",
+          "assumed_current_purpose_coverage": "complete",
+          "assumed_covered_units": [
+            "unit.synthetic.1"
+          ]
+        },
+        {
+          "rule_id": "CLS-PURPOSE-001",
+          "status": "proposed_unfrozen",
+          "synthetic_version": "fixture-rule-v1-not-registered",
+          "assumed_current_purpose_coverage": "complete",
+          "assumed_covered_units": [
+            "unit.synthetic.1"
+          ]
+        }
+      ],
+      "actual_value_check": {
+        "role": "host_check_assumption_not_classifier_result",
+        "target_ref": "content-v2-normalized",
+        "target_is_actual_new_value": true,
+        "state": "complete_assumption",
+        "signal": "none_assumption",
+        "rule_id": "CLS-CREDENTIAL-001",
+        "rule_status": "proposed_unfrozen",
+        "secret_plaintext_in_artifact": false
+      },
+      "mode_facts": {
+        "mode": "FullAllow",
+        "mode_grant": "valid_finite_synthetic_assumption",
+        "grant_created_at": "2026-10-14T00:00:00Z",
+        "expires_at": "2026-10-14T00:10:00Z",
+        "evaluated_at": "2026-10-14T00:01:00Z",
+        "fixture_expiry_is_product_default": false,
+        "auto_risk_rule": "unfrozen_not_required_by_FullAllow",
+        "risk": "high_advice_assumption",
+        "new_endpoint": true,
+        "extra_risk_confirmation_is_required": false
+      },
+      "execution_prerequisites": {
+        "scope": "valid_assumption",
+        "read_right": "valid_assumption",
+        "write_right": "valid_assumption",
+        "identity": "valid_assumption",
+        "tls": "valid_assumption_if_transport",
+        "capability": "valid_assumption",
+        "plan_revision": "valid_assumption",
+        "cas": "valid_assumption",
+        "business_validity": "valid_assumption",
+        "ledger": "valid_assumption",
+        "capability_hold": "absent_assumption"
+      },
+      "expected": {
+        "classification": {
+          "unit_sensitivity": "unreviewed",
+          "attempt_result": "invalidated_expected",
+          "terminal": true,
+          "no_infinite_wait": true
+        },
+        "action_result": "blocked_current_reuse_requires_revalidation",
+        "local_body_allowed": false,
+        "model_body_allowed": false,
+        "business_outbound_allowed": false,
+        "extra_risk_confirmations": 0,
+        "real_model_requests": 0,
+        "real_external_sends": 0,
+        "database_changes": "not_observed_not_run",
+        "receipt": "not_observed_not_run",
+        "runtime_payload": "not_captured_not_run",
+        "safe_observation": "only minimal permitted metadata; no secret body/log copies",
+        "display": "已裁剪，使用处理后版本",
+        "original_secret_diff_visible": false,
+        "new_attempt_required": true,
+        "actual_sent_version": "content-v2-normalized_expected_not_sent",
+        "retained_body": false,
+        "retained_secret_diff": false,
+        "retained_metadata": [
+          "opaque input ref",
+          "processed version ref",
+          "transformation ref",
+          "permitted purpose and reason"
+        ],
+        "history_body_display": "unavailable_not_fabricated",
+        "expected_new_effects": 0,
+        "previous_use_fact_preserved": true,
+        "history_body_requires_current_read_and_retention": true,
+        "previously_used_does_not_mean_reusable": true,
+        "body_allowance_scope": "current scenario and stated purpose only; not a global local-write ban or outbound grant",
+        "disallowed_secret_copies": [
+          "model body",
+          "business body",
+          "logs",
+          "diagnostics",
+          "notifications"
+        ]
+      }
+    },
+    {
+      "variant_id": "purpose_changed",
+      "input": {
+        "clean_text": null,
+        "opaque_secret_refs": [
+          {
+            "symbol": "SENTINEL_CREDENTIAL_01",
+            "placement": "required unit; symbolic fixture metadata only",
+            "materialization": "never materialized or printed by this artifact"
+          }
+        ],
+        "mutations": [
+          "purpose_changed"
+        ],
+        "transform": "remove_symbolic_secret_segment",
+        "processed_clean_text": "裁剪后的完整合成任务内容",
+        "retention_policy": "body_disabled_or_not_authorized",
+        "previously_used_version": "content-v2-normalized"
+      },
+      "source_inheritance": {
+        "unit_ref": "unit.synthetic.1",
+        "source_kind": "user_input",
+        "trusted_event_ref": "host.synthetic.event.1",
+        "source_version": "source-v1",
+        "claimed_source_kind": null,
+        "inherited_sensitivity_units": [],
+        "inherited_purpose_restrictions": [],
+        "source_rights": "valid_assumption",
+        "taint": "none_assumption",
+        "verification": "not_a_classification_or_authorization_fact",
+        "field_path": null,
+        "trusted_field_base": "personal",
+        "field_declaration_version": null
+      },
+      "current_version": {
+        "input": "content-v1",
+        "normalized": "content-v2-normalized",
+        "checked": "content-v2-normalized",
+        "final": "content-v2-normalized",
+        "normalization": "fixture-NFC-example; production Unicode/trim equivalence not frozen",
+        "evidence_current": false
+      },
+      "purpose": {
+        "current": "model_request",
+        "task_ref": "task.synthetic.1",
+        "scope_ref": "scope.synthetic.1",
+        "required_units": [
+          "unit.synthetic.1"
+        ],
+        "partial_result_allowed": false,
+        "actual_range": [
+          "unit.synthetic.1"
+        ],
+        "required_secret_segment": false
+      },
+      "rule_coverage": [
+        {
+          "rule_id": "CLS-REUSE-001",
+          "status": "proposed_unfrozen",
+          "synthetic_version": "fixture-rule-v1-not-registered",
+          "assumed_current_purpose_coverage": "complete",
+          "assumed_covered_units": [
+            "unit.synthetic.1"
+          ]
+        },
+        {
+          "rule_id": "CLS-CREDENTIAL-001",
+          "status": "proposed_unfrozen",
+          "synthetic_version": "fixture-rule-v1-not-registered",
+          "assumed_current_purpose_coverage": "complete",
+          "assumed_covered_units": [
+            "unit.synthetic.1"
+          ]
+        },
+        {
+          "rule_id": "CLS-PURPOSE-001",
+          "status": "proposed_unfrozen",
+          "synthetic_version": "fixture-rule-v1-not-registered",
+          "assumed_current_purpose_coverage": "complete",
+          "assumed_covered_units": [
+            "unit.synthetic.1"
+          ]
+        }
+      ],
+      "actual_value_check": {
+        "role": "host_check_assumption_not_classifier_result",
+        "target_ref": "content-v2-normalized",
+        "target_is_actual_new_value": true,
+        "state": "complete_assumption",
+        "signal": "none_assumption",
+        "rule_id": "CLS-CREDENTIAL-001",
+        "rule_status": "proposed_unfrozen",
+        "secret_plaintext_in_artifact": false
+      },
+      "mode_facts": {
+        "mode": "FullAllow",
+        "mode_grant": "valid_finite_synthetic_assumption",
+        "grant_created_at": "2026-10-14T00:00:00Z",
+        "expires_at": "2026-10-14T00:10:00Z",
+        "evaluated_at": "2026-10-14T00:01:00Z",
+        "fixture_expiry_is_product_default": false,
+        "auto_risk_rule": "unfrozen_not_required_by_FullAllow",
+        "risk": "high_advice_assumption",
+        "new_endpoint": true,
+        "extra_risk_confirmation_is_required": false
+      },
+      "execution_prerequisites": {
+        "scope": "valid_assumption",
+        "read_right": "valid_assumption",
+        "write_right": "valid_assumption",
+        "identity": "valid_assumption",
+        "tls": "valid_assumption_if_transport",
+        "capability": "valid_assumption",
+        "plan_revision": "valid_assumption",
+        "cas": "valid_assumption",
+        "business_validity": "valid_assumption",
+        "ledger": "valid_assumption",
+        "capability_hold": "absent_assumption"
+      },
+      "expected": {
+        "classification": {
+          "unit_sensitivity": "unreviewed",
+          "attempt_result": "invalidated_expected",
+          "terminal": true,
+          "no_infinite_wait": true
+        },
+        "action_result": "blocked_current_reuse_requires_revalidation",
+        "local_body_allowed": false,
+        "model_body_allowed": false,
+        "business_outbound_allowed": false,
+        "extra_risk_confirmations": 0,
+        "real_model_requests": 0,
+        "real_external_sends": 0,
+        "database_changes": "not_observed_not_run",
+        "receipt": "not_observed_not_run",
+        "runtime_payload": "not_captured_not_run",
+        "safe_observation": "only minimal permitted metadata; no secret body/log copies",
+        "display": "已裁剪，使用处理后版本",
+        "original_secret_diff_visible": false,
+        "new_attempt_required": true,
+        "actual_sent_version": "content-v2-normalized_expected_not_sent",
+        "retained_body": false,
+        "retained_secret_diff": false,
+        "retained_metadata": [
+          "opaque input ref",
+          "processed version ref",
+          "transformation ref",
+          "permitted purpose and reason"
+        ],
+        "history_body_display": "unavailable_not_fabricated",
+        "expected_new_effects": 0,
+        "previous_use_fact_preserved": true,
+        "history_body_requires_current_read_and_retention": true,
+        "previously_used_does_not_mean_reusable": true,
+        "body_allowance_scope": "current scenario and stated purpose only; not a global local-write ban or outbound grant",
+        "disallowed_secret_copies": [
+          "model body",
+          "business body",
+          "logs",
+          "diagnostics",
+          "notifications"
+        ]
+      }
+    }
+  ],
+  "notes": "重启不恢复旧用途/权限；仍保留获准最小效果事实。",
+  "evidence_required_not_yet_available": [
+    "real implementation SHA and command",
+    "host current-purpose ValueCheck and coverage evidence",
+    "source/permission/version evidence",
+    "final model/tool payload capture where applicable",
+    "authoritative receipt and database diff where applicable",
+    "independent review"
+  ],
+  "runtime_acceptance_claim": false
+}

@@ -1,0 +1,24 @@
+{
+  "run_id": 39184565190,
+  "job_id": 117844503603,
+  "source_sha": "f86804cce3f54888ef0cc42b0540d12fb82e42c7",
+  "status": "completed",
+  "conclusion": "success",
+  "phases": {
+    "sdk": 0,
+    "avd": 0,
+    "boot": 0,
+    "install": 0,
+    "instrumentation": 0,
+    "result": 0
+  },
+  "tests_run": 2,
+  "failures": 0,
+  "compose_service_loop_test": "PASS",
+  "owner_contract_test": "PASS",
+  "root_cause": "test omitted explicit original-request reconciliation after lifecycle disclosure loss",
+  "production_logic_changed": false,
+  "rerun": false,
+  "old_denied_evidence_accessed": false,
+  "restrictions": "PR86/dependencies I04 HOLD; no real model, credentials, fees, merge or deployment"
+}

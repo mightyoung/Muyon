@@ -1,0 +1,2 @@
+NOT_RUN: existing Kotlin compiler unavailable; no installation attempted.
+NOT_RUN: set MUYON_UI_GRADLE to the existing Gradle 8.13 executable.

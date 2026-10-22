@@ -1,0 +1,9 @@
+INSTRUMENTATION_STATUS: numtests=1
+INSTRUMENTATION_STATUS: stream=
+com.mightyoung.muyon.product.SystemPickerProductTest:
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=reopenPrivatePdfAfterOriginalRemoved
+INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.product.SystemPickerProductTest
+INSTRUMENTATION_STATUS: current=1
+INSTRUMENTATION_STATUS_CODE: 1
+Killed 

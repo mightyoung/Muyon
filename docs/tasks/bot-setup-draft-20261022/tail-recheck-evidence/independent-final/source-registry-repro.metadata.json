@@ -1,0 +1,30 @@
+{
+  "kind": "new_independent_source_registry_tail_repro",
+  "head": "00b042ea7748c315d7c3ab9f4c8b9b02fdd4660d",
+  "dependency": "098d9aca214e6642c1b3ffde64921ebedbae335d",
+  "dependency_sha256": "6514165380738130e639d4be1ab5440e1bcb09c7d82fd0184b22b986e0d3c678",
+  "extra_test_source": "\n#[test]\nfn independent_tail_source_registry_blob_archive_must_reject() {\n check_receipt_tail_trigger(\"UPDATE local_bot_drafts SET archive_hex=CAST(archive_hex AS BLOB) WHERE project_id='p1'\");\n}\n#[test]\nfn independent_tail_source_registry_blob_digest_must_reject() {\n check_receipt_tail_trigger(\"UPDATE local_bot_drafts SET archive_digest=CAST(archive_digest AS BLOB) WHERE project_id='p1'\");\n}\n\n#[test]\nfn independent_tail_source_registry_workspace_must_reject() {\n check_receipt_tail_trigger(\"UPDATE local_bot_draft_meta SET workspace='wrong-workspace'\");\n}\n#[test]\nfn independent_tail_source_registry_schema_must_reject() {\n check_receipt_tail_trigger(\"UPDATE local_bot_draft_meta SET schema_version='2'\");\n}\n",
+  "command": [
+    "/tmp/bot-cargo/bin/cargo",
+    "test",
+    "--manifest-path",
+    "/tmp/bot-tail-independent-8b1eaq1q/repo/crates/Cargo.toml",
+    "-p",
+    "muyon-core",
+    "--lib",
+    "independent_tail_source_registry",
+    "--",
+    "--test-threads=1",
+    "--nocapture"
+  ],
+  "cwd": "/workspace/bot-setup-draft",
+  "utc_start": "2026-10-22T06:37:25.893670Z",
+  "utc_end": "2026-10-22T06:37:30.811850Z",
+  "exit_code": 101,
+  "source_sha256": "fa62ca121575e0a9e1308e1465f20eacd565f29380f5612c70301f0881dc651d",
+  "modified_test_sha256": "bcba71437fad248627fa0091702c75e4767294c63177d8e4fd8e540dd2d2e734",
+  "logs_sha256": {
+    "source-registry-repro.stdout.log": "18e118ac84a013b535240e8b46a26927bb6d252581fe9ad02d28fd7765dc23ae",
+    "source-registry-repro.stderr.log": "e30eddc12d8d0edd9d96dc2446bdbff5828c3dd2fd24c533b18a9903a5a607a3"
+  }
+}

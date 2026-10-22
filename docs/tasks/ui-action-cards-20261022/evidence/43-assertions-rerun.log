@@ -1,0 +1,7 @@
+Fresh rerun; NOT the earlier original log
+UTC: 2026-10-22T04:04:54.696589+00:00
+Source HEAD: 0519403abdf0f23e9104a022c3c4c8629ef1e1f3
+Command: KOTLINC=/tmp/action-cards-tools/kotlinc/bin/kotlinc bash apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/ui/cards/run-offline.sh
+PASS: 43 action-card projection and safety checks; no host/network invoked
+
+Exit: 0

@@ -1,0 +1,281 @@
+INSTRUMENTATION_STATUS: numtests=9
+INSTRUMENTATION_STATUS: stream=
+com.mightyoung.muyon.product.chat.AgentWorkflowProductTest:
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=conversationProjectAndBinderSessionIsolateAuthority
+INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.product.chat.AgentWorkflowProductTest
+INSTRUMENTATION_STATUS: current=1
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: numtests=9
+INSTRUMENTATION_STATUS: stream=
+Error in conversationProjectAndBinderSessionIsolateAuthority(com.mightyoung.muyon.product.chat.AgentWorkflowProductTest):
+java.lang.AssertionError: nested operation failure: {"blocked_reason":null,"can_control":true,"cancel_requested":false,"conversation_id":"91209f38-f1cd-4f3a-befb-685643eafbad","created_seq":1,"current_request_id":null,"depth":0,"error":null,"id":"804d119c267c9b1daf9da6222075418e","kind":"workflow","parent_id":null,"project_id":null,"remote_request_id":null,"remote_request_ids":[],"result":null,"root_id":"804d119c267c9b1daf9da6222075418e","skill_digest":null,"skill_id":null,"status":"queued","task":"读取本地测试记录，保留来源，不外发。","title":"真实任务 62babd71-3966-497c-8cea-44c19634b106","updated_seq":1}
+	at org.junit.Assert.fail(Assert.java:89)
+	at org.junit.Assert.assertTrue(Assert.java:42)
+	at org.junit.Assert.assertFalse(Assert.java:65)
+	at com.mightyoung.muyon.product.chat.AgentWorkflowProductTest.success(AgentWorkflowProductTest.kt:66)
+	at com.mightyoung.muyon.product.chat.AgentWorkflowProductTest.workflow(AgentWorkflowProductTest.kt:77)
+	at com.mightyoung.muyon.product.chat.AgentWorkflowProductTest.workflow$default(AgentWorkflowProductTest.kt:76)
+	at com.mightyoung.muyon.product.chat.AgentWorkflowProductTest.root(AgentWorkflowProductTest.kt:87)
+	at com.mightyoung.muyon.product.chat.AgentWorkflowProductTest.root$default(AgentWorkflowProductTest.kt:87)
+	at com.mightyoung.muyon.product.chat.AgentWorkflowProductTest.conversationProjectAndBinderSessionIsolateAuthority(AgentWorkflowProductTest.kt:169)
+
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=conversationProjectAndBinderSessionIsolateAuthority
+INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.product.chat.AgentWorkflowProductTest
+INSTRUMENTATION_STATUS: stack=java.lang.AssertionError: nested operation failure: {"blocked_reason":null,"can_control":true,"cancel_requested":false,"conversation_id":"91209f38-f1cd-4f3a-befb-685643eafbad","created_seq":1,"current_request_id":null,"depth":0,"error":null,"id":"804d119c267c9b1daf9da6222075418e","kind":"workflow","parent_id":null,"project_id":null,"remote_request_id":null,"remote_request_ids":[],"result":null,"root_id":"804d119c267c9b1daf9da6222075418e","skill_digest":null,"skill_id":null,"status":"queued","task":"读取本地测试记录，保留来源，不外发。","title":"真实任务 62babd71-3966-497c-8cea-44c19634b106","updated_seq":1}
+	at org.junit.Assert.fail(Assert.java:89)
+	at org.junit.Assert.assertTrue(Assert.java:42)
+	at org.junit.Assert.assertFalse(Assert.java:65)
+	at com.mightyoung.muyon.product.chat.AgentWorkflowProductTest.success(AgentWorkflowProductTest.kt:66)
+	at com.mightyoung.muyon.product.chat.AgentWorkflowProductTest.workflow(AgentWorkflowProductTest.kt:77)
+	at com.mightyoung.muyon.product.chat.AgentWorkflowProductTest.workflow$default(AgentWorkflowProductTest.kt:76)
+	at com.mightyoung.muyon.product.chat.AgentWorkflowProductTest.root(AgentWorkflowProductTest.kt:87)
+	at com.mightyoung.muyon.product.chat.AgentWorkflowProductTest.root$default(AgentWorkflowProductTest.kt:87)
+	at com.mightyoung.muyon.product.chat.AgentWorkflowProductTest.conversationProjectAndBinderSessionIsolateAuthority(AgentWorkflowProductTest.kt:169)
+
+INSTRUMENTATION_STATUS: current=1
+INSTRUMENTATION_STATUS_CODE: -2
+INSTRUMENTATION_STATUS: numtests=9
+INSTRUMENTATION_STATUS: stream=
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=metadataLoadsBodyOnDemandAndDisabledSkillCannotCreateOrExecute
+INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.product.chat.AgentWorkflowProductTest
+INSTRUMENTATION_STATUS: current=2
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: numtests=9
+INSTRUMENTATION_STATUS: stream=
+Error in metadataLoadsBodyOnDemandAndDisabledSkillCannotCreateOrExecute(com.mightyoung.muyon.product.chat.AgentWorkflowProductTest):
+java.lang.AssertionError: nested operation failure: {"blocked_reason":null,"can_control":true,"cancel_requested":false,"conversation_id":"2781d627-0a3a-487c-b9d9-af35bdf080d8","created_seq":3,"current_request_id":null,"depth":0,"error":null,"id":"1a99d12caeba3b293e7d389c3df8d01c","kind":"workflow","parent_id":null,"project_id":null,"remote_request_id":null,"remote_request_ids":[],"result":null,"root_id":"1a99d12caeba3b293e7d389c3df8d01c","skill_digest":null,"skill_id":null,"status":"queued","task":"读取本地测试记录，保留来源，不外发。","title":"真实任务 b469df10-f295-44f6-8547-45cdb50fa7e3","updated_seq":3}
+	at org.junit.Assert.fail(Assert.java:89)
+	at org.junit.Assert.assertTrue(Assert.java:42)
+	at org.junit.Assert.assertFalse(Assert.java:65)
+	at com.mightyoung.muyon.product.chat.AgentWorkflowProductTest.success(AgentWorkflowProductTest.kt:66)
+	at com.mightyoung.muyon.product.chat.AgentWorkflowProductTest.workflow(AgentWorkflowProductTest.kt:77)
+	at com.mightyoung.muyon.product.chat.AgentWorkflowProductTest.workflow$default(AgentWorkflowProductTest.kt:76)
+	at com.mightyoung.muyon.product.chat.AgentWorkflowProductTest.root(AgentWorkflowProductTest.kt:87)
+	at com.mightyoung.muyon.product.chat.AgentWorkflowProductTest.root$default(AgentWorkflowProductTest.kt:87)
+	at com.mightyoung.muyon.product.chat.AgentWorkflowProductTest.metadataLoadsBodyOnDemandAndDisabledSkillCannotCreateOrExecute(AgentWorkflowProductTest.kt:155)
+
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=metadataLoadsBodyOnDemandAndDisabledSkillCannotCreateOrExecute
+INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.product.chat.AgentWorkflowProductTest
+INSTRUMENTATION_STATUS: stack=java.lang.AssertionError: nested operation failure: {"blocked_reason":null,"can_control":true,"cancel_requested":false,"conversation_id":"2781d627-0a3a-487c-b9d9-af35bdf080d8","created_seq":3,"current_request_id":null,"depth":0,"error":null,"id":"1a99d12caeba3b293e7d389c3df8d01c","kind":"workflow","parent_id":null,"project_id":null,"remote_request_id":null,"remote_request_ids":[],"result":null,"root_id":"1a99d12caeba3b293e7d389c3df8d01c","skill_digest":null,"skill_id":null,"status":"queued","task":"读取本地测试记录，保留来源，不外发。","title":"真实任务 b469df10-f295-44f6-8547-45cdb50fa7e3","updated_seq":3}
+	at org.junit.Assert.fail(Assert.java:89)
+	at org.junit.Assert.assertTrue(Assert.java:42)
+	at org.junit.Assert.assertFalse(Assert.java:65)
+	at com.mightyoung.muyon.product.chat.AgentWorkflowProductTest.success(AgentWorkflowProductTest.kt:66)
+	at com.mightyoung.muyon.product.chat.AgentWorkflowProductTest.workflow(AgentWorkflowProductTest.kt:77)
+	at com.mightyoung.muyon.product.chat.AgentWorkflowProductTest.workflow$default(AgentWorkflowProductTest.kt:76)
+	at com.mightyoung.muyon.product.chat.AgentWorkflowProductTest.root(AgentWorkflowProductTest.kt:87)
+	at com.mightyoung.muyon.product.chat.AgentWorkflowProductTest.root$default(AgentWorkflowProductTest.kt:87)
+	at com.mightyoung.muyon.product.chat.AgentWorkflowProductTest.metadataLoadsBodyOnDemandAndDisabledSkillCannotCreateOrExecute(AgentWorkflowProductTest.kt:155)
+
+INSTRUMENTATION_STATUS: current=2
+INSTRUMENTATION_STATUS_CODE: -2
+INSTRUMENTATION_STATUS: numtests=9
+INSTRUMENTATION_STATUS: stream=
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=remoteChildCannotPretendToExecuteAndRootCancellationStopsQueuedWork
+INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.product.chat.AgentWorkflowProductTest
+INSTRUMENTATION_STATUS: current=3
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: numtests=9
+INSTRUMENTATION_STATUS: stream=
+Error in remoteChildCannotPretendToExecuteAndRootCancellationStopsQueuedWork(com.mightyoung.muyon.product.chat.AgentWorkflowProductTest):
+java.lang.AssertionError: nested operation failure: {"blocked_reason":null,"can_control":true,"cancel_requested":false,"conversation_id":"0dc70cb8-c61e-4845-9034-34a43d54bea7","created_seq":5,"current_request_id":null,"depth":0,"error":null,"id":"4f65cc6146b6f2c8f7224baa4283ee1e","kind":"workflow","parent_id":null,"project_id":null,"remote_request_id":null,"remote_request_ids":[],"result":null,"root_id":"4f65cc6146b6f2c8f7224baa4283ee1e","skill_digest":null,"skill_id":null,"status":"queued","task":"读取本地测试记录，保留来源，不外发。","title":"真实任务 95177b22-1ca0-4717-b60d-55d129862f54","updated_seq":5}
+	at org.junit.Assert.fail(Assert.java:89)
+	at org.junit.Assert.assertTrue(Assert.java:42)
+	at org.junit.Assert.assertFalse(Assert.java:65)
+	at com.mightyoung.muyon.product.chat.AgentWorkflowProductTest.success(AgentWorkflowProductTest.kt:66)
+	at com.mightyoung.muyon.product.chat.AgentWorkflowProductTest.workflow(AgentWorkflowProductTest.kt:77)
+	at com.mightyoung.muyon.product.chat.AgentWorkflowProductTest.workflow$default(AgentWorkflowProductTest.kt:76)
+	at com.mightyoung.muyon.product.chat.AgentWorkflowProductTest.root(AgentWorkflowProductTest.kt:87)
+	at com.mightyoung.muyon.product.chat.AgentWorkflowProductTest.root$default(AgentWorkflowProductTest.kt:87)
+	at com.mightyoung.muyon.product.chat.AgentWorkflowProductTest.remoteChildCannotPretendToExecuteAndRootCancellationStopsQueuedWork(AgentWorkflowProductTest.kt:188)
+
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=remoteChildCannotPretendToExecuteAndRootCancellationStopsQueuedWork
+INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.product.chat.AgentWorkflowProductTest
+INSTRUMENTATION_STATUS: stack=java.lang.AssertionError: nested operation failure: {"blocked_reason":null,"can_control":true,"cancel_requested":false,"conversation_id":"0dc70cb8-c61e-4845-9034-34a43d54bea7","created_seq":5,"current_request_id":null,"depth":0,"error":null,"id":"4f65cc6146b6f2c8f7224baa4283ee1e","kind":"workflow","parent_id":null,"project_id":null,"remote_request_id":null,"remote_request_ids":[],"result":null,"root_id":"4f65cc6146b6f2c8f7224baa4283ee1e","skill_digest":null,"skill_id":null,"status":"queued","task":"读取本地测试记录，保留来源，不外发。","title":"真实任务 95177b22-1ca0-4717-b60d-55d129862f54","updated_seq":5}
+	at org.junit.Assert.fail(Assert.java:89)
+	at org.junit.Assert.assertTrue(Assert.java:42)
+	at org.junit.Assert.assertFalse(Assert.java:65)
+	at com.mightyoung.muyon.product.chat.AgentWorkflowProductTest.success(AgentWorkflowProductTest.kt:66)
+	at com.mightyoung.muyon.product.chat.AgentWorkflowProductTest.workflow(AgentWorkflowProductTest.kt:77)
+	at com.mightyoung.muyon.product.chat.AgentWorkflowProductTest.workflow$default(AgentWorkflowProductTest.kt:76)
+	at com.mightyoung.muyon.product.chat.AgentWorkflowProductTest.root(AgentWorkflowProductTest.kt:87)
+	at com.mightyoung.muyon.product.chat.AgentWorkflowProductTest.root$default(AgentWorkflowProductTest.kt:87)
+	at com.mightyoung.muyon.product.chat.AgentWorkflowProductTest.remoteChildCannotPretendToExecuteAndRootCancellationStopsQueuedWork(AgentWorkflowProductTest.kt:188)
+
+INSTRUMENTATION_STATUS: current=3
+INSTRUMENTATION_STATUS_CODE: -2
+INSTRUMENTATION_STATUS: numtests=9
+INSTRUMENTATION_STATUS: stream=
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=selectedSkillReadsCommittedBusinessAndPublishesOrderedToolFacts
+INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.product.chat.AgentWorkflowProductTest
+INSTRUMENTATION_STATUS: current=4
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: numtests=9
+INSTRUMENTATION_STATUS: stream=
+Error in selectedSkillReadsCommittedBusinessAndPublishesOrderedToolFacts(com.mightyoung.muyon.product.chat.AgentWorkflowProductTest):
+java.lang.AssertionError: nested operation failure: {"status":"committed","receipt":{"protocol_version":1,"intent_id":"intent:f211428c8d44bf314ab9dfc046359c48","binding_digest":"7fadb89363f89cbab9aa9da725078cffd94461c93adbca893c17e879703c2f68","scope":{"workspace_id":"local-workspace","project_id":null},"authority":{"grant_id":"grant:c330886bf314ada9b324ba04d6174d16","generation":"1","owner_epoch":"09f38d5c-c7bd-46c8-904c-48ff1e104c4f"},"admission_id":null,"target_id":"ac1dbb58-4151-443d-8403-30d735332bf1","revision":"1","status":"committed","result":{"deleted":false,"id":"ac1dbb58-4151-443d-8403-30d735332bf1","payload":{"address":null,"aliases":[],"categories":[],"merged_into":null,"name":"Workflow fixture ac1dbb58-4151-443d-8403-30d735332bf1","notes":"Local workflow fixture","rating":null,"rating_note":null},"revision":"1"}},"error":null,"recovery_action":"none"}
+	at org.junit.Assert.fail(Assert.java:89)
+	at org.junit.Assert.assertTrue(Assert.java:42)
+	at org.junit.Assert.assertFalse(Assert.java:65)
+	at com.mightyoung.muyon.product.chat.AgentWorkflowProductTest.success(AgentWorkflowProductTest.kt:66)
+	at com.mightyoung.muyon.product.chat.AgentWorkflowProductTest.commit(AgentWorkflowProductTest.kt:99)
+	at com.mightyoung.muyon.product.chat.AgentWorkflowProductTest.selectedSkillReadsCommittedBusinessAndPublishesOrderedToolFacts(AgentWorkflowProductTest.kt:109)
+
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=selectedSkillReadsCommittedBusinessAndPublishesOrderedToolFacts
+INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.product.chat.AgentWorkflowProductTest
+INSTRUMENTATION_STATUS: stack=java.lang.AssertionError: nested operation failure: {"status":"committed","receipt":{"protocol_version":1,"intent_id":"intent:f211428c8d44bf314ab9dfc046359c48","binding_digest":"7fadb89363f89cbab9aa9da725078cffd94461c93adbca893c17e879703c2f68","scope":{"workspace_id":"local-workspace","project_id":null},"authority":{"grant_id":"grant:c330886bf314ada9b324ba04d6174d16","generation":"1","owner_epoch":"09f38d5c-c7bd-46c8-904c-48ff1e104c4f"},"admission_id":null,"target_id":"ac1dbb58-4151-443d-8403-30d735332bf1","revision":"1","status":"committed","result":{"deleted":false,"id":"ac1dbb58-4151-443d-8403-30d735332bf1","payload":{"address":null,"aliases":[],"categories":[],"merged_into":null,"name":"Workflow fixture ac1dbb58-4151-443d-8403-30d735332bf1","notes":"Local workflow fixture","rating":null,"rating_note":null},"revision":"1"}},"error":null,"recovery_action":"none"}
+	at org.junit.Assert.fail(Assert.java:89)
+	at org.junit.Assert.assertTrue(Assert.java:42)
+	at org.junit.Assert.assertFalse(Assert.java:65)
+	at com.mightyoung.muyon.product.chat.AgentWorkflowProductTest.success(AgentWorkflowProductTest.kt:66)
+	at com.mightyoung.muyon.product.chat.AgentWorkflowProductTest.commit(AgentWorkflowProductTest.kt:99)
+	at com.mightyoung.muyon.product.chat.AgentWorkflowProductTest.selectedSkillReadsCommittedBusinessAndPublishesOrderedToolFacts(AgentWorkflowProductTest.kt:109)
+
+INSTRUMENTATION_STATUS: current=4
+INSTRUMENTATION_STATUS_CODE: -2
+INSTRUMENTATION_STATUS: numtests=9
+INSTRUMENTATION_STATUS: stream=
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=activityMenuCreatesAndExecutesLocalChildWithCollapsibleFacts
+INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.product.chat.AgentWorkflowProductTest
+INSTRUMENTATION_STATUS: current=5
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: numtests=9
+INSTRUMENTATION_STATUS: stream=
+Error in activityMenuCreatesAndExecutesLocalChildWithCollapsibleFacts(com.mightyoung.muyon.product.chat.AgentWorkflowProductTest):
+androidx.compose.ui.test.ComposeTimeoutException: Condition still not satisfied after 15000 ms
+	at androidx.compose.ui.test.AndroidComposeUiTestEnvironment$AndroidComposeUiTestImpl.waitUntil(ComposeUiTest.android.kt:755)
+	at androidx.compose.ui.test.junit4.AndroidComposeTestRule.waitUntil(AndroidComposeTestRule.android.kt:362)
+	at com.mightyoung.muyon.product.chat.AgentWorkflowProductTest.activityMenuCreatesAndExecutesLocalChildWithCollapsibleFacts(AgentWorkflowProductTest.kt:225)
+
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=activityMenuCreatesAndExecutesLocalChildWithCollapsibleFacts
+INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.product.chat.AgentWorkflowProductTest
+INSTRUMENTATION_STATUS: stack=androidx.compose.ui.test.ComposeTimeoutException: Condition still not satisfied after 15000 ms
+	at androidx.compose.ui.test.AndroidComposeUiTestEnvironment$AndroidComposeUiTestImpl.waitUntil(ComposeUiTest.android.kt:755)
+	at androidx.compose.ui.test.junit4.AndroidComposeTestRule.waitUntil(AndroidComposeTestRule.android.kt:362)
+	at com.mightyoung.muyon.product.chat.AgentWorkflowProductTest.activityMenuCreatesAndExecutesLocalChildWithCollapsibleFacts(AgentWorkflowProductTest.kt:225)
+
+INSTRUMENTATION_STATUS: current=5
+INSTRUMENTATION_STATUS_CODE: -2
+INSTRUMENTATION_STATUS: numtests=9
+INSTRUMENTATION_STATUS: stream=
+com.mightyoung.muyon.product.chat.ConversationRichTextTest:
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=longBilingualParagraphsAndMarkdownKeepTheirContent
+INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.product.chat.ConversationRichTextTest
+INSTRUMENTATION_STATUS: current=6
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: numtests=9
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=longBilingualParagraphsAndMarkdownKeepTheirContent
+INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.product.chat.ConversationRichTextTest
+INSTRUMENTATION_STATUS: current=6
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: numtests=9
+INSTRUMENTATION_STATUS: stream=
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=fencedCodeCopiesExactBodyAndTablesScrollHorizontally
+INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.product.chat.ConversationRichTextTest
+INSTRUMENTATION_STATUS: current=7
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: numtests=9
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=fencedCodeCopiesExactBodyAndTablesScrollHorizontally
+INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.product.chat.ConversationRichTextTest
+INSTRUMENTATION_STATUS: current=7
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: numtests=9
+INSTRUMENTATION_STATUS: stream=
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=actualRequestActivityUsesObservedFactsAndResetsForAnotherRequest
+INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.product.chat.ConversationRichTextTest
+INSTRUMENTATION_STATUS: current=8
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: numtests=9
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=actualRequestActivityUsesObservedFactsAndResetsForAnotherRequest
+INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.product.chat.ConversationRichTextTest
+INSTRUMENTATION_STATUS: current=8
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: numtests=9
+INSTRUMENTATION_STATUS: stream=
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=unsafeSchemesHaveNoLinksAndEmptyEventsHaveNoReasoningPlaceholder
+INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.product.chat.ConversationRichTextTest
+INSTRUMENTATION_STATUS: current=9
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: numtests=9
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=unsafeSchemesHaveNoLinksAndEmptyEventsHaveNoReasoningPlaceholder
+INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.product.chat.ConversationRichTextTest
+INSTRUMENTATION_STATUS: current=9
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_RESULT: stream=
+
+Time: 20.326
+There were 5 failures:
+1) conversationProjectAndBinderSessionIsolateAuthority(com.mightyoung.muyon.product.chat.AgentWorkflowProductTest)
+java.lang.AssertionError: nested operation failure: {"blocked_reason":null,"can_control":true,"cancel_requested":false,"conversation_id":"91209f38-f1cd-4f3a-befb-685643eafbad","created_seq":1,"current_request_id":null,"depth":0,"error":null,"id":"804d119c267c9b1daf9da6222075418e","kind":"workflow","parent_id":null,"project_id":null,"remote_request_id":null,"remote_request_ids":[],"result":null,"root_id":"804d119c267c9b1daf9da6222075418e","skill_digest":null,"skill_id":null,"status":"queued","task":"读取本地测试记录，保留来源，不外发。","title":"真实任务 62babd71-3966-497c-8cea-44c19634b106","updated_seq":1}
+	at org.junit.Assert.fail(Assert.java:89)
+	at org.junit.Assert.assertTrue(Assert.java:42)
+	at org.junit.Assert.assertFalse(Assert.java:65)
+	at com.mightyoung.muyon.product.chat.AgentWorkflowProductTest.success(AgentWorkflowProductTest.kt:66)
+	at com.mightyoung.muyon.product.chat.AgentWorkflowProductTest.workflow(AgentWorkflowProductTest.kt:77)
+	at com.mightyoung.muyon.product.chat.AgentWorkflowProductTest.workflow$default(AgentWorkflowProductTest.kt:76)
+	at com.mightyoung.muyon.product.chat.AgentWorkflowProductTest.root(AgentWorkflowProductTest.kt:87)
+	at com.mightyoung.muyon.product.chat.AgentWorkflowProductTest.root$default(AgentWorkflowProductTest.kt:87)
+	at com.mightyoung.muyon.product.chat.AgentWorkflowProductTest.conversationProjectAndBinderSessionIsolateAuthority(AgentWorkflowProductTest.kt:169)
+2) metadataLoadsBodyOnDemandAndDisabledSkillCannotCreateOrExecute(com.mightyoung.muyon.product.chat.AgentWorkflowProductTest)
+java.lang.AssertionError: nested operation failure: {"blocked_reason":null,"can_control":true,"cancel_requested":false,"conversation_id":"2781d627-0a3a-487c-b9d9-af35bdf080d8","created_seq":3,"current_request_id":null,"depth":0,"error":null,"id":"1a99d12caeba3b293e7d389c3df8d01c","kind":"workflow","parent_id":null,"project_id":null,"remote_request_id":null,"remote_request_ids":[],"result":null,"root_id":"1a99d12caeba3b293e7d389c3df8d01c","skill_digest":null,"skill_id":null,"status":"queued","task":"读取本地测试记录，保留来源，不外发。","title":"真实任务 b469df10-f295-44f6-8547-45cdb50fa7e3","updated_seq":3}
+	at org.junit.Assert.fail(Assert.java:89)
+	at org.junit.Assert.assertTrue(Assert.java:42)
+	at org.junit.Assert.assertFalse(Assert.java:65)
+	at com.mightyoung.muyon.product.chat.AgentWorkflowProductTest.success(AgentWorkflowProductTest.kt:66)
+	at com.mightyoung.muyon.product.chat.AgentWorkflowProductTest.workflow(AgentWorkflowProductTest.kt:77)
+	at com.mightyoung.muyon.product.chat.AgentWorkflowProductTest.workflow$default(AgentWorkflowProductTest.kt:76)
+	at com.mightyoung.muyon.product.chat.AgentWorkflowProductTest.root(AgentWorkflowProductTest.kt:87)
+	at com.mightyoung.muyon.product.chat.AgentWorkflowProductTest.root$default(AgentWorkflowProductTest.kt:87)
+	at com.mightyoung.muyon.product.chat.AgentWorkflowProductTest.metadataLoadsBodyOnDemandAndDisabledSkillCannotCreateOrExecute(AgentWorkflowProductTest.kt:155)
+3) remoteChildCannotPretendToExecuteAndRootCancellationStopsQueuedWork(com.mightyoung.muyon.product.chat.AgentWorkflowProductTest)
+java.lang.AssertionError: nested operation failure: {"blocked_reason":null,"can_control":true,"cancel_requested":false,"conversation_id":"0dc70cb8-c61e-4845-9034-34a43d54bea7","created_seq":5,"current_request_id":null,"depth":0,"error":null,"id":"4f65cc6146b6f2c8f7224baa4283ee1e","kind":"workflow","parent_id":null,"project_id":null,"remote_request_id":null,"remote_request_ids":[],"result":null,"root_id":"4f65cc6146b6f2c8f7224baa4283ee1e","skill_digest":null,"skill_id":null,"status":"queued","task":"读取本地测试记录，保留来源，不外发。","title":"真实任务 95177b22-1ca0-4717-b60d-55d129862f54","updated_seq":5}
+	at org.junit.Assert.fail(Assert.java:89)
+	at org.junit.Assert.assertTrue(Assert.java:42)
+	at org.junit.Assert.assertFalse(Assert.java:65)
+	at com.mightyoung.muyon.product.chat.AgentWorkflowProductTest.success(AgentWorkflowProductTest.kt:66)
+	at com.mightyoung.muyon.product.chat.AgentWorkflowProductTest.workflow(AgentWorkflowProductTest.kt:77)
+	at com.mightyoung.muyon.product.chat.AgentWorkflowProductTest.workflow$default(AgentWorkflowProductTest.kt:76)
+	at com.mightyoung.muyon.product.chat.AgentWorkflowProductTest.root(AgentWorkflowProductTest.kt:87)
+	at com.mightyoung.muyon.product.chat.AgentWorkflowProductTest.root$default(AgentWorkflowProductTest.kt:87)
+	at com.mightyoung.muyon.product.chat.AgentWorkflowProductTest.remoteChildCannotPretendToExecuteAndRootCancellationStopsQueuedWork(AgentWorkflowProductTest.kt:188)
+4) selectedSkillReadsCommittedBusinessAndPublishesOrderedToolFacts(com.mightyoung.muyon.product.chat.AgentWorkflowProductTest)
+java.lang.AssertionError: nested operation failure: {"status":"committed","receipt":{"protocol_version":1,"intent_id":"intent:f211428c8d44bf314ab9dfc046359c48","binding_digest":"7fadb89363f89cbab9aa9da725078cffd94461c93adbca893c17e879703c2f68","scope":{"workspace_id":"local-workspace","project_id":null},"authority":{"grant_id":"grant:c330886bf314ada9b324ba04d6174d16","generation":"1","owner_epoch":"09f38d5c-c7bd-46c8-904c-48ff1e104c4f"},"admission_id":null,"target_id":"ac1dbb58-4151-443d-8403-30d735332bf1","revision":"1","status":"committed","result":{"deleted":false,"id":"ac1dbb58-4151-443d-8403-30d735332bf1","payload":{"address":null,"aliases":[],"categories":[],"merged_into":null,"name":"Workflow fixture ac1dbb58-4151-443d-8403-30d735332bf1","notes":"Local workflow fixture","rating":null,"rating_note":null},"revision":"1"}},"error":null,"recovery_action":"none"}
+	at org.junit.Assert.fail(Assert.java:89)
+	at org.junit.Assert.assertTrue(Assert.java:42)
+	at org.junit.Assert.assertFalse(Assert.java:65)
+	at com.mightyoung.muyon.product.chat.AgentWorkflowProductTest.success(AgentWorkflowProductTest.kt:66)
+	at com.mightyoung.muyon.product.chat.AgentWorkflowProductTest.commit(AgentWorkflowProductTest.kt:99)
+	at com.mightyoung.muyon.product.chat.AgentWorkflowProductTest.selectedSkillReadsCommittedBusinessAndPublishesOrderedToolFacts(AgentWorkflowProductTest.kt:109)
+5) activityMenuCreatesAndExecutesLocalChildWithCollapsibleFacts(com.mightyoung.muyon.product.chat.AgentWorkflowProductTest)
+androidx.compose.ui.test.ComposeTimeoutException: Condition still not satisfied after 15000 ms
+	at androidx.compose.ui.test.AndroidComposeUiTestEnvironment$AndroidComposeUiTestImpl.waitUntil(ComposeUiTest.android.kt:755)
+	at androidx.compose.ui.test.junit4.AndroidComposeTestRule.waitUntil(AndroidComposeTestRule.android.kt:362)
+	at com.mightyoung.muyon.product.chat.AgentWorkflowProductTest.activityMenuCreatesAndExecutesLocalChildWithCollapsibleFacts(AgentWorkflowProductTest.kt:225)
+
+FAILURES!!!
+Tests run: 9,  Failures: 5
+
+
+INSTRUMENTATION_CODE: -1

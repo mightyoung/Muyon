@@ -1,0 +1,13 @@
+{
+  "report_sha256": "a13d725bf4040ddf1b415fb063d9bde63c57efaea26cfb87008ad2765871e0f0",
+  "reference_entries": 158,
+  "distinct_anchor_evidence": 131,
+  "distinct_git_blobs_checked": 109,
+  "errors": [],
+  "units": 23,
+  "registered_modules": 3,
+  "legacy_entries": 22,
+  "target_pages": 38,
+  "null_unit_writer_count": 23,
+  "runtime_verification_not_run": true
+}

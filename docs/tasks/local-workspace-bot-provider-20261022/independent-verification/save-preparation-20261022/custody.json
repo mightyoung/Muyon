@@ -1,0 +1,117 @@
+{
+  "at_utc": "2026-10-22T06:30:57.458405+00:00",
+  "old_20_and_13_evidence_hashes_unchanged": true,
+  "format_files_match_exact_expected_rustfmt_output": true,
+  "results": [
+    {
+      "argv": [
+        "git",
+        "rev-parse",
+        "HEAD"
+      ],
+      "exit_status": 0,
+      "stdout": "111e51178645bdcf147a8a24a0caf3a76755db39\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "git",
+        "log",
+        "-1",
+        "--format=%H %P"
+      ],
+      "exit_status": 0,
+      "stdout": "111e51178645bdcf147a8a24a0caf3a76755db39 b0d3d952355e4f0ed6547b5a25acd7f8787b64a8\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "git",
+        "diff-tree",
+        "--no-commit-id",
+        "--name-only",
+        "-r",
+        "111e51178645bdcf147a8a24a0caf3a76755db39"
+      ],
+      "exit_status": 0,
+      "stdout": "crates/muyon-android-ffi/src/lib.rs\ncrates/muyon-core/src/bot_drafts.rs\ncrates/muyon-core/tests/bot_drafts.rs\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "git",
+        "diff",
+        "098d9aca214e6642c1b3ffde64921ebedbae335d",
+        "HEAD",
+        "--stat",
+        "--",
+        "crates"
+      ],
+      "exit_status": 0,
+      "stdout": " crates/muyon-android-ffi/src/lib.rs   | 105 +++++++++---\n crates/muyon-core/src/bot_drafts.rs   |  88 ++++++----\n crates/muyon-core/src/lib.rs          |   1 +\n crates/muyon-core/tests/bot_drafts.rs | 311 ++++++++++++++++++++++++++++++----\n 4 files changed, 420 insertions(+), 85 deletions(-)\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/workspace/Muyon-group",
+        "rev-parse",
+        "HEAD"
+      ],
+      "exit_status": 0,
+      "stdout": "7fde617bab8f45644820590529def5b2f2193454\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/workspace/Muyon-group",
+        "status",
+        "--short"
+      ],
+      "exit_status": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/workspace/Muyon-document-verification",
+        "rev-parse",
+        "HEAD"
+      ],
+      "exit_status": 0,
+      "stdout": "f076e068e65b59b1b0aff0efefd9fa540f176e86\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "git",
+        "-C",
+        "/workspace/Muyon-document-verification",
+        "status",
+        "--short"
+      ],
+      "exit_status": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "git",
+        "ls-remote",
+        "origin",
+        "refs/heads/task/local-workspace-bot-provider-20261022",
+        "refs/heads/task/local-workspace-bot-provider-verification-20261022",
+        "refs/heads/main",
+        "refs/heads/develop"
+      ],
+      "exit_status": 0,
+      "stdout": "0ab2c4f667681b9aacb017f8cd2eea6f576cf78e\trefs/heads/develop\ncc7c8d14d30e3d3c4c7c6cb2bf2059a99e46e003\trefs/heads/main\n098d9aca214e6642c1b3ffde64921ebedbae335d\trefs/heads/task/local-workspace-bot-provider-20261022\ndc7f1c0c5331c5ecb53e4dfa33c0c0cb3d6b7bfa\trefs/heads/task/local-workspace-bot-provider-verification-20261022\n",
+      "stderr": ""
+    }
+  ]
+}

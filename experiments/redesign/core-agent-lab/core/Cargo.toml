@@ -1,0 +1,13 @@
+[package]
+name = "muyon-core-agent-lab"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+[lib]
+name = "muyon_core_agent_lab"
+path = "src/lib.rs"
+
+[[bin]]
+name = "muyon-core-agent-lab"
+path = "src/main.rs"

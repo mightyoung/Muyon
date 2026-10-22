@@ -1,0 +1,8 @@
+[crates.muyon_android_contract_bridge.bindings.kotlin]
+package_name = "com.mightyoung.muyon.androidbridge"
+cdylib_name = "muyon_android_contract_bridge"
+generate_immutable_records = true
+omit_checksums = false
+kotlin_target_version = "2.2.20"
+android = false
+android_cleaner = false

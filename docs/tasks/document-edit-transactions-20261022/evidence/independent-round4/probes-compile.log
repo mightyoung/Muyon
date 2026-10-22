@@ -1,0 +1,65 @@
+warning: function `previewed` is never used
+  --> /tmp/document-edit-independent-review/round4/probes.rs:82:4
+   |
+82 | fn previewed() -> Transaction {
+   |    ^^^^^^^^^
+   |
+   = note: `#[warn(dead_code)]` on by default
+
+warning: function `applied` is never used
+  --> /tmp/document-edit-independent-review/round4/probes.rs:91:4
+   |
+91 | fn applied() -> Transaction {
+   |    ^^^^^^^
+
+warning: function `validated` is never used
+   --> /tmp/document-edit-independent-review/round4/probes.rs:107:4
+    |
+107 | fn validated() -> Transaction {
+    |    ^^^^^^^^^
+
+warning: function `receipt` is never used
+   --> /tmp/document-edit-independent-review/round4/probes.rs:114:4
+    |
+114 | fn receipt(b: &Binding) -> CommitReceipt {
+    |    ^^^^^^^
+
+warning: variants `Recalculated`, `Unknown`, and `Failed` are never constructed
+  --> /workspace/Muyon/crates/muyon-core/src/document_edit/mod.rs:69:5
+   |
+67 | pub enum FormulaStatus {
+   |          ------------- variants in this enum
+68 |     NotApplicable,
+69 |     Recalculated,
+   |     ^^^^^^^^^^^^
+70 |     Unknown,
+   |     ^^^^^^^
+71 |     Failed,
+   |     ^^^^^^
+   |
+   = note: `FormulaStatus` has derived impls for the traits `Debug` and `Clone`, but these are intentionally ignored during dead code analysis
+
+warning: variants `AwaitApply` and `RecoverApply` are never constructed
+   --> /workspace/Muyon/crates/muyon-core/src/document_edit/mod.rs:109:5
+    |
+103 | pub enum Command {
+    |          ------- variants in this enum
+...
+109 |     AwaitApply(Confirmation),
+    |     ^^^^^^^^^^
+110 |     RecoverApply(Option<Candidate>),
+    |     ^^^^^^^^^^^^
+    |
+    = note: `Command` has derived impls for the traits `Debug` and `Clone`, but these are intentionally ignored during dead code analysis
+
+warning: method `cancel_requested` is never used
+   --> /workspace/Muyon/crates/muyon-core/src/document_edit/mod.rs:186:12
+    |
+163 | impl Transaction {
+    | ---------------- method in this implementation
+...
+186 |     pub fn cancel_requested(&self) -> bool {
+    |            ^^^^^^^^^^^^^^^^
+
+warning: 7 warnings emitted
+

@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "source_sha": "214b4031deb38ca7dfd35ee86396089eb48157d5",
+  "purpose": "Immutable schema12 text reference for original Rust assertions; not a Dart runtime or a user database",
+  "files": {
+    "store.dart": {
+      "source_path": "packages/supplier_core/lib/src/store.dart",
+      "bytes": 23533,
+      "sha256": "c75c10d73db7f554290d02d11efda73045ddca22a2c1fd70bca1f60a403d0e3c",
+      "git_blob": "6499d3afdbc394ab333bcbb0b41ed7eb537c92b2"
+    },
+    "entities.dart": {
+      "source_path": "packages/supplier_core/lib/src/entities.dart",
+      "bytes": 6862,
+      "sha256": "aa9980a6cb84150d773e012c7a79e13ffda28efb1e170d78b86db01c9a052a46",
+      "git_blob": "00c5e1d0e7393c13c823b6beff4402dc527f08be"
+    }
+  }
+}

@@ -1,0 +1,44 @@
+INSTRUMENTATION_STATUS: numtests=1
+INSTRUMENTATION_STATUS: stream=
+com.mightyoung.muyon.product.WorkbenchNavigationTest:
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=agentAndGroupNavigationPreservesSeparateConversationsAndGlobalReceiptMarkers
+INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.product.WorkbenchNavigationTest
+INSTRUMENTATION_STATUS: current=1
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: numtests=1
+INSTRUMENTATION_STATUS: stream=
+Error in agentAndGroupNavigationPreservesSeparateConversationsAndGlobalReceiptMarkers(com.mightyoung.muyon.product.WorkbenchNavigationTest):
+java.lang.AssertionError
+	at org.junit.Assert.fail(Assert.java:87)
+	at org.junit.Assert.assertTrue(Assert.java:42)
+	at org.junit.Assert.assertTrue(Assert.java:53)
+	at com.mightyoung.muyon.product.WorkbenchNavigationTest.agentAndGroupNavigationPreservesSeparateConversationsAndGlobalReceiptMarkers(WorkbenchNavigationTest.kt:43)
+
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=agentAndGroupNavigationPreservesSeparateConversationsAndGlobalReceiptMarkers
+INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.product.WorkbenchNavigationTest
+INSTRUMENTATION_STATUS: stack=java.lang.AssertionError
+	at org.junit.Assert.fail(Assert.java:87)
+	at org.junit.Assert.assertTrue(Assert.java:42)
+	at org.junit.Assert.assertTrue(Assert.java:53)
+	at com.mightyoung.muyon.product.WorkbenchNavigationTest.agentAndGroupNavigationPreservesSeparateConversationsAndGlobalReceiptMarkers(WorkbenchNavigationTest.kt:43)
+
+INSTRUMENTATION_STATUS: current=1
+INSTRUMENTATION_STATUS_CODE: -2
+INSTRUMENTATION_RESULT: stream=
+
+Time: 0.777
+There was 1 failure:
+1) agentAndGroupNavigationPreservesSeparateConversationsAndGlobalReceiptMarkers(com.mightyoung.muyon.product.WorkbenchNavigationTest)
+java.lang.AssertionError
+	at org.junit.Assert.fail(Assert.java:87)
+	at org.junit.Assert.assertTrue(Assert.java:42)
+	at org.junit.Assert.assertTrue(Assert.java:53)
+	at com.mightyoung.muyon.product.WorkbenchNavigationTest.agentAndGroupNavigationPreservesSeparateConversationsAndGlobalReceiptMarkers(WorkbenchNavigationTest.kt:43)
+
+FAILURES!!!
+Tests run: 1,  Failures: 1
+
+
+INSTRUMENTATION_CODE: -1

@@ -1,0 +1,46 @@
+{
+  "develop": "325e798d37044cbc0617f5bddbd14ccb9adec390",
+  "baseline": "7ed1f350c348e32510c142ef9a623a1411c85658",
+  "original_source": "fadaeb797733ade84be2ebcfb8910c931a4ccd39",
+  "fixed_source": "bdbe0ed34fa48f9170436d3c3e44d870118ee381",
+  "platform": "Linux x86_64; Python3; OpenJDK21 JVM",
+  "rust_tests": 18,
+  "python_tests": 10,
+  "h1_baseline_cases": 6,
+  "h1_baseline_exit": 124,
+  "h1_fixed_cases": 8,
+  "h1_fixed_exit": 0,
+  "jvm_pairs": 21,
+  "jvm_exit": 0,
+  "android_cross_compile": {
+    "aarch64-linux-android": 0,
+    "x86_64-linux-android": 0
+  },
+  "android_actual_load": "NOT_RUN",
+  "M03": "blocked_contract",
+  "independent_fix_review": "pending",
+  "tools": {
+    "rust": "1.99.0",
+    "cargo": "1.99.0",
+    "uniffi": "0.32.2",
+    "kotlin": "2.2.20",
+    "JNA": "5.19.1",
+    "coroutines": "1.10.2",
+    "JDK": "Debian OpenJDK21.0.12.1+1",
+    "NDK": "28.2.13676358 r28c",
+    "sdk_cmdline": "19.0",
+    "SDK_platform": "35",
+    "build_tools": "35.0.0",
+    "Gradle": "not_installed_not_needed"
+  },
+  "license_anomaly": "sdkmanager --licenses accepted extra IDs; quarantined and not used",
+  "wait_handshake": "release_waiter_count obtains same native mutex after Condvar::wait releases it",
+  "mutation": {
+    "driver_exit": 0,
+    "close_session_child_exit": 1,
+    "unsubscribe_child_exit": 1,
+    "expected_failure": "native_wait_entered False / early True"
+  },
+  "latest_evidence": "FOLLOWUP.md",
+  "review_artifacts": "review-artifacts.json"
+}

@@ -1,0 +1,28 @@
+UTC 2026-10-22T05:52:14.306168+00:00
+Linux-6.18.55-x86_64-with-glibc2.41
+Source: HEAD plus module documentation comment only; this log is uncommitted during checks.
+
+$ git rev-parse HEAD
+10d3aa83e2a93581107ad2e9f44331b5ea99d866
+exit=0
+
+$ git status --short --branch
+## task/document-core-contracts-20261022
+ M crates/muyon-core/src/documents/mod.rs
+?? docs/tasks/document-core-contracts-20261022/candidate-evidence/04-final-verification.log
+exit=0
+
+$ cargo test -p muyon-core --offline documents::candidate_tests
+[Errno 2] No such file or directory: 'cargo'
+exit=127 NOT_RUN (tool unavailable; neither pass nor test failure)
+
+$ cargo test -p muyon-core --offline
+[Errno 2] No such file or directory: 'cargo'
+exit=127 NOT_RUN (tool unavailable; neither pass nor test failure)
+
+$ rustfmt --check --edition 2021 crates/muyon-core/src/documents/candidate.rs crates/muyon-core/src/documents/candidate_tests.rs crates/muyon-core/src/documents/mod.rs crates/muyon-core/src/blobs.rs
+[Errno 2] No such file or directory: 'rustfmt'
+exit=127 NOT_RUN (tool unavailable; neither pass nor test failure)
+
+$ git diff --check
+exit=0

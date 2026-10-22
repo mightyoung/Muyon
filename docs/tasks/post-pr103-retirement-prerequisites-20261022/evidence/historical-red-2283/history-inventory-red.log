@@ -1,0 +1,16 @@
+BEGIN {"argv": ["python3", "-B", "scripts/test_retirement_prerequisites.py", "FrozenSchema.test_historical_manifest_cannot_remove_all_references"], "cwd": "/workspace/Muyon-retirement-review-fix-20261022", "source_sha": "3a2f5aa331a5ff91b3cbf624e081dfd25d5cb5bc", "dirty_source": true, "start_utc": "2026-10-22T19:48:52.867009+00:00"}
+test_historical_manifest_cannot_remove_all_references (__main__.FrozenSchema.test_historical_manifest_cannot_remove_all_references) ... FAIL
+
+======================================================================
+FAIL: test_historical_manifest_cannot_remove_all_references (__main__.FrozenSchema.test_historical_manifest_cannot_remove_all_references)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/Muyon-retirement-review-fix-20261022/scripts/test_retirement_prerequisites.py", line 136, in test_historical_manifest_cannot_remove_all_references
+    self.assertNotEqual(result.returncode, 0)
+AssertionError: 0 == 0
+
+----------------------------------------------------------------------
+Ran 1 test in 0.566s
+
+FAILED (failures=1)
+END {"argv": ["python3", "-B", "scripts/test_retirement_prerequisites.py", "FrozenSchema.test_historical_manifest_cannot_remove_all_references"], "cwd": "/workspace/Muyon-retirement-review-fix-20261022", "source_sha": "3a2f5aa331a5ff91b3cbf624e081dfd25d5cb5bc", "dirty_source": true, "start_utc": "2026-10-22T19:48:52.867009+00:00", "exit_code": 1, "duration_seconds": 1.065, "end_utc": "2026-10-22T19:48:53.859827+00:00"}
