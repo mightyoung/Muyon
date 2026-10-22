@@ -118,6 +118,22 @@ fn check_never_renews_absolute_or_idle_deadline_and_expiry_frees_resources() {
 }
 
 #[test]
+fn short_original_grant_bounds_status_and_frame_change_never_renews_it() {
+    let (_f, mut host, mut access) = setup();
+    access.authority.generation = access.authority.generation.next().unwrap();
+    let deadline = storage::now_ms().unwrap() + 8_000;
+    host.store().issue_document_grant_trusted(&access.document, &access.authority, &[DocumentOperation::Render], deadline).unwrap();
+    let opened = host.open_presentation(&access).unwrap();
+    assert!(opened.status.valid_for_ms > 0 && opened.status.valid_for_ms <= 8_000);
+    assert!(opened.status.check_after_ms <= 1000 && opened.status.check_after_ms <= opened.status.valid_for_ms);
+    host.read_presentation_chunk(&opened.status.ticket, crate::blobs::MAX_CHUNK).unwrap();
+    let next = host.advance_presentation_frame(&opened.status.ticket).unwrap();
+    assert!(next.valid_for_ms <= 8_000);
+    let grant = host.store().database().query("SELECT expires_at_ms FROM document_grants WHERE grant_id=?", &[&access.authority.grant_id]).unwrap();
+    assert_eq!(grant[0][0].as_deref(), Some(deadline.to_string().as_str()));
+}
+
+#[test]
 fn presentation_cleanup_failure_poison_withholds_lifecycle_and_retains_budget_until_retry() {
     let (_f, mut host, access) = setup();
     let opened = host.open_presentation(&access).unwrap();
