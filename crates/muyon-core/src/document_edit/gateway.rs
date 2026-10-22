@@ -88,7 +88,7 @@ fn hex(bytes: &[u8]) -> String {
 }
 fn unhex(s: &str) -> Result<Vec<u8>> {
     if s.is_empty()
-        || s.len() % 2 != 0
+        || !s.len().is_multiple_of(2)
         || s.len() as u64 > MAX_DOCUMENT_BYTES * 2
         || !s
             .bytes()
@@ -354,7 +354,7 @@ impl<'a> DocumentEditGateway<'a> {
         let digest = copy_plan_digest(&source, intent)?;
         let b = Binding {
             document: source.document.clone(),
-            patch_digest: digest.into(),
+            patch_digest: digest,
             intent_id: intent.into(),
             rollback_target: None,
         };
