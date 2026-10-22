@@ -727,6 +727,32 @@ internal object IntegrityCheckingUniffiLib {
     ): Int
     external fun uniffi_muyon_android_product_checksum_method_productcore_discard_plan(
     ): Int
+    external fun uniffi_muyon_android_product_checksum_method_productcore_document_annotations(
+    ): Int
+    external fun uniffi_muyon_android_product_checksum_method_productcore_document_evidence_answer(
+    ): Int
+    external fun uniffi_muyon_android_product_checksum_method_productcore_document_evidence_close(
+    ): Int
+    external fun uniffi_muyon_android_product_checksum_method_productcore_document_evidence_process(
+    ): Int
+    external fun uniffi_muyon_android_product_checksum_method_productcore_document_evidence_query(
+    ): Int
+    external fun uniffi_muyon_android_product_checksum_method_productcore_document_evidence_quote(
+    ): Int
+    external fun uniffi_muyon_android_product_checksum_method_productcore_document_metadata(
+    ): Int
+    external fun uniffi_muyon_android_product_checksum_method_productcore_document_read_check(
+    ): Int
+    external fun uniffi_muyon_android_product_checksum_method_productcore_document_read_chunk(
+    ): Int
+    external fun uniffi_muyon_android_product_checksum_method_productcore_document_read_close(
+    ): Int
+    external fun uniffi_muyon_android_product_checksum_method_productcore_document_read_open(
+    ): Int
+    external fun uniffi_muyon_android_product_checksum_method_productcore_document_read_release_owner(
+    ): Int
+    external fun uniffi_muyon_android_product_checksum_method_productcore_document_read_shutdown(
+    ): Int
     external fun uniffi_muyon_android_product_checksum_method_productcore_finish_upload(
     ): Int
     external fun uniffi_muyon_android_product_checksum_method_productcore_health(
@@ -844,6 +870,32 @@ internal object UniffiLib {
     external fun uniffi_muyon_android_product_fn_method_productcore_confirm_user_plan(`ptr`: Long,`planId`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
     external fun uniffi_muyon_android_product_fn_method_productcore_discard_plan(`ptr`: Long,`planId`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): Unit
+    external fun uniffi_muyon_android_product_fn_method_productcore_document_annotations(`ptr`: Long,`request`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    external fun uniffi_muyon_android_product_fn_method_productcore_document_evidence_answer(`ptr`: Long,`request`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    external fun uniffi_muyon_android_product_fn_method_productcore_document_evidence_close(`ptr`: Long,`context`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): Unit
+    external fun uniffi_muyon_android_product_fn_method_productcore_document_evidence_process(`ptr`: Long,`request`: RustBuffer.ByValue,`kind`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    external fun uniffi_muyon_android_product_fn_method_productcore_document_evidence_query(`ptr`: Long,`context`: RustBuffer.ByValue,`query`: RustBuffer.ByValue,`limit`: Int,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    external fun uniffi_muyon_android_product_fn_method_productcore_document_evidence_quote(`ptr`: Long,`context`: RustBuffer.ByValue,`queryId`: RustBuffer.ByValue,`evidenceId`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    external fun uniffi_muyon_android_product_fn_method_productcore_document_metadata(`ptr`: Long,`request`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    external fun uniffi_muyon_android_product_fn_method_productcore_document_read_check(`ptr`: Long,`request`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    external fun uniffi_muyon_android_product_fn_method_productcore_document_read_chunk(`ptr`: Long,`request`: RustBuffer.ByValue,`maxBytes`: Int,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    external fun uniffi_muyon_android_product_fn_method_productcore_document_read_close(`ptr`: Long,`request`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): Unit
+    external fun uniffi_muyon_android_product_fn_method_productcore_document_read_open(`ptr`: Long,`request`: RustBuffer.ByValue,`purpose`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    external fun uniffi_muyon_android_product_fn_method_productcore_document_read_release_owner(`ptr`: Long,`serviceSession`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): Unit
+    external fun uniffi_muyon_android_product_fn_method_productcore_document_read_shutdown(`ptr`: Long,uniffi_out_err: UniffiRustCallStatus, 
     ): Unit
     external fun uniffi_muyon_android_product_fn_method_productcore_finish_upload(`ptr`: Long,`uploadId`: RustBuffer.ByValue,`kind`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
@@ -1081,6 +1133,45 @@ private fun uniffiCheckApiChecksums(lib: IntegrityCheckingUniffiLib) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if ((lib.uniffi_muyon_android_product_checksum_method_productcore_discard_plan() and 0xFFFF) != 11839) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if ((lib.uniffi_muyon_android_product_checksum_method_productcore_document_annotations() and 0xFFFF) != 18710) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if ((lib.uniffi_muyon_android_product_checksum_method_productcore_document_evidence_answer() and 0xFFFF) != 37493) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if ((lib.uniffi_muyon_android_product_checksum_method_productcore_document_evidence_close() and 0xFFFF) != 47608) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if ((lib.uniffi_muyon_android_product_checksum_method_productcore_document_evidence_process() and 0xFFFF) != 46214) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if ((lib.uniffi_muyon_android_product_checksum_method_productcore_document_evidence_query() and 0xFFFF) != 55326) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if ((lib.uniffi_muyon_android_product_checksum_method_productcore_document_evidence_quote() and 0xFFFF) != 892) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if ((lib.uniffi_muyon_android_product_checksum_method_productcore_document_metadata() and 0xFFFF) != 8096) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if ((lib.uniffi_muyon_android_product_checksum_method_productcore_document_read_check() and 0xFFFF) != 23349) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if ((lib.uniffi_muyon_android_product_checksum_method_productcore_document_read_chunk() and 0xFFFF) != 35988) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if ((lib.uniffi_muyon_android_product_checksum_method_productcore_document_read_close() and 0xFFFF) != 7228) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if ((lib.uniffi_muyon_android_product_checksum_method_productcore_document_read_open() and 0xFFFF) != 28477) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if ((lib.uniffi_muyon_android_product_checksum_method_productcore_document_read_release_owner() and 0xFFFF) != 19166) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if ((lib.uniffi_muyon_android_product_checksum_method_productcore_document_read_shutdown() and 0xFFFF) != 32977) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if ((lib.uniffi_muyon_android_product_checksum_method_productcore_finish_upload() and 0xFFFF) != 7720) {
@@ -1646,6 +1737,38 @@ public interface ProductCoreInterface {
     fun `confirmUserPlan`(`planId`: kotlin.String): kotlin.String
     
     fun `discardPlan`(`planId`: kotlin.String)
+    
+    fun `documentAnnotations`(`request`: DocumentAccessRequest): kotlin.String
+    
+    fun `documentEvidenceAnswer`(`request`: DocumentEvidenceAnswerRequest): kotlin.String
+    
+    fun `documentEvidenceClose`(`context`: DocumentEvidenceUseRequest)
+    
+    fun `documentEvidenceProcess`(`request`: DocumentAccessRequest, `kind`: DocumentEvidenceKind): kotlin.String
+    
+    fun `documentEvidenceQuery`(`context`: DocumentEvidenceUseRequest, `query`: kotlin.String, `limit`: kotlin.UInt): kotlin.String
+    
+    fun `documentEvidenceQuote`(`context`: DocumentEvidenceUseRequest, `queryId`: kotlin.String, `evidenceId`: kotlin.String): kotlin.String
+    
+    /**
+     * Private trusted Service only: exact existing grant references, no issuer.
+     */
+    fun `documentMetadata`(`request`: DocumentAccessRequest): kotlin.String
+    
+    fun `documentReadCheck`(`request`: DocumentReadUseRequest): kotlin.String
+    
+    fun `documentReadChunk`(`request`: DocumentReadUseRequest, `maxBytes`: kotlin.UInt): DocumentReadChunkResult
+    
+    fun `documentReadClose`(`request`: DocumentReadUseRequest)
+    
+    fun `documentReadOpen`(`request`: DocumentAccessRequest, `purpose`: DocumentReadOperation): kotlin.String
+    
+    fun `documentReadReleaseOwner`(`serviceSession`: kotlin.String)
+    
+    /**
+     * Service lifecycle only: invalidate all document outputs and retry cleanup.
+     */
+    fun `documentReadShutdown`()
     
     fun `finishUpload`(`uploadId`: kotlin.String, `kind`: kotlin.String): kotlin.String
     
@@ -2226,6 +2349,209 @@ open class ProductCore: Disposable, AutoCloseable, ProductCoreInterface
     
 
     
+    @Throws(ProductException::class)override fun `documentAnnotations`(`request`: DocumentAccessRequest): kotlin.String {
+            return FfiConverterString.lift(
+    callWithHandle {
+    uniffiRustCallWithError(ProductException) { _status ->
+    UniffiLib.uniffi_muyon_android_product_fn_method_productcore_document_annotations(
+        it,
+        
+        FfiConverterTypeDocumentAccessRequest.lower(`request`),_status)
+}
+    }
+    )
+    }
+    
+
+    
+    @Throws(ProductException::class)override fun `documentEvidenceAnswer`(`request`: DocumentEvidenceAnswerRequest): kotlin.String {
+            return FfiConverterString.lift(
+    callWithHandle {
+    uniffiRustCallWithError(ProductException) { _status ->
+    UniffiLib.uniffi_muyon_android_product_fn_method_productcore_document_evidence_answer(
+        it,
+        
+        FfiConverterTypeDocumentEvidenceAnswerRequest.lower(`request`),_status)
+}
+    }
+    )
+    }
+    
+
+    
+    @Throws(ProductException::class)override fun `documentEvidenceClose`(`context`: DocumentEvidenceUseRequest)
+        = 
+    callWithHandle {
+    uniffiRustCallWithError(ProductException) { _status ->
+    UniffiLib.uniffi_muyon_android_product_fn_method_productcore_document_evidence_close(
+        it,
+        
+        FfiConverterTypeDocumentEvidenceUseRequest.lower(`context`),_status)
+}
+    }
+    
+    
+
+    
+    @Throws(ProductException::class)override fun `documentEvidenceProcess`(`request`: DocumentAccessRequest, `kind`: DocumentEvidenceKind): kotlin.String {
+            return FfiConverterString.lift(
+    callWithHandle {
+    uniffiRustCallWithError(ProductException) { _status ->
+    UniffiLib.uniffi_muyon_android_product_fn_method_productcore_document_evidence_process(
+        it,
+        
+        FfiConverterTypeDocumentAccessRequest.lower(`request`),
+        FfiConverterTypeDocumentEvidenceKind.lower(`kind`),_status)
+}
+    }
+    )
+    }
+    
+
+    
+    @Throws(ProductException::class)override fun `documentEvidenceQuery`(`context`: DocumentEvidenceUseRequest, `query`: kotlin.String, `limit`: kotlin.UInt): kotlin.String {
+            return FfiConverterString.lift(
+    callWithHandle {
+    uniffiRustCallWithError(ProductException) { _status ->
+    UniffiLib.uniffi_muyon_android_product_fn_method_productcore_document_evidence_query(
+        it,
+        
+        FfiConverterTypeDocumentEvidenceUseRequest.lower(`context`),
+        FfiConverterString.lower(`query`),
+        FfiConverterUInt.lower(`limit`),_status)
+}
+    }
+    )
+    }
+    
+
+    
+    @Throws(ProductException::class)override fun `documentEvidenceQuote`(`context`: DocumentEvidenceUseRequest, `queryId`: kotlin.String, `evidenceId`: kotlin.String): kotlin.String {
+            return FfiConverterString.lift(
+    callWithHandle {
+    uniffiRustCallWithError(ProductException) { _status ->
+    UniffiLib.uniffi_muyon_android_product_fn_method_productcore_document_evidence_quote(
+        it,
+        
+        FfiConverterTypeDocumentEvidenceUseRequest.lower(`context`),
+        FfiConverterString.lower(`queryId`),
+        FfiConverterString.lower(`evidenceId`),_status)
+}
+    }
+    )
+    }
+    
+
+    
+    /**
+     * Private trusted Service only: exact existing grant references, no issuer.
+     */
+    @Throws(ProductException::class)override fun `documentMetadata`(`request`: DocumentAccessRequest): kotlin.String {
+            return FfiConverterString.lift(
+    callWithHandle {
+    uniffiRustCallWithError(ProductException) { _status ->
+    UniffiLib.uniffi_muyon_android_product_fn_method_productcore_document_metadata(
+        it,
+        
+        FfiConverterTypeDocumentAccessRequest.lower(`request`),_status)
+}
+    }
+    )
+    }
+    
+
+    
+    @Throws(ProductException::class)override fun `documentReadCheck`(`request`: DocumentReadUseRequest): kotlin.String {
+            return FfiConverterString.lift(
+    callWithHandle {
+    uniffiRustCallWithError(ProductException) { _status ->
+    UniffiLib.uniffi_muyon_android_product_fn_method_productcore_document_read_check(
+        it,
+        
+        FfiConverterTypeDocumentReadUseRequest.lower(`request`),_status)
+}
+    }
+    )
+    }
+    
+
+    
+    @Throws(ProductException::class)override fun `documentReadChunk`(`request`: DocumentReadUseRequest, `maxBytes`: kotlin.UInt): DocumentReadChunkResult {
+            return FfiConverterTypeDocumentReadChunkResult.lift(
+    callWithHandle {
+    uniffiRustCallWithError(ProductException) { _status ->
+    UniffiLib.uniffi_muyon_android_product_fn_method_productcore_document_read_chunk(
+        it,
+        
+        FfiConverterTypeDocumentReadUseRequest.lower(`request`),
+        FfiConverterUInt.lower(`maxBytes`),_status)
+}
+    }
+    )
+    }
+    
+
+    
+    @Throws(ProductException::class)override fun `documentReadClose`(`request`: DocumentReadUseRequest)
+        = 
+    callWithHandle {
+    uniffiRustCallWithError(ProductException) { _status ->
+    UniffiLib.uniffi_muyon_android_product_fn_method_productcore_document_read_close(
+        it,
+        
+        FfiConverterTypeDocumentReadUseRequest.lower(`request`),_status)
+}
+    }
+    
+    
+
+    
+    @Throws(ProductException::class)override fun `documentReadOpen`(`request`: DocumentAccessRequest, `purpose`: DocumentReadOperation): kotlin.String {
+            return FfiConverterString.lift(
+    callWithHandle {
+    uniffiRustCallWithError(ProductException) { _status ->
+    UniffiLib.uniffi_muyon_android_product_fn_method_productcore_document_read_open(
+        it,
+        
+        FfiConverterTypeDocumentAccessRequest.lower(`request`),
+        FfiConverterTypeDocumentReadOperation.lower(`purpose`),_status)
+}
+    }
+    )
+    }
+    
+
+    
+    @Throws(ProductException::class)override fun `documentReadReleaseOwner`(`serviceSession`: kotlin.String)
+        = 
+    callWithHandle {
+    uniffiRustCallWithError(ProductException) { _status ->
+    UniffiLib.uniffi_muyon_android_product_fn_method_productcore_document_read_release_owner(
+        it,
+        
+        FfiConverterString.lower(`serviceSession`),_status)
+}
+    }
+    
+    
+
+    
+    /**
+     * Service lifecycle only: invalidate all document outputs and retry cleanup.
+     */
+    @Throws(ProductException::class)override fun `documentReadShutdown`()
+        = 
+    callWithHandle {
+    uniffiRustCallWithError(ProductException) { _status ->
+    UniffiLib.uniffi_muyon_android_product_fn_method_productcore_document_read_shutdown(
+        it,
+        _status)
+}
+    }
+    
+    
+
+    
     @Throws(ProductException::class)override fun `finishUpload`(`uploadId`: kotlin.String, `kind`: kotlin.String): kotlin.String {
             return FfiConverterString.lift(
     callWithHandle {
@@ -2652,6 +2978,269 @@ public object FfiConverterTypeProductCore: FfiConverter<ProductCore, Long> {
 
 
 
+data class DocumentAccessRequest (
+    var `scope`: DocumentReaderScope
+    , 
+    var `documentRefJson`: kotlin.String
+    , 
+    var `grantId`: kotlin.String
+    , 
+    var `grantGeneration`: kotlin.String
+    
+){
+    
+
+    
+
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeDocumentAccessRequest: FfiConverterRustBuffer<DocumentAccessRequest> {
+    override fun read(buf: ByteBuffer): DocumentAccessRequest {
+        return DocumentAccessRequest(
+            FfiConverterTypeDocumentReaderScope.read(buf),
+            FfiConverterString.read(buf),
+            FfiConverterString.read(buf),
+            FfiConverterString.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: DocumentAccessRequest) = (
+            FfiConverterTypeDocumentReaderScope.allocationSize(value.`scope`) +
+            FfiConverterString.allocationSize(value.`documentRefJson`) +
+            FfiConverterString.allocationSize(value.`grantId`) +
+            FfiConverterString.allocationSize(value.`grantGeneration`)
+    )
+
+    override fun write(value: DocumentAccessRequest, buf: ByteBuffer) {
+            FfiConverterTypeDocumentReaderScope.write(value.`scope`, buf)
+            FfiConverterString.write(value.`documentRefJson`, buf)
+            FfiConverterString.write(value.`grantId`, buf)
+            FfiConverterString.write(value.`grantGeneration`, buf)
+    }
+}
+
+
+
+data class DocumentEvidenceAnswerRequest (
+    var `context`: DocumentEvidenceUseRequest
+    , 
+    var `queryId`: kotlin.String
+    , 
+    var `body`: kotlin.String
+    , 
+    var `citedIndices`: List<kotlin.UInt>
+    
+){
+    
+
+    
+
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeDocumentEvidenceAnswerRequest: FfiConverterRustBuffer<DocumentEvidenceAnswerRequest> {
+    override fun read(buf: ByteBuffer): DocumentEvidenceAnswerRequest {
+        return DocumentEvidenceAnswerRequest(
+            FfiConverterTypeDocumentEvidenceUseRequest.read(buf),
+            FfiConverterString.read(buf),
+            FfiConverterString.read(buf),
+            FfiConverterSequenceUInt.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: DocumentEvidenceAnswerRequest) = (
+            FfiConverterTypeDocumentEvidenceUseRequest.allocationSize(value.`context`) +
+            FfiConverterString.allocationSize(value.`queryId`) +
+            FfiConverterString.allocationSize(value.`body`) +
+            FfiConverterSequenceUInt.allocationSize(value.`citedIndices`)
+    )
+
+    override fun write(value: DocumentEvidenceAnswerRequest, buf: ByteBuffer) {
+            FfiConverterTypeDocumentEvidenceUseRequest.write(value.`context`, buf)
+            FfiConverterString.write(value.`queryId`, buf)
+            FfiConverterString.write(value.`body`, buf)
+            FfiConverterSequenceUInt.write(value.`citedIndices`, buf)
+    }
+}
+
+
+
+data class DocumentEvidenceUseRequest (
+    var `scope`: DocumentReaderScope
+    , 
+    var `processingId`: kotlin.String
+    
+){
+    
+
+    
+
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeDocumentEvidenceUseRequest: FfiConverterRustBuffer<DocumentEvidenceUseRequest> {
+    override fun read(buf: ByteBuffer): DocumentEvidenceUseRequest {
+        return DocumentEvidenceUseRequest(
+            FfiConverterTypeDocumentReaderScope.read(buf),
+            FfiConverterString.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: DocumentEvidenceUseRequest) = (
+            FfiConverterTypeDocumentReaderScope.allocationSize(value.`scope`) +
+            FfiConverterString.allocationSize(value.`processingId`)
+    )
+
+    override fun write(value: DocumentEvidenceUseRequest, buf: ByteBuffer) {
+            FfiConverterTypeDocumentReaderScope.write(value.`scope`, buf)
+            FfiConverterString.write(value.`processingId`, buf)
+    }
+}
+
+
+
+data class DocumentReadChunkResult (
+    var `offset`: kotlin.String
+    , 
+    var `bytes`: kotlin.ByteArray
+    , 
+    var `eof`: kotlin.Boolean
+    , 
+    var `sessionActive`: kotlin.Boolean
+    
+){
+    
+
+    
+
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeDocumentReadChunkResult: FfiConverterRustBuffer<DocumentReadChunkResult> {
+    override fun read(buf: ByteBuffer): DocumentReadChunkResult {
+        return DocumentReadChunkResult(
+            FfiConverterString.read(buf),
+            FfiConverterByteArray.read(buf),
+            FfiConverterBoolean.read(buf),
+            FfiConverterBoolean.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: DocumentReadChunkResult) = (
+            FfiConverterString.allocationSize(value.`offset`) +
+            FfiConverterByteArray.allocationSize(value.`bytes`) +
+            FfiConverterBoolean.allocationSize(value.`eof`) +
+            FfiConverterBoolean.allocationSize(value.`sessionActive`)
+    )
+
+    override fun write(value: DocumentReadChunkResult, buf: ByteBuffer) {
+            FfiConverterString.write(value.`offset`, buf)
+            FfiConverterByteArray.write(value.`bytes`, buf)
+            FfiConverterBoolean.write(value.`eof`, buf)
+            FfiConverterBoolean.write(value.`sessionActive`, buf)
+    }
+}
+
+
+
+data class DocumentReadUseRequest (
+    var `scope`: DocumentReaderScope
+    , 
+    var `readSessionId`: kotlin.String
+    
+){
+    
+
+    
+
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeDocumentReadUseRequest: FfiConverterRustBuffer<DocumentReadUseRequest> {
+    override fun read(buf: ByteBuffer): DocumentReadUseRequest {
+        return DocumentReadUseRequest(
+            FfiConverterTypeDocumentReaderScope.read(buf),
+            FfiConverterString.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: DocumentReadUseRequest) = (
+            FfiConverterTypeDocumentReaderScope.allocationSize(value.`scope`) +
+            FfiConverterString.allocationSize(value.`readSessionId`)
+    )
+
+    override fun write(value: DocumentReadUseRequest, buf: ByteBuffer) {
+            FfiConverterTypeDocumentReaderScope.write(value.`scope`, buf)
+            FfiConverterString.write(value.`readSessionId`, buf)
+    }
+}
+
+
+
+data class DocumentReaderScope (
+    var `serviceSession`: kotlin.String
+    , 
+    var `generation`: kotlin.String
+    , 
+    var `project`: kotlin.String?
+    
+){
+    
+
+    
+
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeDocumentReaderScope: FfiConverterRustBuffer<DocumentReaderScope> {
+    override fun read(buf: ByteBuffer): DocumentReaderScope {
+        return DocumentReaderScope(
+            FfiConverterString.read(buf),
+            FfiConverterString.read(buf),
+            FfiConverterOptionalString.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: DocumentReaderScope) = (
+            FfiConverterString.allocationSize(value.`serviceSession`) +
+            FfiConverterString.allocationSize(value.`generation`) +
+            FfiConverterOptionalString.allocationSize(value.`project`)
+    )
+
+    override fun write(value: DocumentReaderScope, buf: ByteBuffer) {
+            FfiConverterString.write(value.`serviceSession`, buf)
+            FfiConverterString.write(value.`generation`, buf)
+            FfiConverterOptionalString.write(value.`project`, buf)
+    }
+}
+
+
+
 /**
  * Private host snapshot for a new, not-yet-released prepare API. Fields are
  * references/preconditions, never caller-issued authority or a saved assertion.
@@ -2731,6 +3320,75 @@ public object FfiConverterTypeLocalDraftPrepareRequest: FfiConverterRustBuffer<L
             FfiConverterByteArray.write(value.`archive`, buf)
     }
 }
+
+
+
+
+enum class DocumentEvidenceKind {
+    
+    UTF8_TEXT,
+    PDF,
+    OCR;
+
+    
+
+
+    companion object
+}
+
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeDocumentEvidenceKind: FfiConverterRustBuffer<DocumentEvidenceKind> {
+    override fun read(buf: ByteBuffer) = try {
+        DocumentEvidenceKind.values()[buf.getInt() - 1]
+    } catch (e: IndexOutOfBoundsException) {
+        throw RuntimeException("invalid enum value, something is very wrong!!", e)
+    }
+
+    override fun allocationSize(value: DocumentEvidenceKind) = 4UL
+
+    override fun write(value: DocumentEvidenceKind, buf: ByteBuffer) {
+        buf.putInt(value.ordinal + 1)
+    }
+}
+
+
+
+
+
+
+enum class DocumentReadOperation {
+    
+    READ_TEXT,
+    RENDER;
+
+    
+
+
+    companion object
+}
+
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeDocumentReadOperation: FfiConverterRustBuffer<DocumentReadOperation> {
+    override fun read(buf: ByteBuffer) = try {
+        DocumentReadOperation.values()[buf.getInt() - 1]
+    } catch (e: IndexOutOfBoundsException) {
+        throw RuntimeException("invalid enum value, something is very wrong!!", e)
+    }
+
+    override fun allocationSize(value: DocumentReadOperation) = 4UL
+
+    override fun write(value: DocumentReadOperation, buf: ByteBuffer) {
+        buf.putInt(value.ordinal + 1)
+    }
+}
+
+
 
 
 
@@ -2854,6 +3512,34 @@ public object FfiConverterOptionalString: FfiConverterRustBuffer<kotlin.String?>
         } else {
             buf.put(1)
             FfiConverterString.write(value, buf)
+        }
+    }
+}
+
+
+
+
+/**
+ * @suppress
+ */
+public object FfiConverterSequenceUInt: FfiConverterRustBuffer<List<kotlin.UInt>> {
+    override fun read(buf: ByteBuffer): List<kotlin.UInt> {
+        val len = buf.getInt()
+        return List<kotlin.UInt>(len) {
+            FfiConverterUInt.read(buf)
+        }
+    }
+
+    override fun allocationSize(value: List<kotlin.UInt>): ULong {
+        val sizeForLength = 4UL
+        val sizeForItems = value.map { FfiConverterUInt.allocationSize(it) }.sum()
+        return sizeForLength + sizeForItems
+    }
+
+    override fun write(value: List<kotlin.UInt>, buf: ByteBuffer) {
+        buf.putInt(value.size)
+        value.iterator().forEach {
+            FfiConverterUInt.write(it, buf)
         }
     }
 } fun `productProtocolVersion`(): kotlin.UInt {
