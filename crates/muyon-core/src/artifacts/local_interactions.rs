@@ -1,6 +1,9 @@
 //! Bounded local component state, not business execution or canonical source data.
 //! Actual Evidence source authority is revalidated in each local transaction.
-use super::save_journal::{requires_original_lookup, ArtifactSaveFailure, JournalDomain};
+use super::save_journal::{
+    requires_original_lookup, ArtifactSaveFailure, JournalDomain, PendingJournal,
+    PendingJournalTarget,
+};
 use super::*;
 use crate::contract::{AuthorityBinding, RecoveryAction};
 use sha2::{Digest, Sha256};
@@ -895,15 +898,16 @@ impl BusinessStore {
                 if self.local_pending(a)?.is_some() {
                     return Err(ContractError::IntentConflict);
                 }
-                self.journal_pending(
-                    JournalDomain::Local,
-                    intent,
-                    a.project.project_id()?,
-                    &a.project.actor_id,
-                    &digest,
-                    &json,
-                    &a.object.object_id,
-                )?;
+                self.journal_pending(PendingJournal {
+                    target: PendingJournalTarget::Local {
+                        object_id: &a.object.object_id,
+                    },
+                    intent_id: intent,
+                    project_id: a.project.project_id()?,
+                    actor_id: &a.project.actor_id,
+                    binding_digest: &digest,
+                    request_json: &json,
+                })?;
                 self.local_binding(&tx, a, permission)?;
                 sql(tx.commit())?;
             }
