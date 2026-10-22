@@ -1,0 +1,10 @@
+Final independent static review: /workspace/Muyon-host-bot-native-acceptance-20261022
+Base ee742351fe7cf02133c5d68fd21eaabd73579d8d
+Final BotNativeServiceAcceptanceTest.kt SHA256 48301773cdf4dc138b8eca16eec77676df46262441cae48d265c8a066a34d01b
+Current test source has THREE device-only scenarios. This supersedes earlier two-scenario review count.
+No new Important found in reviewed delta. git diff --check exit 0; earlier trailing whitespace repaired.
+Scenario2 adds altered original expectedStoredRevision=1 rejection, alongside altered registry generation. It reuses exact original attempt and expects ProductException, not a fake changed receipt; later explicit native lookup fence still rejects late save. This is a malformed/stale-original binding rejection assertion, not a device test result.
+Scenario3 creates actual generated native prepare/save in the fixed synthetic DB, validates committed receipt and known-committed duplicate, then closes original owner. No Host reducer receives that original delivery. New Service discovers only original pointer, explicit query returns historical cold receipt without acknowledging fresh editor, name remains empty, and explicit restore loads durable content. Foreign conversation lookup must fail. No automatic save replay, latest-owner substitution, new gateway, real-root access or fake receipt used.
+Third scenario is deliberate discarded delivery fixture AFTER known actual native commit, NOT actual Binder dropped-packet or kill-in-flight fault injection. First scenario remains acknowledged save then process death; second remains durable prepared preset then explicit fence.
+Production defaults stay unchanged; verified=true is solely debug non-exported synthetic-root subclass. No instrumentation/native execution occurred during this review. All THREE device scenarios remain NOT_RUN absent a confirmed completed device execution; compilation does not prove runtime acceptance. Review does not promote gate or reinterpret pending connected command as execution.
+Reviewer made no source changes.

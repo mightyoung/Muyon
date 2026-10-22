@@ -1,0 +1,8 @@
+Read-only static review: recordInstalledIdentity addition
+Worktree /workspace/Muyon-host-bot-native-acceptance-20261022, HEAD c363ca2418634d76e7d0a5b1c9a746df2832daed
+Current androidTest SHA256 301b92bbe3971f352a3d2de767902aed9c90a2b40889a1d7ebf19e187efa3c5f
+No Important found in added method itself. connect invokes actual Service/native health; validates sealed BuildConfig format and exact native build_id, native synthetic=false, fixed synthetic workspace. APK sourceDir is actual target application installed base APK. Whole APK and four expected native zip entries stream-hashed with closed streams/ZipFile. Result is logged for independent host comparison, not a self-issued acceptance result.
+No owner/root/gate/test-scenario change. Production remains false, isolated debug fixture only. git diff --check exit0. No source changes by reviewer.
+Identity condition: formal build-native.sh input_hash includes all app/src including changed androidTest. c363 pre-change native build/assemble PASS is not final modified-source proof. health==BuildConfig only checks equality of the supplied seals; final host must recompute/rebuild exact current source identity and independently compare final installed APK/package-native hashes against sealed final manifests. Parent informed; old and new candidate evidence must remain separate.
+Four zip hashes identify PACKAGED native inputs, not a claim of independently hashing loaded memory. Device has not executed this method; logs/build artifacts alone are not acceptance. Identity-test compilation was pending at task dispatch and is not claimed as independently rerun/pass here.
+ADB path issue is not bypassed or altered by reviewer. No device/credential/HOME/permission changes or model/search requests performed.

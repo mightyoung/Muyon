@@ -17,7 +17,7 @@ import java.io.File
 import java.util.UUID
 
 /** One private process owns the native business connection. No fixture fallback. */
-class ProductService : Service() {
+open class ProductService : Service() {
     companion object {
         private val retiringOwners = java.util.concurrent.ConcurrentHashMap<String, java.util.concurrent.CountDownLatch>()
     }
@@ -28,7 +28,10 @@ class ProductService : Service() {
     private lateinit var handler: Handler
     private lateinit var messenger: Messenger
     private val epoch = UUID.randomUUID().toString()
-    private val workspace = "local-workspace"
+    protected open val workspace: String get() = "local-workspace"
+    // Build-specific subclass seams; production has no wire/configuration switch.
+    protected open fun nativeStorageRoot(): File = File(filesDir, "muyon-product-v2")
+    protected open fun localDraftPortVerifiedForBuild(): Boolean = false
     private var core: ProductCore? = null
     private lateinit var chat: ProductChatRuntime
     private val clients = java.util.concurrent.ConcurrentHashMap<IBinder, String>()
@@ -122,7 +125,7 @@ class ProductService : Service() {
             // The fixed tree contains all five actual generated draft methods.
             // Android Service/native invocation and release acceptance remain
             // unverified; source wiring alone cannot open this gate.
-            override val verified = false
+            override val verified = localDraftPortVerifiedForBuild()
             private fun data(raw: String) = nativeData(raw) as JSONObject
             override fun resolve(conversation: String, project: String?) = data(open(false).localDraftResolve(conversation, project))
             override fun read(conversation: String, project: String?, namespace: String, draft: String, generation: String, revision: String) =
@@ -157,7 +160,7 @@ class ProductService : Service() {
             check(drain.await((deadline - SystemClock.elapsedRealtime()).coerceAtLeast(0), java.util.concurrent.TimeUnit.MILLISECONDS))
         }
         check(!stopped)
-        val root = File(filesDir, "muyon-product-v2").absolutePath
+        val root = nativeStorageRoot().absolutePath
         // Native open first acquires the sole owner and reconciles old-epoch
         // uploads/readers plus reference-checked GC. Publish only after that
         // succeeds; no maintenance can overlap a predecessor's drain.
@@ -207,7 +210,7 @@ class ProductService : Service() {
                     }
                     JSONObject().put("status", "ok").put("data", JSONObject()
                         .put("session", session).put("epoch", epoch).put("workspace", workspace)
-                        .put("initialized", File(filesDir, "muyon-product-v2/business-v2.sqlite").isFile))
+                        .put("initialized", File(nativeStorageRoot(), "business-v2.sqlite").isFile))
                 } else if (method == "disconnect") {
                     // Revocation is bound to this caller's Binder identity. It
                     // also works if close raced the connect reply (no lease yet

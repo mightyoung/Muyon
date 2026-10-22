@@ -46,12 +46,19 @@ def check_contract(service, binding, ffi):
         hostEditorRevision=original.exportedLocalRevision.toString(),archive=original.archive'''
     assert record_call(service) == ''.join(expected_mapping.split()), 'captured original binding drift'
     port = service[service.index('localDraftPort = object : ProductLocalDraftPort'):]
-    assert 'override val verified = false' in port, 'native source wiring is not release verification'
+    assert 'override val verified = localDraftPortVerifiedForBuild()' in port
+    assert re.search(r'protected open fun localDraftPortVerifiedForBuild\(\): Boolean = false', service), 'production gate must remain false'
 
 
 class PrepareBindingContract(unittest.TestCase):
     def test_real_repository_contract(self):
         check_contract(SERVICE.read_text(), BINDING.read_text(), FFI.read_text())
+
+    def test_production_gate_cannot_be_opened(self):
+        bad = SERVICE.read_text().replace('fun localDraftPortVerifiedForBuild(): Boolean = false',
+                                          'fun localDraftPortVerifiedForBuild(): Boolean = true')
+        with self.assertRaises(AssertionError):
+            check_contract(bad, BINDING.read_text(), FFI.read_text())
 
     def test_wrong_base_revision_is_rejected(self):
         actual = SERVICE.read_text()

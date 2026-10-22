@@ -1,0 +1,47 @@
+{
+  "rust": "1.93.1",
+  "rustup_init_sha256": "5be191e8c70a5007074254cb74d78dbfdd25cd5a61c27de7b8e5410122ec24f4",
+  "ndk": {
+    "version": "28.2.13676358",
+    "url": "https://dl.google.com/android/repository/android-ndk-r28c-linux.zip",
+    "sha1": "a7b54a5de87fecd125a17d54f73c446199e72a64",
+    "license_ref": "android-sdk-license",
+    "actual_archive_sha256": "dfb20d396df28ca02a8c708314b814a4d961dc9074f9a161932746f815aa552f"
+  },
+  "cmake": {
+    "version": "3.22.1",
+    "url": "https://dl.google.com/android/repository/cmake-3.22.1-linux.zip",
+    "sha1": "fd0a48b4a758310df8c7aa51f59840ed48fe7ed8",
+    "license_ref": "android-sdk-license",
+    "actual_archive_sha256": "9196644852a978012caf7a4067ba1898debf6cc204c3341562771e31080d6869"
+  },
+  "emulator": {
+    "version": "37.2.12",
+    "url": "https://dl.google.com/android/repository/emulator-linux_x64-16428233.zip",
+    "sha1": "cd7362ea55dfb86a418958138dc396e74165dd01",
+    "channel": "stable",
+    "license_ref": "android-sdk-license",
+    "actual_archive_sha256": "b08fc43d8608d2955f607f1b287beb525041e730086bdca3af152accac3af9c1"
+  },
+  "image": {
+    "package": "system-images;android-26;default;x86_64",
+    "url": "https://dl.google.com/android/repository/sys-img/android/x86_64-26_r01.zip",
+    "sha1": "432f149c048bffce7f9de526ec65b336daf7a0a3",
+    "license_ref": "android-sdk-license",
+    "actual_archive_sha256": "78a79eb02751b19b6626b785f05d5b0ab3a283596fe9d29e54905090a36fe77d"
+  },
+  "host_sqlite": {
+    "real_library": "/usr/lib/x86_64-linux-gnu/libsqlite3.so.0",
+    "sha256": "14c4418a06c5c2e30f5fb57bc8add93762236ae17898c6708984cf15e680ca71",
+    "task_link": "/workspace/host-bot-native-tools/host-lib/libsqlite3.so"
+  },
+  "boundary": "all actual task-local tools; no sudo/HOME reassignment/auth disabling/account credentials or extra SDK license acceptance",
+  "sdk_agreement_reference": {
+    "license_ref": "android-sdk-license",
+    "embedded_date": "January 16, 2019",
+    "text_sha256": "1f8729233617b193fd619213792ae16a41b95d2bbbf525dfe66998252ba68b16",
+    "same_in_image_and_tools_metadata": true,
+    "current_official_page_date_already_disclosed": "April 28, 2026",
+    "new_acceptance_or_preview_license": false
+  }
+}

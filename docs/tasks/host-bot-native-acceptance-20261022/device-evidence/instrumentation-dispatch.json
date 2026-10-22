@@ -1,0 +1,5 @@
+{
+  "state": "DISPATCH_ONCE",
+  "command": "am instrument -w -r -e class com.mightyoung.muyon.product.agentipc.BotNativeServiceAcceptanceTest com.mightyoung.muyon.product.test/androidx.test.runner.AndroidJUnitRunner",
+  "no_automatic_retry": true
+}
