@@ -36,3 +36,7 @@ Hostreauth/PFD/renderer/unifiedgatewayacceptanceNOT_RUN, noSDKinstall/bypass.
 Sourceinvalidatione3fa/36b stillABA/COPYtailHOLD, notimported; laterrealharnessdeps
 notimplementedearly, seeNEXT-INPUTS. NoCI/PR/main/develop/fee/credentials/realengine/
 model/search/I04/old403/historicalUnknownorheldbudget action. Writersstopafterseal.
+
+Superseding closure: parentexpandedfourthwrapperexpect, appliedff99be23; actual
+fullworkspace/alltargetstrictPASS0/no warnings, related97PASS. Fourthexpectscope
+andoldunusedblock CLOSED. SeeSTRICT-GATE-CLOSED.md; priorfailure/proposal retained.
