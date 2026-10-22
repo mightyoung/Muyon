@@ -69,3 +69,19 @@ no alternative Rust documents source were verified. No new blocker identified in
 this host-only API slice. Actual Android Service/build/device, full card binding,
 backend persistence/create and shell adoption remain open. No review merges or
 changes were made by the reviewer.
+
+## Persistent storage frame final independent review
+
+Non-author host_projection_review reviewed actual canonical-codec store and ran its
+synthetic tests, final nullable-floor version exit0. Original output in
+persistence-independent.log. No production store caller or owner bypass found;
+runtime save/restore remains unavailable. Strict trailing JSON/raw NUL rejection,
+existing durable root precondition, real cross-process CAS, atomic replace/sync,
+Unknown exact receipt recovery, archive size, valid older frame/floor, anchored0 and
+MAX cases verified. Earlier parse/root/floor problems were corrected before this
+checkpoint. Fixed49ad codec is reused; no host replica of editing serialization.
+
+Store alone is not an authorized owner resolver or rollback-resistant account
+ledger. Production persistence remains blocked by missing verified owner, trusted
+anchor and unresolved creation/stop guard. Actual Android and power-loss tests not
+performed. Reviewer did not modify, submit, push or touch real app data.

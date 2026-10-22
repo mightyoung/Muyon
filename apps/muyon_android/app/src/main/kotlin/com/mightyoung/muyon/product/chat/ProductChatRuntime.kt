@@ -334,6 +334,7 @@ class ProductChatRuntime internal constructor(private val port: ProductChatPort,
             if (workspace.isBlank() || conversation.isBlank() || conversation.length > 1024 ||
                 !scopes.matches(session, project, generation)) return@submit failure("setup_scope_unavailable")
             val action = input.opt("action") as? String ?: return@submit failure("setup_operation_unavailable")
+            if (action in setOf("save", "restore")) return@submit failure("setup_persistent_owner_unavailable")
             val mutations = setOf("edit_name", "edit_purpose", "edit_role", "next", "back", "cancel", "resume", "suggest_role", "accept_role")
             if (action !in mutations && action !in setOf("open", "read")) return@submit failure("setup_operation_unavailable")
             val required = when (action) {
@@ -413,6 +414,7 @@ class ProductChatRuntime internal constructor(private val port: ProductChatPort,
                 .put("project_id", state.scope.project ?: JSONObject.NULL).put("generation", state.scope.generation))
             .put("local_draft_id", draft.draftId).put("local_revision", state.revision).put("reducer_revision", draft.revision)
             .put("step", draft.step.name).put("name", draft.name.value).put("purpose", draft.purpose.value).put("role", draft.role.value)
+            .put("persistence_status", "unavailable").put("persistent_owner_status", "unavailable")
             .put("cancelled", draft.cancelled).put("saved", false).put("can_save", false).put("can_create", false).put("can_start", false)
             .put("creation_status", "not_requested").put("agent_id", JSONObject.NULL).put("intent_id", JSONObject.NULL)
             .put("actual_micro_cny", JSONObject.NULL).put("reserved_micro_cny", JSONObject.NULL)

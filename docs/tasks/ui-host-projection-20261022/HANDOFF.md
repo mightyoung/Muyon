@@ -41,3 +41,15 @@ save/create/start. Empty skill/material offers explicitly mean metadata unavaila
 no replacement document truth. Shell chooses one draft source of truth and retains
 mounted scope guards. Backend identities/CAS/documents and Android acceptance remain
 open. Producer endpoint implementation is source-delivered, not shell wiring.
+
+## Persistence continuation — unavailable in product
+
+PERSISTENCE-OWNER-CONTRACT.md and PERSISTENCE-REPORT.md describe the verified gaps
+and tested store API. Canonical49ad export/restore dependency is combined; dedicated
+HostDraftStore uses its binary archive with stable owner/record envelope and exact
+CAS. It is NOT instantiated by production. Runtime now returns
+setup_persistent_owner_unavailable for save/restore, with persistent_owner_status
+and persistence_status unavailable; saved/can_save remain false. Do not wire a save
+button from standalone store tests. Stable owner join, trusted rollback anchor and
+unresolved creation/stop guard are still required and cannot be made from session/
+generation, checksum, an archive or a fabricated installation/account ID.
