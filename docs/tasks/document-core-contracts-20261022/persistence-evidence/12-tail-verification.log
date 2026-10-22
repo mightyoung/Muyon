@@ -1,0 +1,11 @@
+Thu Oct 22 05:04:47 UTC 2026
+4c6b706f8cf071b14227c5093f0e0b1d65109f43
+/bin/bash: line 2: cargo: command not found
+hook_tests_exit=127
+/bin/bash: line 2: cargo: command not found
+storage_tests_exit=127
+/bin/bash: line 2: cargo: command not found
+core_exit=127
+/bin/bash: line 2: cargo: command not found
+fmt_exit=127
+diff_check_exit=0

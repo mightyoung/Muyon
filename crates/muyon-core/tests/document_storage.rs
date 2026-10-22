@@ -1,0 +1,759 @@
+//! Actual SQLite/blob round trips with original synthetic bytes; no document engine.
+use muyon_core::{blobs::BlobKind, business::BusinessStore, contract::*, documents::*, sqlite::Db};
+use std::{
+    fs,
+    path::PathBuf,
+    sync::atomic::{AtomicU64, Ordering},
+    time::{SystemTime, UNIX_EPOCH},
+};
+static NEXT: AtomicU64 = AtomicU64::new(0);
+const PDF: &[u8] = b"%PDF-1.4\nsynthetic DOC04 fixture; not a rendered PDF\n%%EOF\n";
+struct Fixture {
+    root: PathBuf,
+}
+impl Fixture {
+    fn new() -> Self {
+        let root = std::env::temp_dir().join(format!(
+            "muyon-document-storage-{}-{}",
+            std::process::id(),
+            NEXT.fetch_add(1, Ordering::Relaxed)
+        ));
+        fs::create_dir(&root).unwrap();
+        Self { root }
+    }
+    fn path(&self) -> PathBuf {
+        self.root.join("business.sqlite")
+    }
+    fn open(&self) -> BusinessStore {
+        BusinessStore::open_existing(&self.path(), "workspace", "epoch").unwrap()
+    }
+    fn db(&self) -> Db {
+        Db::open(self.path().to_str().unwrap(), false, false).unwrap()
+    }
+    fn initialize(&self) -> BusinessStore {
+        BusinessStore::initialize(&self.path(), "workspace").unwrap();
+        let store = self.open();
+        for project in ["project", "other"] {
+            let mut command = CommandEnvelope {
+                protocol_version: 1,
+                business_version: 1,
+                intent_id: format!("create-{project}"),
+                scope: Scope {
+                    workspace_id: "workspace".into(),
+                    project_id: Some(project.into()),
+                },
+                expected_revision: Revision::new(0),
+                authority: AuthorityBinding {
+                    grant_id: format!("grant-{project}"),
+                    generation: Revision::new(1),
+                    owner_epoch: "epoch".into(),
+                },
+                plan_id: format!("plan-{project}"),
+                plan_digest: "0".repeat(64),
+                command: Operation::ProjectCreate {
+                    project_id: project.into(),
+                    name: project.into(),
+                },
+            };
+            command.plan_digest = command.expected_plan_digest().unwrap();
+            store.issue_grant_trusted(&command, None).unwrap();
+            assert_eq!(
+                store.execute(&command).unwrap().status,
+                ExecutionStatus::Committed
+            );
+        }
+        store.initialize_documents_trusted().unwrap();
+        store
+    }
+}
+impl Drop for Fixture {
+    fn drop(&mut self) {
+        let _ = fs::remove_dir_all(&self.root);
+    }
+}
+fn expires() -> u64 {
+    SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .unwrap()
+        .as_millis() as u64
+        + 20_000
+}
+fn binding() -> AuthorityBinding {
+    AuthorityBinding {
+        grant_id: "document-grant".into(),
+        generation: Revision::new(1),
+        owner_epoch: "epoch".into(),
+    }
+}
+fn upload(store: &BusinessStore, bytes: &[u8]) -> muyon_core::blobs::FinishedBlob {
+    let h = store.begin_upload("project").unwrap();
+    store.append_chunk(&h.upload_id, bytes).unwrap();
+    store.finish_blob(&h.upload_id, BlobKind::Pdf).unwrap()
+}
+fn register(store: &BusinessStore) -> DocumentMetadata {
+    store
+        .register_document_trusted(
+            "project",
+            "document",
+            "Synthetic document",
+            DocumentFormat::Pdf,
+            &upload(store, PDF),
+        )
+        .unwrap()
+}
+fn access(
+    store: &BusinessStore,
+    metadata: &DocumentMetadata,
+    operations: &[DocumentOperation],
+) -> DocumentAccess {
+    store
+        .issue_document_grant_trusted(&metadata.document, &binding(), operations, expires())
+        .unwrap();
+    DocumentAccess {
+        document: metadata.document.clone(),
+        authority: binding(),
+    }
+}
+fn all() -> Vec<DocumentOperation> {
+    vec![
+        DocumentOperation::Inspect,
+        DocumentOperation::ReadText,
+        DocumentOperation::Annotate,
+        DocumentOperation::Export,
+    ]
+}
+fn anchor(document: &DocumentRef) -> DocumentAnchor {
+    DocumentAnchor {
+        document: document.clone(),
+        location: AnchorLocation::Pdf(PdfAnchor {
+            page_index_zero_based: Some(0),
+            coordinates: CoordinateSystem::PdfUserSpace,
+            rotation: Some(PageRotation::Degrees0),
+            crop: Some(Rect {
+                x: 0.0,
+                y: 0.0,
+                width: 600.0,
+                height: 800.0,
+            }),
+            region: Rect {
+                x: 1.0,
+                y: 2.0,
+                width: 10.0,
+                height: 20.0,
+            },
+        }),
+    }
+}
+fn human() -> AnnotationAuthor {
+    AnnotationAuthor::Human {
+        actor_id: "human".into(),
+    }
+}
+fn ai() -> AnnotationAuthor {
+    AnnotationAuthor::Ai {
+        agent_id: "agent".into(),
+        run_id: "run".into(),
+    }
+}
+fn comment(text: &str) -> AnnotationBody {
+    AnnotationBody::Comment { text: text.into() }
+}
+
+#[test]
+fn synthetic_metadata_blob_and_annotation_survive_reopen() {
+    let f = Fixture::new();
+    let store = f.initialize();
+    let metadata = register(&store);
+    let a = access(&store, &metadata, &all());
+    let saved = store
+        .save_annotation_trusted(
+            &a,
+            "annotation",
+            &Revision::new(0),
+            &anchor(&a.document),
+            &comment("original synthetic note"),
+            &human(),
+        )
+        .unwrap();
+    assert_eq!(saved.revision, Revision::new(1));
+    drop(store);
+    let store = f.open();
+    store.initialize_documents_trusted().unwrap();
+    assert_eq!(store.read_document(&a).unwrap(), metadata);
+    assert_eq!(store.list_annotations(&a).unwrap(), vec![saved]);
+    let mut reader = store.open_blob_reader("project", &metadata.blob).unwrap();
+    assert_eq!(store.read_blob_chunk(&mut reader, 4096).unwrap(), PDF);
+}
+#[test]
+fn grant_scope_revision_epoch_generation_and_revoke_are_current() {
+    let f = Fixture::new();
+    let store = f.initialize();
+    let metadata = register(&store);
+    let a = access(&store, &metadata, &all());
+    assert!(store.read_document(&a).is_ok());
+    for authority in [
+        AuthorityBinding {
+            owner_epoch: "old".into(),
+            ..binding()
+        },
+        AuthorityBinding {
+            generation: Revision::new(2),
+            ..binding()
+        },
+    ] {
+        assert!(store
+            .read_document(&DocumentAccess {
+                document: a.document.clone(),
+                authority
+            })
+            .is_err());
+    }
+    let wrong = DocumentRef::new(
+        Scope {
+            workspace_id: "workspace".into(),
+            project_id: Some("other".into()),
+        },
+        "document",
+        Revision::new(1),
+        DocumentFormat::Pdf,
+    )
+    .unwrap();
+    assert!(store
+        .read_document(&DocumentAccess {
+            document: wrong,
+            authority: binding()
+        })
+        .is_err());
+    store.revoke_document_grant_trusted(&a.authority).unwrap();
+    assert!(store.read_document(&a).is_err());
+    assert!(store.list_annotations(&a).is_err());
+    assert!(store.export_annotations(&a).is_err());
+    assert!(store
+        .save_annotation_trusted(
+            &a,
+            "blocked",
+            &Revision::new(0),
+            &anchor(&a.document),
+            &comment("x"),
+            &human()
+        )
+        .is_err());
+    assert!(store
+        .issue_document_grant_trusted(&a.document, &binding(), &all(), expires())
+        .is_err());
+    let next = AuthorityBinding {
+        generation: Revision::new(2),
+        ..binding()
+    };
+    store
+        .issue_document_grant_trusted(&a.document, &next, &all(), expires())
+        .unwrap();
+    assert!(store
+        .read_document(&DocumentAccess {
+            document: a.document,
+            authority: next
+        })
+        .is_ok());
+}
+#[test]
+fn expires_deleted_project_and_missing_permissions_fail_closed() {
+    let f = Fixture::new();
+    let store = f.initialize();
+    let m = register(&store);
+    let a = access(&store, &m, &[DocumentOperation::Inspect]);
+    assert!(store.read_document(&a).is_ok());
+    assert!(store.list_annotations(&a).is_err());
+    assert!(store.export_annotations(&a).is_err());
+    assert!(store
+        .save_annotation_trusted(
+            &a,
+            "x",
+            &Revision::new(0),
+            &anchor(&a.document),
+            &comment("x"),
+            &human()
+        )
+        .is_err());
+    f.db()
+        .exec("UPDATE document_grants SET expires_at_ms='0'", &[])
+        .unwrap();
+    assert!(store.read_document(&a).is_err());
+    f.db()
+        .exec(
+            "UPDATE document_grants SET expires_at_ms=?",
+            &[&expires().to_string()],
+        )
+        .unwrap();
+    f.db()
+        .exec("UPDATE projects SET deleted=1 WHERE id='project'", &[])
+        .unwrap();
+    assert!(store.read_document(&a).is_err());
+}
+#[test]
+fn annotation_cas_tombstones_and_ai_provenance_are_durable() {
+    let f = Fixture::new();
+    let store = f.initialize();
+    let m = register(&store);
+    let a = access(&store, &m, &all());
+    let one = store
+        .save_annotation_trusted(
+            &a,
+            "a",
+            &Revision::new(0),
+            &anchor(&a.document),
+            &comment("AI draft"),
+            &ai(),
+        )
+        .unwrap();
+    assert_eq!(one.created_by, ai());
+    assert!(store
+        .save_annotation_trusted(
+            &a,
+            "a",
+            &Revision::new(0),
+            &anchor(&a.document),
+            &comment("stale"),
+            &human()
+        )
+        .is_err());
+    let two = store
+        .save_annotation_trusted(
+            &a,
+            "a",
+            &one.revision,
+            &anchor(&a.document),
+            &comment("Human corrected"),
+            &human(),
+        )
+        .unwrap();
+    assert_eq!(two.created_by, ai());
+    assert_eq!(two.modified_by, human());
+    let deleted = store
+        .delete_annotation_trusted(&a, "a", &two.revision, &human())
+        .unwrap();
+    assert!(deleted.deleted);
+    assert_eq!(deleted.revision, Revision::new(3));
+    assert!(store
+        .save_annotation_trusted(
+            &a,
+            "a",
+            &deleted.revision,
+            &anchor(&a.document),
+            &comment("recreate"),
+            &ai()
+        )
+        .is_err());
+    assert_eq!(store.list_annotations(&a).unwrap(), vec![deleted]);
+    assert_eq!(
+        f.db()
+            .query(
+                "SELECT revision FROM document_annotation_history ORDER BY revision",
+                &[]
+            )
+            .unwrap()
+            .len(),
+        3
+    );
+}
+#[test]
+fn immutable_document_revisions_invalidate_access_and_preserve_old_anchors() {
+    let f = Fixture::new();
+    let store = f.initialize();
+    let old = register(&store);
+    let a = access(&store, &old, &all());
+    store
+        .save_annotation_trusted(
+            &a,
+            "old-anchor",
+            &Revision::new(0),
+            &anchor(&a.document),
+            &comment("old"),
+            &human(),
+        )
+        .unwrap();
+    let bytes = b"%PDF-1.4\nsecond synthetic revision\n%%EOF\n";
+    let new = store
+        .publish_document_revision_trusted(
+            &old.document,
+            "Second",
+            DocumentFormat::Pdf,
+            &upload(&store, bytes),
+        )
+        .unwrap();
+    assert_eq!(new.document.revision(), &Revision::new(2));
+    assert!(store.read_document(&a).is_err());
+    assert!(store
+        .publish_document_revision_trusted(
+            &old.document,
+            "stale",
+            DocumentFormat::Pdf,
+            &upload(&store, bytes)
+        )
+        .is_err());
+    let second_binding = AuthorityBinding {
+        generation: Revision::new(2),
+        ..binding()
+    };
+    store
+        .issue_document_grant_trusted(&new.document, &second_binding, &all(), expires())
+        .unwrap();
+    let access = DocumentAccess {
+        document: new.document.clone(),
+        authority: second_binding,
+    };
+    let annotations = store.list_annotations(&access).unwrap();
+    assert_eq!(annotations[0].anchor.document, old.document);
+    assert_eq!(annotations[0].anchor_state, StoredAnchorState::Stale);
+    let mut reader = store.open_blob_reader("project", &old.blob).unwrap();
+    assert_eq!(store.read_blob_chunk(&mut reader, 4096).unwrap(), PDF);
+    assert_eq!(
+        f.db()
+            .query("SELECT revision FROM document_revisions", &[])
+            .unwrap()
+            .len(),
+        2
+    );
+}
+#[test]
+fn invalid_or_cross_revision_anchors_do_not_leave_rows() {
+    let f = Fixture::new();
+    let store = f.initialize();
+    let m = register(&store);
+    let a = access(&store, &m, &all());
+    let mut unknown = anchor(&a.document);
+    if let AnchorLocation::Pdf(p) = &mut unknown.location {
+        p.rotation = None;
+    }
+    assert!(store
+        .save_annotation_trusted(
+            &a,
+            "bad",
+            &Revision::new(0),
+            &unknown,
+            &comment("x"),
+            &human()
+        )
+        .is_err());
+    let mut stale = anchor(&a.document);
+    stale.document = DocumentRef::new(
+        a.document.scope().clone(),
+        "document",
+        Revision::new(0),
+        DocumentFormat::Pdf,
+    )
+    .unwrap();
+    assert!(store
+        .save_annotation_trusted(
+            &a,
+            "bad",
+            &Revision::new(0),
+            &stale,
+            &comment("x"),
+            &human()
+        )
+        .is_err());
+    assert!(store.list_annotations(&a).unwrap().is_empty());
+}
+#[test]
+fn export_is_deterministic_sidecar_data_with_origin_and_tombstones() {
+    let f = Fixture::new();
+    let store = f.initialize();
+    let m = register(&store);
+    let a = access(&store, &m, &all());
+    for id in ["z", "a"] {
+        store
+            .save_annotation_trusted(
+                &a,
+                id,
+                &Revision::new(0),
+                &anchor(&a.document),
+                &AnnotationBody::Highlight {
+                    quote: "synthetic quote".into(),
+                    note: Some("note".into()),
+                },
+                &human(),
+            )
+            .unwrap();
+    }
+    let export = store.export_annotations(&a).unwrap();
+    assert_eq!(export.annotations[0].id, "a");
+    let json = serde_json::to_string(&export).unwrap();
+    let restored: AnnotationExport = serde_json::from_str(&json).unwrap();
+    assert_eq!(restored, export);
+    assert_eq!(
+        json,
+        serde_json::to_string(&store.export_annotations(&a).unwrap()).unwrap()
+    );
+    assert_eq!(export.schema, "muyon.annotation-sidecar.v1");
+}
+#[test]
+fn foreign_upload_and_bad_schema_are_rejected_without_partial_metadata() {
+    let f = Fixture::new();
+    let store = f.initialize();
+    let h = store.begin_upload("other").unwrap();
+    store.append_chunk(&h.upload_id, PDF).unwrap();
+    let foreign = store.finish_blob(&h.upload_id, BlobKind::Pdf).unwrap();
+    assert!(store
+        .register_document_trusted(
+            "project",
+            "document",
+            "title",
+            DocumentFormat::Pdf,
+            &foreign
+        )
+        .is_err());
+    assert!(f
+        .db()
+        .query("SELECT * FROM document_heads", &[])
+        .unwrap()
+        .is_empty());
+    f.db()
+        .exec(
+            "UPDATE document_store_meta SET value='999' WHERE key='version'",
+            &[],
+        )
+        .unwrap();
+    assert!(store.initialize_documents_trusted().is_err());
+}
+#[test]
+fn corrupted_revision_keys_or_missing_snapshot_fail_closed() {
+    let f = Fixture::new();
+    let store = f.initialize();
+    let m = register(&store);
+    let a = access(&store, &m, &all());
+    f.db()
+        .exec("UPDATE document_heads SET revision='2'", &[])
+        .unwrap();
+    f.db()
+        .exec("UPDATE document_revisions SET revision='2'", &[])
+        .unwrap();
+    assert_eq!(store.read_document(&a), Err(ContractError::StorageCorrupt));
+    f.db().exec("DELETE FROM document_revisions", &[]).unwrap();
+    assert_eq!(store.read_document(&a), Err(ContractError::StorageCorrupt));
+}
+#[test]
+fn oversized_persistent_payloads_are_rejected_before_decode() {
+    let f = Fixture::new();
+    let store = f.initialize();
+    let m = register(&store);
+    let a = access(&store, &m, &all());
+    store
+        .save_annotation_trusted(
+            &a,
+            "a",
+            &Revision::new(0),
+            &anchor(&a.document),
+            &comment("x"),
+            &human(),
+        )
+        .unwrap();
+    f.db()
+        .exec(
+            "UPDATE document_annotations SET payload=replace(hex(zeroblob(150000)),'0','x')",
+            &[],
+        )
+        .unwrap();
+    assert!(store.list_annotations(&a).is_err());
+    assert!(store.export_annotations(&a).is_err());
+    f.db()
+        .exec(
+            "UPDATE document_grants SET document_json=hex(zeroblob(20000))",
+            &[],
+        )
+        .unwrap();
+    assert!(store.read_document(&a).is_err());
+    f.db()
+        .exec(
+            "UPDATE document_revisions SET payload=hex(zeroblob(20000))",
+            &[],
+        )
+        .unwrap();
+    assert_eq!(store.read_document(&a), Err(ContractError::StorageCorrupt));
+}
+#[test]
+fn late_metadata_failure_rolls_back_blob_publication_and_head() {
+    let f = Fixture::new();
+    let store = f.initialize();
+    let finished = upload(&store, PDF);
+    f.db().exec("CREATE TRIGGER fail_document_metadata BEFORE INSERT ON document_revisions BEGIN SELECT RAISE(ABORT,'synthetic injected failure'); END", &[]).unwrap();
+    assert!(store
+        .register_document_trusted(
+            "project",
+            "document",
+            "title",
+            DocumentFormat::Pdf,
+            &finished
+        )
+        .is_err());
+    let db = f.db();
+    assert!(db
+        .query("SELECT * FROM document_heads", &[])
+        .unwrap()
+        .is_empty());
+    assert!(db
+        .query("SELECT * FROM blob_references", &[])
+        .unwrap()
+        .is_empty());
+    assert_eq!(
+        db.query(
+            "SELECT state FROM blob_uploads WHERE upload_id=?",
+            &[&finished.upload_id]
+        )
+        .unwrap()[0][0]
+            .as_deref(),
+        Some("pinned")
+    );
+    assert_eq!(
+        db.query(
+            "SELECT pin_id FROM blob_pins WHERE upload_id=?",
+            &[&finished.upload_id]
+        )
+        .unwrap()
+        .len(),
+        1
+    );
+    db.exec("DROP TRIGGER fail_document_metadata", &[]).unwrap();
+    assert!(store
+        .register_document_trusted(
+            "project",
+            "document",
+            "title",
+            DocumentFormat::Pdf,
+            &finished
+        )
+        .is_ok());
+}
+#[test]
+fn late_annotation_failure_rolls_back_history() {
+    let f = Fixture::new();
+    let store = f.initialize();
+    let m = register(&store);
+    let a = access(&store, &m, &all());
+    f.db().exec("CREATE TRIGGER fail_annotation_head BEFORE INSERT ON document_annotations BEGIN SELECT RAISE(ABORT,'synthetic injected failure'); END", &[]).unwrap();
+    assert!(store
+        .save_annotation_trusted(
+            &a,
+            "a",
+            &Revision::new(0),
+            &anchor(&a.document),
+            &comment("x"),
+            &human()
+        )
+        .is_err());
+    assert!(f
+        .db()
+        .query("SELECT * FROM document_annotation_history", &[])
+        .unwrap()
+        .is_empty());
+    assert!(store.list_annotations(&a).unwrap().is_empty());
+    f.db()
+        .exec("DROP TRIGGER fail_annotation_head", &[])
+        .unwrap();
+    assert!(store
+        .save_annotation_trusted(
+            &a,
+            "a",
+            &Revision::new(0),
+            &anchor(&a.document),
+            &comment("x"),
+            &human()
+        )
+        .is_ok());
+}
+#[test]
+fn writes_cannot_strand_existing_annotations_above_read_budget() {
+    let f = Fixture::new();
+    let store = f.initialize();
+    let m = register(&store);
+    let a = access(&store, &m, &all());
+    let record = store
+        .save_annotation_trusted(
+            &a,
+            "initial",
+            &Revision::new(0),
+            &anchor(&a.document),
+            &comment("x"),
+            &human(),
+        )
+        .unwrap();
+    let db = f.db();
+    db.exec("DELETE FROM document_annotations", &[]).unwrap();
+    for n in 0..64 {
+        let mut row = record.clone();
+        row.id = format!("padded-{n}");
+        let mut payload = serde_json::to_string(&row).unwrap();
+        payload.extend(std::iter::repeat(' ').take(262144 - payload.len()));
+        db.exec(
+            "INSERT INTO document_annotations VALUES('project','document',?,'1',?)",
+            &[&row.id, &payload],
+        )
+        .unwrap();
+    }
+    assert_eq!(
+        store.save_annotation_trusted(
+            &a,
+            "new",
+            &Revision::new(0),
+            &anchor(&a.document),
+            &comment("x"),
+            &human()
+        ),
+        Err(ContractError::TextLimit)
+    );
+    assert_eq!(store.list_annotations(&a).unwrap().len(), 64);
+}
+#[test]
+fn save_expiry_at_publication_tail_rolls_back_sidecar_and_history() {
+    let f = Fixture::new();
+    let store = f.initialize();
+    let m = register(&store);
+    let a = access(&store, &m, &all());
+    f.db().exec("CREATE TRIGGER expire_after_annotation_history AFTER INSERT ON document_annotation_history BEGIN UPDATE document_grants SET expires_at_ms='0'; END", &[]).unwrap();
+    assert_eq!(
+        store.save_annotation_trusted(
+            &a,
+            "a",
+            &Revision::new(0),
+            &anchor(&a.document),
+            &comment("x"),
+            &human()
+        ),
+        Err(ContractError::InvalidAuthority)
+    );
+    assert!(f
+        .db()
+        .query("SELECT * FROM document_annotation_history", &[])
+        .unwrap()
+        .is_empty());
+    assert!(store.list_annotations(&a).unwrap().is_empty());
+}
+#[test]
+fn delete_expiry_at_publication_tail_preserves_previous_annotation() {
+    let f = Fixture::new();
+    let store = f.initialize();
+    let m = register(&store);
+    let a = access(&store, &m, &all());
+    let original = store
+        .save_annotation_trusted(
+            &a,
+            "a",
+            &Revision::new(0),
+            &anchor(&a.document),
+            &comment("x"),
+            &human(),
+        )
+        .unwrap();
+    f.db().exec("CREATE TRIGGER expire_after_annotation_update AFTER UPDATE ON document_annotations BEGIN UPDATE document_grants SET expires_at_ms='0'; END", &[]).unwrap();
+    assert_eq!(
+        store.delete_annotation_trusted(&a, "a", &original.revision, &human()),
+        Err(ContractError::InvalidAuthority)
+    );
+    assert_eq!(store.list_annotations(&a).unwrap(), vec![original]);
+    assert_eq!(
+        f.db()
+            .query("SELECT * FROM document_annotation_history", &[])
+            .unwrap()
+            .len(),
+        1
+    );
+}

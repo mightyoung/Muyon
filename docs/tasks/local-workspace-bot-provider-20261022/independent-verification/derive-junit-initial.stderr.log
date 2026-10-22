@@ -1,0 +1,5 @@
+Traceback (most recent call last):
+  File "/workspace/Muyon-bot-provider-verification/docs/tasks/local-workspace-bot-provider-20261022/independent-verification/derive_junit.py", line 35, in <module>
+    assert summary[0]['failed_test_names'] == summary[1]['failed_test_names']
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError

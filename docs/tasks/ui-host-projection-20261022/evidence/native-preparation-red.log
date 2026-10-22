@@ -1,0 +1,3 @@
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/chat/persistence/HostLocalDraftSessionChecks.kt:33:5: error: 'prepare' overrides nothing.
+    override fun prepare(conversation: String, project: String?, namespace: String, draft: String, generation: String, revision: String,
+    ^^^^^^^^

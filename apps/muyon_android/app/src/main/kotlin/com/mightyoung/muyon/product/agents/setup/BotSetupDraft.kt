@@ -2,6 +2,18 @@ package com.mightyoung.muyon.product.agents.setup
 
 import java.util.UUID
 
+internal fun validateSetupText(value: String, max: Int, required: Boolean = true) {
+        require(value.length <= max && (!required || value.any { !it.isWhitespace() && !Character.isSpaceChar(it) }))
+        require(value.none { it.isISOControl() || Character.getType(it) == Character.FORMAT.toInt() })
+        var index = 0
+        while (index < value.length) {
+            val c = value[index++]
+            if (Character.isHighSurrogate(c)) require(index < value.length && Character.isLowSurrogate(value[index++]))
+            else require(!Character.isLowSurrogate(c))
+        }
+    }
+
+
 enum class SetupStep { NAME, PURPOSE, CONFIGURATION, REVIEW }
 enum class FieldOrigin { USER, TEMPLATE }
 enum class CreationStatus { NOT_REQUESTED, PENDING, UNKNOWN, REJECTED, CREATED }
@@ -37,13 +49,16 @@ data class SetupPreview(val draftId: String, val revision: Long, val name: Strin
 
 /** Deterministic suggestions from purpose only; never infers access from a display name. */
 object LocalSetupTemplates {
+    private val paper = RoleSuggestion("文献整理助手", TemplateSource("paper-organizer", 1))
+    private val supplier = RoleSuggestion("采购资料整理助手", TemplateSource("supplier-organizer", 1))
+    private val general = RoleSuggestion("通用资料整理助手", TemplateSource("general-organizer", 1))
     fun suggest(request: SuggestionRequest): RoleSuggestion = when {
-        "论文" in request.purpose || "文献" in request.purpose ->
-            RoleSuggestion("文献整理助手", TemplateSource("paper-organizer", 1))
-        "供应商" in request.purpose || "采购" in request.purpose ->
-            RoleSuggestion("采购资料整理助手", TemplateSource("supplier-organizer", 1))
-        else -> RoleSuggestion("通用资料整理助手", TemplateSource("general-organizer", 1))
+        "论文" in request.purpose || "文献" in request.purpose -> paper
+        "供应商" in request.purpose || "采购" in request.purpose -> supplier
+        else -> general
     }
+    internal fun matches(source: TemplateSource, role: String): Boolean =
+        listOf(paper, supplier, general).any { it.source == source && it.role == role }
 }
 
 /**
@@ -69,6 +84,31 @@ class BotSetupDraft(private val scope: String, private val draftId: String = UUI
     private var invalidations = emptyList<SelectionInvalidation>()
 
     init { require(scope.isNotBlank() && draftId.isNotBlank() && draftId.length <= 80) }
+    /** Export editable data only; expectedRevision is the current in-memory CAS, not storedRevision. */
+    fun exportDraft(storedRevision: Long, expectedRevision: Long): ByteArray {
+        require(expectedRevision == revision) { "草稿已更改" }
+        require(creation.status in setOf(CreationStatus.NOT_REQUESTED, CreationStatus.REJECTED)) {
+            "创建已开始或结果待核，禁止作为可编辑草稿导出"
+        }
+        return SetupDraftArchive.encode(ArchivedSetupEdits(storedRevision,
+            name.copy(revision = 0), purpose.copy(revision = 0), role.copy(revision = 0), selectedTemplate))
+    }
+
+    companion object {
+        /** Host must select the correct private account/project record and enforce stored CAS/rollback. */
+        fun restoreDraft(bytes: ByteArray, newHostScope: String,
+            newDraftId: String = UUID.randomUUID().toString()): RestoredBotSetupDraft {
+            val edits = SetupDraftArchive.decode(bytes)
+            val restored = BotSetupDraft(newHostScope, newDraftId)
+            restored.name = edits.name
+            restored.purpose = edits.purpose
+            restored.role = edits.role
+            restored.selectedTemplate = edits.template
+            // Constructor defaults reset revision, step, cancellation, all choices, tokens and creation.
+            return RestoredBotSetupDraft(restored, edits.storedRevision)
+        }
+    }
+
     fun snapshot() = DraftSnapshot(scope, draftId, revision, step, name, purpose, role,
         cancelled, suggestion, creation)
 
@@ -84,25 +124,15 @@ class BotSetupDraft(private val scope: String, private val draftId: String = UUI
         invalidate()
         if (creation.status == CreationStatus.REJECTED) creation = CreationObservation()
     }
-    private fun validText(value: String, max: Int, required: Boolean = true) {
-        require(value.length <= max && (!required || value.any { !it.isWhitespace() && !Character.isSpaceChar(it) }))
-        require(value.none { it.isISOControl() || Character.getType(it) == Character.FORMAT.toInt() })
-        var index = 0
-        while (index < value.length) {
-            val c = value[index++]
-            if (Character.isHighSurrogate(c)) require(index < value.length && Character.isLowSurrogate(value[index++]))
-            else require(!Character.isLowSurrogate(c))
-        }
-    }
-    fun editName(value: String) { editable(); validText(value, 60); changed(); name = DraftField(value, FieldOrigin.USER, revision, true) }
-    fun editPurpose(value: String) { editable(); validText(value, 8000); changed(); purpose = DraftField(value, FieldOrigin.USER, revision, true) }
-    fun editRole(value: String) { editable(); validText(value, 160); changed(); role = DraftField(value, FieldOrigin.USER, revision, true); selectedTemplate = null }
+    fun editName(value: String) { editable(); validateSetupText(value, 60); changed(); name = DraftField(value, FieldOrigin.USER, revision, true) }
+    fun editPurpose(value: String) { editable(); validateSetupText(value, 8000); changed(); purpose = DraftField(value, FieldOrigin.USER, revision, true) }
+    fun editRole(value: String) { editable(); validateSetupText(value, 160); changed(); role = DraftField(value, FieldOrigin.USER, revision, true); selectedTemplate = null }
     fun next() {
         editable()
         when (step) {
-            SetupStep.NAME -> { validText(name.value, 60); step = SetupStep.PURPOSE }
-            SetupStep.PURPOSE -> { validText(purpose.value, 8000); step = SetupStep.CONFIGURATION }
-            SetupStep.CONFIGURATION -> { validText(role.value, 160); require(invalidations.isEmpty()) { "能力或资料已变化，请重新选择并确认" }; step = SetupStep.REVIEW }
+            SetupStep.NAME -> { validateSetupText(name.value, 60); step = SetupStep.PURPOSE }
+            SetupStep.PURPOSE -> { validateSetupText(purpose.value, 8000); step = SetupStep.CONFIGURATION }
+            SetupStep.CONFIGURATION -> { validateSetupText(role.value, 160); require(invalidations.isEmpty()) { "能力或资料已变化，请重新选择并确认" }; step = SetupStep.REVIEW }
             SetupStep.REVIEW -> Unit
         }
     }
@@ -112,7 +142,7 @@ class BotSetupDraft(private val scope: String, private val draftId: String = UUI
     fun restoreScope(currentScope: String) { require(scope == currentScope) { "账户或项目不同，不能恢复此草稿" } }
 
     fun requestSuggestions(): SuggestionRequest {
-        editable(); validText(name.value, 60); validText(purpose.value, 8000)
+        editable(); validateSetupText(name.value, 60); validateSetupText(purpose.value, 8000)
         suggestion = null
         return SuggestionRequest(draftId, revision, UUID.randomUUID().toString(), name.value, purpose.value)
             .also { request = it }
@@ -128,7 +158,7 @@ class BotSetupDraft(private val scope: String, private val draftId: String = UUI
         editable()
         val proposed = suggestion ?: return false
         if (request != token || revision != token.revision || role.userLocked) return false
-        validText(proposed.role, 160)
+        validateSetupText(proposed.role, 160)
         changed(); role = DraftField(proposed.role, FieldOrigin.TEMPLATE, revision)
         selectedTemplate = proposed.source
         return true
@@ -181,7 +211,7 @@ class BotSetupDraft(private val scope: String, private val draftId: String = UUI
     fun preview(): SetupPreview {
         editable(); require(step == SetupStep.REVIEW)
         require(invalidations.isEmpty()) { "能力或资料已变化，请重新选择并确认" }
-        validText(name.value, 60); validText(purpose.value, 8000); validText(role.value, 160)
+        validateSetupText(name.value, 60); validateSetupText(purpose.value, 8000); validateSetupText(role.value, 160)
         return SetupPreview(draftId, revision, name.value, purpose.value, role.value,
             selectedCapabilities.toList(), selectedMaterials.toList(), selectedTemplate)
     }

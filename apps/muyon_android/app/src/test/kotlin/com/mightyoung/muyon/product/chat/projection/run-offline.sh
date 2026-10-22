@@ -9,7 +9,11 @@ source_root="$repo_root/apps/muyon_android/app/src/main/kotlin/com/mightyoung/mu
 "$compiler" -Werror -jvm-target 17 -classpath "$json_jar" \
   "$source_root/ProductChatRuntime.kt" "$source_root/ProductSendGate.kt" \
   "$source_root/ProductHttpsTransport.kt" \
+  "$source_root/persistence/HostDraftSaveState.kt" \
+  "$source_root/persistence/NativeLocalDraftCodec.kt" \
+  "$source_root/persistence/HostLocalDraftSession.kt" \
   "$source_root/../agents/setup/BotSetupDraft.kt" \
+  "$source_root/../agents/setup/SetupDraftArchive.kt" \
   "$repo_root/apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/chat/projection/HostContinuationChecks.kt" \
   "$repo_root/apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/chat/projection/HostProjectionChecks.kt" \
   -include-runtime -d "$output_dir/checks.jar"

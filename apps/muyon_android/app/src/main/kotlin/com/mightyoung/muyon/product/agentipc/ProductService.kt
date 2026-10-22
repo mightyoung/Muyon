@@ -8,6 +8,7 @@ import com.mightyoung.muyon.productbridge.ProductException
 import android.util.Base64
 import com.mightyoung.muyon.product.chat.ProductChatPort
 import com.mightyoung.muyon.product.chat.ProductChatRuntime
+import com.mightyoung.muyon.product.chat.persistence.ProductLocalDraftPort
 import org.json.JSONArray
 import org.json.JSONObject
 import org.json.JSONTokener
@@ -116,6 +117,25 @@ class ProductService : Service() {
                 check(!stopped && clients.containsValue(session) && planOwners[planId] == session && toolPlans.contains(planId))
                 tool("confirm_suggestion", request, session, generation, project, planId)
             }
+        }, localDraftPort = object : ProductLocalDraftPort {
+            // Real provider + FFI + generated bindings verified upstream at B88e810.
+            // Release gate remains durable original-attempt recovery across process
+            // loss and actual Android checks; this source now calls the real bridge.
+            override val verified = false
+            private fun data(raw: String) = nativeData(raw) as JSONObject
+            override fun resolve(conversation: String, project: String?) = data(open(false).localDraftResolve(conversation, project))
+            override fun read(conversation: String, project: String?, namespace: String, draft: String, generation: String, revision: String) =
+                data(open(false).localDraftRead(conversation, project, namespace, draft, generation, revision))
+            // Fixed fifth schema is consumed by Runtime; actual regenerated fifth
+            // binding is pending B verification. A missing prepare NEVER dispatches save.
+            override fun prepare(conversation: String, project: String?, namespace: String, draft: String, generation: String, revision: String,
+                attempt: String, exportedMemoryRevision: String, hostEditorRevision: String, archive: ByteArray): JSONObject =
+                error("local_draft_prepare_binding_pending")
+            override fun save(conversation: String, project: String?, namespace: String, draft: String, generation: String, revision: String,
+                attempt: String, exportedMemoryRevision: String, archive: ByteArray) =
+                data(open(false).localDraftSave(conversation, project, namespace, draft, generation, revision, attempt, exportedMemoryRevision, archive))
+            override fun lookup(conversation: String, project: String?, namespace: String, draft: String, attempt: String) =
+                data(open(false).localDraftLookupSave(conversation, project, namespace, draft, attempt))
         })
     }
     override fun onBind(intent: Intent): IBinder = messenger.binder
