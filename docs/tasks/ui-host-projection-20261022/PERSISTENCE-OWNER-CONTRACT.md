@@ -83,3 +83,14 @@ owner/record checks. Codec restores NAME/revision0/no grants/NOT_REQUESTED; that
 not permission to clear an old unknown creation: host must check the durable original
 creation/stop ledger before restore and before any future create. Missing ledger
 is a blocker, not an empty ledger. None of these absent production guards is invented.
+
+## Parent-approved local-workspace resolution path
+
+LOCAL-WORKSPACE-PROVIDER-PLAN.md supersedes any interpretation that account login or
+an old account join is necessary for NEW local-only drafts. Actual BusinessStore
+workspace/project checks plus a NEW tagged local_workspace registry/archive/receipt
+transaction can create genuine local owner facts without credentials or privileges.
+This is authorized implementation, not fabricated historical identity. No legacy
+file import. Parent coordinates core bot_drafts module and sole lib.rs/FFI exports;
+this thread then implements Kotlin adaptation. Until the fixed provider is present,
+can_save remains false for an implementation dependency, not new-user-approval need.
