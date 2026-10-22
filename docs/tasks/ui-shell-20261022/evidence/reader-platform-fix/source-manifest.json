@@ -1,0 +1,31 @@
+{
+  "base": "c5dd872863a0e454f5d74889e1cd6c3932c2fed5",
+  "scope": "Synthetic component device tests, no authoritative product ReaderHost/FFI",
+  "files": [
+    {
+      "source": "apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/ui/documents/DocumentReaderModels.kt",
+      "sha256": "cddb2403725a102287fd4980d6ea8ca2b07fce479d2cd1386b5a6c97709d8440"
+    },
+    {
+      "source": "apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/ui/documents/DocumentReaderScreen.kt",
+      "sha256": "0f7fbd9da0fe6ec22f93326f4098fb73fff2a643958dda78f696bdb9334cbe47"
+    },
+    {
+      "source": "apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/ui/documents/NativeDocumentPreview.kt",
+      "sha256": "28774887984ae245f14d1e9b378d4e66c36f82369d0bbae9d714a35a85360494"
+    },
+    {
+      "source": "apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/ui/documents/OfficeTextPreview.kt",
+      "sha256": "37efc87a9dbee0172e8c4ee68599820ebbd6c6a72a86bf8fd4114989c8c1fc23"
+    },
+    {
+      "source": "apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/ui/documents/SharedDocumentJson.kt",
+      "sha256": "a096a0272230c0a05cd8e0f6ae0919dbb4e5d098aca50f4a6ced4126fe71eb8e"
+    },
+    {
+      "source": "apps/muyon_android/app/src/androidTest/kotlin/com/mightyoung/muyon/product/ui/documents/DocumentReaderPlatformTest.kt",
+      "sha256": "0ff86ea1bf4b6280a18b98f4ef0752ff4c316832545a4f45e9df2106a3d311f2"
+    }
+  ],
+  "fixed_source": "acfa9d47808ee860369e080820524ca03c900f59"
+}

@@ -1,5 +1,7 @@
 # UI shell integration — partial source delivery, 2026-10-22
 
+Latest targeted verification: [Reader platform resource fix](READER-PLATFORM-RESOURCE-FIX.md) — real complete Android-test Kotlin compilation after explicit PdfDocument cleanup. Historical results below remain historical.
+
 Current follow-up: original brand placement and neutral Material role dependency
 are source-complete; see [follow-up report](BRAND-FOUNDATION-BATCH.md). Real original-
 request read-only snapshot source wiring is also completed in
