@@ -126,6 +126,11 @@ class ProductService : Service() {
             override fun resolve(conversation: String, project: String?) = data(open(false).localDraftResolve(conversation, project))
             override fun read(conversation: String, project: String?, namespace: String, draft: String, generation: String, revision: String) =
                 data(open(false).localDraftRead(conversation, project, namespace, draft, generation, revision))
+            // Fixed fifth schema is consumed by Runtime; actual regenerated fifth
+            // binding is pending B verification. A missing prepare NEVER dispatches save.
+            override fun prepare(conversation: String, project: String?, namespace: String, draft: String, generation: String, revision: String,
+                attempt: String, exportedMemoryRevision: String, hostEditorRevision: String, archive: ByteArray): JSONObject =
+                error("local_draft_prepare_binding_pending")
             override fun save(conversation: String, project: String?, namespace: String, draft: String, generation: String, revision: String,
                 attempt: String, exportedMemoryRevision: String, archive: ByteArray) =
                 data(open(false).localDraftSave(conversation, project, namespace, draft, generation, revision, attempt, exportedMemoryRevision, archive))

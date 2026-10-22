@@ -1,0 +1,12 @@
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/chat/persistence/HostLocalDraftSessionChecks.kt:152:20: error: unresolved reference 'lastOutcome'.
+    check(zeroCold.lastOutcome!!.recovered && zeroCold.lastOutcome!!.phase == LocalSavePhase.COMMITTED)
+                   ^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/chat/persistence/HostLocalDraftSessionChecks.kt:152:34: error: unresolved reference 'recovered'.
+    check(zeroCold.lastOutcome!!.recovered && zeroCold.lastOutcome!!.phase == LocalSavePhase.COMMITTED)
+                                 ^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/chat/persistence/HostLocalDraftSessionChecks.kt:152:56: error: unresolved reference 'lastOutcome'.
+    check(zeroCold.lastOutcome!!.recovered && zeroCold.lastOutcome!!.phase == LocalSavePhase.COMMITTED)
+                                                       ^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/chat/persistence/HostLocalDraftSessionChecks.kt:152:70: error: unresolved reference 'phase'.
+    check(zeroCold.lastOutcome!!.recovered && zeroCold.lastOutcome!!.phase == LocalSavePhase.COMMITTED)
+                                                                     ^^^^^

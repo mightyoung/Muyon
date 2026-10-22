@@ -115,3 +115,18 @@ Current consumer actual JVM runner and non-author review PASS; Android still NOT
 verified=false now only preserves cold-process original-attempt/Android gates, not
 old closed NULL/cache/API gaps. Exact durable pending-journal request is in the report
 for sole Rust owner; it must supply real outstanding original pointer, never latest.
+
+## Cold original preparation consumer — latest
+
+COLD-PREPARATION-CONSUMER.md supersedes earlier missing cold-pointer consumer work.
+Fixed098 five-method schema is implemented in Host session/codec and synthetic
+Runtime tests: await exact prepare before save; resolve AND read pointer discovery;
+only explicit query_original_save may fence; definite not_committed allows a NEW
+explicit save; no replay; cold numeric0/0 never acknowledges a new reducer; restore
+is separate and refuses a new read-discovered pointer. Terminal state and full
+original binding stay monotonic. Independent actual runners/repros passed, review
+findings repaired; raw intermediate failures retained. Service fifth method still
+explicit unavailable pending B actual fifth generated binding; exact prepared patch
+is NATIVE-PREPARE-SERVICE.patch, no missing method referenced. verified=false.
+Parent upstream Rust26/core209/probes3 and purefmt111e pass are recorded accurately;
+new five-method FFI/Android acceptance is not inferred from previous four-method pass.

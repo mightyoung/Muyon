@@ -6,6 +6,7 @@ import com.mightyoung.muyon.product.agents.setup.SuggestionRequest
 import com.mightyoung.muyon.product.agents.setup.SetupStep
 import com.mightyoung.muyon.product.chat.persistence.DraftViewLease
 import com.mightyoung.muyon.product.chat.persistence.HostLocalDraftSession
+import com.mightyoung.muyon.product.chat.persistence.LocalSavePhase
 import com.mightyoung.muyon.product.chat.persistence.ProductLocalDraftPort
 import org.json.JSONArray
 import org.json.JSONObject
@@ -433,6 +434,7 @@ class ProductChatRuntime internal constructor(private val port: ProductChatPort,
         val token = state.suggestionRequest
         val localActions = localSetupActions(state)
         val storage = state.persistent?.view(state.revision)
+        val outcome = state.persistent?.lastOutcome
         return JSONObject().put("schema_version", 1).put("projection_type", "setup_draft").put("status", "local_only")
             .put("scope", JSONObject().put("workspace_id", state.scope.workspace).put("conversation_id", state.scope.conversation)
                 .put("project_id", state.scope.project ?: JSONObject.NULL).put("generation", state.scope.generation))
@@ -442,6 +444,18 @@ class ProductChatRuntime internal constructor(private val port: ProductChatPort,
             .put("persistent_owner_status", if (storage == null) "unavailable" else "local_workspace")
             .put("stored_revision", storage?.storedRevision?.toString() ?: JSONObject.NULL)
             .put("original_save_attempt_id", storage?.originalAttemptId ?: JSONObject.NULL)
+            .put("original_save_outcome", outcome?.let {
+                JSONObject().put("status", if (it.phase == LocalSavePhase.COMMITTED)
+                    "committed_local_storage" else "not_committed_local_storage")
+                    .put("attempt_id", it.original.attemptId).put("expected_stored_revision", it.original.record.storedRevision.toString())
+                    .put("proposed_stored_revision", it.original.nextStoredRevision.toString())
+                    .put("committed_stored_revision", if (it.phase == LocalSavePhase.COMMITTED)
+                        it.original.nextStoredRevision.toString() else JSONObject.NULL)
+                    .put("exported_memory_revision", it.original.exportedMemoryRevision.toString())
+                    .put("host_editor_revision", it.original.hostEditorRevision.toString()).put("historical", true)
+                    .put("cold_recovered", it.recovered)
+                    .put("acknowledges_current_editor", it.phase == LocalSavePhase.COMMITTED && !it.recovered && storage?.saved == true && !draft.cancelled)
+            } ?: JSONObject.NULL)
             .put("can_restore", "restore" in localActions)
             .put("cancelled", draft.cancelled).put("saved", storage?.saved == true && !draft.cancelled)
             .put("can_save", "save" in localActions).put("can_create", false).put("can_start", false)
