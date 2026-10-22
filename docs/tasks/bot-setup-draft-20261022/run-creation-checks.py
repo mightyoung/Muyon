@@ -13,5 +13,5 @@ with tempfile.TemporaryDirectory(prefix='muyon-bot-create-') as temp:
  (target/'crates/muyon-core/src/bot_drafts.rs').write_bytes(draft)
  lib=target/'crates/muyon-core/src/lib.rs'
  with lib.open('a') as f:f.write('\npub mod bot_drafts;\npub mod bot_definitions;\n')
- env=os.environ.copy();env.update(RUSTUP_HOME='/tmp/bot-rustup',CARGO_HOME='/tmp/bot-cargo',CARGO_TARGET_DIR='/tmp/bot-definitions-target')
+ env=os.environ.copy();env.update(RUSTUP_HOME='/tmp/bot-rustup',CARGO_HOME='/tmp/bot-cargo',CARGO_TARGET_DIR='/tmp/bot-definitions-target',LIBRARY_PATH='/tmp/bot-sqlite-link')
  subprocess.run(['/tmp/bot-cargo/bin/cargo','test','--manifest-path',str(target/'crates/Cargo.toml'),'-p','muyon-core','--lib','bot_definitions','--','--test-threads=1','--nocapture'],env=env,check=True)
