@@ -1,3 +1,5 @@
+> Important parent review follow-up: [RECEIPT-TAIL-FIX.md](RECEIPT-TAIL-FIX.md) corrects the final receipt-write authorization gap and Unknown classification. This workflow report records the earlier 53badad9 delivery; production acceptance remains HOLD.
+
 # MIG17 / U12 continuation — durable saves and project inventory
 
 Source branch: `task/artifacts-workflows-20261022`.

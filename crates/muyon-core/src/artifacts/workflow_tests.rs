@@ -146,3 +146,66 @@ fn independent_project_grants_reject_expiry_generation_epoch_and_project_changes
     s.database().exec("UPDATE projects SET revision='2' WHERE id='project'", &[]).unwrap();
     assert_eq!(s.discover_project_artifacts(&discover, None, 10), Err(ContractError::RevisionConflict));
 }
+#[test]
+fn receipt_tail_invalidation_rolls_back_all_effects_and_preserves_original_pending() {
+    for mutation in [
+        "UPDATE document_grants SET active=0 WHERE grant_id='grant-report'",
+        "UPDATE document_grants SET expires_at_ms='0' WHERE grant_id='grant-report'",
+        "UPDATE document_grants SET generation='999' WHERE grant_id='grant-report'",
+        "UPDATE document_grants SET active=0 WHERE grant_id='grant-source'",
+        "UPDATE document_grants SET expires_at_ms='0' WHERE grant_id='grant-source'",
+        "UPDATE document_grants SET generation='999' WHERE grant_id='grant-source'",
+        "UPDATE document_history_grants_v1 SET active=0",
+        "UPDATE document_history_grants_v1 SET expires_at_ms='0'",
+        "UPDATE document_history_grants_v1 SET generation='999'",
+        "UPDATE artifact_project_grants_v1 SET active=0",
+    ] {
+        let f = Fixture::new(); let (s, out, source) = f.setup(); s.initialize_artifact_workflows_trusted().unwrap(); let p = all_access(&s);
+        s.submit_artifact_save_trusted("archive", &p, &archive("artifact"), &out, &[source.clone()]).unwrap();
+        let next = s.publish_document_revision_trusted(&source.document, "Source advanced", DocumentFormat::Pdf, &upload(&s, b"%PDF-1.4\nsource advanced\n%%EOF\n")).unwrap();
+        let current_source = grant(&s, next.document, 2);
+        s.initialize_document_history_trusted().unwrap();
+        let expiry = SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_millis() as u64 + 20_000;
+        s.issue_document_history_grant_trusted(&current_source, &source.document, &[DocumentOperation::ReadText], expiry).unwrap();
+        let operation = ArtifactSaveOperation::Revise { artifact_id: "artifact".into(), expected_revision: Revision::new(1), finished: upload(&s, b"%PDF-1.4\nreceipt tail rollback\n%%EOF\n"), title: "Must not commit".into(), origin: human() };
+        let finished = match &operation { ArtifactSaveOperation::Revise { finished, .. } => finished, _ => unreachable!() };
+        let before_document = s.read_document(&out).unwrap();
+        let before_artifact = s.artifact_history("artifact", None, 10, &out, &[current_source.clone()]).unwrap();
+        let before_refs = s.database().query("SELECT * FROM blob_references ORDER BY reference_id", &[]).unwrap();
+        let before_pins = s.database().query("SELECT * FROM blob_pins ORDER BY pin_id", &[]).unwrap();
+        let before_upload = s.lookup_upload(&finished.upload_id).unwrap();
+        let trigger = format!("CREATE TRIGGER invalidate_on_receipt AFTER UPDATE ON artifact_save_intents_v1 WHEN NEW.intent_id='tail-save' AND NEW.status='committed' BEGIN {mutation}; END");
+        s.database().exec(&trigger, &[]).unwrap();
+        let result = s.submit_artifact_save_trusted("tail-save", &p, &operation, &out, &[current_source.clone()]).unwrap();
+        assert_eq!(result.status, ArtifactSaveStatus::Unknown, "{mutation}");
+        assert_eq!(result.recovery_action, RecoveryAction::QueryOriginal); assert!(result.receipt.is_none());
+        assert_eq!(s.read_document(&out).unwrap(), before_document, "{mutation}");
+        assert_eq!(s.artifact_history("artifact", None, 10, &out, &[current_source.clone()]).unwrap(), before_artifact);
+        assert_eq!(s.database().query("SELECT * FROM blob_references ORDER BY reference_id", &[]).unwrap(), before_refs);
+        assert_eq!(s.database().query("SELECT * FROM blob_pins ORDER BY pin_id", &[]).unwrap(), before_pins);
+        assert_eq!(s.lookup_upload(&finished.upload_id).unwrap(), before_upload);
+        assert_eq!(s.database().query("SELECT status,receipt_json,error FROM artifact_save_intents_v1 WHERE intent_id='tail-save'", &[]).unwrap(), vec![vec![Some("pending".into()), None, None]]);
+        assert_eq!(s.database().query("SELECT revision FROM document_revisions WHERE document_id='report' ORDER BY revision", &[]).unwrap(), vec![vec![Some("1".into())]]);
+        s.database().exec("DROP TRIGGER invalidate_on_receipt", &[]).unwrap();
+        assert_eq!(s.lookup_artifact_save("tail-save", &p).unwrap().status, ArtifactSaveStatus::Unknown);
+        drop(s); let s = f.open();
+        assert_eq!(s.submit_artifact_save_trusted("tail-save", &p, &operation, &out, &[current_source.clone()]).unwrap().status, ArtifactSaveStatus::Unknown);
+        assert_eq!(s.read_document(&out).unwrap(), before_document);
+    }
+}
+#[test]
+fn effect_unknown_uses_original_lookup_without_writing_a_rejection() {
+    use super::save_journal::ArtifactSaveFailure;
+    let f = Fixture::new(); let (s, out, source) = f.setup(); s.initialize_artifact_workflows_trusted().unwrap(); let p = all_access(&s);
+    s.database().exec("CREATE TRIGGER fail_artifact BEFORE INSERT ON artifact_revisions BEGIN SELECT RAISE(ABORT,'synthetic'); END", &[]).unwrap();
+    s.submit_artifact_save_trusted("unknown-hook", &p, &archive("artifact"), &out, &[source]).unwrap();
+    let rows = s.database().query("SELECT binding_digest FROM artifact_save_intents_v1 WHERE intent_id='unknown-hook'", &[]).unwrap();
+    let digest = rows[0][0].as_deref().unwrap();
+    let before = s.database().query("SELECT * FROM artifact_save_intents_v1", &[]).unwrap();
+    // Inject a future hook's Unknown into the real production failure dispatcher.
+    let result = s.artifact_save_failure_outcome("unknown-hook", digest, ArtifactSaveFailure::from(ContractError::Unknown)).unwrap();
+    assert_eq!(result.status, ArtifactSaveStatus::Unknown); assert_eq!(result.error, Some(ContractError::Unknown));
+    assert_eq!(result.recovery_action, RecoveryAction::QueryOriginal); assert!(result.receipt.is_none());
+    assert_eq!(s.database().query("SELECT * FROM artifact_save_intents_v1", &[]).unwrap(), before);
+    assert_eq!(s.lookup_artifact_save("unknown-hook", &p).unwrap().status, ArtifactSaveStatus::Unknown);
+}

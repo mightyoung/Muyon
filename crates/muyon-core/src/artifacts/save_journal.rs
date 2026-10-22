@@ -89,8 +89,18 @@ impl SaveRequest {
         Ok(())
     }
 }
-fn storage_failure(error: &ContractError) -> bool {
-    matches!(error, ContractError::Storage | ContractError::StorageBusy | ContractError::StorageConstraint | ContractError::StorageCorrupt | ContractError::StorageIo)
+fn requires_original_lookup(error: &ContractError) -> bool {
+    matches!(error, ContractError::Unknown | ContractError::Storage | ContractError::StorageBusy | ContractError::StorageConstraint | ContractError::StorageCorrupt | ContractError::StorageIo)
+}
+
+/// Internal effect phase: a receipt-tail invalidation cannot become a durable
+/// rejection. Its effect transaction must roll back, leaving the original pending.
+pub(super) enum ArtifactSaveFailure {
+    BeforeReceipt(ContractError),
+    ReceiptTail(ContractError),
+}
+impl From<ContractError> for ArtifactSaveFailure {
+    fn from(error: ContractError) -> Self { Self::BeforeReceipt(error) }
 }
 impl BusinessStore {
     fn artifact_save_rows(&self, intent: &str) -> Result<Vec<Vec<Option<String>>>> {
@@ -110,7 +120,7 @@ impl BusinessStore {
             }
             "rejected" => {
                 let error: ContractError = decode(cell(row, 4)?)?;
-                if storage_failure(&error) || error == ContractError::Unknown { return Err(ContractError::StorageCorrupt); }
+                if requires_original_lookup(&error) { return Err(ContractError::StorageCorrupt); }
                 Ok(ArtifactSaveOutcome { status: ArtifactSaveStatus::Rejected, receipt: None, error: Some(error), recovery_action: RecoveryAction::None })
             },
             _ => Err(ContractError::StorageCorrupt),
@@ -127,7 +137,7 @@ impl BusinessStore {
         let request = SaveRequest { version: 1, intent_id: intent.into(), scope: access.scope.clone(), actor_id: access.actor_id.clone(), project_revision: access.project_revision.clone(), output: output.document.clone(), sources: sources.iter().map(|source| source.document.clone()).collect(), operation: operation.clone() };
         let (json, digest) = request.binding()?;
         match self.artifact_save_execute(intent, access, operation, output, sources, &json, &digest) {
-            Err(error) if storage_failure(&error) => Ok(ArtifactSaveOutcome::unknown(error)),
+            Err(error) if requires_original_lookup(&error) => Ok(ArtifactSaveOutcome::unknown(error)),
             result => result,
         }
     }
@@ -149,12 +159,12 @@ impl BusinessStore {
             self.artifact_project_authorize(&tx, access, ArtifactProjectOperation::Save)?;
             sql(tx.commit())?; // PENDING_DURABLE: no artifact/document effect yet.
         }
-        let outcome = (|| {
+        let outcome = (|| -> std::result::Result<ArtifactSaveOutcome, ArtifactSaveFailure> {
             let tx = sql(self.database().transaction())?;
             self.artifact_project_authorize(&tx, access, ArtifactProjectOperation::Save)?;
             let rows = self.artifact_save_rows(intent)?;
             let row = rows.first().ok_or(ContractError::StorageCorrupt)?;
-            if cell(row, 0)? != digest || cell(row, 1)? != json || cell(row, 2)? != "pending" { return Err(ContractError::IntentConflict); }
+            if cell(row, 0)? != digest || cell(row, 1)? != json || cell(row, 2)? != "pending" { return Err(ContractError::IntentConflict.into()); }
             let record = match operation {
                 ArtifactSaveOperation::Archive { artifact_id, origin } => self.archive_artifact_in_transaction(&tx, artifact_id, output, sources, origin)?,
                 ArtifactSaveOperation::Revise { artifact_id, expected_revision, finished, title, origin } => self.revise_artifact_in_transaction(&tx, artifact_id, expected_revision, output, finished, title, sources, origin)?,
@@ -162,23 +172,42 @@ impl BusinessStore {
             let receipt = ArtifactSaveReceipt { intent_id: intent.into(), binding_digest: digest.into(), scope: access.scope.clone(), actor_id: access.actor_id.clone(), artifact_id: record.artifact_id.clone(), artifact_revision: record.revision.clone(), document: record.document.document.clone() };
             let request: SaveRequest = decode(json)?; request.validate_receipt(&receipt, digest)?;
             let changed = sql(self.database().exec("UPDATE artifact_save_intents_v1 SET status='committed',receipt_json=?,error=NULL WHERE intent_id=? AND binding_digest=? AND status='pending'", &[&encode(&receipt)?, intent, digest]))?;
-            if changed != 1 { return Err(ContractError::IntentConflict); }
-            self.artifact_project_authorize(&tx, access, ArtifactProjectOperation::Save)?;
+            if changed != 1 { return Err(ArtifactSaveFailure::ReceiptTail(ContractError::StorageCorrupt)); }
+            // This is the last write. A receipt trigger can invalidate grants
+            // after the helpers' earlier checks; recheck every authority here.
+            // The output head has advanced on revise: grant-only is correct for
+            // this publication tail, and never used to authorize history reads.
+            self.document_grant_in_transaction(&tx, output, &[DocumentOperation::ReadText, DocumentOperation::StructuredEdit])
+                .map_err(ArtifactSaveFailure::ReceiptTail)?;
+            self.artifact_authorize_snapshots(&tx, output, &record.sources, sources)
+                .map_err(ArtifactSaveFailure::ReceiptTail)?;
+            self.artifact_project_authorize(&tx, access, ArtifactProjectOperation::Save)
+                .map_err(ArtifactSaveFailure::ReceiptTail)?;
             sql(tx.commit())?; // EFFECT_COMMIT: canonical document + artifact + original receipt.
             Ok(ArtifactSaveOutcome { status: ArtifactSaveStatus::Committed, receipt: Some(receipt), error: None, recovery_action: RecoveryAction::None })
         })();
         match outcome {
-            Err(error) if storage_failure(&error) => Ok(ArtifactSaveOutcome::unknown(error)),
-            Err(error) => {
-                // Failed effect transaction has rolled back before rejection is journaled.
-                let tx = sql(self.database().transaction())?;
-                let changed = sql(self.database().exec("UPDATE artifact_save_intents_v1 SET status='rejected',error=? WHERE intent_id=? AND binding_digest=? AND status='pending'", &[&encode(&error)?, intent, digest]))?;
-                if changed != 1 { return Err(ContractError::StorageCorrupt); }
-                sql(tx.commit())?;
-                Ok(ArtifactSaveOutcome { status: ArtifactSaveStatus::Rejected, receipt: None, error: Some(error), recovery_action: RecoveryAction::None })
-            }
-            result => result,
+            Ok(result) => Ok(result),
+            Err(failure) => self.artifact_save_failure_outcome(intent, digest, failure),
         }
+    }
+    pub(super) fn artifact_save_failure_outcome(&self, intent: &str, digest: &str, failure: ArtifactSaveFailure) -> Result<ArtifactSaveOutcome> {
+        let error = match failure {
+            ArtifactSaveFailure::ReceiptTail(error) => return Ok(ArtifactSaveOutcome::unknown(error)),
+            ArtifactSaveFailure::BeforeReceipt(error) => error,
+        };
+        // Unknown from any future effect hook is uncertainty, never a semantic
+        // rejection. Keep the original pending row untouched and query it.
+        if requires_original_lookup(&error) {
+            return Ok(ArtifactSaveOutcome::unknown(error));
+        }
+        // Failed effect transaction has dropped and rolled back before a
+        // determinate semantic rejection is journaled in a separate transaction.
+        let tx = sql(self.database().transaction())?;
+        let changed = sql(self.database().exec("UPDATE artifact_save_intents_v1 SET status='rejected',error=? WHERE intent_id=? AND binding_digest=? AND status='pending'", &[&encode(&error)?, intent, digest]))?;
+        if changed != 1 { return Err(ContractError::StorageCorrupt); }
+        sql(tx.commit())?;
+        Ok(ArtifactSaveOutcome { status: ArtifactSaveStatus::Rejected, receipt: None, error: Some(error), recovery_action: RecoveryAction::None })
     }
     /// Read only and actor scoped. Does not create/reconcile a pending save,
     /// retry a failed upload, publish content, or authorize historical bytes.
@@ -197,6 +226,6 @@ impl BusinessStore {
             self.artifact_project_authorize(&tx, access, ArtifactProjectOperation::LookupOwnSaves)?;
             sql(tx.commit())?; Ok(result)
         })();
-        match outcome { Err(error) if storage_failure(&error) => Ok(ArtifactSaveOutcome::unknown(error)), result => result }
+        match outcome { Err(error) if requires_original_lookup(&error) => Ok(ArtifactSaveOutcome::unknown(error)), result => result }
     }
 }
