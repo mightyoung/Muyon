@@ -5,19 +5,19 @@
 //! reading, rendering, target resolution, editing or native format fidelity.
 pub mod anchor;
 pub mod annotation;
-pub mod capability;
 pub mod candidate;
+pub mod capability;
+#[cfg(test)]
+mod history_tests;
 pub mod identity;
 pub mod storage;
 #[cfg(test)]
 mod storage_tests;
-#[cfg(test)]
-mod history_tests;
 use crate::contract::{AuthorityBinding, FileSource};
 pub use anchor::*;
 pub use annotation::*;
-pub use capability::*;
 pub use candidate::{CandidateState, CandidateStatus};
+pub use capability::*;
 #[cfg(test)]
 mod candidate_tests;
 pub use identity::DocumentRef;

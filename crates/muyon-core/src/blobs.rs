@@ -424,7 +424,10 @@ impl BusinessStore {
         let id = random_id("up_")?;
         let snapshot = random_id("snap_")?;
         sql(self.database().exec("INSERT INTO blob_uploads(upload_id,snapshot_id,workspace,project_id,project_revision,owner_epoch,state,byte_length,digest,kind) VALUES(?,?,?,?,?,?,'copying','0',NULL,NULL)", &[&id, &snapshot, self.workspace_id(), project_id, &revision, self.owner_epoch()]))?;
-        Ok(UploadHandle { upload_id: id, snapshot_id: snapshot })
+        Ok(UploadHandle {
+            upload_id: id,
+            snapshot_id: snapshot,
+        })
     }
     /// First materialization only. Never reuse/overwrite a path after an uncertain
     /// prior call. File creation/fsync are NOT reverted by a later SQL rollback.
@@ -434,8 +437,12 @@ impl BusinessStore {
         if upload.state != "copying" || upload.length != 0 {
             return Err(ContractError::IntentConflict);
         }
-        let file = io(OpenOptions::new().write(true).create_new(true).mode(0o600)
-            .custom_flags(NOFOLLOW).open(self.staging_path(upload_id)?))?;
+        let file = io(OpenOptions::new()
+            .write(true)
+            .create_new(true)
+            .mode(0o600)
+            .custom_flags(NOFOLLOW)
+            .open(self.staging_path(upload_id)?))?;
         io(file.sync_all())?;
         sync_dir(&self.root_dir().join("staging"))
     }
@@ -450,15 +457,23 @@ impl BusinessStore {
         expected.validate()?;
         let upload = self.load_upload(upload_id)?;
         self.project_revision_for_blob(project_id)?;
-        if upload.project != project_id || upload.state != "pinned" || upload.kind != Some(BlobKind::Document)
+        if upload.project != project_id
+            || upload.state != "pinned"
+            || upload.kind != Some(BlobKind::Document)
             || upload.length != expected.byte_length.value()
             || upload.digest.as_deref() != Some(expected.digest.as_str())
-        { return Ok(false); }
+        {
+            return Ok(false);
+        }
         let rows = sql(self.database().query("SELECT CASE WHEN length(CAST(b.byte_length AS BLOB))<=20 THEN b.byte_length ELSE NULL END FROM blobs b WHERE b.digest=? AND b.state='ready' AND EXISTS(SELECT 1 FROM blob_pins p WHERE p.digest=b.digest AND p.kind='upload' AND p.upload_id=? AND p.owner_epoch=? AND p.snapshot_id=?)", &[&expected.digest, upload_id, &upload.owner, &upload.snapshot]))?;
         if rows.len() != 1 || cell(&rows[0], 0)? != expected.byte_length.as_str() {
             return Ok(false);
         }
-        verify_file(&self.object_path(&expected.digest)?, upload.length, &expected.digest)?;
+        verify_file(
+            &self.object_path(&expected.digest)?,
+            upload.length,
+            &expected.digest,
+        )?;
         Ok(true)
     }
     /// Trusted picker owner only; never expose to model-generated commands.
@@ -886,22 +901,28 @@ impl BusinessStore {
     }
     fn can_delete_blob(&self, digest: &str) -> Result<bool> {
         let blocked=sql(self.database().query("SELECT 1 WHERE EXISTS(SELECT 1 FROM blob_references WHERE digest=?) OR EXISTS(SELECT 1 FROM blob_pins WHERE digest=?) OR EXISTS(SELECT 1 FROM blob_uploads WHERE state NOT IN('committed','aborted') AND digest=?) OR EXISTS(SELECT 1 FROM intents WHERE status IN('pending','unknown'))",&[digest,digest,digest]))?;
-        if !blocked.is_empty() { return Ok(false); }
+        if !blocked.is_empty() {
+            return Ok(false);
+        }
         let mut cursor = String::new();
         loop {
             let unresolved = sql(self.database().query("SELECT CASE WHEN length(CAST(upload_id AS BLOB))<=128 THEN upload_id ELSE NULL END FROM blob_uploads WHERE state NOT IN('committed','aborted') AND digest IS NULL AND (?='' OR upload_id>?) ORDER BY upload_id LIMIT 128", &[&cursor, &cursor]))?;
-            if unresolved.is_empty() { return Ok(true); }
+            if unresolved.is_empty() {
+                return Ok(true);
+            }
             for row in &unresolved {
                 let upload = cell(row, 0)?;
                 match self.document_candidate_reserves_digest(upload, digest)? {
-                    Some(false) => {},
+                    Some(false) => {}
                     // Legacy unresolved uploads keep their original conservative
                     // behavior; journal-backed candidates reserve exact digests.
                     Some(true) | None => return Ok(false),
                 }
                 cursor = upload.into();
             }
-            if unresolved.len() < 128 { return Ok(true); }
+            if unresolved.len() < 128 {
+                return Ok(true);
+            }
         }
     }
     /// Explicit, serialized maintenance. Marking deleting commits before unlink;
