@@ -1,0 +1,22 @@
+{
+  "argv": [
+    "cargo",
+    "clippy",
+    "--offline",
+    "--locked",
+    "--manifest-path",
+    "crates/Cargo.toml",
+    "--workspace",
+    "--all-targets",
+    "--",
+    "-D",
+    "warnings"
+  ],
+  "cwd": "/workspace/Muyon-post-pr101-office-bot-20261022",
+  "source_sha": "3e531f76077b6e2170fa7ff4ffda104935363931",
+  "dirty_source": false,
+  "start_utc": "2026-10-22T19:07:45.687866+00:00",
+  "exit_code": 0,
+  "duration_seconds": 101.602,
+  "end_utc": "2026-10-22T19:09:27.117148+00:00"
+}
