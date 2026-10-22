@@ -168,8 +168,13 @@ notifications or default allow to keep UI alive.
 B generates actual new bindings; db40 is old raw-only and01e1 is pre-policy. Host
 owns fresh Looper observation, actual principal/scope/selection serialization,
 shared D->G->drain->admission batch and real PFD disposal. Native never measures
-physical Android visibility or claims OSFD revocation. Initial no-grant selection
-rule is currently UNAPPROVED: fail initial_no_authorization, never grant on click.
+physical Android visibility or claims OSFD revocation. On2026-10-22T09:23:33Z
+user explicitly approved genuine selection -> this reading intent's first readonly
+authorization, subject to exact local registered source/current project and no
+explicit document-read revocation. INITIAL-READ-ADMISSION-REQUEST.md fixes the
+additional admission request; implementation is still pending, not a generated
+endpoint or universal document disclosure. Until real core admission exists,
+missing authorization still fails honestly.
 
 ## Checkpoint status
 
