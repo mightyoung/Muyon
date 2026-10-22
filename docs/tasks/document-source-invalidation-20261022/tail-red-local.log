@@ -1,0 +1,4 @@
+2026-10-22: success-trigger regression tests appended BEFORE implementation changes.
+Command in exact prepared tree: cargo test --offline --locked --manifest-path crates/Cargo.toml -p muyon-core --lib documents::source_notification_tests::successful_outbox
+exit=127: cargo: command not found
+NOT_RUN, not a behavioral RED. Independent Rust RED/GREEN remains pending.

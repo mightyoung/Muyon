@@ -11,10 +11,10 @@ index 8c3985cd..ed84cd9f 100644
 +mod source_notification_tests;
 diff --git a/crates/muyon-core/src/documents/source_notification_tests.rs b/crates/muyon-core/src/documents/source_notification_tests.rs
 new file mode 100644
-index 00000000..d51140f8
+index 00000000..af6b92a0
 --- /dev/null
 +++ b/crates/muyon-core/src/documents/source_notification_tests.rs
-@@ -0,0 +1,228 @@
+@@ -0,0 +1,311 @@
 +//! Integration regressions against real fixed Artifacts/Evidence, synthetic data.
 +use super::{storage_tests::Fixture, *};
 +use crate::{artifacts::{*, local_interactions::*}, blobs::BlobKind, business::BusinessStore, contract::*, evidence::{store::StoreEvidence, InputKind}, sqlite::Db};
@@ -243,12 +243,95 @@ index 00000000..d51140f8
 +    assert!(store.pending_document_source_notifications_trusted(None, 0).is_err());
 +    assert!(store.pending_document_source_notifications_trusted(None, 257).is_err());
 +}
++
++// Successful AFTER triggers must not turn a successful SQL statement into an
++// unchecked mutation receipt. Each case must fail at the read-only tail and
++// roll back the grant/head, source/binding and notification together.
++#[test]
++fn successful_outbox_trigger_tampering_rolls_back_revoke() {
++    for action in [
++        "UPDATE document_grants SET active=1 WHERE grant_id='source-grant'",
++        "DELETE FROM document_source_notifications_v1 WHERE object_id=NEW.object_id",
++        "UPDATE document_source_notifications_v1 SET pending=0 WHERE object_id=NEW.object_id",
++        "UPDATE document_source_notifications_v1 SET generation='99' WHERE object_id=NEW.object_id",
++        "UPDATE artifact_local_evidence_sources_v1 SET active=1 WHERE object_id=NEW.object_id",
++        "UPDATE artifact_local_bindings_v1 SET active=1 WHERE object_id=NEW.object_id",
++    ] {
++        let (_f, store, source, _, _) = fixture();
++        store.database().exec(&format!("CREATE TRIGGER tamper AFTER INSERT ON document_source_notifications_v1 BEGIN {action}; END"), &[]).unwrap();
++        assert!(store.revoke_document_grant_trusted(&source.authority).is_err(), "successful trigger escaped the tail: {action}");
++        assert!(store.read_document(&source).is_ok());
++        assert_eq!(active(&store), "1");
++        assert!(store.pending_document_source_notifications_trusted(None, 256).unwrap().is_empty());
++    }
++}
++
++#[test]
++fn successful_outbox_trigger_tampering_rolls_back_issue_publish_and_copy() {
++    for mutation in [0, 1, 2] {
++        let (_f, store, source, _, _) = fixture();
++        let action = if mutation == 0 {
++            "UPDATE document_grants SET generation='1' WHERE grant_id='source-grant'"
++        } else { "UPDATE document_heads SET revision='1' WHERE document_id='text-source'" };
++        store.database().exec(&format!("CREATE TRIGGER tamper AFTER INSERT ON document_source_notifications_v1 BEGIN {action}; END"), &[]).unwrap();
++        if mutation == 0 {
++            let next = AuthorityBinding { generation: source.authority.generation.next().unwrap(), ..source.authority.clone() };
++            assert!(store.issue_document_grant_trusted(&source.document, &next, &[DocumentOperation::ReadText], expiry()).is_err());
++        } else if mutation == 1 {
++            let blob = upload(&store, "project", b"Replacement synthetic source.");
++            assert!(store.publish_document_revision_trusted(&source.document, "Next", DocumentFormat::Text, &blob).is_err());
++        } else {
++            let metadata = store.read_document(&source).unwrap();
++            let tx = store.database().transaction().unwrap();
++            assert!(store.document_clone_in_transaction(&tx, &source.document, "Copy", &metadata.blob).is_err());
++            drop(tx);
++        }
++        assert_eq!(head(&store), "1"); assert_eq!(active(&store), "1");
++        assert!(store.read_document(&source).is_ok());
++        assert!(store.pending_document_source_notifications_trusted(None, 256).unwrap().is_empty());
++    }
++}
++
++#[test]
++fn later_outbox_write_cannot_erase_an_earlier_event() {
++    let (_f, store, source, local, kind) = fixture();
++    let mut second = local.clone(); second.object.object_id = "object-z".into();
++    bind(&store, &source, &second, &kind);
++    store.database().exec("CREATE TRIGGER tamper AFTER INSERT ON document_source_notifications_v1 WHEN NEW.object_id='object-z' BEGIN DELETE FROM document_source_notifications_v1 WHERE object_id='object'; END", &[]).unwrap();
++    assert!(store.revoke_document_grant_trusted(&source.authority).is_err());
++    assert!(store.read_document(&source).is_ok()); assert_eq!(active(&store), "1");
++    assert!(store.pending_document_source_notifications_trusted(None, 256).unwrap().is_empty());
++}
++
++#[test]
++fn successful_outbox_update_and_ack_tampering_cannot_report_success() {
++    for acknowledge in [false, true] {
++        let (_f, store, mut source, mut local, kind) = fixture();
++        store.revoke_document_grant_trusted(&source.authority).unwrap();
++        let first = store.pending_document_source_notifications_trusted(None, 256).unwrap();
++        if acknowledge {
++            store.database().exec("CREATE TRIGGER tamper AFTER UPDATE ON document_source_notifications_v1 WHEN NEW.pending=0 BEGIN UPDATE document_source_notifications_v1 SET pending=1 WHERE object_id=NEW.object_id; END", &[]).unwrap();
++            assert!(store.ack_document_source_notifications_trusted(&first).is_err());
++            assert_eq!(store.pending_document_source_notifications_trusted(None, 256).unwrap(), first);
++        } else {
++            store.ack_document_source_notifications_trusted(&first).unwrap();
++            source.authority.generation = source.authority.generation.next().unwrap();
++            store.issue_document_grant_trusted(&source.document, &source.authority, &[DocumentOperation::Inspect, DocumentOperation::ReadText], expiry()).unwrap();
++            local.binding_generation = local.binding_generation.next().unwrap();
++            bind(&store, &source, &local, &kind);
++            store.database().exec("CREATE TRIGGER tamper AFTER UPDATE ON document_source_notifications_v1 WHEN NEW.pending=1 BEGIN UPDATE document_grants SET active=1 WHERE grant_id='source-grant'; END", &[]).unwrap();
++            assert!(store.revoke_document_grant_trusted(&source.authority).is_err());
++            assert!(store.read_document(&source).is_ok()); assert_eq!(active(&store), "1");
++            assert!(store.pending_document_source_notifications_trusted(None, 256).unwrap().is_empty());
++        }
++    }
++}
 diff --git a/crates/muyon-core/src/documents/source_notifications.rs b/crates/muyon-core/src/documents/source_notifications.rs
 new file mode 100644
-index 00000000..86998740
+index 00000000..9d4a4cd8
 --- /dev/null
 +++ b/crates/muyon-core/src/documents/source_notifications.rs
-@@ -0,0 +1,101 @@
+@@ -0,0 +1,132 @@
 +//! Same-transaction metadata-only outbox for the actual Artifacts source hook.
 +//! Requires fixed resolver0e85c6e9 plus real library/harness composition by B.
 +use super::{identity::valid_id, DocumentRef};
@@ -282,19 +365,20 @@ index 00000000..86998740
 +        Ok(true)
 +    }
 +    /// All callers propagate failure; no commit/event publication occurs here.
-+    pub(crate) fn invalidate_document_dependents_in_transaction(&self, tx: &Transaction<'_>, changed: &DocumentRef) -> Result<()> {
++    pub(crate) fn invalidate_document_dependents_in_transaction(&self, tx: &Transaction<'_>, changed: &DocumentRef) -> Result<Vec<DocumentSourceNotification>> {
 +        if !tx.belongs_to(self.database()) || changed.scope().workspace_id != self.workspace_id() { return Err(ContractError::ScopeMismatch); }
 +        let source = sql(self.database().query("SELECT type FROM sqlite_master WHERE name=?", &[SOURCE]))?;
 +        let notifications = self.document_notification_schema()?;
 +        if source.is_empty() {
 +            // Legacy/uninitialized resolver, not a swallowed resolver failure.
-+            return if notifications { Err(ContractError::InvalidVersion) } else { Ok(()) };
++            return if notifications { Err(ContractError::InvalidVersion) } else { Ok(Vec::new()) };
 +        }
 +        if source.len() != 1 || cell(&source[0], 0)? != "table" { return Err(ContractError::InvalidVersion); }
 +        // The real source owner validates its exact schema and rechecks every
 +        // source. Never duplicate that truth, substitute TTL or accept all errors.
 +        let affected = self.invalidate_local_evidence_sources_in_transaction(tx, changed)?;
 +        if !notifications { sql(self.database().exec(DDL, &[]))?; }
++        let mut queued = Vec::with_capacity(affected.len());
 +        for event in affected {
 +            ids(&event.project_id, &event.actor_id, &event.object_id)?;
 +            let old = sql(self.database().query("SELECT CASE WHEN length(CAST(generation AS BLOB))<=20 THEN generation ELSE NULL END FROM document_source_notifications_v1 WHERE project_id=? AND actor_id=? AND object_id=?", &[&event.project_id, &event.actor_id, &event.object_id]))?;
@@ -307,6 +391,31 @@ index 00000000..86998740
 +                None => Revision::new(1),
 +            };
 +            sql(self.database().exec("INSERT INTO document_source_notifications_v1 VALUES(?,?,?,?,1) ON CONFLICT(project_id,actor_id,object_id) DO UPDATE SET generation=excluded.generation,pending=1", &[&event.project_id, &event.actor_id, &event.object_id, generation.as_str()]))?;
++            queued.push(DocumentSourceNotification { project_id: event.project_id, actor_id: event.actor_id, object_id: event.object_id, generation });
++        }
++        // Check the entire batch after ALL writes, not only each just-written row:
++        // a later successful trigger can corrupt an earlier event/source.
++        self.verify_document_source_notifications_in_transaction(tx, changed, &queued)?;
++        Ok(queued)
++    }
++    fn verify_document_notification_rows(&self, events: &[DocumentSourceNotification], pending: &str) -> Result<()> {
++        if !events.is_empty() && !self.document_notification_schema()? { return Err(ContractError::StorageCorrupt); }
++        for event in events {
++            let rows = sql(self.database().query("SELECT 1 FROM document_source_notifications_v1 WHERE project_id=? AND actor_id=? AND object_id=? AND generation=? AND pending=?", &[&event.project_id, &event.actor_id, &event.object_id, event.generation.as_str(), pending]))?;
++            if rows.len() != 1 { return Err(ContractError::StorageCorrupt); }
++        }
++        Ok(())
++    }
++    /// Read-only postcondition of the REAL owner's returned invalidations; this
++    /// projects only exact inactive flags, never decodes grants/payloads or makes
++    /// a source-authority decision. No owner schema/permission logic is copied.
++    pub(super) fn verify_document_source_notifications_in_transaction(&self, tx: &Transaction<'_>, changed: &DocumentRef, events: &[DocumentSourceNotification]) -> Result<()> {
++        if !tx.belongs_to(self.database()) { return Err(ContractError::ScopeMismatch); }
++        self.verify_document_notification_rows(events, "1")?;
++        for event in events {
++            if changed.scope().workspace_id != self.workspace_id() || changed.scope().project_id.as_deref() != Some(event.project_id.as_str()) { return Err(ContractError::ScopeMismatch); }
++            let rows = sql(self.database().query("SELECT 1 FROM artifact_local_evidence_sources_v1 s JOIN artifact_local_bindings_v1 b ON b.project_id=s.project_id AND b.actor_id=s.actor_id AND b.object_id=s.object_id WHERE s.project_id=? AND s.actor_id=? AND s.object_id=? AND s.document_id=? AND s.active=0 AND b.active=0", &[&event.project_id, &event.actor_id, &event.object_id, changed.document_id()]))?;
++            if rows.len() != 1 { return Err(ContractError::StorageCorrupt); }
 +        }
 +        Ok(())
 +    }
@@ -341,36 +450,56 @@ index 00000000..86998740
 +        self.document_schema()?;
 +        if !self.document_notification_schema()? { return Err(ContractError::NotFound); }
 +        let mut acknowledged = 0;
++        let mut updated = Vec::new();
 +        for event in events {
 +            ids(&event.project_id, &event.actor_id, &event.object_id)?;
 +            if event.generation.value() == 0 { return Err(ContractError::InvalidRevision); }
-+            acknowledged += sql(self.database().exec("UPDATE document_source_notifications_v1 SET pending=0 WHERE project_id=? AND actor_id=? AND object_id=? AND generation=? AND pending=1", &[&event.project_id, &event.actor_id, &event.object_id, event.generation.as_str()]))?;
++            let changed = sql(self.database().exec("UPDATE document_source_notifications_v1 SET pending=0 WHERE project_id=? AND actor_id=? AND object_id=? AND generation=? AND pending=1", &[&event.project_id, &event.actor_id, &event.object_id, event.generation.as_str()]))?;
++            if changed > 1 { return Err(ContractError::StorageCorrupt); }
++            acknowledged += changed;
++            if changed == 1 { updated.push(event.clone()); }
 +        }
++        self.verify_document_notification_rows(&updated, "0")?;
 +        tx.commit().map_err(|_| ContractError::Unknown)?;
 +        Ok(acknowledged)
 +    }
 +}
 diff --git a/crates/muyon-core/src/documents/storage.rs b/crates/muyon-core/src/documents/storage.rs
-index b0976ce4..14384f30 100644
+index b0976ce4..8daa6b67 100644
 --- a/crates/muyon-core/src/documents/storage.rs
 +++ b/crates/muyon-core/src/documents/storage.rs
-@@ -498,6 +498,7 @@ impl BusinessStore {
+@@ -498,6 +498,10 @@ impl BusinessStore {
                  &encode(&metadata)?,
              ],
          ))?;
 +        self.invalidate_document_dependents_in_transaction(tx, &metadata.document)?;
++        if self.current_document(&metadata.document)? != metadata {
++            return Err(ContractError::StorageCorrupt);
++        }
          Ok(metadata)
      }
      /// COPY-only: append metadata for the exact existing source bytes. There is
-@@ -564,6 +565,7 @@ impl BusinessStore {
+@@ -564,6 +568,10 @@ impl BusinessStore {
                  &encode(&metadata)?,
              ],
          ))?;
 +        self.invalidate_document_dependents_in_transaction(tx, &metadata.document)?;
++        if self.current_document(&metadata.document)? != metadata {
++            return Err(ContractError::StorageCorrupt);
++        }
          Ok(metadata)
      }
      /// HOST ONLY, after authentic current policy/user authorization. No model or
-@@ -591,7 +593,8 @@ impl BusinessStore {
+@@ -577,7 +585,7 @@ impl BusinessStore {
+     ) -> Result<()> {
+         let tx = sql(self.database().transaction())?;
+         self.document_schema()?;
+-        self.current_document(document)?;
++        let expected_metadata = self.current_document(document)?;
+         binding_shape(authority)?;
+         let now = now_ms()?;
+         if authority.owner_epoch != self.owner_epoch()
+@@ -591,7 +599,8 @@ impl BusinessStore {
          {
              return Err(ContractError::InvalidAuthority);
          }
@@ -380,18 +509,32 @@ index b0976ce4..14384f30 100644
          let expected = if old.is_empty() {
              Revision::new(1)
          } else {
-@@ -601,8 +604,21 @@ impl BusinessStore {
+@@ -601,8 +610,35 @@ impl BusinessStore {
              return Err(ContractError::InvalidAuthority);
          }
          sql(self.database().exec("INSERT INTO document_grants VALUES(?,?,?,?,?,?,1) ON CONFLICT(grant_id) DO UPDATE SET generation=excluded.generation,owner_epoch=excluded.owner_epoch,document_json=excluded.document_json,permissions=excluded.permissions,expires_at_ms=excluded.expires_at_ms,active=1", &[&authority.grant_id, authority.generation.as_str(), self.owner_epoch(), &encode(document)?, &encode(&operations)?, &expires_at_ms.to_string()]))?;
++        let mut queued = Vec::new();
 +        if let Some(previous) = old_document.as_ref() {
-+            self.invalidate_document_dependents_in_transaction(&tx, previous)?;
++            queued.push((previous, self.invalidate_document_dependents_in_transaction(&tx, previous)?));
 +        }
 +        if old_document.as_ref() != Some(document) {
-+            self.invalidate_document_dependents_in_transaction(&tx, document)?;
++            queued.push((document, self.invalidate_document_dependents_in_transaction(&tx, document)?));
 +        }
++        for (changed, events) in &queued {
++            self.verify_document_source_notifications_in_transaction(&tx, changed, events)?;
++        }
++        self.document_grant_write_postcondition(authority, &encode(document)?, &encode(&operations)?, &expires_at_ms.to_string(), "1")?;
++        self.document_grant(&DocumentAccess { document: document.clone(), authority: authority.clone() }, operations)?;
++        if self.current_document(document)? != expected_metadata { return Err(ContractError::StorageCorrupt); }
          sql(tx.commit())
      }
++    // Read-only exact write receipt, after all hook/outbox writes. This is not
++    // authorization: normal grant expiry/project checks still run for issue.
++    fn document_grant_write_postcondition(&self, authority: &AuthorityBinding, document_json: &str, permissions: &str, expires: &str, active: &str) -> Result<()> {
++        let rows = sql(self.database().query("SELECT 1 FROM document_grants WHERE grant_id=? AND generation=? AND owner_epoch=? AND document_json=? AND permissions=? AND expires_at_ms=? AND active=?", &[&authority.grant_id, authority.generation.as_str(), self.owner_epoch(), document_json, permissions, expires, active]))?;
++        if rows.len() != 1 { return Err(ContractError::StorageCorrupt); }
++        Ok(())
++    }
 +    fn document_grant_target(&self, payload: &str) -> Result<DocumentRef> {
 +        let document: DocumentRef = decode(payload)?;
 +        if document.scope().workspace_id != self.workspace_id() || document.scope().project_id.is_none() || document.revision().value() == 0 {
@@ -402,17 +545,19 @@ index b0976ce4..14384f30 100644
      pub fn revoke_document_grant_trusted(&self, authority: &AuthorityBinding) -> Result<()> {
          let tx = sql(self.database().transaction())?;
          self.document_schema()?;
-@@ -610,10 +626,13 @@ impl BusinessStore {
+@@ -610,10 +646,15 @@ impl BusinessStore {
          if authority.owner_epoch != self.owner_epoch() {
              return Err(ContractError::InvalidAuthority);
          }
-+        let targets = sql(self.database().query("SELECT CASE WHEN length(CAST(document_json AS BLOB))<=8192 THEN document_json ELSE NULL END FROM document_grants WHERE grant_id=? AND generation=? AND owner_epoch=?", &[&authority.grant_id, authority.generation.as_str(), self.owner_epoch()]))?;
++        let targets = sql(self.database().query("SELECT CASE WHEN length(CAST(document_json AS BLOB))<=8192 THEN document_json ELSE NULL END,CASE WHEN length(CAST(permissions AS BLOB))<=1024 THEN permissions ELSE NULL END,CASE WHEN length(CAST(expires_at_ms AS BLOB))<=20 THEN expires_at_ms ELSE NULL END FROM document_grants WHERE grant_id=? AND generation=? AND owner_epoch=?", &[&authority.grant_id, authority.generation.as_str(), self.owner_epoch()]))?;
 +        let target = self.document_grant_target(cell(targets.first().ok_or(ContractError::InvalidAuthority)?, 0)?)?;
          let changed = sql(self.database().exec("UPDATE document_grants SET active=0 WHERE grant_id=? AND generation=? AND owner_epoch=?", &[&authority.grant_id, authority.generation.as_str(), self.owner_epoch()]))?;
          if changed != 1 {
              return Err(ContractError::InvalidAuthority);
          }
 +        self.invalidate_document_dependents_in_transaction(&tx, &target)?;
++        let original = targets.first().ok_or(ContractError::InvalidAuthority)?;
++        self.document_grant_write_postcondition(authority, cell(original, 0)?, cell(original, 1)?, cell(original, 2)?, "0")?;
          sql(tx.commit())
      }
      pub fn read_document(&self, access: &DocumentAccess) -> Result<DocumentMetadata> {
