@@ -1,5 +1,20 @@
 # Independent non-author review
 
+## Round4 — revision finding corrected
+
+The parent later identified an Important revision progression defect missed by the
+original review below. The author reproduced base1->0 as behavioral RED before
+fixing the common validator in84d438e3f2587c3398c33fac7e984cd5143289a0. Both Commit
+and original-intent RecoverCommit now require shared checked Revision::next().
+Reviewer independently ran28/28 transaction and18/18 documents tests, plus3 new
+probes covering546 numeric/route combinations and15 overflow/skip edge cases.
+Rejected observations preserve state/candidate and cannot Export/rollback; legitimate
+next results remain recoverable. No new blocking or should-fix finding remains in
+this offline scope. Raw probes, logs and final hashes: evidence/independent-round4/.
+See REVISION-FOLLOWUP.md for impact and exact final hashes.
+
+## Original rounds1–3 (historical)
+
 Reviewer: separately dispatched `independent_review`, read-only; no authoring,
 commits or pushes by reviewer. Final assessment: no outstanding blocking or
 should-fix findings in the offline contract scope. This is not approval to merge

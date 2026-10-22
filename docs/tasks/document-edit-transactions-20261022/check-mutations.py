@@ -17,6 +17,7 @@ mutations = {
     'revocation removed': ('if !f.active', 'if false'),
     'reopen validation removed': ('if !v.reopened', 'if false'),
     'operation permission removed': ('if !f.permissions.contains(&operation) {', 'if false {'),
+    'revision progression reverted to non-equality': ('if r.committed_revision != next {', 'if r.committed_revision == r.previous_revision {'),
     'CAS failure ignored': ('|| !r.cas_succeeded', '|| false'),
 }
 with tempfile.TemporaryDirectory(prefix='muyon-doc-edit-mutations-') as temp:
@@ -34,4 +35,4 @@ with tempfile.TemporaryDirectory(prefix='muyon-doc-edit-mutations-') as temp:
         result = subprocess.run([str(root/'tests-bin')], capture_output=True, text=True)
         print(result.stdout + result.stderr, end='', flush=True)
         assert result.returncode != 0 and 'FAILED' in result.stdout, 'mutation escaped: '+name
-    print('\n6/6 behavior mutations caught; no production files edited.')
+    print(f'\n{len(mutations)}/{len(mutations)} behavior mutations caught; no production files edited.')

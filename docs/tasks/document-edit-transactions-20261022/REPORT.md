@@ -1,8 +1,29 @@
 # DOC-06/08 delivery — offline contract only
 
+## Current revision fix (supersedes original counts below)
+
+Parent's Important finding of decreasing commit revisions is fixed in
+`84d438e3f2587c3398c33fac7e984cd5143289a0`. Both Commit and RecoverCommit now require
+shared checked `previous_revision.next()`, including cancelled late recovery;
+same/backward/skipped revisions and u64 overflow reject without changing the prior
+state/candidate or enabling Export/rollback. A rollback always publishes a new
+increasing revision. Scope: one validator, tests and docs/evidence; no added effects.
+
+Behavioral RED `31` preceded the fix. Final combination: **28 transaction +18 exact
+core tests passed** (`32`). Full `cargo test --offline --locked --manifest-path
+/workspace/document-edit-combination/crates/Cargo.toml -p muyon-core`, same tools/env
+as below: **193 passed,0 failed,0 compiler warnings** (`33`). Seven compiled behavior
+mutations caught (`34`). Fourth non-author review independently reran28+18 and three
+probes, including546 numeric/route combinations and15 edge cases; no remaining
+blocking findings. See REVISION-FOLLOWUP.md and evidence/independent-round4/.
+Original evidence/results below remain historical; the same toolchain/Flutter and
+production gateway/engine blockers remain open.
+
+## Original batch report
+
 Status: source-delivered, independently reviewed; production integration pending.
 Branch: `task/document-edit-transactions-20261022`.
-Source commit: `9b242a4ae0143b872e7c885be29585da87a165f8`.
+Original source commit: `9b242a4ae0143b872e7c885be29585da87a165f8`.
 Fixed UI base: `3ecb544ad0a47ccc38fe830777f35588b92e8afc`.
 Verified original candidate: `f4781e16ddf4e542b983fbd77f266a0071148255`.
 Core dependency read/combined exactly: `ab9c381cc935be0cd52db5a8a455ce985bdba1db`;

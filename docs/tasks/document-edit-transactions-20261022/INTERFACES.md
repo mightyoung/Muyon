@@ -24,7 +24,9 @@ structure, semantics, render comparison, unsupported-feature preservation and fo
 status. These supplied booleans are not implementations of format validators.
 
 Commit accepts only a matching durable host receipt, candidate, old base Revision,
-successful host CAS and distinct resulting Revision. Source revision conflict retains
+successful host CAS and exactly `previous_revision.next()` as the resulting Revision.
+The shared checked increment rejects same/backward/skipped versions and overflow;
+this also applies to original-intent recovery and new rollback transactions. Source revision conflict retains
 the candidate. Unknown accepts only the matching original intent's query results;
 ordinary apply/commit cannot replay it. A missing receipt leaves the state unresolved.
 Cancellation records a request; a late durable original commit is still observable.
