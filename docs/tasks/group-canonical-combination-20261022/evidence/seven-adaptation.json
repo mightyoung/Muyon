@@ -1,0 +1,8 @@
+{
+  "source": "d06541c3367308e69852bde98d1f60756a750338",
+  "assertions_unchanged": true,
+  "changes": [
+    "source path prefix to exact combined checkout",
+    "real documents source module import needed by current blobs candidate retention"
+  ]
+}

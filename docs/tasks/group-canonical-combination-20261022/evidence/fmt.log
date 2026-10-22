@@ -1,0 +1,17 @@
+Diff in /workspace/Muyon-group-canonical-combination-20261022/crates/muyon-core/tests/group_request_binding.rs:1:
+ //! Same-crate source harness exercises actual pub(crate) BusinessStore seams.
+ #![allow(dead_code)]
+-#[path = "../src/documents/mod.rs"]
+-mod documents;
+ #[path = "../src/agent/mod.rs"]
+ mod agent;
+ #[path = "../src/archive.rs"]
+Diff in /workspace/Muyon-group-canonical-combination-20261022/crates/muyon-core/tests/group_request_binding.rs:12:
+ mod business;
+ #[path = "../src/contract.rs"]
+ mod contract;
++#[path = "../src/documents/mod.rs"]
++mod documents;
+ #[path = "../src/group_runtime/store.rs"]
+ mod group_runtime_store;
+ #[path = "../src/research.rs"]

@@ -1,0 +1,11 @@
+# Independent fixed combination review
+
+source_review read-onlycheckedc70185454d1b0bc4aeaad52a2f6153a24b72378a. No new
+composition/authoritydefect. Owned5sourceexactd065; testonlyactualdocuments import;
+existingmigration/3expect/export/FFI/Host/Artifact/Readerunchanged. ActualOwner payload
+SHA reread, typedprivatefacts, lifetimeRunLedgerroot/children/context observed;
+executionauthorityfalse/crossowneratomicfalse/rootbudgetunavailable retained.
+Bindingstorechild reusesoriginalBusinessStoretransactionandtails; noclaim/replay/
+refund/Agentexecutionunlock. NewfourthharnessCandidateStatuslintnotfixed, nofullstrict
+claim. Reviewer didnotrun tests/probes orwritefiles. Postfmt-only importsort provided
+separately; noassertionorbehaviorchange.

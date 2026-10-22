@@ -1,0 +1,8 @@
+{
+  "crates/muyon-core/src/agent/owner.rs": "d8a3d40676f0a4f9777ccf9aa1fb7c426b1d876135d2510c7bc1ebded2ce639e",
+  "crates/muyon-core/src/agent/workflow.rs": "605c553185a467d0bae4ea1b9e67e87b8ad2aa7fdafe4b38b5b654dfd91fb13d",
+  "crates/muyon-core/src/group_runtime/binding.rs": "da5814f087ff30a185e7aeffc784ed32177b86782711e102bb0f418000f7298e",
+  "crates/muyon-core/src/group_runtime/bridge.rs": "836507e862b3ddbd720a68662702cd34df781cce24aadb21d6ea7b77b6bdfaae",
+  "crates/muyon-core/src/group_runtime/store.rs": "a0d80c3cf27761dab591c86c1e594197769ce5d8992cd183070a6d5691e16c18",
+  "crates/muyon-core/tests/group_request_binding.rs": "6b5c501ee670e0da4e8b2fc4a4168da7b0292ecb7974e447f791ece277c8af73"
+}

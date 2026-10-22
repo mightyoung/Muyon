@@ -1,0 +1,16 @@
+    Checking muyon-core-agent-lab v0.1.0 (/workspace/Muyon-group-canonical-combination-20261022/experiments/redesign/core-agent-lab/core)
+    Checking muyon-plugin-contract-lab v0.1.0 (/workspace/Muyon-group-canonical-combination-20261022/experiments/redesign/plugin-contract-lab/core)
+    Checking muyon-rust-agent-host-lab v0.1.0 (/workspace/Muyon-group-canonical-combination-20261022/experiments/redesign/rust-agent-host-lab/core)
+    Checking muyon-web-search-lab v0.1.0 (/workspace/Muyon-group-canonical-combination-20261022/experiments/redesign/web-search-lab/core)
+    Checking muyon-core v0.1.0 (/workspace/Muyon-group-canonical-combination-20261022/crates/muyon-core)
+    Checking muyon-android-ffi v0.1.0 (/workspace/Muyon-group-canonical-combination-20261022/crates/muyon-android-ffi)
+error: unused import: `CandidateStatus`
+  --> muyon-core/tests/../src/documents/mod.rs:24:37
+   |
+24 | pub use candidate::{CandidateState, CandidateStatus};
+   |                                     ^^^^^^^^^^^^^^^
+   |
+   = note: `-D unused-imports` implied by `-D warnings`
+   = help: to override `-D warnings` add `#[allow(unused_imports)]`
+
+error: could not compile `muyon-core` (test "group_request_binding") due to 1 previous error
