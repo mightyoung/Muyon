@@ -1,0 +1,3 @@
+committed_to_not_committed_accepted=false
+not_committed_to_committed_accepted=false
+PASS fixed native codec: schema/owner/scope/Long bounds/lifecycle/real original receipt/canonical restore; no backend calls
