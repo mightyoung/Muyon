@@ -1,0 +1,96 @@
+test_active_formulas_and_cfb (test_harness.AdditionalBoundaryTests.test_active_formulas_and_cfb) ... ok
+test_corrupt_deflate_is_structured_rejection (test_harness.AdditionalBoundaryTests.test_corrupt_deflate_is_structured_rejection) ... ok
+test_duplicate_and_crc_corruption (test_harness.AdditionalBoundaryTests.test_duplicate_and_crc_corruption) ... ok
+test_fixture_generation_reproducible_and_usable (test_harness.AdditionalBoundaryTests.test_fixture_generation_reproducible_and_usable) ... ok
+test_limits_and_deep_xml (test_harness.AdditionalBoundaryTests.test_limits_and_deep_xml) ... ok
+test_local_header_encryption_and_flags_disagreement (test_harness.AdditionalBoundaryTests.test_local_header_encryption_and_flags_disagreement) ... 
+  test_local_header_encryption_and_flags_disagreement (test_harness.AdditionalBoundaryTests.test_local_header_encryption_and_flags_disagreement) (flag=1) ... FAIL
+  test_local_header_encryption_and_flags_disagreement (test_harness.AdditionalBoundaryTests.test_local_header_encryption_and_flags_disagreement) (flag=8) ... FAIL
+test_pdf_obfuscated_names (test_harness.AdditionalBoundaryTests.test_pdf_obfuscated_names) ... ok
+test_relationship_declared_mime_required (test_harness.AdditionalBoundaryTests.test_relationship_declared_mime_required) ... FAIL
+test_relationship_escape_and_missing_target (test_harness.AdditionalBoundaryTests.test_relationship_escape_and_missing_target) ... ok
+test_relationship_type_and_declared_mime_required (test_harness.AdditionalBoundaryTests.test_relationship_type_and_declared_mime_required) ... FAIL
+test_unused_content_type_cannot_be_empty (test_harness.AdditionalBoundaryTests.test_unused_content_type_cannot_be_empty) ... FAIL
+test_cli_stdout_and_original_untouched (test_harness.HarnessTests.test_cli_stdout_and_original_untouched) ... ok
+test_compare_unknown_loss_and_changes_fail (test_harness.HarnessTests.test_compare_unknown_loss_and_changes_fail) ... ok
+test_duplicate_symlink_and_encryption (test_harness.HarnessTests.test_duplicate_symlink_and_encryption) ... ok
+test_invalid_archive_and_plaintext_not_ooxml (test_harness.HarnessTests.test_invalid_archive_and_plaintext_not_ooxml) ... ok
+test_macro_external_and_embedded_recorded (test_harness.HarnessTests.test_macro_external_and_embedded_recorded) ... ok
+test_masquerade (test_harness.HarnessTests.test_masquerade) ... ok
+test_missing_main_and_root_relationship (test_harness.HarnessTests.test_missing_main_and_root_relationship) ... ok
+test_pdf_preflight_never_certifies_safety (test_harness.HarnessTests.test_pdf_preflight_never_certifies_safety) ... ok
+test_three_formats_and_honest_dimensions (test_harness.HarnessTests.test_three_formats_and_honest_dimensions) ... ok
+test_unsafe_archive_paths (test_harness.HarnessTests.test_unsafe_archive_paths) ... ok
+test_wrong_content_type_and_root (test_harness.HarnessTests.test_wrong_content_type_and_root) ... ok
+test_xml_entities_utf16_and_malformed (test_harness.HarnessTests.test_xml_entities_utf16_and_malformed) ... ok
+test_zip_bomb_ratio_and_member_limit (test_harness.HarnessTests.test_zip_bomb_ratio_and_member_limit) ... ok
+
+======================================================================
+FAIL: test_local_header_encryption_and_flags_disagreement (test_harness.AdditionalBoundaryTests.test_local_header_encryption_and_flags_disagreement) (flag=1)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/document-fidelity/tools/document_fidelity/tests/test_harness.py", line 187, in test_local_header_encryption_and_flags_disagreement
+    self.reject(p, code)
+  File "/workspace/document-fidelity/tools/document_fidelity/tests/test_harness.py", line 48, in reject
+    self.assertEqual('reject', r['decision'], r)
+AssertionError: 'reject' != 'inspect_only'
+- reject
++ inspect_only
+ : {'schema_version': 1, 'format': 'docx', 'sha256': '9252a16d9abf095af088ca1ecc7db4db7d1d5abc55002c4d106fe6308780f890', 'size': 918, 'decision': 'inspect_only', 'safety': 'unknown', 'fidelity': 'unknown', 'parts': [{'name': '[Content_Types].xml', 'size': 439, 'sha256': '84fda44d58fcbe79a47ea25bd64cefe8e8d3038bb79fc558beca96e97486f67c'}, {'name': '_rels/.rels', 'size': 242, 'sha256': '22c01d12e912dc45bdf191c382dd5b80cdeca1a9e95af86a477798a9f7e541e9'}, {'name': 'word/document.xml', 'size': 80, 'sha256': '8d955cb02b64b6d4602c8d12b39b2b248a36828d51a411433b91029a160792ab'}, {'name': 'custom/original.bin', 'size': 32, 'sha256': '67f8770ac3dd1bef1d1335f3d65c6c0e62cbd153ea026beb36db97174d66ae43'}], 'findings': [], 'limits': {'max_file': 16777216, 'max_members': 2048, 'max_member': 8388608, 'max_total': 33554432, 'max_ratio': 100, 'max_xml_depth': 128}, 'dimensions': {'structure': {'status': 'pass', 'reason': 'Bounded container/XML/main-part/relationship checks only; no OOXML schema or semantic validation'}, 'visual': {'status': 'not_run', 'reason': 'No engine installed or invoked'}, 'formula': {'status': 'not_run', 'reason': 'No engine installed or invoked'}, 'annotation': {'status': 'not_run', 'reason': 'No engine installed or invoked'}, 'render': {'status': 'not_run', 'reason': 'No engine installed or invoked'}, 'recalc': {'status': 'not_run', 'reason': 'No engine installed or invoked'}}, 'limitations': ['No complete OOXML schema validation or malware detection', 'Unknown parts inventoried; no editing/rendering/semantic preservation proven']}
+
+======================================================================
+FAIL: test_local_header_encryption_and_flags_disagreement (test_harness.AdditionalBoundaryTests.test_local_header_encryption_and_flags_disagreement) (flag=8)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/document-fidelity/tools/document_fidelity/tests/test_harness.py", line 187, in test_local_header_encryption_and_flags_disagreement
+    self.reject(p, code)
+  File "/workspace/document-fidelity/tools/document_fidelity/tests/test_harness.py", line 48, in reject
+    self.assertEqual('reject', r['decision'], r)
+AssertionError: 'reject' != 'inspect_only'
+- reject
++ inspect_only
+ : {'schema_version': 1, 'format': 'docx', 'sha256': '6c4c7ce776dc832c95358c468d9d370427a9e3b8fe08a36f61e77fab0d1f5ffd', 'size': 918, 'decision': 'inspect_only', 'safety': 'unknown', 'fidelity': 'unknown', 'parts': [{'name': '[Content_Types].xml', 'size': 439, 'sha256': '84fda44d58fcbe79a47ea25bd64cefe8e8d3038bb79fc558beca96e97486f67c'}, {'name': '_rels/.rels', 'size': 242, 'sha256': '22c01d12e912dc45bdf191c382dd5b80cdeca1a9e95af86a477798a9f7e541e9'}, {'name': 'word/document.xml', 'size': 80, 'sha256': '8d955cb02b64b6d4602c8d12b39b2b248a36828d51a411433b91029a160792ab'}, {'name': 'custom/original.bin', 'size': 32, 'sha256': '67f8770ac3dd1bef1d1335f3d65c6c0e62cbd153ea026beb36db97174d66ae43'}], 'findings': [], 'limits': {'max_file': 16777216, 'max_members': 2048, 'max_member': 8388608, 'max_total': 33554432, 'max_ratio': 100, 'max_xml_depth': 128}, 'dimensions': {'structure': {'status': 'pass', 'reason': 'Bounded container/XML/main-part/relationship checks only; no OOXML schema or semantic validation'}, 'visual': {'status': 'not_run', 'reason': 'No engine installed or invoked'}, 'formula': {'status': 'not_run', 'reason': 'No engine installed or invoked'}, 'annotation': {'status': 'not_run', 'reason': 'No engine installed or invoked'}, 'render': {'status': 'not_run', 'reason': 'No engine installed or invoked'}, 'recalc': {'status': 'not_run', 'reason': 'No engine installed or invoked'}}, 'limitations': ['No complete OOXML schema validation or malware detection', 'Unknown parts inventoried; no editing/rendering/semantic preservation proven']}
+
+======================================================================
+FAIL: test_relationship_declared_mime_required (test_harness.AdditionalBoundaryTests.test_relationship_declared_mime_required)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/document-fidelity/tools/document_fidelity/tests/test_harness.py", line 197, in test_relationship_declared_mime_required
+    self.reject(self.sample(members=members), 'invalid_relationship_content_type')
+  File "/workspace/document-fidelity/tools/document_fidelity/tests/test_harness.py", line 48, in reject
+    self.assertEqual('reject', r['decision'], r)
+AssertionError: 'reject' != 'inspect_only'
+- reject
++ inspect_only
+ : {'schema_version': 1, 'format': 'docx', 'sha256': '9249e0ce72f44b086e86d35b0a0f8c926f531618057b9007c383ce0e3f386ac3', 'size': 906, 'decision': 'inspect_only', 'safety': 'unknown', 'fidelity': 'unknown', 'parts': [{'name': '[Content_Types].xml', 'size': 398, 'sha256': 'a28ceeb871ed451d0fe21f3d4c96af7b07b328481c842362bbc8cf8073281343'}, {'name': '_rels/.rels', 'size': 242, 'sha256': '22c01d12e912dc45bdf191c382dd5b80cdeca1a9e95af86a477798a9f7e541e9'}, {'name': 'word/document.xml', 'size': 80, 'sha256': '8d955cb02b64b6d4602c8d12b39b2b248a36828d51a411433b91029a160792ab'}, {'name': 'custom/original.bin', 'size': 32, 'sha256': '67f8770ac3dd1bef1d1335f3d65c6c0e62cbd153ea026beb36db97174d66ae43'}], 'findings': [], 'limits': {'max_file': 16777216, 'max_members': 2048, 'max_member': 8388608, 'max_total': 33554432, 'max_ratio': 100, 'max_xml_depth': 128}, 'dimensions': {'structure': {'status': 'pass', 'reason': 'Bounded container/XML/main-part/relationship checks only; no OOXML schema or semantic validation'}, 'visual': {'status': 'not_run', 'reason': 'No engine installed or invoked'}, 'formula': {'status': 'not_run', 'reason': 'No engine installed or invoked'}, 'annotation': {'status': 'not_run', 'reason': 'No engine installed or invoked'}, 'render': {'status': 'not_run', 'reason': 'No engine installed or invoked'}, 'recalc': {'status': 'not_run', 'reason': 'No engine installed or invoked'}}, 'limitations': ['No complete OOXML schema validation or malware detection', 'Unknown parts inventoried; no editing/rendering/semantic preservation proven']}
+
+======================================================================
+FAIL: test_relationship_type_and_declared_mime_required (test_harness.AdditionalBoundaryTests.test_relationship_type_and_declared_mime_required)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/document-fidelity/tools/document_fidelity/tests/test_harness.py", line 192, in test_relationship_type_and_declared_mime_required
+    self.reject(self.sample(members=members), 'invalid_relationships')
+  File "/workspace/document-fidelity/tools/document_fidelity/tests/test_harness.py", line 48, in reject
+    self.assertEqual('reject', r['decision'], r)
+AssertionError: 'reject' != 'inspect_only'
+- reject
++ inspect_only
+ : {'schema_version': 1, 'format': 'docx', 'sha256': 'f1323cc46f350405061ce967866fdaeb950e988d0cddb9394973706a5e1baad4', 'size': 1160, 'decision': 'inspect_only', 'safety': 'unknown', 'fidelity': 'unknown', 'parts': [{'name': '[Content_Types].xml', 'size': 439, 'sha256': '84fda44d58fcbe79a47ea25bd64cefe8e8d3038bb79fc558beca96e97486f67c'}, {'name': '_rels/.rels', 'size': 242, 'sha256': '22c01d12e912dc45bdf191c382dd5b80cdeca1a9e95af86a477798a9f7e541e9'}, {'name': 'word/document.xml', 'size': 80, 'sha256': '8d955cb02b64b6d4602c8d12b39b2b248a36828d51a411433b91029a160792ab'}, {'name': 'custom/original.bin', 'size': 32, 'sha256': '67f8770ac3dd1bef1d1335f3d65c6c0e62cbd153ea026beb36db97174d66ae43'}, {'name': 'word/_rels/document.xml.rels', 'size': 145, 'sha256': '0814a9f945bfb5d0f262cc5422e8fc95bbd4d832cfd74ee0a43bddec53d27913'}], 'findings': [], 'limits': {'max_file': 16777216, 'max_members': 2048, 'max_member': 8388608, 'max_total': 33554432, 'max_ratio': 100, 'max_xml_depth': 128}, 'dimensions': {'structure': {'status': 'pass', 'reason': 'Bounded container/XML/main-part/relationship checks only; no OOXML schema or semantic validation'}, 'visual': {'status': 'not_run', 'reason': 'No engine installed or invoked'}, 'formula': {'status': 'not_run', 'reason': 'No engine installed or invoked'}, 'annotation': {'status': 'not_run', 'reason': 'No engine installed or invoked'}, 'render': {'status': 'not_run', 'reason': 'No engine installed or invoked'}, 'recalc': {'status': 'not_run', 'reason': 'No engine installed or invoked'}}, 'limitations': ['No complete OOXML schema validation or malware detection', 'Unknown parts inventoried; no editing/rendering/semantic preservation proven']}
+
+======================================================================
+FAIL: test_unused_content_type_cannot_be_empty (test_harness.AdditionalBoundaryTests.test_unused_content_type_cannot_be_empty)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/document-fidelity/tools/document_fidelity/tests/test_harness.py", line 202, in test_unused_content_type_cannot_be_empty
+    self.reject(self.sample(members=members), 'invalid_content_types')
+  File "/workspace/document-fidelity/tools/document_fidelity/tests/test_harness.py", line 48, in reject
+    self.assertEqual('reject', r['decision'], r)
+AssertionError: 'reject' != 'inspect_only'
+- reject
++ inspect_only
+ : {'schema_version': 1, 'format': 'docx', 'sha256': '42e9d6f047dffdf62ac2e1a4744144de9cb1a1762d59581ce2365504a7eab7fc', 'size': 925, 'decision': 'inspect_only', 'safety': 'unknown', 'fidelity': 'unknown', 'parts': [{'name': '[Content_Types].xml', 'size': 483, 'sha256': 'cb26564722a12ebfff80eb266c07c059dd46b60a21b81b9243a8f62f8055badd'}, {'name': '_rels/.rels', 'size': 242, 'sha256': '22c01d12e912dc45bdf191c382dd5b80cdeca1a9e95af86a477798a9f7e541e9'}, {'name': 'word/document.xml', 'size': 80, 'sha256': '8d955cb02b64b6d4602c8d12b39b2b248a36828d51a411433b91029a160792ab'}, {'name': 'custom/original.bin', 'size': 32, 'sha256': '67f8770ac3dd1bef1d1335f3d65c6c0e62cbd153ea026beb36db97174d66ae43'}], 'findings': [], 'limits': {'max_file': 16777216, 'max_members': 2048, 'max_member': 8388608, 'max_total': 33554432, 'max_ratio': 100, 'max_xml_depth': 128}, 'dimensions': {'structure': {'status': 'pass', 'reason': 'Bounded container/XML/main-part/relationship checks only; no OOXML schema or semantic validation'}, 'visual': {'status': 'not_run', 'reason': 'No engine installed or invoked'}, 'formula': {'status': 'not_run', 'reason': 'No engine installed or invoked'}, 'annotation': {'status': 'not_run', 'reason': 'No engine installed or invoked'}, 'render': {'status': 'not_run', 'reason': 'No engine installed or invoked'}, 'recalc': {'status': 'not_run', 'reason': 'No engine installed or invoked'}}, 'limitations': ['No complete OOXML schema validation or malware detection', 'Unknown parts inventoried; no editing/rendering/semantic preservation proven']}
+
+----------------------------------------------------------------------
+Ran 24 tests in 0.074s
+
+FAILED (failures=5)

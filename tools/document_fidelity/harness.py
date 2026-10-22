@@ -2,6 +2,7 @@
 import argparse
 import hashlib
 import io
+import os
 import json
 import posixpath
 import re
@@ -12,6 +13,7 @@ from urllib.parse import unquote, urlsplit
 import xml.etree.ElementTree as ET
 from xml.parsers import expat
 import zipfile
+import zlib
 
 LIMITS = dict(max_file=16 * 1024 * 1024, max_members=2048,
               max_member=8 * 1024 * 1024, max_total=32 * 1024 * 1024,
@@ -84,7 +86,7 @@ def inspect(path, limits=None):
                               for key in ('structure', 'visual', 'formula', 'annotation', 'render', 'recalc')})
     try:
         with Path(path).open('rb') as stream:
-            if not stat.S_ISREG(__import__('os').fstat(stream.fileno()).st_mode):
+            if not stat.S_ISREG(os.fstat(stream.fileno()).st_mode):
                 raise ValueError('regular file required')
             data = stream.read(cap['max_file'] + 1)
         report['size'] = len(data)
@@ -152,6 +154,15 @@ def inspect_zip(data, suffix, report, cap):
                 names.add(name)
                 if stat.S_ISLNK(info.external_attr >> 16):
                     finding(report, 'symlink', name)
+                offset = info.header_offset
+                if offset < 0 or offset + 30 > cd_offset or data[offset:offset + 4] != b'PK\x03\x04':
+                    finding(report, 'invalid_zip', name, 'Invalid local header')
+                else:
+                    local_flags, local_method = struct.unpack_from('<HH', data, offset + 6)
+                    if local_flags & (1 | 64):
+                        finding(report, 'encrypted', name, 'Local header encryption flag')
+                    if local_flags != info.flag_bits or local_method != info.compress_type:
+                        finding(report, 'invalid_zip', name, 'Local/central flags or method disagree')
                 if info.flag_bits & (1 | 64):
                     finding(report, 'encrypted', name)
                 if info.file_size > cap['max_member'] or info.file_size > max(1, info.compress_size) * cap['max_ratio']:
@@ -173,7 +184,7 @@ def inspect_zip(data, suffix, report, cap):
                 payloads[info.filename] = payload
                 report['parts'].append(dict(name=info.filename, size=len(payload), sha256=digest(payload)))
             inspect_parts(payloads, suffix, report, cap)
-    except (zipfile.BadZipFile, NotImplementedError, RuntimeError, OSError, ValueError, EOFError) as exc:
+    except (zipfile.BadZipFile, NotImplementedError, RuntimeError, OSError, ValueError, EOFError, zlib.error) as exc:
         finding(report, 'invalid_zip', detail=type(exc).__name__)
 
 
@@ -199,6 +210,8 @@ def inspect_parts(parts, suffix, report, cap):
         return
     overrides, defaults = {}, {}
     for node in ct:
+        if not re.fullmatch(r"[A-Za-z0-9!#$&^_.+-]+/[A-Za-z0-9!#$&^_.+-]+", node.get('ContentType', '')):
+            finding(report, 'invalid_content_types', detail='Missing or malformed MIME type')
         if node.tag == f'{{{CT}}}Override':
             raw = node.get('PartName', '')
             name = raw[1:] if raw.startswith('/') else ''
@@ -216,6 +229,8 @@ def inspect_parts(parts, suffix, report, cap):
         mime = overrides.get(name, defaults.get(name.rsplit('.', 1)[-1].lower()))
         if name != '[Content_Types].xml' and not mime:
             finding(report, 'missing_content_type', name)
+        if name.endswith('.rels') and mime != 'application/vnd.openxmlformats-package.relationships+xml':
+            finding(report, 'invalid_relationship_content_type', name)
         lowered = (mime or '').lower()
         if 'macroenabled' in lowered or 'vbaproject' in lowered:
             finding(report, 'macro', name)
@@ -248,7 +263,8 @@ def inspect_parts(parts, suffix, report, cap):
             ids = set()
             for node in root:
                 target, typ, mode = node.get('Target', ''), node.get('Type', ''), node.get('TargetMode', 'Internal')
-                if node.tag != f'{{{REL}}}Relationship' or not node.get('Id') or node.get('Id') in ids:
+                if (node.tag != f'{{{REL}}}Relationship' or not node.get('Id') or node.get('Id') in ids
+                        or not re.match(r'^[A-Za-z][A-Za-z0-9+.-]*:', typ)):
                     finding(report, 'invalid_relationships', name)
                 ids.add(node.get('Id'))
                 if mode == 'External' or urlsplit(target).scheme or target.startswith('//'):

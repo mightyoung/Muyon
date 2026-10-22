@@ -178,6 +178,40 @@ class AdditionalBoundaryTests(unittest.TestCase):
         p.write_bytes(data)
         self.reject(p, 'invalid_zip')
 
+    def test_local_header_encryption_and_flags_disagreement(self):
+        for flag, code in ((1, 'encrypted'), (8, 'invalid_zip')):
+            with self.subTest(flag=flag):
+                p = self.sample(); data = bytearray(p.read_bytes())
+                struct.pack_into('<H', data, 6, struct.unpack_from('<H', data, 6)[0] | flag)
+                p.write_bytes(data)
+                self.reject(p, code)
+
+    def test_relationship_type_and_declared_mime_required(self):
+        members = parts()
+        members['word/_rels/document.xml.rels'] = f'<Relationships xmlns="{REL}"><Relationship Id="r2" Target="document.xml"/></Relationships>'.encode()
+        self.reject(self.sample(members=members), 'invalid_relationships')
+
+    def test_relationship_declared_mime_required(self):
+        members = parts()
+        members['[Content_Types].xml'] = members['[Content_Types].xml'].replace(b'application/vnd.openxmlformats-package.relationships+xml', b'application/xml')
+        self.reject(self.sample(members=members), 'invalid_relationship_content_type')
+
+    def test_unused_content_type_cannot_be_empty(self):
+        members = parts()
+        members['[Content_Types].xml'] = members['[Content_Types].xml'].replace(b'</Types>', b'<Default Extension="unused" ContentType=""/></Types>')
+        self.reject(self.sample(members=members), 'invalid_content_types')
+
+    def test_corrupt_deflate_is_structured_rejection(self):
+        p = self.sample()
+        data = bytearray(p.read_bytes())
+        with zipfile.ZipFile(p) as z:
+            info = z.infolist()[0]
+            offset = info.header_offset
+            namelen, extra = struct.unpack_from('<HH', data, offset + 26)
+            data[offset + 30 + namelen + extra] = 0x07  # invalid deflate block type
+        p.write_bytes(data)
+        self.reject(p, 'invalid_zip')
+
     def test_limits_and_deep_xml(self):
         p = self.sample()
         self.assertEqual('reject', inspect(p, {'max_file': 10})['decision'])
