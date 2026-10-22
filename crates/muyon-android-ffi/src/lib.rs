@@ -18,12 +18,12 @@ use std::{
 };
 
 mod document_bridge;
+use document_bridge::DocumentBridge;
 pub use document_bridge::{
     DocumentAccessRequest, DocumentEvidenceAnswerRequest, DocumentEvidenceKind,
     DocumentEvidenceUseRequest, DocumentReadChunkResult, DocumentReadOperation,
     DocumentReadUseRequest, DocumentReaderScope,
 };
-use document_bridge::DocumentBridge;
 #[cfg(test)]
 mod document_bridge_tests;
 
@@ -311,19 +311,36 @@ impl ProductCore {
     }
 
     /// Private trusted Service only: exact existing grant references, no issuer.
-    pub fn document_metadata(&self, request: DocumentAccessRequest) -> Result<String, ProductError> {
+    pub fn document_metadata(
+        &self,
+        request: DocumentAccessRequest,
+    ) -> Result<String, ProductError> {
         document_call(self, |bridge| bridge.metadata(request))
     }
-    pub fn document_annotations(&self, request: DocumentAccessRequest) -> Result<String, ProductError> {
+    pub fn document_annotations(
+        &self,
+        request: DocumentAccessRequest,
+    ) -> Result<String, ProductError> {
         document_call(self, |bridge| bridge.annotations(request))
     }
-    pub fn document_read_open(&self, request: DocumentAccessRequest, purpose: DocumentReadOperation) -> Result<String, ProductError> {
+    pub fn document_read_open(
+        &self,
+        request: DocumentAccessRequest,
+        purpose: DocumentReadOperation,
+    ) -> Result<String, ProductError> {
         document_call(self, |bridge| bridge.open(request, purpose))
     }
-    pub fn document_read_check(&self, request: DocumentReadUseRequest) -> Result<String, ProductError> {
+    pub fn document_read_check(
+        &self,
+        request: DocumentReadUseRequest,
+    ) -> Result<String, ProductError> {
         document_call(self, |bridge| bridge.check(request))
     }
-    pub fn document_read_chunk(&self, request: DocumentReadUseRequest, max_bytes: u32) -> Result<DocumentReadChunkResult, ProductError> {
+    pub fn document_read_chunk(
+        &self,
+        request: DocumentReadUseRequest,
+        max_bytes: u32,
+    ) -> Result<DocumentReadChunkResult, ProductError> {
         document_call(self, |bridge| bridge.chunk(request, max_bytes))
     }
     pub fn document_read_close(&self, request: DocumentReadUseRequest) -> Result<(), ProductError> {
@@ -336,19 +353,39 @@ impl ProductCore {
     pub fn document_read_shutdown(&self) -> Result<(), ProductError> {
         document_call(self, DocumentBridge::shutdown)
     }
-    pub fn document_evidence_process(&self, request: DocumentAccessRequest, kind: DocumentEvidenceKind) -> Result<String, ProductError> {
+    pub fn document_evidence_process(
+        &self,
+        request: DocumentAccessRequest,
+        kind: DocumentEvidenceKind,
+    ) -> Result<String, ProductError> {
         document_call(self, |bridge| bridge.process(request, kind))
     }
-    pub fn document_evidence_query(&self, context: DocumentEvidenceUseRequest, query: String, limit: u32) -> Result<String, ProductError> {
+    pub fn document_evidence_query(
+        &self,
+        context: DocumentEvidenceUseRequest,
+        query: String,
+        limit: u32,
+    ) -> Result<String, ProductError> {
         document_call(self, |bridge| bridge.query(context, query, limit))
     }
-    pub fn document_evidence_quote(&self, context: DocumentEvidenceUseRequest, query_id: String, evidence_id: String) -> Result<String, ProductError> {
+    pub fn document_evidence_quote(
+        &self,
+        context: DocumentEvidenceUseRequest,
+        query_id: String,
+        evidence_id: String,
+    ) -> Result<String, ProductError> {
         document_call(self, |bridge| bridge.quote(context, query_id, evidence_id))
     }
-    pub fn document_evidence_answer(&self, request: DocumentEvidenceAnswerRequest) -> Result<String, ProductError> {
+    pub fn document_evidence_answer(
+        &self,
+        request: DocumentEvidenceAnswerRequest,
+    ) -> Result<String, ProductError> {
         document_call(self, |bridge| bridge.answer(request))
     }
-    pub fn document_evidence_close(&self, context: DocumentEvidenceUseRequest) -> Result<(), ProductError> {
+    pub fn document_evidence_close(
+        &self,
+        context: DocumentEvidenceUseRequest,
+    ) -> Result<(), ProductError> {
         document_call(self, |bridge| bridge.close_evidence(context))
     }
 
