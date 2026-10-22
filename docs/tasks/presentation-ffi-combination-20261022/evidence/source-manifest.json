@@ -1,0 +1,13 @@
+{
+  "apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/productbridge/muyon_android_product.kt": "c71b8062e07da7ee07059557acba768a7193b680fb20bc193a359b919d7dacdb",
+  "crates/muyon-android-ffi/src/document_bridge.rs": "fb650bf86498b67f5208cecdf3cb9d48cbcdb627abcdc873a7fcaff94f3f2688",
+  "crates/muyon-android-ffi/src/document_bridge_tests.rs": "fe7412c24109883c29aa845b40abe4ff7a1873d4c4304ad5b7417e15dced7b2f",
+  "crates/muyon-android-ffi/src/lib.rs": "38cbf4344b1469af1631a51e7905fe648dfd152b12b361c6b547a71dc46005ff",
+  "crates/muyon-core/src/artifacts/local_interactions.rs": "559e4f51b277935ed11211b58e52b2db03ec781cb4594d3cc6b9753dadb6af25",
+  "crates/muyon-core/src/artifacts/save_journal.rs": "28833934cd692ff891d649534944de2bcf67f7bdacbb692b48323d590a865d82",
+  "crates/muyon-core/src/documents/mod.rs": "f6acf9d73a5a0401321afe4fe5029c552a1ff7671b1b9ed29af6470b6e943154",
+  "crates/muyon-core/src/documents/presentation_tests.rs": "f844cebd846554283b77124f17fc760f341f22fac37abdcad554e0f1cf9655ac",
+  "crates/muyon-core/src/documents/reader.rs": "d58512973c405b6d5b1951428102888ac7b6f401c1999392fcc93864d950c7f9",
+  "crates/muyon-core/src/documents/reader_tests.rs": "6b5c6350f51d0c3d928a08f2c4682a62c3f17aed568b99c468778b9af4d1b74c",
+  "crates/muyon-core/src/documents/storage.rs": "c524f665b8844c467c74081c3984365ed60e35492eba5ce8be1ccb7e18c5b005"
+}

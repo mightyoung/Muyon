@@ -1,0 +1,30 @@
+    Finished `test` profile [unoptimized] target(s) in 0.08s
+     Running unittests src/lib.rs (/tmp/muyon-combination-target/debug/deps/muyon_android_product-5988612d86e8a293)
+
+running 23 tests
+test document_bridge::presentation_projection_tests::simulated_global_cleanup_errors_notify_even_without_core_terminal_event ... ok
+test document_bridge::presentation_projection_tests::simulated_post_increment_terminal_event_clears_host_original_generation ... ok
+test document_bridge_tests::actual_metadata_and_bytes_mark_eof_closed_not_display_authority ... ok
+test document_bridge_tests::bounded_native_terminal_queue_requests_clear_all_on_overflow ... ok
+test document_bridge_tests::deleted_project_and_chunk_limit_errors_never_yield_successful_bytes ... ok
+test document_bridge_tests::eight_actually_idle_expired_sessions_allow_fresh_open_without_manual_checks ... ok
+test document_bridge_tests::eight_invalidated_native_ids_do_not_block_fresh_authorized_admission ... ok
+test document_bridge_tests::evidence_uses_real_text_explicit_citations_and_exact_query_snapshot ... ok
+test document_bridge_tests::explicit_presentation_reselection_does_not_reuse_old_handle_or_scope ... ok
+test document_bridge_tests::foreign_service_generation_and_project_never_borrow_a_live_reader ... ok
+test document_bridge_tests::forged_or_inspect_only_grants_do_not_open_or_issue_read_permission ... ok
+test document_bridge_tests::late_cross_scope_selection_cannot_replace_current_other_scope_display ... ok
+test document_bridge_tests::native_selection_tokens_fence_late_same_scope_open_and_completed_replay ... ok
+test document_bridge_tests::owner_release_closes_only_its_sessions_and_evidence ... ok
+test document_bridge_tests::pdf_processing_remains_unsupported_and_never_claims_a_renderer ... ok
+test document_bridge_tests::presentation_advance_fences_every_old_async_callback_including_close ... ok
+test document_bridge_tests::presentation_checks_do_not_renew_actual_short_grant_deadline ... ok
+test document_bridge_tests::presentation_eof_retains_exact_ticket_while_raw_entries_cannot_bypass_mode ... ok
+test document_bridge_tests::presentation_requires_real_render_and_owner_release_uses_current_native_ticket ... ok
+test document_bridge_tests::presentation_revoke_after_eof_delivers_terminal_invalidation_not_cached_true ... ok
+test document_bridge_tests::processing_cache_is_not_a_grant_and_other_sessions_cannot_read_it ... ok
+test document_bridge_tests::readonly_annotations_and_explicit_shutdown_do_not_claim_a_display_lease ... ok
+test document_bridge_tests::revoked_current_grant_discards_bytes_and_publishes_invalidation ... ok
+
+test result: ok. 23 passed; 0 failed; 0 ignored; 0 measured; 15 filtered out; finished in 17.96s
+

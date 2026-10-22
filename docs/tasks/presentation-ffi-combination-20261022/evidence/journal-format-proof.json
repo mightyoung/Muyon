@@ -1,0 +1,10 @@
+{
+  "crates/muyon-core/src/artifacts/save_journal.rs": {
+    "current_exact_formatted_owner_base": true,
+    "formatted_fixed": "28833934cd692ff891d649534944de2bcf67f7bdacbb692b48323d590a865d82"
+  },
+  "crates/muyon-core/src/artifacts/local_interactions.rs": {
+    "current_exact_formatted_owner_base": true,
+    "formatted_fixed": "559e4f51b277935ed11211b58e52b2db03ec781cb4594d3cc6b9753dadb6af25"
+  }
+}

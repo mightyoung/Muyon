@@ -1,0 +1,30 @@
+{
+  "baseline": "db40a794fb4b903142c3d0c20a7c3c2d157d9623",
+  "native_source": "edce1cf4ca94bbbb3edeaa9cc99f3cc9a45e68e7",
+  "repeat_generation_identical": true,
+  "methods": {
+    "resolve": {
+      "signature_identical": true,
+      "checksum": "29826"
+    },
+    "read": {
+      "signature_identical": true,
+      "checksum": "65349"
+    },
+    "prepare_save": {
+      "signature_identical": true,
+      "checksum": "63893"
+    },
+    "save": {
+      "signature_identical": true,
+      "checksum": "4781"
+    },
+    "lookup_save": {
+      "signature_identical": true,
+      "checksum": "33659"
+    }
+  },
+  "prepare_record_identical": true,
+  "raw13_signatures_identical": true,
+  "new_generated_sha256": "c71b8062e07da7ee07059557acba768a7193b680fb20bc193a359b919d7dacdb"
+}

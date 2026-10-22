@@ -20,3 +20,10 @@ PresentationReady/EOF retention is byte lifecycle, not renderer/PFD success.
 
 No main/develop/release/fee/realprovider/engine/credentials/I04/old403 actions.
 Publication/verified remain HOLD; original Unknown and held budgets untouched.
+
+Separate subsequent quality input: Artifact5a008900a1b7290eb28caa93b1efe845c539469a
+applied as edce1cf4ca94bbbb3edeaa9cc99f3cc9a45e68e7. Read JOURNAL-CONTEXT.md;
+private borrowed context/target enum removes journal_pending parameter allowance,
+normalized before/after proof against currentformattedownerbase. No SQL/tx/identity
+or Unknown change. Final814 and41 results include it, unlike prior763.
+Source-invalidation36b1e763/patchb9b18149 explicitly NOT imported.
