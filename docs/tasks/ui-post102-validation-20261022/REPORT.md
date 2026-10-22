@@ -113,3 +113,12 @@ exact sizes/hashes are in DELIVERABLES.json. Re-enable authenticated Library hel
 access in this execution environment (or an authorized consumer with actual file
 access) before the upload can proceed. There is no duplicate430MB ZIP. Old708
 APK was never uploaded. Parent chooses final delivery timing/merge independently.
+
+Follow-up material correction: license ZIP now self-contained with model-manifest
+and original upstream .src_sha/LFS/convert-log evidence,47379 bytes,SHA256
+dd47422ea8823d215cebd63b0f3c01a31d352e9083b65c6c414e869c02b4c878.
+No further Library attempt was made; APK/PNG bytes are unchanged.
+
+Independent review: INDEPENDENT-REVIEW.md. Raw terminal logs intentionally retain
+original trailing whitespace; diff--check reports those raw-evidence warnings,
+not a production code change.
