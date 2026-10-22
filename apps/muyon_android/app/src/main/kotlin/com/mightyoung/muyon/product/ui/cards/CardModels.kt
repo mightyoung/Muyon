@@ -117,6 +117,7 @@ data class ReceiptCardModel(
     val binding: CardBinding, val original: OriginalCardRequest, val status: ReceiptStatus, val detail: String,
     val reservedCost: String? = null, val actualCost: String? = null, val cancelRequested: Boolean = false,
 ) {
+    val cancelIntentNotice get() = if (cancelRequested) "已记录取消意图；尚未确认取消；取消不代表回滚。" else null
     val intentId get() = original.intentId
     val actions: Set<CardCapability> get() = if (status == ReceiptStatus.Running && !cancelRequested)
         setOf(CardCapability.QueryReceipt, CardCapability.RequestCancel) else setOf(CardCapability.QueryReceipt)

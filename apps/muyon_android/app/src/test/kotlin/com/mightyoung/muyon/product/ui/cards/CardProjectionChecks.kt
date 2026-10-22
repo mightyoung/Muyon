@@ -11,6 +11,8 @@ fun main() {
     val binding = CardBinding(CardScope("workspace", "conversation", "project", "agent", 1), "message", "card", 1, 1, "attempt", "digest")
     val unknown = ReceiptCardModel(binding, OriginalCardRequest(binding, "submit", "intent-original"), ReceiptStatus.Unknown,
         "执行结果尚未确认", "¥0.002620", null, cancelRequested = true)
+    verify(unknown.cancelIntentNotice == "已记录取消意图；尚未确认取消；取消不代表回滚。")
+    verify(unknown.copy(cancelRequested = false).cancelIntentNotice == null)
     verify(unknown.status.label == "结果未知")
     verify(unknown.actualCost == null)
     verify(unknown.copy(cancelRequested = false).actions == setOf(CardCapability.QueryReceipt))

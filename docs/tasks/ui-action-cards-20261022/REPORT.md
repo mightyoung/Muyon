@@ -44,7 +44,7 @@ git diff --cached --check
 
 | Check | Observed result |
 | --- | --- |
-| Standalone card projection/safety runner | PASS, exit 0, 43 actual assertions; independently rerun with same result |
+| Standalone card projection/safety runner | Initial 43 PASS; final cancellation correction 45 PASS, exit 0, independently rerun; timestamped outputs in evidence/ |
 | Fixed foundation palette/structural check | PASS, exit 0, one unittest; does not verify UI rendering |
 | Product Gradle unit/Android compile/lint command | exit 2: `NOT_RUN: set MUYON_UI_GRADLE to the existing Gradle 8.13 executable.` No Gradle, SDK/adb found in environment |
 | Diff whitespace checks | PASS |
@@ -60,7 +60,7 @@ After implementation, three independent temporary source mutations compiled succ
 2. Remove `saveStatus != DraftSaveStatus.Unknown` from canEdit — killed by unknown draft preview lock assertion.
 3. Add `PreviewReportSave` to conflict report actions — killed by exact conflict action-set assertion.
 
-These sensitivity checks are post-implementation mutation evidence, not a substitute for a pre-implementation behavioral RED. Temporary sources/compiler jars/raw logs remain outside the repository under `/tmp`; no raw execution log was added by this lane. Dependency-origin evidence files were inherited unchanged with the authorized fixed foundation commit.
+These sensitivity checks are post-implementation mutation evidence, not a substitute for a pre-implementation behavioral RED. At initial delivery, temporary sources/compiler jars/raw logs remained outside the repository under `/tmp`. Following parent review, explicitly requested fresh offline rerun logs are now archived; see [cancellation correction](CANCEL-INTENT-FIX.md). They are labelled fresh reruns, not recovered original logs. Dependency-origin evidence files were inherited unchanged with the authorized fixed foundation commit.
 
 ## Remaining blockers and handoff
 
@@ -70,3 +70,7 @@ These sensitivity checks are post-implementation mutation evidence, not a substi
 4. These components do not close provider/device/release/I04 holds. The two old real requests remain unknown; reserved ¥0.002620 remains unresolved. No real lookup, retry, model/search request, paid action, deployment, credential or permission change occurred.
 
 No action was denied by approval review; build/render actions are NOT_RUN due to missing tools, not pending permission. Remote push outcome is checked separately before final delivery.
+
+## Parent review correction
+
+The parent found the initial cancellation notice incorrectly claimed dispatch from a local cancellation-intent flag. The [correction and timestamped RED/GREEN/rerun outputs](CANCEL-INTENT-FIX.md) record the repair and the missed initial review finding. The fixed offline suite passes 45 assertions; original 43 assertions and three mutants were freshly rerun and their actual outputs archived. Android remains NOT_RUN. No real cancellation occurred.
