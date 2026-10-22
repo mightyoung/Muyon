@@ -1,6 +1,8 @@
 package com.mightyoung.muyon.product.ui.shell
 
+import org.json.JSONArray
 import org.json.JSONObject
+import java.math.BigDecimal
 
 data class RequestCandidate(val snapshot: ReadOnlySnapshot, val configurationId: String?)
 
@@ -21,9 +23,35 @@ fun decodeRequestCandidate(data: JSONObject, workspace: String, conversation: St
         candidate.opt("can_cancel") != false || candidate.opt("disabled_reason") != "trusted_card_binding_unavailable") return null
     val reads = candidate.optJSONArray("supported_local_reads") ?: return null
     if (reads.length() != 1 || reads.opt(0) != "query_original" ||
-        candidate.optJSONObject("observation")?.similar(source.optJSONObject("observation")) != true) return null
+        !jsonStructurallyEqual(candidate.optJSONObject("observation"), source.optJSONObject("observation"))) return null
     if (!candidate.has("configuration_id")) return null
     val configuration = if (candidate.isNull("configuration_id")) null else
         (candidate.opt("configuration_id") as? String)?.takeIf { it.isNotBlank() && it.length <= 256 && '\u0000' !in it } ?: return null
     return RequestCandidate(snapshot, configuration)
+}
+
+/**
+ * Strict structural JSON equality. Android's org.json has no JSONObject.similar (a json.org-only
+ * method), so compare explicitly: same key set, same types, same values; a missing side never matches.
+ */
+internal fun jsonStructurallyEqual(left: Any?, right: Any?): Boolean {
+    if (left == null || right == null) return false
+    return when {
+        left is JSONObject && right is JSONObject -> {
+            val keys = left.keys().asSequence().toSet()
+            keys == right.keys().asSequence().toSet() &&
+                keys.all { key -> jsonValuesEqual(left.opt(key), right.opt(key)) }
+        }
+        else -> jsonValuesEqual(left, right)
+    }
+}
+
+private fun jsonValuesEqual(left: Any?, right: Any?): Boolean = when {
+    left is JSONObject && right is JSONObject -> jsonStructurallyEqual(left, right)
+    left is JSONArray && right is JSONArray -> left.length() == right.length() &&
+        (0 until left.length()).all { jsonValuesEqual(left.opt(it), right.opt(it)) }
+    left is Number && right is Number -> BigDecimal(left.toString()).compareTo(BigDecimal(right.toString())) == 0
+    left == JSONObject.NULL && right == JSONObject.NULL -> true
+    left is JSONObject || right is JSONObject || left is JSONArray || right is JSONArray -> false
+    else -> left == right
 }
