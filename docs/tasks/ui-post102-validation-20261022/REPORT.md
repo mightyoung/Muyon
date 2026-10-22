@@ -122,3 +122,16 @@ No further Library attempt was made; APK/PNG bytes are unchanged.
 Independent review: INDEPENDENT-REVIEW.md. Raw terminal logs intentionally retain
 original trailing whitespace; diff--check reports those raw-evidence warnings,
 not a production code change.
+
+## Authorized Library connection follow-up
+
+Parent supplied materially new evidence of a working official Library connection
+and explicitly authorized one new minimum read probe and helper attempt.
+Official Library list(`/`,recursive=false,include_folders=false,limit=1) PASSED,
+returning owned libfile_233e54fda540819189a2ce911b5153af.
+The required prepared-upload helper was then invoked once with the same ordered
+APK/license/main/menu paths; it again failed at hosted apps tools/list HTTP401,
+stdout empty, before prepare/transfer/finalize. No upload IDs exist. Stopped here;
+no credential reading/configuration/export, direct fallback or further retry.
+Thus official read access works while this execution environment's helper
+authentication remains blocked. Builds and artifact bytes were not rerun/changed.

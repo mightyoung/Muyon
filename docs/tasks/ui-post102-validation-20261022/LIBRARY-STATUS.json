@@ -1,10 +1,13 @@
 {
   "status": "blocked",
-  "action": "save four prepared local deliverables to current user Library",
-  "stage": "hosted tools/list before prepare",
-  "error": "HTTP401",
-  "attempts": 1,
+  "action": "save original ordered four-file batch to Library",
+  "official_read_probe": "PASS: owned libfile_233e54fda540819189a2ce911b5153af returned",
+  "current_helper_attempt": "HTTP401 at hosted apps tools/list before prepare",
+  "total_helper_attempts": 2,
+  "new_attempt_authorization": "parent supplied successful official Library connection and explicitly authorized one new probe/helper attempt",
   "library_file_ids": [],
-  "outcome": "no file mutation started; no upload success claimed",
-  "public_fallback": false
+  "outcome": "neither attempt entered prepare/transfer/finalize",
+  "retry_stopped": true,
+  "credentials_changed": false,
+  "direct_fallback": false
 }
