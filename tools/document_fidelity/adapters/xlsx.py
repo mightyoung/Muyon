@@ -40,7 +40,16 @@ def tree(data):
     parser = ET.XMLParser(target=ET.TreeBuilder(insert_comments=True, insert_pis=True))
     root = ET.fromstring(data, parser=parser)
     # Preserve all comments/PIs, including those before/after the root.
-    specials = [(event, node.text) for event, node in ET.iterparse(io.BytesIO(data), events=('comment', 'pi'))]
+    specials, depth, root_seen = [], 0, False
+    for event, node in ET.iterparse(io.BytesIO(data), events=('start','end','comment','pi')):
+        if event == 'start':
+            depth += 1
+            root_seen = True
+        elif event == 'end':
+            depth -= 1
+        else:
+            location = 'inside' if depth else ('epilog' if root_seen else 'prolog')
+            specials.append((event, location, node.text))
     return root, specials
 
 

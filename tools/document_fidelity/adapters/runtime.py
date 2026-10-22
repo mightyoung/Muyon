@@ -30,7 +30,7 @@ def run_real(source, raw, admission=None):
     """Cannot launch, even with caller-forged pass flags; admission is diagnostic only."""
     result = base_report()
     result['reasons'] = ['environment_hold', 'real_executor_not_implemented']
-    if not admission or any(admission.get(key) != 'pass' for key in ('license','provenance','isolation','resources')):
+    if type(admission) is not dict or not admission or any(admission.get(key) != 'pass' for key in ('license','provenance','isolation','resources')):
         result['reasons'].append('admission_missing')
     try:
         request = parse_request(raw)

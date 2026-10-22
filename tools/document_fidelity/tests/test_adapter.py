@@ -121,6 +121,33 @@ class AdapterTests(unittest.TestCase):
         for sheet,cell,expected in [('Original','B1','999'),('Original','A3','2'),('Hidden','A1','2')]:
             req=json.loads(json.dumps(self.req));req['operation'].update(sheet=sheet,cell=cell,expected=expected)
             r,f=self.simulate(req=req);self.assertEqual('rejected',r['status'],r);self.assertFalse(f.calls)
+    def test_malformed_admission_still_returns_held_without_engine(self):
+        for admission in (True, 1, 'pass', ['pass']):
+            with self.subTest(admission=admission):
+                r=runtime.run_real(self.source,self.req,admission=admission)
+                self.assertEqual('held',r['status'])
+                self.assertEqual('not_run',r['engine_execution'])
+
+    def test_document_level_special_nodes_cannot_move_across_root(self):
+        from tools.document_fidelity.adapters.xlsx import prepare,validate_candidate
+        for special in (b'<?xml-stylesheet href="synthetic.xsl" type="text/xsl"?>',b'<!--original synthetic comment-->'):
+            with self.subTest(special=special):
+                def rewrite(data,position):
+                    with zipfile.ZipFile(io.BytesIO(data)) as z:
+                        members={n:z.read(n) for n in z.namelist()}
+                    name='xl/worksheets/sheet1.xml'
+                    members[name]=(special+members[name]) if position=='before' else (members[name]+special)
+                    stream=io.BytesIO()
+                    with zipfile.ZipFile(stream,'w',zipfile.ZIP_DEFLATED) as z:
+                        for n,payload in members.items():z.writestr(n,payload)
+                    return stream.getvalue()
+                source=rewrite(self.source,'before')
+                candidate=rewrite(edit_bytes(self.source),'after')
+                plan=prepare(source,request(source))
+                result=validate_candidate(plan,candidate)
+                self.assertEqual('fail',result['status'],result)
+                self.assertIn('unauthorized_semantic_delta',result['reasons'])
+
     def test_disabled_worker_entry_does_not_import_engine(self):
         from tools.document_fidelity.adapters import openpyxl_worker
         with self.assertRaises(RuntimeError):openpyxl_worker.edit_copy(None,None,None)
