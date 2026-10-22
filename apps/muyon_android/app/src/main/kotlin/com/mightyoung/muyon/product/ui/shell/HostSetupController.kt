@@ -6,7 +6,7 @@ data class HostSetupScope(val workspace: String, val conversation: String, val p
 data class HostRoleSuggestion(val requestId: String, val role: String, val sourceId: String, val sourceVersion: Long, val label: String)
 data class HostSetupSnapshot(val scope: HostSetupScope, val id: String, val revision: Long, val reducerRevision: Long,
     val step: String, val name: String, val purpose: String, val role: String, val cancelled: Boolean,
-    val operations: Set<String>, val suggestion: HostRoleSuggestion?)
+    val operations: Set<String>, val suggestion: HostRoleSuggestion?, val persistence: HostDraftPersistence)
 fun canAcceptHostSuggestion(value: HostSetupSnapshot, buffer: String): Boolean =
     value.suggestion != null && "accept_role" in value.operations && buffer == value.role
 
@@ -34,7 +34,7 @@ fun decodeHostSetup(data: JSONObject, expected: HostSetupScope): HostSetupSnapsh
     if (scope.opt("workspace_id") != expected.workspace || scope.opt("conversation_id") != expected.conversation ||
         !scope.has("project_id") || (if (scope.isNull("project_id")) null else scope.opt("project_id")) != expected.project ||
         integer(scope.opt("generation")) != expected.generation) return null
-    if (listOf("saved", "can_save", "can_create", "can_start").any { data.opt(it) != false } ||
+    if (listOf("can_create", "can_start").any { data.opt(it) != false } ||
         listOf("agent_id", "intent_id", "actual_micro_cny", "reserved_micro_cny", "binding").any { !data.has(it) || !data.isNull(it) } ||
         data.opt("creation_status") != "not_requested" ||
         data.opt("capability_metadata_status") != "unavailable" || data.opt("material_metadata_status") != "unavailable" ||
@@ -48,9 +48,10 @@ fun decodeHostSetup(data: JSONObject, expected: HostSetupScope): HostSetupSnapsh
     val role = text(data, "role", 160, true) ?: return null
     val cancelled = data.opt("cancelled") as? Boolean ?: return null
     val array = data.optJSONArray("supported_local_operations") ?: return null
-    if (array.length() > localSetupOperations.size) return null
+    val projectedOperations = localSetupOperations + persistentSetupOperations
+    if (array.length() > projectedOperations.size) return null
     val operations = (0 until array.length()).map { array.opt(it) as? String ?: return null }
-    if (operations.distinct().size != operations.size || operations.any { it !in localSetupOperations } ||
+    if (operations.distinct().size != operations.size || operations.any { it !in projectedOperations } ||
         (cancelled && operations.any { it !in setOf("open", "read", "resume") })) return null
     val suggestion = if (data.has("suggestion") && data.isNull("suggestion")) null else {
         val value = data.optJSONObject("suggestion") ?: return null
@@ -58,7 +59,8 @@ fun decodeHostSetup(data: JSONObject, expected: HostSetupScope): HostSetupSnapsh
             text(value, "source_id", 128) ?: return null, integer(value.opt("source_version"))?.takeIf { it > 0 } ?: return null,
             text(value, "source_label", 256) ?: return null)
     }
-    return HostSetupSnapshot(expected, id, revision, reducerRevision, step, name, purpose, role, cancelled, operations.toSet(), suggestion)
+    val persistence = decodeHostPersistence(data, revision, reducerRevision, cancelled, operations.toSet()) ?: return null
+    return HostSetupSnapshot(expected, id, revision, reducerRevision, step, name, purpose, role, cancelled, operations.toSet(), suggestion, persistence)
 }
 
 /** No local reducer, port, create, save or execution seam. Calls are finite in-memory host operations. */
@@ -113,7 +115,7 @@ class HostSetupController(private val scope: HostSetupScope,
         val data = reply.optJSONObject("data")
         val decoded = if (reply.opt("status") == "ok" && data != null) decodeHostSetup(data, scope) else null
         if (decoded == null || (expected != null && (decoded.id != expected.id || decoded.revision < expected.revision ||
-                decoded.reducerRevision < expected.reducerRevision || (decoded.revision == expected.revision && decoded != expected) || (mutation && decoded.revision != expected.revision + 1)))) {
+                decoded.reducerRevision < expected.reducerRevision || !acceptsHostStorageObservation(expected, decoded) || (mutation && decoded.revision != expected.revision + 1)))) {
             unresolved = expected
             needsRead = expected != null
             notice = "内存操作未确认或快照失效；编辑文本保留。请读取原内存草稿，不会自动重试或替换身份。"

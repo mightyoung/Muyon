@@ -69,7 +69,7 @@ fun ConfigurationPreviewHost(state: ConfigurationPreviewState, client: ProductCl
             state.coordinator, { state.coordinator = it }, onLeaveWithDraft = { state.panel = "" })
         else -> Column(Modifier.fillMaxSize().padding(20.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
             Text("配置草稿", style = MaterialTheme.typography.headlineSmall)
-            Text("Bot 步骤由当前宿主内存草稿核实。未持久保存，未接入创建或运行；群组仅展示不可执行的配置预览。")
+            Text("Bot 步骤与保存记录由当前宿主核实。持久操作尚未开放，未接入创建或运行；群组仅展示不可执行的配置预览。")
             Button(onClick = { state.panel = "bot" }) { Text("Bot 配置预览") }
             Button(onClick = { state.panel = "group" }) { Text("群组配置预览") }
             TextButton(onClick = onLeave) { Text("返回目录") }

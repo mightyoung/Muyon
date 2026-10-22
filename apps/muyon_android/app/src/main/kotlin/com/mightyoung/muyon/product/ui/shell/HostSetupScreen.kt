@@ -17,8 +17,8 @@ fun HostSetupScreen(state: ConfigurationPreviewState, onLeave: () -> Unit) {
     fun allowed(action: String) = available && action in displayed!!.operations
     Column(Modifier.fillMaxSize().imePadding().verticalScroll(rememberScrollState()).padding(20.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        Text("Bot 内存草稿", style = MaterialTheme.typography.headlineSmall)
-        Text("文本缓冲与宿主内存草稿分开。未持久保存；进程或宿主会话结束后不能恢复。未创建智能体、未启动任务。")
+        Text("Bot 草稿", style = MaterialTheme.typography.headlineSmall)
+        Text("文本缓冲与宿主草稿分开。未提交文本只保留在本机内存；保存、恢复与原保存结果核查当前不可用。未创建智能体、未启动任务。")
         if (state.hostNotice.isNotEmpty()) Text(state.hostNotice, color = MaterialTheme.colorScheme.error)
         if (state.hostBusy) Text("正在核对本地内存状态…")
         if (displayed == null) {
@@ -26,6 +26,7 @@ fun HostSetupScreen(state: ConfigurationPreviewState, onLeave: () -> Unit) {
             OutlinedTextField(state.name, { state.name = it }, label = { Text("名称") }, modifier = Modifier.fillMaxWidth())
         } else {
             Text("步骤 ${displayed.step} · 内存修订 ${displayed.revision}")
+            hostPersistenceMessages(displayed, state.name, state.purpose, state.role).forEach { Text(it) }
             if (displayed.cancelled) {
                 Text("已停止编辑此内存草稿；尚未创建或执行任何任务。")
                 Button(onClick = { controller?.mutate(displayed, "resume") }, enabled = allowed("resume")) { Text("恢复原内存草稿") }
@@ -78,6 +79,8 @@ fun HostSetupScreen(state: ConfigurationPreviewState, onLeave: () -> Unit) {
             }) { Text("放弃本页恢复绑定，重新打开宿主草稿（保留文本）") }
         }
         Button(onClick = {}, enabled = false) { Text("持久保存 · 尚不可用") }
+        Button(onClick = {}, enabled = false) { Text("恢复存储草稿 · 尚不可用") }
+        Button(onClick = {}, enabled = false) { Text("核查原保存结果 · 尚不可用") }
         Button(onClick = {}, enabled = false) { Text("创建并启动 · 尚不可用") }
         TextButton(onClick = onLeave) { Text("稍后配置 · 保留内存草稿") }
     }
