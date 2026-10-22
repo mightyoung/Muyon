@@ -142,3 +142,17 @@ binding/class. Test-first scalar mismatch RED, final session/Runtime synthetic
 regressions and distinct memory1/editor42/stored0->1 PASS, non-author review PASS.
 Service prepare remains explicit unavailable/verifiedfalse until B's real generated
 record is accepted and checked; no phantom fifth invocation/Android/reader FD claim.
+
+## Actual fifth Service method connected — latest
+
+FIVE-METHOD-SERVICE-WIRING.md supersedes prior “fifth generated binding pending /
+unapplied patch” status. Exact B next b13af112 dependency and f604 generated record
+are inherited; Service prepare actually constructs its10 named fields and calls
+localDraftPrepareSave. Placeholder removed, no fake binding. All native crates
+compare exact B bytes after resolving dependency conflicts and duplicate automatic
+export; no independently authored native logic. Current local session + joint shell
+runners exit0. B576/FFI15/provider26 actual native results are upstream evidence,
+not this environment's fresh native run. Here native command exit127 (no cargo),
+Android compile command exit2 before Gradle (missing existing8.13); not bypassed.
+verified=false only preserves real Android/Service-native/product acceptance gates.
+Reader FD/annotation bridge still pending; no overall completion or execution claim.

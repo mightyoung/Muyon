@@ -1,0 +1,4 @@
+PASS exact generated record SHA256 e406384f87abe0caac6455b1786b619c123718d94ebf7f91d077a5e229fec0a4
+PASS actual Service named-record call; no unavailable prepare placeholder; verified=false
+PASS all10 generated named fields; all native crates byte-identical to B b13af112
+STATIC source verification, not a Kotlin/Android/native invocation result
