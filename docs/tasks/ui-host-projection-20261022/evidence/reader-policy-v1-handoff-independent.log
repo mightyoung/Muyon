@@ -1,0 +1,10 @@
+Independent static review: NATIVE-READER-POLICY-V1.md
+SHA256 120a6a53b07169ac31e4798b4d42b50d26cb1259c4d59b74b7012260617639c1
+Result: previous Important handoff gap addressed at proposed semantic contract level; no additional Important found in this scope.
+B starts from a real initial-open presentation ticket, never replays consumed selection token.
+First D creates actual root-owned child grant chain; parent row/other uses remain unchanged. Parent active/original generation rechecked transactionally, and parent revocation fences derived roots.
+G is explicitly NEW required core/FFI hook. Exact one-use token binds root/epoch/original selection/renew attempt/predecessor frame/new grant. New selection must fence before destructive open; no fabricated frame/token or old-callback close-current.
+Issued grant and handoff outcome are separate. SQL commit does not claim PFD atomicity; failure/unknown after issuance retains original facts and fences/holds output, never reports grant not_committed.
+Natural predecessor expiry may retain root only; explicit source/scope/revoke/selection changes terminate root. Old frame invalidation cannot authorize or clear new frame.
+Current generic registry CURRENT_TERMINAL is explicitly insufficient; controller routing, actual native implementation, Activity join and PFD/device acceptance remain pending. Production gate stays closed.
+No behavior tests run for documentation-only review. git diff --check exit 0. No repository files changed by reviewer.

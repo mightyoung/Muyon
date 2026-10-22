@@ -197,3 +197,17 @@ Actual Android compile exit2 NOT_RUN (existing Gradle8.13 missing). Adapter itse
 not compiled by pure runner. No actual IPC/catalog/policy/PFD/Activity join or >30s
 acceptance; verified=false. These private typed seams are NOT ready Shell IPC.
 No permission decision, synthetic/native equivalence or overall completion claimed.
+
+
+## Precise native policy continuation handoff for owner implementation
+
+Read NATIVE-READER-POLICY-V1.md at reviewed2a8c10b6a7314a38fbfd8fc2b73343961e317a9a
+and NATIVE-READER-POLICY-REVIEW.md. Seven proposed semantic APIs with exact I/O:
+observe, begin from actual initial ticket+valid parent, prepare/challenge, renew
+root-owned child grant, explicit original reconcile(may fence), stop, genuine native
+presentation continue. Initial six-endpoint875e7c35 had an Important handoff gap;
+corrected protocol independently statically reviewed no new Important. These are
+NOT generated/currently implemented policy endpoints. Needs native core ticket
+transfer/reopen hook and FFI mapping; ordinary missing code is not new user permission.
+Only first read without any prior valid grant has a stated narrow product policy
+choice/recommendation. Native/Host/Android policy and >30s execution still pending.
