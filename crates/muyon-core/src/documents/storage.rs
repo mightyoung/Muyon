@@ -118,9 +118,17 @@ impl BusinessStore {
     /// project liveness and current document revision are checked on every access.
     fn document_access(&self, access: &DocumentAccess, required: &[DocumentOperation]) -> Result<DocumentMetadata> {
         self.document_schema()?;
+        let metadata = self.current_document(&access.document)?;
+        self.document_grant(access, required)?;
+        Ok(metadata)
+    }
+    // Grant truth is separate from the current head: publication advances the
+    // head inside the gateway transaction before its final grant/expiry check.
+    fn document_grant(&self, access: &DocumentAccess, required: &[DocumentOperation]) -> Result<()> {
+        self.document_schema()?;
         binding_shape(&access.authority)?;
         if access.authority.owner_epoch != self.owner_epoch() { return Err(ContractError::InvalidAuthority); }
-        let metadata = self.current_document(&access.document)?;
+        self.document_project(&access.document)?;
         let rows = sql(self.database().query("SELECT CASE WHEN length(CAST(document_json AS BLOB))<=8192 THEN document_json ELSE NULL END,CASE WHEN length(CAST(permissions AS BLOB))<=1024 THEN permissions ELSE NULL END,CASE WHEN length(CAST(expires_at_ms AS BLOB))<=20 THEN expires_at_ms ELSE NULL END FROM document_grants WHERE grant_id=? AND generation=? AND owner_epoch=? AND active=1", &[&access.authority.grant_id, access.authority.generation.as_str(), self.owner_epoch()]))?;
         if rows.len() != 1 { return Err(ContractError::InvalidAuthority); }
         let granted: DocumentRef = decode(cell(&rows[0], 0)?)?;
@@ -129,7 +137,7 @@ impl BusinessStore {
         if granted != access.document || expires <= now_ms()? || required.iter().any(|op| !operations.contains(op)) {
             return Err(ContractError::InvalidAuthority);
         }
-        Ok(metadata)
+        Ok(())
     }
     /// Gateway integration seam: current persisted authority plus exact head
     /// revision under the gateway's existing transaction. Does not commit or
@@ -137,6 +145,15 @@ impl BusinessStore {
     pub(crate) fn document_access_in_transaction(&self, tx: &Transaction<'_>, access: &DocumentAccess, required: &[DocumentOperation]) -> Result<DocumentMetadata> {
         if !tx.belongs_to(self.database()) { return Err(ContractError::InvalidAuthority); }
         self.document_access(access, required)
+    }
+    /// Publication-tail check only: validates the original persisted grant,
+    /// generation/epoch/expiry, operation and project liveness after CAS changed
+    /// the head. Does not resolve or authorize reading an old document revision.
+    /// Gateway must first use document_access_in_transaction and perform exact
+    /// CAS; propagate failure and roll back publication/receipt together.
+    pub(crate) fn document_grant_in_transaction(&self, tx: &Transaction<'_>, access: &DocumentAccess, required: &[DocumentOperation]) -> Result<()> {
+        if !tx.belongs_to(self.database()) { return Err(ContractError::InvalidAuthority); }
+        self.document_grant(access, required)
     }
     pub fn register_document_trusted(&self, project_id: &str, document_id: &str, title: &str, format: DocumentFormat, finished: &FinishedBlob) -> Result<DocumentMetadata> {
         let base = DocumentRef::new(Scope { workspace_id: self.workspace_id().into(), project_id: Some(project_id.into()) }, document_id, Revision::new(0), format).map_err(|_| ContractError::InvalidIdentity)?;
@@ -164,7 +181,8 @@ impl BusinessStore {
         let revision = base.revision().next()?;
         let document = DocumentRef::new(base.scope().clone(), base.document_id(), revision.clone(), format).map_err(|_| ContractError::InvalidIdentity)?;
         let binding = encode(&document)?;
-        let reference = format!("doc-{:x}", Sha256::digest(binding.as_bytes()));
+        let digest: String = Sha256::digest(binding.as_bytes()).iter().map(|byte| format!("{byte:02x}")).collect();
+        let reference = format!("doc-{digest}");
         let blob = self.publish_blob_in_transaction(tx, &finished.upload_id, &reference, project, base.document_id(), &finished.blob)?;
         if rows.is_empty() {
             sql(self.database().exec("INSERT INTO document_heads VALUES(?,?,?)", &[project, base.document_id(), revision.as_str()]))?;

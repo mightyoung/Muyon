@@ -42,6 +42,20 @@ the next revision. Schema SQL and constants are authoritative in
 Permission grants can name all nine typed DocumentOperation variants but do not
 establish an engine capability; gateway still checks capabilities separately.
 
+Publication-tail hook (requested by gateway owner):
+`pub(crate) document_grant_in_transaction(&self, tx: &Transaction<'_>,
+access: &DocumentAccess, required: &[DocumentOperation])
+-> Result<(), ContractError>`. It checks same-connection transaction, real
+persisted exact grant document binding, active state, epoch/generation, expiry,
+requested operation intersection, workspace/project scope and project liveness.
+It deliberately does NOT require the old base to remain the current head after
+the gateway's own CAS. It returns no bytes or metadata and is not an old-revision
+read permit. Required sequence stays access/head check → CAS/publication → tail
+grant check → gateway receipt → single COMMIT; any failure rolls everything back.
+Gateway does not read/write `document_grants` truth directly. Related gateway
+interface: `142c922a44471069f47fbff7b79cf3f1afc1df19`,
+`docs/tasks/document-edit-transactions-20261022/DURABLE-GATEWAY-INTERFACE.md`.
+
 ## Concrete API
 
 `DocumentMetadata { document: DocumentRef, title: String, blob: BlobRef }`.

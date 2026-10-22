@@ -7,6 +7,8 @@ pub mod capability;
 pub mod identity;
 pub mod annotation;
 pub mod storage;
+#[cfg(test)]
+mod storage_tests;
 use crate::contract::{AuthorityBinding, FileSource};
 pub use anchor::*;
 pub use capability::*;
