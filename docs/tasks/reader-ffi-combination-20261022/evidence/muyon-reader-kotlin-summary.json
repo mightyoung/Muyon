@@ -1,0 +1,12 @@
+[
+  {
+    "runner": "chat/persistence/run-native-session.sh",
+    "exit": 0,
+    "log": "/tmp/muyon-reader-kotlin-chat_persistence_run-native-session.sh.log"
+  },
+  {
+    "runner": "ui/shell/run-host-shell-checks.sh",
+    "exit": 0,
+    "log": "/tmp/muyon-reader-kotlin-ui_shell_run-host-shell-checks.sh.log"
+  }
+]

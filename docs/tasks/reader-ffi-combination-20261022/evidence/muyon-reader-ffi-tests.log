@@ -1,0 +1,37 @@
+   Compiling muyon-core-agent-lab v0.1.0 (/workspace/Muyon-reader-ffi-combination-20261022/experiments/redesign/core-agent-lab/core)
+   Compiling muyon-plugin-contract-lab v0.1.0 (/workspace/Muyon-reader-ffi-combination-20261022/experiments/redesign/plugin-contract-lab/core)
+   Compiling muyon-rust-agent-host-lab v0.1.0 (/workspace/Muyon-reader-ffi-combination-20261022/experiments/redesign/rust-agent-host-lab/core)
+   Compiling muyon-web-search-lab v0.1.0 (/workspace/Muyon-reader-ffi-combination-20261022/experiments/redesign/web-search-lab/core)
+   Compiling muyon-core v0.1.0 (/workspace/Muyon-reader-ffi-combination-20261022/crates/muyon-core)
+warning: method `document_publish_candidate_in_transaction` is never used
+   --> muyon-core/src/documents/candidate.rs:297:19
+    |
+ 62 | impl BusinessStore {
+    | ------------------ method in this implementation
+...
+297 |     pub(crate) fn document_publish_candidate_in_transaction(
+    |                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: `muyon-core` (lib) generated 1 warning
+   Compiling muyon-android-ffi v0.1.0 (/workspace/Muyon-reader-ffi-combination-20261022/crates/muyon-android-ffi)
+    Finished `test` profile [unoptimized] target(s) in 13.06s
+     Running unittests src/lib.rs (/tmp/muyon-combination-target/debug/deps/muyon_android_product-ce0511cdb3c01736)
+
+running 12 tests
+test document_bridge_tests::actual_metadata_and_bytes_mark_eof_closed_not_display_authority ... ok
+test document_bridge_tests::deleted_project_and_chunk_limit_errors_never_yield_successful_bytes ... ok
+test document_bridge_tests::eight_actually_idle_expired_sessions_allow_fresh_open_without_manual_checks ... ok
+test document_bridge_tests::eight_invalidated_native_ids_do_not_block_fresh_authorized_admission ... ok
+test document_bridge_tests::evidence_uses_real_text_explicit_citations_and_exact_query_snapshot ... ok
+test document_bridge_tests::foreign_service_generation_and_project_never_borrow_a_live_reader ... ok
+test document_bridge_tests::forged_or_inspect_only_grants_do_not_open_or_issue_read_permission ... ok
+test document_bridge_tests::owner_release_closes_only_its_sessions_and_evidence ... ok
+test document_bridge_tests::pdf_processing_remains_unsupported_and_never_claims_a_renderer ... ok
+test document_bridge_tests::processing_cache_is_not_a_grant_and_other_sessions_cannot_read_it ... ok
+test document_bridge_tests::readonly_annotations_and_explicit_shutdown_do_not_claim_a_display_lease ... ok
+test document_bridge_tests::revoked_current_grant_discards_bytes_and_publishes_invalidation ... ok
+
+test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 15 filtered out; finished in 16.16s
+
