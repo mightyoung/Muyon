@@ -13,7 +13,7 @@ repo = pathlib.Path(__file__).resolve().parents[4]
 source = (repo / 'crates/muyon-core/src/bot_drafts.rs').read_text()
 sqls = re.findall(r'"((?:SELECT|UPDATE|INSERT|CREATE TABLE)[^"\n]+)"', source)
 ddls = [s for s in sqls if s.startswith('CREATE TABLE')]
-assert len(ddls) == 3
+assert len(ddls) == 5
 
 def sql(prefix):
     found = list(dict.fromkeys(s for s in sqls if s.startswith(prefix)))
