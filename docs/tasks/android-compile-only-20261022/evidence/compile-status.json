@@ -1,0 +1,21 @@
+{
+  "source_sha": "a62c88ce2b46d4d3a7a1f78477f08384a671a84d",
+  "compile_only": true,
+  "targets": {
+    ":app:compileDebugKotlin": {
+      "dry_run": 0,
+      "online": 1,
+      "offline": 1
+    },
+    ":app:compileDebugAndroidTestKotlin": {
+      "dry_run": "NOT_RUN",
+      "online": "NOT_RUN",
+      "offline": "NOT_RUN"
+    },
+    ":app:compileDebugUnitTestKotlin": {
+      "dry_run": "NOT_RUN",
+      "online": "NOT_RUN",
+      "offline": "NOT_RUN"
+    }
+  }
+}

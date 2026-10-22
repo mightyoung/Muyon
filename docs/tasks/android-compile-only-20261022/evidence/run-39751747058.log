@@ -1,0 +1,386 @@
+compile-only	Set up job	﻿2026-10-22T08:58:04.9649993Z Current runner version: '2.338.0'
+compile-only	Set up job	2026-10-22T08:58:04.9684206Z ##[group]Runner Image Provisioner
+compile-only	Set up job	2026-10-22T08:58:04.9685682Z Hosted Compute Agent
+compile-only	Set up job	2026-10-22T08:58:04.9686703Z Version: 20261012.601
+compile-only	Set up job	2026-10-22T08:58:04.9687804Z Commit: f3dc54e1fb89da6852db922499a0233137369e1d
+compile-only	Set up job	2026-10-22T08:58:04.9689008Z Build Date: 2026-10-12T17:48:21Z
+compile-only	Set up job	2026-10-22T08:58:04.9690541Z Worker ID: {f7fd9902-186e-4047-a1db-629ef30e4d71}
+compile-only	Set up job	2026-10-22T08:58:04.9691759Z Region: eastus
+compile-only	Set up job	2026-10-22T08:58:04.9692760Z Cloud: Azure
+compile-only	Set up job	2026-10-22T08:58:04.9693711Z ##[endgroup]
+compile-only	Set up job	2026-10-22T08:58:04.9695929Z ##[group]Operating System
+compile-only	Set up job	2026-10-22T08:58:04.9697101Z Ubuntu
+compile-only	Set up job	2026-10-22T08:58:04.9697924Z 24.04.5
+compile-only	Set up job	2026-10-22T08:58:04.9698800Z LTS
+compile-only	Set up job	2026-10-22T08:58:04.9700020Z ##[endgroup]
+compile-only	Set up job	2026-10-22T08:58:04.9701387Z ##[group]Runner Image
+compile-only	Set up job	2026-10-22T08:58:04.9702498Z Image: ubuntu-24.04
+compile-only	Set up job	2026-10-22T08:58:04.9703542Z Version: 20261012.334.1
+compile-only	Set up job	2026-10-22T08:58:04.9705433Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20261012.334/images/ubuntu/Ubuntu2404-Readme.md
+compile-only	Set up job	2026-10-22T08:58:04.9708359Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20261012.334
+compile-only	Set up job	2026-10-22T08:58:04.9710479Z ##[endgroup]
+compile-only	Set up job	2026-10-22T08:58:04.9712327Z ##[group]GITHUB_TOKEN Permissions
+compile-only	Set up job	2026-10-22T08:58:04.9715266Z Contents: read
+compile-only	Set up job	2026-10-22T08:58:04.9716362Z Metadata: read
+compile-only	Set up job	2026-10-22T08:58:04.9717331Z ##[endgroup]
+compile-only	Set up job	2026-10-22T08:58:04.9720480Z Secret source: Actions
+compile-only	Set up job	2026-10-22T08:58:04.9722183Z Cache mode: write
+compile-only	Set up job	2026-10-22T08:58:04.9723604Z Prepare workflow directory
+compile-only	Set up job	2026-10-22T08:58:05.0284743Z Prepare all required actions
+compile-only	Set up job	2026-10-22T08:58:05.0353368Z Getting action download info
+compile-only	Set up job	2026-10-22T08:58:05.1993344Z Download action repository 'actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683' (SHA:11bd71901bbe5b1630ceea73d27597364c9af683)
+compile-only	Set up job	2026-10-22T08:58:05.3131657Z Download action repository 'actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00' (SHA:c5195efecf7bdfc987ee8bae7a71cb8b11521c00)
+compile-only	Set up job	2026-10-22T08:58:05.6493151Z Complete job name: compile-only
+compile-only	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	﻿2026-10-22T08:58:05.7252712Z ##[group]Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+compile-only	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-22T08:58:05.7253781Z with:
+compile-only	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-22T08:58:05.7254263Z   ref: a62c88ce2b46d4d3a7a1f78477f08384a671a84d
+compile-only	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-22T08:58:05.7254863Z   persist-credentials: false
+compile-only	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-22T08:58:05.7255383Z   repository: mightyoung/Muyon
+compile-only	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-22T08:58:05.7259237Z   token: ***
+compile-only	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-22T08:58:05.7260065Z   ssh-strict: true
+compile-only	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-22T08:58:05.7260605Z   ssh-user: git
+compile-only	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-22T08:58:05.7261027Z   clean: true
+compile-only	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-22T08:58:05.7261461Z   sparse-checkout-cone-mode: true
+compile-only	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-22T08:58:05.7261978Z   fetch-depth: 1
+compile-only	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-22T08:58:05.7262399Z   fetch-tags: false
+compile-only	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-22T08:58:05.7262832Z   show-progress: true
+compile-only	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-22T08:58:05.7263265Z   lfs: false
+compile-only	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-22T08:58:05.7263666Z   submodules: false
+compile-only	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-22T08:58:05.7264101Z   set-safe-directory: true
+compile-only	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-22T08:58:05.7264888Z ##[endgroup]
+compile-only	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-22T08:58:05.8232528Z Syncing repository: mightyoung/Muyon
+compile-only	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-22T08:58:05.8235001Z ##[group]Getting Git version info
+compile-only	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-22T08:58:05.8236190Z Working directory is '/home/runner/work/Muyon/Muyon'
+compile-only	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-22T08:58:05.8237734Z [command]/usr/bin/git version
+compile-only	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-22T08:58:05.8341615Z git version 2.55.0
+compile-only	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-22T08:58:05.8372475Z ##[endgroup]
+compile-only	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-22T08:58:05.8378490Z Temporarily overriding HOME='/home/runner/work/_temp/dac6f55b-2a2b-40c7-8266-efc8e55ff343' before making global git config changes
+compile-only	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-22T08:58:05.8383364Z Adding repository directory to the temporary git global config as a safe directory
+compile-only	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-22T08:58:05.8391642Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/Muyon/Muyon
+compile-only	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-22T08:58:05.8437047Z Deleting the contents of '/home/runner/work/Muyon/Muyon'
+compile-only	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-22T08:58:05.8441317Z ##[group]Initializing the repository
+compile-only	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-22T08:58:05.8446012Z [command]/usr/bin/git init /home/runner/work/Muyon/Muyon
+compile-only	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-22T08:58:05.8578844Z hint: Using 'master' as the name for the initial branch. This default branch name
+compile-only	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-22T08:58:05.8581059Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+compile-only	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-22T08:58:05.8582070Z hint: to use in all of your new repositories, which will suppress this warning,
+compile-only	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-22T08:58:05.8582800Z hint: call:
+compile-only	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-22T08:58:05.8583504Z hint:
+compile-only	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-22T08:58:05.8584039Z hint: 	git config --global init.defaultBranch <name>
+compile-only	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-22T08:58:05.8584656Z hint:
+compile-only	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-22T08:58:05.8585235Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+compile-only	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-22T08:58:05.8586155Z hint: 'development'. The just-created branch can be renamed via this command:
+compile-only	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-22T08:58:05.8587046Z hint:
+compile-only	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-22T08:58:05.8587691Z hint: 	git branch -m <name>
+compile-only	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-22T08:58:05.8588188Z hint:
+compile-only	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-22T08:58:05.8588813Z hint: Disable this message with "git config set advice.defaultBranchName false"
+compile-only	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-22T08:58:05.8590130Z Initialized empty Git repository in /home/runner/work/Muyon/Muyon/.git/
+compile-only	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-22T08:58:05.8622340Z [command]/usr/bin/git remote add origin https://github.com/mightyoung/Muyon
+compile-only	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-22T08:58:05.8678355Z ##[endgroup]
+compile-only	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-22T08:58:05.8680006Z ##[group]Disabling automatic garbage collection
+compile-only	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-22T08:58:05.8683359Z [command]/usr/bin/git config --local gc.auto 0
+compile-only	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-22T08:58:05.8717028Z ##[endgroup]
+compile-only	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-22T08:58:05.8718454Z ##[group]Setting up auth
+compile-only	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-22T08:58:05.8725131Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+compile-only	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-22T08:58:05.8758560Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+compile-only	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-22T08:58:05.9137337Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+compile-only	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-22T08:58:05.9177163Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+compile-only	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-22T08:58:05.9420818Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+compile-only	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-22T08:58:05.9467498Z ##[endgroup]
+compile-only	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-22T08:58:05.9481216Z ##[group]Fetching the repository
+compile-only	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-22T08:58:05.9482636Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin a62c88ce2b46d4d3a7a1f78477f08384a671a84d
+compile-only	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-22T08:58:08.0527645Z From https://github.com/mightyoung/Muyon
+compile-only	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-22T08:58:08.0530065Z  * branch            a62c88ce2b46d4d3a7a1f78477f08384a671a84d -> FETCH_HEAD
+compile-only	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-22T08:58:08.0533871Z ##[endgroup]
+compile-only	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-22T08:58:08.0535580Z ##[group]Determining the checkout info
+compile-only	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-22T08:58:08.0537523Z ##[endgroup]
+compile-only	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-22T08:58:08.0544756Z [command]/usr/bin/git sparse-checkout disable
+compile-only	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-22T08:58:08.0641383Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+compile-only	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-22T08:58:08.0714111Z ##[group]Checking out the ref
+compile-only	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-22T08:58:08.0719294Z [command]/usr/bin/git checkout --progress --force a62c88ce2b46d4d3a7a1f78477f08384a671a84d
+compile-only	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-22T08:58:08.7723717Z Note: switching to 'a62c88ce2b46d4d3a7a1f78477f08384a671a84d'.
+compile-only	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-22T08:58:08.7725735Z 
+compile-only	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-22T08:58:08.7726922Z You are in 'detached HEAD' state. You can look around, make experimental
+compile-only	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-22T08:58:08.7728977Z changes and commit them, and you can discard any commits you make in this
+compile-only	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-22T08:58:08.7732154Z state without impacting any branches by switching back to a branch.
+compile-only	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-22T08:58:08.7732858Z 
+compile-only	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-22T08:58:08.7733385Z If you want to create a new branch to retain commits you create, you may
+compile-only	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-22T08:58:08.7734314Z do so (now or later) by using -c with the switch command. Example:
+compile-only	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-22T08:58:08.7734843Z 
+compile-only	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-22T08:58:08.7735104Z   git switch -c <new-branch-name>
+compile-only	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-22T08:58:08.7735498Z 
+compile-only	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-22T08:58:08.7735735Z Or undo this operation with:
+compile-only	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-22T08:58:08.7736085Z 
+compile-only	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-22T08:58:08.7736288Z   git switch -
+compile-only	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-22T08:58:08.7736600Z 
+compile-only	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-22T08:58:08.7737443Z Turn off this advice by setting config variable advice.detachedHead to false
+compile-only	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-22T08:58:08.7738195Z 
+compile-only	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-22T08:58:08.7738665Z HEAD is now at a62c88c ci: add exact-source guarded Android compile-only branch
+compile-only	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-22T08:58:08.7763799Z ##[endgroup]
+compile-only	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-22T08:58:08.7821843Z [command]/usr/bin/git log -1 --format=%H
+compile-only	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-22T08:58:08.7884007Z a62c88ce2b46d4d3a7a1f78477f08384a671a84d
+compile-only	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-22T08:58:08.7893573Z ##[group]Removing auth
+compile-only	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-22T08:58:08.7897292Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+compile-only	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-22T08:58:08.7932015Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+compile-only	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-22T08:58:08.8159204Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+compile-only	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-22T08:58:08.8186882Z http.https://github.com/.extraheader
+compile-only	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-22T08:58:08.8195278Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+compile-only	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-22T08:58:08.8230980Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+compile-only	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-22T08:58:08.8452136Z ##[endgroup]
+compile-only	Run actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00	﻿2026-10-22T08:58:08.8724229Z ##[group]Run actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00
+compile-only	Run actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00	2026-10-22T08:58:08.8724743Z with:
+compile-only	Run actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00	2026-10-22T08:58:08.8725004Z   distribution: temurin
+compile-only	Run actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00	2026-10-22T08:58:08.8725283Z   java-version: 17
+compile-only	Run actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00	2026-10-22T08:58:08.8725541Z   java-package: jdk
+compile-only	Run actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00	2026-10-22T08:58:08.8725802Z   check-latest: false
+compile-only	Run actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00	2026-10-22T08:58:08.8726065Z   server-id: github
+compile-only	Run actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00	2026-10-22T08:58:08.8726333Z   server-username: GITHUB_ACTOR
+compile-only	Run actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00	2026-10-22T08:58:08.8726648Z   server-password: GITHUB_TOKEN
+compile-only	Run actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00	2026-10-22T08:58:08.8726951Z   overwrite-settings: true
+compile-only	Run actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00	2026-10-22T08:58:08.8727234Z   job-status: success
+compile-only	Run actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00	2026-10-22T08:58:08.8730092Z   token: ***
+compile-only	Run actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00	2026-10-22T08:58:08.8730388Z ##[endgroup]
+compile-only	Run actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00	2026-10-22T08:58:09.0332906Z ##[group]Installed distributions
+compile-only	Run actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00	2026-10-22T08:58:09.0353177Z (node:2329) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+compile-only	Run actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00	2026-10-22T08:58:09.0354669Z (Use `node --trace-deprecation ...` to show where the warning was created)
+compile-only	Run actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00	2026-10-22T08:58:09.0367053Z Resolved Java 17.0.20+1 from tool-cache
+compile-only	Run actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00	2026-10-22T08:58:09.0367809Z Setting Java 17.0.20+1 as the default
+compile-only	Run actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00	2026-10-22T08:58:09.0368506Z Creating toolchains.xml for JDK version 17 from temurin
+compile-only	Run actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00	2026-10-22T08:58:09.0437282Z Writing to /home/runner/.m2/toolchains.xml
+compile-only	Run actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00	2026-10-22T08:58:09.0437756Z 
+compile-only	Run actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00	2026-10-22T08:58:09.0437937Z Java configuration:
+compile-only	Run actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00	2026-10-22T08:58:09.0438375Z   Distribution: temurin
+compile-only	Run actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00	2026-10-22T08:58:09.0438801Z   Version: 17.0.20+1
+compile-only	Run actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00	2026-10-22T08:58:09.0439406Z   Path: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.20-1/x64
+compile-only	Run actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00	2026-10-22T08:58:09.0440227Z 
+compile-only	Run actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00	2026-10-22T08:58:09.0440750Z ##[endgroup]
+compile-only	Run actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00	2026-10-22T08:58:09.0456853Z Creating settings.xml with server-id: github
+compile-only	Run actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00	2026-10-22T08:58:09.0468750Z Writing to /home/runner/.m2/settings.xml
+compile-only	Record exact source and provision compiler tools only	﻿2026-10-22T08:58:09.0613615Z ##[group]Run test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+compile-only	Record exact source and provision compiler tools only	2026-10-22T08:58:09.0614148Z [36;1mtest "$(git rev-parse HEAD)" = "$GITHUB_SHA"[0m
+compile-only	Record exact source and provision compiler tools only	2026-10-22T08:58:09.0614664Z [36;1mprintf 'source_sha=%s\nbase_sha=16945df54fd0233a89a41262952e0967d2d0cb59\n' "$GITHUB_SHA"[0m
+compile-only	Record exact source and provision compiler tools only	2026-10-22T08:58:09.0615146Z [36;1mjava -version[0m
+compile-only	Record exact source and provision compiler tools only	2026-10-22T08:58:09.0615443Z [36;1mmkdir -p "$RUNNER_TEMP/android-compile-tools"[0m
+compile-only	Record exact source and provision compiler tools only	2026-10-22T08:58:09.0616161Z [36;1mcurl --fail --location https://services.gradle.org/distributions/gradle-8.13-bin.zip -o "$RUNNER_TEMP/android-compile-tools/gradle.zip"[0m
+compile-only	Record exact source and provision compiler tools only	2026-10-22T08:58:09.0617218Z [36;1mprintf '20f1b1176237254a6fc204d8434196fa11a4cfb387567519c61556e8710aed78  %s\n' "$RUNNER_TEMP/android-compile-tools/gradle.zip" | sha256sum --check[0m
+compile-only	Record exact source and provision compiler tools only	2026-10-22T08:58:09.0618109Z [36;1munzip -q "$RUNNER_TEMP/android-compile-tools/gradle.zip" -d "$RUNNER_TEMP/android-compile-tools"[0m
+compile-only	Record exact source and provision compiler tools only	2026-10-22T08:58:09.0619065Z [36;1m"$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --install 'platforms;android-36' 'build-tools;35.0.0'[0m
+compile-only	Record exact source and provision compiler tools only	2026-10-22T08:58:09.0619953Z [36;1m{[0m
+compile-only	Record exact source and provision compiler tools only	2026-10-22T08:58:09.0620341Z [36;1m  echo "MUYON_UI_GRADLE=$RUNNER_TEMP/android-compile-tools/gradle-8.13/bin/gradle"[0m
+compile-only	Record exact source and provision compiler tools only	2026-10-22T08:58:09.0620870Z [36;1m  echo "GRADLE_USER_HOME=$RUNNER_TEMP/android-compile-gradle"[0m
+compile-only	Record exact source and provision compiler tools only	2026-10-22T08:58:09.0621230Z [36;1m} >> "$GITHUB_ENV"[0m
+compile-only	Record exact source and provision compiler tools only	2026-10-22T08:58:09.0951413Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+compile-only	Record exact source and provision compiler tools only	2026-10-22T08:58:09.0951963Z env:
+compile-only	Record exact source and provision compiler tools only	2026-10-22T08:58:09.0952378Z   JAVA_HOME: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.20-1/x64
+compile-only	Record exact source and provision compiler tools only	2026-10-22T08:58:09.0953056Z   JAVA_HOME_17_X64: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.20-1/x64
+compile-only	Record exact source and provision compiler tools only	2026-10-22T08:58:09.0953576Z ##[endgroup]
+compile-only	Record exact source and provision compiler tools only	2026-10-22T08:58:09.1077960Z source_sha=a62c88ce2b46d4d3a7a1f78477f08384a671a84d
+compile-only	Record exact source and provision compiler tools only	2026-10-22T08:58:09.1078674Z base_sha=16945df54fd0233a89a41262952e0967d2d0cb59
+compile-only	Record exact source and provision compiler tools only	2026-10-22T08:58:09.2318171Z openjdk version "17.0.20.1" 2026-08-18
+compile-only	Record exact source and provision compiler tools only	2026-10-22T08:58:09.2320063Z OpenJDK Runtime Environment Temurin-17.0.20.1+1 (build 17.0.20.1+1)
+compile-only	Record exact source and provision compiler tools only	2026-10-22T08:58:09.2321094Z OpenJDK 64-Bit Server VM Temurin-17.0.20.1+1 (build 17.0.20.1+1, mixed mode, sharing)
+compile-only	Record exact source and provision compiler tools only	2026-10-22T08:58:09.2472179Z   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+compile-only	Record exact source and provision compiler tools only	2026-10-22T08:58:09.2473051Z                                  Dload  Upload   Total   Spent    Left  Speed
+compile-only	Record exact source and provision compiler tools only	2026-10-22T08:58:09.2473516Z 
+compile-only	Record exact source and provision compiler tools only	2026-10-22T08:58:09.2782223Z   0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+compile-only	Record exact source and provision compiler tools only	2026-10-22T08:58:09.2783073Z 100   169  100   169    0     0   5418      0 --:--:-- --:--:-- --:--:--  5451
+compile-only	Record exact source and provision compiler tools only	2026-10-22T08:58:09.3061111Z 
+compile-only	Record exact source and provision compiler tools only	2026-10-22T08:58:09.3061583Z   0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+compile-only	Record exact source and provision compiler tools only	2026-10-22T08:58:09.6236330Z 
+compile-only	Record exact source and provision compiler tools only	2026-10-22T08:58:09.7475557Z  68  130M   68 89.8M    0     0   238M      0 --:--:-- --:--:-- --:--:--  238M
+compile-only	Record exact source and provision compiler tools only	2026-10-22T08:58:09.7476436Z 100  130M  100  130M    0     0   261M      0 --:--:-- --:--:-- --:--:--  331M
+compile-only	Record exact source and provision compiler tools only	2026-10-22T08:58:09.8528560Z /home/runner/work/_temp/android-compile-tools/gradle.zip: OK
+compile-only	Record exact source and provision compiler tools only	2026-10-22T08:58:12.7434994Z Loading package information...                                                  
+compile-only	Record exact source and provision compiler tools only	2026-10-22T08:58:12.8376889Z Loading local repository...                                                     
+compile-only	Record exact source and provision compiler tools only	2026-10-22T08:58:12.8380460Z [                                       ] 3% Loading local repository...        
+compile-only	Record exact source and provision compiler tools only	2026-10-22T08:58:13.2690531Z [                                       ] 3% Fetch remote repository...         
+compile-only	Record exact source and provision compiler tools only	2026-10-22T08:58:13.7329515Z [=                                      ] 3% Fetch remote repository...         
+compile-only	Record exact source and provision compiler tools only	2026-10-22T08:58:13.8290815Z [=                                      ] 4% Fetch remote repository...         
+compile-only	Record exact source and provision compiler tools only	2026-10-22T08:58:13.8915727Z [=                                      ] 5% Fetch remote repository...         
+compile-only	Record exact source and provision compiler tools only	2026-10-22T08:58:13.9680543Z [==                                     ] 5% Fetch remote repository...         
+compile-only	Record exact source and provision compiler tools only	2026-10-22T08:58:14.0298977Z [==                                     ] 6% Fetch remote repository...         
+compile-only	Record exact source and provision compiler tools only	2026-10-22T08:58:14.2140605Z [==                                     ] 7% Fetch remote repository...         
+compile-only	Record exact source and provision compiler tools only	2026-10-22T08:58:14.2170476Z [==                                     ] 7% Computing updates...               
+compile-only	Record exact source and provision compiler tools only	2026-10-22T08:58:14.2278129Z [===                                    ] 8% Computing updates...               
+compile-only	Record exact source and provision compiler tools only	2026-10-22T08:58:14.5476253Z [===                                    ] 10% Computing updates...              
+compile-only	Record exact source and provision compiler tools only	2026-10-22T08:58:14.5477138Z [=======================================] 100% Computing updates...             
+compile-only	Record exact source and provision compiler tools only	2026-10-22T08:58:14.5477758Z 
+compile-only	Audit dry-run graphs, compile online, recompile same cache offline	﻿2026-10-22T08:58:14.6358549Z ##[group]Run python3 -B tools/ci/android_compile_only.py
+compile-only	Audit dry-run graphs, compile online, recompile same cache offline	2026-10-22T08:58:14.6359102Z [36;1mpython3 -B tools/ci/android_compile_only.py[0m
+compile-only	Audit dry-run graphs, compile online, recompile same cache offline	2026-10-22T08:58:14.6430073Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+compile-only	Audit dry-run graphs, compile online, recompile same cache offline	2026-10-22T08:58:14.6430841Z env:
+compile-only	Audit dry-run graphs, compile online, recompile same cache offline	2026-10-22T08:58:14.6431310Z   JAVA_HOME: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.20-1/x64
+compile-only	Audit dry-run graphs, compile online, recompile same cache offline	2026-10-22T08:58:14.6431833Z   JAVA_HOME_17_X64: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.20-1/x64
+compile-only	Audit dry-run graphs, compile online, recompile same cache offline	2026-10-22T08:58:14.6432399Z   MUYON_UI_GRADLE: /home/runner/work/_temp/android-compile-tools/gradle-8.13/bin/gradle
+compile-only	Audit dry-run graphs, compile online, recompile same cache offline	2026-10-22T08:58:14.6432914Z   GRADLE_USER_HOME: /home/runner/work/_temp/android-compile-gradle
+compile-only	Audit dry-run graphs, compile online, recompile same cache offline	2026-10-22T08:58:14.6433257Z ##[endgroup]
+compile-only	Audit dry-run graphs, compile online, recompile same cache offline	2026-10-22T08:58:14.7145782Z COMMAND ["/home/runner/work/_temp/android-compile-tools/gradle-8.13/bin/gradle", "--no-daemon", "--console=plain", "--max-workers=2", "-Pandroid.builder.sdkDownload=false", "-p", "/home/runner/work/Muyon/Muyon/apps/muyon_android", "--init-script", "/home/runner/work/_temp/android-compile-evidence/task-graph-guard.gradle", "--dry-run", ":app:compileDebugKotlin"]
+compile-only	Audit dry-run graphs, compile online, recompile same cache offline	2026-10-22T08:58:15.5740552Z 
+compile-only	Audit dry-run graphs, compile online, recompile same cache offline	2026-10-22T08:58:15.5741102Z Welcome to Gradle 8.13!
+compile-only	Audit dry-run graphs, compile online, recompile same cache offline	2026-10-22T08:58:15.5741602Z 
+compile-only	Audit dry-run graphs, compile online, recompile same cache offline	2026-10-22T08:58:15.5741977Z Here are the highlights of this release:
+compile-only	Audit dry-run graphs, compile online, recompile same cache offline	2026-10-22T08:58:15.5742673Z  - Daemon JVM auto-provisioning
+compile-only	Audit dry-run graphs, compile online, recompile same cache offline	2026-10-22T08:58:15.5743358Z  - Enhancements for Scala plugin and JUnit testing
+compile-only	Audit dry-run graphs, compile online, recompile same cache offline	2026-10-22T08:58:15.5744152Z  - Improvements for build authors and plugin developers
+compile-only	Audit dry-run graphs, compile online, recompile same cache offline	2026-10-22T08:58:15.5744709Z 
+compile-only	Audit dry-run graphs, compile online, recompile same cache offline	2026-10-22T08:58:15.5745204Z For more details see https://docs.gradle.org/8.13/release-notes.html
+compile-only	Audit dry-run graphs, compile online, recompile same cache offline	2026-10-22T08:58:15.5745885Z 
+compile-only	Audit dry-run graphs, compile online, recompile same cache offline	2026-10-22T08:58:15.6688581Z To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/8.13/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+compile-only	Audit dry-run graphs, compile online, recompile same cache offline	2026-10-22T08:58:16.7680566Z Daemon will be stopped at the end of the build 
+compile-only	Audit dry-run graphs, compile online, recompile same cache offline	2026-10-22T08:59:07.2693606Z COMPILE_ONLY_GRAPH [":app:checkKotlinGradlePluginConfigurationErrors",":app:preBuild",":app:preDebugBuild",":app:compileDebugAidl",":app:generateDebugBuildConfig",":app:checkDebugAarMetadata",":app:generateDebugResValues",":app:mapDebugSourceSetPaths",":app:generateDebugResources",":app:mergeDebugResources",":app:packageDebugResources",":app:parseDebugLocalResources",":app:createDebugCompatibleScreenManifests",":app:extractDeepLinksDebug",":app:processDebugMainManifest",":app:processDebugManifest",":app:processDebugManifestForPackage",":app:processDebugResources",":app:compileDebugKotlin"]
+compile-only	Audit dry-run graphs, compile online, recompile same cache offline	2026-10-22T08:59:07.3722462Z :app:checkKotlinGradlePluginConfigurationErrors SKIPPED
+compile-only	Audit dry-run graphs, compile online, recompile same cache offline	2026-10-22T08:59:07.3750332Z :app:preBuild SKIPPED
+compile-only	Audit dry-run graphs, compile online, recompile same cache offline	2026-10-22T08:59:07.3780185Z :app:preDebugBuild SKIPPED
+compile-only	Audit dry-run graphs, compile online, recompile same cache offline	2026-10-22T08:59:07.3810267Z :app:compileDebugAidl SKIPPED
+compile-only	Audit dry-run graphs, compile online, recompile same cache offline	2026-10-22T08:59:07.3840276Z :app:generateDebugBuildConfig SKIPPED
+compile-only	Audit dry-run graphs, compile online, recompile same cache offline	2026-10-22T08:59:07.3870313Z :app:checkDebugAarMetadata SKIPPED
+compile-only	Audit dry-run graphs, compile online, recompile same cache offline	2026-10-22T08:59:07.3900331Z :app:generateDebugResValues SKIPPED
+compile-only	Audit dry-run graphs, compile online, recompile same cache offline	2026-10-22T08:59:07.3930263Z :app:mapDebugSourceSetPaths SKIPPED
+compile-only	Audit dry-run graphs, compile online, recompile same cache offline	2026-10-22T08:59:07.3960250Z :app:generateDebugResources SKIPPED
+compile-only	Audit dry-run graphs, compile online, recompile same cache offline	2026-10-22T08:59:07.3960812Z :app:mergeDebugResources SKIPPED
+compile-only	Audit dry-run graphs, compile online, recompile same cache offline	2026-10-22T08:59:07.3961345Z :app:packageDebugResources SKIPPED
+compile-only	Audit dry-run graphs, compile online, recompile same cache offline	2026-10-22T08:59:07.3961867Z :app:parseDebugLocalResources SKIPPED
+compile-only	Audit dry-run graphs, compile online, recompile same cache offline	2026-10-22T08:59:07.3962416Z :app:createDebugCompatibleScreenManifests SKIPPED
+compile-only	Audit dry-run graphs, compile online, recompile same cache offline	2026-10-22T08:59:07.3963035Z :app:extractDeepLinksDebug SKIPPED
+compile-only	Audit dry-run graphs, compile online, recompile same cache offline	2026-10-22T08:59:07.3963545Z :app:processDebugMainManifest SKIPPED
+compile-only	Audit dry-run graphs, compile online, recompile same cache offline	2026-10-22T08:59:07.3964028Z :app:processDebugManifest SKIPPED
+compile-only	Audit dry-run graphs, compile online, recompile same cache offline	2026-10-22T08:59:07.3964557Z :app:processDebugManifestForPackage SKIPPED
+compile-only	Audit dry-run graphs, compile online, recompile same cache offline	2026-10-22T08:59:07.3965076Z :app:processDebugResources SKIPPED
+compile-only	Audit dry-run graphs, compile online, recompile same cache offline	2026-10-22T08:59:07.3965554Z :app:compileDebugKotlin SKIPPED
+compile-only	Audit dry-run graphs, compile online, recompile same cache offline	2026-10-22T08:59:07.3965803Z 
+compile-only	Audit dry-run graphs, compile online, recompile same cache offline	2026-10-22T08:59:07.3965940Z BUILD SUCCESSFUL in 52s
+compile-only	Audit dry-run graphs, compile online, recompile same cache offline	2026-10-22T08:59:07.7226874Z REVIEWED_GRAPH [":app:checkKotlinGradlePluginConfigurationErrors", ":app:preBuild", ":app:preDebugBuild", ":app:compileDebugAidl", ":app:generateDebugBuildConfig", ":app:checkDebugAarMetadata", ":app:generateDebugResValues", ":app:mapDebugSourceSetPaths", ":app:generateDebugResources", ":app:mergeDebugResources", ":app:packageDebugResources", ":app:parseDebugLocalResources", ":app:createDebugCompatibleScreenManifests", ":app:extractDeepLinksDebug", ":app:processDebugMainManifest", ":app:processDebugManifest", ":app:processDebugManifestForPackage", ":app:processDebugResources", ":app:compileDebugKotlin"]
+compile-only	Audit dry-run graphs, compile online, recompile same cache offline	2026-10-22T08:59:07.7233739Z COMMAND ["/home/runner/work/_temp/android-compile-tools/gradle-8.13/bin/gradle", "--no-daemon", "--console=plain", "--max-workers=2", "-Pandroid.builder.sdkDownload=false", "-p", "/home/runner/work/Muyon/Muyon/apps/muyon_android", "--init-script", "/home/runner/work/_temp/android-compile-evidence/task-graph-guard.gradle", ":app:compileDebugKotlin"]
+compile-only	Audit dry-run graphs, compile online, recompile same cache offline	2026-10-22T08:59:08.4131551Z To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/8.13/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+compile-only	Audit dry-run graphs, compile online, recompile same cache offline	2026-10-22T08:59:09.4108139Z Daemon will be stopped at the end of the build 
+compile-only	Audit dry-run graphs, compile online, recompile same cache offline	2026-10-22T08:59:17.9164292Z COMPILE_ONLY_GRAPH [":app:checkKotlinGradlePluginConfigurationErrors",":app:preBuild",":app:preDebugBuild",":app:compileDebugAidl",":app:generateDebugBuildConfig",":app:checkDebugAarMetadata",":app:generateDebugResValues",":app:mapDebugSourceSetPaths",":app:generateDebugResources",":app:mergeDebugResources",":app:packageDebugResources",":app:parseDebugLocalResources",":app:createDebugCompatibleScreenManifests",":app:extractDeepLinksDebug",":app:processDebugMainManifest",":app:processDebugManifest",":app:processDebugManifestForPackage",":app:processDebugResources",":app:compileDebugKotlin"]
+compile-only	Audit dry-run graphs, compile online, recompile same cache offline	2026-10-22T08:59:18.0111082Z > Task :app:checkKotlinGradlePluginConfigurationErrors SKIPPED
+compile-only	Audit dry-run graphs, compile online, recompile same cache offline	2026-10-22T08:59:18.0115358Z > Task :app:preBuild UP-TO-DATE
+compile-only	Audit dry-run graphs, compile online, recompile same cache offline	2026-10-22T08:59:18.0116255Z > Task :app:preDebugBuild UP-TO-DATE
+compile-only	Audit dry-run graphs, compile online, recompile same cache offline	2026-10-22T08:59:18.0117154Z > Task :app:compileDebugAidl NO-SOURCE
+compile-only	Audit dry-run graphs, compile online, recompile same cache offline	2026-10-22T08:59:18.1113695Z > Task :app:generateDebugBuildConfig
+compile-only	Audit dry-run graphs, compile online, recompile same cache offline	2026-10-22T08:59:28.1104465Z > Task :app:generateDebugResValues
+compile-only	Audit dry-run graphs, compile online, recompile same cache offline	2026-10-22T08:59:28.1118667Z > Task :app:checkDebugAarMetadata
+compile-only	Audit dry-run graphs, compile online, recompile same cache offline	2026-10-22T08:59:28.2104448Z > Task :app:mapDebugSourceSetPaths
+compile-only	Audit dry-run graphs, compile online, recompile same cache offline	2026-10-22T08:59:28.2107591Z > Task :app:generateDebugResources
+compile-only	Audit dry-run graphs, compile online, recompile same cache offline	2026-10-22T08:59:29.0103799Z > Task :app:packageDebugResources
+compile-only	Audit dry-run graphs, compile online, recompile same cache offline	2026-10-22T08:59:30.0105198Z > Task :app:parseDebugLocalResources
+compile-only	Audit dry-run graphs, compile online, recompile same cache offline	2026-10-22T08:59:30.0128504Z > Task :app:mergeDebugResources
+compile-only	Audit dry-run graphs, compile online, recompile same cache offline	2026-10-22T08:59:30.0160357Z > Task :app:createDebugCompatibleScreenManifests
+compile-only	Audit dry-run graphs, compile online, recompile same cache offline	2026-10-22T08:59:30.1104088Z > Task :app:extractDeepLinksDebug
+compile-only	Audit dry-run graphs, compile online, recompile same cache offline	2026-10-22T08:59:30.3139479Z > Task :app:processDebugMainManifest
+compile-only	Audit dry-run graphs, compile online, recompile same cache offline	2026-10-22T08:59:30.4130744Z > Task :app:processDebugManifest
+compile-only	Audit dry-run graphs, compile online, recompile same cache offline	2026-10-22T08:59:30.5103692Z > Task :app:processDebugManifestForPackage
+compile-only	Audit dry-run graphs, compile online, recompile same cache offline	2026-10-22T08:59:31.4103854Z > Task :app:processDebugResources
+compile-only	Audit dry-run graphs, compile online, recompile same cache offline	2026-10-22T08:59:56.4108655Z 
+compile-only	Audit dry-run graphs, compile online, recompile same cache offline	2026-10-22T08:59:56.4109251Z > Task :app:compileDebugKotlin FAILED
+compile-only	Audit dry-run graphs, compile online, recompile same cache offline	2026-10-22T08:59:56.4110939Z e: file:///home/runner/work/Muyon/Muyon/apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/ui/shell/RequestCandidates.kt:24:49 Unresolved reference 'similar'.
+compile-only	Audit dry-run graphs, compile online, recompile same cache offline	2026-10-22T08:59:56.5130228Z 
+compile-only	Audit dry-run graphs, compile online, recompile same cache offline	2026-10-22T08:59:56.5167178Z FAILURE: Build failed with an exception.
+compile-only	Audit dry-run graphs, compile online, recompile same cache offline	2026-10-22T08:59:56.5195654Z 
+compile-only	Audit dry-run graphs, compile online, recompile same cache offline	2026-10-22T08:59:56.5220371Z * What went wrong:
+compile-only	Audit dry-run graphs, compile online, recompile same cache offline	2026-10-22T08:59:56.5250265Z Execution failed for task ':app:compileDebugKotlin'.
+compile-only	Audit dry-run graphs, compile online, recompile same cache offline	2026-10-22T08:59:56.5282735Z > A failure occurred while executing org.jetbrains.kotlin.compilerRunner.GradleCompilerRunnerWithWorkers$GradleKotlinCompilerWorkAction
+compile-only	Audit dry-run graphs, compile online, recompile same cache offline	2026-10-22T08:59:56.5284215Z    > Compilation error. See log for more details
+compile-only	Audit dry-run graphs, compile online, recompile same cache offline	2026-10-22T08:59:56.5291730Z 
+compile-only	Audit dry-run graphs, compile online, recompile same cache offline	2026-10-22T08:59:56.5292257Z * Try:
+compile-only	Audit dry-run graphs, compile online, recompile same cache offline	2026-10-22T08:59:56.5292890Z > Run with --stacktrace option to get the stack trace.
+compile-only	Audit dry-run graphs, compile online, recompile same cache offline	2026-10-22T08:59:56.5293799Z > Run with --info or --debug option to get more log output.
+compile-only	Audit dry-run graphs, compile online, recompile same cache offline	2026-10-22T08:59:56.5295042Z > Run with --scan to get full insights.
+compile-only	Audit dry-run graphs, compile online, recompile same cache offline	2026-10-22T08:59:56.5295720Z > Get more help at https://help.gradle.org.
+compile-only	Audit dry-run graphs, compile online, recompile same cache offline	2026-10-22T08:59:56.5296224Z 
+compile-only	Audit dry-run graphs, compile online, recompile same cache offline	2026-10-22T08:59:56.5296530Z BUILD FAILED in 48s
+compile-only	Audit dry-run graphs, compile online, recompile same cache offline	2026-10-22T08:59:56.5297329Z 15 actionable tasks: 15 executed
+compile-only	Audit dry-run graphs, compile online, recompile same cache offline	2026-10-22T08:59:56.9042893Z COMMAND ["/home/runner/work/_temp/android-compile-tools/gradle-8.13/bin/gradle", "--no-daemon", "--console=plain", "--max-workers=2", "-Pandroid.builder.sdkDownload=false", "-p", "/home/runner/work/Muyon/Muyon/apps/muyon_android", "--init-script", "/home/runner/work/_temp/android-compile-evidence/task-graph-guard.gradle", "--offline", "--rerun-tasks", ":app:compileDebugKotlin"]
+compile-only	Audit dry-run graphs, compile online, recompile same cache offline	2026-10-22T08:59:57.5733092Z To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/8.13/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+compile-only	Audit dry-run graphs, compile online, recompile same cache offline	2026-10-22T08:59:58.5696796Z Daemon will be stopped at the end of the build 
+compile-only	Audit dry-run graphs, compile online, recompile same cache offline	2026-10-22T09:00:13.8732756Z COMPILE_ONLY_GRAPH [":app:checkKotlinGradlePluginConfigurationErrors",":app:preBuild",":app:preDebugBuild",":app:compileDebugAidl",":app:generateDebugBuildConfig",":app:checkDebugAarMetadata",":app:generateDebugResValues",":app:mapDebugSourceSetPaths",":app:generateDebugResources",":app:mergeDebugResources",":app:packageDebugResources",":app:parseDebugLocalResources",":app:createDebugCompatibleScreenManifests",":app:extractDeepLinksDebug",":app:processDebugMainManifest",":app:processDebugManifest",":app:processDebugManifestForPackage",":app:processDebugResources",":app:compileDebugKotlin"]
+compile-only	Audit dry-run graphs, compile online, recompile same cache offline	2026-10-22T09:00:13.9719003Z > Task :app:checkKotlinGradlePluginConfigurationErrors SKIPPED
+compile-only	Audit dry-run graphs, compile online, recompile same cache offline	2026-10-22T09:00:13.9740469Z > Task :app:preBuild UP-TO-DATE
+compile-only	Audit dry-run graphs, compile online, recompile same cache offline	2026-10-22T09:00:13.9741435Z > Task :app:preDebugBuild UP-TO-DATE
+compile-only	Audit dry-run graphs, compile online, recompile same cache offline	2026-10-22T09:00:13.9742200Z > Task :app:compileDebugAidl NO-SOURCE
+compile-only	Audit dry-run graphs, compile online, recompile same cache offline	2026-10-22T09:00:14.0695499Z > Task :app:generateDebugBuildConfig
+compile-only	Audit dry-run graphs, compile online, recompile same cache offline	2026-10-22T09:00:14.6694988Z > Task :app:generateDebugResValues
+compile-only	Audit dry-run graphs, compile online, recompile same cache offline	2026-10-22T09:00:14.6700254Z > Task :app:checkDebugAarMetadata
+compile-only	Audit dry-run graphs, compile online, recompile same cache offline	2026-10-22T09:00:14.6701090Z > Task :app:mapDebugSourceSetPaths
+compile-only	Audit dry-run graphs, compile online, recompile same cache offline	2026-10-22T09:00:14.6701805Z > Task :app:generateDebugResources
+compile-only	Audit dry-run graphs, compile online, recompile same cache offline	2026-10-22T09:00:15.6692660Z > Task :app:packageDebugResources
+compile-only	Audit dry-run graphs, compile online, recompile same cache offline	2026-10-22T09:00:16.3698165Z > Task :app:mergeDebugResources
+compile-only	Audit dry-run graphs, compile online, recompile same cache offline	2026-10-22T09:00:16.4700802Z > Task :app:createDebugCompatibleScreenManifests
+compile-only	Audit dry-run graphs, compile online, recompile same cache offline	2026-10-22T09:00:16.4720363Z > Task :app:extractDeepLinksDebug
+compile-only	Audit dry-run graphs, compile online, recompile same cache offline	2026-10-22T09:00:16.4730359Z > Task :app:parseDebugLocalResources
+compile-only	Audit dry-run graphs, compile online, recompile same cache offline	2026-10-22T09:00:16.6704606Z > Task :app:processDebugMainManifest
+compile-only	Audit dry-run graphs, compile online, recompile same cache offline	2026-10-22T09:00:16.7693879Z > Task :app:processDebugManifest
+compile-only	Audit dry-run graphs, compile online, recompile same cache offline	2026-10-22T09:00:16.7716334Z > Task :app:processDebugManifestForPackage
+compile-only	Audit dry-run graphs, compile online, recompile same cache offline	2026-10-22T09:00:17.1704789Z > Task :app:processDebugResources
+compile-only	Audit dry-run graphs, compile online, recompile same cache offline	2026-10-22T09:00:36.5695936Z 
+compile-only	Audit dry-run graphs, compile online, recompile same cache offline	2026-10-22T09:00:36.5696637Z > Task :app:compileDebugKotlin FAILED
+compile-only	Audit dry-run graphs, compile online, recompile same cache offline	2026-10-22T09:00:36.5709337Z e: file:///home/runner/work/Muyon/Muyon/apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/ui/shell/RequestCandidates.kt:24:49 Unresolved reference 'similar'.
+compile-only	Audit dry-run graphs, compile online, recompile same cache offline	2026-10-22T09:00:36.5711119Z 
+compile-only	Audit dry-run graphs, compile online, recompile same cache offline	2026-10-22T09:00:36.5711587Z FAILURE: Build failed with an exception.
+compile-only	Audit dry-run graphs, compile online, recompile same cache offline	2026-10-22T09:00:36.5712180Z 
+compile-only	Audit dry-run graphs, compile online, recompile same cache offline	2026-10-22T09:00:36.5712392Z * What went wrong:
+compile-only	Audit dry-run graphs, compile online, recompile same cache offline	2026-10-22T09:00:36.5712834Z Execution failed for task ':app:compileDebugKotlin'.
+compile-only	Audit dry-run graphs, compile online, recompile same cache offline	2026-10-22T09:00:36.5713934Z > A failure occurred while executing org.jetbrains.kotlin.compilerRunner.GradleCompilerRunnerWithWorkers$GradleKotlinCompilerWorkAction
+compile-only	Audit dry-run graphs, compile online, recompile same cache offline	2026-10-22T09:00:36.5715018Z    > Compilation error. See log for more details
+compile-only	Audit dry-run graphs, compile online, recompile same cache offline	2026-10-22T09:00:36.5715341Z 
+compile-only	Audit dry-run graphs, compile online, recompile same cache offline	2026-10-22T09:00:36.5715445Z * Try:
+compile-only	Audit dry-run graphs, compile online, recompile same cache offline	2026-10-22T09:00:36.5715786Z > Run with --stacktrace option to get the stack trace.
+compile-only	Audit dry-run graphs, compile online, recompile same cache offline	2026-10-22T09:00:36.5716307Z > Run with --info or --debug option to get more log output.
+compile-only	Audit dry-run graphs, compile online, recompile same cache offline	2026-10-22T09:00:36.5716775Z > Run with --scan to get full insights.
+compile-only	Audit dry-run graphs, compile online, recompile same cache offline	2026-10-22T09:00:36.5717201Z > Get more help at https://help.gradle.org.
+compile-only	Audit dry-run graphs, compile online, recompile same cache offline	2026-10-22T09:00:36.5717493Z 
+compile-only	Audit dry-run graphs, compile online, recompile same cache offline	2026-10-22T09:00:36.5717923Z BUILD FAILED in 39s
+compile-only	Audit dry-run graphs, compile online, recompile same cache offline	2026-10-22T09:00:36.5718224Z 15 actionable tasks: 15 executed
+compile-only	Audit dry-run graphs, compile online, recompile same cache offline	2026-10-22T09:00:37.0093555Z ##[error]Process completed with exit code 1.
+compile-only	Report compile status without uploading outputs	﻿2026-10-22T09:00:37.0144225Z ##[group]Run printf 'source_sha=%s\n' "$GITHUB_SHA"
+compile-only	Report compile status without uploading outputs	2026-10-22T09:00:37.0144796Z [36;1mprintf 'source_sha=%s\n' "$GITHUB_SHA"[0m
+compile-only	Report compile status without uploading outputs	2026-10-22T09:00:37.0145179Z [36;1mif test -f "$RUNNER_TEMP/android-compile-status.json"; then[0m
+compile-only	Report compile status without uploading outputs	2026-10-22T09:00:37.0145596Z [36;1m  cat "$RUNNER_TEMP/android-compile-status.json"[0m
+compile-only	Report compile status without uploading outputs	2026-10-22T09:00:37.0145904Z [36;1melse[0m
+compile-only	Report compile status without uploading outputs	2026-10-22T09:00:37.0146245Z [36;1m  printf 'compile_status=NOT_RUN (provisioning did not reach compile driver)\n'[0m
+compile-only	Report compile status without uploading outputs	2026-10-22T09:00:37.0146656Z [36;1mfi[0m
+compile-only	Report compile status without uploading outputs	2026-10-22T09:00:37.0207956Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+compile-only	Report compile status without uploading outputs	2026-10-22T09:00:37.0208298Z env:
+compile-only	Report compile status without uploading outputs	2026-10-22T09:00:37.0208605Z   JAVA_HOME: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.20-1/x64
+compile-only	Report compile status without uploading outputs	2026-10-22T09:00:37.0209105Z   JAVA_HOME_17_X64: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.20-1/x64
+compile-only	Report compile status without uploading outputs	2026-10-22T09:00:37.0209818Z   MUYON_UI_GRADLE: /home/runner/work/_temp/android-compile-tools/gradle-8.13/bin/gradle
+compile-only	Report compile status without uploading outputs	2026-10-22T09:00:37.0210330Z   GRADLE_USER_HOME: /home/runner/work/_temp/android-compile-gradle
+compile-only	Report compile status without uploading outputs	2026-10-22T09:00:37.0210713Z ##[endgroup]
+compile-only	Report compile status without uploading outputs	2026-10-22T09:00:37.0286611Z source_sha=a62c88ce2b46d4d3a7a1f78477f08384a671a84d
+compile-only	Report compile status without uploading outputs	2026-10-22T09:00:37.0296346Z {
+compile-only	Report compile status without uploading outputs	2026-10-22T09:00:37.0296831Z   "source_sha": "a62c88ce2b46d4d3a7a1f78477f08384a671a84d",
+compile-only	Report compile status without uploading outputs	2026-10-22T09:00:37.0297392Z   "compile_only": true,
+compile-only	Report compile status without uploading outputs	2026-10-22T09:00:37.0297687Z   "targets": {
+compile-only	Report compile status without uploading outputs	2026-10-22T09:00:37.0297910Z     ":app:compileDebugKotlin": {
+compile-only	Report compile status without uploading outputs	2026-10-22T09:00:37.0298149Z       "dry_run": 0,
+compile-only	Report compile status without uploading outputs	2026-10-22T09:00:37.0298346Z       "online": 1,
+compile-only	Report compile status without uploading outputs	2026-10-22T09:00:37.0298533Z       "offline": 1
+compile-only	Report compile status without uploading outputs	2026-10-22T09:00:37.0298712Z     },
+compile-only	Report compile status without uploading outputs	2026-10-22T09:00:37.0299032Z     ":app:compileDebugAndroidTestKotlin": {
+compile-only	Report compile status without uploading outputs	2026-10-22T09:00:37.0299885Z       "dry_run": "NOT_RUN",
+compile-only	Report compile status without uploading outputs	2026-10-22T09:00:37.0300271Z       "online": "NOT_RUN",
+compile-only	Report compile status without uploading outputs	2026-10-22T09:00:37.0300635Z       "offline": "NOT_RUN"
+compile-only	Report compile status without uploading outputs	2026-10-22T09:00:37.0300959Z     },
+compile-only	Report compile status without uploading outputs	2026-10-22T09:00:37.0301169Z     ":app:compileDebugUnitTestKotlin": {
+compile-only	Report compile status without uploading outputs	2026-10-22T09:00:37.0301437Z       "dry_run": "NOT_RUN",
+compile-only	Report compile status without uploading outputs	2026-10-22T09:00:37.0301667Z       "online": "NOT_RUN",
+compile-only	Report compile status without uploading outputs	2026-10-22T09:00:37.0301884Z       "offline": "NOT_RUN"
+compile-only	Report compile status without uploading outputs	2026-10-22T09:00:37.0302089Z     }
+compile-only	Report compile status without uploading outputs	2026-10-22T09:00:37.0302255Z   }
+compile-only	Report compile status without uploading outputs	2026-10-22T09:00:37.0302414Z }
+compile-only	Post Run actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00	﻿2026-10-22T09:00:37.0420408Z Post job cleanup.
+compile-only	Post Run actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00	2026-10-22T09:00:37.1705178Z (node:2949) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+compile-only	Post Run actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00	2026-10-22T09:00:37.1706475Z (Use `node --trace-deprecation ...` to show where the warning was created)
+compile-only	Post Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	﻿2026-10-22T09:00:37.1971749Z Post job cleanup.
+compile-only	Post Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-22T09:00:37.2840645Z [command]/usr/bin/git version
+compile-only	Post Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-22T09:00:37.2884129Z git version 2.55.0
+compile-only	Post Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-22T09:00:37.2954697Z Temporarily overriding HOME='/home/runner/work/_temp/d0be69ce-95e8-4d2a-8088-afa64c0c0895' before making global git config changes
+compile-only	Post Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-22T09:00:37.2956097Z Adding repository directory to the temporary git global config as a safe directory
+compile-only	Post Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-22T09:00:37.2959924Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/Muyon/Muyon
+compile-only	Post Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-22T09:00:37.2998206Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+compile-only	Post Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-22T09:00:37.3045103Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+compile-only	Post Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-22T09:00:37.3297125Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+compile-only	Post Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-22T09:00:37.3331520Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+compile-only	Complete job	﻿2026-10-22T09:00:37.3791823Z Cleaning up orphan processes
+compile-only	Complete job	2026-10-22T09:00:37.4112974Z Terminate orphan process: pid (2899) (java)
+compile-only	Complete job	2026-10-22T09:00:37.4123370Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683, actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/

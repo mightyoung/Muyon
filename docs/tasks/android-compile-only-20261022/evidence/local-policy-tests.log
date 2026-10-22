@@ -1,0 +1,8 @@
+test_forbidden_product_gates_packaging_and_runtime_stop_the_route (tools.ci.test_android_compile_only.CompileOnlyGraphTests.test_forbidden_product_gates_packaging_and_runtime_stop_the_route) ... ok
+test_resource_intermediates_are_not_apk_packaging (tools.ci.test_android_compile_only.CompileOnlyGraphTests.test_resource_intermediates_are_not_apk_packaging) ... ok
+test_unknown_tasks_and_missing_actual_target_fail_closed (tools.ci.test_android_compile_only.CompileOnlyGraphTests.test_unknown_tasks_and_missing_actual_target_fail_closed) ... ok
+
+----------------------------------------------------------------------
+Ran 3 tests in 0.000s
+
+OK

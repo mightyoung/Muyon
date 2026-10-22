@@ -1,0 +1,11 @@
+{
+  "commit": "a62c88ce2b46d4d3a7a1f78477f08384a671a84d",
+  "files": {
+    ".github/workflows/android-compile-only.yml": "5522b5854a951146a5b58c1640d98f21638d6a8b7279ee2bcade8fc773e736f3",
+    "docs/tasks/android-compile-only-20261022/PLAN.md": "4df58d3ef8a8fe6fd7cad0c0ea1ca0ef04e73e6019dfd5d0db63bf73298b682b",
+    "tools/ci/android_compile_only.py": "bdce5048082ae3ca36d46938a132c14f85ef9b7373659c1c721d97992b6a0c4a",
+    "tools/ci/test_android_compile_only.py": "b694083c8b44db463c215e8bab5209b33dd8a26e31696e351579789394e8b4c4"
+  },
+  "product_paths_unchanged": true,
+  "pre_push_independent_review": "PASS"
+}

@@ -1,0 +1,15 @@
+{
+  "run": 39751747058,
+  "job": 119733753002,
+  "conclusion": "failure",
+  "graph_audit": "PASS",
+  "online_kotlin": "FAILED",
+  "same_cache_offline_kotlin": "FAILED",
+  "errors": [
+    "file:///home/runner/work/Muyon/Muyon/apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/ui/shell/RequestCandidates.kt:24:49 Unresolved reference 'similar'.",
+    "file:///home/runner/work/Muyon/Muyon/apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/ui/shell/RequestCandidates.kt:24:49 Unresolved reference 'similar'."
+  ],
+  "androidtest_compile": "NOT_RUN",
+  "unit_compile": "NOT_RUN",
+  "apk_device_runtime": "NOT_RUN"
+}
