@@ -9,6 +9,7 @@ import android.util.Base64
 import com.mightyoung.muyon.product.chat.ProductChatPort
 import com.mightyoung.muyon.product.chat.ProductChatRuntime
 import com.mightyoung.muyon.product.chat.persistence.ProductLocalDraftPort
+import com.mightyoung.muyon.product.chat.persistence.PreparedLocalSave
 import org.json.JSONArray
 import org.json.JSONObject
 import org.json.JSONTokener
@@ -126,10 +127,9 @@ class ProductService : Service() {
             override fun resolve(conversation: String, project: String?) = data(open(false).localDraftResolve(conversation, project))
             override fun read(conversation: String, project: String?, namespace: String, draft: String, generation: String, revision: String) =
                 data(open(false).localDraftRead(conversation, project, namespace, draft, generation, revision))
-            // Fixed fifth schema is consumed by Runtime; actual regenerated fifth
-            // binding is pending B verification. A missing prepare NEVER dispatches save.
-            override fun prepare(conversation: String, project: String?, namespace: String, draft: String, generation: String, revision: String,
-                attempt: String, exportedMemoryRevision: String, hostEditorRevision: String, archive: ByteArray): JSONObject =
+            // Provider7bb89 uses the generated LocalDraftPrepareRequest record.
+            // Actual fifth binding pending B; no substitute record or old scalar ABI.
+            override fun prepare(original: PreparedLocalSave): JSONObject =
                 error("local_draft_prepare_binding_pending")
             override fun save(conversation: String, project: String?, namespace: String, draft: String, generation: String, revision: String,
                 attempt: String, exportedMemoryRevision: String, archive: ByteArray) =

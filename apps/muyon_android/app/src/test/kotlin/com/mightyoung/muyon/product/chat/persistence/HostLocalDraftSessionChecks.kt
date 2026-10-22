@@ -42,8 +42,16 @@ private class SyntheticLocalPort : ProductLocalDraftPort {
             .put("archive_hex", archive?.joinToString("") { "%02x".format(it) } ?: JSONObject.NULL)
             .put("archive_digest", archive?.let { digest(it) } ?: JSONObject.NULL)
     }
-    override fun prepare(conversation: String, project: String?, namespace: String, draft: String, generation: String, revision: String,
-        attempt: String, exportedMemoryRevision: String, hostEditorRevision: String, archive: ByteArray): JSONObject {
+    override fun prepare(original: PreparedLocalSave): JSONObject {
+        val revision = original.record.storedRevision.toString()
+        val attempt = original.attemptId
+        val exportedMemoryRevision = original.exportedMemoryRevision.toString()
+        val hostEditorRevision = original.exportedLocalRevision.toString()
+        val archive = original.archive
+        check(original.record.namespaceId == descriptor().getString("namespace_id") && original.record.draftId == descriptor().getString("draft_id"))
+        check(original.record.workspaceId == lease.workspaceId && original.record.projectId == lease.projectId &&
+            original.record.conversationId == lease.conversationId && original.record.registryGeneration == 1L)
+        check(original.storedRevision == original.record.storedRevision + 1)
         check(!rejectScope && revision == this.revision && preparation?.optString("state") != "prepared")
         prepareCalls++
         preparation = descriptor().also { it.remove("save_attempt"); it.remove("stored_revision"); it.remove("archive_present"); it.remove("lifecycle") }
@@ -168,6 +176,14 @@ fun main() {
     zeroPort.foreignPreparationOnRead = true
     check(runCatching { zeroCold.restore() }.isFailure)
     check(zeroCold.view(1).queryOriginalOnly && zeroCold.draft.snapshot().name.value == "retain local editor" && zeroPort.saves == 1)
+    val recordPort = SyntheticLocalPort()
+    val recordSession = HostLocalDraftSession.open(recordPort, recordPort.lease, "record-scope")
+    recordSession.draft.editName("distinct counters")
+    recordSession.save(42)
+    check(recordPort.preparation!!.getString("exported_memory_revision") == "1")
+    check(recordPort.preparation!!.getString("host_editor_revision") == "42")
+    check(recordPort.preparation!!.getString("expected_stored_revision") == "0" && recordPort.preparation!!.getString("next_stored_revision") == "1")
+    check(recordSession.view(42).saved && !recordSession.view(43).saved)
     runtimeIntegrationChecks()
     println("PASS host native session: verification gate; real stored vs memory revisions; original unknown lookup; late edit not saved; restart semantic restore; revoked scope no write")
 }

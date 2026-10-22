@@ -8,8 +8,8 @@ interface ProductLocalDraftPort {
     val verified: Boolean
     fun resolve(conversation: String, project: String?): JSONObject
     fun read(conversation: String, project: String?, namespace: String, draft: String, generation: String, revision: String): JSONObject
-    fun prepare(conversation: String, project: String?, namespace: String, draft: String, generation: String, revision: String,
-        attempt: String, exportedMemoryRevision: String, hostEditorRevision: String, archive: ByteArray): JSONObject
+    /** Same captured export object, mapped to the real generated request only by Service. */
+    fun prepare(original: PreparedLocalSave): JSONObject
     fun save(conversation: String, project: String?, namespace: String, draft: String, generation: String, revision: String,
         attempt: String, exportedMemoryRevision: String, archive: ByteArray): JSONObject
     /** Explicit original reconciliation; may atomically fence an uncommitted attempt. */
@@ -103,9 +103,7 @@ class HostLocalDraftSession private constructor(private val port: ProductLocalDr
         try {
             // Must await an exact durable preparation acknowledgement first. A throw,
             // malformed reply or foreign binding here means ZERO save dispatches.
-            NativeLocalDraftCodec.prepared(port.prepare(lease.conversationId, lease.projectId, record.namespaceId,
-                record.draftId, record.registryGeneration.toString(), record.storedRevision.toString(), prepared.attemptId,
-                prepared.exportedMemoryRevision.toString(), prepared.exportedLocalRevision.toString(), prepared.archive), lease, prepared)
+            NativeLocalDraftCodec.prepared(port.prepare(prepared), lease, prepared)
             val reply = port.save(lease.conversationId, lease.projectId, record.namespaceId, record.draftId,
                 record.registryGeneration.toString(), record.storedRevision.toString(), prepared.attemptId,
                 prepared.exportedMemoryRevision.toString(), prepared.archive)

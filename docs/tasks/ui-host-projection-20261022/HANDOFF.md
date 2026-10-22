@@ -130,3 +130,15 @@ explicit unavailable pending B actual fifth generated binding; exact prepared pa
 is NATIVE-PREPARE-SERVICE.patch, no missing method referenced. verified=false.
 Parent upstream Rust26/core209/probes3 and purefmt111e pass are recorded accurately;
 new five-method FFI/Android acceptance is not inferred from previous four-method pass.
+
+## Provider7bb prepare record — latest
+
+PREPARE-RECORD-ADAPTATION.md supersedes the old098 scalar prepare signature.
+Only fifth ABI changed to actual UniFFI LocalDraftPrepareRequest record; four
+existing APIs and JSON stay fixed. Internal port receives one existing captured
+PreparedLocalSave, and revised unapplied NATIVE-PREPARE-SERVICE.patch maps all10
+named fields to the future actual generated record. No handwritten replacement
+binding/class. Test-first scalar mismatch RED, final session/Runtime synthetic
+regressions and distinct memory1/editor42/stored0->1 PASS, non-author review PASS.
+Service prepare remains explicit unavailable/verifiedfalse until B's real generated
+record is accepted and checked; no phantom fifth invocation/Android/reader FD claim.
