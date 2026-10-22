@@ -1,0 +1,26 @@
+{
+  "delivery_commit": "36b1e76382a1e1883dcdfd8f337759cb0156007e",
+  "patch_commit": "b9b18149604bb96d4c3c531e2283764ac4030015",
+  "baseline": "b4940ddc1600acced5e268053450b48395df93f6",
+  "dependency": "0e85c6e98c4e32efc8008092e480626f342a701d",
+  "source_hashes_unchanged_after_all_probes": true,
+  "tools": {
+    "rustc": {
+      "version": "rustc 1.99.1 (58cf8f9c3 2026-10-13)",
+      "sha256": "b53b780f77f952062f8ca8a3b70aef2390b1e45ad91939be94afdc9543026853"
+    },
+    "cargo": {
+      "version": "cargo 1.99.1 (5f94df478 2026-08-27)",
+      "sha256": "a670e02cfa39ac2e53f77a2d911ca1fc9e2c479b0603ec956625be1daf24e3af"
+    },
+    "rustfmt": {
+      "version": "rustfmt 1.10.0-stable (58cf8f9c35 2026-10-13)",
+      "sha256": "68cb47a2a38daa8ff2ec6d623a2374b0a165d77ec74f1f654216665018c04598"
+    }
+  },
+  "cargo_lock_sha256": "3a87fdce6228dff89d292547057627f999e7286ccf0a774c1683c4ba5f95f367",
+  "manifest_sha256": "5ad0515e55312d678c1763fa6a36f53727308eeab911ddbffb9f0ecc6ad8af60",
+  "lib_rs_identical_to_baseline": true,
+  "reader_combo_state": "4c9072af48d7a6eceb9abb70594b03ab4bc412be + exact dependency blobs + core patch applied; harness check failed missing group_runtime_store.rs, not applied. No Reader tests executed on partial combination.",
+  "setup_observation": "Initial generic git fetch only fetched configured main; delivery object absent. ls-remote located exact source branch, targeted fetch succeeded; dependency fetched exact branch. Earlier tool outputs are conversation records, this note is a summary, not raw logs. No denied or uncertain writes."
+}

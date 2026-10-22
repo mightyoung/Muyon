@@ -1,0 +1,17 @@
+
+running 12 tests
+test documents::source_notification_tests::legacy_local_tables_without_source_namespace_remain_compatible ... ok
+test documents::source_notification_tests::foreign_transaction_and_oversized_pages_are_rejected ... ok
+test documents::source_notification_tests::grant_replacement_invalidates_old_document_even_when_new_scope_differs ... ok
+test documents::source_notification_tests::malformed_original_grant_target_is_not_discarded_during_reissue_or_revoke ... ok
+test documents::source_notification_tests::malformed_feature_or_notification_schema_rejects_without_committing_revocation ... ok
+test documents::source_notification_tests::pending_notifications_repeat_until_ack_and_stale_ack_cannot_erase_new_generation ... ok
+test documents::source_notification_tests::notification_failure_rolls_back_original_head_and_grant_mutations ... ok
+test documents::source_notification_tests::reissuing_same_document_grant_invalidates_active_original_generation ... ok
+test documents::source_notification_tests::uninitialized_source_feature_does_not_block_docs_or_create_tables_on_read ... ok
+test documents::source_notification_tests::publish_and_copy_call_real_hook_preserving_manual_values ... ok
+test documents::source_notification_tests::source_and_notifications_are_not_visible_until_commit_and_rollback_keeps_both ... ok
+test documents::source_notification_tests::more_than_256_real_bindings_revoke_and_queue_without_a_global_limit ... ok
+
+test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 135 filtered out; finished in 0.59s
+

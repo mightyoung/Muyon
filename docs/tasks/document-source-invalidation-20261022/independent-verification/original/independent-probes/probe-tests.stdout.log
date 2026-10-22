@@ -1,0 +1,18 @@
+
+running 3 tests
+revocation_ok=true grant_active=[[Some("1")]] source_active=0 queue_pending=1 authorized_read_ok=true
+test independent_source_validation::probe::independent_notification_trigger_must_not_restore_revoked_grant ... FAILED
+revocation_ok=true source_active=0 queue_pending=0
+revocation_ok=true source_active=0 queue_pending=0
+test independent_source_validation::probe::independent_notification_trigger_must_not_preack_queued_invalidation ... FAILED
+test independent_source_validation::probe::independent_notification_trigger_must_not_delete_queued_invalidation ... FAILED
+
+failures:
+
+failures:
+    independent_source_validation::probe::independent_notification_trigger_must_not_delete_queued_invalidation
+    independent_source_validation::probe::independent_notification_trigger_must_not_preack_queued_invalidation
+    independent_source_validation::probe::independent_notification_trigger_must_not_restore_revoked_grant
+
+test result: FAILED. 0 passed; 3 failed; 0 ignored; 0 measured; 147 filtered out; finished in 0.03s
+

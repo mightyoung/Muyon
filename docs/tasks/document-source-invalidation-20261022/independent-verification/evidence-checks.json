@@ -1,0 +1,29 @@
+{
+  "checks": [
+    {
+      "label": "full-staged",
+      "argv": [
+        "git",
+        "diff",
+        "--cached",
+        "--check"
+      ],
+      "exit_status": 2
+    },
+    {
+      "label": "authored-report-json-junit",
+      "argv": [
+        "git",
+        "diff",
+        "--cached",
+        "--check",
+        "--",
+        "docs/tasks/document-source-invalidation-20261022/INDEPENDENT-RUST-VERIFICATION.md",
+        ":(glob)docs/tasks/document-source-invalidation-20261022/independent-verification/**/*.json",
+        ":(glob)docs/tasks/document-source-invalidation-20261022/independent-verification/**/*.xml"
+      ],
+      "exit_status": 0
+    }
+  ],
+  "note": "Raw logs/patches/actual source preserved byte-exact. Full staged whitespace failure is retained, authored report/JSON/JUnit checked separately."
+}

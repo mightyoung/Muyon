@@ -1,0 +1,32 @@
+import pathlib,re,json,xml.etree.ElementTree as ET,hashlib,shutil,subprocess,datetime
+base=pathlib.Path('/workspace/Muyon-document-verification/docs/tasks/document-source-invalidation-20261022/independent-verification');p=base/'original';suites=ET.Element('testsuites',{'name':'source invalidation actual executions; derived Rust stdout'});summary={}
+for label in ['source-targeted','artifacts-targeted','core-full','independent-probes/probe-tests','additional-probes/probe-tests']:
+ stdout=(p/(label+'.stdout.log')).read_text();stderr=(p/(label+'.stderr.log')).read_text();blocks=re.findall(r'[\s\S]*?test result: (?:ok|FAILED)\. [^\n]+',stdout);targets=re.findall(r'^\s*Running ([^\n]+)',stderr,re.M)
+ if label=='core-full':targets+=['Doc-tests muyon_core']
+ elif not targets:targets=[label]
+ assert len(blocks)==len(targets),(label,len(blocks),len(targets));counts=[]
+ for block,target in zip(blocks,targets):
+  match=re.search(r'test result: (?:ok|FAILED)\. (\d+) passed; (\d+) failed; (\d+) ignored',block);assert match;passed,failed,ignored=map(int,match.groups());cases=re.findall(r'^test (\S+) \.\.\. (ok|FAILED|ignored)$',block,re.M);assert len(cases)==passed+failed+ignored
+  suite=ET.SubElement(suites,'testsuite',{'name':label+' / '+target,'tests':str(len(cases)),'failures':str(failed),'errors':'0','skipped':str(ignored)})
+  for name,result in cases:
+   case=ET.SubElement(suite,'testcase',{'classname':target,'name':name})
+   if result=='FAILED':ET.SubElement(case,'failure',{'message':'Expected rejection assertion failed; see exact raw stdout/stderr.'}).text=stderr
+   if result=='ignored':ET.SubElement(case,'skipped')
+  counts.append({'binary':target,'passed':passed,'failed':failed,'ignored':ignored})
+ summary[label]={'per_binary':counts,'total_passed':sum(c['passed'] for c in counts),'total_failed':sum(c['failed'] for c in counts)}
+assert summary['core-full']['total_passed']==727;assert summary['independent-probes/probe-tests']['total_failed']==3
+ET.indent(suites);ET.ElementTree(suites).write(p/'derived-junit.xml',encoding='utf-8',xml_declaration=True)
+(base/'execution-summary.json').write_text(json.dumps({'note':'Per-binary execution counts only, include embedded duplicate owner test modules; not independent scenario count. JUnit derived from actual stdout, not native, no invented timings.','results':summary},indent=2)+'\n')
+h=base/'harness';h.mkdir(exist_ok=True)
+for name in ['verify-source-invalidation.py','run-source-invalidation-probes.py','run-source-invalidation-additional.py','source-invalidation-red-probes.rs','source-invalidation-independent-probes.rs','summarize-source-invalidation.py']:
+ shutil.copyfile('/tmp/'+name,h/(name+'.txt'))
+# restore original RED driver's explicit input provenance as it ran, rather than current additional probe file
+s=(h/'run-source-invalidation-probes.py.txt').read_text();(h/'driver-input-history.txt').write_text('Original RED driver read /tmp/source-invalidation-independent-probes.rs when it contained the exact bytes now archived as source-invalidation-red-probes.rs.txt. Additional run reused that input path with new four ordinary probes; standalone generated Rust sources and manifests preserve each exact input. Neither run changed product files.\n')
+delivery=pathlib.Path('/workspace/Muyon-source-invalidation-delivery/docs/tasks/document-source-invalidation-20261022');d=base/'delivery';d.mkdir(exist_ok=True)
+for name in ['HANDOFF.md','CORE-SOURCE-INVALIDATION.patch','UNAPPLIED-B-HARNESS-DEPENDENCIES.patch','patch-manifest.json','prepare_validation.py','verification.log']:
+ shutil.copyfile(delivery/name,d/(name+'.txt' if name.endswith(('.py','.log')) else name))
+root=pathlib.Path('/workspace/Muyon-source-invalidation-verification');m=json.loads((p/'manifest.json').read_text());assert all(hashlib.sha256((root/n).read_bytes()).hexdigest()==h for n,h in m['source_sha256'].items())
+sha=lambda path:hashlib.sha256(pathlib.Path(path).read_bytes()).hexdigest();tools={n:{'version':subprocess.check_output(['/tmp/muyon-rust/bin/'+n,'--version'],text=True).strip(),'sha256':sha('/tmp/muyon-rust/bin/'+n)} for n in ['rustc','cargo','rustfmt']}
+proof={'delivery_commit':'36b1e76382a1e1883dcdfd8f337759cb0156007e','patch_commit':'b9b18149604bb96d4c3c531e2283764ac4030015','baseline':'b4940ddc1600acced5e268053450b48395df93f6','dependency':'0e85c6e98c4e32efc8008092e480626f342a701d','source_hashes_unchanged_after_all_probes':True,'tools':tools,'cargo_lock_sha256':sha(root/'crates/Cargo.lock'),'manifest_sha256':sha(root/'SOURCE-INVALIDATION-MANIFEST.json'),'lib_rs_identical_to_baseline':subprocess.check_output(['git','show','b4940ddc1600acced5e268053450b48395df93f6:crates/muyon-core/src/lib.rs'],cwd=root)==(root/'crates/muyon-core/src/lib.rs').read_bytes(),'reader_combo_state':'4c9072af48d7a6eceb9abb70594b03ab4bc412be + exact dependency blobs + core patch applied; harness check failed missing group_runtime_store.rs, not applied. No Reader tests executed on partial combination.','setup_observation':'Initial generic git fetch only fetched configured main; delivery object absent. ls-remote located exact source branch, targeted fetch succeeded; dependency fetched exact branch. Earlier tool outputs are conversation records, this note is a summary, not raw logs. No denied or uncertain writes.'}
+(base/'final-provenance.json').write_text(json.dumps(proof,indent=2)+'\n');shutil.copyfile(root/'SOURCE-INVALIDATION-MANIFEST.json',base/'actual-prepared-source-manifest.json')
+print('summary',[(k,v['total_passed'],v['total_failed']) for k,v in summary.items()])

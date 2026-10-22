@@ -1,0 +1,49 @@
+2026-10-22T08:01:26.647481+00:00
+Prepared base/dependency/output bytes: prepared-source-manifest.json
+Rust commands target the dependency-complete disposable tree, NOT the unapplied baseline.
+
+focused
+cwd=/tmp/muyon-source-invalidation-validation
+argv=["cargo", "test", "--offline", "--locked", "--manifest-path", "crates/Cargo.toml", "-p", "muyon-core", "--lib", "documents::source_notification_tests"]
+exit=127
+NOT_RUN: [Errno 2] No such file or directory: 'cargo'
+
+workspace
+cwd=/tmp/muyon-source-invalidation-validation
+argv=["cargo", "test", "--offline", "--locked", "--manifest-path", "crates/Cargo.toml", "--workspace"]
+exit=127
+NOT_RUN: [Errno 2] No such file or directory: 'cargo'
+
+scopedfmt
+cwd=/tmp/muyon-source-invalidation-validation
+argv=["rustfmt", "--check", "--edition", "2021", "--config", "skip_children=true", "crates/muyon-core/src/documents/mod.rs", "crates/muyon-core/src/documents/storage.rs", "crates/muyon-core/src/documents/source_notifications.rs", "crates/muyon-core/src/documents/source_notification_tests.rs"]
+exit=127
+NOT_RUN: [Errno 2] No such file or directory: 'rustfmt'
+
+core-patch-base-check
+cwd=/workspace/Muyon-source-invalidation
+argv=["git", "apply", "--check", "/workspace/Muyon-source-invalidation/docs/tasks/document-source-invalidation-20261022/CORE-SOURCE-INVALIDATION.patch"]
+exit=0
+
+
+
+harness-patch-base-check
+cwd=/workspace/Muyon-source-invalidation
+argv=["git", "apply", "--check", "/workspace/Muyon-source-invalidation/docs/tasks/document-source-invalidation-20261022/UNAPPLIED-B-HARNESS-DEPENDENCIES.patch"]
+exit=0
+
+
+
+core-patch-reader-check
+cwd=/workspace/Muyon
+argv=["git", "apply", "--check", "/workspace/Muyon-source-invalidation/docs/tasks/document-source-invalidation-20261022/CORE-SOURCE-INVALIDATION.patch"]
+exit=0
+
+
+
+patch-whitespace
+cwd=/workspace/Muyon-source-invalidation
+argv=["git", "diff", "--check"]
+exit=0
+
+

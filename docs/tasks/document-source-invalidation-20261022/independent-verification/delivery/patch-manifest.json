@@ -1,0 +1,23 @@
+{
+  "base": "b4940ddc1600acced5e268053450b48395df93f6",
+  "dependency": "0e85c6e98c4e32efc8008092e480626f342a701d",
+  "core_patch_sha256": "b6ddc8a034e318ef02b641044c19b8b41497bd64a4b3622ec64b148cbf7833a9",
+  "patched_files": [
+    {
+      "path": "crates/muyon-core/src/documents/mod.rs",
+      "sha256": "08117d921d48d4885368978eb273bae76fa07f420a4678d88ee827a7e162ba2d"
+    },
+    {
+      "path": "crates/muyon-core/src/documents/storage.rs",
+      "sha256": "3e78690f7e29f7b4c0f6f31129a179d6894297ffb26e4a279880aa9ab5a89eea"
+    },
+    {
+      "path": "crates/muyon-core/src/documents/source_notifications.rs",
+      "sha256": "e8fd85cf26b13792ab988b90ec8bb7cfa2c5eacbb54e6c356b49e1d1596a2244"
+    },
+    {
+      "path": "crates/muyon-core/src/documents/source_notification_tests.rs",
+      "sha256": "61b6cf32517edb67d907bb7d8ab248a2ba33f06425b9d2d634dce24ee0fc73f1"
+    }
+  ]
+}

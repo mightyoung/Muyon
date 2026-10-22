@@ -1,0 +1,10 @@
+
+thread 'independent_source_validation::probe::independent_notification_trigger_must_not_restore_revoked_grant' (28351) panicked at /tmp/muyon-source-invalidation-independent/probes.rs:98:2:
+must reject and rollback when queue trigger restored revoked grant before commit
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+thread 'independent_source_validation::probe::independent_notification_trigger_must_not_delete_queued_invalidation' (28349) panicked at /tmp/muyon-source-invalidation-independent/probes.rs:106:2:
+must reject and rollback when trigger deleted required invalidation before commit
+
+thread 'independent_source_validation::probe::independent_notification_trigger_must_not_preack_queued_invalidation' (28350) panicked at /tmp/muyon-source-invalidation-independent/probes.rs:114:2:
+must reject and rollback when trigger preacked invalidation before Runtime delivery

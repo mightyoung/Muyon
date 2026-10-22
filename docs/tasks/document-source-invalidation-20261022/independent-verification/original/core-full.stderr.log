@@ -1,0 +1,95 @@
+warning: suspicious definition of the runtime `read` symbol used by the standard library
+   --> /workspace/Muyon-source-invalidation-verification/experiments/redesign/core-agent-lab/core/src/host_session.rs:132:124
+    |
+132 | ...ount: usize, timeout: i32) -> i32; fn read(fd: i32, buffer: *mut u8, count: usize) -> isize; fn write(fd: i32, buffer: *const u8...
+    |                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = note: expected `unsafe extern "C" fn(i32, *mut c_void, usize) -> isize` (for the current target)
+            found    `unsafe extern "C" fn(i32, *mut u8, usize) -> isize`
+    = help: either fix the signature or remove any attributes like `#[unsafe(no_mangle)]`, `#[unsafe(export_name = "read")]`, or `#[link_name = "read"]`
+    = help: allow this lint if the signature is compatible
+    = note: `#[warn(suspicious_runtime_symbol_definitions)]` on by default
+
+warning: suspicious definition of the runtime `write` symbol used by the standard library
+   --> /workspace/Muyon-source-invalidation-verification/experiments/redesign/core-agent-lab/core/src/host_session.rs:132:182
+    |
+132 | ... *mut u8, count: usize) -> isize; fn write(fd: i32, buffer: *const u8, count: usize) -> isize; }
+    |                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = note: expected `unsafe extern "C" fn(i32, *const c_void, usize) -> isize` (for the current target)
+            found    `unsafe extern "C" fn(i32, *const u8, usize) -> isize`
+    = help: either fix the signature or remove any attributes like `#[unsafe(no_mangle)]`, `#[unsafe(export_name = "write")]`, or `#[link_name = "write"]`
+    = help: allow this lint if the signature is compatible
+
+warning: `muyon-core-agent-lab` (lib) generated 2 warnings
+   Compiling muyon-core v0.1.0 (/workspace/Muyon-source-invalidation-verification/crates/muyon-core)
+warning: method `document_publish_candidate_in_transaction` is never used
+   --> muyon-core/src/documents/candidate.rs:297:19
+    |
+ 62 | impl BusinessStore {
+    | ------------------ method in this implementation
+...
+297 |     pub(crate) fn document_publish_candidate_in_transaction(
+    |                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: `muyon-core` (lib) generated 1 warning
+warning: unused imports: `CandidateState` and `CandidateStatus`
+  --> muyon-core/src/bin/../documents/mod.rs:19:21
+   |
+19 | pub use candidate::{CandidateState, CandidateStatus};
+   |                     ^^^^^^^^^^^^^^  ^^^^^^^^^^^^^^^
+   |
+   = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused import: `CandidateStatus`
+  --> muyon-core/src/bin/../documents/mod.rs:19:37
+   |
+19 | pub use candidate::{CandidateState, CandidateStatus};
+   |                                     ^^^^^^^^^^^^^^^
+   |
+   = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused import: `CandidateStatus`
+  --> muyon-core/tests/../src/documents/mod.rs:19:37
+   |
+19 | pub use candidate::{CandidateState, CandidateStatus};
+   |                                     ^^^^^^^^^^^^^^^
+   |
+   = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+warning: `muyon-core` (bin "business_worker") generated 1 warning (run `cargo fix --bin "business_worker" -p muyon-core` to apply 1 suggestion)
+warning: `muyon-core` (bin "business_worker" test) generated 1 warning (run `cargo fix --bin "business_worker" -p muyon-core --tests` to apply 1 suggestion)
+warning: `muyon-core` (test "group_runtime_store") generated 1 warning (run `cargo fix --test "group_runtime_store" -p muyon-core` to apply 1 suggestion)
+    Finished `test` profile [unoptimized] target(s) in 17.13s
+     Running unittests src/lib.rs (/tmp/muyon-document-cargo-target/debug/deps/muyon_core-a72f6eb584e2ebcc)
+     Running unittests src/bin/business_worker.rs (/tmp/muyon-document-cargo-target/debug/deps/business_worker-bb7983b5d6ae98ca)
+     Running tests/agent_child_tools.rs (/tmp/muyon-document-cargo-target/debug/deps/agent_child_tools-4cf9e9926e43cd55)
+     Running tests/agent_owner.rs (/tmp/muyon-document-cargo-target/debug/deps/agent_owner-e6ad77c29ff2924e)
+     Running tests/agent_product.rs (/tmp/muyon-document-cargo-target/debug/deps/agent_product-3636cc6525eaa39e)
+     Running tests/agent_tools.rs (/tmp/muyon-document-cargo-target/debug/deps/agent_tools-619235753706630d)
+     Running tests/agent_workflow.rs (/tmp/muyon-document-cargo-target/debug/deps/agent_workflow-f0ee022b49df87c7)
+     Running tests/archive.rs (/tmp/muyon-document-cargo-target/debug/deps/archive-61423fdc5a97c4c7)
+     Running tests/blobs.rs (/tmp/muyon-document-cargo-target/debug/deps/blobs-e330748567a3903b)
+     Running tests/bot_drafts.rs (/tmp/muyon-document-cargo-target/debug/deps/bot_drafts-51b678960e7b5ea3)
+     Running tests/business.rs (/tmp/muyon-document-cargo-target/debug/deps/business-7114771eabccd512)
+     Running tests/contract.rs (/tmp/muyon-document-cargo-target/debug/deps/contract-16e5840c5b8774fa)
+     Running tests/contract_vectors_additional.rs (/tmp/muyon-document-cargo-target/debug/deps/contract_vectors_additional-2794b66a050dd1c3)
+     Running tests/document_edit_candidates.rs (/tmp/muyon-document-cargo-target/debug/deps/document_edit_candidates-9853d8d741c9585d)
+     Running tests/document_edit_core_bridge.rs (/tmp/muyon-document-cargo-target/debug/deps/document_edit_core_bridge-89d15a07c4b3b02f)
+     Running tests/document_edit_engine_protocol.rs (/tmp/muyon-document-cargo-target/debug/deps/document_edit_engine_protocol-3dc809ca9a4edb87)
+     Running tests/document_edit_gateway.rs (/tmp/muyon-document-cargo-target/debug/deps/document_edit_gateway-3640c7f3aa6fb102)
+     Running tests/document_edit_policy_epoch.rs (/tmp/muyon-document-cargo-target/debug/deps/document_edit_policy_epoch-fe581a341af39970)
+     Running tests/document_edit_schema2.rs (/tmp/muyon-document-cargo-target/debug/deps/document_edit_schema2-9acadd413933a0ce)
+     Running tests/document_edit_transactions.rs (/tmp/muyon-document-cargo-target/debug/deps/document_edit_transactions-d996a6014426da69)
+     Running tests/document_storage.rs (/tmp/muyon-document-cargo-target/debug/deps/document_storage-c4e83e4f51d3c384)
+     Running tests/documents.rs (/tmp/muyon-document-cargo-target/debug/deps/documents-96601cbe4e620ff4)
+     Running tests/evidence_local.rs (/tmp/muyon-document-cargo-target/debug/deps/evidence_local-93ec29ce6e4f195f)
+     Running tests/group_governance.rs (/tmp/muyon-document-cargo-target/debug/deps/group_governance-139eacddf909f0ce)
+     Running tests/group_runtime.rs (/tmp/muyon-document-cargo-target/debug/deps/group_runtime-f94def52dafbf5c0)
+     Running tests/group_runtime_store.rs (/tmp/muyon-document-cargo-target/debug/deps/group_runtime_store-1266406eaba1a00b)
+     Running tests/research.rs (/tmp/muyon-document-cargo-target/debug/deps/research-f056c484e14019f9)
+     Running tests/resource_boundaries_additional.rs (/tmp/muyon-document-cargo-target/debug/deps/resource_boundaries_additional-078d6d15071a64a3)
+     Running tests/store_admission_additional.rs (/tmp/muyon-document-cargo-target/debug/deps/store_admission_additional-4cb01794288a825c)
+   Doc-tests muyon_core

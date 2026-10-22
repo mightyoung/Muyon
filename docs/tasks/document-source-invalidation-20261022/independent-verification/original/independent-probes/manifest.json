@@ -1,0 +1,311 @@
+{
+  "source_composition": {
+    "base": "b4940ddc1600acced5e268053450b48395df93f6",
+    "dependency": "0e85c6e98c4e32efc8008092e480626f342a701d",
+    "core_patch_sha256": "b6ddc8a034e318ef02b641044c19b8b41497bd64a4b3622ec64b148cbf7833a9",
+    "harness_patch_sha256": "e94558f71bf732a9ae68fd6eb130c83a8920329f7fdd61c4369a6cd7fa8e064f",
+    "destination": "/workspace/Muyon-source-invalidation-verification",
+    "lib_rs_unchanged_from_base": true,
+    "note": "Prepared only; no cargo, formatter, engine, network or notification executed",
+    "files": [
+      {
+        "path": "crates/muyon-core/src/artifacts/catalog.rs",
+        "sha256": "6cf4969a1582e5daddf63bc0976d6c615003e9d2257be15ba6da164c12d708a0"
+      },
+      {
+        "path": "crates/muyon-core/src/artifacts/local_interactions.rs",
+        "sha256": "b54c147c38c9628b00679b215945037c5ffa8cbe0c043f709250ce6d4e86354d"
+      },
+      {
+        "path": "crates/muyon-core/src/artifacts/local_interactions/source_tests.rs",
+        "sha256": "c107eb7a38fac27d07302ffa9dc8893724257320c3daed22d0abdeedab5c51b2"
+      },
+      {
+        "path": "crates/muyon-core/src/artifacts/local_interactions/tests.rs",
+        "sha256": "c483aad458df1088f9ddc96824aecb60e5aef1dec10fefdf5bef9228cc31dec5"
+      },
+      {
+        "path": "crates/muyon-core/src/artifacts/local_sources.rs",
+        "sha256": "52b3a4e9eda179d43535218da7452dc68ad98a8c6635e582678399d0b6b3e364"
+      },
+      {
+        "path": "crates/muyon-core/src/artifacts/mod.rs",
+        "sha256": "2ca104e9440f5288e482a589efede316ea0f5f8deb9f4f573cb6ffcedda125c1"
+      },
+      {
+        "path": "crates/muyon-core/src/artifacts/project_access.rs",
+        "sha256": "1315229f4065581ef8dc6e90f022a879469ee0853caa83bc443b92cff1157fd3"
+      },
+      {
+        "path": "crates/muyon-core/src/artifacts/save_journal.rs",
+        "sha256": "2d635f415aaee183a341385892972f6f2426026947a018a6adaf761ecb07c229"
+      },
+      {
+        "path": "crates/muyon-core/src/artifacts/tests.rs",
+        "sha256": "cfd2190c15dc7105a0db5c5613ab1f161af1ebcd5c0e0eba018629c5822d372f"
+      },
+      {
+        "path": "crates/muyon-core/src/artifacts/workflow_tests.rs",
+        "sha256": "7d6fe48dc203e653cad5f12ef56a0a8d891be263e7a808fcf30f88fedd300746"
+      },
+      {
+        "path": "crates/muyon-core/src/evidence/local.rs",
+        "sha256": "7e48171496deb3c5ba8bde155186e89f785fb43482424b7b2726ada2f6297e47"
+      },
+      {
+        "path": "crates/muyon-core/src/evidence/mod.rs",
+        "sha256": "35b2f22f9b386c8a4aeb81c6ea33d386a40a04db509a48cbf3e813136480281c"
+      },
+      {
+        "path": "crates/muyon-core/src/evidence/run-store-tests.py",
+        "sha256": "0ca6f7223a30d44adffb1a6d781b66064fbed7881f2af3cb75aa7ba0be5c6b19"
+      },
+      {
+        "path": "crates/muyon-core/src/evidence/store.rs",
+        "sha256": "c9cb7dd270dfd958eccbd27827067258e55b9c2b10fdb959a921c290a3c9a262"
+      },
+      {
+        "path": "crates/muyon-core/src/evidence/store_tests.rs",
+        "sha256": "1077e2550b8f7fe94aae782b9a1d1da03c749c1e27d3549922f94f7c4e3c4d56"
+      },
+      {
+        "path": "crates/muyon-core/src/documents/mod.rs",
+        "sha256": "08117d921d48d4885368978eb273bae76fa07f420a4678d88ee827a7e162ba2d"
+      },
+      {
+        "path": "crates/muyon-core/src/documents/storage.rs",
+        "sha256": "3e78690f7e29f7b4c0f6f31129a179d6894297ffb26e4a279880aa9ab5a89eea"
+      },
+      {
+        "path": "crates/muyon-core/src/documents/source_notifications.rs",
+        "sha256": "e8fd85cf26b13792ab988b90ec8bb7cfa2c5eacbb54e6c356b49e1d1596a2244"
+      },
+      {
+        "path": "crates/muyon-core/src/documents/source_notification_tests.rs",
+        "sha256": "61b6cf32517edb67d907bb7d8ab248a2ba33f06425b9d2d634dce24ee0fc73f1"
+      },
+      {
+        "path": "crates/muyon-core/src/bin/business_worker.rs",
+        "sha256": "4db1cfcb35cf14607f79d7eb7779e8a33ff9e810d7b16178540f75b14472677d"
+      },
+      {
+        "path": "crates/muyon-core/tests/group_runtime_store.rs",
+        "sha256": "b90fff2416f915b37264b28024ff342bfe5d104f04b15000b8c9b49c2df2b6dd"
+      },
+      {
+        "path": "crates/muyon-core/src/lib.rs",
+        "sha256": "b579a028dfef7b10124947c2e166915d1893316b1e7606a876e18821c616cde0"
+      }
+    ]
+  },
+  "temporary_harness": "Exact lib modules referenced by absolute path; only synthetic fixture/setup and independent tests appended. Product source unmodified. Existing cfg(test) owner tests filtered out.",
+  "linked_artifacts": {
+    "typenum": {
+      "path": "/tmp/muyon-document-cargo-target/debug/deps/libtypenum-0abba4eda4df95ce.rlib",
+      "sha256": "9211e402146f92d4589c7eacff9a7821ab32fda211fe79ac669d1e9fc977856b"
+    },
+    "unicode_ident": {
+      "path": "/tmp/muyon-document-cargo-target/debug/deps/libunicode_ident-65358d29b4f798df.rlib",
+      "sha256": "3c13155cda6f29cd300f79aa0f6c51941210627f936d7879161844b6fe8ea985"
+    },
+    "hybrid_array": {
+      "path": "/tmp/muyon-document-cargo-target/debug/deps/libhybrid_array-96fce85aa665074c.rlib",
+      "sha256": "53ae8892f73e4fb4ec0e3c8a392ea049ce06e4f2ed1855dfe768fd859ebf270b"
+    },
+    "proc_macro2": {
+      "path": "/tmp/muyon-document-cargo-target/debug/deps/libproc_macro2-cf9d02df85e93841.rlib",
+      "sha256": "94d713437b6c6f48f7623ce62678864fbe2117c5c8febe9b87b663336b022d61"
+    },
+    "muyon_core_agent_lab": {
+      "path": "/tmp/muyon-document-cargo-target/debug/deps/libmuyon_core_agent_lab-6fd81d5e9dedad96.rlib",
+      "sha256": "b653d93694b8910fe11f24cb4d044743da8a7403be2f9f8950cf37c59ef0ee85"
+    },
+    "quote": {
+      "path": "/tmp/muyon-document-cargo-target/debug/deps/libquote-5a05b16e0b04b050.rlib",
+      "sha256": "e25fa17a63c8739b1219a306bad7cded6daba7f0b3c36ecba46c3bdf255125f5"
+    },
+    "muyon_plugin_contract_lab": {
+      "path": "/tmp/muyon-document-cargo-target/debug/deps/libmuyon_plugin_contract_lab-9e7d4ff646e6ae2a.rlib",
+      "sha256": "4e66fe929a3968aa21614a97e8b73006f475b98df32e6713d7315b78aa944e22"
+    },
+    "serde_core": {
+      "path": "/tmp/muyon-document-cargo-target/debug/deps/libserde_core-0cffc7c6931cc9d2.rlib",
+      "sha256": "94f3e5657407dee4510da2f9baf653a187ed970cf47da39bf6a571852a69019a"
+    },
+    "syn": {
+      "path": "/tmp/muyon-document-cargo-target/debug/deps/libsyn-b28c06a1cabb4405.rlib",
+      "sha256": "be116ae70f58e08c5057f77ac6304309db5b838885d2b808aa4264f70cb75275"
+    },
+    "block_buffer": {
+      "path": "/tmp/muyon-document-cargo-target/debug/deps/libblock_buffer-1415169473214b88.rlib",
+      "sha256": "e605c5926127ef081f2ad24d6d0a25563aec46dd74fd3c3a81a1b774390062e0"
+    },
+    "crypto_common": {
+      "path": "/tmp/muyon-document-cargo-target/debug/deps/libcrypto_common-69aca6c9bb9013ed.rlib",
+      "sha256": "28b1d5abb062d7c389bcb33e4d54a5d601232bffad7ad1d273d56e29109cf8de"
+    },
+    "const_oid": {
+      "path": "/tmp/muyon-document-cargo-target/debug/deps/libconst_oid-4f042e6b148e5ee5.rlib",
+      "sha256": "513db06556f32aa0f32cae0e3fb4feca259f799976d9d71e0564c38673db6c7d"
+    },
+    "zmij": {
+      "path": "/tmp/muyon-document-cargo-target/debug/deps/libzmij-165867cff18955fa.rlib",
+      "sha256": "ecc0905f80ae76a8c418710e2a70d00fe9e72962423ffc6d7a7f6d10e5d38ebd"
+    },
+    "digest": {
+      "path": "/tmp/muyon-document-cargo-target/debug/deps/libdigest-cd21c234762519f4.rlib",
+      "sha256": "05bbafab5274b7eeb4653aef8fa9eaaa7d544f1593564e450f37cc20de81b1e5"
+    },
+    "muyon_rust_agent_host_lab": {
+      "path": "/tmp/muyon-document-cargo-target/debug/deps/libmuyon_rust_agent_host_lab-db892e0d74ad8fe2.rlib",
+      "sha256": "c5f17ce0e37292222e6516c9e77141312b6e3552e2158d4b8e7ac79f34d7b9df"
+    },
+    "memchr": {
+      "path": "/tmp/muyon-document-cargo-target/debug/deps/libmemchr-68fbf1e5b9c2741c.rlib",
+      "sha256": "0b0906c8b29a111e8240aae9fabc3792b6d49d183210f7350feecb1e75142057"
+    },
+    "cpufeatures": {
+      "path": "/tmp/muyon-document-cargo-target/debug/deps/libcpufeatures-516b7c64969ae37d.rlib",
+      "sha256": "e9f9b4deec8b3a1753e2b5543f73d3d7a3640c9d87806a04fb5ff0743545be6f"
+    },
+    "tinyvec": {
+      "path": "/tmp/muyon-document-cargo-target/debug/deps/libtinyvec-32de9a59aa8cac40.rlib",
+      "sha256": "92dd9f087d080ec73adda0332efb731df01fa47c00168696a348f3deca45d7d2"
+    },
+    "cfg_if": {
+      "path": "/tmp/muyon-document-cargo-target/debug/deps/libcfg_if-15c3f98da7529950.rlib",
+      "sha256": "1b1ed27db6ba297b0cdf21b1430c1816f4b633c34396e2e6d614da5778f36344"
+    },
+    "itoa": {
+      "path": "/tmp/muyon-document-cargo-target/debug/deps/libitoa-b8f1e7bebfec6d00.rlib",
+      "sha256": "49a5d81c60137a47198ba063b913eec395d8c350ce13982e305199da91b1f3c0"
+    },
+    "muyon_web_search_lab": {
+      "path": "/tmp/muyon-document-cargo-target/debug/deps/libmuyon_web_search_lab-65475cd947fd436f.rlib",
+      "sha256": "945550cdbec57b0b7df8c324331827c683b0eccc5fdaa3a55663f18e7c631800"
+    },
+    "unicode_normalization": {
+      "path": "/tmp/muyon-document-cargo-target/debug/deps/libunicode_normalization-33e7da85f9d8b87a.rlib",
+      "sha256": "5cb3f44fcc2d38c6fa261e81a4a87a7d50451c526e52cfcd647dcee9e9ea481f"
+    },
+    "sha2": {
+      "path": "/tmp/muyon-document-cargo-target/debug/deps/libsha2-ac6e1e3f5db50395.rlib",
+      "sha256": "5d58c5d2c330e2d6d032065384466b3b2206d7e48eb2ff46b918935dee3a507d"
+    },
+    "serde_json": {
+      "path": "/tmp/muyon-document-cargo-target/debug/deps/libserde_json-bd1e7064091000e5.rlib",
+      "sha256": "b7471ea236ac91d5b3168928b82733d82466777d737f90b8618bfe1c399ff6b2"
+    },
+    "serde": {
+      "path": "/tmp/muyon-document-cargo-target/debug/deps/libserde-300831f57be44d76.rlib",
+      "sha256": "c1c07a8270968e61a483150cad8a5efb7d5782e04af5983476e447d6ed03f5e0"
+    },
+    "muyon_core": {
+      "path": "/tmp/muyon-document-cargo-target/debug/libmuyon_core.rlib",
+      "sha256": "4c3c30f1d37ffa26eeab07a2078090f6128d435b2b813c6b1e17016f9d6ff326"
+    }
+  },
+  "probe_extra_sha256": "96136bb15ce79daa19c90859ffbc2657ab8137b286994528a304b6fc0a6fa146",
+  "commands": [
+    {
+      "label": "artifact-build",
+      "argv": [
+        "cargo",
+        "build",
+        "--offline",
+        "--locked",
+        "--manifest-path",
+        "crates/Cargo.toml",
+        "-p",
+        "muyon-core",
+        "--lib",
+        "--message-format=json"
+      ],
+      "cwd": "/workspace/Muyon-source-invalidation-verification",
+      "start_utc": "2026-10-22T08:09:01.223976+00:00",
+      "end_utc": "2026-10-22T08:09:01.253777+00:00",
+      "exit_status": 0
+    },
+    {
+      "label": "probe-compile",
+      "argv": [
+        "/tmp/muyon-rust/bin/rustc",
+        "--edition=2021",
+        "--test",
+        "/tmp/muyon-source-invalidation-independent/probes.rs",
+        "-L",
+        "dependency=/tmp/muyon-document-cargo-target/debug/deps",
+        "-L",
+        "native=/tmp/muyon-native-libs",
+        "--extern",
+        "typenum=/tmp/muyon-document-cargo-target/debug/deps/libtypenum-0abba4eda4df95ce.rlib",
+        "--extern",
+        "unicode_ident=/tmp/muyon-document-cargo-target/debug/deps/libunicode_ident-65358d29b4f798df.rlib",
+        "--extern",
+        "hybrid_array=/tmp/muyon-document-cargo-target/debug/deps/libhybrid_array-96fce85aa665074c.rlib",
+        "--extern",
+        "proc_macro2=/tmp/muyon-document-cargo-target/debug/deps/libproc_macro2-cf9d02df85e93841.rlib",
+        "--extern",
+        "muyon_core_agent_lab=/tmp/muyon-document-cargo-target/debug/deps/libmuyon_core_agent_lab-6fd81d5e9dedad96.rlib",
+        "--extern",
+        "quote=/tmp/muyon-document-cargo-target/debug/deps/libquote-5a05b16e0b04b050.rlib",
+        "--extern",
+        "muyon_plugin_contract_lab=/tmp/muyon-document-cargo-target/debug/deps/libmuyon_plugin_contract_lab-9e7d4ff646e6ae2a.rlib",
+        "--extern",
+        "serde_core=/tmp/muyon-document-cargo-target/debug/deps/libserde_core-0cffc7c6931cc9d2.rlib",
+        "--extern",
+        "syn=/tmp/muyon-document-cargo-target/debug/deps/libsyn-b28c06a1cabb4405.rlib",
+        "--extern",
+        "block_buffer=/tmp/muyon-document-cargo-target/debug/deps/libblock_buffer-1415169473214b88.rlib",
+        "--extern",
+        "crypto_common=/tmp/muyon-document-cargo-target/debug/deps/libcrypto_common-69aca6c9bb9013ed.rlib",
+        "--extern",
+        "const_oid=/tmp/muyon-document-cargo-target/debug/deps/libconst_oid-4f042e6b148e5ee5.rlib",
+        "--extern",
+        "zmij=/tmp/muyon-document-cargo-target/debug/deps/libzmij-165867cff18955fa.rlib",
+        "--extern",
+        "digest=/tmp/muyon-document-cargo-target/debug/deps/libdigest-cd21c234762519f4.rlib",
+        "--extern",
+        "muyon_rust_agent_host_lab=/tmp/muyon-document-cargo-target/debug/deps/libmuyon_rust_agent_host_lab-db892e0d74ad8fe2.rlib",
+        "--extern",
+        "memchr=/tmp/muyon-document-cargo-target/debug/deps/libmemchr-68fbf1e5b9c2741c.rlib",
+        "--extern",
+        "cpufeatures=/tmp/muyon-document-cargo-target/debug/deps/libcpufeatures-516b7c64969ae37d.rlib",
+        "--extern",
+        "tinyvec=/tmp/muyon-document-cargo-target/debug/deps/libtinyvec-32de9a59aa8cac40.rlib",
+        "--extern",
+        "cfg_if=/tmp/muyon-document-cargo-target/debug/deps/libcfg_if-15c3f98da7529950.rlib",
+        "--extern",
+        "itoa=/tmp/muyon-document-cargo-target/debug/deps/libitoa-b8f1e7bebfec6d00.rlib",
+        "--extern",
+        "muyon_web_search_lab=/tmp/muyon-document-cargo-target/debug/deps/libmuyon_web_search_lab-65475cd947fd436f.rlib",
+        "--extern",
+        "unicode_normalization=/tmp/muyon-document-cargo-target/debug/deps/libunicode_normalization-33e7da85f9d8b87a.rlib",
+        "--extern",
+        "sha2=/tmp/muyon-document-cargo-target/debug/deps/libsha2-ac6e1e3f5db50395.rlib",
+        "--extern",
+        "serde_json=/tmp/muyon-document-cargo-target/debug/deps/libserde_json-bd1e7064091000e5.rlib",
+        "--extern",
+        "serde=/tmp/muyon-document-cargo-target/debug/deps/libserde-300831f57be44d76.rlib",
+        "-o",
+        "/tmp/muyon-source-invalidation-independent/probe-tests"
+      ],
+      "cwd": "/workspace/Muyon-source-invalidation-verification",
+      "start_utc": "2026-10-22T08:09:01.255452+00:00",
+      "end_utc": "2026-10-22T08:09:07.532841+00:00",
+      "exit_status": 0
+    },
+    {
+      "label": "probe-tests",
+      "argv": [
+        "/tmp/muyon-source-invalidation-independent/probe-tests",
+        "independent_source_validation::probe::independent_",
+        "--nocapture"
+      ],
+      "cwd": "/workspace/Muyon-source-invalidation-verification",
+      "start_utc": "2026-10-22T08:09:07.533114+00:00",
+      "end_utc": "2026-10-22T08:09:07.567685+00:00",
+      "exit_status": 101
+    }
+  ]
+}

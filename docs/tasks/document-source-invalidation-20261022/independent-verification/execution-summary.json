@@ -1,0 +1,239 @@
+{
+  "note": "Per-binary execution counts only, include embedded duplicate owner test modules; not independent scenario count. JUnit derived from actual stdout, not native, no invented timings.",
+  "results": {
+    "source-targeted": {
+      "per_binary": [
+        {
+          "binary": "unittests src/lib.rs (/tmp/muyon-document-cargo-target/debug/deps/muyon_core-a72f6eb584e2ebcc)",
+          "passed": 12,
+          "failed": 0,
+          "ignored": 0
+        }
+      ],
+      "total_passed": 12,
+      "total_failed": 0
+    },
+    "artifacts-targeted": {
+      "per_binary": [
+        {
+          "binary": "unittests src/lib.rs (/tmp/muyon-document-cargo-target/debug/deps/muyon_core-a72f6eb584e2ebcc)",
+          "passed": 41,
+          "failed": 0,
+          "ignored": 0
+        }
+      ],
+      "total_passed": 41,
+      "total_failed": 0
+    },
+    "core-full": {
+      "per_binary": [
+        {
+          "binary": "unittests src/lib.rs (/tmp/muyon-document-cargo-target/debug/deps/muyon_core-a72f6eb584e2ebcc)",
+          "passed": 147,
+          "failed": 0,
+          "ignored": 0
+        },
+        {
+          "binary": "unittests src/bin/business_worker.rs (/tmp/muyon-document-cargo-target/debug/deps/business_worker-bb7983b5d6ae98ca)",
+          "passed": 113,
+          "failed": 0,
+          "ignored": 0
+        },
+        {
+          "binary": "tests/agent_child_tools.rs (/tmp/muyon-document-cargo-target/debug/deps/agent_child_tools-4cf9e9926e43cd55)",
+          "passed": 3,
+          "failed": 0,
+          "ignored": 0
+        },
+        {
+          "binary": "tests/agent_owner.rs (/tmp/muyon-document-cargo-target/debug/deps/agent_owner-e6ad77c29ff2924e)",
+          "passed": 11,
+          "failed": 0,
+          "ignored": 0
+        },
+        {
+          "binary": "tests/agent_product.rs (/tmp/muyon-document-cargo-target/debug/deps/agent_product-3636cc6525eaa39e)",
+          "passed": 6,
+          "failed": 0,
+          "ignored": 0
+        },
+        {
+          "binary": "tests/agent_tools.rs (/tmp/muyon-document-cargo-target/debug/deps/agent_tools-619235753706630d)",
+          "passed": 7,
+          "failed": 0,
+          "ignored": 0
+        },
+        {
+          "binary": "tests/agent_workflow.rs (/tmp/muyon-document-cargo-target/debug/deps/agent_workflow-f0ee022b49df87c7)",
+          "passed": 16,
+          "failed": 0,
+          "ignored": 0
+        },
+        {
+          "binary": "tests/archive.rs (/tmp/muyon-document-cargo-target/debug/deps/archive-61423fdc5a97c4c7)",
+          "passed": 13,
+          "failed": 0,
+          "ignored": 0
+        },
+        {
+          "binary": "tests/blobs.rs (/tmp/muyon-document-cargo-target/debug/deps/blobs-e330748567a3903b)",
+          "passed": 8,
+          "failed": 0,
+          "ignored": 0
+        },
+        {
+          "binary": "tests/bot_drafts.rs (/tmp/muyon-document-cargo-target/debug/deps/bot_drafts-51b678960e7b5ea3)",
+          "passed": 26,
+          "failed": 0,
+          "ignored": 0
+        },
+        {
+          "binary": "tests/business.rs (/tmp/muyon-document-cargo-target/debug/deps/business-7114771eabccd512)",
+          "passed": 14,
+          "failed": 0,
+          "ignored": 0
+        },
+        {
+          "binary": "tests/contract.rs (/tmp/muyon-document-cargo-target/debug/deps/contract-16e5840c5b8774fa)",
+          "passed": 10,
+          "failed": 0,
+          "ignored": 0
+        },
+        {
+          "binary": "tests/contract_vectors_additional.rs (/tmp/muyon-document-cargo-target/debug/deps/contract_vectors_additional-2794b66a050dd1c3)",
+          "passed": 1,
+          "failed": 0,
+          "ignored": 0
+        },
+        {
+          "binary": "tests/document_edit_candidates.rs (/tmp/muyon-document-cargo-target/debug/deps/document_edit_candidates-9853d8d741c9585d)",
+          "passed": 12,
+          "failed": 0,
+          "ignored": 0
+        },
+        {
+          "binary": "tests/document_edit_core_bridge.rs (/tmp/muyon-document-cargo-target/debug/deps/document_edit_core_bridge-89d15a07c4b3b02f)",
+          "passed": 8,
+          "failed": 0,
+          "ignored": 0
+        },
+        {
+          "binary": "tests/document_edit_engine_protocol.rs (/tmp/muyon-document-cargo-target/debug/deps/document_edit_engine_protocol-3dc809ca9a4edb87)",
+          "passed": 6,
+          "failed": 0,
+          "ignored": 0
+        },
+        {
+          "binary": "tests/document_edit_gateway.rs (/tmp/muyon-document-cargo-target/debug/deps/document_edit_gateway-3640c7f3aa6fb102)",
+          "passed": 19,
+          "failed": 0,
+          "ignored": 0
+        },
+        {
+          "binary": "tests/document_edit_policy_epoch.rs (/tmp/muyon-document-cargo-target/debug/deps/document_edit_policy_epoch-fe581a341af39970)",
+          "passed": 1,
+          "failed": 0,
+          "ignored": 0
+        },
+        {
+          "binary": "tests/document_edit_schema2.rs (/tmp/muyon-document-cargo-target/debug/deps/document_edit_schema2-9acadd413933a0ce)",
+          "passed": 6,
+          "failed": 0,
+          "ignored": 0
+        },
+        {
+          "binary": "tests/document_edit_transactions.rs (/tmp/muyon-document-cargo-target/debug/deps/document_edit_transactions-d996a6014426da69)",
+          "passed": 28,
+          "failed": 0,
+          "ignored": 0
+        },
+        {
+          "binary": "tests/document_storage.rs (/tmp/muyon-document-cargo-target/debug/deps/document_storage-c4e83e4f51d3c384)",
+          "passed": 15,
+          "failed": 0,
+          "ignored": 0
+        },
+        {
+          "binary": "tests/documents.rs (/tmp/muyon-document-cargo-target/debug/deps/documents-96601cbe4e620ff4)",
+          "passed": 18,
+          "failed": 0,
+          "ignored": 0
+        },
+        {
+          "binary": "tests/evidence_local.rs (/tmp/muyon-document-cargo-target/debug/deps/evidence_local-93ec29ce6e4f195f)",
+          "passed": 16,
+          "failed": 0,
+          "ignored": 0
+        },
+        {
+          "binary": "tests/group_governance.rs (/tmp/muyon-document-cargo-target/debug/deps/group_governance-139eacddf909f0ce)",
+          "passed": 21,
+          "failed": 0,
+          "ignored": 0
+        },
+        {
+          "binary": "tests/group_runtime.rs (/tmp/muyon-document-cargo-target/debug/deps/group_runtime-f94def52dafbf5c0)",
+          "passed": 20,
+          "failed": 0,
+          "ignored": 0
+        },
+        {
+          "binary": "tests/group_runtime_store.rs (/tmp/muyon-document-cargo-target/debug/deps/group_runtime_store-1266406eaba1a00b)",
+          "passed": 160,
+          "failed": 0,
+          "ignored": 0
+        },
+        {
+          "binary": "tests/research.rs (/tmp/muyon-document-cargo-target/debug/deps/research-f056c484e14019f9)",
+          "passed": 16,
+          "failed": 0,
+          "ignored": 0
+        },
+        {
+          "binary": "tests/resource_boundaries_additional.rs (/tmp/muyon-document-cargo-target/debug/deps/resource_boundaries_additional-078d6d15071a64a3)",
+          "passed": 3,
+          "failed": 0,
+          "ignored": 0
+        },
+        {
+          "binary": "tests/store_admission_additional.rs (/tmp/muyon-document-cargo-target/debug/deps/store_admission_additional-4cb01794288a825c)",
+          "passed": 3,
+          "failed": 0,
+          "ignored": 0
+        },
+        {
+          "binary": "Doc-tests muyon_core",
+          "passed": 0,
+          "failed": 0,
+          "ignored": 0
+        }
+      ],
+      "total_passed": 727,
+      "total_failed": 0
+    },
+    "independent-probes/probe-tests": {
+      "per_binary": [
+        {
+          "binary": "independent-probes/probe-tests",
+          "passed": 0,
+          "failed": 3,
+          "ignored": 0
+        }
+      ],
+      "total_passed": 0,
+      "total_failed": 3
+    },
+    "additional-probes/probe-tests": {
+      "per_binary": [
+        {
+          "binary": "additional-probes/probe-tests",
+          "passed": 4,
+          "failed": 0,
+          "ignored": 0
+        }
+      ],
+      "total_passed": 4,
+      "total_failed": 0
+    }
+  }
+}

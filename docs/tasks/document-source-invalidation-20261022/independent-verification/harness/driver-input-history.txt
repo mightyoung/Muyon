@@ -1,0 +1,1 @@
+Original RED driver read /tmp/source-invalidation-independent-probes.rs when it contained the exact bytes now archived as source-invalidation-red-probes.rs.txt. Additional run reused that input path with new four ordinary probes; standalone generated Rust sources and manifests preserve each exact input. Neither run changed product files.
