@@ -1,0 +1,50 @@
+test_cancel_before_spawn_and_running_are_reaped (test_launcher.LauncherTests.test_cancel_before_spawn_and_running_are_reaped) ... ok
+test_cancellation_during_snapshot_discards_candidate (test_launcher.LauncherTests.test_cancellation_during_snapshot_discards_candidate) ... FAIL
+test_full_fake_lifecycle_receipt_is_never_txn_eligible (test_launcher.LauncherTests.test_full_fake_lifecycle_receipt_is_never_txn_eligible) ... ok
+test_kill_reap_and_uncertain_reap_quarantine (test_launcher.LauncherTests.test_kill_reap_and_uncertain_reap_quarantine) ... ok
+test_missing_ready_and_wrong_engine_proof_never_spawn (test_launcher.LauncherTests.test_missing_ready_and_wrong_engine_proof_never_spawn) ... ok
+test_policy_only_tightens_and_no_json_host_session_or_opaque_factory (test_launcher.LauncherTests.test_policy_only_tightens_and_no_json_host_session_or_opaque_factory) ... ok
+test_production_default_and_plain_json_can_never_open_execution (test_launcher.LauncherTests.test_production_default_and_plain_json_can_never_open_execution) ... ok
+test_ready_transition_is_single_use_and_guards_are_strict_booleans (test_launcher.LauncherTests.test_ready_transition_is_single_use_and_guards_are_strict_booleans) ... FAIL
+test_scope_expiry_and_replay_and_simulated_worker_permits (test_launcher.LauncherTests.test_scope_expiry_and_replay_and_simulated_worker_permits) ... ok
+test_snapshot_source_links_and_unknown_parts_fail_validation (test_launcher.LauncherTests.test_snapshot_source_links_and_unknown_parts_fail_validation) ... ok
+test_spawn_uncertainty_reconciles_without_retry (test_launcher.LauncherTests.test_spawn_uncertainty_reconciles_without_retry) ... ok
+test_terminate_failure_still_attempts_kill_and_reap (test_launcher.LauncherTests.test_terminate_failure_still_attempts_kill_and_reap) ... FAIL
+test_time_logs_outputs_exit_and_exception_fail_closed (test_launcher.LauncherTests.test_time_logs_outputs_exit_and_exception_fail_closed) ... ok
+
+======================================================================
+FAIL: test_cancellation_during_snapshot_discards_candidate (test_launcher.LauncherTests.test_cancellation_during_snapshot_discards_candidate)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/document-fidelity/tools/document_fidelity/adapters/runner/tests/test_launcher.py", line 121, in test_cancellation_during_snapshot_discards_candidate
+    self.assertEqual('cancelled',result.public['status']);self.assertIsNone(result.candidate)
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 'cancelled' != 'simulated_validated'
+- cancelled
++ simulated_validated
+
+
+======================================================================
+FAIL: test_ready_transition_is_single_use_and_guards_are_strict_booleans (test_launcher.LauncherTests.test_ready_transition_is_single_use_and_guards_are_strict_booleans)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/document-fidelity/tools/document_fidelity/adapters/runner/tests/test_launcher.py", line 135, in test_ready_transition_is_single_use_and_guards_are_strict_booleans
+    self.assertFalse(a.approve_ready(cap,ready,os))
+AssertionError: True is not false
+
+======================================================================
+FAIL: test_terminate_failure_still_attempts_kill_and_reap (test_launcher.LauncherTests.test_terminate_failure_still_attempts_kill_and_reap)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/document-fidelity/tools/document_fidelity/adapters/runner/tests/test_launcher.py", line 126, in test_terminate_failure_still_attempts_kill_and_reap
+    self.assertEqual('cancelled',result.public['status']);self.assertIn('kill',os.calls)
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 'cancelled' != 'outcome_unknown'
+- cancelled
++ outcome_unknown
+
+
+----------------------------------------------------------------------
+Ran 13 tests in 0.112s
+
+FAILED (failures=3)

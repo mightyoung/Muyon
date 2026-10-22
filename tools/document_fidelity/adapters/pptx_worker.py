@@ -1,10 +1,10 @@
-"""Dormant python-pptx source; no import/engine/CLI execution path enabled."""
-from_guard_message='environment_hold: source/license/isolation/launcher qualification missing'
+"""Permit-checked python-pptx copy source; trusted worker bootstrap required."""
+from .runner.worker_gate import require_worker_permit
 
 
-def edit_copy(job,source_path,candidate_path):
-    raise RuntimeError(from_guard_message)
-    # Unreachable until a separately reviewed trusted runtime integration exists.
+def edit_copy(job,source_path,candidate_path,*,permit=None):
+    admitted=require_worker_permit(permit,job,source_path,candidate_path,'python-pptx')
+    job=admitted.request
     from pptx import Presentation
     document=Presentation(source_path);op=job['operation']
     slides=[s for s in document.slides if s.slide_id == op['slide_id']]
@@ -19,4 +19,10 @@ def edit_copy(job,source_path,candidate_path):
     with candidate_path.open('xb') as output:document.save(output)
 
 
-if __name__=='__main__':raise RuntimeError(from_guard_message)
+def main():
+    from .runner.worker_entry import dispatch
+    return dispatch('pptx')
+
+if __name__=='__main__':
+    import json
+    print(json.dumps(main(),sort_keys=True))

@@ -38,8 +38,15 @@ def build_launch_spec(raw):
                 artifact_and_worker_hash_verification='required_by_future_host',current_environment='hold')
 
 
-def run_real(source, raw, admission=None):
-    """Cannot launch, even with caller-forged pass flags; admission is diagnostic only."""
+def run_real(source, raw, admission=None, *, trusted_runtime=None):
+    """Default HOLD; only separately bootstrapped typed runner can be delegated.
+
+    Legacy diagnostic admission flags never grant authority. Core integrations
+    need runner Result (non-JSON credential), not this audit-only public wrapper.
+    """
+    if trusted_runtime is not None:
+        from .runner.launcher import run_production
+        return run_production(source,raw,trusted_runtime).public
     result = base_report()
     result['reasons'] = ['environment_hold', 'real_executor_not_implemented']
     if type(admission) is not dict or not admission or any(admission.get(key) != 'pass' for key in ('license','provenance','isolation','resources')):

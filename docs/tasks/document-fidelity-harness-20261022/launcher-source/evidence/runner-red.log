@@ -1,0 +1,368 @@
+test_cancel_before_spawn_and_running_are_reaped (test_launcher.LauncherTests.test_cancel_before_spawn_and_running_are_reaped) ... ERROR
+test_full_fake_lifecycle_receipt_is_never_txn_eligible (test_launcher.LauncherTests.test_full_fake_lifecycle_receipt_is_never_txn_eligible) ... ERROR
+test_kill_reap_and_uncertain_reap_quarantine (test_launcher.LauncherTests.test_kill_reap_and_uncertain_reap_quarantine) ... ERROR
+test_missing_ready_and_wrong_engine_proof_never_spawn (test_launcher.LauncherTests.test_missing_ready_and_wrong_engine_proof_never_spawn) ... 
+  test_missing_ready_and_wrong_engine_proof_never_spawn (test_launcher.LauncherTests.test_missing_ready_and_wrong_engine_proof_never_spawn) (mode='network') ... ERROR
+  test_missing_ready_and_wrong_engine_proof_never_spawn (test_launcher.LauncherTests.test_missing_ready_and_wrong_engine_proof_never_spawn) (mode='wrong_artifact') ... ERROR
+test_production_default_and_plain_json_can_never_open_execution (test_launcher.LauncherTests.test_production_default_and_plain_json_can_never_open_execution) ... ERROR
+test_scope_expiry_and_replay_and_simulated_worker_permits (test_launcher.LauncherTests.test_scope_expiry_and_replay_and_simulated_worker_permits) ... ERROR
+test_snapshot_source_links_and_unknown_parts_fail_validation (test_launcher.LauncherTests.test_snapshot_source_links_and_unknown_parts_fail_validation) ... 
+  test_snapshot_source_links_and_unknown_parts_fail_validation (test_launcher.LauncherTests.test_snapshot_source_links_and_unknown_parts_fail_validation) (mode='unknown_part') ... ERROR
+  test_snapshot_source_links_and_unknown_parts_fail_validation (test_launcher.LauncherTests.test_snapshot_source_links_and_unknown_parts_fail_validation) (mode='source_changed') ... ERROR
+  test_snapshot_source_links_and_unknown_parts_fail_validation (test_launcher.LauncherTests.test_snapshot_source_links_and_unknown_parts_fail_validation) (mode='symlink') ... ERROR
+  test_snapshot_source_links_and_unknown_parts_fail_validation (test_launcher.LauncherTests.test_snapshot_source_links_and_unknown_parts_fail_validation) (mode='extra') ... ERROR
+test_spawn_uncertainty_reconciles_without_retry (test_launcher.LauncherTests.test_spawn_uncertainty_reconciles_without_retry) ... 
+  test_spawn_uncertainty_reconciles_without_retry (test_launcher.LauncherTests.test_spawn_uncertainty_reconciles_without_retry) (mode='spawn_uncertain') ... ERROR
+  test_spawn_uncertainty_reconciles_without_retry (test_launcher.LauncherTests.test_spawn_uncertainty_reconciles_without_retry) (mode='spawn_reconciled') ... ERROR
+  test_spawn_uncertainty_reconciles_without_retry (test_launcher.LauncherTests.test_spawn_uncertainty_reconciles_without_retry) (mode='reserve_error') ... ERROR
+test_time_logs_outputs_exit_and_exception_fail_closed (test_launcher.LauncherTests.test_time_logs_outputs_exit_and_exception_fail_closed) ... 
+  test_time_logs_outputs_exit_and_exception_fail_closed (test_launcher.LauncherTests.test_time_logs_outputs_exit_and_exception_fail_closed) (mode='timeout') ... ERROR
+  test_time_logs_outputs_exit_and_exception_fail_closed (test_launcher.LauncherTests.test_time_logs_outputs_exit_and_exception_fail_closed) (mode='stdout') ... ERROR
+  test_time_logs_outputs_exit_and_exception_fail_closed (test_launcher.LauncherTests.test_time_logs_outputs_exit_and_exception_fail_closed) (mode='stderr') ... ERROR
+  test_time_logs_outputs_exit_and_exception_fail_closed (test_launcher.LauncherTests.test_time_logs_outputs_exit_and_exception_fail_closed) (mode='chunk') ... ERROR
+  test_time_logs_outputs_exit_and_exception_fail_closed (test_launcher.LauncherTests.test_time_logs_outputs_exit_and_exception_fail_closed) (mode='output_limit') ... ERROR
+  test_time_logs_outputs_exit_and_exception_fail_closed (test_launcher.LauncherTests.test_time_logs_outputs_exit_and_exception_fail_closed) (mode='exit') ... ERROR
+  test_time_logs_outputs_exit_and_exception_fail_closed (test_launcher.LauncherTests.test_time_logs_outputs_exit_and_exception_fail_closed) (mode='exception') ... ERROR
+  test_time_logs_outputs_exit_and_exception_fail_closed (test_launcher.LauncherTests.test_time_logs_outputs_exit_and_exception_fail_closed) (mode='clock_back') ... ERROR
+  test_time_logs_outputs_exit_and_exception_fail_closed (test_launcher.LauncherTests.test_time_logs_outputs_exit_and_exception_fail_closed) (mode='unknown_event') ... ERROR
+
+======================================================================
+ERROR: test_cancel_before_spawn_and_running_are_reaped (test_launcher.LauncherTests.test_cancel_before_spawn_and_running_are_reaped)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/document-fidelity/tools/document_fidelity/adapters/runner/tests/test_launcher.py", line 89, in test_cancel_before_spawn_and_running_are_reaped
+    r,os,_=self.simulate(cancel=lambda:True)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/document-fidelity/tools/document_fidelity/adapters/runner/tests/test_launcher.py", line 67, in simulate
+    result=launcher.run_simulation(self.source,self.req,os,a,cancel=cancel)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/document-fidelity/tools/document_fidelity/adapters/runner/launcher.py", line 3, in run_simulation
+    def run_simulation(*args,**kwargs):raise NotImplementedError('runner missing')
+                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+NotImplementedError: runner missing
+
+======================================================================
+ERROR: test_full_fake_lifecycle_receipt_is_never_txn_eligible (test_launcher.LauncherTests.test_full_fake_lifecycle_receipt_is_never_txn_eligible)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/document-fidelity/tools/document_fidelity/adapters/runner/tests/test_launcher.py", line 74, in test_full_fake_lifecycle_receipt_is_never_txn_eligible
+    r,os,a=self.simulate()
+           ^^^^^^^^^^^^^^^
+  File "/workspace/document-fidelity/tools/document_fidelity/adapters/runner/tests/test_launcher.py", line 67, in simulate
+    result=launcher.run_simulation(self.source,self.req,os,a,cancel=cancel)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/document-fidelity/tools/document_fidelity/adapters/runner/launcher.py", line 3, in run_simulation
+    def run_simulation(*args,**kwargs):raise NotImplementedError('runner missing')
+                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+NotImplementedError: runner missing
+
+======================================================================
+ERROR: test_kill_reap_and_uncertain_reap_quarantine (test_launcher.LauncherTests.test_kill_reap_and_uncertain_reap_quarantine)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/document-fidelity/tools/document_fidelity/adapters/runner/tests/test_launcher.py", line 100, in test_kill_reap_and_uncertain_reap_quarantine
+    r,os,_=self.simulate('needs_kill')
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/document-fidelity/tools/document_fidelity/adapters/runner/tests/test_launcher.py", line 67, in simulate
+    result=launcher.run_simulation(self.source,self.req,os,a,cancel=cancel)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/document-fidelity/tools/document_fidelity/adapters/runner/launcher.py", line 3, in run_simulation
+    def run_simulation(*args,**kwargs):raise NotImplementedError('runner missing')
+                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+NotImplementedError: runner missing
+
+======================================================================
+ERROR: test_missing_ready_and_wrong_engine_proof_never_spawn (test_launcher.LauncherTests.test_missing_ready_and_wrong_engine_proof_never_spawn) (mode='network')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/document-fidelity/tools/document_fidelity/adapters/runner/tests/test_launcher.py", line 87, in test_missing_ready_and_wrong_engine_proof_never_spawn
+    r,os,_=self.simulate(mode);self.assertEqual('failed',r.public['status']);self.assertNotIn('spawn',os.calls)
+           ^^^^^^^^^^^^^^^^^^^
+  File "/workspace/document-fidelity/tools/document_fidelity/adapters/runner/tests/test_launcher.py", line 67, in simulate
+    result=launcher.run_simulation(self.source,self.req,os,a,cancel=cancel)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/document-fidelity/tools/document_fidelity/adapters/runner/launcher.py", line 3, in run_simulation
+    def run_simulation(*args,**kwargs):raise NotImplementedError('runner missing')
+                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+NotImplementedError: runner missing
+
+======================================================================
+ERROR: test_missing_ready_and_wrong_engine_proof_never_spawn (test_launcher.LauncherTests.test_missing_ready_and_wrong_engine_proof_never_spawn) (mode='wrong_artifact')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/document-fidelity/tools/document_fidelity/adapters/runner/tests/test_launcher.py", line 87, in test_missing_ready_and_wrong_engine_proof_never_spawn
+    r,os,_=self.simulate(mode);self.assertEqual('failed',r.public['status']);self.assertNotIn('spawn',os.calls)
+           ^^^^^^^^^^^^^^^^^^^
+  File "/workspace/document-fidelity/tools/document_fidelity/adapters/runner/tests/test_launcher.py", line 67, in simulate
+    result=launcher.run_simulation(self.source,self.req,os,a,cancel=cancel)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/document-fidelity/tools/document_fidelity/adapters/runner/launcher.py", line 3, in run_simulation
+    def run_simulation(*args,**kwargs):raise NotImplementedError('runner missing')
+                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+NotImplementedError: runner missing
+
+======================================================================
+ERROR: test_production_default_and_plain_json_can_never_open_execution (test_launcher.LauncherTests.test_production_default_and_plain_json_can_never_open_execution)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/document-fidelity/tools/document_fidelity/adapters/runner/tests/test_launcher.py", line 71, in test_production_default_and_plain_json_can_never_open_execution
+    os=FakeOS();r=launcher.run_production(self.source,self.req,binding,os)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/document-fidelity/tools/document_fidelity/adapters/runner/launcher.py", line 2, in run_production
+    def run_production(*args,**kwargs):raise NotImplementedError('runner missing')
+                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+NotImplementedError: runner missing
+
+======================================================================
+ERROR: test_scope_expiry_and_replay_and_simulated_worker_permits (test_launcher.LauncherTests.test_scope_expiry_and_replay_and_simulated_worker_permits)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/document-fidelity/tools/document_fidelity/adapters/runner/tests/test_launcher.py", line 118, in test_scope_expiry_and_replay_and_simulated_worker_permits
+    lease=a.admit(self.req,hashlib.sha256(self.source).hexdigest(),os,'attempt1',0)
+          ^^^^^^^
+AttributeError: 'Authority' object has no attribute 'admit'
+
+======================================================================
+ERROR: test_snapshot_source_links_and_unknown_parts_fail_validation (test_launcher.LauncherTests.test_snapshot_source_links_and_unknown_parts_fail_validation) (mode='unknown_part')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/document-fidelity/tools/document_fidelity/adapters/runner/tests/test_launcher.py", line 114, in test_snapshot_source_links_and_unknown_parts_fail_validation
+    r,os,_=self.simulate(mode);self.assertEqual('failed',r.public['status']);self.assertIsNone(r.credential)
+           ^^^^^^^^^^^^^^^^^^^
+  File "/workspace/document-fidelity/tools/document_fidelity/adapters/runner/tests/test_launcher.py", line 67, in simulate
+    result=launcher.run_simulation(self.source,self.req,os,a,cancel=cancel)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/document-fidelity/tools/document_fidelity/adapters/runner/launcher.py", line 3, in run_simulation
+    def run_simulation(*args,**kwargs):raise NotImplementedError('runner missing')
+                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+NotImplementedError: runner missing
+
+======================================================================
+ERROR: test_snapshot_source_links_and_unknown_parts_fail_validation (test_launcher.LauncherTests.test_snapshot_source_links_and_unknown_parts_fail_validation) (mode='source_changed')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/document-fidelity/tools/document_fidelity/adapters/runner/tests/test_launcher.py", line 114, in test_snapshot_source_links_and_unknown_parts_fail_validation
+    r,os,_=self.simulate(mode);self.assertEqual('failed',r.public['status']);self.assertIsNone(r.credential)
+           ^^^^^^^^^^^^^^^^^^^
+  File "/workspace/document-fidelity/tools/document_fidelity/adapters/runner/tests/test_launcher.py", line 67, in simulate
+    result=launcher.run_simulation(self.source,self.req,os,a,cancel=cancel)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/document-fidelity/tools/document_fidelity/adapters/runner/launcher.py", line 3, in run_simulation
+    def run_simulation(*args,**kwargs):raise NotImplementedError('runner missing')
+                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+NotImplementedError: runner missing
+
+======================================================================
+ERROR: test_snapshot_source_links_and_unknown_parts_fail_validation (test_launcher.LauncherTests.test_snapshot_source_links_and_unknown_parts_fail_validation) (mode='symlink')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/document-fidelity/tools/document_fidelity/adapters/runner/tests/test_launcher.py", line 114, in test_snapshot_source_links_and_unknown_parts_fail_validation
+    r,os,_=self.simulate(mode);self.assertEqual('failed',r.public['status']);self.assertIsNone(r.credential)
+           ^^^^^^^^^^^^^^^^^^^
+  File "/workspace/document-fidelity/tools/document_fidelity/adapters/runner/tests/test_launcher.py", line 67, in simulate
+    result=launcher.run_simulation(self.source,self.req,os,a,cancel=cancel)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/document-fidelity/tools/document_fidelity/adapters/runner/launcher.py", line 3, in run_simulation
+    def run_simulation(*args,**kwargs):raise NotImplementedError('runner missing')
+                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+NotImplementedError: runner missing
+
+======================================================================
+ERROR: test_snapshot_source_links_and_unknown_parts_fail_validation (test_launcher.LauncherTests.test_snapshot_source_links_and_unknown_parts_fail_validation) (mode='extra')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/document-fidelity/tools/document_fidelity/adapters/runner/tests/test_launcher.py", line 114, in test_snapshot_source_links_and_unknown_parts_fail_validation
+    r,os,_=self.simulate(mode);self.assertEqual('failed',r.public['status']);self.assertIsNone(r.credential)
+           ^^^^^^^^^^^^^^^^^^^
+  File "/workspace/document-fidelity/tools/document_fidelity/adapters/runner/tests/test_launcher.py", line 67, in simulate
+    result=launcher.run_simulation(self.source,self.req,os,a,cancel=cancel)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/document-fidelity/tools/document_fidelity/adapters/runner/launcher.py", line 3, in run_simulation
+    def run_simulation(*args,**kwargs):raise NotImplementedError('runner missing')
+                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+NotImplementedError: runner missing
+
+======================================================================
+ERROR: test_spawn_uncertainty_reconciles_without_retry (test_launcher.LauncherTests.test_spawn_uncertainty_reconciles_without_retry) (mode='spawn_uncertain')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/document-fidelity/tools/document_fidelity/adapters/runner/tests/test_launcher.py", line 107, in test_spawn_uncertainty_reconciles_without_retry
+    r,os,_=self.simulate(mode);self.assertIn('reconcile',os.calls);self.assertLessEqual(os.calls.count('spawn'),1)
+           ^^^^^^^^^^^^^^^^^^^
+  File "/workspace/document-fidelity/tools/document_fidelity/adapters/runner/tests/test_launcher.py", line 67, in simulate
+    result=launcher.run_simulation(self.source,self.req,os,a,cancel=cancel)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/document-fidelity/tools/document_fidelity/adapters/runner/launcher.py", line 3, in run_simulation
+    def run_simulation(*args,**kwargs):raise NotImplementedError('runner missing')
+                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+NotImplementedError: runner missing
+
+======================================================================
+ERROR: test_spawn_uncertainty_reconciles_without_retry (test_launcher.LauncherTests.test_spawn_uncertainty_reconciles_without_retry) (mode='spawn_reconciled')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/document-fidelity/tools/document_fidelity/adapters/runner/tests/test_launcher.py", line 107, in test_spawn_uncertainty_reconciles_without_retry
+    r,os,_=self.simulate(mode);self.assertIn('reconcile',os.calls);self.assertLessEqual(os.calls.count('spawn'),1)
+           ^^^^^^^^^^^^^^^^^^^
+  File "/workspace/document-fidelity/tools/document_fidelity/adapters/runner/tests/test_launcher.py", line 67, in simulate
+    result=launcher.run_simulation(self.source,self.req,os,a,cancel=cancel)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/document-fidelity/tools/document_fidelity/adapters/runner/launcher.py", line 3, in run_simulation
+    def run_simulation(*args,**kwargs):raise NotImplementedError('runner missing')
+                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+NotImplementedError: runner missing
+
+======================================================================
+ERROR: test_spawn_uncertainty_reconciles_without_retry (test_launcher.LauncherTests.test_spawn_uncertainty_reconciles_without_retry) (mode='reserve_error')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/document-fidelity/tools/document_fidelity/adapters/runner/tests/test_launcher.py", line 107, in test_spawn_uncertainty_reconciles_without_retry
+    r,os,_=self.simulate(mode);self.assertIn('reconcile',os.calls);self.assertLessEqual(os.calls.count('spawn'),1)
+           ^^^^^^^^^^^^^^^^^^^
+  File "/workspace/document-fidelity/tools/document_fidelity/adapters/runner/tests/test_launcher.py", line 67, in simulate
+    result=launcher.run_simulation(self.source,self.req,os,a,cancel=cancel)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/document-fidelity/tools/document_fidelity/adapters/runner/launcher.py", line 3, in run_simulation
+    def run_simulation(*args,**kwargs):raise NotImplementedError('runner missing')
+                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+NotImplementedError: runner missing
+
+======================================================================
+ERROR: test_time_logs_outputs_exit_and_exception_fail_closed (test_launcher.LauncherTests.test_time_logs_outputs_exit_and_exception_fail_closed) (mode='timeout')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/document-fidelity/tools/document_fidelity/adapters/runner/tests/test_launcher.py", line 97, in test_time_logs_outputs_exit_and_exception_fail_closed
+    r,os,_=self.simulate(mode);self.assertIn(r.public['status'],('timed_out','failed'))
+           ^^^^^^^^^^^^^^^^^^^
+  File "/workspace/document-fidelity/tools/document_fidelity/adapters/runner/tests/test_launcher.py", line 67, in simulate
+    result=launcher.run_simulation(self.source,self.req,os,a,cancel=cancel)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/document-fidelity/tools/document_fidelity/adapters/runner/launcher.py", line 3, in run_simulation
+    def run_simulation(*args,**kwargs):raise NotImplementedError('runner missing')
+                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+NotImplementedError: runner missing
+
+======================================================================
+ERROR: test_time_logs_outputs_exit_and_exception_fail_closed (test_launcher.LauncherTests.test_time_logs_outputs_exit_and_exception_fail_closed) (mode='stdout')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/document-fidelity/tools/document_fidelity/adapters/runner/tests/test_launcher.py", line 97, in test_time_logs_outputs_exit_and_exception_fail_closed
+    r,os,_=self.simulate(mode);self.assertIn(r.public['status'],('timed_out','failed'))
+           ^^^^^^^^^^^^^^^^^^^
+  File "/workspace/document-fidelity/tools/document_fidelity/adapters/runner/tests/test_launcher.py", line 67, in simulate
+    result=launcher.run_simulation(self.source,self.req,os,a,cancel=cancel)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/document-fidelity/tools/document_fidelity/adapters/runner/launcher.py", line 3, in run_simulation
+    def run_simulation(*args,**kwargs):raise NotImplementedError('runner missing')
+                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+NotImplementedError: runner missing
+
+======================================================================
+ERROR: test_time_logs_outputs_exit_and_exception_fail_closed (test_launcher.LauncherTests.test_time_logs_outputs_exit_and_exception_fail_closed) (mode='stderr')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/document-fidelity/tools/document_fidelity/adapters/runner/tests/test_launcher.py", line 97, in test_time_logs_outputs_exit_and_exception_fail_closed
+    r,os,_=self.simulate(mode);self.assertIn(r.public['status'],('timed_out','failed'))
+           ^^^^^^^^^^^^^^^^^^^
+  File "/workspace/document-fidelity/tools/document_fidelity/adapters/runner/tests/test_launcher.py", line 67, in simulate
+    result=launcher.run_simulation(self.source,self.req,os,a,cancel=cancel)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/document-fidelity/tools/document_fidelity/adapters/runner/launcher.py", line 3, in run_simulation
+    def run_simulation(*args,**kwargs):raise NotImplementedError('runner missing')
+                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+NotImplementedError: runner missing
+
+======================================================================
+ERROR: test_time_logs_outputs_exit_and_exception_fail_closed (test_launcher.LauncherTests.test_time_logs_outputs_exit_and_exception_fail_closed) (mode='chunk')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/document-fidelity/tools/document_fidelity/adapters/runner/tests/test_launcher.py", line 97, in test_time_logs_outputs_exit_and_exception_fail_closed
+    r,os,_=self.simulate(mode);self.assertIn(r.public['status'],('timed_out','failed'))
+           ^^^^^^^^^^^^^^^^^^^
+  File "/workspace/document-fidelity/tools/document_fidelity/adapters/runner/tests/test_launcher.py", line 67, in simulate
+    result=launcher.run_simulation(self.source,self.req,os,a,cancel=cancel)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/document-fidelity/tools/document_fidelity/adapters/runner/launcher.py", line 3, in run_simulation
+    def run_simulation(*args,**kwargs):raise NotImplementedError('runner missing')
+                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+NotImplementedError: runner missing
+
+======================================================================
+ERROR: test_time_logs_outputs_exit_and_exception_fail_closed (test_launcher.LauncherTests.test_time_logs_outputs_exit_and_exception_fail_closed) (mode='output_limit')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/document-fidelity/tools/document_fidelity/adapters/runner/tests/test_launcher.py", line 97, in test_time_logs_outputs_exit_and_exception_fail_closed
+    r,os,_=self.simulate(mode);self.assertIn(r.public['status'],('timed_out','failed'))
+           ^^^^^^^^^^^^^^^^^^^
+  File "/workspace/document-fidelity/tools/document_fidelity/adapters/runner/tests/test_launcher.py", line 67, in simulate
+    result=launcher.run_simulation(self.source,self.req,os,a,cancel=cancel)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/document-fidelity/tools/document_fidelity/adapters/runner/launcher.py", line 3, in run_simulation
+    def run_simulation(*args,**kwargs):raise NotImplementedError('runner missing')
+                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+NotImplementedError: runner missing
+
+======================================================================
+ERROR: test_time_logs_outputs_exit_and_exception_fail_closed (test_launcher.LauncherTests.test_time_logs_outputs_exit_and_exception_fail_closed) (mode='exit')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/document-fidelity/tools/document_fidelity/adapters/runner/tests/test_launcher.py", line 97, in test_time_logs_outputs_exit_and_exception_fail_closed
+    r,os,_=self.simulate(mode);self.assertIn(r.public['status'],('timed_out','failed'))
+           ^^^^^^^^^^^^^^^^^^^
+  File "/workspace/document-fidelity/tools/document_fidelity/adapters/runner/tests/test_launcher.py", line 67, in simulate
+    result=launcher.run_simulation(self.source,self.req,os,a,cancel=cancel)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/document-fidelity/tools/document_fidelity/adapters/runner/launcher.py", line 3, in run_simulation
+    def run_simulation(*args,**kwargs):raise NotImplementedError('runner missing')
+                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+NotImplementedError: runner missing
+
+======================================================================
+ERROR: test_time_logs_outputs_exit_and_exception_fail_closed (test_launcher.LauncherTests.test_time_logs_outputs_exit_and_exception_fail_closed) (mode='exception')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/document-fidelity/tools/document_fidelity/adapters/runner/tests/test_launcher.py", line 97, in test_time_logs_outputs_exit_and_exception_fail_closed
+    r,os,_=self.simulate(mode);self.assertIn(r.public['status'],('timed_out','failed'))
+           ^^^^^^^^^^^^^^^^^^^
+  File "/workspace/document-fidelity/tools/document_fidelity/adapters/runner/tests/test_launcher.py", line 67, in simulate
+    result=launcher.run_simulation(self.source,self.req,os,a,cancel=cancel)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/document-fidelity/tools/document_fidelity/adapters/runner/launcher.py", line 3, in run_simulation
+    def run_simulation(*args,**kwargs):raise NotImplementedError('runner missing')
+                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+NotImplementedError: runner missing
+
+======================================================================
+ERROR: test_time_logs_outputs_exit_and_exception_fail_closed (test_launcher.LauncherTests.test_time_logs_outputs_exit_and_exception_fail_closed) (mode='clock_back')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/document-fidelity/tools/document_fidelity/adapters/runner/tests/test_launcher.py", line 97, in test_time_logs_outputs_exit_and_exception_fail_closed
+    r,os,_=self.simulate(mode);self.assertIn(r.public['status'],('timed_out','failed'))
+           ^^^^^^^^^^^^^^^^^^^
+  File "/workspace/document-fidelity/tools/document_fidelity/adapters/runner/tests/test_launcher.py", line 67, in simulate
+    result=launcher.run_simulation(self.source,self.req,os,a,cancel=cancel)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/document-fidelity/tools/document_fidelity/adapters/runner/launcher.py", line 3, in run_simulation
+    def run_simulation(*args,**kwargs):raise NotImplementedError('runner missing')
+                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+NotImplementedError: runner missing
+
+======================================================================
+ERROR: test_time_logs_outputs_exit_and_exception_fail_closed (test_launcher.LauncherTests.test_time_logs_outputs_exit_and_exception_fail_closed) (mode='unknown_event')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/document-fidelity/tools/document_fidelity/adapters/runner/tests/test_launcher.py", line 97, in test_time_logs_outputs_exit_and_exception_fail_closed
+    r,os,_=self.simulate(mode);self.assertIn(r.public['status'],('timed_out','failed'))
+           ^^^^^^^^^^^^^^^^^^^
+  File "/workspace/document-fidelity/tools/document_fidelity/adapters/runner/tests/test_launcher.py", line 67, in simulate
+    result=launcher.run_simulation(self.source,self.req,os,a,cancel=cancel)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/document-fidelity/tools/document_fidelity/adapters/runner/launcher.py", line 3, in run_simulation
+    def run_simulation(*args,**kwargs):raise NotImplementedError('runner missing')
+                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+NotImplementedError: runner missing
+
+----------------------------------------------------------------------
+Ran 9 tests in 0.009s
+
+FAILED (errors=23)

@@ -1,18 +1,11 @@
-"""Dormant openpyxl source boundary. No CLI or function can currently start it."""
+"""Permit-checked copy editor source; absent trusted bootstrap remains HOLD."""
 
-ENVIRONMENT_HOLD = True  # No override/env/CLI flag. Requires future reviewed integration.
-
-
-def require_admitted_runtime():
-    # Even mutating the public module constant is not a launch authorization.
-    raise RuntimeError('environment_hold: no qualified isolation/provenance/license/launcher')
+from .runner.worker_gate import require_worker_permit
 
 
-def edit_copy(job, source_path, candidate_path):
-    require_admitted_runtime()
-    # Dormant implementation, intentionally unreachable in this checkpoint.
-    # A future host must deliver immutable prevalidated job and mount source RO,
-    # isolate and enforce limits before lifting the gate in a reviewed patch.
+def edit_copy(job, source_path, candidate_path, *, permit=None):
+    admitted=require_worker_permit(permit,job,source_path,candidate_path,'openpyxl')
+    job=admitted.request
     from openpyxl import load_workbook
     workbook = load_workbook(source_path, read_only=False, data_only=False, keep_links=False)
     try:
@@ -32,8 +25,9 @@ def edit_copy(job, source_path, candidate_path):
 
 
 def main():
-    require_admitted_runtime()
+    from .runner.worker_entry import dispatch
+    return dispatch('xlsx')
 
-
-if __name__ == '__main__':
-    main()
+if __name__=='__main__':
+    import json
+    print(json.dumps(main(),sort_keys=True))
