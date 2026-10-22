@@ -1,0 +1,7 @@
+legacy_source=c7c0d4729d034eb3d644e8945a56ca7dba467ff4; offline synthetic only
+captured_cancel_intent=intent-A; current_pending=intent-B
+before_phase=PENDING; after_phase=CANCEL_REQUESTED
+before_revision=6; after_revision=7; same_identity=true
+Exception in thread "main" java.lang.IllegalStateException: Late cancel for attempt A changed pending attempt B
+	at com.mightyoung.muyon.product.chat.components.Muyon_cancel_independent_legacyKt.main(muyon-cancel-independent-legacy.kt:31)
+	at com.mightyoung.muyon.product.chat.components.Muyon_cancel_independent_legacyKt.main(muyon-cancel-independent-legacy.kt)
