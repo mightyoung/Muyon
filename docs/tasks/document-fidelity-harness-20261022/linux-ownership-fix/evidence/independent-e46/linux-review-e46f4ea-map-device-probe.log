@@ -1,0 +1,2 @@
+maps_device=02:03, opened_artifact_device=00:01, same_inode=42
+accepted: [('/lib/reviewed.so', 1, 42, 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')]
