@@ -1,0 +1,19 @@
+Initial verification-helper assertion failed: it expected one allow in entire FFI; base already contains an unrelated pre-existing method allowance. Fixed check verifies exactly one added allowance and exact source restoration. No source changed for that helper correction.
+Base B FFI source 82169330ff6868b5979e351056d538dd496e9519
+Provider base8b2d7783a0bfe5c5207edb7cf37a83631f1cfb0f
+$ git apply --check /workspace/Muyon-ffi-abi-lint/docs/tasks/local-workspace-bot-provider-20261022/FIXED-FOUR-METHOD-ABI-LINT.patch
+exit=0
+
+
+$ git apply /workspace/Muyon-ffi-abi-lint/docs/tasks/local-workspace-bot-provider-20261022/FIXED-FOUR-METHOD-ABI-LINT.patch
+exit=0
+
+
+PASS exactB patch applies; removing3 inserted lines restores exact original bytes (ABI/body unchanged)
+PASS exactly one NEW method-scoped lint exception; existing allowances unchanged; no fifth API/core/journal source
+$ git diff --check
+exit=0
+
+
+$ cargo clippy --offline --locked --manifest-path crates/Cargo.toml --workspace --all-targets -- -D warnings
+NOT_RUN: cargo absent; B must rerun actual fixed combination
