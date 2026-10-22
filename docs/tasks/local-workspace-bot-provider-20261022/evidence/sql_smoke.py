@@ -42,7 +42,22 @@ def run():
         db.execute(insert_none, (draft,key,'workspace',conversation))
         db.commit()
         assert db.execute('SELECT stored_revision,archive_hex,lifecycle FROM local_bot_drafts').fetchone() == ('0',None,'editing_only')
-        print('PASS actual DDL + initial NULL archive + registry fact')
+        assert db.execute(sql('SELECT draft_id,workspace,conversation_id'),(key,)).fetchone()[7:9] == (None,None)
+        print('PASS actual DDL + initial NULL archive + registry fact + actual bounded projection')
+        # Exercise actual source projections, including NULL/type/byte-length boundaries.
+        record_query = sql('SELECT draft_id,workspace,conversation_id')
+        for value, projected in [
+            ('0' * 65536, '0' * 65536), ('0' * 65537, 'oversize'),
+            ('中' * 21846, 'oversize'), ('00' + '\0' + '0' * 65536, 'oversize'),
+            (b'00', 'invalid_storage'), (7, '7'), ('', '')]:
+            db.execute('UPDATE local_bot_drafts SET archive_hex=?,archive_digest=?', (value, 'a' * 64))
+            assert db.execute(record_query, (key,)).fetchone()[7] == projected
+        db.execute('UPDATE local_bot_drafts SET archive_hex=?,archive_digest=?', ('00', b'a' * 64))
+        assert db.execute(record_query, (key,)).fetchone()[8] == 'invalid_storage'
+        db.execute('UPDATE local_bot_drafts SET archive_hex=NULL,archive_digest=NULL')
+        assert db.execute(record_query, (key,)).fetchone()[7:9] == (None, None)
+        print('PASS actual archive NULL/text/BLOB/exact65536/oversize65537/multibyte/NUL and digest type projections')
+
         # Every production SQL statement parses against actual schema (no duplicated SQL).
         for statement in dict.fromkeys(sqls):
             if statement.startswith('CREATE TABLE'): continue
@@ -78,6 +93,17 @@ def run():
         db.commit()
         assert db.execute(update,('1',archive_hex,digest,draft,'1','0')).rowcount==0
         print('PASS save commit + stale editor CAS refuses')
+        original_query = sql('SELECT namespace_id,draft_id,scope_key')
+        for value, projected in [('x' * 4096, 'x' * 4096), ('x' * 4097, 'oversize'),
+                                 ('中' * 1366, 'oversize'), (b'{}', 'invalid_storage')]:
+            db.execute('UPDATE local_bot_draft_saves SET receipt_json=?', (value,))
+            assert db.execute(original_query, (attempt,)).fetchone()[-1] == projected
+        for bad_digest in [b'a' * 64, 'a' * 65, '中' * 64]:
+            db.execute('UPDATE local_bot_draft_saves SET archive_digest=?', (bad_digest,))
+            assert db.execute(original_query, (attempt,)).fetchone()[-2] == 'invalid_storage'
+        db.execute('UPDATE local_bot_draft_saves SET receipt_json=?,archive_digest=?', (receipt,digest))
+        print('PASS actual original-receipt text/BLOB/exact4096/oversize4097/byte-length/digest projection bounds')
+
         db.close()
         db = sqlite3.connect(path, isolation_level=None)
         assert db.execute(sql('SELECT namespace_id,draft_id,scope_key'),(attempt,)).fetchone()[-1]==receipt
