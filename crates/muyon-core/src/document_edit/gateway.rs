@@ -711,12 +711,14 @@ impl<'a> DocumentEditGateway<'a> {
         // COPY-only uses the already-published immutable source object. The
         // candidate bytes were independently persisted and checked identical.
         // No upload, staging, file write, or independent transaction remains.
-        let (result, postcondition) = self.store.document_clone_with_postcondition_in_transaction(
-            &tx,
-            &b.document,
-            &r.source.title,
-            &r.source.blob,
-        )?;
+        let (result, postcondition) = self
+            .store
+            .document_clone_with_postcondition_in_transaction(
+                &tx,
+                &b.document,
+                &r.source.title,
+                &r.source.blob,
+            )?;
         if result.document.revision() != &b.document.revision().next()? {
             return Err(ContractError::InvalidRevision);
         }
