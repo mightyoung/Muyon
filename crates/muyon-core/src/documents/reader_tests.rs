@@ -122,6 +122,24 @@ fn one_shot_callback_failure_and_cleanup_failure_return_no_success_or_pin() {
 }
 
 #[test]
+fn one_shot_cleanup_time_revocation_withholds_prepared_output() {
+    let (_f, host, access) = setup();
+    host.store().database().exec("CREATE TRIGGER expire_during_reader_cleanup BEFORE DELETE ON blob_pins WHEN OLD.kind='reader' BEGIN UPDATE document_grants SET expires_at_ms='0'; END", &[]).unwrap();
+    let result = host.store().with_document_source(&access, DocumentReadPurpose::ReadText, 1024, |view| Ok(view.bytes().to_vec()));
+    assert!(result.is_err(), "cleanup-time revocation must withhold output");
+    assert_eq!(pins(host.store()), 0);
+}
+
+#[test]
+fn eof_cleanup_time_revocation_withholds_prepared_chunk() {
+    let (_f, mut host, access) = setup();
+    let opened = host.open(&access, DocumentReadPurpose::ReadText).unwrap();
+    host.store().database().exec("CREATE TRIGGER expire_during_reader_cleanup BEFORE DELETE ON blob_pins WHEN OLD.kind='reader' BEGIN UPDATE document_grants SET expires_at_ms='0'; END", &[]).unwrap();
+    assert!(host.read_chunk(&opened.session_id, crate::blobs::MAX_CHUNK).is_err(), "cleanup-time revocation must withhold EOF bytes");
+    assert_eq!(pins(host.store()), 0);
+}
+
+#[test]
 fn bounded_sessions_idle_absolute_lifetime_and_invalid_chunk_release_pins() {
     let (_f, mut host, access) = setup();
     let mut ids = Vec::new();
