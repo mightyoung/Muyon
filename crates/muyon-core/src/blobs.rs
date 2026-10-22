@@ -454,7 +454,7 @@ impl BusinessStore {
             || upload.length != expected.byte_length.value()
             || upload.digest.as_deref() != Some(expected.digest.as_str())
         { return Ok(false); }
-        let rows = sql(self.database().query("SELECT b.byte_length FROM blobs b WHERE b.digest=? AND b.state='ready' AND EXISTS(SELECT 1 FROM blob_pins p WHERE p.digest=b.digest AND p.kind='upload' AND p.upload_id=? AND p.owner_epoch=? AND p.snapshot_id=?)", &[&expected.digest, upload_id, &upload.owner, &upload.snapshot]))?;
+        let rows = sql(self.database().query("SELECT CASE WHEN length(CAST(b.byte_length AS BLOB))<=20 THEN b.byte_length ELSE NULL END FROM blobs b WHERE b.digest=? AND b.state='ready' AND EXISTS(SELECT 1 FROM blob_pins p WHERE p.digest=b.digest AND p.kind='upload' AND p.upload_id=? AND p.owner_epoch=? AND p.snapshot_id=?)", &[&expected.digest, upload_id, &upload.owner, &upload.snapshot]))?;
         if rows.len() != 1 || cell(&rows[0], 0)? != expected.byte_length.as_str() {
             return Ok(false);
         }
@@ -885,8 +885,18 @@ impl BusinessStore {
         Ok(recovery)
     }
     fn can_delete_blob(&self, digest: &str) -> Result<bool> {
-        let blocked=sql(self.database().query("SELECT 1 WHERE EXISTS(SELECT 1 FROM blob_references WHERE digest=?) OR EXISTS(SELECT 1 FROM blob_pins WHERE digest=?) OR EXISTS(SELECT 1 FROM blob_uploads WHERE state NOT IN('committed','aborted') AND (digest=? OR digest IS NULL)) OR EXISTS(SELECT 1 FROM intents WHERE status IN('pending','unknown'))",&[digest,digest,digest]))?;
-        Ok(blocked.is_empty())
+        let blocked=sql(self.database().query("SELECT 1 WHERE EXISTS(SELECT 1 FROM blob_references WHERE digest=?) OR EXISTS(SELECT 1 FROM blob_pins WHERE digest=?) OR EXISTS(SELECT 1 FROM blob_uploads WHERE state NOT IN('committed','aborted') AND digest=?) OR EXISTS(SELECT 1 FROM intents WHERE status IN('pending','unknown'))",&[digest,digest,digest]))?;
+        if !blocked.is_empty() { return Ok(false); }
+        let unresolved = sql(self.database().query("SELECT upload_id FROM blob_uploads WHERE state NOT IN('committed','aborted') AND digest IS NULL", &[]))?;
+        for row in unresolved {
+            match self.document_candidate_reserves_digest(cell(&row, 0)?, digest)? {
+                Some(false) => {},
+                // Legacy unresolved uploads retain their original conservative
+                // behavior; only exact journal-backed candidate digests narrow it.
+                Some(true) | None => return Ok(false),
+            }
+        }
+        Ok(true)
     }
     /// Explicit, serialized maintenance. Marking deleting commits before unlink;
     /// publication/read acquisition both require ready in the same database.

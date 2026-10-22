@@ -51,7 +51,7 @@ impl BusinessStore {
     fn candidate_row(&self, candidate_id: &str) -> Result<(Row, CandidateState)> {
         identifier(candidate_id)?;
         self.candidate_schema()?;
-        let rows = sql(self.database().query("SELECT workspace,project_id,upload_id,expected_length,CASE WHEN length(CAST(payload AS BLOB))<=8192 THEN payload ELSE NULL END,state FROM document_candidates_v1 WHERE candidate_id=?", &[candidate_id]))?;
+        let rows = sql(self.database().query("SELECT CASE WHEN length(CAST(workspace AS BLOB))<=128 THEN workspace ELSE NULL END,CASE WHEN length(CAST(project_id AS BLOB))<=128 THEN project_id ELSE NULL END,CASE WHEN length(CAST(upload_id AS BLOB))<=128 THEN upload_id ELSE NULL END,CASE WHEN length(CAST(expected_length AS BLOB))<=8 THEN expected_length ELSE NULL END,CASE WHEN length(CAST(payload AS BLOB))<=8192 THEN payload ELSE NULL END,CASE WHEN length(CAST(state AS BLOB))<=32 THEN state ELSE NULL END FROM document_candidates_v1 WHERE candidate_id=?", &[candidate_id]))?;
         let raw = rows.first().ok_or(ContractError::NotFound)?;
         let row: Row = serde_json::from_str(cell(raw, 4)?).map_err(|_| ContractError::StorageCorrupt)?;
         identifier(&row.operation_id)?; identifier(&row.upload_id)?;
@@ -148,7 +148,7 @@ impl BusinessStore {
             Ok(())
         })();
         if work.is_err() { self.mark_candidate_unknown(candidate_id); return Err(ContractError::Unknown); }
-        self.lookup_document_candidate(access, candidate_id)
+        self.lookup_document_candidate(access, candidate_id).map_err(|_| ContractError::Unknown)
     }
     pub fn lookup_document_candidate(&self, access: &DocumentAccess, candidate_id: &str) -> Result<CandidateStatus> {
         let tx = sql(self.database().transaction())?;
@@ -175,5 +175,17 @@ impl BusinessStore {
         self.candidate_schema()?;
         let rows = sql(self.database().query("SELECT 1 FROM document_candidates_v1 WHERE workspace=? AND upload_id=? LIMIT 1", &[self.workspace_id(), upload_id]))?;
         Ok(!rows.is_empty())
+    }
+    /// GC needs the exact expected digest for a journal-backed incomplete upload,
+    /// not a global "any object might belong to it" reservation.
+    pub(crate) fn document_candidate_reserves_digest(&self, upload_id: &str, digest: &str) -> Result<Option<bool>> {
+        let exists = sql(self.database().query("SELECT name FROM sqlite_master WHERE type='table' AND name='document_candidates_v1'", &[]))?;
+        if exists.is_empty() { return Ok(None); }
+        self.candidate_schema()?;
+        let rows = sql(self.database().query("SELECT CASE WHEN length(CAST(candidate_id AS BLOB))<=128 THEN candidate_id ELSE NULL END FROM document_candidates_v1 WHERE workspace=? AND upload_id=?", &[self.workspace_id(), upload_id]))?;
+        let Some(raw) = rows.first() else { return Ok(None); };
+        let (row, _) = self.candidate_row(cell(raw, 0)?)?;
+        if row.upload_id != upload_id { return Err(ContractError::StorageCorrupt); }
+        Ok(Some(row.expected_blob.digest == digest))
     }
 }
