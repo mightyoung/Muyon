@@ -1,0 +1,9 @@
+test_leaf_members_and_recursive_empty_are_both_observed (tools.document_fidelity.adapters.runner.linux.tests.test_domain.DomainTests.test_leaf_members_and_recursive_empty_are_both_observed) ... ok
+test_reap_capture_cleanup_reject_root_empty_but_recursive_live (tools.document_fidelity.adapters.runner.linux.tests.test_domain.DomainTests.test_reap_capture_cleanup_reject_root_empty_but_recursive_live) ... ok
+test_recursive_kill_refuses_child_domain_before_open_or_write (tools.document_fidelity.adapters.runner.linux.tests.test_domain.DomainTests.test_recursive_kill_refuses_child_domain_before_open_or_write) ... ok
+test_root_empty_cannot_hide_recursive_populated_or_existing_child (tools.document_fidelity.adapters.runner.linux.tests.test_domain.DomainTests.test_root_empty_cannot_hide_recursive_populated_or_existing_child) ... ok
+
+----------------------------------------------------------------------
+Ran 4 tests in 0.005s
+
+OK

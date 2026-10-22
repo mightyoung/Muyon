@@ -135,6 +135,33 @@ def _text_at(fd,name,limit=65536):
     try:return _read(child,limit).decode('utf-8',errors='strict').strip()
     finally:os.close(child)
 
+def _domain_state(fd):
+    """Observe an already provisioned leaf. Never configure cgroup controls.
+
+    cgroup.events populated is recursive; cgroup.procs alone is not. A zero
+    max.descendants prevents new children, but existing child groups must still
+    be rejected before recursive kill, even when they are currently empty.
+    """
+    def leaf():
+        if _text_at(fd,'cgroup.max.descendants')!='0':raise ValueError('preconfigured_leaf_domain_required')
+        names=set(os.listdir(fd))
+        for name in names:
+            mode=os.stat(name,dir_fd=fd,follow_symlinks=False).st_mode
+            if stat.S_ISDIR(mode) or stat.S_ISLNK(mode):raise ValueError('child_cgroup_forbidden')
+        return names
+    before=leaf()
+    raw=_text_at(fd,'cgroup.procs').split()
+    if any(not p.isdecimal() or int(p)<=0 for p in raw) or len(raw)!=len(set(raw)):raise ValueError('domain_members_invalid')
+    members={int(p) for p in raw};events={}
+    for line in _text_at(fd,'cgroup.events').splitlines():
+        pair=line.split()
+        if len(pair)!=2 or pair[0] in events:raise ValueError('domain_events_invalid')
+        events[pair[0]]=pair[1]
+    populated=events.get('populated')
+    if populated not in ('0','1') or bool(members)!=(populated=='1'):raise ValueError('recursive_domain_population_mismatch')
+    if before!=leaf():raise ValueError('domain_structure_changed')
+    return members,populated=='1'
+
 def _readonly_source(fd,device,mount_pid=None):
     """FD mount + underlying superblock must both be read-only.
 
@@ -233,7 +260,8 @@ class NativeLinuxSystem:
             info=os.fstat(domain);buf=(ctypes.c_long*32)()
             if ctypes.CDLL(None,use_errno=True).fstatfs(domain,ctypes.byref(buf))!=0 or buf[0]!=0x63677270:raise ValueError('not_kernel_cgroup2')
             if (info.st_dev,info.st_ino)!=config.domain_identity or info.st_uid!=os.geteuid() or info.st_mode&0o077:raise ValueError('domain_identity_or_ownership')
-            if _text_at(domain,'cgroup.procs'):raise ValueError('exclusive_empty_domain_required')
+            members,populated=_domain_state(domain)
+            if members or populated:raise ValueError('exclusive_empty_domain_required')
             check_domain_values({name:_text_at(domain,name) for name in ('memory.max','pids.max','memory.swap.max','memory.oom.group','cpu.max','cgroup.type')},config.policy)
             image_info=os.fstat(image)
             if image_info.st_mode&0o022 or image_info.st_uid not in (0,os.geteuid()) or not os.statvfs(config.image).f_flag&os.ST_RDONLY:raise ValueError('preprovisioned_readonly_image_required')
@@ -385,7 +413,10 @@ class NativeLinuxSystem:
             except Exception:return False
         state.uncertain=False
         return True
-    def _members(self):return {int(p) for p in _text_at(self.domain_fd,'cgroup.procs').split()}
+    def _members(self):return _domain_state(self.domain_fd)[0]
+    def _domain_empty(self):
+        members,populated=_domain_state(self.domain_fd)
+        return not members and not populated
     def _alive(self,pidfd):return not select.select([pidfd],[],[],0)[0]
     def _verify_executable(self,pid,expected):
         fd=os.open('/proc/'+str(pid)+'/exe',os.O_RDONLY|os.O_CLOEXEC)
@@ -535,6 +566,7 @@ class NativeLinuxSystem:
             except ProcessLookupError:pass
     def kill(self,state):
         # Domain identity and exclusive ownership were pinned before launch.
+        _domain_state(self.domain_fd) # recursive kill must not touch a child group
         fd=_beneath(self.domain_fd,'cgroup.kill',os.O_WRONLY)
         try:os.write(fd,b'1')
         finally:os.close(fd)
@@ -552,18 +584,18 @@ class NativeLinuxSystem:
                     if int(child)!=state.process.pid:
                         try:os.waitpid(int(child),os.WNOHANG)
                         except ChildProcessError:pass
-                if not self._members() and not _proc(os.getpid(),'task/'+str(os.getpid())+'/children').strip():state.reaped=True;return True
+                if self._domain_empty() and not _proc(os.getpid(),'task/'+str(os.getpid())+'/children').strip():state.reaped=True;return True
             if self.now_ms()>=deadline:return False
             time.sleep(min(0.005,max(0,(deadline-self.now_ms())/1000)))
     def capture(self,state,policy):
-        if not state.reaped or self._members():raise ValueError('tree_not_reaped')
+        if not state.reaped or not self._domain_empty():raise ValueError('tree_not_reaped')
         files=snapshot.NativeFiles()
         candidate=snapshot.capture(files,state.output_fd,'candidate.'+state.spec['format'],policy.max_candidate_bytes,reaped=True)
         source=snapshot.capture(files,state.input_fd,'source.'+state.spec['format'],policy.max_input_bytes,reaped=True)
         job=snapshot.capture(files,state.job_dir_fd,'request.json',16384,reaped=True)
         return model.Snapshot(candidate,source,job,True,1,False)
     def cleanup(self,state):
-        if not state.reaped or self._members():raise ValueError('live_job_cleanup_forbidden')
+        if not state.reaped or not self._domain_empty():raise ValueError('live_job_cleanup_forbidden')
         st=os.stat(state.root,follow_symlinks=False)
         if (st.st_dev,st.st_ino)!=state.root_identity:raise ValueError('workspace_identity_changed')
         self._close(state);shutil.rmtree(state.root)

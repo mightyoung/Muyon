@@ -1,0 +1,103 @@
+test_leaf_members_and_recursive_empty_are_both_observed (tools.document_fidelity.adapters.runner.linux.tests.test_domain.DomainTests.test_leaf_members_and_recursive_empty_are_both_observed) ... ERROR
+test_reap_capture_cleanup_reject_root_empty_but_recursive_live (tools.document_fidelity.adapters.runner.linux.tests.test_domain.DomainTests.test_reap_capture_cleanup_reject_root_empty_but_recursive_live) ... 
+  test_reap_capture_cleanup_reject_root_empty_but_recursive_live (tools.document_fidelity.adapters.runner.linux.tests.test_domain.DomainTests.test_reap_capture_cleanup_reject_root_empty_but_recursive_live) (operation='reap') ... FAIL
+  test_reap_capture_cleanup_reject_root_empty_but_recursive_live (tools.document_fidelity.adapters.runner.linux.tests.test_domain.DomainTests.test_reap_capture_cleanup_reject_root_empty_but_recursive_live) (operation='capture') ... ERROR
+  test_reap_capture_cleanup_reject_root_empty_but_recursive_live (tools.document_fidelity.adapters.runner.linux.tests.test_domain.DomainTests.test_reap_capture_cleanup_reject_root_empty_but_recursive_live) (operation='cleanup') ... ERROR
+test_recursive_kill_refuses_child_domain_before_open_or_write (tools.document_fidelity.adapters.runner.linux.tests.test_domain.DomainTests.test_recursive_kill_refuses_child_domain_before_open_or_write) ... FAIL
+test_root_empty_cannot_hide_recursive_populated_or_existing_child (tools.document_fidelity.adapters.runner.linux.tests.test_domain.DomainTests.test_root_empty_cannot_hide_recursive_populated_or_existing_child) ... 
+  test_root_empty_cannot_hide_recursive_populated_or_existing_child (tools.document_fidelity.adapters.runner.linux.tests.test_domain.DomainTests.test_root_empty_cannot_hide_recursive_populated_or_existing_child) (kwargs={'populated': '1'}) ... FAIL
+  test_root_empty_cannot_hide_recursive_populated_or_existing_child (tools.document_fidelity.adapters.runner.linux.tests.test_domain.DomainTests.test_root_empty_cannot_hide_recursive_populated_or_existing_child) (kwargs={'child': True}) ... FAIL
+  test_root_empty_cannot_hide_recursive_populated_or_existing_child (tools.document_fidelity.adapters.runner.linux.tests.test_domain.DomainTests.test_root_empty_cannot_hide_recursive_populated_or_existing_child) (kwargs={'descendants': 'max'}) ... FAIL
+  test_root_empty_cannot_hide_recursive_populated_or_existing_child (tools.document_fidelity.adapters.runner.linux.tests.test_domain.DomainTests.test_root_empty_cannot_hide_recursive_populated_or_existing_child) (kwargs={'descendants': '1'}) ... FAIL
+
+======================================================================
+ERROR: test_leaf_members_and_recursive_empty_are_both_observed (tools.document_fidelity.adapters.runner.linux.tests.test_domain.DomainTests.test_leaf_members_and_recursive_empty_are_both_observed)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/document-fidelity/tools/document_fidelity/adapters/runner/linux/tests/test_domain.py", line 24, in test_leaf_members_and_recursive_empty_are_both_observed
+    native=self.fake(stack);self.assertEqual(set(),native._members());self.assertTrue(native._domain_empty())
+                                                                                      ^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'NativeLinuxSystem' object has no attribute '_domain_empty'
+
+======================================================================
+ERROR: test_reap_capture_cleanup_reject_root_empty_but_recursive_live (tools.document_fidelity.adapters.runner.linux.tests.test_domain.DomainTests.test_reap_capture_cleanup_reject_root_empty_but_recursive_live) (operation='capture')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/document-fidelity/tools/document_fidelity/adapters/runner/linux/tests/test_domain.py", line 44, in test_reap_capture_cleanup_reject_root_empty_but_recursive_live
+    elif operation=='capture':native.capture(state,model.Policy())
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/document-fidelity/tools/document_fidelity/adapters/runner/linux/kernel.py", line 561, in capture
+    candidate=snapshot.capture(files,state.output_fd,'candidate.'+state.spec['format'],policy.max_candidate_bytes,reaped=True)
+                                     ^^^^^^^^^^^^^^^
+AttributeError: 'types.SimpleNamespace' object has no attribute 'output_fd'
+
+======================================================================
+ERROR: test_reap_capture_cleanup_reject_root_empty_but_recursive_live (tools.document_fidelity.adapters.runner.linux.tests.test_domain.DomainTests.test_reap_capture_cleanup_reject_root_empty_but_recursive_live) (operation='cleanup')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/document-fidelity/tools/document_fidelity/adapters/runner/linux/tests/test_domain.py", line 45, in test_reap_capture_cleanup_reject_root_empty_but_recursive_live
+    else:native.cleanup(state)
+         ^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/document-fidelity/tools/document_fidelity/adapters/runner/linux/kernel.py", line 567, in cleanup
+    st=os.stat(state.root,follow_symlinks=False)
+               ^^^^^^^^^^
+AttributeError: 'types.SimpleNamespace' object has no attribute 'root'
+
+======================================================================
+FAIL: test_reap_capture_cleanup_reject_root_empty_but_recursive_live (tools.document_fidelity.adapters.runner.linux.tests.test_domain.DomainTests.test_reap_capture_cleanup_reject_root_empty_but_recursive_live) (operation='reap')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/document-fidelity/tools/document_fidelity/adapters/runner/linux/tests/test_domain.py", line 42, in test_reap_capture_cleanup_reject_root_empty_but_recursive_live
+    with self.assertRaises(ValueError):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ValueError not raised
+
+======================================================================
+FAIL: test_recursive_kill_refuses_child_domain_before_open_or_write (tools.document_fidelity.adapters.runner.linux.tests.test_domain.DomainTests.test_recursive_kill_refuses_child_domain_before_open_or_write)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/document-fidelity/tools/document_fidelity/adapters/runner/linux/tests/test_domain.py", line 32, in test_recursive_kill_refuses_child_domain_before_open_or_write
+    with self.assertRaises(ValueError):native.kill(NS(process=None))
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ValueError not raised
+
+======================================================================
+FAIL: test_root_empty_cannot_hide_recursive_populated_or_existing_child (tools.document_fidelity.adapters.runner.linux.tests.test_domain.DomainTests.test_root_empty_cannot_hide_recursive_populated_or_existing_child) (kwargs={'populated': '1'})
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/document-fidelity/tools/document_fidelity/adapters/runner/linux/tests/test_domain.py", line 21, in test_root_empty_cannot_hide_recursive_populated_or_existing_child
+    with self.assertRaises(ValueError):native._members()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ValueError not raised
+
+======================================================================
+FAIL: test_root_empty_cannot_hide_recursive_populated_or_existing_child (tools.document_fidelity.adapters.runner.linux.tests.test_domain.DomainTests.test_root_empty_cannot_hide_recursive_populated_or_existing_child) (kwargs={'child': True})
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/document-fidelity/tools/document_fidelity/adapters/runner/linux/tests/test_domain.py", line 21, in test_root_empty_cannot_hide_recursive_populated_or_existing_child
+    with self.assertRaises(ValueError):native._members()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ValueError not raised
+
+======================================================================
+FAIL: test_root_empty_cannot_hide_recursive_populated_or_existing_child (tools.document_fidelity.adapters.runner.linux.tests.test_domain.DomainTests.test_root_empty_cannot_hide_recursive_populated_or_existing_child) (kwargs={'descendants': 'max'})
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/document-fidelity/tools/document_fidelity/adapters/runner/linux/tests/test_domain.py", line 21, in test_root_empty_cannot_hide_recursive_populated_or_existing_child
+    with self.assertRaises(ValueError):native._members()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ValueError not raised
+
+======================================================================
+FAIL: test_root_empty_cannot_hide_recursive_populated_or_existing_child (tools.document_fidelity.adapters.runner.linux.tests.test_domain.DomainTests.test_root_empty_cannot_hide_recursive_populated_or_existing_child) (kwargs={'descendants': '1'})
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/document-fidelity/tools/document_fidelity/adapters/runner/linux/tests/test_domain.py", line 21, in test_root_empty_cannot_hide_recursive_populated_or_existing_child
+    with self.assertRaises(ValueError):native._members()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ValueError not raised
+
+----------------------------------------------------------------------
+Ran 4 tests in 0.008s
+
+FAILED (failures=6, errors=3)
