@@ -51,7 +51,7 @@ fn restart_restores_exact_snapshot_and_source_advance_fails_closed() {
     let newer = s.publish_document_revision_trusted(&source.document, "New source", DocumentFormat::Pdf, &upload(&s, b"%PDF-1.4\nsource v2\n%%EOF\n")).unwrap();
     let current_source = grant(&s, newer.document, 2);
     assert_eq!(s.read_artifact_revision("artifact", &Revision::new(1), &out, &[source.clone()]), Err(ContractError::RevisionConflict));
-    assert_eq!(s.read_artifact_revision("artifact", &Revision::new(1), &out, &[current_source]), Err(ContractError::RevisionConflict));
+    assert_eq!(s.read_artifact_revision("artifact", &Revision::new(1), &out, &[current_source]), Err(ContractError::InvalidAuthority));
     // Immutable original snapshot remains on disk; failure never retargets it.
     let raw = s.database().query("SELECT payload FROM artifact_revisions WHERE artifact_id='artifact'", &[]).unwrap();
     let stored: ArtifactRevision = serde_json::from_str(raw[0][0].as_deref().unwrap()).unwrap();
@@ -72,9 +72,9 @@ fn human_revision_is_atomic_and_generated_cannot_overwrite_it() {
     assert_eq!(s.read_document(&current).unwrap(), edited.document);
     let history = s.artifact_history("artifact", None, 1, &current, &[source.clone()]).unwrap();
     assert_eq!(history, vec![edited.clone()]);
-    assert_eq!(s.artifact_history("artifact", None, 10, &current, &[source.clone()]), Err(ContractError::RevisionConflict));
-    assert_eq!(s.artifact_history("artifact", Some(&edited.revision), 1, &current, &[source.clone()]), Err(ContractError::RevisionConflict));
-    assert_eq!(s.read_artifact_revision("artifact", &old.revision, &current, &[source]), Err(ContractError::RevisionConflict));
+    assert_eq!(s.artifact_history("artifact", None, 10, &current, &[source.clone()]), Err(ContractError::InvalidAuthority));
+    assert_eq!(s.artifact_history("artifact", Some(&edited.revision), 1, &current, &[source.clone()]), Err(ContractError::InvalidAuthority));
+    assert_eq!(s.read_artifact_revision("artifact", &old.revision, &current, &[source]), Err(ContractError::InvalidAuthority));
 }
 #[test]
 fn revocation_deletion_wrong_project_and_missing_source_deny_history() {

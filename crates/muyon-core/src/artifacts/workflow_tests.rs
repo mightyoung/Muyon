@@ -104,3 +104,45 @@ fn historical_output_and_source_require_explicit_core_history_policy() {
     let persisted: ArtifactRevision = serde_json::from_str(raw[0][0].as_deref().unwrap()).unwrap();
     assert_eq!(persisted, original);
 }
+#[test]
+fn receipt_write_failure_rolls_back_publication_and_keeps_pending_without_retry() {
+    let f = Fixture::new(); let (s, out, source) = f.setup(); s.initialize_artifact_workflows_trusted().unwrap(); let p = all_access(&s);
+    s.submit_artifact_save_trusted("archive", &p, &archive("artifact"), &out, &[source.clone()]).unwrap();
+    s.database().exec("CREATE TRIGGER fail_receipt BEFORE UPDATE ON artifact_save_intents_v1 WHEN NEW.status='committed' BEGIN SELECT RAISE(ABORT,'synthetic receipt failure'); END", &[]).unwrap();
+    let operation = ArtifactSaveOperation::Revise { artifact_id: "artifact".into(), expected_revision: Revision::new(1), finished: upload(&s, b"%PDF-1.4\nreceipt rollback\n%%EOF\n"), title: "Uncommitted".into(), origin: human() };
+    let result = s.submit_artifact_save_trusted("failed-receipt", &p, &operation, &out, &[source.clone()]).unwrap();
+    assert_eq!(result.status, ArtifactSaveStatus::Unknown); assert_eq!(result.recovery_action, RecoveryAction::QueryOriginal);
+    assert_eq!(s.read_document(&out).unwrap().title, "Synthetic");
+    assert_eq!(s.artifact_history("artifact", None, 10, &out, &[source.clone()]).unwrap().len(), 1);
+    assert_eq!(s.lookup_artifact_save("failed-receipt", &p).unwrap().status, ArtifactSaveStatus::Unknown);
+    s.database().exec("DROP TRIGGER fail_receipt", &[]).unwrap();
+    assert_eq!(s.submit_artifact_save_trusted("failed-receipt", &p, &operation, &out, &[source.clone()]).unwrap().status, ArtifactSaveStatus::Unknown);
+    assert_eq!(s.read_document(&out).unwrap().document, out.document);
+}
+#[test]
+fn rejected_projection_requires_a_durable_terminal_row() {
+    let f = Fixture::new(); let (s, out, source) = f.setup(); s.initialize_artifact_workflows_trusted().unwrap(); let p = all_access(&s);
+    s.submit_artifact_save_trusted("archive", &p, &archive("artifact"), &out, &[source.clone()]).unwrap();
+    s.database().exec("CREATE TRIGGER ignore_rejection BEFORE UPDATE ON artifact_save_intents_v1 WHEN NEW.status='rejected' BEGIN SELECT RAISE(IGNORE); END", &[]).unwrap();
+    // This duplicate artifact ID is a deterministic effect conflict, but the
+    // synthetic fault prevents its rejection from becoming a durable terminal.
+    let result = s.submit_artifact_save_trusted("cannot-reject", &p, &archive("artifact"), &out, &[source]).unwrap();
+    assert_eq!(result.status, ArtifactSaveStatus::Unknown); assert!(result.receipt.is_none());
+    assert_eq!(s.lookup_artifact_save("cannot-reject", &p).unwrap().status, ArtifactSaveStatus::Unknown);
+}
+#[test]
+fn independent_project_grants_reject_expiry_generation_epoch_and_project_changes() {
+    let f = Fixture::new(); let (s, out, source) = f.setup(); s.initialize_artifact_workflows_trusted().unwrap(); let p = all_access(&s);
+    let discover = project_access(&s, "actor", "discover-grant", 1, &[ArtifactProjectOperation::Discover]);
+    assert_eq!(s.submit_artifact_save_trusted("not-authorized", &discover, &archive("artifact"), &out, &[source]), Err(ContractError::InvalidAuthority));
+    assert_eq!(s.lookup_artifact_save("not-authorized", &discover), Err(ContractError::InvalidAuthority));
+    let mut wrong = p.clone(); wrong.authority.owner_epoch = "old-epoch".into();
+    assert_eq!(s.discover_project_artifacts(&wrong, None, 10), Err(ContractError::InvalidAuthority));
+    let next = project_access(&s, "actor", "project-grant", 2, &[ArtifactProjectOperation::Discover]);
+    assert_eq!(s.discover_project_artifacts(&p, None, 10), Err(ContractError::InvalidAuthority));
+    assert!(s.discover_project_artifacts(&next, None, 10).unwrap().is_empty());
+    s.revoke_artifact_project_grant_trusted(&next).unwrap();
+    assert_eq!(s.discover_project_artifacts(&next, None, 10), Err(ContractError::InvalidAuthority));
+    s.database().exec("UPDATE projects SET revision='2' WHERE id='project'", &[]).unwrap();
+    assert_eq!(s.discover_project_artifacts(&discover, None, 10), Err(ContractError::RevisionConflict));
+}

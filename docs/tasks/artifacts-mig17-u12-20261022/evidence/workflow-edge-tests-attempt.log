@@ -1,0 +1,2 @@
+/bin/bash: line 45: cargo: command not found
+WORKFLOW_EDGE_TEST_ATTEMPT_EXIT=127; NOT_RUN when cargo missing

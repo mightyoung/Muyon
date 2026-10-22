@@ -162,13 +162,19 @@ impl BusinessStore {
         Ok(record)
     }
     fn artifact_authorize_record(&self, tx: &Transaction<'_>, record: &ArtifactRevision, output: &DocumentAccess, sources: &[DocumentAccess]) -> Result<()> {
-        let current = self.artifact_access(tx, output, false)?;
         if !same_document(&record.document, output) { return Err(ContractError::BindingMismatch); }
-        if current.document != record.document.document { return Err(ContractError::RevisionConflict); }
-        let current_sources = self.artifact_sources(tx, output, sources)?;
-        for snapshot in &record.sources {
-            let current = current_sources.iter().find(|current| current.document.document_id() == snapshot.document.document_id()).ok_or(ContractError::InvalidAuthority)?;
-            if current.document != snapshot.document { return Err(ContractError::RevisionConflict); }
+        // Current grant alone never authorizes old content. Core explicitly checks
+        // exact historical policy and canonical immutable metadata in this tx.
+        let metadata = self.document_history_access_in_transaction(tx, output, &record.document.document, &[DocumentOperation::ReadText])?;
+        if metadata != record.document { return Err(ContractError::StorageCorrupt); }
+        self.artifact_authorize_snapshots(tx, output, &record.sources, sources)
+    }
+    fn artifact_authorize_snapshots(&self, tx: &Transaction<'_>, output: &DocumentAccess, snapshots: &[DocumentMetadata], sources: &[DocumentAccess]) -> Result<()> {
+        self.artifact_sources(tx, output, sources)?;
+        for snapshot in snapshots {
+            let access = sources.iter().find(|access| access.document.document_id() == snapshot.document.document_id()).ok_or(ContractError::InvalidAuthority)?;
+            let metadata = self.document_history_access_in_transaction(tx, access, &snapshot.document, &[DocumentOperation::ReadText])?;
+            if metadata != *snapshot { return Err(ContractError::StorageCorrupt); }
         }
         Ok(())
     }
@@ -196,11 +202,11 @@ impl BusinessStore {
     fn archive_artifact_in_transaction(&self, tx: &Transaction<'_>, id: &str, output: &DocumentAccess, sources: &[DocumentAccess], origin: &ArtifactOrigin) -> Result<ArtifactRevision> {
         identifier(id)?; origin.validate()?;
         self.artifact_schema()?;
-        let document = self.artifact_access(&tx, output, true)?;
+        let document = self.artifact_access(tx, output, true)?;
         if self.artifact_head(id, output)?.is_some() { return Err(ContractError::RevisionConflict); }
-        let record = ArtifactRevision { artifact_id: id.into(), revision: Revision::new(1), document, sources: self.artifact_sources(&tx, output, sources)?, created_by: origin.clone(), modified_by: origin.clone(), human_edited: origin.is_human() };
+        let record = ArtifactRevision { artifact_id: id.into(), revision: Revision::new(1), document, sources: self.artifact_sources(tx, output, sources)?, created_by: origin.clone(), modified_by: origin.clone(), human_edited: origin.is_human() };
         self.artifact_put(&record, output, &Revision::new(0))?;
-        self.artifact_access(&tx, output, true)?;
+        self.artifact_access(tx, output, true)?;
         self.artifact_sources(tx, output, sources)?;
         Ok(record)
     }
@@ -220,24 +226,23 @@ impl BusinessStore {
     fn revise_artifact_in_transaction(&self, tx: &Transaction<'_>, id: &str, expected: &Revision, output: &DocumentAccess, finished: &FinishedBlob, title: &str, current_sources: &[DocumentAccess], origin: &ArtifactOrigin) -> Result<ArtifactRevision> {
         identifier(id)?; origin.validate()?;
         self.artifact_schema()?;
-        self.artifact_access(&tx, output, true)?;
+        self.artifact_access(tx, output, true)?;
         if self.artifact_head(id, output)?.as_ref() != Some(expected) { return Err(ContractError::RevisionConflict); }
         let old = self.artifact_record(id, expected, output)?;
         // Reject external document edits rather than silently absorbing them.
         if old.document.document != output.document { return Err(ContractError::RevisionConflict); }
-        self.artifact_authorize_record(&tx, &old, output, current_sources)?;
+        self.artifact_authorize_record(tx, &old, output, current_sources)?;
         if old.human_edited && !origin.is_human() { return Err(ContractError::IntentConflict); }
-        let document = self.document_publish_in_transaction(&tx, &output.document, title, output.document.format(), finished)?;
+        let document = self.document_publish_in_transaction(tx, &output.document, title, output.document.format(), finished)?;
         let record = ArtifactRevision { artifact_id: id.into(), revision: expected.next()?, document, sources: old.sources, created_by: old.created_by, modified_by: origin.clone(), human_edited: old.human_edited || origin.is_human() };
         self.artifact_put(&record, output, expected)?;
-        self.document_grant_in_transaction(&tx, output, &[DocumentOperation::ReadText, DocumentOperation::StructuredEdit])?;
-        self.artifact_sources(tx, output, current_sources)?;
+        self.document_grant_in_transaction(tx, output, &[DocumentOperation::ReadText, DocumentOperation::StructuredEdit])?;
+        self.artifact_authorize_snapshots(tx, output, &record.sources, current_sources)?;
         Ok(record)
     }
-    /// Recovery lookup only: returns the exact archived refs with fresh exact
-    /// grants, including all sources. Older revisions fail closed until the core
-    /// owner supplies explicit historical authorization. Does not advance a head
-    /// or deliver bytes.
+    /// Recovery lookup only: returns exact archived refs under current + explicit
+    /// core historical policy for both output and sources. No latest substitution,
+    /// implicit historical grant, head restoration or byte delivery occurs.
     /// Byte delivery must remain behind the trusted host's current access checks.
     pub fn read_artifact_revision(&self, id: &str, revision: &Revision, output: &DocumentAccess, current_sources: &[DocumentAccess]) -> Result<ArtifactRevision> {
         identifier(id)?;

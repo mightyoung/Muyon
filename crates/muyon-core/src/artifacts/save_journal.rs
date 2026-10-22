@@ -108,7 +108,11 @@ impl BusinessStore {
                 request.validate_receipt(&receipt, &digest)?;
                 Ok(ArtifactSaveOutcome { status: ArtifactSaveStatus::Committed, receipt: Some(receipt), error: None, recovery_action: RecoveryAction::None })
             }
-            "rejected" => Ok(ArtifactSaveOutcome { status: ArtifactSaveStatus::Rejected, receipt: None, error: Some(decode(cell(row, 4)?)?), recovery_action: RecoveryAction::None }),
+            "rejected" => {
+                let error: ContractError = decode(cell(row, 4)?)?;
+                if storage_failure(&error) || error == ContractError::Unknown { return Err(ContractError::StorageCorrupt); }
+                Ok(ArtifactSaveOutcome { status: ArtifactSaveStatus::Rejected, receipt: None, error: Some(error), recovery_action: RecoveryAction::None })
+            },
             _ => Err(ContractError::StorageCorrupt),
         }
     }
