@@ -8,7 +8,7 @@ import tempfile
 import time
 
 from .protocol import IDENTITY_FIELDS, LIMITS, parse_request
-from . import xlsx
+from . import xlsx,docx,pptx
 
 
 def base_report():
@@ -17,13 +17,25 @@ def base_report():
                 dimensions={key:'not_run' for key in ('render','recalc','visual','annotation')})
 
 
+def adapter(raw):
+    request=parse_request(raw)
+    return {'set_numeric_cell':('xlsx',xlsx,'openpyxl','3.1.5','openpyxl_worker.py'),
+            'replace_docx_run_text':('docx',docx,'python-docx','1.2.0','docx_worker.py'),
+            'replace_pptx_shape_text':('pptx',pptx,'python-pptx','1.0.2','pptx_worker.py')}[request['operation']['kind']]
+
+
+def preview_target(source,raw):
+    try:return adapter(raw)[1].preview(source,raw)
+    except (ValueError,KeyError,TypeError):return dict(status='unsupported',reasons=['invalid_request'])
+
+
 def build_launch_spec(raw):
-    parse_request(raw)
-    return dict(argv=['/runtime/python3','-I','/adapter/openpyxl_worker.py','--request','/job/request.json'],
-                engine_id='openpyxl', engine_version='3.1.5', input='/input/source.xlsx',
-                candidate='/output/candidate.xlsx', input_read_only=True, network=False,
-                sanitized_environment=True, limits=dict(LIMITS), actual_launcher_available=False,
-                artifact_and_worker_hash_verification='required_by_future_host', current_environment='hold')
+    format,module,engine,version,worker=adapter(raw)
+    return dict(argv=['/runtime/python3','-I','/adapter/'+worker,'--request','/job/request.json'],
+                engine_id=engine,engine_version=version,format=format,input='/input/source.'+format,
+                candidate='/output/candidate.'+format,input_read_only=True,network=False,
+                sanitized_environment=True,limits=dict(LIMITS),actual_launcher_available=False,
+                artifact_and_worker_hash_verification='required_by_future_host',current_environment='hold')
 
 
 def run_real(source, raw, admission=None):
@@ -34,6 +46,7 @@ def run_real(source, raw, admission=None):
         result['reasons'].append('admission_missing')
     try:
         request = parse_request(raw)
+        result['schema_version'] = request['schema_version']
         result['identity'] = {key:request[key] for key in IDENTITY_FIELDS}
     except ValueError:
         result['reasons'].append('invalid_request')
@@ -67,11 +80,14 @@ def simulate_for_tests(source, raw, fake_executor):
         result['reasons'] = ['explicit_fake_executor_required']
         return result
     try:
-        plan = xlsx.prepare(source, raw)
+        format,module,engine,version,worker = adapter(raw)
+        result['preview'] = module.preview(source,raw)
+        plan = module.prepare(source, raw)
     except (ValueError, KeyError, TypeError):
         result['reasons'] = ['request_or_preflight_or_precondition_rejected']
         return result
     request = plan['request']
+    result['schema_version'] = request['schema_version']
     result['identity'] = {key:request[key] for key in IDENTITY_FIELDS}
     result['source_sha256'] = xlsx.sha(source)
     result['source_manifest'] = plan['source_report']['parts']
@@ -81,7 +97,7 @@ def simulate_for_tests(source, raw, fake_executor):
             root = Path(tmp)
             (root/'input').mkdir(mode=0o700)
             (root/'output').mkdir(mode=0o700)
-            original, candidate, job = root/'input/source.xlsx', root/'output/candidate.xlsx', root/'request.json'
+            original, candidate, job = root/('input/source.'+format), root/('output/candidate.'+format), root/'request.json'
             with original.open('xb') as stream:
                 stream.write(source)
             original.chmod(0o400)

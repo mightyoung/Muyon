@@ -36,7 +36,7 @@ def numeric(value):
 def parse_request(raw):
     if type(raw) is not dict or set(raw) != REQUEST_KEYS:
         raise ValueError('invalid_request_fields')
-    if type(raw['schema_version']) is not int or raw['schema_version'] != 1:
+    if type(raw['schema_version']) is not int or raw['schema_version'] not in (1,2):
         raise ValueError('unsupported_schema')
     for field in IDENTITY_FIELDS:
         if not isinstance(raw[field], str) or not re.fullmatch(r'[A-Za-z0-9][A-Za-z0-9_.:-]{0,127}', raw[field]):
@@ -44,14 +44,36 @@ def parse_request(raw):
     if not isinstance(raw['source_sha256'], str) or not re.fullmatch(r'[0-9a-f]{64}', raw['source_sha256']):
         raise ValueError('invalid_source_hash')
     op = raw['operation']
-    if type(op) is not dict or set(op) != {'kind', 'sheet', 'cell', 'expected', 'replacement'}:
+    if type(op) is not dict or 'kind' not in op:
         raise ValueError('invalid_operation_fields')
-    if op['kind'] != 'set_numeric_cell':
-        raise ValueError('unsupported_operation')
-    if (not isinstance(op['sheet'], str) or not 1 <= len(op['sheet']) <= 31
-            or any(ord(c) < 32 or c in '[]:*?/\\' for c in op['sheet'])):
-        raise ValueError('unsupported_sheet_name')
-    cell_address(op['cell'])
-    if numeric(op['expected']) == numeric(op['replacement']):
-        raise ValueError('noop_operation')
+    kind = op['kind']
+    if kind == 'set_numeric_cell':
+        if set(op) != {'kind','sheet','cell','expected','replacement'}:
+            raise ValueError('invalid_operation_fields')
+        if (not isinstance(op['sheet'], str) or not 1 <= len(op['sheet']) <= 31
+                or any(ord(c) < 32 or c in '[]:*?/\\' for c in op['sheet'])):
+            raise ValueError('unsupported_sheet_name')
+        cell_address(op['cell'])
+        if numeric(op['expected']) == numeric(op['replacement']):
+            raise ValueError('noop_operation')
+    elif raw['schema_version'] == 2 and kind in ('replace_docx_run_text','replace_pptx_shape_text'):
+        keys={'kind','part','paragraph_index','run_index','target_sha256','expected','replacement'}
+        if kind == 'replace_pptx_shape_text': keys |= {'slide_id','shape_id'}
+        if set(op) != keys: raise ValueError('invalid_operation_fields')
+        if not isinstance(op['part'],str) or (kind == 'replace_docx_run_text' and op['part'] != 'word/document.xml') or (kind == 'replace_pptx_shape_text' and not re.fullmatch(r'ppt/slides/slide[1-9][0-9]{0,4}\.xml',op['part'])):
+            raise ValueError('unsupported_part')
+        if not isinstance(op['target_sha256'],str) or not re.fullmatch(r'[0-9a-f]{64}',op['target_sha256']):
+            raise ValueError('invalid_target_hash')
+        for key in ('paragraph_index','run_index'):
+            if type(op[key]) is not int or not 0 <= op[key] <= 9999: raise ValueError('invalid_locator')
+        if kind == 'replace_pptx_shape_text':
+            for key in ('slide_id','shape_id'):
+                if type(op[key]) is not int or not 1 <= op[key] <= 2147483647: raise ValueError('invalid_locator')
+        for key in ('expected','replacement'):
+            value=op[key]
+            if (not isinstance(value,str) or not 1 <= len(value) <= 512 or any(ord(c) < 32 or 0xD800 <= ord(c) <= 0xDFFF or ord(c) in (0xFFFE,0xFFFF) for c in value)):
+                raise ValueError('unsupported_text')
+        if op['expected'] == op['replacement']: raise ValueError('noop_operation')
+    else:
+        raise ValueError('unsupported_operation_or_schema')
     return {**{key: raw[key] for key in raw if key != 'operation'}, 'operation': dict(op)}
