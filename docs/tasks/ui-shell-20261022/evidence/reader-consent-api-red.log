@@ -1,0 +1,63 @@
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/ui/shell/ReaderSurfaceFenceChecks.kt:6:9: error: class 'SurfaceTestHost' is not abstract and does not implement abstract members:
+fun acceptSelection(request: ReaderSurfaceRequest, observation: ReaderVisibilityObservation): Unit
+fun stopReadingExact(request: ReaderSurfaceRequest, reason: String): Boolean
+fun closeFrameExact(request: ReaderSurfaceRequest, reason: String): Boolean
+private class SurfaceTestHost : ReaderSurfaceHost {
+        ^^^^^^^^^^^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/ui/shell/ReaderSurfaceFenceChecks.kt:8:33: error: unresolved reference 'ReaderReadOnlySelectionIntent'.
+    val intents = mutableListOf<ReaderReadOnlySelectionIntent>()
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/ui/shell/ReaderSurfaceFenceChecks.kt:9:5: error: 'acceptSelection' overrides nothing. Potential signatures for overriding:
+fun acceptSelection(request: ReaderSurfaceRequest, observation: ReaderVisibilityObservation): Unit
+    override fun acceptSelection(request: ReaderSurfaceRequest, observation: ReaderVisibilityObservation, intent: ReaderReadOnlySelectionIntent) {
+    ^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/ui/shell/ReaderSurfaceFenceChecks.kt:9:115: error: unresolved reference 'ReaderReadOnlySelectionIntent'.
+    override fun acceptSelection(request: ReaderSurfaceRequest, observation: ReaderVisibilityObservation, intent: ReaderReadOnlySelectionIntent) {
+                                                                                                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/ui/shell/ReaderSurfaceFenceChecks.kt:10:57: error: unresolved reference 'request'.
+        check(observation.request === request && intent.request === request)
+                                                        ^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/ui/shell/ReaderSurfaceFenceChecks.kt:11:22: error: unresolved reference 'consumeFor'.
+        check(intent.consumeFor(request) && !intent.consumeFor(request))
+                     ^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/ui/shell/ReaderSurfaceFenceChecks.kt:11:53: error: unresolved reference 'consumeFor'.
+        check(intent.consumeFor(request) && !intent.consumeFor(request))
+                                                    ^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/ui/shell/ReaderSurfaceFenceChecks.kt:19:40: error: unresolved reference 'ReaderChainCleanup'.
+    val cleanupReasons = mutableListOf<ReaderChainCleanup>()
+                                       ^^^^^^^^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/ui/shell/ReaderSurfaceFenceChecks.kt:25:5: error: 'stopReadingExact' overrides nothing. Potential signatures for overriding:
+fun stopReadingExact(request: ReaderSurfaceRequest, reason: String): Boolean
+    override fun stopReadingExact(request: ReaderSurfaceRequest, reason: ReaderChainCleanup): Boolean { cleanupReasons += reason; stopped += request; return cleanupKnown }
+    ^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/ui/shell/ReaderSurfaceFenceChecks.kt:25:74: error: unresolved reference 'ReaderChainCleanup'.
+    override fun stopReadingExact(request: ReaderSurfaceRequest, reason: ReaderChainCleanup): Boolean { cleanupReasons += reason; stopped += request; return cleanupKnown }
+                                                                         ^^^^^^^^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/ui/shell/ReaderSurfaceFenceChecks.kt:26:5: error: 'closeFrameExact' overrides nothing. Potential signatures for overriding:
+fun closeFrameExact(request: ReaderSurfaceRequest, reason: String): Boolean
+    override fun closeFrameExact(request: ReaderSurfaceRequest, reason: ReaderChainCleanup): Boolean { cleanupReasons += reason; retiredFrames += request; return cleanupKnown }
+    ^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/ui/shell/ReaderSurfaceFenceChecks.kt:26:73: error: unresolved reference 'ReaderChainCleanup'.
+    override fun closeFrameExact(request: ReaderSurfaceRequest, reason: ReaderChainCleanup): Boolean { cleanupReasons += reason; retiredFrames += request; return cleanupKnown }
+                                                                        ^^^^^^^^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/ui/shell/ReaderSurfaceFenceChecks.kt:45:53: error: unresolved reference 'intentId'.
+    check(host.intents.size == 2 && host.intents[0].intentId != host.intents[1].intentId)
+                                                    ^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/ui/shell/ReaderSurfaceFenceChecks.kt:45:81: error: unresolved reference 'intentId'.
+    check(host.intents.size == 2 && host.intents[0].intentId != host.intents[1].intentId)
+                                                                                ^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/ui/shell/ReaderSurfaceFenceChecks.kt:46:28: error: unresolved reference 'consumeFor'.
+    check(!host.intents[0].consumeFor(b)) // old intent cannot authorize another exact choice
+                           ^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/ui/shell/ReaderSurfaceFenceChecks.kt:76:31: error: cannot infer type for type parameter 'T'. Specify it explicitly.
+    check(host.cleanupReasons.last() == ReaderChainCleanup.ACTIVITY_VISIBILITY_CHANGED)
+                              ^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/ui/shell/ReaderSurfaceFenceChecks.kt:76:41: error: unresolved reference 'ReaderChainCleanup'.
+    check(host.cleanupReasons.last() == ReaderChainCleanup.ACTIVITY_VISIBILITY_CHANGED)
+                                        ^^^^^^^^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/ui/shell/ReaderSurfaceFenceChecks.kt:83:24: error: cannot infer type for type parameter 'T'. Specify it explicitly.
+    check(host.intents.last().request === foreground && foreground.selectionSequence > a3.selectionSequence)
+                       ^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/ui/shell/ReaderSurfaceFenceChecks.kt:83:31: error: unresolved reference 'request'.
+    check(host.intents.last().request === foreground && foreground.selectionSequence > a3.selectionSequence)
+                              ^^^^^^^

@@ -12,6 +12,30 @@ class ReaderSurfaceRequest internal constructor(val surfaceId: String, val gener
     val lifecycleEpoch: Long, val frameSequence: Long, val selection: ReaderExactSelection)
 class ReaderVisibilityObservation internal constructor(val sampledAtNanos: Long, val observationId: String,
     val request: ReaderSurfaceRequest) // one dispatch consumes it; not a native grant or deadline
+/** One genuine selection's readonly intent, NOT a grant, ACL or provenance assertion.
+ * Host consumes once before lookup and still checks registration, source, scope and explicit revocation.
+ * Native owner/version/epoch/selection fences remain mandatory even after local consumption.
+ */
+class ReaderReadOnlySelectionIntent private constructor(val request: ReaderSurfaceRequest) {
+    val intentId: String = java.util.UUID.randomUUID().toString()
+    private var consumed = false
+    @Synchronized fun consumeFor(candidate: ReaderSurfaceRequest): Boolean {
+        if (consumed || candidate !== request) return false
+        consumed = true
+        return true
+    }
+    companion object {
+        internal fun fromUserSelection(request: ReaderSurfaceRequest) = ReaderReadOnlySelectionIntent(request)
+    }
+}
+/** Only ends this reading chain/child grants. None of these revoke document permission.
+ * An explicit permission revoke is a separate authoritative Host policy event, with no bypass here.
+ */
+enum class ReaderChainCleanup {
+    RESOURCE_CLEANUP_UNKNOWN, ACTIVITY_VISIBILITY_CHANGED, ROUTE_ENTERED, ROUTE_LEFT,
+    SCOPE_CHANGED, SELECTION_CHANGED, SELECTION_ADMISSION_UNKNOWN, FRAME_CHANGED,
+    OPEN_OUTCOME_UNKNOWN, VISIBILITY_SAMPLE_FAILED, FOREIGN_REPLY, ACTIVITY_DESTROYED, HOST_INVALIDATED
+}
 /** One exact host-owned resource. Duplicate replies never close it twice; unknown close is not retried. */
 class ReaderSurfaceResource(private val closeExact: () -> Unit) : AutoCloseable {
     private var state = 0 // 0 open, 1 confirmed closed, 2 outcome unknown
@@ -30,10 +54,11 @@ sealed class ReaderSurfaceReply {
 /** Future private Host adapter must enforce its own serialized native fence; no JSON allow bit. */
 interface ReaderSurfaceHost {
     /** Serialized authentic selection event BEFORE asynchronous lookup; not permission issuance. */
-    fun acceptSelection(request: ReaderSurfaceRequest, observation: ReaderVisibilityObservation)
+    fun acceptSelection(request: ReaderSurfaceRequest, observation: ReaderVisibilityObservation, intent: ReaderReadOnlySelectionIntent,
+        invalidated: () -> Unit)
     fun open(request: ReaderSurfaceRequest, observation: ReaderVisibilityObservation, receive: (ReaderSurfaceReply) -> Unit)
-    fun stopReadingExact(request: ReaderSurfaceRequest, reason: String): Boolean
-    fun closeFrameExact(request: ReaderSurfaceRequest, reason: String): Boolean
+    fun stopReadingExact(request: ReaderSurfaceRequest, reason: ReaderChainCleanup): Boolean
+    fun closeFrameExact(request: ReaderSurfaceRequest, reason: ReaderChainCleanup): Boolean
 }
 class ReaderSurfaceFence(private val checkOwner: () -> Unit, private val physical: () -> ReaderPhysicalState,
     private val nowNanos: () -> Long, private val host: ReaderSurfaceHost? = null, private val changed: () -> Unit = {},
@@ -66,12 +91,12 @@ class ReaderSurfaceFence(private val checkOwner: () -> Unit, private val physica
             if (!held) generation = increment(generation)
             held = true
             if (failedResources.none { it === resource }) failedResources.add(resource)
-            stopCurrent("reader_resource_cleanup_unknown")
+            stopCurrent(ReaderChainCleanup.RESOURCE_CLEANUP_UNKNOWN)
             notice = "阅读资源清理结果未知；已停止，不能自动重开。"
             changed()
         }
     }
-    private fun stopCurrent(reason: String, terminal: Boolean = true) {
+    private fun stopCurrent(reason: ReaderChainCleanup, terminal: Boolean = true) {
         val requests = if (terminal) listOfNotNull(selectionEvent) else listOfNotNull(inFlight, displayed).distinct()
         if (terminal) selectionEvent = null
         inFlight = null; displayed = null; current = null; intentActive = false
@@ -84,7 +109,7 @@ class ReaderSurfaceFence(private val checkOwner: () -> Unit, private val physica
         resource?.let(::closeOwned)
         if (held) notice = "阅读停止或清理尚未确认；保持暂停，不能自动重开。"
     }
-    private fun advance(reason: String, terminal: Boolean = true) {
+    private fun advance(reason: ReaderChainCleanup, terminal: Boolean = true) {
         generation = increment(generation)
         stopCurrent(reason, terminal)
     }
@@ -92,13 +117,13 @@ class ReaderSurfaceFence(private val checkOwner: () -> Unit, private val physica
         val state = physical()
         if (state != lastPhysical) {
             lastPhysical = state; lifecycleEpoch = increment(lifecycleEpoch)
-            advance("activity_visibility_changed")
+            advance(ReaderChainCleanup.ACTIVITY_VISIBILITY_CHANGED)
         }
         return state
     }
     fun enter(workspace: String?, project: String?): ReaderRoute {
         checkOwner(); check(!destroyed)
-        advance("reader_route_entered")
+        advance(ReaderChainCleanup.ROUTE_ENTERED)
         if (this.workspace != workspace || this.project != project) selected = null
         this.workspace = workspace; this.project = project
         return ReaderRoute().also { route = it; refreshPhysical(); changed() }
@@ -106,7 +131,7 @@ class ReaderSurfaceFence(private val checkOwner: () -> Unit, private val physica
     fun leave(route: ReaderRoute) {
         checkOwner()
         if (this.route !== route || destroyed) return
-        this.route = null; advance("reader_route_left"); changed()
+        this.route = null; advance(ReaderChainCleanup.ROUTE_LEFT); changed()
     }
     fun lifecycleEvent() {
         checkOwner(); if (destroyed) return
@@ -115,7 +140,7 @@ class ReaderSurfaceFence(private val checkOwner: () -> Unit, private val physica
     fun scopeChanged(workspace: String?, project: String?) {
         checkOwner(); if (destroyed || (this.workspace == workspace && this.project == project)) return
         this.workspace = workspace; this.project = project; selected = null
-        advance("reader_scope_changed"); changed()
+        advance(ReaderChainCleanup.SCOPE_CHANGED); changed()
     }
     private fun newRequest(): ReaderSurfaceRequest = ReaderSurfaceRequest(surfaceId, generation,
         selectionSequence, lifecycleEpoch, frameSequence, checkNotNull(selected)).also { current = it }
@@ -126,28 +151,37 @@ class ReaderSurfaceFence(private val checkOwner: () -> Unit, private val physica
         if (!eligible(actual) || workspace == null || selection.document.workspaceId != workspace || selection.document.projectId != project) {
             notice = "当前阅读页面、窗口或精确文档范围不可用；未调用阅读宿主。"; changed(); return null
         }
-        advance("reader_selection_changed")
+        advance(ReaderChainCleanup.SELECTION_CHANGED)
         if (held) { changed(); return null }
         selectionSequence = increment(selectionSequence); frameSequence = 0
         selected = selection; intentActive = true
-        notice = "已记录当前文档选择；仍需宿主核实范围与阅读策略。"
+        notice = "已记录本次点选的只读查看意图；仍需宿主核实文档来源、范围与撤权状态。"
         val request = newRequest()
         if (host != null) {
             selectionEvent = request
             try {
-                host.acceptSelection(request, ReaderVisibilityObservation(nowNanos(), java.util.UUID.randomUUID().toString(), request))
+                host.acceptSelection(request, ReaderVisibilityObservation(nowNanos(), java.util.UUID.randomUUID().toString(), request),
+                    ReaderReadOnlySelectionIntent.fromUserSelection(request)) { postOwner { invalidateSelection(request) } }
             } catch (_: Exception) {
-                held = true; advance("reader_selection_admission_unknown")
+                held = true; advance(ReaderChainCleanup.SELECTION_ADMISSION_UNKNOWN)
                 notice = "阅读选择接纳未确认；保持暂停，不自动重试。"; changed(); return null
             }
         }
         changed(); return request
     }
+    /** Host policy/source invalidation is independent of an open reply, including after publication. */
+    private fun invalidateSelection(original: ReaderSurfaceRequest) {
+        checkOwner()
+        if (destroyed || selectionEvent !== original) return
+        advance(ReaderChainCleanup.HOST_INVALIDATED)
+        if (!held) notice = "宿主报告本次文档来源或阅读权限失效；已停止阅读。"
+        changed()
+    }
     fun nextFrame(route: ReaderRoute): ReaderSurfaceRequest? {
         checkOwner()
         if (destroyed || held || this.route !== route || !intentActive || !eligible(refreshPhysical()) || !intentActive) return null
         // Page/frame epoch is separate from the exact document selection sequence.
-        advance("reader_frame_changed", terminal = false)
+        advance(ReaderChainCleanup.FRAME_CHANGED, terminal = false)
         if (held) { changed(); return null }
         intentActive = true; frameSequence = increment(frameSequence)
         return newRequest().also { changed() }
@@ -164,7 +198,7 @@ class ReaderSurfaceFence(private val checkOwner: () -> Unit, private val physica
         inFlight = request
         try { adapter.open(request, observation) { reply -> postOwner { receive(request, reply) } } }
         catch (_: Exception) {
-            held = true; advance("reader_open_outcome_unknown")
+            held = true; advance(ReaderChainCleanup.OPEN_OUTCOME_UNKNOWN)
             notice = "阅读打开结果未知；已停止，不自动重试。"; changed(); return false
         }
         return true
@@ -176,7 +210,7 @@ class ReaderSurfaceFence(private val checkOwner: () -> Unit, private val physica
             return
         }
         try { refreshPhysical() } catch (_: Exception) {
-            held = true; advance("reader_visibility_sample_failed")
+            held = true; advance(ReaderChainCleanup.VISIBILITY_SAMPLE_FAILED)
         }
         if (held || current !== request || inFlight !== request || !intentActive || route == null) {
             if (reply is ReaderSurfaceReply.Opened && reply.resource !== ownedResource) closeOwned(reply.resource)
@@ -186,7 +220,7 @@ class ReaderSurfaceFence(private val checkOwner: () -> Unit, private val physica
             is ReaderSurfaceReply.Opened -> {
                 if (reply.request !== request) {
                     // Keep the original inFlight until exact cleanup has captured its identity.
-                    held = true; advance("foreign_reader_reply"); closeOwned(reply.resource)
+                    held = true; advance(ReaderChainCleanup.FOREIGN_REPLY); closeOwned(reply.resource)
                 } else {
                     inFlight = null; ownedResource = reply.resource; displayed = request
                     notice = "宿主返回当前选择的阅读资源；不代表重授权或持续阅读已验收。"
@@ -201,7 +235,7 @@ class ReaderSurfaceFence(private val checkOwner: () -> Unit, private val physica
     }
     fun destroy() {
         checkOwner(); if (destroyed) return
-        destroyed = true; route = null; advance("activity_destroyed")
+        destroyed = true; route = null; advance(ReaderChainCleanup.ACTIVITY_DESTROYED)
         val failures = failedResources.toList(); failedResources.clear()
         failures.forEach(::closeOwned); changed()
     }

@@ -1,0 +1,8 @@
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/ui/shell/ReaderSurfaceFenceChecks.kt:6:9: error: class 'SurfaceTestHost' is not abstract and does not implement abstract member:
+fun acceptSelection(request: ReaderSurfaceRequest, observation: ReaderVisibilityObservation, intent: ReaderReadOnlySelectionIntent): Unit
+private class SurfaceTestHost : ReaderSurfaceHost {
+        ^^^^^^^^^^^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/ui/shell/ReaderSurfaceFenceChecks.kt:10:5: error: 'acceptSelection' overrides nothing. Potential signatures for overriding:
+fun acceptSelection(request: ReaderSurfaceRequest, observation: ReaderVisibilityObservation, intent: ReaderReadOnlySelectionIntent): Unit
+    override fun acceptSelection(request: ReaderSurfaceRequest, observation: ReaderVisibilityObservation, intent: ReaderReadOnlySelectionIntent, invalidated: () -> Unit) {
+    ^^^^^^^^

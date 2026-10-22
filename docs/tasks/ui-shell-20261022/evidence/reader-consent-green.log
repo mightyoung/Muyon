@@ -1,0 +1,1 @@
+PASS reader surface fence: single-use exact readonly selection intent and lifecycle-only typed cleanup; exact A/B/A and frame identity; stale pre-Host zero calls; owning-thread fresh sample; background/focus/scope/route/destroy cleanup; no auto-resume; unavailable and cleanup hold

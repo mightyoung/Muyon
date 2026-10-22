@@ -5,19 +5,29 @@ import com.mightyoung.muyon.product.ui.documents.ReaderDocumentRef
 
 private class SurfaceTestHost : ReaderSurfaceHost {
     val selections = mutableListOf<ReaderSurfaceRequest>()
-    override fun acceptSelection(request: ReaderSurfaceRequest, observation: ReaderVisibilityObservation) { selections += request; check(observation.request === request) }
+    val intents = mutableListOf<ReaderReadOnlySelectionIntent>()
+    val invalidations = mutableMapOf<ReaderSurfaceRequest, () -> Unit>()
+    override fun acceptSelection(request: ReaderSurfaceRequest, observation: ReaderVisibilityObservation, intent: ReaderReadOnlySelectionIntent, invalidated: () -> Unit) {
+        check(observation.request === request && intent.request === request)
+        check(intent.consumeFor(request) && !intent.consumeFor(request))
+        intents += intent; selections += request; invalidations[request] = invalidated
+    }
     val opened = mutableListOf<ReaderSurfaceRequest>()
     val stopped = mutableListOf<ReaderSurfaceRequest>()
     val retiredFrames = mutableListOf<ReaderSurfaceRequest>()
     val callbacks = mutableMapOf<ReaderSurfaceRequest, (ReaderSurfaceReply) -> Unit>()
     val observations = mutableListOf<ReaderVisibilityObservation>()
+    val cleanupReasons = mutableListOf<ReaderChainCleanup>()
     var cleanupKnown = true
+    // Synthetic authoritative policy fixture; production catalog/policy adapter remains absent.
+    val revoked = mutableSetOf<ReaderExactSelection>()
     override fun open(request: ReaderSurfaceRequest, observation: ReaderVisibilityObservation, receive: (ReaderSurfaceReply) -> Unit) {
         check(selections.lastOrNull()?.let { it.surfaceId == request.surfaceId && it.selectionSequence == request.selectionSequence && it.selection == request.selection } == true) { "selection must be accepted before any open" }
         opened += request; observations += observation; callbacks[request] = receive
+        if (request.selection in revoked) receive(ReaderSurfaceReply.Unavailable("explicit_document_read_revoked"))
     }
-    override fun stopReadingExact(request: ReaderSurfaceRequest, reason: String): Boolean { stopped += request; return cleanupKnown }
-    override fun closeFrameExact(request: ReaderSurfaceRequest, reason: String): Boolean { retiredFrames += request; return cleanupKnown }
+    override fun stopReadingExact(request: ReaderSurfaceRequest, reason: ReaderChainCleanup): Boolean { cleanupReasons += reason; stopped += request; return cleanupKnown }
+    override fun closeFrameExact(request: ReaderSurfaceRequest, reason: ReaderChainCleanup): Boolean { cleanupReasons += reason; retiredFrames += request; return cleanupKnown }
 }
 private class SurfaceTestResource {
     var closes = 0
@@ -36,6 +46,10 @@ fun main() {
     val a1 = checkNotNull(fence.select(route, ref("a"))) { "visible user selection must create local exact intent" }
     val b = checkNotNull(fence.select(route, ref("b")))
     check(host.selections == listOf(a1, b))
+    check(host.intents.size == 2 && host.intents[0].intentId != host.intents[1].intentId)
+    check(!host.intents[0].consumeFor(b)) // old intent cannot authorize another exact choice
+    val singleIntent = ReaderReadOnlySelectionIntent.fromUserSelection(a1)
+    check(!singleIntent.consumeFor(b) && singleIntent.consumeFor(a1) && !singleIntent.consumeFor(a1))
     check(!fence.dispatch(a1) && host.opened.isEmpty()) // reject BEFORE any Host/destructive open
     check(fence.dispatch(b) && host.opened.single() === b)
     check(!fence.dispatch(b) && host.opened.size == 1) // one request/observation cannot be reused
@@ -65,10 +79,15 @@ fun main() {
     state = state.copy(resumed = false); fence.lifecycleEvent()
     check(fence.generation > priorGeneration && frame2.closes == 1 && fence.displayed == null)
     check(host.stopped.last() === a3 && !host.stopped.contains(aFrame2)) // stop exact reading selection, not a page as a new chain
+    check(host.cleanupReasons.last() == ReaderChainCleanup.ACTIVITY_VISIBILITY_CHANGED)
+    val consentBeforeResume = host.intents.size
     val before = host.opened.size
     state = state.copy(resumed = true); fence.lifecycleEvent()
     check(!fence.dispatch(aFrame2) && fence.nextFrame(route) == null && host.opened.size == before) // never auto-resume
+    check(host.intents.size == consentBeforeResume) // lifecycle never manufactures a new user consent
     val foreground = checkNotNull(fence.select(route, ref("a")))
+    check(host.intents.last().request === foreground && foreground.selectionSequence > a3.selectionSequence)
+    check(host.intents.size == consentBeforeResume + 1) // genuine new click after stop, no permanent file ban
     state = state.copy(focused = false) // fresh owning-thread sample catches even a missing callback
     check(!fence.dispatch(foreground) && host.opened.size == before)
     state = state.copy(focused = true); fence.lifecycleEvent()
@@ -122,5 +141,36 @@ fun main() {
     val foreignResource = SurfaceTestResource()
     foreignHost.callbacks.getValue(requested)(ReaderSurfaceReply.Opened(old, foreignResource.resource))
     check(foreignHost.stopped.contains(requested) && foreignResource.closes == 1 && foreign.displayed == null)
-    println("PASS reader surface fence: exact A/B/A and frame identity; stale pre-Host zero calls; owning-thread fresh sample; background/focus/scope/route/destroy cleanup; no auto-resume; unavailable and cleanup hold")
+    val invalidationHost = SurfaceTestHost()
+    val invalidation = ReaderSurfaceFence({}, { state }, { ++clock }, invalidationHost)
+    val invalidationRoute = invalidation.enter("w", "p")
+    val invalidA = checkNotNull(invalidation.select(invalidationRoute, ref("a")))
+    check(invalidation.dispatch(invalidA))
+    val invalidResource = SurfaceTestResource()
+    invalidationHost.callbacks.getValue(invalidA)(ReaderSurfaceReply.Opened(invalidA, invalidResource.resource))
+    invalidationHost.invalidations.getValue(invalidA)()
+    check(invalidation.displayed == null && invalidResource.closes == 1 && invalidation.nextFrame(invalidationRoute) == null)
+    val invalidB = checkNotNull(invalidation.select(invalidationRoute, ref("b")))
+    check(invalidation.dispatch(invalidB))
+    val validBResource = SurfaceTestResource()
+    invalidationHost.callbacks.getValue(invalidB)(ReaderSurfaceReply.Opened(invalidB, validBResource.resource))
+    invalidationHost.invalidations.getValue(invalidA)()
+    check(invalidation.displayed === invalidB && validBResource.closes == 0) // old policy event cannot stop current B
+    val renewedA = checkNotNull(invalidation.select(invalidationRoute, ref("a")))
+    check(invalidation.dispatch(renewedA))
+    invalidationHost.invalidations.getValue(invalidA)()
+    val renewedResource = SurfaceTestResource()
+    invalidationHost.callbacks.getValue(renewedA)(ReaderSurfaceReply.Opened(renewedA, renewedResource.resource))
+    check(invalidation.displayed === renewedA && renewedResource.closes == 0) // same ref, different original choice
+    val policyHost = SurfaceTestHost().also { it.revoked += ref("a") }
+    val policySurface = ReaderSurfaceFence({}, { state }, { ++clock }, policyHost)
+    val policyRoute = policySurface.enter("w", "p")
+    repeat(2) {
+        val denied = checkNotNull(policySurface.select(policyRoute, ref("a")))
+        check(policySurface.dispatch(denied)) // dispatch is not a permission/success result
+        check(policySurface.displayed == null && policySurface.nextFrame(policyRoute) == null)
+    }
+    check(policyHost.intents.map { it.intentId }.distinct().size == 2)
+    check(policyHost.opened.size == 2 && policySurface.displayed == null) // new intent IDs never override Host denial
+    println("PASS reader surface fence: single-use exact readonly selection intent and lifecycle-only typed cleanup; exact A/B/A and frame identity; stale pre-Host zero calls; owning-thread fresh sample; background/focus/scope/route/destroy cleanup; no auto-resume; unavailable and cleanup hold")
 }

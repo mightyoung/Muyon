@@ -160,3 +160,13 @@ main/develop modification. Whole reading and overall UI acceptance remain incomp
 Existing package checks also executed: python3 -m unittest discover -s
 apps/muyon_android/checks -p 'test_*.py',17 PASS exit0; reader-surface-package-checks.log.
 These are package/evidence gates, not Android lifecycle acceptance.
+
+
+## Approved explicit-click rule follow-up
+
+See READER-CLICK-CONSENT.md for the additive single-use readonly selection intent,
+typed lifecycle-only cleanup and exact post-publication Host invalidation callback.
+The private Host port signature in that follow-up supersedes the earlier proposed
+acceptSelection/cleanup signatures here. It does not release a canonical catalog,
+principal, controlled-FD or authoritative policy bridge. Real Activity remains
+host=null/unavailable; no permission or verified flag is inferred from the rule.

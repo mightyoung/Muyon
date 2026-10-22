@@ -1,0 +1,22 @@
+Reviewer: /root/review_shell
+UTC: 2026-10-22T09:37:38.156065+00:00
+Base HEAD: c0c2dc994df099c36c83813adf8410dac999d943; uncommitted final selection-consent/invalidation increment identified below
+Command: KOTLINC=/workspace/ui-shell-tools/kotlin-2.2.20/kotlinc/bin/kotlinc bash apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/ui/shell/run-reader-surface-checks.sh
+Actual Kotlin2.2.20 -Werror -jvm-target17; no Android stubs/network
+Input SHA256 before/after run: identical; exact final hashes supplied by parent independently matched
+runner_exit=0
+STDOUT captured directly:
+PASS reader surface fence: single-use exact readonly selection intent and lifecycle-only typed cleanup; exact A/B/A and frame identity; stale pre-Host zero calls; owning-thread fresh sample; background/focus/scope/route/destroy cleanup; no auto-resume; unavailable and cleanup hold
+
+STDERR captured directly:
+
+git diff --check exit=0
+
+SHA256:
+cddb2403725a102287fd4980d6ea8ca2b07fce479d2cd1386b5a6c97709d8440  apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/ui/documents/DocumentReaderModels.kt
+0e20ae687f2471d5d16dce07e75f7946da03493ece5f6bbf69ce27e182a7da42  apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/ui/shell/ReaderSurfaceFence.kt
+063fee7952e29d693b30201f2a9b478577541faf5b9120be1b48594eb45bb26b  apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/ui/shell/ActivityReaderSurface.kt
+5d0fd778e4ccf759136ddf9c7112400c60b367c366f50b3a809bab4ad8a236b9  apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/ui/shell/ReaderSelectionSurface.kt
+067623f111505cf820abb3a63e185b86e8cb4d1ede6edacd7e5a99b9de86c621  apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/MainActivity.kt
+45d883b10dfdeea32d9ff57a40544eed8d532997f65c8eda5e5f2fda983775b0  apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/ui/shell/ReaderSurfaceFenceChecks.kt
+2fe0183b36e8597b07dec3c44d00b79404973d398f2546fd1b46f5279fc615a6  apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/ui/shell/run-reader-surface-checks.sh
