@@ -10,7 +10,8 @@ public document capability entry. Fixed dependencies combined; independent stati
 review findings addressed. Actual offline results and limits remain in REPORT.md.
 
 Next inputs are coordinated by the parent. Brand/foundation follow-up now source-
-combined; read-only host projection exact reviewed SHA remains pending. See
+combined; bounded read-only host snapshot also source-wired at exact98e5b6529cfbd9313c5fea73db168eebcfd4cfbc.
+Full typed host facts remain missing. See READ-ONLY-SNAPSHOT-BATCH.md and
 BRAND-FOUNDATION-BATCH.md for actual placement/checks and unchanged build blockers.
 
 - Foundation DONE_SOURCE: exacta2213ce2cc35bf5d42cdb306197d02a531539380 combined,
@@ -20,8 +21,10 @@ BRAND-FOUNDATION-BATCH.md for actual placement/checks and unchanged build blocke
   to archive400e. No binary edits or contact-sheet identity rendering.
 - `task/ui-host-projection-20261022`, delegated thread
   `01a161cf-39fb-738e-89ec-39f7e3dee024`: exclusive owner of ProductChatRuntime.kt,
-  ProductService.kt and necessary Rust read-only projection adaptation. Shell will
-  consume reviewed immutable identities/snapshots for cards after exact SHA handoff.
+  ProductService.kt and necessary Rust read-only projection adaptation. Bounded
+  real observation source is now combined at98e5b6529cfbd9313c5fea73db168eebcfd4cfbc
+  and explicitly user-read in shell; binding=null/capabilities=[] remains unavailable.
+  Full typed card/source/task producer remains a future coordinated contract.
   Do not fabricate binding/digest/revision or replace an old attempt identity.
 
 MainActivity.kt and ChatScreen.kt remain under the sole shell integration owner.
@@ -37,5 +40,5 @@ That installation step stopped without retry/relocation bypass. Android compilat
 lint/device/IME/Back/rotation/accessibility/screenshots remain open. Do not inherit
 old device results or describe dispatched work as delivered capability.
 
-Parent provides exact reviewed dependency SHAs before the next combination batch.
+Parent provides exact reviewed SHAs for future trusted facts before another combination batch.
 Main/develop untouched; Leader B remains the only develop merge executor.

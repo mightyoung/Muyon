@@ -9,6 +9,9 @@ import androidx.compose.runtime.*
 import com.mightyoung.muyon.product.ui.shell.ConversationHeader
 import com.mightyoung.muyon.product.ui.shell.ShellInputDock
 import com.mightyoung.muyon.product.ui.shell.LocalShellDrafts
+import com.mightyoung.muyon.product.ui.shell.ReadOnlySnapshot
+import com.mightyoung.muyon.product.ui.shell.ReadOnlySnapshotPanel
+import com.mightyoung.muyon.product.ui.shell.decodeReadOnlySnapshot
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.platform.testTag
@@ -80,6 +83,10 @@ private fun ChatConversation(client: ProductClient, projectId: String?, conversa
     var businessOriginalText by remember { mutableStateOf(saved.getString("last_business_receipt_fact", "").orEmpty()) }
     var businessLookupRunning by remember { mutableStateOf(false) }
     var scopeReady by remember(projectId) { mutableStateOf(false) }
+    var snapshotGeneration by remember { mutableStateOf<Long?>(null) }
+    var readOnlySnapshot by remember { mutableStateOf<ReadOnlySnapshot?>(null) }
+    var snapshotNotice by remember { mutableStateOf("") }
+    var snapshotReading by remember { mutableStateOf(false) }
     var availability by remember { mutableStateOf<JSONObject?>(null) }
     var error by remember { mutableStateOf("") }
     var draftSaveError by remember { mutableStateOf("") }
@@ -159,6 +166,36 @@ private fun ChatConversation(client: ProductClient, projectId: String?, conversa
         scopedCall("chat_budget") { reply ->
             reply.optJSONObject("data")?.let { data ->
                 accounting = "累计成本上界 ${data.optString("charged_micro_cny")} / ${data.optString("cap_micro_cny")} 微人民币；未知或待发保留 ${data.optString("held_micro_cny")} 微人民币。"
+            }
+        }
+    }
+    fun readOriginalSnapshot() {
+        val request = original ?: return
+        val generation = snapshotGeneration ?: return
+        val selectedConversation = conversation
+        val selectedProject = projectId
+        fun stillSelected() = original == request && conversation == selectedConversation &&
+            currentProject == selectedProject && snapshotGeneration == generation
+        snapshotReading = true; snapshotNotice = ""
+        // Explicit user gesture only. Resolve current trusted workspace locally;
+        // never auto-query a recovered historical request on mount or refresh.
+        scopedCall("health") healthReply@{ health ->
+            if (!stillSelected()) return@healthReply
+            val workspace = (health.optJSONObject("data")?.opt("workspace") as? String)?.takeIf { it.isNotBlank() }
+            if (health.optString("status") != "ok" || workspace == null) {
+                snapshotReading = false; snapshotNotice = "当前工作台身份未取得，只读快照暂不可用。"
+                return@healthReply
+            }
+            scopedCall("chat_snapshot", JSONObject().put("request_id", request)
+                .put("conversation_id", selectedConversation).put("project_id", selectedProject ?: JSONObject.NULL)
+                .put("scope_generation", generation)) snapshotReply@{ reply ->
+                if (!stillSelected()) return@snapshotReply
+                val data = reply.optJSONObject("data")
+                val decoded = if (reply.optString("status") == "ok" && data != null)
+                    decodeReadOnlySnapshot(data, workspace, selectedConversation, selectedProject, generation, request) else null
+                snapshotReading = false
+                if (decoded != null) readOnlySnapshot = decoded
+                else snapshotNotice = "当前会话缺少有效只读来源或作用域已变化；原请求身份保留，可使用原结果查询。"
             }
         }
     }
@@ -252,13 +289,23 @@ private fun ChatConversation(client: ProductClient, projectId: String?, conversa
             }
         }
     }
+    LaunchedEffect(original, conversation) {
+        readOnlySnapshot = null; snapshotNotice = ""; snapshotReading = false
+    }
     LaunchedEffect(client, conversation) { refreshStatus() }
     LaunchedEffect(client, projectId) {
         records = emptyList(); source = ""; offset = 0
         pendingTool = null; disclosure = null; suggestion = null; followupReady = false
         val requested = projectId
         scopedCall("chat_scope", JSONObject().put("project_id", projectId ?: JSONObject.NULL)) { reply ->
-            if (currentProject == requested) scopeReady = reply.optString("status") == "ok" && reply.optJSONObject("data")?.has("scope_generation") == true
+            if (currentProject == requested) {
+                val data = reply.optJSONObject("data")
+                scopeReady = reply.optString("status") == "ok" && data?.has("scope_generation") == true
+                val value = data?.opt("scope_generation")
+                snapshotGeneration = if (!scopeReady) null else when (value) {
+                    is Int -> value.toLong().takeIf { it >= 0 }; is Long -> value.takeIf { it >= 0 }; else -> null
+                }
+            }
         }
     }
 
@@ -291,6 +338,8 @@ private fun ChatConversation(client: ProductClient, projectId: String?, conversa
                 Text("全局原请求恢复 · 结果与动作属于以上原始身份，不代表当前助手或群组的回复。", style = MaterialTheme.typography.bodySmall)
                 Text("原请求：$original")
                 if (usageDetails.isNotBlank()) Text(usageDetails, style = MaterialTheme.typography.bodySmall)
+                ReadOnlySnapshotPanel(readOnlySnapshot?.takeIf { it.requestId == original }, snapshotNotice, snapshotReading,
+                    if (scopeReady && snapshotGeneration != null) ({ readOriginalSnapshot() }) else null)
                 TextButton(onClick = { scopedCall("chat_cancel", JSONObject().put("request_id", original)) { observe() } }) { Text("取消原请求") }
             }
         requestObservation?.let { ChatRequestActivity(it) }
@@ -412,6 +461,8 @@ private fun ChatConversation(client: ProductClient, projectId: String?, conversa
         confirmButton = { TextButton(onClick = {
             val input = key.toCharArray(); key = ""; settingsOpen = false
             // In-flight status replies belong to the previous configuration.
+            snapshotReading = false
+            if (snapshotNotice.isEmpty()) snapshotNotice = "配置已变化，可按需重新读取只读快照。"
             callbacks.invalidate()
             val token = callbacks.capture()
             client.configureChat(JSONObject().put("cap_micro_cny", cap).put("max_calls", calls).put("chat", true).put("search", true), input) { reply ->

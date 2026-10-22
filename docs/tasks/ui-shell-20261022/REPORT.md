@@ -1,7 +1,9 @@
 # UI shell integration — partial source delivery, 2026-10-22
 
 Current follow-up: original brand placement and neutral Material role dependency
-are source-complete; see [follow-up report](BRAND-FOUNDATION-BATCH.md). Other
+are source-complete; see [follow-up report](BRAND-FOUNDATION-BATCH.md). Real original-
+request read-only snapshot source wiring is also completed in
+[read-only batch](READ-ONLY-SNAPSHOT-BATCH.md), with typed actions still unavailable. Other
 runtime/Android acceptance gaps below remain open. Earlier checkpoint verification
 counts are preserved as historical results; current foundation checks pass2 tests.
 
