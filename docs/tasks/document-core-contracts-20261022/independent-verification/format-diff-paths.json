@@ -1,0 +1,254 @@
+{
+  "documents-fmt": [
+    {
+      "path": "crates/muyon-core/src/documents/anchor.rs",
+      "changed_in_document_contracts_candidate": true
+    },
+    {
+      "path": "crates/muyon-core/src/documents/capability.rs",
+      "changed_in_document_contracts_candidate": true
+    },
+    {
+      "path": "crates/muyon-core/src/documents/identity.rs",
+      "changed_in_document_contracts_candidate": true
+    },
+    {
+      "path": "crates/muyon-core/src/documents/mod.rs",
+      "changed_in_document_contracts_candidate": true
+    },
+    {
+      "path": "crates/muyon-core/tests/documents.rs",
+      "changed_in_document_contracts_candidate": true
+    }
+  ],
+  "workspace-fmt": [
+    {
+      "path": "crates/muyon-core/src/documents/anchor.rs",
+      "changed_in_document_contracts_candidate": true
+    },
+    {
+      "path": "crates/muyon-core/src/documents/capability.rs",
+      "changed_in_document_contracts_candidate": true
+    },
+    {
+      "path": "crates/muyon-core/src/documents/identity.rs",
+      "changed_in_document_contracts_candidate": true
+    },
+    {
+      "path": "crates/muyon-core/src/documents/mod.rs",
+      "changed_in_document_contracts_candidate": true
+    },
+    {
+      "path": "crates/muyon-core/tests/agent_child_tools.rs",
+      "changed_in_document_contracts_candidate": false
+    },
+    {
+      "path": "crates/muyon-core/tests/documents.rs",
+      "changed_in_document_contracts_candidate": true
+    },
+    {
+      "path": "experiments/redesign/core-agent-lab/core/src/agent.rs",
+      "changed_in_document_contracts_candidate": false
+    },
+    {
+      "path": "experiments/redesign/core-agent-lab/core/src/agent_ports.rs",
+      "changed_in_document_contracts_candidate": false
+    },
+    {
+      "path": "experiments/redesign/core-agent-lab/core/src/host_session.rs",
+      "changed_in_document_contracts_candidate": false
+    },
+    {
+      "path": "experiments/redesign/core-agent-lab/core/src/http_transport.rs",
+      "changed_in_document_contracts_candidate": false
+    },
+    {
+      "path": "experiments/redesign/core-agent-lab/core/src/lib.rs",
+      "changed_in_document_contracts_candidate": false
+    },
+    {
+      "path": "experiments/redesign/core-agent-lab/core/src/main.rs",
+      "changed_in_document_contracts_candidate": false
+    },
+    {
+      "path": "experiments/redesign/core-agent-lab/core/src/model.rs",
+      "changed_in_document_contracts_candidate": false
+    },
+    {
+      "path": "experiments/redesign/core-agent-lab/core/src/policy.rs",
+      "changed_in_document_contracts_candidate": false
+    },
+    {
+      "path": "experiments/redesign/core-agent-lab/core/src/store.rs",
+      "changed_in_document_contracts_candidate": false
+    },
+    {
+      "path": "experiments/redesign/core-agent-lab/core/src/wire_json.rs",
+      "changed_in_document_contracts_candidate": false
+    },
+    {
+      "path": "experiments/redesign/core-agent-lab/core/src/wire_provider.rs",
+      "changed_in_document_contracts_candidate": false
+    },
+    {
+      "path": "experiments/redesign/core-agent-lab/core/src/wire_sse.rs",
+      "changed_in_document_contracts_candidate": false
+    },
+    {
+      "path": "experiments/redesign/core-agent-lab/core/tests/host.rs",
+      "changed_in_document_contracts_candidate": false
+    },
+    {
+      "path": "experiments/redesign/core-agent-lab/core/tests/http_transport.rs",
+      "changed_in_document_contracts_candidate": false
+    },
+    {
+      "path": "experiments/redesign/core-agent-lab/core/tests/kernel.rs",
+      "changed_in_document_contracts_candidate": false
+    },
+    {
+      "path": "experiments/redesign/core-agent-lab/core/tests/native_ports.rs",
+      "changed_in_document_contracts_candidate": false
+    },
+    {
+      "path": "experiments/redesign/core-agent-lab/core/tests/native_protocol.rs",
+      "changed_in_document_contracts_candidate": false
+    },
+    {
+      "path": "experiments/redesign/core-agent-lab/core/tests/native_runtime_restore.rs",
+      "changed_in_document_contracts_candidate": false
+    },
+    {
+      "path": "experiments/redesign/core-agent-lab/core/tests/wire.rs",
+      "changed_in_document_contracts_candidate": false
+    },
+    {
+      "path": "experiments/redesign/core-agent-lab/core/tests/wire_review.rs",
+      "changed_in_document_contracts_candidate": false
+    },
+    {
+      "path": "experiments/redesign/plugin-contract-lab/core/src/lib.rs",
+      "changed_in_document_contracts_candidate": false
+    },
+    {
+      "path": "experiments/redesign/plugin-contract-lab/core/src/main.rs",
+      "changed_in_document_contracts_candidate": false
+    },
+    {
+      "path": "experiments/redesign/plugin-contract-lab/core/src/mappings.rs",
+      "changed_in_document_contracts_candidate": false
+    },
+    {
+      "path": "experiments/redesign/plugin-contract-lab/core/src/schema.rs",
+      "changed_in_document_contracts_candidate": false
+    },
+    {
+      "path": "experiments/redesign/plugin-contract-lab/core/tests/mapping_contract.rs",
+      "changed_in_document_contracts_candidate": false
+    },
+    {
+      "path": "experiments/redesign/plugin-contract-lab/core/tests/read_contract.rs",
+      "changed_in_document_contracts_candidate": false
+    },
+    {
+      "path": "experiments/redesign/plugin-contract-lab/core/tests/registration.rs",
+      "changed_in_document_contracts_candidate": false
+    },
+    {
+      "path": "experiments/redesign/plugin-contract-lab/core/tests/support/mod.rs",
+      "changed_in_document_contracts_candidate": false
+    },
+    {
+      "path": "experiments/redesign/rust-agent-host-lab/core/src/chat_history.rs",
+      "changed_in_document_contracts_candidate": false
+    },
+    {
+      "path": "experiments/redesign/rust-agent-host-lab/core/src/http_recovery_tests.rs",
+      "changed_in_document_contracts_candidate": false
+    },
+    {
+      "path": "experiments/redesign/rust-agent-host-lab/core/src/lib.rs",
+      "changed_in_document_contracts_candidate": false
+    },
+    {
+      "path": "experiments/redesign/rust-agent-host-lab/core/src/model_gateway.rs",
+      "changed_in_document_contracts_candidate": false
+    },
+    {
+      "path": "experiments/redesign/rust-agent-host-lab/core/src/ordinary_chat.rs",
+      "changed_in_document_contracts_candidate": false
+    },
+    {
+      "path": "experiments/redesign/rust-agent-host-lab/core/src/service_controller.rs",
+      "changed_in_document_contracts_candidate": false
+    },
+    {
+      "path": "experiments/redesign/rust-agent-host-lab/core/src/service_host.rs",
+      "changed_in_document_contracts_candidate": false
+    },
+    {
+      "path": "experiments/redesign/rust-agent-host-lab/core/src/service_provider.rs",
+      "changed_in_document_contracts_candidate": false
+    },
+    {
+      "path": "experiments/redesign/rust-agent-host-lab/core/src/service_runtime.rs",
+      "changed_in_document_contracts_candidate": false
+    },
+    {
+      "path": "experiments/redesign/rust-agent-host-lab/core/src/service_tools.rs",
+      "changed_in_document_contracts_candidate": false
+    },
+    {
+      "path": "experiments/redesign/rust-agent-host-lab/core/src/supplier_business.rs",
+      "changed_in_document_contracts_candidate": false
+    },
+    {
+      "path": "experiments/redesign/rust-agent-host-lab/core/src/supplier_scope_bridge.rs",
+      "changed_in_document_contracts_candidate": false
+    },
+    {
+      "path": "experiments/redesign/rust-agent-host-lab/core/src/supplier_sqlite.rs",
+      "changed_in_document_contracts_candidate": false
+    },
+    {
+      "path": "experiments/redesign/rust-agent-host-lab/core/tests/host_http.rs",
+      "changed_in_document_contracts_candidate": false
+    },
+    {
+      "path": "experiments/redesign/rust-agent-host-lab/core/tests/ordinary_chat_controller.rs",
+      "changed_in_document_contracts_candidate": false
+    },
+    {
+      "path": "experiments/redesign/rust-agent-host-lab/core/tests/ordinary_chat_live_controller.rs",
+      "changed_in_document_contracts_candidate": false
+    },
+    {
+      "path": "experiments/redesign/rust-agent-host-lab/core/tests/service_host_controller.rs",
+      "changed_in_document_contracts_candidate": false
+    },
+    {
+      "path": "experiments/redesign/rust-agent-host-lab/core/tests/service_provider.rs",
+      "changed_in_document_contracts_candidate": false
+    },
+    {
+      "path": "experiments/redesign/rust-agent-host-lab/core/tests/service_provider_release.rs",
+      "changed_in_document_contracts_candidate": false
+    },
+    {
+      "path": "experiments/redesign/rust-agent-host-lab/core/tests/supplier_lab_source.rs",
+      "changed_in_document_contracts_candidate": false
+    },
+    {
+      "path": "experiments/redesign/rust-agent-host-lab/core/tests/supplier_scope_bridge.rs",
+      "changed_in_document_contracts_candidate": false
+    },
+    {
+      "path": "experiments/redesign/web-search-lab/core/src/lib.rs",
+      "changed_in_document_contracts_candidate": false
+    },
+    {
+      "path": "experiments/redesign/web-search-lab/core/tests/service_send.rs",
+      "changed_in_document_contracts_candidate": false
+    }
+  ]
+}

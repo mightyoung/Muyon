@@ -1,0 +1,54 @@
+{
+  "at_utc": "2026-10-22T04:29:38.029165+00:00",
+  "AGENTS_search_result": "No /workspace/AGENTS.md or worktree AGENTS.md found before execution.",
+  "results": [
+    {
+      "argv": [
+        "git",
+        "rev-parse",
+        "HEAD"
+      ],
+      "exit_status": 0,
+      "stdout": "ab9c381cc935be0cd52db5a8a455ce985bdba1db\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "git",
+        "status",
+        "--short"
+      ],
+      "exit_status": 0,
+      "stdout": "?? docs/tasks/document-core-contracts-20261022/COMPILE-VERIFICATION.md\n?? docs/tasks/document-core-contracts-20261022/independent-verification/\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "git",
+        "diff",
+        "--exit-code",
+        "ab9c381cc935be0cd52db5a8a455ce985bdba1db",
+        "--",
+        "crates",
+        "experiments"
+      ],
+      "exit_status": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "git",
+        "ls-remote",
+        "origin",
+        "refs/heads/task/document-core-contracts-20261022",
+        "refs/heads/task/document-core-verification-20261022",
+        "refs/heads/main",
+        "refs/heads/develop"
+      ],
+      "exit_status": 0,
+      "stdout": "0ab2c4f667681b9aacb017f8cd2eea6f576cf78e\trefs/heads/develop\ncc7c8d14d30e3d3c4c7c6cb2bf2059a99e46e003\trefs/heads/main\nab9c381cc935be0cd52db5a8a455ce985bdba1db\trefs/heads/task/document-core-contracts-20261022\n",
+      "stderr": ""
+    }
+  ]
+}

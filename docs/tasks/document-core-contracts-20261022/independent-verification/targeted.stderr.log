@@ -1,0 +1,53 @@
+   Compiling proc-macro2 v1.0.107
+   Compiling typenum v1.20.1
+   Compiling quote v1.0.47
+   Compiling unicode-ident v1.0.27
+   Compiling serde_core v1.0.229
+   Compiling zmij v1.0.23
+   Compiling muyon-core-agent-lab v0.1.0 (/workspace/Muyon-document-verification/experiments/redesign/core-agent-lab/core)
+warning: suspicious definition of the runtime `read` symbol used by the standard library
+   --> /workspace/Muyon-document-verification/experiments/redesign/core-agent-lab/core/src/host_session.rs:132:124
+    |
+132 | ...ount: usize, timeout: i32) -> i32; fn read(fd: i32, buffer: *mut u8, count: usize) -> isize; fn write(fd: i32, buffer: *const u8...
+    |                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = note: expected `unsafe extern "C" fn(i32, *mut c_void, usize) -> isize` (for the current target)
+            found    `unsafe extern "C" fn(i32, *mut u8, usize) -> isize`
+    = help: either fix the signature or remove any attributes like `#[unsafe(no_mangle)]`, `#[unsafe(export_name = "read")]`, or `#[link_name = "read"]`
+    = help: allow this lint if the signature is compatible
+    = note: `#[warn(suspicious_runtime_symbol_definitions)]` on by default
+
+warning: suspicious definition of the runtime `write` symbol used by the standard library
+   --> /workspace/Muyon-document-verification/experiments/redesign/core-agent-lab/core/src/host_session.rs:132:182
+    |
+132 | ... *mut u8, count: usize) -> isize; fn write(fd: i32, buffer: *const u8, count: usize) -> isize; }
+    |                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = note: expected `unsafe extern "C" fn(i32, *const c_void, usize) -> isize` (for the current target)
+            found    `unsafe extern "C" fn(i32, *const u8, usize) -> isize`
+    = help: either fix the signature or remove any attributes like `#[unsafe(no_mangle)]`, `#[unsafe(export_name = "write")]`, or `#[link_name = "write"]`
+    = help: allow this lint if the signature is compatible
+
+   Compiling syn v3.0.9
+   Compiling hybrid-array v0.4.15
+   Compiling crypto-common v0.2.2
+warning: `muyon-core-agent-lab` (lib) generated 2 warnings
+   Compiling block-buffer v0.12.1
+   Compiling muyon-plugin-contract-lab v0.1.0 (/workspace/Muyon-document-verification/experiments/redesign/plugin-contract-lab/core)
+   Compiling serde v1.0.229
+   Compiling serde_json v1.0.154
+   Compiling const-oid v0.10.2
+   Compiling digest v0.11.3
+   Compiling muyon-rust-agent-host-lab v0.1.0 (/workspace/Muyon-document-verification/experiments/redesign/rust-agent-host-lab/core)
+   Compiling cpufeatures v0.3.1
+   Compiling cfg-if v1.0.5
+   Compiling tinyvec v1.13.3
+   Compiling memchr v2.8.3
+   Compiling itoa v1.0.18
+   Compiling unicode-normalization v0.1.25
+   Compiling serde_derive v1.0.229
+   Compiling sha2 v0.11.1
+   Compiling muyon-web-search-lab v0.1.0 (/workspace/Muyon-document-verification/experiments/redesign/web-search-lab/core)
+   Compiling muyon-core v0.1.0 (/workspace/Muyon-document-verification/crates/muyon-core)
+    Finished `test` profile [unoptimized] target(s) in 7.87s
+     Running tests/documents.rs (/tmp/muyon-document-cargo-target/debug/deps/documents-c0b0526bf498eadd)
