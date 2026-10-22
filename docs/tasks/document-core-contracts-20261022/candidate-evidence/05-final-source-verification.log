@@ -1,0 +1,22 @@
+UTC 2026-10-22T05:53:43.599074+00:00
+Linux-6.18.55-x86_64-with-glibc2.41
+Fixed source HEAD; pending report/logs only.
+
+$ git rev-parse HEAD
+0ddb5d2a76ae42efcc7b252c86d2992a8a85c9f3
+exit=0
+
+$ cargo test -p muyon-core --offline documents::candidate_tests
+[Errno 2] No such file or directory: 'cargo'
+exit=127 NOT_RUN (tool unavailable; neither pass nor test failure)
+
+$ cargo test -p muyon-core --offline
+[Errno 2] No such file or directory: 'cargo'
+exit=127 NOT_RUN (tool unavailable; neither pass nor test failure)
+
+$ rustfmt --check --edition 2021 crates/muyon-core/src/documents/candidate.rs crates/muyon-core/src/documents/candidate_tests.rs crates/muyon-core/src/documents/mod.rs crates/muyon-core/src/blobs.rs
+[Errno 2] No such file or directory: 'rustfmt'
+exit=127 NOT_RUN (tool unavailable; neither pass nor test failure)
+
+$ git diff --check
+exit=0
