@@ -224,7 +224,7 @@ private fun AnnotationEditor(
             if (annotation.content is AnnotationContent.Highlight) Text("原引用：${annotation.content.quote}")
             OutlinedTextField(draft, { editor.draft = it }, Modifier.fillMaxWidth(), label = { Text("批注正文") },
                 enabled = !stale && !saving && !locked, minLines = 2)
-            Button(enabled = !stale && !saving && !locked && edit != null && draft != annotation.content.editableText(), onClick = {
+            Button(enabled = !stale && !saving && !locked && edit != null && edit.replacement != annotation.content, onClick = {
                 if (!editor.submission.canSubmit) return@Button
                 val submitted = edit ?: return@Button
                 editor.submission = SidecarSubmission.SAVING

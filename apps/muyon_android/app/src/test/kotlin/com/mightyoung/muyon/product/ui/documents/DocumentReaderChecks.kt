@@ -44,6 +44,10 @@ fun main() {
     check(item.edit(ref, "é".repeat(4097)) == null)
     val highlight = item.copy(content = AnnotationContent.Highlight("original quote", "old"))
     check(highlight.edit(ref, "new")?.replacement == AnnotationContent.Highlight("original quote", "new"))
+    check(highlight.edit(ref, "")?.replacement == AnnotationContent.Highlight("original quote", null))
+    check(highlight.edit(ref, " \t")?.replacement == AnnotationContent.Highlight("original quote", null))
+    check(highlight.edit(ref, "\u0000") == null)
+    check(item.edit(ref, "") == null)
     fun zip(vararg parts: Pair<String, String>): ByteArray {
         val bytes = ByteArrayOutputStream()
         ZipOutputStream(bytes).use { z -> parts.forEach { (name, xml) ->

@@ -37,3 +37,9 @@ lib.rs/documents, Gradle dependencies, main/develop, credentials, paid configura
 security permissions. No third-party HOLD engine, real model/search request, original two
 unknown requests/reservation or real user files touched. No installs, force pushes, deletes
 or deployment. Synthetic fixtures are created only by retained platform tests, not executed here.
+
+Parent review corrective batch: two Important findings (page-failure navigation trap; XLSX
+phonetic hints mixed into cell values) and blank-highlight-note Minor are addressed in
+REVIEW-FOLLOWUP.md, with regression-first source and independent static re-review. New runtime
+attempts remain NOT_RUN; original pure JVM PASS was reported externally by parent, not rerun
+or generalized here. Host anchor binding/durable intent recovery remains required beyond core CAS.

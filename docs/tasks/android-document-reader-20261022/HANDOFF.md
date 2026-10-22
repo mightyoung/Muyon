@@ -94,3 +94,9 @@ Retained tests: pure Kotlin state/CAS/scope/revision/ZIP/XML behavior; Android s
 PDFs check distinct actual page colors, invalid page error, exact core JSON projection,
 and pending-save → flip → Unknown → flip-back preserves lock/draft and excludes foreign scope.
 All compiler/device results remain NOT_RUN in this environment; no green TDD or APK claim.
+
+Parent review correction: authorized per-page read/render failures preserve known-page-count
+prev/next/location and offer explicit read retry (also available before first successful read).
+Access/revision invalidation disables these controls. Retry restarts read only, keeps editor
+sessions/Unknown locks, and cannot call saveSidecar. Spreadsheet rPh hints are excluded from
+base cell values. Blank highlight note clears to null; blank Comment remains invalid.

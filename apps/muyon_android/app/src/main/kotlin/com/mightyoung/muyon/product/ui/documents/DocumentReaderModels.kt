@@ -55,11 +55,11 @@ data class SidecarAnnotation(
             document.documentId == current.documentId && document.format == current.format
 
     fun edit(current: ReaderDocumentRef, text: String): SidecarEdit? {
-        if (deleted || stale || document != current || text.isBlank() || text.contains('\u0000') ||
+        if (deleted || stale || document != current || text.contains('\u0000') ||
             text.toByteArray(Charsets.UTF_8).size > 8192) return null
         val replacement = when (content) {
-            is AnnotationContent.Comment -> AnnotationContent.Comment(text)
-            is AnnotationContent.Highlight -> AnnotationContent.Highlight(content.quote, text)
+            is AnnotationContent.Comment -> if (text.isBlank()) return null else AnnotationContent.Comment(text)
+            is AnnotationContent.Highlight -> AnnotationContent.Highlight(content.quote, text.takeUnless { it.isBlank() })
         }
         return SidecarEdit(current, id, revision, anchorJson, replacement)
     }

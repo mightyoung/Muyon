@@ -91,6 +91,7 @@ object OfficeTextPreview {
         private val value = StringBuilder()
         private val sharedValue = StringBuilder()
         private var capture = false
+        private var phoneticDepth = 0
         private var cell = ""
         private var cellType = ""
         private var formula = false
@@ -100,13 +101,15 @@ object OfficeTextPreview {
         override fun startElement(uri: String?, localName: String?, qName: String?, attributes: Attributes) {
             require(++depth <= 128) { "XML depth limit" }
             val tag = localName?.takeIf { it.isNotEmpty() } ?: qName.orEmpty().substringAfter(':')
+            // Spreadsheet rPh text is a pronunciation hint, never the base cell/string value.
+            if (mode != Mode.TEXT && tag == "rPh") phoneticDepth++
             if (tag == "si") sharedValue.setLength(0)
             if (tag == "c") {
                 cell = attributes.getValue("r").orEmpty(); cellType = attributes.getValue("t").orEmpty()
                 value.setLength(0); formula = false
             }
             if (tag == "f") formula = true
-            capture = tag == "t" || (mode == Mode.SHEET && tag == "v")
+            capture = phoneticDepth == 0 && (tag == "t" || (mode == Mode.SHEET && tag == "v"))
         }
         override fun characters(ch: CharArray, start: Int, length: Int) {
             if (!capture) return
@@ -117,6 +120,7 @@ object OfficeTextPreview {
         override fun endElement(uri: String?, localName: String?, qName: String?) {
             val tag = localName?.takeIf { it.isNotEmpty() } ?: qName.orEmpty().substringAfter(':')
             if (tag == "t" || tag == "v") capture = false
+            if (mode != Mode.TEXT && tag == "rPh") phoneticDepth--
             if (mode == Mode.STRINGS && tag == "si") {
                 require(strings.size < 10000 && strings.sumOf { it.length } + sharedValue.length <= MAX_TEXT) { "Shared string limit" }
                 strings.add(sharedValue.toString())
