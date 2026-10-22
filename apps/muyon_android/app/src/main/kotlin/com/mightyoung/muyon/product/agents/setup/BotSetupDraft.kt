@@ -16,8 +16,12 @@ data class RoleSuggestion(val role: String, val source: TemplateSource)
 data class CapabilityOption(val id: String, val version: String, val available: Boolean,
     val reason: String, val inputs: String, val outputs: String)
 data class MaterialOption(val id: String, val scope: String, val available: Boolean)
+enum class SelectionInvalidationReason { CAPABILITY_REMOVED, CAPABILITY_CHANGED, CAPABILITY_UNAVAILABLE,
+    MATERIAL_REMOVED, MATERIAL_UNAVAILABLE }
+data class SelectionInvalidation(val id: String, val reason: SelectionInvalidationReason)
 data class SetupChoices(val capabilities: List<CapabilityOption>, val materials: List<MaterialOption>,
-    val selectedCapabilityIds: Set<String>, val selectedMaterialIds: Set<String>)
+    val selectedCapabilityIds: Set<String>, val selectedMaterialIds: Set<String>,
+    val invalidations: List<SelectionInvalidation>)
 data class DraftSnapshot(val scope: String, val draftId: String, val revision: Long,
     val step: SetupStep, val name: DraftField, val purpose: DraftField, val role: DraftField,
     val cancelled: Boolean, val suggestion: RoleSuggestion?, val creation: CreationObservation)
@@ -62,6 +66,7 @@ class BotSetupDraft(private val scope: String, private val draftId: String = UUI
     private var materials = emptyList<MaterialOption>()
     private var selectedCapabilities = emptyList<CapabilityOption>()
     private var selectedMaterials = emptyList<String>()
+    private var invalidations = emptyList<SelectionInvalidation>()
 
     init { require(scope.isNotBlank() && draftId.isNotBlank() && draftId.length <= 80) }
     fun snapshot() = DraftSnapshot(scope, draftId, revision, step, name, purpose, role,
@@ -97,7 +102,7 @@ class BotSetupDraft(private val scope: String, private val draftId: String = UUI
         when (step) {
             SetupStep.NAME -> { validText(name.value, 60); step = SetupStep.PURPOSE }
             SetupStep.PURPOSE -> { validText(purpose.value, 8000); step = SetupStep.CONFIGURATION }
-            SetupStep.CONFIGURATION -> { validText(role.value, 160); step = SetupStep.REVIEW }
+            SetupStep.CONFIGURATION -> { validText(role.value, 160); require(invalidations.isEmpty()) { "能力或资料已变化，请重新选择并确认" }; step = SetupStep.REVIEW }
             SetupStep.REVIEW -> Unit
         }
     }
@@ -130,7 +135,7 @@ class BotSetupDraft(private val scope: String, private val draftId: String = UUI
     }
 
     fun choices() = SetupChoices(capabilities.toList(), materials.toList(),
-        selectedCapabilities.map { it.id }.toSet(), selectedMaterials.toSet())
+        selectedCapabilities.map { it.id }.toSet(), selectedMaterials.toSet(), invalidations.toList())
 
     /** Host supplies current allowed metadata; changing availability/version requires reselection. */
     fun offerChoices(allowedCapabilities: List<CapabilityOption>, allowedMaterials: List<MaterialOption>) {
@@ -139,7 +144,27 @@ class BotSetupDraft(private val scope: String, private val draftId: String = UUI
         require(allowedMaterials.map { it.id }.distinct().size == allowedMaterials.size)
         require(allowedCapabilities.all { it.id.isNotBlank() && it.version.isNotBlank() })
         require(allowedMaterials.all { it.id.isNotBlank() && it.scope == scope })
+        val capabilityChanges = selectedCapabilities.mapNotNull { selected ->
+            val current = allowedCapabilities.singleOrNull { it.id == selected.id }
+            val reason = when {
+                current == null -> SelectionInvalidationReason.CAPABILITY_REMOVED
+                !current.available -> SelectionInvalidationReason.CAPABILITY_UNAVAILABLE
+                current != selected -> SelectionInvalidationReason.CAPABILITY_CHANGED
+                else -> null
+            }
+            reason?.let { SelectionInvalidation(selected.id, it) }
+        }
+        val materialChanges = selectedMaterials.mapNotNull { id ->
+            val current = allowedMaterials.singleOrNull { it.id == id }
+            val reason = when {
+                current == null -> SelectionInvalidationReason.MATERIAL_REMOVED
+                !current.available -> SelectionInvalidationReason.MATERIAL_UNAVAILABLE
+                else -> null
+            }
+            reason?.let { SelectionInvalidation(id, it) }
+        }
         changed(); capabilities = allowedCapabilities.toList(); materials = allowedMaterials.toList()
+        invalidations = (invalidations + capabilityChanges + materialChanges).distinct()
         selectedCapabilities = selectedCapabilities.filter { it.available && it in capabilities }
         selectedMaterials = selectedMaterials.filter { id -> materials.any { it.id == id && it.available } }
     }
@@ -150,9 +175,12 @@ class BotSetupDraft(private val scope: String, private val draftId: String = UUI
         changed()
         selectedCapabilities = capabilities.filter { it.id in capabilityIds }
         selectedMaterials = materials.filter { it.id in materialIds }.map { it.id }
+        // Explicit selection, including an empty selection, acknowledges all displayed changes.
+        invalidations = emptyList()
     }
     fun preview(): SetupPreview {
         editable(); require(step == SetupStep.REVIEW)
+        require(invalidations.isEmpty()) { "能力或资料已变化，请重新选择并确认" }
         validText(name.value, 60); validText(purpose.value, 8000); validText(role.value, 160)
         return SetupPreview(draftId, revision, name.value, purpose.value, role.value,
             selectedCapabilities.toList(), selectedMaterials.toList(), selectedTemplate)

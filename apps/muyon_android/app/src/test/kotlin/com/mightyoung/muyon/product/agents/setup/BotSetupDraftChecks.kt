@@ -119,10 +119,36 @@ fun main() {
         d.editName("改名不重置技能")
         check(d.preview().capabilities.single().id == "paper-overview")
         d.offerChoices(listOf(paper.copy(version = "v2")), listOf(MaterialOption("p1", "account/project", false)))
+        check(d.choices().selectedCapabilityIds.isEmpty() && d.choices().selectedMaterialIds.isEmpty())
+        check(d.choices().invalidations.map { it.reason }.toSet() == setOf(
+            SelectionInvalidationReason.CAPABILITY_CHANGED, SelectionInvalidationReason.MATERIAL_UNAVAILABLE))
+        rejects { d.preview() }
+        d.selectChoices(emptySet(), emptySet())
+        check(d.choices().invalidations.isEmpty())
         check(d.preview().capabilities.isEmpty() && d.preview().materialScope.isEmpty())
         check(d.choices().capabilities.single().version == "v2")
         check(d.choices().materials.single().available == false)
         check(d.preview().role == "研究员")
+    }
+    test("removed choices retain reasons until explicit reconfirmation") {
+        val d = ready(); d.editRole("研究员")
+        val cap = CapabilityOption("paper-overview", "v1", true, "可用", "论文", "摘要")
+        val material = MaterialOption("m1", "account/project", true)
+        d.offerChoices(listOf(cap), listOf(material))
+        d.selectChoices(setOf(cap.id), setOf(material.id))
+        d.offerChoices(emptyList(), emptyList())
+        val notices = d.choices().invalidations
+        check(notices.map { it.reason }.toSet() == setOf(
+            SelectionInvalidationReason.CAPABILITY_REMOVED, SelectionInvalidationReason.MATERIAL_REMOVED))
+        check(notices.map { it.id }.toSet() == setOf(cap.id, material.id))
+        d.offerChoices(listOf(cap), listOf(material))
+        check(d.choices().invalidations == notices)
+        rejects { d.next() }
+        d.selectChoices(setOf(cap.id), setOf(material.id)); d.next()
+        check(d.preview().capabilities.single() == cap)
+        d.offerChoices(listOf(cap.copy(available = false, reason = "权限已撤回")), listOf(material))
+        check(d.choices().invalidations.single().reason == SelectionInvalidationReason.CAPABILITY_UNAVAILABLE)
+        rejects { d.preview() }
     }
     test("UTF16 is bounded and malformed input rejected without state loss") {
         val d = ready()
