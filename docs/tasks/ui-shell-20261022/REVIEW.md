@@ -41,3 +41,9 @@ common reader/edit actions disabled, no new engine/FFI/file authority. Menu fail
 notice visible inside the modal. One low feedback issue was identified and fixed:
 a successful pin commit now clears its specific previous failure message. Card and
 contract merges contain no production card call and are not described as adoption.
+
+Final fixed dependency review: exact cards0a8c9fede203ecb5f3a65fb3bd01bd104e429838
+correctly describes recorded cancellation intent with no dispatch/remote-success claim.
+No production cards call exists in Main/ChatScreen/shell. Pin success feedback fix
+confirmed. No new static blocker. Actual Gradle final suite failed at AGP resolution;
+SDK filesystem refusal stopped without bypass. Android acceptance remains open.

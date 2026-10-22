@@ -21,7 +21,8 @@ Main/develop remain unchanged; Leader B retains sole develop merge authority.
 - Authored production changes only MainActivity.kt, ChatScreen.kt and new ui/shell/.
   Authored instrumentation tests live in matching ui/shell/. All other production
   directories are unchanged beyond the explicitly authorized dependency merges.
-- Cards `0519403abdf0f23e9104a022c3c4c8629ef1e1f3` and repaired chat cancellation
+- Cards `0519403abdf0f23e9104a022c3c4c8629ef1e1f3`, then reviewed wording fix
+  `0a8c9fede203ecb5f3a65fb3bd01bd104e429838`, and repaired chat cancellation
   contract `52576777716ea215ef1428b4dc0bcd65fde17f00` subsequently combined after
   parent coordination, reusing existing foundation ancestry. They are not instantiated
   into production: this batch has no typed-card producer/host action binding. It does not call old requestCancel(scope), fabricate a component identity,
@@ -112,12 +113,14 @@ Commands from repository root unless specified:
 8. Official Kotlin2.2.20 compiler used for steps3/4, downloaded in task-writable
    directory. No Android stubs or substituted Android build were used.
 9. Scoped authored source/document whitespace check — PASS. Whole staged
-   diff-check reports trailing spaces emitted by Gradle in the two original logs;
+   diff-check reports trailing spaces emitted by Gradle in the original logs;
    raw evidence is retained unmodified and this whole-archive check remains exit2.
    Final independent static review in REVIEW.md.
 10. Final combined dependency checks additionally executed: cards runner **43
-   assertions PASS** and component-contract runner **20 groups PASS**; raw outputs
-   `evidence/cards-offline.log` and `evidence/component-contract-offline.log`.
+   assertions PASS**, then corrected cards **45 assertions PASS**, and
+   component-contract runner **20 groups PASS**; raw outputs
+   `evidence/cards-offline.log`, `evidence/cards-final-offline.log` and
+   `evidence/component-contract-offline.log`.
    These check offline dependencies, not shell UI or live business adapters.
 
 ## Remaining blockers and explicit non-completion
@@ -150,8 +153,15 @@ Historical two unknown requests and ¥0.002620 reservation untouched; no model/s
 request, resubmission, refund, credential setup, permission expansion, deployment,
 main/develop merge, force push, branch deletion or changes to user's original checkout.
 
-Cards cancellation wording Important: parent flagged the combined card source's
-`cancelRequested` label as overstating dispatch; this state is NOT live-bound by
-shell. Await exact reviewed correction before any production receipt-card adoption.
+Cards cancellation wording Important closed by parent and non-author static review:
+combined exact corrected source0a8c9fede203ecb5f3a65fb3bd01bd104e429838 now says
+only local intent recorded, no confirmed cancellation. Final45 assertions actually
+rerun in this environment. Cards still are NOT live-bound by shell.
 No local alteration of ui/cards/ was made. Required cross-owner producer patch plan
 is in HOST-ADAPTER-PATCH-PLAN.md; missing identities are never fabricated.
+
+Final full project command after authored adapters and combined dependencies:
+`./gradlew --offline --no-daemon --console=plain :app:testDebugUnitTest :app:compileDebugKotlin :app:compileDebugAndroidTestKotlin :app:connectedDebugAndroidTest :app:lintDebug`
+with the same explicit temporary Gradle/cache settings — FAILED exit1 before
+product compilation, same AGP8.11.1 resolution prerequisite. Retained as
+`evidence/android-final-suite.log`. No individual Android test executed.
