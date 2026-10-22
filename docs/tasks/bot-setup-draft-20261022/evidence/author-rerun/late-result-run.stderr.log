@@ -1,0 +1,5 @@
+Exception in thread "main" java.lang.IllegalStateException: Check failed.
+	at com.mightyoung.muyon.product.agents.setup.BotSetupDraftChecksKt.main$lambda$7(BotSetupDraftChecks.kt:29)
+	at com.mightyoung.muyon.product.agents.setup.BotSetupDraftChecksKt.main$test(BotSetupDraftChecks.kt:9)
+	at com.mightyoung.muyon.product.agents.setup.BotSetupDraftChecksKt.main(BotSetupDraftChecks.kt:25)
+	at com.mightyoung.muyon.product.agents.setup.BotSetupDraftChecksKt.main(BotSetupDraftChecks.kt)
