@@ -91,7 +91,7 @@ pub(super) fn validate(db: &Db) -> Result<()> {
 }
 pub(super) fn migrate(db: &Db, workspace: &str) -> Result<()> {
     let tx = storage(db.transaction())?;
-    let requests = storage(db.query("SELECT * FROM requests ORDER BY id", &[]))?;
+    let requests = storage(db.query("SELECT rowid,* FROM requests ORDER BY id", &[]))?;
     let config = storage(db.query("SELECT * FROM configuration ORDER BY slot", &[]))?;
     let tools = storage(db.query("SELECT * FROM tool_steps ORDER BY request_id", &[]))?;
     initialize(db)?;
@@ -130,7 +130,7 @@ pub(super) fn migrate(db: &Db, workspace: &str) -> Result<()> {
     validate(db)?;
     if storage(db.query("SELECT workspace,version FROM meta", &[]))?
         != vec![vec![Some(workspace.into()), Some("4".into())]]
-        || storage(db.query("SELECT * FROM requests ORDER BY id", &[]))? != requests
+        || storage(db.query("SELECT rowid,* FROM requests ORDER BY id", &[]))? != requests
         || storage(db.query("SELECT * FROM configuration ORDER BY slot", &[]))? != config
         || storage(db.query("SELECT * FROM tool_steps ORDER BY request_id", &[]))? != tools
         || storage(db.query("SELECT * FROM request_origins ORDER BY request_id", &[]))? != expected

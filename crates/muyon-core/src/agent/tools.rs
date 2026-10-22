@@ -547,16 +547,6 @@ impl AgentOwner {
             return Err("tool_visible_review_required");
         }
         let mut body = decode_json(field(&original, 5)?).map_err(|_| "tool_history_invalid")?;
-        let messages = body["messages"]
-            .as_array_mut()
-            .ok_or("tool_history_invalid")?;
-        messages.push(json!({"role":"assistant","content":null,"tool_calls":[{"id":call.call_ref,"type":"function","function":{"name":call.name,"arguments":call.arguments.to_string()}}]}));
-        messages
-            .push(json!({"role":"tool","tool_call_id":call.call_ref,"content":field(&step,2)?}));
-        // The existing structural encoder proves pairing/name mapping; it does
-        // not create authority. Product transport keeps its non-stream envelope.
-        let history = wire_json::parse(body["messages"].to_string().as_bytes())
-            .map_err(|_| "tool_history_invalid")?;
         let advertised = body["tools"].as_array().ok_or("tool_history_invalid")?;
         let defs: Vec<_> = definitions()?
             .into_iter()
@@ -569,6 +559,37 @@ impl AgentOwner {
         if defs.is_empty() {
             return Err("tool_not_allowed");
         }
+        // Stored history is the previous encoder's wire output. Restore only
+        // exact selected registered names to its logical input vocabulary; the
+        // unchanged encoder still validates all shape, IDs, pairing and args.
+        let messages = body
+            .get_mut("messages")
+            .and_then(Value::as_array_mut)
+            .ok_or("tool_history_invalid")?;
+        for message in messages.iter_mut() {
+            if let Some(raw) = message.get_mut("tool_calls") {
+                for old_call in raw.as_array_mut().ok_or("tool_history_invalid")? {
+                    let function = old_call
+                        .get_mut("function")
+                        .and_then(Value::as_object_mut)
+                        .ok_or("tool_history_invalid")?;
+                    let wire = function
+                        .get("name")
+                        .and_then(Value::as_str)
+                        .ok_or("tool_history_invalid")?;
+                    let definition = defs
+                        .iter()
+                        .find(|d| d.wire_name == wire)
+                        .ok_or("tool_history_invalid")?;
+                    function.insert("name".into(), json!(definition.name));
+                }
+            }
+        }
+        messages.push(json!({"role":"assistant","content":null,"tool_calls":[{"id":call.call_ref,"type":"function","function":{"name":call.name,"arguments":call.arguments.to_string()}}]}));
+        messages
+            .push(json!({"role":"tool","tool_call_id":call.call_ref,"content":field(&step,2)?}));
+        let history = wire_json::parse(body["messages"].to_string().as_bytes())
+            .map_err(|_| "tool_history_invalid")?;
         let model_request = ModelRequest {
             task: "product".into(),
             attempt: request.into(),

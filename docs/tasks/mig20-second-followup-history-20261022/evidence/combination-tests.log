@@ -1,0 +1,394 @@
+   Compiling muyon-core-agent-lab v0.1.0 (/tmp/mig20-canonical-B-rey6n5o3/snapshot/experiments/redesign/core-agent-lab/core)
+warning: suspicious definition of the runtime `read` symbol used by the standard library
+   --> /tmp/mig20-canonical-B-rey6n5o3/snapshot/experiments/redesign/core-agent-lab/core/src/host_session.rs:132:124
+    |
+132 | ...ount: usize, timeout: i32) -> i32; fn read(fd: i32, buffer: *mut u8, count: usize) -> isize; fn write(fd: i32, buffer: *const u8...
+    |                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = note: expected `unsafe extern "C" fn(i32, *mut c_void, usize) -> isize` (for the current target)
+            found    `unsafe extern "C" fn(i32, *mut u8, usize) -> isize`
+    = help: either fix the signature or remove any attributes like `#[unsafe(no_mangle)]`, `#[unsafe(export_name = "read")]`, or `#[link_name = "read"]`
+    = help: allow this lint if the signature is compatible
+    = note: `#[warn(suspicious_runtime_symbol_definitions)]` on by default
+
+warning: suspicious definition of the runtime `write` symbol used by the standard library
+   --> /tmp/mig20-canonical-B-rey6n5o3/snapshot/experiments/redesign/core-agent-lab/core/src/host_session.rs:132:182
+    |
+132 | ... *mut u8, count: usize) -> isize; fn write(fd: i32, buffer: *const u8, count: usize) -> isize; }
+    |                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = note: expected `unsafe extern "C" fn(i32, *const c_void, usize) -> isize` (for the current target)
+            found    `unsafe extern "C" fn(i32, *const u8, usize) -> isize`
+    = help: either fix the signature or remove any attributes like `#[unsafe(no_mangle)]`, `#[unsafe(export_name = "write")]`, or `#[link_name = "write"]`
+    = help: allow this lint if the signature is compatible
+
+   Compiling muyon-plugin-contract-lab v0.1.0 (/tmp/mig20-canonical-B-rey6n5o3/snapshot/experiments/redesign/plugin-contract-lab/core)
+   Compiling muyon-rust-agent-host-lab v0.1.0 (/tmp/mig20-canonical-B-rey6n5o3/snapshot/experiments/redesign/rust-agent-host-lab/core)
+warning: `muyon-core-agent-lab` (lib) generated 2 warnings
+   Compiling muyon-web-search-lab v0.1.0 (/tmp/mig20-canonical-B-rey6n5o3/snapshot/experiments/redesign/web-search-lab/core)
+   Compiling muyon-core v0.1.0 (/tmp/mig20-canonical-B-rey6n5o3/snapshot/crates/muyon-core)
+warning: unused imports: `CandidateState` and `CandidateStatus`
+  --> muyon-core/src/bin/../documents/mod.rs:22:21
+   |
+22 | pub use candidate::{CandidateState, CandidateStatus};
+   |                     ^^^^^^^^^^^^^^  ^^^^^^^^^^^^^^^
+   |
+   = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused import: `CandidateStatus`
+  --> muyon-core/tests/../src/documents/mod.rs:22:37
+   |
+22 | pub use candidate::{CandidateState, CandidateStatus};
+   |                                     ^^^^^^^^^^^^^^^
+   |
+   = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+warning: `muyon-core` (bin "business_worker") generated 1 warning (run `cargo fix --bin "business_worker" -p muyon-core` to apply 1 suggestion)
+warning: `muyon-core` (test "group_runtime_store") generated 1 warning (run `cargo fix --test "group_runtime_store" -p muyon-core` to apply 1 suggestion)
+warning: `muyon-core` (test "group_runtime_bridge") generated 1 warning (1 duplicate)
+warning: `muyon-core` (test "group_request_binding") generated 1 warning (1 duplicate)
+    Finished `test` profile [unoptimized] target(s) in 17.77s
+     Running tests/group_request_binding.rs (/tmp/mig20-target/debug/deps/group_request_binding-8d0b94ac143fc4ff)
+
+running 114 tests
+test blobs::tests::deleting_rejects_new_read_or_same_digest_upload ... ok
+test blobs::tests::failed_ledger_after_solidification_keeps_staging_and_object_independent ... ok
+test blobs::tests::corrupt_existing_object_and_dangling_symlink_are_never_replaced ... ok
+test blobs::tests::file_and_upload_logical_length_quotas_precede_hashing_and_writing ... ok
+test blobs::tests::kill_fixture ... ok
+test blobs::tests::gc_and_publish_barrier_preserves_either_upload_pin_or_reference ... ok
+test blobs::tests::gc_and_reader_barrier_covers_reader_after_upload_pin_release ... ok
+test actual_ledger_admission_facts_include_live_original_and_private_context_without_permission ... ok
+test blobs::tests::pinned_state_alone_does_not_replace_a_durable_upload_pin ... ok
+test blobs::tests::publication_binds_expected_bytes_project_revision_and_real_transaction ... ok
+test blobs::tests::partial_publication_copy_is_not_reused_and_unknown_uploads_are_not_cleaned ... ok
+test blobs::tests::rename_then_failed_pin_commit_can_retry_existing_target_without_overwrite ... ok
+test blobs::tests::pending_unknown_never_expire_and_lookup_does_not_recover ... ok
+test canonical_binding_cannot_grow_the_actual_members_task_capabilities ... ok
+test canonical_binding_does_not_substitute_another_actual_root_even_with_same_payload_digest ... ok
+test blobs::tests::real_paper_effect_receipt_and_blob_reference_survive_or_roll_back_together ... ok
+test canonical_binding_tail_fault_rolls_back_all_local_effects_and_gates_actual_unknown ... ok
+test canonical_binding_without_real_ledger_context_is_refused_then_real_native_path_works ... ok
+test canonical_context_recheck_detects_real_configuration_replacement ... ok
+test canonical_group_binding_is_real_durable_scoped_and_preserves_original_gate ... ok
+test canonical_mapping_survives_restart_as_readonly_unknown_without_freeing_original_hold ... ok
+test canonical_recheck_source_failure_keeps_registered_original_identity_without_ready_or_known_usage ... ok
+test canonical_mapping_event_receipt_and_consume_faults_rollback_and_never_replay ... ok
+test canonical_registered_mapping_requires_its_actual_committed_original_local_receipt ... ok
+test canonical_tail_preserves_exact_source_plan_provenance_or_rolls_back ... ok
+test documents::candidate_tests::duplicate_preparation_is_query_only_and_conflicting_binding_is_rejected ... ok
+test documents::candidate_tests::expiry_after_durable_pin_is_unknown_and_never_source_success ... ok
+test documents::candidate_tests::late_seal_failure_leaves_unpublished_object_and_query_only_unknown ... ok
+test documents::candidate_tests::missing_pin_or_corrupt_object_is_query_only_unknown ... ok
+test documents::candidate_tests::new_bytes_are_private_sealed_unvalidated_and_never_publish ... ok
+test documents::candidate_tests::oversize_nonpayload_fields_fail_before_status_decode ... ok
+test blobs::tests::real_sigkill_and_reopen_at_twelve_cross_media_windows ... ok
+test documents::candidate_tests::partial_staging_restart_preserves_candidate_without_blocking_unrelated_gc ... ok
+test documents::candidate_tests::reservation_failure_has_no_upload_or_output_effect ... ok
+test documents::candidate_tests::restart_retains_prepared_pin_but_never_adopts_original_execution_authority ... ok
+test documents::candidate_tests::source_head_advance_rejects_old_candidate_without_latest_substitution ... ok
+test documents::candidate_tests::revocation_conflict_invalid_input_and_foreign_publication_fail_closed ... ok
+test documents::history_tests::advancing_parent_head_does_not_reuse_old_history_policy ... ok
+test documents::history_tests::canonical_history_corruption_and_missing_revision_are_not_substituted ... ok
+test documents::history_tests::historical_and_parent_revocation_expiry_generation_and_project_are_current ... ok
+test documents::history_tests::historical_identity_scope_schema_and_read_only_policy_fail_closed ... ok
+test documents::history_tests::history_denies_without_explicit_target_policy_and_then_reads_exact_snapshot ... ok
+test documents::history_tests::text_label_roundtrips_without_default_utf8_or_reader_capability ... ok
+test documents::history_tests::old_policy_is_not_inherited_by_a_new_parent_grant_generation ... ok
+test documents::history_tests::wrong_history_schema_is_rejected_without_changing_document_store ... ok
+test documents::reader_tests::authenticated_snapshot_never_delivers_mutated_disk_bytes_even_with_resampled_stamp ... ok
+test documents::reader_tests::cleanup_failure_withholds_bytes_and_poisoned_host_refuses_new_sessions ... ok
+test documents::reader_tests::corrupt_oversize_blob_length_is_rejected_without_creating_reader_pin ... ok
+test documents::reader_tests::bounded_sessions_idle_absolute_lifetime_and_invalid_chunk_release_pins ... ok
+test documents::reader_tests::dropping_host_releases_sessions_before_reopening_same_store ... ok
+test documents::reader_tests::deleted_pin_or_same_length_corruption_invalidates_session ... ok
+test documents::reader_tests::eof_cleanup_time_revocation_withholds_prepared_chunk ... ok
+test documents::candidate_tests::candidate_gc_crosses_page_boundary_preserving_exact_objects_and_project_quotas ... ok
+test documents::reader_tests::exact_metadata_and_sequential_bytes_close_at_eof ... ok
+test documents::reader_tests::inspect_grant_cannot_open_bytes_and_forged_scope_never_substitutes_source ... ok
+test documents::reader_tests::one_shot_cleanup_time_revocation_withholds_prepared_output ... ok
+test documents::reader_tests::one_shot_callback_failure_and_cleanup_failure_return_no_success_or_pin ... ok
+test documents::reader_tests::one_shot_view_is_live_bounded_and_tail_rechecks_expiry_before_delivery ... ok
+test documents::reader_tests::open_commit_rejection_maps_to_unknown_and_cleans_original_pin ... ok
+test documents::reader_tests::open_failure_after_pin_creation_rolls_back_without_exposing_a_session ... ok
+test documents::reader_tests::generation_epoch_expiry_and_project_deletion_revoke_existing_sessions ... ok
+test documents::storage_tests::clone_and_late_receipt_failure_roll_back_together ... ok
+test documents::storage_tests::clone_late_metadata_failure_and_revision_overflow_leave_original_intact ... ok
+test documents::reader_tests::revoked_or_advanced_session_never_delivers_cached_bytes ... ok
+test documents::storage_tests::clone_reference_requires_same_project_ready_source_and_unique_reference ... ok
+test documents::storage_tests::clone_rejects_changed_source_stale_base_and_foreign_transaction ... ok
+test documents::storage_tests::clone_verifies_real_source_file_hash_and_missing_file ... ok
+test documents::storage_tests::copy_clone_commits_same_bytes_and_revision_without_upload_or_staging ... ok
+test documents::storage_tests::tail_grant_rechecks_revocation_expiry_generation_epoch_and_project ... ok
+test documents::storage_tests::tail_grant_rejects_foreign_transaction_and_mismatched_document_binding ... ok
+test documents::storage_tests::tail_grant_survives_own_cas_without_authorizing_old_revision_reads ... ok
+test group_origin_gate_cases::actual_second_followup_encoder_boundary_identifies_wire_logical_history_mismatch ... ok
+test group_origin_gate_cases::canonical_mapping_evidence_survives_missing_workflow_child_for_direct_entry ... ok
+test group_origin_gate_cases::direct_and_non_group_workflow_controls_remain_non_group_observations_without_permit ... ok
+test group_origin_gate_cases::durable_followup_inherits_group_origin_and_request_only_gate_finds_first_original_mapping ... ok
+test group_origin_gate_cases::followup_first_insert_cannot_change_parent_charge_before_source_witness_capture ... ok
+test group_origin_gate_cases::group_prepare_records_real_group_root_child_before_canonical_mapping_exists ... ok
+test group_origin_gate_cases::isolated_owned_namespace_remnants_are_inconclusive_not_never_initialized ... ok
+test group_origin_gate_cases::followup_tail_fault_rolls_back_new_identity_link_and_preserves_parent_origin ... ok
+test group_origin_gate_cases::kind_damage_cannot_erase_actual_group_request_references ... ok
+test group_origin_gate_cases::legacy_v3_migration_preserves_original_bytes_and_unknown_hold_without_guessing_direct ... ok
+test group_origin_gate_cases::legitimate_local_read_and_workflow_roots_remain_non_group_but_remote_fields_are_invalid ... ok
+test group_origin_gate_cases::migration_must_preserve_request_rowid_history_order_not_only_named_columns ... ok
+test group_origin_gate_cases::legacy_origin_migration_trigger_faults_rollback_whole_upgrade ... ok
+test group_origin_gate_cases::normal_legacy_migration_keeps_completed_history_order_and_new_direct_behavior ... ok
+test group_origin_gate_cases::ordinary_origin_is_persisted_at_prepare_and_missing_origin_never_means_direct ... ok
+test group_origin_gate_cases::ordinary_followup_stays_direct_non_group_and_keeps_existing_confirmation_semantics ... ok
+test group_origin_gate_cases::ordinary_prepare_in_actual_group_child_cannot_bypass_request_only_gate ... ok
+test group_origin_gate_cases::origin_gate_cannot_downgrade_when_actual_group_run_row_is_missing ... ok
+test group_origin_gate_cases::origin_gate_holds_actual_legacy_bind_original_without_a_workflow_child ... ok
+test group_origin_gate_cases::origin_gate_cannot_drop_a_bound_child_after_conversation_damage ... ok
+test group_origin_gate_cases::prepare_origin_tail_fault_rolls_back_request_and_origin ... ok
+test group_origin_gate_cases::pending_canonical_evidence_survives_missing_workflow_child_for_direct_entry ... ok
+test group_origin_gate_cases::second_followup_encoder_refusal_for_duplicate_call_ref_preserves_group_chain_and_hold ... ok
+test group_origin_gate_cases::registered_group_sources_never_downgrade_under_missing_or_corrupt_mapping_and_source_tables ... ok
+test group_origin_gate_cases::second_legal_followup_preserves_group_origin_and_original_mapping ... ok
+test group_origin_gate_cases::second_followup_unknown_unadvertised_and_unpaired_history_remain_rejected_without_writes ... ok
+test group_origin_gate_cases::second_ordinary_followup_retains_direct_lineage_without_changing_confirmation_policy ... ok
+test ledger_complete_facts_do_not_omit_a_child_moved_to_another_physical_root ... ok
+test ledger_complete_facts_do_not_omit_a_child_moved_to_another_physical_scope ... ok
+test owner_binding_after_restart_preserves_original_epoch_unknown_and_hold_without_replay ... ok
+test owner_binding_detects_persisted_payload_digest_mismatch ... ok
+test owner_binding_reloads_actual_canonical_bytes_instead_of_caller_plan ... ok
+test ledger_facts_reject_duplicate_remote_conversations_and_original_chains ... ok
+test pending_canonical_actual_unknown_blocks_the_real_handoff_checkpoint ... ok
+test pending_canonical_chain_read_failure_remains_pending_and_keeps_epoch_and_hold ... ok
+test pending_canonical_missing_identity_does_not_restore_admission_or_handoff ... ok
+test review_lifecycle::tests::committed_claims_are_preserved_and_partial_committed_schema_is_refused ... ok
+test review_lifecycle::tests::empty_file_from_interrupted_creation_initializes_without_replacement ... ok
+test review_lifecycle::tests::uncommitted_ddl_reopens_and_initializes_the_original_database ... ok
+test documents::candidate_tests::candidate_count_and_expected_byte_admission_limits_precede_file_writes ... ok
+test research::resource_tests::real_opaque_uploads_are_not_aggregated_when_sealing_or_importing ... ok
+test typed_admission_facts_cover_eight_lifetime_children_after_display_event_pruning ... ok
+test documents::reader_tests::thirty_mib_stream_hash_cost_is_linear_and_chunk_bytes_are_exact ... ok
+
+test result: ok. 114 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 13.00s
+
+     Running tests/group_runtime_bridge.rs (/tmp/mig20-target/debug/deps/group_runtime_bridge-abe65dcd4b705ce4)
+
+running 100 tests
+test blobs::tests::deleting_rejects_new_read_or_same_digest_upload ... ok
+test blobs::tests::corrupt_existing_object_and_dangling_symlink_are_never_replaced ... ok
+test blobs::tests::failed_ledger_after_solidification_keeps_staging_and_object_independent ... ok
+test blobs::tests::file_and_upload_logical_length_quotas_precede_hashing_and_writing ... ok
+test blobs::tests::gc_and_publish_barrier_preserves_either_upload_pin_or_reference ... ok
+test blobs::tests::kill_fixture ... ok
+test blobs::tests::gc_and_reader_barrier_covers_reader_after_upload_pin_release ... ok
+test actual_workflow_projection_follows_child_conversation_and_preserves_unknown_cost ... ok
+test blobs::tests::partial_publication_copy_is_not_reused_and_unknown_uploads_are_not_cleaned ... ok
+test blobs::tests::pinned_state_alone_does_not_replace_a_durable_upload_pin ... ok
+test blobs::tests::publication_binds_expected_bytes_project_revision_and_real_transaction ... ok
+test blobs::tests::pending_unknown_never_expire_and_lookup_does_not_recover ... ok
+test blobs::tests::rename_then_failed_pin_commit_can_retry_existing_target_without_overwrite ... ok
+test bridge_json_is_strict_and_cannot_nominate_host_scope_or_authority ... ok
+test configuration_preparation_does_not_turn_coordinator_into_manager ... ok
+test configuration_preparation_validates_mode_member_scope_without_issuing_grants ... ok
+test blobs::tests::real_paper_effect_receipt_and_blob_reference_survive_or_roll_back_together ... ok
+test configure_defaults_are_real_cas_writes_and_running_tasks_keep_mode_and_members ... ok
+test configuration_run_witness_checks_receipt_and_consumption_tail_mutations ... ok
+test configure_tail_expiry_rolls_back_defaults_and_legacy_capture ... ok
+test configure_rejects_unknown_modes_stale_cas_and_invalid_fixed_leader ... ok
+test configuring_legacy_records_freezes_the_previous_actual_mode_before_defaults_change ... ok
+test blobs::tests::real_sigkill_and_reopen_at_twelve_cross_media_windows ... ok
+test documents::candidate_tests::duplicate_preparation_is_query_only_and_conflicting_binding_is_rejected ... ok
+test documents::candidate_tests::expiry_after_durable_pin_is_unknown_and_never_source_success ... ok
+test documents::candidate_tests::late_seal_failure_leaves_unpublished_object_and_query_only_unknown ... ok
+test documents::candidate_tests::missing_pin_or_corrupt_object_is_query_only_unknown ... ok
+test documents::candidate_tests::new_bytes_are_private_sealed_unvalidated_and_never_publish ... ok
+test documents::candidate_tests::oversize_nonpayload_fields_fail_before_status_decode ... ok
+test documents::candidate_tests::partial_staging_restart_preserves_candidate_without_blocking_unrelated_gc ... ok
+test documents::candidate_tests::candidate_gc_crosses_page_boundary_preserving_exact_objects_and_project_quotas ... ok
+test documents::candidate_tests::reservation_failure_has_no_upload_or_output_effect ... ok
+test documents::candidate_tests::restart_retains_prepared_pin_but_never_adopts_original_execution_authority ... ok
+test documents::candidate_tests::source_head_advance_rejects_old_candidate_without_latest_substitution ... ok
+test documents::candidate_tests::revocation_conflict_invalid_input_and_foreign_publication_fail_closed ... ok
+test documents::history_tests::advancing_parent_head_does_not_reuse_old_history_policy ... ok
+test documents::history_tests::canonical_history_corruption_and_missing_revision_are_not_substituted ... ok
+test documents::history_tests::historical_and_parent_revocation_expiry_generation_and_project_are_current ... ok
+test documents::history_tests::historical_identity_scope_schema_and_read_only_policy_fail_closed ... ok
+test documents::history_tests::history_denies_without_explicit_target_policy_and_then_reads_exact_snapshot ... ok
+test documents::history_tests::text_label_roundtrips_without_default_utf8_or_reader_capability ... ok
+test documents::history_tests::old_policy_is_not_inherited_by_a_new_parent_grant_generation ... ok
+test documents::history_tests::wrong_history_schema_is_rejected_without_changing_document_store ... ok
+test documents::reader_tests::authenticated_snapshot_never_delivers_mutated_disk_bytes_even_with_resampled_stamp ... ok
+test documents::reader_tests::cleanup_failure_withholds_bytes_and_poisoned_host_refuses_new_sessions ... ok
+test documents::reader_tests::corrupt_oversize_blob_length_is_rejected_without_creating_reader_pin ... ok
+test documents::reader_tests::bounded_sessions_idle_absolute_lifetime_and_invalid_chunk_release_pins ... ok
+test documents::reader_tests::dropping_host_releases_sessions_before_reopening_same_store ... ok
+test documents::reader_tests::deleted_pin_or_same_length_corruption_invalidates_session ... ok
+test documents::reader_tests::eof_cleanup_time_revocation_withholds_prepared_chunk ... ok
+test documents::reader_tests::exact_metadata_and_sequential_bytes_close_at_eof ... ok
+test documents::reader_tests::inspect_grant_cannot_open_bytes_and_forged_scope_never_substitutes_source ... ok
+test documents::reader_tests::one_shot_callback_failure_and_cleanup_failure_return_no_success_or_pin ... ok
+test documents::reader_tests::generation_epoch_expiry_and_project_deletion_revoke_existing_sessions ... ok
+test documents::reader_tests::one_shot_cleanup_time_revocation_withholds_prepared_output ... ok
+test documents::reader_tests::one_shot_view_is_live_bounded_and_tail_rechecks_expiry_before_delivery ... ok
+test documents::reader_tests::open_commit_rejection_maps_to_unknown_and_cleans_original_pin ... ok
+test documents::reader_tests::open_failure_after_pin_creation_rolls_back_without_exposing_a_session ... ok
+test documents::reader_tests::revoked_or_advanced_session_never_delivers_cached_bytes ... ok
+test documents::storage_tests::clone_and_late_receipt_failure_roll_back_together ... ok
+test documents::storage_tests::clone_late_metadata_failure_and_revision_overflow_leave_original_intact ... ok
+test documents::storage_tests::clone_reference_requires_same_project_ready_source_and_unique_reference ... ok
+test documents::storage_tests::clone_rejects_changed_source_stale_base_and_foreign_transaction ... ok
+test documents::storage_tests::clone_verifies_real_source_file_hash_and_missing_file ... ok
+test documents::storage_tests::copy_clone_commits_same_bytes_and_revision_without_upload_or_staging ... ok
+test documents::storage_tests::tail_grant_rechecks_revocation_expiry_generation_epoch_and_project ... ok
+test documents::storage_tests::tail_grant_rejects_foreign_transaction_and_mismatched_document_binding ... ok
+test documents::storage_tests::tail_grant_survives_own_cas_without_authorizing_old_revision_reads ... ok
+test group_lists_and_get_are_persisted_and_paginated_with_management_separate_from_coordination ... ok
+test live_owner_absence_is_explicit_and_local_intent_receipts_are_actual ... ok
+test local_configuration_remains_readable_when_real_owner_has_no_configuration ... ok
+test migration_preservation_normal_reads_and_later_v2_bindings_remain_usable_without_replay ... ok
+test migration_preservation_rejects_journal_row_injection ... ok
+test migration_preservation_rejects_legacy_pending_deletion ... ok
+test migration_preservation_rejects_legacy_receipt_rewrite ... ok
+test migration_preservation_rejects_original_binding_injection ... ok
+test mode_catalog_and_configuration_prepare_default_only_new_groups_to_host_only ... ok
+test parent_configure_group_trigger_cannot_replace_intended_mode_and_leader ... ok
+test parent_exact_revision_trigger_preserves_new_revision_but_undoes_configuration ... ok
+test parent_normal_explicit_modes_and_fixed_leader_persist_and_start_real_local_runs ... ok
+test parent_original_binding_insert_cannot_commit_a_corrupted_pending_journal ... ok
+test parent_original_binding_receipt_and_consume_tail_damage_returns_pending_and_rolls_back ... ok
+test parent_original_binding_suppression_and_tampering_roll_back_pending_transaction ... ok
+test parent_pending_register_binding_tamper_and_missing_metadata_do_not_claim_identity ... ok
+test parent_pending_register_recovery_reads_original_after_failure_and_restart_without_group ... ok
+test parent_v1_identity_migration_storage_failure_rolls_back_schema_without_identity_backfill ... ok
+test parent_v1_migration_preserves_journal_without_fabricating_missing_original_identity ... ok
+test regression_existing_run_keeps_removed_members_and_handoff_mode ... ok
+test regression_legacy_capture_survives_configuration_tail ... ok
+test regression_tool_pending_cost_projection ... ok
+test actual_workflow_rows_remain_complete_when_display_events_are_truncated ... ok
+test review_lifecycle::tests::committed_claims_are_preserved_and_partial_committed_schema_is_refused ... ok
+test review_lifecycle::tests::empty_file_from_interrupted_creation_initializes_without_replacement ... ok
+test review_lifecycle::tests::uncommitted_ddl_reopens_and_initializes_the_original_database ... ok
+test run_view_shows_deadline_without_turning_a_local_proposal_into_a_completion ... ok
+test stale_native_ui_scope_cannot_read_after_owner_epoch_rotation ... ok
+test workflow_owner_absence_and_missing_real_root_do_not_fabricate_ready_state ... ok
+test documents::candidate_tests::candidate_count_and_expected_byte_admission_limits_precede_file_writes ... ok
+test research::resource_tests::real_opaque_uploads_are_not_aggregated_when_sealing_or_importing ... ok
+test documents::reader_tests::thirty_mib_stream_hash_cost_is_linear_and_chunk_bytes_are_exact ... ok
+
+test result: ok. 100 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 13.16s
+
+     Running tests/group_runtime_store.rs (/tmp/mig20-target/debug/deps/group_runtime_store-d5f23eb42f78760d)
+
+running 112 tests
+test blobs::tests::deleting_rejects_new_read_or_same_digest_upload ... ok
+test blobs::tests::failed_ledger_after_solidification_keeps_staging_and_object_independent ... ok
+test blobs::tests::corrupt_existing_object_and_dangling_symlink_are_never_replaced ... ok
+test a_new_run_id_cannot_reset_the_same_registered_root_lifetime ... ok
+test blobs::tests::kill_fixture ... ok
+test blobs::tests::file_and_upload_logical_length_quotas_precede_hashing_and_writing ... ok
+test blobs::tests::gc_and_publish_barrier_preserves_either_upload_pin_or_reference ... ok
+test blobs::tests::gc_and_reader_barrier_covers_reader_after_upload_pin_release ... ok
+test blobs::tests::pinned_state_alone_does_not_replace_a_durable_upload_pin ... ok
+test blobs::tests::publication_binds_expected_bytes_project_revision_and_real_transaction ... ok
+test blobs::tests::partial_publication_copy_is_not_reused_and_unknown_uploads_are_not_cleaned ... ok
+test blobs::tests::rename_then_failed_pin_commit_can_retry_existing_target_without_overwrite ... ok
+test blobs::tests::pending_unknown_never_expire_and_lookup_does_not_recover ... ok
+test business_commit_failure_rolls_back_receipt_event_stop_and_grant ... ok
+test changed_pending_is_rolled_back_before_original_journal_commit ... ok
+test consume_tail_epoch_is_checked_after_this_transaction_consumption ... ok
+test consume_tail_admission_id_is_checked ... ok
+test blobs::tests::real_paper_effect_receipt_and_blob_reference_survive_or_roll_back_together ... ok
+test consume_tail_expiry_is_checked_after_this_transaction_consumption ... ok
+test consume_tail_generation_is_checked_after_this_transaction_consumption ... ok
+test consume_tail_group_scope_is_checked_after_this_transaction_consumption ... ok
+test consume_tail_project_is_checked_after_this_transaction_consumption ... ok
+test consume_tail_grant_readmission_is_checked ... ok
+test documents::candidate_tests::duplicate_preparation_is_query_only_and_conflicting_binding_is_rejected ... ok
+test documents::candidate_tests::expiry_after_durable_pin_is_unknown_and_never_source_success ... ok
+test documents::candidate_tests::late_seal_failure_leaves_unpublished_object_and_query_only_unknown ... ok
+test documents::candidate_tests::missing_pin_or_corrupt_object_is_query_only_unknown ... ok
+test documents::candidate_tests::new_bytes_are_private_sealed_unvalidated_and_never_publish ... ok
+test documents::candidate_tests::oversize_nonpayload_fields_fail_before_status_decode ... ok
+test documents::candidate_tests::partial_staging_restart_preserves_candidate_without_blocking_unrelated_gc ... ok
+test documents::candidate_tests::reservation_failure_has_no_upload_or_output_effect ... ok
+test documents::candidate_tests::restart_retains_prepared_pin_but_never_adopts_original_execution_authority ... ok
+test documents::candidate_tests::revocation_conflict_invalid_input_and_foreign_publication_fail_closed ... ok
+test documents::candidate_tests::source_head_advance_rejects_old_candidate_without_latest_substitution ... ok
+test documents::history_tests::advancing_parent_head_does_not_reuse_old_history_policy ... ok
+test documents::history_tests::canonical_history_corruption_and_missing_revision_are_not_substituted ... ok
+test blobs::tests::real_sigkill_and_reopen_at_twelve_cross_media_windows ... ok
+test documents::history_tests::historical_identity_scope_schema_and_read_only_policy_fail_closed ... ok
+test documents::history_tests::historical_and_parent_revocation_expiry_generation_and_project_are_current ... ok
+test documents::history_tests::history_denies_without_explicit_target_policy_and_then_reads_exact_snapshot ... ok
+test documents::history_tests::text_label_roundtrips_without_default_utf8_or_reader_capability ... ok
+test documents::history_tests::old_policy_is_not_inherited_by_a_new_parent_grant_generation ... ok
+test documents::history_tests::wrong_history_schema_is_rejected_without_changing_document_store ... ok
+test documents::reader_tests::authenticated_snapshot_never_delivers_mutated_disk_bytes_even_with_resampled_stamp ... ok
+test documents::reader_tests::bounded_sessions_idle_absolute_lifetime_and_invalid_chunk_release_pins ... ok
+test documents::reader_tests::cleanup_failure_withholds_bytes_and_poisoned_host_refuses_new_sessions ... ok
+test documents::reader_tests::corrupt_oversize_blob_length_is_rejected_without_creating_reader_pin ... ok
+test documents::reader_tests::dropping_host_releases_sessions_before_reopening_same_store ... ok
+test documents::reader_tests::deleted_pin_or_same_length_corruption_invalidates_session ... ok
+test documents::reader_tests::eof_cleanup_time_revocation_withholds_prepared_chunk ... ok
+test documents::reader_tests::exact_metadata_and_sequential_bytes_close_at_eof ... ok
+test documents::reader_tests::inspect_grant_cannot_open_bytes_and_forged_scope_never_substitutes_source ... ok
+test documents::reader_tests::generation_epoch_expiry_and_project_deletion_revoke_existing_sessions ... ok
+test documents::reader_tests::one_shot_cleanup_time_revocation_withholds_prepared_output ... ok
+test documents::reader_tests::one_shot_callback_failure_and_cleanup_failure_return_no_success_or_pin ... ok
+test documents::reader_tests::one_shot_view_is_live_bounded_and_tail_rechecks_expiry_before_delivery ... ok
+test documents::reader_tests::open_commit_rejection_maps_to_unknown_and_cleans_original_pin ... ok
+test documents::reader_tests::open_failure_after_pin_creation_rolls_back_without_exposing_a_session ... ok
+test documents::reader_tests::revoked_or_advanced_session_never_delivers_cached_bytes ... ok
+test documents::storage_tests::clone_and_late_receipt_failure_roll_back_together ... ok
+test documents::storage_tests::clone_late_metadata_failure_and_revision_overflow_leave_original_intact ... ok
+test documents::storage_tests::clone_reference_requires_same_project_ready_source_and_unique_reference ... ok
+test documents::storage_tests::clone_rejects_changed_source_stale_base_and_foreign_transaction ... ok
+test documents::storage_tests::clone_verifies_real_source_file_hash_and_missing_file ... ok
+test documents::storage_tests::copy_clone_commits_same_bytes_and_revision_without_upload_or_staging ... ok
+test documents::candidate_tests::candidate_gc_crosses_page_boundary_preserving_exact_objects_and_project_quotas ... ok
+test documents::storage_tests::tail_grant_rechecks_revocation_expiry_generation_epoch_and_project ... ok
+test documents::storage_tests::tail_grant_rejects_foreign_transaction_and_mismatched_document_binding ... ok
+test documents::storage_tests::tail_grant_survives_own_cas_without_authorizing_old_revision_reads ... ok
+test events_tail_epoch_change_revokes_local_commit ... ok
+test events_tail_expiry_revokes_local_commit ... ok
+test events_tail_generation_change_revokes_local_commit ... ok
+test events_tail_project_delete_revokes_local_commit ... ok
+test events_tail_group_scope_change_revokes_local_commit ... ok
+test events_tail_revoke_is_not_mistaken_for_this_transaction_consumption ... ok
+test existing_original_can_be_registered_for_reconciliation_after_stop ... ok
+test failed_request_chain_read_during_handoff_is_inconclusive_not_rejected ... ok
+test grant_revocation_and_changed_payload_do_not_create_business_facts ... ok
+test failed_request_chain_read_keeps_original_unknown_and_local_observation_pending ... ok
+test handoff_and_stop_cas_survive_reopen_and_do_not_replay ... ok
+test handoff_narrowing_is_task_local_and_does_not_silently_change_group_defaults ... ok
+test handoff_requires_original_owner_even_before_any_node_is_bound ... ok
+test original_identity_storage_failure_is_pending_not_definitive_not_found ... ok
+test observed_dissent_and_original_artifact_survive_unknown_resolution_and_restart ... ok
+test real_original_unknown_is_scoped_query_only_and_holds_are_unchanged ... ok
+test receipt_tail_binding_change_is_checked ... ok
+test receipt_tail_epoch_change_revokes_local_commit ... ok
+test receipt_tail_expiry_revokes_local_commit ... ok
+test receipt_tail_failure_rolls_back_epoch_count_revision_grant_and_event ... ok
+test receipt_tail_generation_change_revokes_local_commit ... ok
+test receipt_tail_group_scope_change_revokes_local_commit ... ok
+test receipt_tail_revoke_is_not_mistaken_for_this_transaction_consumption ... ok
+test receipt_tail_project_delete_revokes_local_commit ... ok
+test registration_is_real_durable_scoped_fact_and_not_an_account_or_execution_grant ... ok
+test register_tail_checks_the_newly_persisted_group_scope ... ok
+test rejected_commit_failure_is_pending_without_committing_rejected_receipt ... ok
+test rejected_receipt_tail_tampering_returns_original_pending_instead_of_fabricated_rejection ... ok
+test rejected_update_ignored_returns_original_pending_instead_of_fabricated_rejection ... ok
+test rejected_write_sql_failure_is_pending_without_a_terminal_receipt ... ok
+test review_lifecycle::tests::committed_claims_are_preserved_and_partial_committed_schema_is_refused ... ok
+test review_lifecycle::tests::empty_file_from_interrupted_creation_initializes_without_replacement ... ok
+test review_lifecycle::tests::uncommitted_ddl_reopens_and_initializes_the_original_database ... ok
+test schedule_is_only_durable_pending_advice_and_grants_are_consumed ... ok
+test stale_revision_and_failed_sql_leave_no_partial_group_effect ... ok
+test stale_source_version_cannot_enter_persisted_summary ... ok
+test stop_does_not_cancel_original_request_or_free_hold ... ok
+test two_unsubmitted_nodes_can_be_invalidated_atomically_on_handoff ... ok
+test wire_claim_without_persisted_grant_and_member_management_are_denied ... ok
+test wrong_conversation_cannot_be_linked_and_memory_capabilities_cannot_expand_grants ... ok
+test documents::candidate_tests::candidate_count_and_expected_byte_admission_limits_precede_file_writes ... ok
+test research::resource_tests::real_opaque_uploads_are_not_aggregated_when_sealing_or_importing ... ok
+test documents::reader_tests::thirty_mib_stream_hash_cost_is_linear_and_chunk_bytes_are_exact ... ok
+
+test result: ok. 112 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 12.85s
+

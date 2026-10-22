@@ -1,0 +1,48 @@
+warning: suspicious definition of the runtime `read` symbol used by the standard library
+   --> /workspace/mig20/experiments/redesign/core-agent-lab/core/src/host_session.rs:132:124
+    |
+132 | ...ount: usize, timeout: i32) -> i32; fn read(fd: i32, buffer: *mut u8, count: usize) -> isize; fn write(fd: i32, buffer: *const u8...
+    |                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = note: expected `unsafe extern "C" fn(i32, *mut c_void, usize) -> isize` (for the current target)
+            found    `unsafe extern "C" fn(i32, *mut u8, usize) -> isize`
+    = help: either fix the signature or remove any attributes like `#[unsafe(no_mangle)]`, `#[unsafe(export_name = "read")]`, or `#[link_name = "read"]`
+    = help: allow this lint if the signature is compatible
+    = note: `#[warn(suspicious_runtime_symbol_definitions)]` on by default
+
+warning: suspicious definition of the runtime `write` symbol used by the standard library
+   --> /workspace/mig20/experiments/redesign/core-agent-lab/core/src/host_session.rs:132:182
+    |
+132 | ... *mut u8, count: usize) -> isize; fn write(fd: i32, buffer: *const u8, count: usize) -> isize; }
+    |                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = note: expected `unsafe extern "C" fn(i32, *const c_void, usize) -> isize` (for the current target)
+            found    `unsafe extern "C" fn(i32, *const u8, usize) -> isize`
+    = help: either fix the signature or remove any attributes like `#[unsafe(no_mangle)]`, `#[unsafe(export_name = "write")]`, or `#[link_name = "write"]`
+    = help: allow this lint if the signature is compatible
+
+warning: `muyon-core-agent-lab` (lib) generated 2 warnings
+   Compiling mig20-second-history-independent-review v0.1.0 (/tmp/mig20-second-history-independent-review)
+    Finished `test` profile [unoptimized] target(s) in 5.36s
+     Running current.rs (/tmp/mig20-target/debug/deps/current-3dcd105afcda805c)
+
+running 7 tests
+test independent_legal_local_read_and_direct_remain_nongroup ... ok
+KIND=local_read ATTR_IS_ERR=true GROUP_HOLD=true
+KIND=workflow ATTR_IS_ERR=true GROUP_HOLD=true
+KIND=unknown_kind ATTR_IS_ERR=true GROUP_HOLD=true
+test independent_kind_contradictions_never_erase_actual_group_references ... ok
+ROWID_MIGRATION_REJECTED=true BEFORE=[Some("2"), Some("3"), Some("1")] AFTER=[Some("2"), Some("3"), Some("1")]
+test independent_migration_preserves_actual_rowid_order_and_rolls_back_replacement ... ok
+ACTUAL_LEGAL_SECOND_PREPARE=Ok("0225a259536c58d2575b754741095433")
+test independent_duplicate_actual_call_ref_still_rejects_without_new_identity ... ok
+test independent_normal_legacy_migration_preserves_next_actual_prompt_history ... ok
+test independent_legal_second_followup_preserves_full_actual_payload_chain_and_hold ... ok
+NEGATIVE_HISTORY=unknown_wire RESULT=Err("tool_history_invalid")
+NEGATIVE_HISTORY=unselected_wire RESULT=Err("tool_history_invalid")
+NEGATIVE_HISTORY=logical_in_wire RESULT=Err("tool_history_invalid")
+NEGATIVE_HISTORY=unpaired RESULT=Err("tool_history_invalid")
+test independent_second_followup_rejects_unknown_unselected_logical_and_unpaired_history ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 67 filtered out; finished in 0.12s
+

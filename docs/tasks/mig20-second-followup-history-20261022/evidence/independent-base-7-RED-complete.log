@@ -1,0 +1,67 @@
+warning: suspicious definition of the runtime `read` symbol used by the standard library
+   --> /workspace/mig20/experiments/redesign/core-agent-lab/core/src/host_session.rs:132:124
+    |
+132 | ...ount: usize, timeout: i32) -> i32; fn read(fd: i32, buffer: *mut u8, count: usize) -> isize; fn write(fd: i32, buffer: *const u8...
+    |                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = note: expected `unsafe extern "C" fn(i32, *mut c_void, usize) -> isize` (for the current target)
+            found    `unsafe extern "C" fn(i32, *mut u8, usize) -> isize`
+    = help: either fix the signature or remove any attributes like `#[unsafe(no_mangle)]`, `#[unsafe(export_name = "read")]`, or `#[link_name = "read"]`
+    = help: allow this lint if the signature is compatible
+    = note: `#[warn(suspicious_runtime_symbol_definitions)]` on by default
+
+warning: suspicious definition of the runtime `write` symbol used by the standard library
+   --> /workspace/mig20/experiments/redesign/core-agent-lab/core/src/host_session.rs:132:182
+    |
+132 | ... *mut u8, count: usize) -> isize; fn write(fd: i32, buffer: *const u8, count: usize) -> isize; }
+    |                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = note: expected `unsafe extern "C" fn(i32, *const c_void, usize) -> isize` (for the current target)
+            found    `unsafe extern "C" fn(i32, *const u8, usize) -> isize`
+    = help: either fix the signature or remove any attributes like `#[unsafe(no_mangle)]`, `#[unsafe(export_name = "write")]`, or `#[link_name = "write"]`
+    = help: allow this lint if the signature is compatible
+
+warning: `muyon-core-agent-lab` (lib) generated 2 warnings
+   Compiling mig20-second-history-independent-review v0.1.0 (/tmp/mig20-second-history-independent-review)
+    Finished `test` profile [unoptimized] target(s) in 5.48s
+     Running base.rs (/tmp/mig20-target/debug/deps/base-fdac8529faeebef0)
+
+running 7 tests
+test independent_legal_local_read_and_direct_remain_nongroup ... ok
+KIND=local_read ATTR_IS_ERR=false GROUP_HOLD=false
+
+thread 'independent_kind_contradictions_never_erase_actual_group_references' (42217) panicked at base.rs:1281:483:
+assertion failed: attribution.is_err()
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test independent_kind_contradictions_never_erase_actual_group_references ... FAILED
+ROWID_MIGRATION_REJECTED=false BEFORE=[Some("3"), Some("1"), Some("2")] AFTER=[Some("3"), Some("4"), Some("2")]
+
+thread 'independent_migration_preserves_actual_rowid_order_and_rolls_back_replacement' (42220) panicked at base.rs:1296:748:
+assertion failed: migrated.is_err()
+test independent_migration_preserves_actual_rowid_order_and_rolls_back_replacement ... FAILED
+test independent_duplicate_actual_call_ref_still_rejects_without_new_identity ... ok
+ACTUAL_LEGAL_SECOND_PREPARE=Err("tool_history_invalid")
+
+thread 'independent_legal_second_followup_preserves_full_actual_payload_chain_and_hold' (42219) panicked at base.rs:1271:177:
+called `Result::unwrap()` on an `Err` value: "tool_history_invalid"
+test independent_legal_second_followup_preserves_full_actual_payload_chain_and_hold ... FAILED
+test independent_normal_legacy_migration_preserves_next_actual_prompt_history ... ok
+NEGATIVE_HISTORY=unknown_wire RESULT=Err("tool_history_invalid")
+NEGATIVE_HISTORY=unselected_wire RESULT=Err("tool_history_invalid")
+NEGATIVE_HISTORY=logical_in_wire RESULT=Err("agent_origin_chain_invalid")
+
+thread 'independent_second_followup_rejects_unknown_unselected_logical_and_unpaired_history' (42222) panicked at base.rs:1309:400:
+logical_in_wire
+test independent_second_followup_rejects_unknown_unselected_logical_and_unpaired_history ... FAILED
+
+failures:
+
+failures:
+    independent_kind_contradictions_never_erase_actual_group_references
+    independent_legal_second_followup_preserves_full_actual_payload_chain_and_hold
+    independent_migration_preserves_actual_rowid_order_and_rolls_back_replacement
+    independent_second_followup_rejects_unknown_unselected_logical_and_unpaired_history
+
+test result: FAILED. 3 passed; 4 failed; 0 ignored; 0 measured; 67 filtered out; finished in 0.10s
+
+error: test failed, to rerun pass `--test base`

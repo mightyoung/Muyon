@@ -120,6 +120,14 @@ fn approve_actual_tool(
     o: &agent::owner::AgentOwner,
     p: &agent::owner::AgentPlan,
 ) -> agent::tools::ToolsContext {
+    approve_actual_tool_with_ref(s, o, p, &format!("call_{}", p.request_id))
+}
+fn approve_actual_tool_with_ref(
+    s: &BusinessStore,
+    o: &agent::owner::AgentOwner,
+    p: &agent::owner::AgentPlan,
+    call_ref: &str,
+) -> agent::tools::ToolsContext {
     let ctx =
         agent::tools::ToolsContext::current(s, "session", "generation", Some("project")).unwrap();
     o.bind_tool_scope_trusted(&p.request_id, &ctx).unwrap();
@@ -128,7 +136,7 @@ fn approve_actual_tool(
     let _unsent = o
         .claim_dispatch(&p.request_id, &cfg.id, &cfg.settings.credential_generation)
         .unwrap();
-    let body=json!({"id":"synthetic-tool","model":agent::owner::MODEL,"choices":[{"index":0,"finish_reason":"tool_calls","message":{"role":"assistant","content":null,"tool_calls":[{"id":format!("call_{}",p.request_id),"type":"function","function":{"name":"product_supplier_list","arguments":"{\"limit\":5,\"offset\":0}"}}]}}],"usage":{"prompt_tokens":17,"completion_tokens":4,"total_tokens":21}}).to_string();
+    let body=json!({"id":"synthetic-tool","model":agent::owner::MODEL,"choices":[{"index":0,"finish_reason":"tool_calls","message":{"role":"assistant","content":null,"tool_calls":[{"id":call_ref,"type":"function","function":{"name":"product_supplier_list","arguments":"{\"limit\":5,\"offset\":0}"}}]}}],"usage":{"prompt_tokens":17,"completion_tokens":4,"total_tokens":21}}).to_string();
     assert_eq!(
         o.settle_response(&p.request_id, &body).unwrap().status,
         "tool_pending"
@@ -520,14 +528,14 @@ fn origin_gate_holds_actual_legacy_bind_original_without_a_workflow_child() {
     assert!(gate.group_hold(),"actual committed Group BindOriginal is group evidence even when no remote workflow child or canonical mapping exists");
 }
 #[test]
-fn second_followup_encoder_refusal_preserves_existing_group_chain_and_hold() {
+fn second_followup_encoder_refusal_for_duplicate_call_ref_preserves_group_chain_and_hold() {
     let (f, s, o, mut l, scope, p, child) = prepared_group();
     map_actual(&s, &o, &mut l, &scope, &p, &child);
     let ctx = approve_actual_tool(&s, &o, &p);
     let next = o
         .prepare_tool_followup_trusted(&s, &ctx, &p.request_id, Some(&Proof))
         .unwrap();
-    let ctx = approve_actual_tool(&s, &o, &next);
+    let ctx = approve_actual_tool_with_ref(&s, &o, &next, &format!("call_{}", p.request_id));
     let before = o
         .request_chain(&p.request_id)
         .unwrap()
@@ -675,4 +683,491 @@ fn isolated_owned_namespace_remnants_are_inconclusive_not_never_initialized() {
             "{keep}"
         );
     }
+}
+
+#[test]
+fn second_legal_followup_preserves_group_origin_and_original_mapping() {
+    let (f, s, o, mut l, scope, p, child) = prepared_group();
+    map_actual(&s, &o, &mut l, &scope, &p, &child);
+    let ctx = approve_actual_tool(&s, &o, &p);
+    let next = o
+        .prepare_tool_followup_trusted(&s, &ctx, &p.request_id, Some(&Proof))
+        .unwrap();
+    let ctx = approve_actual_tool(&s, &o, &next);
+    let last = o
+        .prepare_tool_followup_trusted(&s, &ctx, &next.request_id, Some(&Proof))
+        .unwrap();
+    let db = sqlite::Db::open(f.0.join("agent.sqlite").to_str().unwrap(), false, false).unwrap();
+    let previous: serde_json::Value = serde_json::from_str(
+        db.query(
+            "SELECT payload FROM requests WHERE id=?",
+            &[&next.request_id],
+        )
+        .unwrap()[0][0]
+            .as_deref()
+            .unwrap(),
+    )
+    .unwrap();
+    let final_payload: serde_json::Value = serde_json::from_str(
+        db.query(
+            "SELECT payload FROM requests WHERE id=?",
+            &[&last.request_id],
+        )
+        .unwrap()[0][0]
+            .as_deref()
+            .unwrap(),
+    )
+    .unwrap();
+    assert_eq!(previous["messages"].as_array().unwrap().len(), 3);
+    assert_eq!(final_payload["messages"].as_array().unwrap().len(), 5);
+    assert_eq!(
+        &final_payload["messages"].as_array().unwrap()[..3],
+        previous["messages"].as_array().unwrap().as_slice()
+    );
+    assert_eq!(final_payload["tools"], previous["tools"]);
+    assert_eq!(
+        final_payload["messages"][3]["tool_calls"][0]["function"]["name"],
+        "product_supplier_list"
+    );
+    let original = serde_json::to_value(o.request_origin(&p.request_id).unwrap()).unwrap();
+    let inherited = serde_json::to_value(o.request_origin(&last.request_id).unwrap()).unwrap();
+    assert_eq!(inherited["parent_request_id"], next.request_id);
+    assert_eq!(inherited["classification"], "group");
+    assert_eq!(inherited["group"], original["group"]);
+    assert_eq!(o.request_chain(&p.request_id).unwrap().len(), 3);
+    assert_eq!(o.lookup(&last.request_id).unwrap().status, "prepared");
+    assert_eq!(
+        o.request_origin(&last.request_id)
+            .unwrap()
+            .root_request_id(),
+        Some(p.request_id.as_str())
+    );
+    let gate = serde_json::to_value(s.group_request_gate(&last.request_id, &o, &l)).unwrap();
+    assert_eq!(gate["canonical"]["request_id"], p.request_id);
+    assert_eq!(gate["group_hold"], true);
+    assert_eq!(gate["execution_authority"], false);
+    assert_eq!(gate["execution_authority"], false);
+    assert_eq!(gate["cross_owner_atomic"], false);
+    let g = GroupScope::current(&s, "project", "group").unwrap();
+    let check = serde_json::to_value(
+        s.group_recheck_request_binding(&g, "run", "node", &o, &l, &scope)
+            .unwrap(),
+    )
+    .unwrap();
+    assert_eq!(check["observations"].as_array().unwrap().len(), 3);
+    assert_eq!(check["recovery_state"], "query_original");
+    assert_eq!(check["execution_authority"], false);
+    assert_eq!(
+        s.group_lookup_original(&g, "run", "node", &o)
+            .unwrap()
+            .request_id,
+        last.request_id
+    );
+    let db = sqlite::Db::open(f.0.join("agent.sqlite").to_str().unwrap(), false, false).unwrap();
+    db.exec(
+        "DELETE FROM request_origins WHERE request_id=?",
+        &[&p.request_id],
+    )
+    .unwrap();
+    assert!(o.request_origin(&last.request_id).is_err());
+    assert!(s.group_request_gate(&last.request_id, &o, &l).group_hold());
+}
+
+#[test]
+fn actual_second_followup_encoder_boundary_identifies_wire_logical_history_mismatch() {
+    use muyon_core_agent_lab::{
+        model::ModelRequest, wire_json, wire_provider::encode_registered_request,
+    };
+    let (f, s, o, mut l, scope, p, child) = prepared_group();
+    map_actual(&s, &o, &mut l, &scope, &p, &child);
+    let ctx = approve_actual_tool(&s, &o, &p);
+    let next = o
+        .prepare_tool_followup_trusted(&s, &ctx, &p.request_id, Some(&Proof))
+        .unwrap();
+    let _ctx = approve_actual_tool(&s, &o, &next);
+    let db = sqlite::Db::open(f.0.join("agent.sqlite").to_str().unwrap(), false, false).unwrap();
+    let raw = db
+        .query(
+            "SELECT payload FROM requests WHERE id=?",
+            &[&next.request_id],
+        )
+        .unwrap()[0][0]
+        .clone()
+        .unwrap();
+    let mut body: serde_json::Value = serde_json::from_str(&raw).unwrap();
+    let review = db
+        .query(
+            "SELECT review FROM tool_steps WHERE request_id=?",
+            &[&next.request_id],
+        )
+        .unwrap()[0][0]
+        .clone()
+        .unwrap();
+    let observed = o.lookup(&next.request_id).unwrap();
+    let call: agent::tools::ToolCall =
+        serde_json::from_value(observed.answer.unwrap()["call"].clone()).unwrap();
+    println!(
+        "ACTUAL_STORED_HISTORY_NAME={} NEW_ACTUAL_CALL_NAME={}",
+        body["messages"][1]["tool_calls"][0]["function"]["name"], call.name
+    );
+    body["messages"].as_array_mut().unwrap().push(json!({"role":"assistant","content":null,"tool_calls":[{"id":call.call_ref,"type":"function","function":{"name":call.name,"arguments":call.arguments.to_string()}}]}));
+    body["messages"]
+        .as_array_mut()
+        .unwrap()
+        .push(json!({"role":"tool","tool_call_id":call.call_ref,"content":review}));
+    let defs = agent::tools::definitions()
+        .unwrap()
+        .into_iter()
+        .filter(|d| {
+            body["tools"]
+                .as_array()
+                .unwrap()
+                .iter()
+                .any(|t| t["function"]["name"] == d.wire_name)
+        })
+        .collect::<Vec<_>>();
+    let request = ModelRequest {
+        task: "product".into(),
+        attempt: next.request_id.clone(),
+        turn: 1,
+        messages: vec![],
+        tools: defs.iter().map(|d| d.name.clone()).collect(),
+    };
+    let raw_history = wire_json::parse(body["messages"].to_string().as_bytes()).unwrap();
+    assert_eq!(
+        encode_registered_request(&request, &raw_history, &defs, agent::owner::MODEL).unwrap_err(),
+        "wire_history_call"
+    );
+    let expected_wire_history = body["messages"].clone();
+    // Probe only: invert exact registered wire names in memory, leaving ALL
+    // ids/pairing/arguments/content untouched. The production encoder is unchanged.
+    for row in body["messages"].as_array_mut().unwrap() {
+        if let Some(calls) = row
+            .get_mut("tool_calls")
+            .and_then(serde_json::Value::as_array_mut)
+        {
+            for c in calls {
+                if let Some(d) = defs.iter().find(|d| c["function"]["name"] == d.wire_name) {
+                    c["function"]["name"] = json!(d.name);
+                }
+            }
+        }
+    }
+    let history = wire_json::parse(body["messages"].to_string().as_bytes()).unwrap();
+    let result = encode_registered_request(&request, &history, &defs, agent::owner::MODEL).unwrap();
+    let encoded: serde_json::Value = serde_json::from_slice(&result).unwrap();
+    let mut expected = expected_wire_history;
+    expected.as_array_mut().unwrap()[3]["tool_calls"][0]["function"]["name"] =
+        json!("product_supplier_list");
+    assert_eq!(encoded["messages"], expected);
+    println!("ONE_VARIABLE_INVERSE_MAPPING_PROBE=PASS; no request persisted or bytes sent");
+}
+
+#[test]
+fn kind_damage_cannot_erase_actual_group_request_references() {
+    let f = CanonicalFixture::new();
+    let db = sqlite::Db::open(
+        f.files.0.join("workflow.sqlite").to_str().unwrap(),
+        false,
+        false,
+    )
+    .unwrap();
+    db.exec(
+        "UPDATE runs SET record=json_set(record,'$.kind','local_read') WHERE id=?",
+        &[&f.child],
+    )
+    .unwrap();
+    let result = f.ledger.request_attribution(&f.plan.request_id, &f.owner);
+    let gate = f
+        .store
+        .group_request_gate(&f.plan.request_id, &f.owner, &f.ledger);
+    println!(
+        "KIND_DAMAGED_ATTRIBUTION_IS_ERROR={} GATE={}",
+        result.is_err(),
+        serde_json::to_value(&gate).unwrap()
+    );
+    assert!(result.is_err());
+    assert!(gate.group_hold());
+}
+#[test]
+fn migration_must_preserve_request_rowid_history_order_not_only_named_columns() {
+    let f = Fixture::new();
+    let o = owner(&f);
+    let mut ids = Vec::new();
+    for label in ["First", "Second", "Third"] {
+        let p = o
+            .prepare_chat("migration-history", label, Some(&Proof))
+            .unwrap();
+        let cfg = o.configuration().unwrap();
+        o.confirm_trusted(&p.request_id, &cfg.id).unwrap();
+        let _unsent = o
+            .claim_dispatch(&p.request_id, &cfg.id, &cfg.settings.credential_generation)
+            .unwrap();
+        let response=json!({"id":"synthetic-answer","model":agent::owner::MODEL,"choices":[{"index":0,"finish_reason":"stop","message":{"role":"assistant","content":format!("Answer {label}")}}],"usage":{"prompt_tokens":17,"completion_tokens":4,"total_tokens":21}}).to_string();
+        assert_eq!(
+            o.settle_response(&p.request_id, &response).unwrap().status,
+            "completed"
+        );
+        ids.push(p.request_id);
+    }
+    drop(o);
+    let db = sqlite::Db::open(f.0.join("agent.sqlite").to_str().unwrap(), false, false).unwrap();
+    db.exec("DROP TABLE request_origins", &[]).unwrap();
+    db.exec("UPDATE meta SET version='3'", &[]).unwrap();
+    let before = db
+        .query("SELECT rowid,* FROM requests ORDER BY id", &[])
+        .unwrap();
+    db.exec(&format!("CREATE TRIGGER reorder_legacy_history AFTER UPDATE OF version ON meta WHEN OLD.version='3' AND NEW.version='4' BEGIN INSERT OR REPLACE INTO requests SELECT * FROM requests WHERE id='{}'; END",ids[0]),&[]).unwrap();
+    let result = agent::owner::AgentOwner::open(&f.0.join("agent.sqlite"), "ws", "epoch");
+    println!(
+        "ROWID_REORDER_MIGRATION_IS_ERROR={} BEFORE={:?} AFTER={:?}",
+        result.is_err(),
+        before.iter().map(|r| &r[0]).collect::<Vec<_>>(),
+        db.query("SELECT rowid,* FROM requests ORDER BY id", &[])
+            .unwrap()
+            .iter()
+            .map(|r| &r[0])
+            .collect::<Vec<_>>()
+    );
+    assert!(
+        result.is_err(),
+        "same columns with changed rowid alters the real history LIMIT8 order"
+    );
+    assert_eq!(
+        db.query("SELECT rowid,* FROM requests ORDER BY id", &[])
+            .unwrap(),
+        before
+    );
+    assert_eq!(
+        db.query("SELECT version FROM meta", &[]).unwrap()[0][0].as_deref(),
+        Some("3")
+    );
+}
+#[test]
+fn legitimate_local_read_and_workflow_roots_remain_non_group_but_remote_fields_are_invalid() {
+    let f = Fixture::new();
+    let s = f.init();
+    let o = owner(&f);
+    let mut l =
+        agent::workflow::RunLedger::open(&f.0.join("workflow.sqlite"), "ws", "epoch").unwrap();
+    let scope =
+        agent::workflow::RunScope::current(&s, "session", "nongroup-local", Some("project"))
+            .unwrap();
+    let root = l
+        .execute(
+            &json!({"action":"create_root","title":"Synthetic local","task":"Offline"}).to_string(),
+            &s,
+            &scope,
+        )
+        .unwrap()["id"]
+        .as_str()
+        .unwrap()
+        .to_string();
+    let child=l.execute(&json!({"action":"create_child","root_id":root,"skill_id":"supplier-overview","task":"Synthetic","executor":"local_read","arguments":{"limit":5,"offset":0}}).to_string(),&s,&scope).unwrap()["id"].as_str().unwrap().to_string();
+    l.execute(
+        &json!({"action":"execute_local","run_id":child}).to_string(),
+        &s,
+        &scope,
+    )
+    .unwrap();
+    let p = o
+        .prepare_chat("nongroup-local", "Synthetic ordinary", Some(&Proof))
+        .unwrap();
+    assert!(l.request_attribution(&p.request_id, &o).unwrap().is_none());
+    assert!(!s.group_request_gate(&p.request_id, &o, &l).group_hold());
+    let db = sqlite::Db::open(f.0.join("workflow.sqlite").to_str().unwrap(), false, false).unwrap();
+    for id in [&root, &child] {
+        let before = db
+            .query("SELECT record FROM runs WHERE id=?", &[id])
+            .unwrap()[0][0]
+            .clone()
+            .unwrap();
+        for key in [
+            "remote_request_id",
+            "current_request_id",
+            "remote_request_ids",
+        ] {
+            let mut value: serde_json::Value = serde_json::from_str(&before).unwrap();
+            value[key] = if key == "remote_request_ids" {
+                json!([p.request_id])
+            } else {
+                json!(p.request_id)
+            };
+            db.exec(
+                "UPDATE runs SET record=? WHERE id=?",
+                &[&value.to_string(), id],
+            )
+            .unwrap();
+            assert!(l.request_attribution(&p.request_id, &o).is_err(), "{key}");
+            assert!(s.group_request_gate(&p.request_id, &o, &l).group_hold());
+            db.exec("UPDATE runs SET record=? WHERE id=?", &[&before, id])
+                .unwrap();
+        }
+    }
+    assert!(!s.group_request_gate(&p.request_id, &o, &l).group_hold());
+}
+
+#[test]
+fn second_followup_unknown_unadvertised_and_unpaired_history_remain_rejected_without_writes() {
+    for fault in [
+        "unknown_wire",
+        "unadvertised_wire",
+        "logical_in_wire_history",
+        "unpaired",
+    ] {
+        let (f, s, o, mut l, scope, p, child) = prepared_group();
+        map_actual(&s, &o, &mut l, &scope, &p, &child);
+        let ctx = approve_actual_tool(&s, &o, &p);
+        let next = o
+            .prepare_tool_followup_trusted(&s, &ctx, &p.request_id, Some(&Proof))
+            .unwrap();
+        let ctx = approve_actual_tool(&s, &o, &next);
+        let db =
+            sqlite::Db::open(f.0.join("agent.sqlite").to_str().unwrap(), false, false).unwrap();
+        let raw = db
+            .query(
+                "SELECT payload FROM requests WHERE id=?",
+                &[&next.request_id],
+            )
+            .unwrap()[0][0]
+            .clone()
+            .unwrap();
+        let mut body: serde_json::Value = serde_json::from_str(&raw).unwrap();
+        match fault {
+            "unknown_wire" => {
+                body["messages"][1]["tool_calls"][0]["function"]["name"] =
+                    json!("unregistered_tool")
+            }
+            "unadvertised_wire" => {
+                body["messages"][1]["tool_calls"][0]["function"]["name"] =
+                    json!("product_supplier_get")
+            }
+            "logical_in_wire_history" => {
+                body["messages"][1]["tool_calls"][0]["function"]["name"] =
+                    json!("product.supplier_list")
+            }
+            "unpaired" => {
+                body["messages"].as_array_mut().unwrap().remove(2);
+            }
+            _ => unreachable!(),
+        }
+        db.exec(
+            "UPDATE requests SET payload=? WHERE id=?",
+            &[&body.to_string(), &next.request_id],
+        )
+        .unwrap();
+        let requests = db
+            .query("SELECT rowid,* FROM requests ORDER BY id", &[])
+            .unwrap();
+        let origins = db
+            .query("SELECT * FROM request_origins ORDER BY request_id", &[])
+            .unwrap();
+        let steps = db
+            .query("SELECT * FROM tool_steps ORDER BY request_id", &[])
+            .unwrap();
+        assert!(
+            matches!(
+                o.prepare_tool_followup_trusted(&s, &ctx, &next.request_id, Some(&Proof)),
+                Err("tool_history_invalid")
+            ),
+            "{fault}"
+        );
+        assert_eq!(
+            db.query("SELECT rowid,* FROM requests ORDER BY id", &[])
+                .unwrap(),
+            requests
+        );
+        assert_eq!(
+            db.query("SELECT * FROM request_origins ORDER BY request_id", &[])
+                .unwrap(),
+            origins
+        );
+        assert_eq!(
+            db.query("SELECT * FROM tool_steps ORDER BY request_id", &[])
+                .unwrap(),
+            steps
+        );
+        assert!(s.group_request_gate(&next.request_id, &o, &l).group_hold());
+    }
+}
+#[test]
+fn normal_legacy_migration_keeps_completed_history_order_and_new_direct_behavior() {
+    let f = Fixture::new();
+    let o = owner(&f);
+    for label in ["First", "Second", "Third"] {
+        let p = o
+            .prepare_chat("migration-history", label, Some(&Proof))
+            .unwrap();
+        let cfg = o.configuration().unwrap();
+        o.confirm_trusted(&p.request_id, &cfg.id).unwrap();
+        let _unsent = o
+            .claim_dispatch(&p.request_id, &cfg.id, &cfg.settings.credential_generation)
+            .unwrap();
+        let response=json!({"id":"synthetic-answer","model":agent::owner::MODEL,"choices":[{"index":0,"finish_reason":"stop","message":{"role":"assistant","content":format!("Answer {label}")}}],"usage":{"prompt_tokens":17,"completion_tokens":4,"total_tokens":21}}).to_string();
+        o.settle_response(&p.request_id, &response).unwrap();
+    }
+    drop(o);
+    let db = sqlite::Db::open(f.0.join("agent.sqlite").to_str().unwrap(), false, false).unwrap();
+    let before = db
+        .query("SELECT rowid,* FROM requests ORDER BY id", &[])
+        .unwrap();
+    db.exec("DROP TABLE request_origins", &[]).unwrap();
+    db.exec("UPDATE meta SET version='3'", &[]).unwrap();
+    let o = agent::owner::AgentOwner::open(&f.0.join("agent.sqlite"), "ws", "epoch").unwrap();
+    assert_eq!(
+        db.query("SELECT rowid,* FROM requests ORDER BY id", &[])
+            .unwrap(),
+        before
+    );
+    let p = o
+        .prepare_chat("migration-history", "Fourth", Some(&Proof))
+        .unwrap();
+    assert!(o.request_origin(&p.request_id).unwrap().is_direct());
+    let payload: serde_json::Value = serde_json::from_str(
+        db.query("SELECT payload FROM requests WHERE id=?", &[&p.request_id])
+            .unwrap()[0][0]
+            .as_deref()
+            .unwrap(),
+    )
+    .unwrap();
+    let users = payload["messages"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .filter(|v| v["role"] == "user")
+        .map(|v| v["content"].as_str().unwrap())
+        .collect::<Vec<_>>();
+    assert_eq!(users, vec!["First", "Second", "Third", "Fourth"]);
+}
+#[test]
+fn second_ordinary_followup_retains_direct_lineage_without_changing_confirmation_policy() {
+    let f = Fixture::new();
+    let s = f.init();
+    let o = owner(&f);
+    let l = agent::workflow::RunLedger::open(&f.0.join("workflow.sqlite"), "ws", "epoch").unwrap();
+    let p = o
+        .prepare_chat("ordinary-second", "Synthetic", Some(&Proof))
+        .unwrap();
+    let ctx = approve_actual_tool(&s, &o, &p);
+    let next = o
+        .prepare_tool_followup_trusted(&s, &ctx, &p.request_id, Some(&Proof))
+        .unwrap();
+    let ctx = approve_actual_tool(&s, &o, &next);
+    let last = o
+        .prepare_tool_followup_trusted(&s, &ctx, &next.request_id, Some(&Proof))
+        .unwrap();
+    assert!(o.request_origin(&last.request_id).unwrap().is_direct());
+    assert_eq!(
+        o.request_origin(&last.request_id)
+            .unwrap()
+            .root_request_id(),
+        Some(p.request_id.as_str())
+    );
+    assert_eq!(o.request_chain(&p.request_id).unwrap().len(), 3);
+    assert!(!s.group_request_gate(&last.request_id, &o, &l).group_hold());
+    let cfg = o.configuration().unwrap();
+    assert_eq!(
+        o.confirm_trusted(&last.request_id, &cfg.id).unwrap().status,
+        "reserved"
+    );
 }

@@ -1,0 +1,164 @@
+warning: suspicious definition of the runtime `read` symbol used by the standard library
+   --> /workspace/mig20/experiments/redesign/core-agent-lab/core/src/host_session.rs:132:124
+    |
+132 | ...ount: usize, timeout: i32) -> i32; fn read(fd: i32, buffer: *mut u8, count: usize) -> isize; fn write(fd: i32, buffer: *const u8...
+    |                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = note: expected `unsafe extern "C" fn(i32, *mut c_void, usize) -> isize` (for the current target)
+            found    `unsafe extern "C" fn(i32, *mut u8, usize) -> isize`
+    = help: either fix the signature or remove any attributes like `#[unsafe(no_mangle)]`, `#[unsafe(export_name = "read")]`, or `#[link_name = "read"]`
+    = help: allow this lint if the signature is compatible
+    = note: `#[warn(suspicious_runtime_symbol_definitions)]` on by default
+
+warning: suspicious definition of the runtime `write` symbol used by the standard library
+   --> /workspace/mig20/experiments/redesign/core-agent-lab/core/src/host_session.rs:132:182
+    |
+132 | ... *mut u8, count: usize) -> isize; fn write(fd: i32, buffer: *const u8, count: usize) -> isize; }
+    |                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = note: expected `unsafe extern "C" fn(i32, *const c_void, usize) -> isize` (for the current target)
+            found    `unsafe extern "C" fn(i32, *const u8, usize) -> isize`
+    = help: either fix the signature or remove any attributes like `#[unsafe(no_mangle)]`, `#[unsafe(export_name = "write")]`, or `#[link_name = "write"]`
+    = help: allow this lint if the signature is compatible
+
+warning: `muyon-core-agent-lab` (lib) generated 2 warnings
+warning: method `group_seed` is never used
+  --> muyon-core/src/agent/origin.rs:60:19
+   |
+47 | impl RequestOrigin {
+   | ------------------ method in this implementation
+...
+60 |     pub(crate) fn group_seed(&self) -> Option<&GroupOriginSeed> {
+   |                   ^^^^^^^^^^
+   |
+   = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: variant `Group` is never constructed
+  --> muyon-core/src/agent/origin.rs:66:5
+   |
+64 | pub(super) enum OriginDraft {
+   |                 ----------- variant in this enum
+65 |     Direct,
+66 |     Group(GroupOriginSeed),
+   |     ^^^^^
+
+warning: method `prepare_group_chat_trusted` is never used
+   --> muyon-core/src/agent/origin.rs:214:19
+    |
+142 | impl AgentOwner {
+    | --------------- method in this implementation
+...
+214 |     pub(crate) fn prepare_group_chat_trusted(
+    |                   ^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: `muyon-core` (lib) generated 3 warnings
+   Compiling muyon-core v0.1.0 (/workspace/mig20/crates/muyon-core)
+    Finished `test` profile [unoptimized] target(s) in 4.95s
+     Running tests/group_request_binding.rs (/tmp/mig20-target/debug/deps/group_request_binding-2e9ca052016f892d)
+
+running 62 tests
+test blobs::tests::failed_ledger_after_solidification_keeps_staging_and_object_independent ... ok
+test blobs::tests::deleting_rejects_new_read_or_same_digest_upload ... ok
+test blobs::tests::corrupt_existing_object_and_dangling_symlink_are_never_replaced ... ok
+test blobs::tests::file_and_upload_logical_length_quotas_precede_hashing_and_writing ... ok
+test blobs::tests::kill_fixture ... ok
+test actual_ledger_admission_facts_include_live_original_and_private_context_without_permission ... ok
+test blobs::tests::gc_and_publish_barrier_preserves_either_upload_pin_or_reference ... ok
+test blobs::tests::gc_and_reader_barrier_covers_reader_after_upload_pin_release ... ok
+test blobs::tests::pinned_state_alone_does_not_replace_a_durable_upload_pin ... ok
+test blobs::tests::publication_binds_expected_bytes_project_revision_and_real_transaction ... ok
+test blobs::tests::partial_publication_copy_is_not_reused_and_unknown_uploads_are_not_cleaned ... ok
+test blobs::tests::pending_unknown_never_expire_and_lookup_does_not_recover ... ok
+test blobs::tests::rename_then_failed_pin_commit_can_retry_existing_target_without_overwrite ... ok
+SIGKILL actual PaperCreate publication-applied: effect/history/receipt/reference=0 and protected blob retained
+SIGKILL upload-intent: independent SQLite state copying, recovery preserved publication invariants
+test canonical_binding_cannot_grow_the_actual_members_task_capabilities ... ok
+SIGKILL actual PaperCreate publication-committed: effect/history/receipt/reference=1 and protected blob retained
+test blobs::tests::real_paper_effect_receipt_and_blob_reference_survive_or_roll_back_together ... ok
+test canonical_binding_does_not_substitute_another_actual_root_even_with_same_payload_digest ... ok
+SIGKILL chunk-synced: independent SQLite state copying, recovery preserved publication invariants
+UNBOUND_ORIGINAL_ADVICE=LookupOriginal { request_id: "5371fd2bf0519a359f535ac600b538bf" }
+test canonical_binding_tail_fault_rolls_back_all_local_effects_and_gates_actual_unknown ... ok
+test canonical_binding_without_real_ledger_context_is_refused_then_real_native_path_works ... ok
+SIGKILL temp-copy-created: independent SQLite state copying, recovery preserved publication invariants
+CONFIGURATION_REPLACED={"binding":{"authorized_group_revision":"3","binding_owner_epoch":"epoch","capabilities":{"permissions":["read"],"scopes":["project"]},"configuration_id":"a8daf5c3e5cced464b3661455ddfea75","conversation_id":"child-cb1b098fc9e730b4ba6d8d50c5c375d6","coordinator_epoch":"1","execution_authority":false,"group_id":"group","host_session":"session","local_authority":{"generation":"1","grant_id":"grant-canonical-bind","owner_epoch":"epoch"},"local_intent_id":"canonical-bind","member_id":"a","node_id":"node","payload_digest":"443ab8865b2404124b29f7bf3f353f08c1a618aa1447a32a602969c30c0dffde","project_id":"project","purpose":"chat","registered_revision":"4","request_epoch":"epoch","request_id":"8944d98cdad764bf5759dfb68da0e866","root_task_id":"dbc34c30fe392962f21aa536db63a985","run_id":"run","workflow_arguments_digest":"6cfad4c45c68e5d0140f8fa7cef6c798175d1e69bc6bc9c4258f34b3c9861de5","workflow_owner_epoch":"epoch","workflow_revision":"4","workflow_run_id":"2fb34e06b180ec7270ac62bdc88217ac","workflow_skill_digest":"6a04822d58cadf1b20f8b677f16ef1573e82302cdffe467642eb11cbbed1636a","workspace_id":"ws"},"canonical_verified_now":true,"configuration_current":false,"context_current":false,"cross_owner_atomic":false,"execution_authority":false,"group_stopped":false,"observations":[{"answer":null,"attempted":false,"blocked_reason":null,"cancelled":false,"charged_micro_cny":"0","failure_stage":null,"http_status":null,"recovery_action":"none","request_id":"8944d98cdad764bf5759dfb68da0e866","reserved_micro_cny":"3024","status":"prepared"}],"original_chain_resolved":false,"recovery_state":"query_original","source_error":null,"workflow_verified_now":true}
+test canonical_context_recheck_detects_real_configuration_replacement ... ok
+SIGKILL temp-copy-chunk-synced: independent SQLite state copying, recovery preserved publication invariants
+CANONICAL_CHILD_UI=Ok(Object {"execution_authority": Bool(false), "operation": String("run"), "run": Object {"canonical_payload_binding": String("requires_durable_group_binding"), "coordination_mode": String("per_task"), "coordinator_epoch": String("1"), "coordinator_id": String("a"), "deadline_ms": String("18446744073709551615"), "deadline_reached": Bool(false), "execution_authority": Bool(false), "handoffs": String("0"), "live_state": String("reconciling"), "max_handoffs": String("2"), "max_rounds": String("8"), "members": Object {"a": Object {"permissions": Array [String("read")], "scopes": Array [String("project")]}, "b": Object {"permissions": Array [String("read")], "scopes": Array [String("project")]}}, "nodes": Array [Object {"canonical_binding": Object {"authorized_group_revision": String("3"), "binding_owner_epoch": String("epoch"), "capabilities": Object {"permissions": Array [String("read")], "scopes": Array [String("project")]}, "configuration_id": String("53abbc48135286ce8f5abce06b1e5369"), "conversation_id": String("child-9503c3220cf0c3b9e5770b62f51600fe"), "coordinator_epoch": String("1"), "execution_authority": Bool(false), "group_id": String("group"), "host_session": String("session"), "local_authority": Object {"generation": String("1"), "grant_id": String("grant-canonical-bind"), "owner_epoch": String("epoch")}, "local_intent_id": String("canonical-bind"), "member_id": String("a"), "node_id": String("node"), "payload_digest": String("443ab8865b2404124b29f7bf3f353f08c1a618aa1447a32a602969c30c0dffde"), "project_id": String("project"), "purpose": String("chat"), "registered_revision": String("4"), "request_epoch": String("epoch"), "request_id": String("3bf9950ec9e30bfe5b51ceaf8fde4bc5"), "root_task_id": String("1d708e68b2d95d33962f081d4a0adf85"), "run_id": String("run"), "workflow_arguments_digest": String("6cfad4c45c68e5d0140f8fa7cef6c798175d1e69bc6bc9c4258f34b3c9861de5"), "workflow_owner_epoch": String("epoch"), "workflow_revision": String("4"), "workflow_run_id": String("6eaa9b79ba54a0d9204b18633f4bf5f4"), "workflow_skill_digest": String("6a04822d58cadf1b20f8b677f16ef1573e82302cdffe467642eb11cbbed1636a"), "workspace_id": String("ws")}, "canonical_verified_now": Bool(true), "coordinator_epoch": String("1"), "dependencies": Array [], "member_id": String("a"), "node_id": String("node"), "original": Object {"actual_cost_scope": String("current_request"), "actual_micro_cny": Null, "actual_usage_known": Bool(false), "attempted": Bool(false), "cancel_requested": Bool(false), "chain": Array [Object {"actual_micro_cny": Null, "attempted": Bool(false), "request_id": String("3bf9950ec9e30bfe5b51ceaf8fde4bc5"), "reserved_micro_cny_original": String("3024"), "status": String("prepared")}], "current_request_id": String("3bf9950ec9e30bfe5b51ceaf8fde4bc5"), "lookup_status": String("available"), "original_chain_resolved": Bool(false), "original_request_id": String("3bf9950ec9e30bfe5b51ceaf8fde4bc5"), "recovery_action": String("none"), "status": String("prepared")}, "payload_digest": String("443ab8865b2404124b29f7bf3f353f08c1a618aa1447a32a602969c30c0dffde"), "persisted_state": String("unknown")}], "original_owner_status": String("available"), "owner_budget": Object {"cap_micro_cny": String("100000"), "charged_micro_cny": String("0"), "held_micro_cny": String("0"), "max_calls": String("10"), "scope": String("workspace_owner"), "used_calls": String("0")}, "owner_budget_status": String("available"), "persisted_summary": Object {"claims": Object {}, "execution_authority": Bool(false), "majority_is_truth": Bool(false), "nodes": Array [Object {"capabilities": Object {"permissions": Array [String("read")], "scopes": Array [String("project")]}, "dependencies": Array [], "epoch": String("1"), "evidence": Array [], "member_id": String("a"), "node_id": String("node"), "payload_digest": String("443ab8865b2404124b29f7bf3f353f08c1a618aa1447a32a602969c30c0dffde"), "request_id": String("3bf9950ec9e30bfe5b51ceaf8fde4bc5"), "state": String("unknown")}]}, "root_task_id": String("1d708e68b2d95d33962f081d4a0adf85"), "run_id": String("run"), "stopped": Bool(false)}, "schema_version": Number(1)})
+test canonical_group_binding_is_real_durable_scoped_and_preserves_original_gate ... ok
+SIGKILL temp-copy-durable: independent SQLite state copying, recovery preserved publication invariants
+test canonical_mapping_survives_restart_as_readonly_unknown_without_freeing_original_hold ... ok
+SIGKILL renamed-before-dir-sync: independent SQLite state copying, recovery preserved publication invariants
+test canonical_recheck_source_failure_keeps_registered_original_identity_without_ready_or_known_usage ... ok
+test canonical_mapping_event_receipt_and_consume_faults_rollback_and_never_replay ... ok
+SIGKILL blob-solidified: independent SQLite state copying, recovery preserved publication invariants
+test canonical_registered_mapping_requires_its_actual_committed_original_local_receipt ... ok
+SIGKILL blob-pinned: independent SQLite state pinned, recovery preserved publication invariants
+test group_origin_gate_cases::canonical_mapping_evidence_survives_missing_workflow_child_for_direct_entry ... ok
+ACTUAL_STORED_HISTORY_NAME="product_supplier_list" NEW_ACTUAL_CALL_NAME=product.supplier_list
+ONE_VARIABLE_INVERSE_MAPPING_PROBE=PASS; no request persisted or bytes sent
+test group_origin_gate_cases::actual_second_followup_encoder_boundary_identifies_wire_logical_history_mismatch ... ok
+SIGKILL publication-applied: independent SQLite state pinned, recovery preserved publication invariants
+test canonical_tail_preserves_exact_source_plan_provenance_or_rolls_back ... ok
+test group_origin_gate_cases::direct_and_non_group_workflow_controls_remain_non_group_observations_without_permit ... ok
+SIGKILL publication-committed: independent SQLite state committed, recovery preserved publication invariants
+test group_origin_gate_cases::followup_first_insert_cannot_change_parent_charge_before_source_witness_capture ... ok
+test group_origin_gate_cases::durable_followup_inherits_group_origin_and_request_only_gate_finds_first_original_mapping ... ok
+test group_origin_gate_cases::group_prepare_records_real_group_root_child_before_canonical_mapping_exists ... ok
+SIGKILL gc-marked: independent SQLite state aborted, recovery preserved publication invariants
+KIND_DAMAGED_ATTRIBUTION_IS_ERROR=false GATE={"canonical":null,"cross_owner_atomic":false,"execution_authority":false,"group_hold":false,"origin":{"classification":"direct","configuration_id":"3be77575fdd6da0dfc86ef02cbd4bc55","conversation_id":"child-53f01aee49048da514f025129edaf2dc","group":null,"parent_request_id":null,"payload_digest":"443ab8865b2404124b29f7bf3f353f08c1a618aa1447a32a602969c30c0dffde","request_epoch":"epoch","request_id":"61063315f21ef924e603dbe19e4af052","root_request_id":"61063315f21ef924e603dbe19e4af052","workspace_id":"ws"},"reason":"direct_non_group_observed","request_id":"61063315f21ef924e603dbe19e4af052","source_error":null,"workflow":null}
+
+thread 'group_origin_gate_cases::kind_damage_cannot_erase_actual_group_request_references' (39097) panicked at muyon-core/tests/support/group_origin_gate_cases.rs:751:5:
+assertion failed: result.is_err()
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+SIGKILL gc-unlinked: independent SQLite state aborted, recovery preserved publication invariants
+test group_origin_gate_cases::kind_damage_cannot_erase_actual_group_request_references ... FAILED
+test blobs::tests::real_sigkill_and_reopen_at_twelve_cross_media_windows ... ok
+test group_origin_gate_cases::legacy_v3_migration_preserves_original_bytes_and_unknown_hold_without_guessing_direct ... ok
+test group_origin_gate_cases::isolated_owned_namespace_remnants_are_inconclusive_not_never_initialized ... ok
+test group_origin_gate_cases::followup_tail_fault_rolls_back_new_identity_link_and_preserves_parent_origin ... ok
+test group_origin_gate_cases::ordinary_origin_is_persisted_at_prepare_and_missing_origin_never_means_direct ... ok
+test group_origin_gate_cases::ordinary_followup_stays_direct_non_group_and_keeps_existing_confirmation_semantics ... ok
+MISSING_ACTUAL_GROUP_RUN_GATE={"canonical":null,"cross_owner_atomic":false,"execution_authority":false,"group_hold":true,"origin":{"classification":"direct","configuration_id":"7caa478fd4b19bc0819055af1cd2c31f","conversation_id":"child-28eb5b8d19bbb7d4965ed0ee57bd4407","group":null,"parent_request_id":null,"payload_digest":"c5038fbeb0d9e975a1f159e9cc56c0186be06607e71a6252236b48b902ea9054","request_epoch":"epoch","request_id":"9335d60647fddae93eb2fcdea674a189","root_request_id":"9335d60647fddae93eb2fcdea674a189","workspace_id":"ws"},"reason":"actual_group_child_missing_group_origin","request_id":"9335d60647fddae93eb2fcdea674a189","source_error":null,"workflow":{"chain_contains_request":true,"child_id":"d1aa45c7405eb359551935097c4af067","facts":{"active_child_count":1,"children":[{"arguments_digest":"6cfad4c45c68e5d0140f8fa7cef6c798175d1e69bc6bc9c4258f34b3c9861de5","cancel_requested":false,"conversation_id":"child-28eb5b8d19bbb7d4965ed0ee57bd4407","created_seq":"2","host_session":"session","id":"d1aa45c7405eb359551935097c4af067","kind":"remote_chat","native_context_current":true,"observations":[{"answer":null,"attempted":false,"blocked_reason":null,"cancelled":false,"charged_micro_cny":"0","failure_stage":null,"http_status":null,"recovery_action":"none","request_id":"9335d60647fddae93eb2fcdea674a189","reserved_micro_cny":"3024","status":"prepared"}],"originals":[{"configuration_id":"7caa478fd4b19bc0819055af1cd2c31f","conversation_id":"child-28eb5b8d19bbb7d4965ed0ee57bd4407","payload_digest":"c5038fbeb0d9e975a1f159e9cc56c0186be06607e71a6252236b48b902ea9054","purpose":"chat","request_epoch":"epoch","request_id":"9335d60647fddae93eb2fcdea674a189","workspace_id":"ws"}],"owner_epoch":"epoch","project_id":"project","root_id":"9d3a63e791ce195104d973ba473f5e74","skill_current":true,"skill_digest":"6a04822d58cadf1b20f8b677f16ef1573e82302cdffe467642eb11cbbed1636a","status":"waiting_confirmation","updated_seq":"4"}],"complete_lifetime_children":true,"cross_owner_atomic":false,"execution_authority":false,"host_session":"session","owner_epoch":"epoch","root":{"arguments_digest":"44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a","cancel_requested":false,"conversation_id":"conversation","created_seq":"1","host_session":"session","id":"9d3a63e791ce195104d973ba473f5e74","kind":"workflow","native_context_current":true,"observations":[],"originals":[],"owner_epoch":"epoch","project_id":"project","root_id":"9d3a63e791ce195104d973ba473f5e74","skill_current":true,"skill_digest":null,"status":"waiting_confirmation","updated_seq":"4"},"root_budget_available":false,"workspace_id":"ws"}}}
+test group_origin_gate_cases::origin_gate_cannot_downgrade_when_actual_group_run_row_is_missing ... ok
+test group_origin_gate_cases::ordinary_prepare_in_actual_group_child_cannot_bypass_request_only_gate ... ok
+DAMAGED_CONVERSATION_GATE={"canonical":null,"cross_owner_atomic":false,"execution_authority":false,"group_hold":true,"origin":{"classification":"direct","configuration_id":"168e7d9b1291c8853febbffb8d052ea3","conversation_id":"child-527e7af1496b5688530992e77d8fcd6f","group":null,"parent_request_id":null,"payload_digest":"443ab8865b2404124b29f7bf3f353f08c1a618aa1447a32a602969c30c0dffde","request_epoch":"epoch","request_id":"62b4be5c069a43c49fb4fcd78fc23964","root_request_id":"62b4be5c069a43c49fb4fcd78fc23964","workspace_id":"ws"},"reason":"source_inconclusive","request_id":"62b4be5c069a43c49fb4fcd78fc23964","source_error":"workflow_remote_binding_invalid","workflow":null}
+test group_origin_gate_cases::origin_gate_cannot_drop_a_bound_child_after_conversation_damage ... ok
+test group_origin_gate_cases::prepare_origin_tail_fault_rolls_back_request_and_origin ... ok
+test group_origin_gate_cases::legacy_origin_migration_trigger_faults_rollback_whole_upgrade ... ok
+ACTUAL_LEGACY_BIND_ORIGINAL_GATE={"canonical":null,"cross_owner_atomic":false,"execution_authority":false,"group_hold":true,"origin":{"classification":"direct","configuration_id":"38390b52bcc74cab88a8063eb140b38b","conversation_id":"conversation","group":null,"parent_request_id":null,"payload_digest":"4a99c808550d10722aa5015af11d2f891d67b638e6099e25c66c71e5e31c3b51","request_epoch":"epoch","request_id":"7dbef3378d7a25e932eb916fd36f1919","root_request_id":"7dbef3378d7a25e932eb916fd36f1919","workspace_id":"ws"},"reason":"actual_group_child_missing_group_origin","request_id":"7dbef3378d7a25e932eb916fd36f1919","source_error":null,"workflow":null}
+test group_origin_gate_cases::origin_gate_holds_actual_legacy_bind_original_without_a_workflow_child ... ok
+test group_origin_gate_cases::pending_canonical_evidence_survives_missing_workflow_child_for_direct_entry ... ok
+test ledger_complete_facts_do_not_omit_a_child_moved_to_another_physical_root ... ok
+
+thread 'group_origin_gate_cases::second_legal_followup_preserves_group_origin_and_original_mapping' (39112) panicked at muyon-core/tests/support/group_origin_gate_cases.rs:691:10:
+called `Result::unwrap()` on an `Err` value: "tool_history_invalid"
+test group_origin_gate_cases::second_legal_followup_preserves_group_origin_and_original_mapping ... FAILED
+test group_origin_gate_cases::second_followup_encoder_refusal_preserves_existing_group_chain_and_hold ... ok
+test owner_binding_after_restart_preserves_original_epoch_unknown_and_hold_without_replay ... ok
+test ledger_complete_facts_do_not_omit_a_child_moved_to_another_physical_scope ... ok
+test owner_binding_detects_persisted_payload_digest_mismatch ... ok
+test owner_binding_reloads_actual_canonical_bytes_instead_of_caller_plan ... ok
+test ledger_facts_reject_duplicate_remote_conversations_and_original_chains ... ok
+PENDING_CANONICAL_HANDOFF=LocalReceipt { intent_id: "pending-handoff", status: Rejected, revision: Revision("3"), result: Object {"error": String("unknown"), "execution_authority": Bool(false)} } EPOCH=1
+test pending_canonical_actual_unknown_blocks_the_real_handoff_checkpoint ... ok
+MISSING_PENDING_IDENTITY_ADVICE=Err(Storage)
+MISSING_PENDING_IDENTITY_HANDOFF=LocalReceipt { intent_id: "handoff-missing-pending-source", status: PendingOriginal, revision: Revision("3"), result: Object {"execution_authority": Bool(false), "recovery_action": String("query_original_local_intent")} }
+test pending_canonical_missing_identity_does_not_restore_admission_or_handoff ... ok
+test review_lifecycle::tests::committed_claims_are_preserved_and_partial_committed_schema_is_refused ... ok
+test review_lifecycle::tests::empty_file_from_interrupted_creation_initializes_without_replacement ... ok
+test pending_canonical_chain_read_failure_remains_pending_and_keeps_epoch_and_hold ... ok
+test review_lifecycle::tests::uncommitted_ddl_reopens_and_initializes_the_original_database ... ok
+test group_origin_gate_cases::registered_group_sources_never_downgrade_under_missing_or_corrupt_mapping_and_source_tables ... ok
+test research::resource_tests::real_opaque_uploads_are_not_aggregated_when_sealing_or_importing ... ok
+test typed_admission_facts_cover_eight_lifetime_children_after_display_event_pruning ... ok
+
+failures:
+
+failures:
+    group_origin_gate_cases::kind_damage_cannot_erase_actual_group_request_references
+    group_origin_gate_cases::second_legal_followup_preserves_group_origin_and_original_mapping
+
+test result: FAILED. 60 passed; 2 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.33s
+
+error: test failed, to rerun pass `-p muyon-core --test group_request_binding`

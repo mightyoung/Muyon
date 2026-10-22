@@ -1,0 +1,74 @@
+warning: suspicious definition of the runtime `read` symbol used by the standard library
+   --> /workspace/mig20/experiments/redesign/core-agent-lab/core/src/host_session.rs:132:124
+    |
+132 | ...ount: usize, timeout: i32) -> i32; fn read(fd: i32, buffer: *mut u8, count: usize) -> isize; fn write(fd: i32, buffer: *const u8...
+    |                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = note: expected `unsafe extern "C" fn(i32, *mut c_void, usize) -> isize` (for the current target)
+            found    `unsafe extern "C" fn(i32, *mut u8, usize) -> isize`
+    = help: either fix the signature or remove any attributes like `#[unsafe(no_mangle)]`, `#[unsafe(export_name = "read")]`, or `#[link_name = "read"]`
+    = help: allow this lint if the signature is compatible
+    = note: `#[warn(suspicious_runtime_symbol_definitions)]` on by default
+
+warning: suspicious definition of the runtime `write` symbol used by the standard library
+   --> /workspace/mig20/experiments/redesign/core-agent-lab/core/src/host_session.rs:132:182
+    |
+132 | ... *mut u8, count: usize) -> isize; fn write(fd: i32, buffer: *const u8, count: usize) -> isize; }
+    |                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = note: expected `unsafe extern "C" fn(i32, *const c_void, usize) -> isize` (for the current target)
+            found    `unsafe extern "C" fn(i32, *const u8, usize) -> isize`
+    = help: either fix the signature or remove any attributes like `#[unsafe(no_mangle)]`, `#[unsafe(export_name = "write")]`, or `#[link_name = "write"]`
+    = help: allow this lint if the signature is compatible
+
+warning: `muyon-core-agent-lab` (lib) generated 2 warnings
+warning: method `group_seed` is never used
+  --> muyon-core/src/agent/origin.rs:60:19
+   |
+47 | impl RequestOrigin {
+   | ------------------ method in this implementation
+...
+60 |     pub(crate) fn group_seed(&self) -> Option<&GroupOriginSeed> {
+   |                   ^^^^^^^^^^
+   |
+   = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: variant `Group` is never constructed
+  --> muyon-core/src/agent/origin.rs:66:5
+   |
+64 | pub(super) enum OriginDraft {
+   |                 ----------- variant in this enum
+65 |     Direct,
+66 |     Group(GroupOriginSeed),
+   |     ^^^^^
+
+warning: method `prepare_group_chat_trusted` is never used
+   --> muyon-core/src/agent/origin.rs:214:19
+    |
+142 | impl AgentOwner {
+    | --------------- method in this implementation
+...
+214 |     pub(crate) fn prepare_group_chat_trusted(
+    |                   ^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: `muyon-core` (lib) generated 3 warnings
+   Compiling muyon-core v0.1.0 (/workspace/mig20/crates/muyon-core)
+    Finished `test` profile [unoptimized] target(s) in 4.91s
+     Running tests/group_request_binding.rs (/tmp/mig20-target/debug/deps/group_request_binding-2e9ca052016f892d)
+
+running 1 test
+ROWID_REORDER_MIGRATION_IS_ERROR=false BEFORE=[Some("1"), Some("3"), Some("2")] AFTER=[Some("4"), Some("3"), Some("2")]
+
+thread 'group_origin_gate_cases::migration_must_preserve_request_rowid_history_order_not_only_named_columns' (39468) panicked at muyon-core/tests/support/group_origin_gate_cases.rs:769:5:
+same columns with changed rowid alters the real history LIMIT8 order
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test group_origin_gate_cases::migration_must_preserve_request_rowid_history_order_not_only_named_columns ... FAILED
+
+failures:
+
+failures:
+    group_origin_gate_cases::migration_must_preserve_request_rowid_history_order_not_only_named_columns
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 63 filtered out; finished in 0.01s
+
+error: test failed, to rerun pass `-p muyon-core --test group_request_binding`

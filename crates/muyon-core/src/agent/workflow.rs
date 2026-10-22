@@ -1040,11 +1040,48 @@ impl RunLedger {
             return Err("workflow_scope_mismatch");
         }
         let tx = sql(self.db.transaction())?;
-        let rows = sql(self.db.query("SELECT record FROM runs ORDER BY rowid", &[]))?;
+        let rows = sql(self
+            .db
+            .query("SELECT record,scope FROM runs ORDER BY rowid", &[]))?;
         let mut selected = None;
         for row in rows {
             let run: Run =
                 serde_json::from_str(cell(&row, 0)?).map_err(|_| "workflow_storage_invalid")?;
+            let physical_scope: Value =
+                serde_json::from_str(cell(&row, 1)?).map_err(|_| "workflow_storage_invalid")?;
+            let root_conversation = physical_scope
+                .get(1)
+                .and_then(Value::as_str)
+                .ok_or("workflow_storage_invalid")?;
+            let nonremote = matches!(run.kind.as_str(), "workflow" | "local_read");
+            if (nonremote
+                && (run.remote_request_id.is_some()
+                    || run.current_request_id.is_some()
+                    || !run.remote_request_ids.is_empty()))
+                || match run.kind.as_str() {
+                    "workflow" => {
+                        run.id != run.root_id
+                            || run.parent_id.is_some()
+                            || run.depth != 0
+                            || run.conversation_id != root_conversation
+                    }
+                    "local_read" => {
+                        run.id == run.root_id
+                            || run.parent_id.as_deref() != Some(run.root_id.as_str())
+                            || run.depth != 1
+                            || run.conversation_id != root_conversation
+                    }
+                    "remote_chat" => {
+                        run.id == run.root_id
+                            || run.parent_id.as_deref() != Some(run.root_id.as_str())
+                            || run.depth != 1
+                            || run.conversation_id == root_conversation
+                    }
+                    _ => true,
+                }
+            {
+                return Err("workflow_storage_invalid");
+            }
             let names_request = run.remote_request_id.as_deref() == Some(request)
                 || run.current_request_id.as_deref() == Some(request)
                 || run.remote_request_ids.iter().any(|id| id == request)

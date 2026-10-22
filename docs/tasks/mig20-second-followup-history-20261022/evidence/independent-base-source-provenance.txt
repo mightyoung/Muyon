@@ -1,0 +1,5 @@
+BASE=88c1700eb90e7ca47bb6c022446dff329695c37a
+base-tools.rs: exact git show base:crates/muyon-core/src/agent/tools.rs; sha256=896c66ff972cf7b22624c0c5f0b817289978b2c8171e6db4fd369d27f71a2788
+base-origin.rs: exact git show base:crates/muyon-core/src/agent/origin.rs; sha256=5f8ee59ce9ac5aed70ba5c887850151cb53bdf9d2dded06ddb035cf868313099
+base-workflow.rs: exact git show base:crates/muyon-core/src/agent/workflow.rs; sha256=4054f20b63ac3d1a0037e2b2d1465e09e12270a9d1de2ab5f89ad5cc5db1a332
+base-owner.rs changes only origin module path; base-agent.rs changes only owner/tools/workflow module paths. Includes copied exactly from base. All other dependencies/current fixture imports stay fixed across base/current.
