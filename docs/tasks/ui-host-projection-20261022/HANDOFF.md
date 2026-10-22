@@ -12,7 +12,11 @@ and trusted workspace in Service, validates captured scope before a local origin
 lookup, and returns an inner read_only snapshot or unavailable. Keep mounted-view
 callback scope checks; do not auto-query historical unknown requests.
 
-The detached observation has exact native status and micro-CNY strings/null; original
+The detached observation has exact native status and reserved micro-CNY strings/null.
+charged_micro_cny means actual settled cost: only native completed plus strict
+attempted=true may expose it; other statuses return null even when ledger charged
+is "0". Never display an unknown request's ledger default as a free actual cost.
+Original
 native child conversation is kept separate. binding=null/capabilities=[] and missing
 identities/revisions/tasks/sources explicitly unavailable. It cannot be coerced into
 CardBinding or an actionable typed card. Do not substitute request_id for intent,

@@ -39,7 +39,9 @@ remain in force. Generation must be a nonnegative JSON integer.
 
 The observation is a detached, point-in-time wire value with no authority. It
 excludes model answers, commands and raw failures. It retains whitelisted native
-request status (including tool_consumed), exact decimal micro-CNY strings or null,
+request status (including tool_consumed), exact reserved micro-CNY strings or null,
+and actual charged micro-CNY only when a dispatched completed native request
+proves settlement (otherwise null),
 actual attempted/cancelled facts or null, and original native request identity.
 Prepared/reserved/pending/tool-pending never imply running. Completed request
 observations do not imply current business state. Unknown cancellation flags do
@@ -69,7 +71,9 @@ Inspect inner `data.status` before rendering:
   conversation_id), with null intent_id.
 - `observation`: status, execution_status, reserved_micro_cny, charged_micro_cny,
   attempted, cancelled, cancellation_status, and null current_business_state.
-  Exact costs are micro-CNY strings; null stays unknown, never zero.
+  Costs are micro-CNY strings; null stays unknown, never zero. charged_micro_cny
+  is actual settled cost, not the requests.charged ledger default: only native
+  completed plus attempted=true exposes it; all other cases return null.
 - `binding=null`, `capabilities=[]`; `unavailable` enumerates absent agent,
   message/component/attempt identity, component/state revision, host digest,
   original intent, task/source snapshots.
@@ -167,3 +171,50 @@ SDK installation, paid CI dispatch, credential setup, permission expansion,
 deployment, force push, deletion or main/develop modification. Leader B remains
 sole develop integrator. Completion here is only this bounded request-read slice,
 not all UI development or full host-card adapter completion.
+
+## Parent review correction — actual charge proof
+
+Parent review found Important at ac55ef65a65baf9499fe2e4b3a63a0baaf827887:
+native requests.charged defaults to zero, and unknown lookup serializes that ledger
+value as "0". The original reader incorrectly passed it off as known actual cost.
+Prior unknown-with-null test did not cover that actual native shape.
+
+Added the true shape (unknown, attempted=true, charged_micro_cny="0",
+reserved_micro_cny="2620") before the fix: runner exited1 at
+"native unknown ledger zero is not actual cost proof". Original output remains
+in evidence/charge-proof-red.log; original baseline logs are untouched.
+
+Pure projection fix: expose actual charged_micro_cny only for native completed
+and strict Boolean attempted=true. owner.rs:534 sets attempted when dispatch is
+claimed; settle_response:568–635 is the sole completed transition and validates
+response/usage before recording cost. For all other statuses (including unknown,
+prepared/reserved/pending/tool_pending/tool_consumed/failed/cancelled), actual cost
+is null, even if a raw ledger charge is present. Cancelled mixes pre-send and
+settled cases; tool statuses lack a separately exposed terminal settlement proof.
+Those costs may be known internally but this public projection conservatively
+leaves them unavailable. No ledger-recorded-charge field added or ledger mutated.
+
+Regression includes unknown default0 and positive ledger value, non-completed
+status default0, completed with missing/false/non-Boolean attempt fact, proven
+completed zero and positive charge, and unchanged reservation2620. Projection
+runner exit0 (evidence/charge-proof-green.log). Existing settlement/revocation
+JVM regressions are rerun on the new runtime, with separate original compile/run
+outputs. Actual Android acceptance remains blocked by the previously recorded
+absent Gradle executable; no SDK retry or old unknown lookup was performed.
+
+Use the same projection runner command above. Non-author review of this delta and
+actual rerun are recorded in REVIEW.md and evidence/charge-proof-independent.log.
+
+Fee-fix regression JVM compile exit0 and run exit0, OK (3 tests):
+evidence/charge-proof-regression-compile.log and evidence/charge-proof-regression.log.
+Same exact compiler/source/classpath command from the initial validation was used,
+with output jar /workspace/host-projection-tools/charge-regression.jar. Run command:
+
+```sh
+java -cp /workspace/host-projection-tools/charge-regression.jar:/workspace/host-projection-tools/json.jar:/workspace/host-projection-tools/junit.jar:/workspace/host-projection-tools/hamcrest.jar org.junit.runner.JUnitCore com.mightyoung.muyon.product.chat.ProductSkillRevocationTest com.mightyoung.muyon.product.chat.CompleteResponseSettlementTest
+```
+
+Fee-fix authored source/test/docs diff-check passes; newly preserved original JUnit
+charge-proof-regression.log also retains its terminal blank line, so full-archive
+whitespace checking reports that raw-output warning in addition to the initial log.
+No log was trimmed to hide original output.

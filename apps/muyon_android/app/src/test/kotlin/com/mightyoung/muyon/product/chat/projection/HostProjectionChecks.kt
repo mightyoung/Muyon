@@ -60,6 +60,26 @@ fun main() {
         check(fact.isNull("current_business_state") && !fact.has("answer"))
         check(fact.getString("cancellation_status") == "intent_recorded_outcome_unknown")
         check(result.getJSONArray("unavailable").toString().contains("state_revision"))
+        // Native requests.charged defaults to 0 before a validated settlement.
+        observation = JSONObject().put("status", "unknown").put("attempted", true)
+            .put("reserved_micro_cny", "2620").put("charged_micro_cny", "0")
+        val nativeUnknown = snapshot("session", "conversation", request, "project", generation).getJSONObject("observation")
+        check(nativeUnknown.isNull("charged_micro_cny")) { "native unknown ledger zero is not actual cost proof" }
+        check(nativeUnknown.getString("reserved_micro_cny") == "2620")
+        listOf("prepared", "reserved", "pending", "tool_pending", "tool_consumed", "failed", "cancelled").forEach { status ->
+            observation = JSONObject().put("status", status).put("attempted", true).put("charged_micro_cny", "0")
+            check(snapshot("session", "conversation", request, "project", generation).getJSONObject("observation").isNull("charged_micro_cny")) {
+                "$status has no exposed terminal settlement proof"
+            }
+        }
+        observation = JSONObject().put("status", "unknown").put("attempted", true).put("charged_micro_cny", "66")
+        check(snapshot("session", "conversation", request, "project", generation).getJSONObject("observation").isNull("charged_micro_cny"))
+        listOf(false, JSONObject.NULL, "true").forEach { attempted ->
+            observation = JSONObject().put("status", "completed").put("attempted", attempted).put("charged_micro_cny", "0")
+            check(snapshot("session", "conversation", request, "project", generation).getJSONObject("observation").isNull("charged_micro_cny"))
+        }
+        observation = JSONObject().put("status", "completed").put("attempted", true).put("charged_micro_cny", "0")
+        check(snapshot("session", "conversation", request, "project", generation).getJSONObject("observation").getString("charged_micro_cny") == "0")
         val before = lookups
         val other = scope("other", "project")
         denied(snapshot("other", "conversation", request, "project", other))
@@ -85,10 +105,11 @@ fun main() {
         observation = JSONObject().put("status", "tool_consumed")
         val consumed = snapshot("session", "conversation", request, "project", generation).getJSONObject("observation")
         check(consumed.getString("status") == "tool_consumed" && consumed.getString("execution_status") == "unavailable")
-        observation = JSONObject().put("status", "completed").put("charged_micro_cny", "66")
+        observation = JSONObject().put("status", "completed").put("attempted", true).put("charged_micro_cny", "66")
         val completed = snapshot("session", "conversation", request, "project", generation).getJSONObject("observation")
         check(completed.getString("execution_status") == "completed")
         check(completed.isNull("current_business_state"))
+        check(completed.getString("charged_micro_cny") == "66")
         // Detached output cannot mutate a subsequent observation or its host origin.
         result.getJSONObject("scope").put("conversation_id", "tampered")
         check(snapshot("session", "conversation", request, "project", generation).getJSONObject("scope").getString("conversation_id") == "conversation")
@@ -125,6 +146,6 @@ fun main() {
         runtime.releaseSession("session")
         scope("session", "project") // drain release queue, then remount; old origin is gone
         denied(snapshot("session", "conversation", request, "project", generation))
-        println("PASS host projection: scope/absent/unknown/pending/history/detachment/malformed/search/workflow/followup/release/cache capacity checks")
+        println("PASS host projection: scope/absent/unknown/pending/history/detachment/malformed/search/workflow/followup/release/cache capacity/actual charge proof checks")
     } finally { runtime.close(); check(runtime.awaitDrain(5000)) }
 }

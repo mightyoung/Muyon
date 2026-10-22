@@ -261,6 +261,13 @@ class ProductChatRuntime internal constructor(private val port: ProductChatPort,
         fun micro(key: String): Any = (observation.opt(key) as? String)
             ?.takeIf { it.length <= 20 && it.matches(Regex("0|[1-9][0-9]*")) && it.toULongOrNull() != null } ?: JSONObject.NULL
         val cancelledFact = observation.opt("cancelled") as? Boolean
+        val attemptedFact = observation.opt("attempted") as? Boolean
+        // Native charged defaults to zero, including unresolved unknown requests.
+        // Only completed + actual dispatch has a validated-settlement invariant
+        // in AgentOwner::settle_response. Other statuses are conservatively
+        // unavailable in this projection; cancelled mixes pre-send and settled.
+        val actualCharge = if (rawStatus == "completed" && attemptedFact == true)
+            micro("charged_micro_cny") else JSONObject.NULL
         val execution = when (rawStatus) {
             "completed", "failed", "cancelled" -> rawStatus
             "unknown" -> "unknown"
@@ -274,9 +281,9 @@ class ProductChatRuntime internal constructor(private val port: ProductChatPort,
                 .put("request_conversation_id", origin.requestConversation).put("intent_id", JSONObject.NULL))
             .put("observation", JSONObject().put("status", rawStatus ?: JSONObject.NULL)
                 .put("execution_status", execution).put("reserved_micro_cny", micro("reserved_micro_cny"))
-                .put("charged_micro_cny", micro("charged_micro_cny"))
+                .put("charged_micro_cny", actualCharge)
                 .put("cancelled", cancelledFact ?: JSONObject.NULL)
-                .put("attempted", observation.opt("attempted") as? Boolean ?: JSONObject.NULL)
+                .put("attempted", attemptedFact ?: JSONObject.NULL)
                 .put("cancellation_status", if (rawStatus == "cancelled") "confirmed_cancelled"
                     else if (cancelledFact == true) "intent_recorded_outcome_unknown" else "unavailable")
                 .put("current_business_state", JSONObject.NULL))

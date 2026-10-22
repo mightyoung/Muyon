@@ -1,0 +1,3 @@
+Exception in thread "main" java.lang.IllegalStateException: native unknown ledger zero is not actual cost proof
+	at com.mightyoung.muyon.product.chat.HostProjectionChecksKt.main(HostProjectionChecks.kt:67)
+	at com.mightyoung.muyon.product.chat.HostProjectionChecksKt.main(HostProjectionChecks.kt)
