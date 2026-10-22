@@ -1,0 +1,14 @@
+{
+  "argv": [
+    "python3",
+    "-B",
+    "apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/chat/persistence/check-prepare-binding.py"
+  ],
+  "cwd": "/workspace/Muyon-post-pr102-ui-a11y-20261022",
+  "source_sha": "c0ab1fc36cecf28da002a5766b79bd209a24fde7",
+  "dirty_source": false,
+  "start_utc": "2026-10-22T19:40:37.917053+00:00",
+  "exit_code": 0,
+  "duration_seconds": 0.188,
+  "end_utc": "2026-10-22T19:40:38.059844+00:00"
+}

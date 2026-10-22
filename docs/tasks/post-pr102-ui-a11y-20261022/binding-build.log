@@ -1,0 +1,10 @@
+BEGIN {"argv": ["cargo", "build", "--offline", "--locked", "--manifest-path", "crates/Cargo.toml", "-p", "muyon-android-ffi", "--features", "bindings"], "cwd": "/workspace/Muyon-post-pr102-ui-a11y-20261022", "source_sha": "c0ab1fc36cecf28da002a5766b79bd209a24fde7", "dirty_source": false, "start_utc": "2026-10-22T19:41:35.874002+00:00"}
+   Compiling muyon-core-agent-lab v0.1.0 (/workspace/Muyon-post-pr102-ui-a11y-20261022/experiments/redesign/core-agent-lab/core)
+   Compiling muyon-office v0.1.0 (/workspace/Muyon-post-pr102-ui-a11y-20261022/crates/muyon-office)
+   Compiling muyon-plugin-contract-lab v0.1.0 (/workspace/Muyon-post-pr102-ui-a11y-20261022/experiments/redesign/plugin-contract-lab/core)
+   Compiling muyon-rust-agent-host-lab v0.1.0 (/workspace/Muyon-post-pr102-ui-a11y-20261022/experiments/redesign/rust-agent-host-lab/core)
+   Compiling muyon-web-search-lab v0.1.0 (/workspace/Muyon-post-pr102-ui-a11y-20261022/experiments/redesign/web-search-lab/core)
+   Compiling muyon-core v0.1.0 (/workspace/Muyon-post-pr102-ui-a11y-20261022/crates/muyon-core)
+   Compiling muyon-android-ffi v0.1.0 (/workspace/Muyon-post-pr102-ui-a11y-20261022/crates/muyon-android-ffi)
+    Finished `dev` profile [unoptimized] target(s) in 33.64s
+END {"argv": ["cargo", "build", "--offline", "--locked", "--manifest-path", "crates/Cargo.toml", "-p", "muyon-android-ffi", "--features", "bindings"], "cwd": "/workspace/Muyon-post-pr102-ui-a11y-20261022", "source_sha": "c0ab1fc36cecf28da002a5766b79bd209a24fde7", "dirty_source": false, "start_utc": "2026-10-22T19:41:35.874002+00:00", "exit_code": 0, "duration_seconds": 34.056, "end_utc": "2026-10-22T19:42:09.633330+00:00"}
