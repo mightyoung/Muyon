@@ -1,0 +1,30 @@
+2026-10-22T08:19:49.043983+00:00
+source=3f195f6090727bb8a59dfc11329ba5c38de9fcd4
+base=662aeec6d6462cabfcc317e855ae23797dd88d51
+cwd=/workspace/Muyon-source-invalidation-applied
+Tools: PATH cargo/rustfmt missing; /tmp/muyon-rust/bin cargo/rustfmt and /usr/bin/cargo absent. /root/.cargo/bin/cargo read was denied by filesystem; no escalation or retry.
+
+argv=["cargo", "test", "--offline", "--locked", "--manifest-path", "crates/Cargo.toml", "-p", "muyon-core", "--lib", "documents::source_notification_tests"]
+exit=127
+NOT_RUN: [Errno 2] No such file or directory: 'cargo'
+
+argv=["cargo", "test", "--offline", "--locked", "--manifest-path", "crates/Cargo.toml", "-p", "muyon-core"]
+exit=127
+NOT_RUN: [Errno 2] No such file or directory: 'cargo'
+
+argv=["cargo", "test", "--offline", "--locked", "--manifest-path", "crates/Cargo.toml", "--workspace"]
+exit=127
+NOT_RUN: [Errno 2] No such file or directory: 'cargo'
+
+argv=["cargo", "clippy", "--offline", "--locked", "--manifest-path", "crates/Cargo.toml", "--workspace", "--all-targets", "--", "-D", "warnings"]
+exit=127
+NOT_RUN: [Errno 2] No such file or directory: 'cargo'
+
+argv=["rustfmt", "--check", "--edition", "2021", "--config", "skip_children=true", "crates/muyon-core/src/blobs.rs", "crates/muyon-core/src/documents/mod.rs", "crates/muyon-core/src/documents/source_notification_tests.rs", "crates/muyon-core/src/documents/source_notifications.rs", "crates/muyon-core/src/documents/storage.rs"]
+exit=127
+NOT_RUN: [Errno 2] No such file or directory: 'rustfmt'
+
+argv=["git", "diff", "--check", "662aeec6d6462cabfcc317e855ae23797dd88d51", "3f195f6090727bb8a59dfc11329ba5c38de9fcd4"]
+exit=0
+
+

@@ -1,0 +1,5 @@
+2026-10-22T08:20:59.048892+00:00
+final_source=e3fa0ee71f071bb8cff667d50ee1c0da6827a7c9
+argv=["cargo", "test", "--offline", "--locked", "--manifest-path", "crates/Cargo.toml", "-p", "muyon-core", "--lib", "documents::source_notification_tests"]
+exit=127
+NOT_RUN: [Errno 2] No such file or directory: 'cargo'

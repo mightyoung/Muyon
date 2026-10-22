@@ -1,0 +1,28 @@
+{
+  "source_commit": "3f195f6090727bb8a59dfc11329ba5c38de9fcd4",
+  "base": "662aeec6d6462cabfcc317e855ae23797dd88d51",
+  "files": [
+    {
+      "path": "crates/muyon-core/src/blobs.rs",
+      "sha256": "4db4a45211d73062d143ed6ce497b8f6837c9935907abac7ec42b755d77e4218"
+    },
+    {
+      "path": "crates/muyon-core/src/documents/mod.rs",
+      "sha256": "31694be0e6cec6f73d118527083d911194982c17d31acd20c1208b021b01d939"
+    },
+    {
+      "path": "crates/muyon-core/src/documents/source_notification_tests.rs",
+      "sha256": "38e87500da93835edf72ae5270d1646795c21ee9654d14a07d605538c6f39a0c"
+    },
+    {
+      "path": "crates/muyon-core/src/documents/source_notifications.rs",
+      "sha256": "64629cfdcc7365a83e98d64d17de5c16d45a816fa2ead16cded3e41585763f42"
+    },
+    {
+      "path": "crates/muyon-core/src/documents/storage.rs",
+      "sha256": "a3e97cf37aaac5630406cca2cb933713b2d95265355c40a6e539553f004b0a38"
+    }
+  ],
+  "lib_unchanged": true,
+  "artifacts_local_sources_sha256": "52b3a4e9eda179d43535218da7452dc68ad98a8c6635e582678399d0b6b3e364"
+}
