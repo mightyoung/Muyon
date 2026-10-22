@@ -38,19 +38,19 @@ pub(super) fn human() -> ArtifactOrigin { ArtifactOrigin { author: AnnotationAut
 #[test]
 fn restart_restores_exact_snapshot_and_source_advance_fails_closed() {
     let f = Fixture::new(); let (s, out, source) = f.setup();
-    let saved = s.archive_artifact_trusted("artifact", &out, &[source.clone()], &generated()).unwrap();
+    let saved = s.archive_artifact_trusted("artifact", &out, std::slice::from_ref(&source), &generated()).unwrap();
     assert_eq!(saved.revision, Revision::new(1));
-    assert_eq!(s.archive_artifact_trusted("artifact", &out, &[source.clone()], &generated()), Err(ContractError::RevisionConflict));
+    assert_eq!(s.archive_artifact_trusted("artifact", &out, std::slice::from_ref(&source), &generated()), Err(ContractError::RevisionConflict));
     drop(s);
     let s = f.open(); s.initialize_artifacts_trusted().unwrap();
-    let restored = s.read_artifact_revision("artifact", &Revision::new(1), &out, &[source.clone()]).unwrap();
+    let restored = s.read_artifact_revision("artifact", &Revision::new(1), &out, std::slice::from_ref(&source)).unwrap();
     assert_eq!(restored, saved);
     let mut reader = s.open_blob_reader("project", &restored.document.blob).unwrap();
     assert_eq!(s.read_blob_chunk(&mut reader, 65536).unwrap(), b"%PDF-1.4\nsynthetic report v1\n%%EOF\n");
     s.close_blob_reader(reader).unwrap();
     let newer = s.publish_document_revision_trusted(&source.document, "New source", DocumentFormat::Pdf, &upload(&s, b"%PDF-1.4\nsource v2\n%%EOF\n")).unwrap();
     let current_source = grant(&s, newer.document, 2);
-    assert_eq!(s.read_artifact_revision("artifact", &Revision::new(1), &out, &[source.clone()]), Err(ContractError::RevisionConflict));
+    assert_eq!(s.read_artifact_revision("artifact", &Revision::new(1), &out, std::slice::from_ref(&source)), Err(ContractError::RevisionConflict));
     assert_eq!(s.read_artifact_revision("artifact", &Revision::new(1), &out, &[current_source]), Err(ContractError::InvalidAuthority));
     // Immutable original snapshot remains on disk; failure never retargets it.
     let raw = s.database().query("SELECT payload FROM artifact_revisions WHERE artifact_id='artifact'", &[]).unwrap();
@@ -61,33 +61,33 @@ fn restart_restores_exact_snapshot_and_source_advance_fails_closed() {
 #[test]
 fn human_revision_is_atomic_and_generated_cannot_overwrite_it() {
     let f = Fixture::new(); let (s, out, source) = f.setup();
-    let old = s.archive_artifact_trusted("artifact", &out, &[source.clone()], &generated()).unwrap();
-    let edited = s.revise_artifact_trusted("artifact", &old.revision, &out, &upload(&s, b"%PDF-1.4\nhuman edit\n%%EOF\n"), "Human", &[source.clone()], &human()).unwrap();
+    let old = s.archive_artifact_trusted("artifact", &out, std::slice::from_ref(&source), &generated()).unwrap();
+    let edited = s.revise_artifact_trusted("artifact", &old.revision, &out, &upload(&s, b"%PDF-1.4\nhuman edit\n%%EOF\n"), "Human", std::slice::from_ref(&source), &human()).unwrap();
     assert_eq!(edited.sources, old.sources); assert_eq!(edited.created_by, old.created_by); assert!(edited.human_edited);
     assert_eq!(edited.modified_by, human());
     let current = grant(&s, edited.document.document.clone(), 2);
     let pending = upload(&s, b"%PDF-1.4\nnew generation\n%%EOF\n");
-    assert_eq!(s.revise_artifact_trusted("artifact", &edited.revision, &current, &pending, "Generated", &[source.clone()], &generated()), Err(ContractError::IntentConflict));
-    assert_eq!(s.revise_artifact_trusted("artifact", &old.revision, &current, &pending, "Stale", &[source.clone()], &human()), Err(ContractError::RevisionConflict));
+    assert_eq!(s.revise_artifact_trusted("artifact", &edited.revision, &current, &pending, "Generated", std::slice::from_ref(&source), &generated()), Err(ContractError::IntentConflict));
+    assert_eq!(s.revise_artifact_trusted("artifact", &old.revision, &current, &pending, "Stale", std::slice::from_ref(&source), &human()), Err(ContractError::RevisionConflict));
     assert_eq!(s.read_document(&current).unwrap(), edited.document);
-    let history = s.artifact_history("artifact", None, 1, &current, &[source.clone()]).unwrap();
+    let history = s.artifact_history("artifact", None, 1, &current, std::slice::from_ref(&source)).unwrap();
     assert_eq!(history, vec![edited.clone()]);
-    assert_eq!(s.artifact_history("artifact", None, 10, &current, &[source.clone()]), Err(ContractError::InvalidAuthority));
-    assert_eq!(s.artifact_history("artifact", Some(&edited.revision), 1, &current, &[source.clone()]), Err(ContractError::InvalidAuthority));
+    assert_eq!(s.artifact_history("artifact", None, 10, &current, std::slice::from_ref(&source)), Err(ContractError::InvalidAuthority));
+    assert_eq!(s.artifact_history("artifact", Some(&edited.revision), 1, &current, std::slice::from_ref(&source)), Err(ContractError::InvalidAuthority));
     assert_eq!(s.read_artifact_revision("artifact", &old.revision, &current, &[source]), Err(ContractError::InvalidAuthority));
 }
 #[test]
 fn revocation_deletion_wrong_project_and_missing_source_deny_history() {
     let f = Fixture::new(); let (s, out, source) = f.setup();
-    s.archive_artifact_trusted("artifact", &out, &[source.clone()], &generated()).unwrap();
+    s.archive_artifact_trusted("artifact", &out, std::slice::from_ref(&source), &generated()).unwrap();
     assert_eq!(s.read_artifact_revision("artifact", &Revision::new(1), &out, &[]), Err(ContractError::InvalidAuthority));
     s.revoke_document_grant_trusted(&source.authority).unwrap();
-    assert_eq!(s.read_artifact_revision("artifact", &Revision::new(1), &out, &[source.clone()]), Err(ContractError::InvalidAuthority));
+    assert_eq!(s.read_artifact_revision("artifact", &Revision::new(1), &out, std::slice::from_ref(&source)), Err(ContractError::InvalidAuthority));
     let source = grant(&s, source.document, 2);
     let other = document(&s, "other", b"%PDF-1.4\nother\n%%EOF\n");
-    assert_eq!(s.artifact_history("artifact", None, 10, &other, &[source.clone()]), Err(ContractError::BindingMismatch));
+    assert_eq!(s.artifact_history("artifact", None, 10, &other, std::slice::from_ref(&source)), Err(ContractError::BindingMismatch));
     s.revoke_document_grant_trusted(&out.authority).unwrap();
-    assert_eq!(s.artifact_history("artifact", None, 10, &out, &[source.clone()]), Err(ContractError::InvalidAuthority));
+    assert_eq!(s.artifact_history("artifact", None, 10, &out, std::slice::from_ref(&source)), Err(ContractError::InvalidAuthority));
     let out = grant(&s, out.document, 2);
     s.database().exec("UPDATE projects SET deleted=1 WHERE id='project'", &[]).unwrap();
     assert_eq!(s.artifact_history("artifact", None, 10, &out, &[source]), Err(ContractError::NotFound));
@@ -97,7 +97,7 @@ fn invalid_sources_schema_and_oversized_rows_fail_closed() {
     let f = Fixture::new(); let (s, out, source) = f.setup();
     assert_eq!(s.archive_artifact_trusted("artifact", &out, &[source.clone(), source.clone()], &human()), Err(ContractError::InvalidPayload));
     assert_eq!(s.artifact_history("artifact", None, 0, &out, &[]), Err(ContractError::InvalidPayload));
-    s.archive_artifact_trusted("artifact", &out, &[source.clone()], &human()).unwrap();
+    s.archive_artifact_trusted("artifact", &out, std::slice::from_ref(&source), &human()).unwrap();
     s.database().exec("UPDATE artifact_revisions SET payload=?", &[&"x".repeat(MAX_RECORD_BYTES + 1)]).unwrap();
     assert_eq!(s.read_artifact_revision("artifact", &Revision::new(1), &out, &[source]), Err(ContractError::StorageCorrupt));
     s.database().exec("UPDATE artifact_store_meta SET value='99' WHERE key='version'", &[]).unwrap();
@@ -106,11 +106,11 @@ fn invalid_sources_schema_and_oversized_rows_fail_closed() {
 #[test]
 fn failed_publication_rolls_back_artifact_and_document_heads() {
     let f = Fixture::new(); let (s, out, source) = f.setup();
-    let saved = s.archive_artifact_trusted("artifact", &out, &[source.clone()], &generated()).unwrap();
+    let saved = s.archive_artifact_trusted("artifact", &out, std::slice::from_ref(&source), &generated()).unwrap();
     // Force a real SQLite failure after publication, before the transaction commit.
     s.database().exec("CREATE TRIGGER fail_artifact BEFORE INSERT ON artifact_revisions BEGIN SELECT RAISE(ABORT,'synthetic'); END", &[]).unwrap();
     let blob = upload(&s, b"%PDF-1.4\nfailed revision\n%%EOF\n");
-    assert!(s.revise_artifact_trusted("artifact", &saved.revision, &out, &blob, "Failed", &[source.clone()], &human()).is_err());
+    assert!(s.revise_artifact_trusted("artifact", &saved.revision, &out, &blob, "Failed", std::slice::from_ref(&source), &human()).is_err());
     assert_eq!(s.read_document(&out).unwrap(), saved.document);
     assert_eq!(s.artifact_history("artifact", None, 10, &out, &[source]).unwrap(), vec![saved]);
 }
@@ -126,13 +126,13 @@ fn exact_scope_and_write_permission_are_required() {
     assert_eq!(s.archive_artifact_trusted("artifact", &out, &[foreign], &human()), Err(ContractError::ScopeMismatch));
     // Modify only the synthetic persisted grant, never construct a fake token.
     s.database().exec("UPDATE document_grants SET permissions='[\"read_text\"]' WHERE grant_id='grant-report'", &[]).unwrap();
-    assert_eq!(s.archive_artifact_trusted("artifact", &out, &[source.clone()], &human()), Err(ContractError::InvalidAuthority));
+    assert_eq!(s.archive_artifact_trusted("artifact", &out, std::slice::from_ref(&source), &human()), Err(ContractError::InvalidAuthority));
     let out = grant(&s, out.document, 2);
-    s.archive_artifact_trusted("artifact", &out, &[source.clone()], &generated()).unwrap();
+    s.archive_artifact_trusted("artifact", &out, std::slice::from_ref(&source), &generated()).unwrap();
     let mut wrong_epoch = out.clone(); wrong_epoch.authority.owner_epoch = "other-epoch".into();
-    assert_eq!(s.read_artifact_revision("artifact", &Revision::new(1), &wrong_epoch, &[source.clone()]), Err(ContractError::InvalidAuthority));
+    assert_eq!(s.read_artifact_revision("artifact", &Revision::new(1), &wrong_epoch, std::slice::from_ref(&source)), Err(ContractError::InvalidAuthority));
     let mut old_generation = out.clone(); old_generation.authority.generation = Revision::new(1);
-    assert_eq!(s.read_artifact_revision("artifact", &Revision::new(1), &old_generation, &[source.clone()]), Err(ContractError::InvalidAuthority));
+    assert_eq!(s.read_artifact_revision("artifact", &Revision::new(1), &old_generation, std::slice::from_ref(&source)), Err(ContractError::InvalidAuthority));
     s.database().exec("UPDATE document_grants SET expires_at_ms='0' WHERE grant_id='grant-source'", &[]).unwrap();
     assert_eq!(s.read_artifact_revision("artifact", &Revision::new(1), &out, &[source]), Err(ContractError::InvalidAuthority));
 }
