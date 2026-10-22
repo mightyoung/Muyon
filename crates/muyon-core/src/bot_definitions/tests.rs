@@ -648,3 +648,50 @@ fn source_registry_ddl_changed_between_transactions_rejects() {
     assert_eq!(result.unwrap_err(), "bot_query_original");
     assert_original_pending_zero_definitions(&f);
 }
+
+#[test]
+fn tail_archive_blob_storage_rolls_back() {
+    check_receipt_tail_trigger(
+        "UPDATE local_bot_drafts SET archive_hex=CAST(archive_hex AS BLOB) WHERE project_id='p1'",
+    );
+}
+#[test]
+fn tail_digest_blob_storage_rolls_back() {
+    check_receipt_tail_trigger("UPDATE local_bot_drafts SET archive_digest=CAST(archive_digest AS BLOB) WHERE project_id='p1'");
+}
+#[test]
+fn tail_definition_blob_storage_rolls_back() {
+    check_receipt_tail_trigger(
+        "UPDATE local_bot_definitions SET definition_json=CAST(definition_json AS BLOB)",
+    );
+}
+#[test]
+fn tail_receipt_blob_storage_rolls_back() {
+    check_receipt_tail_trigger(
+        "UPDATE local_bot_definition_intents SET receipt_json=CAST(receipt_json AS BLOB)",
+    );
+}
+#[test]
+fn tail_frozen_blob_storage_rolls_back() {
+    check_receipt_tail_trigger(
+        "UPDATE local_bot_definition_intents SET frozen_json=CAST(frozen_json AS BLOB)",
+    );
+}
+#[test]
+fn archive_type_changed_between_transactions_rejects() {
+    let f = project_fixture();
+    let r = prepare_create(f.store(), CONVERSATION, Some("p1"), &f.binding, INTENT).unwrap();
+    let result = confirm_create_with_boundary(
+        f.store(),
+        CONVERSATION,
+        Some("p1"),
+        INTENT,
+        &r.review_digest,
+        || {
+            sql(f.store().database().exec("UPDATE local_bot_drafts SET archive_hex=CAST(archive_hex AS BLOB) WHERE project_id='p1'",&[]))?;
+            Ok(())
+        },
+    );
+    assert_eq!(result.unwrap_err(), "bot_query_original");
+    assert_original_pending_zero_definitions(&f);
+}
