@@ -10,6 +10,8 @@ pub mod capability;
 #[cfg(test)]
 mod history_tests;
 pub mod identity;
+#[cfg(test)]
+mod presentation_tests;
 pub mod reader;
 #[cfg(test)]
 mod reader_tests;

@@ -66,6 +66,59 @@ pub struct DocumentReadChunk {
     pub bytes: Vec<u8>,
     pub eof: bool,
 }
+/// A callback fence, not self-authenticating wire authority. Only a live native
+/// registry can issue it; every use checks its original document/grant again.
+#[derive(Clone, Debug, Serialize)]
+pub struct PresentationTicket {
+    session_id: String,
+    document: DocumentRef,
+    authority: AuthorityBinding,
+    generation: Revision,
+}
+impl PresentationTicket {
+    pub fn session_id(&self) -> &str {
+        &self.session_id
+    }
+    pub fn document(&self) -> &DocumentRef {
+        &self.document
+    }
+    pub fn generation(&self) -> &Revision {
+        &self.generation
+    }
+}
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize)]
+#[serde(rename_all = "snake_case")]
+pub enum PresentationPhase {
+    Loading,
+    Ready,
+}
+#[derive(Clone, Debug, Serialize)]
+pub struct PresentationStatus {
+    pub ticket: PresentationTicket,
+    pub phase: PresentationPhase,
+    pub valid_for_ms: u64,
+    pub check_after_ms: u64,
+}
+#[derive(Clone, Debug, Serialize)]
+pub struct DocumentPresentationInfo {
+    pub session: DocumentReadSessionInfo,
+    pub status: PresentationStatus,
+}
+#[derive(Debug, Serialize)]
+pub struct PresentationInvalidation {
+    pub session_id: String,
+    pub generation: Revision,
+    pub cleanup_pending: bool,
+}
+#[derive(Debug, Default, Serialize)]
+pub struct PresentationInvalidations {
+    pub clear_all: bool,
+    pub invalidated: Vec<PresentationInvalidation>,
+}
+struct PresentationState {
+    generation: Revision,
+    active: bool,
+}
 struct Session {
     access: DocumentAccess,
     metadata: DocumentMetadata,
@@ -76,6 +129,7 @@ struct Session {
     opened: Instant,
     touched: Instant,
     delivered: u64,
+    presentation: Option<PresentationState>,
 }
 impl Session {
     fn expired(&self) -> bool {
@@ -139,6 +193,7 @@ pub struct DocumentReaderHost {
     store: BusinessStore,
     sessions: BTreeMap<String, Session>,
     poisoned: bool,
+    presentation_invalidations: PresentationInvalidations,
 }
 impl DocumentReaderHost {
     pub fn new(store: BusinessStore) -> Self {
@@ -146,6 +201,7 @@ impl DocumentReaderHost {
             store,
             sessions: BTreeMap::new(),
             poisoned: false,
+            presentation_invalidations: PresentationInvalidations::default(),
         }
     }
     /// Trusted Service/evidence adapter borrow; database/transactions remain private.
@@ -155,8 +211,26 @@ impl DocumentReaderHost {
     pub fn inspect(&self, access: &DocumentAccess) -> Result<DocumentMetadata> {
         Ok(self.store.read_document(access)?)
     }
-    fn release<T>(&mut self, session: Session, result: CoreResult<T>) -> Result<T> {
-        match (result, self.store.release_document_reader(&session.reader)) {
+    fn release<T>(&mut self, mut session: Session, result: CoreResult<T>) -> Result<T> {
+        let cleanup = self.store.release_document_reader(&session.reader);
+        if cleanup.is_err() {
+            self.presentation_invalidations.clear_all = true;
+        }
+        if let Some(state) = session.presentation.as_mut() {
+            state.active = false;
+            if self.presentation_invalidations.invalidated.len() == MAX_READ_SESSIONS {
+                self.presentation_invalidations.clear_all = true;
+                self.presentation_invalidations.invalidated.clear();
+            }
+            self.presentation_invalidations
+                .invalidated
+                .push(PresentationInvalidation {
+                    session_id: session.reader.source().lease.lease_id.clone(),
+                    generation: state.generation.clone(),
+                    cleanup_pending: cleanup.is_err(),
+                });
+        }
+        match (result, cleanup) {
             (Ok(value), Ok(())) => Ok(value),
             (Err(error), Ok(())) => Err(error.into()),
             (result, Err(cleanup)) => {
@@ -206,7 +280,7 @@ impl DocumentReaderHost {
             .map(|(key, _)| key.clone())
             .collect();
         for key in expired {
-            self.close(&key)?;
+            self.close_session(&key)?;
         }
         Ok(())
     }
@@ -285,6 +359,7 @@ impl DocumentReaderHost {
             opened: now,
             touched: now,
             delivered: 0,
+            presentation: None,
         };
         validate_snapshot(&self.store, &tx, &session)?;
         let info = DocumentReadSessionInfo {
@@ -300,7 +375,27 @@ impl DocumentReaderHost {
         Ok(info)
     }
     pub fn read_chunk(&mut self, id: &str, max_bytes: usize) -> Result<DocumentReadChunk> {
+        self.read_chunk_mode(id, max_bytes, None)
+    }
+    fn read_chunk_mode(
+        &mut self,
+        id: &str,
+        max_bytes: usize,
+        ticket: Option<&PresentationTicket>,
+    ) -> Result<DocumentReadChunk> {
         self.sweep()?;
+        match ticket {
+            Some(ticket) => self.require_presentation_ticket(ticket, true)?,
+            None => {
+                if self
+                    .sessions
+                    .get(id)
+                    .is_some_and(|session| session.presentation.is_some())
+                {
+                    return Err(ContractError::UnsupportedOperation.into());
+                }
+            }
+        }
         let mut session = self.sessions.remove(id).ok_or(ContractError::NotFound)?;
         if self.poisoned {
             return self.release(session, Err(ContractError::Unknown));
@@ -334,8 +429,10 @@ impl DocumentReaderHost {
             })
         })();
         match result {
-            Ok(chunk) if !chunk.eof => {
-                session.touched = Instant::now();
+            Ok(chunk) if !chunk.eof || session.presentation.is_some() => {
+                if !chunk.bytes.is_empty() {
+                    session.touched = Instant::now();
+                }
                 self.sessions.insert(id.into(), session);
                 Ok(chunk)
             }
@@ -343,7 +440,185 @@ impl DocumentReaderHost {
             Err(error) => self.release(session, Err(error)),
         }
     }
+    fn require_presentation_ticket(
+        &self,
+        ticket: &PresentationTicket,
+        require_active: bool,
+    ) -> CoreResult<()> {
+        let session = self
+            .sessions
+            .get(&ticket.session_id)
+            .ok_or(ContractError::NotFound)?;
+        let state = session
+            .presentation
+            .as_ref()
+            .ok_or(ContractError::InvalidAuthority)?;
+        if session.access.document != ticket.document
+            || session.access.authority != ticket.authority
+            || state.generation != ticket.generation
+            || (require_active && !state.active)
+        {
+            return Err(ContractError::InvalidAuthority);
+        }
+        Ok(())
+    }
+    fn presentation_status_in_transaction(
+        &self,
+        tx: &Transaction<'_>,
+        session: &Session,
+    ) -> CoreResult<PresentationStatus> {
+        validate_snapshot(&self.store, tx, session)?;
+        let state = session
+            .presentation
+            .as_ref()
+            .ok_or(ContractError::InvalidAuthority)?;
+        if !state.active || session.expired() {
+            return Err(ContractError::InvalidAuthority);
+        }
+        let grant_deadline = self.store.document_read_deadline_in_transaction(
+            tx,
+            &session.access,
+            &[DocumentOperation::Render],
+        )?;
+        let grant_remaining = grant_deadline.saturating_sub(storage::now_ms()?);
+        let remaining = LIFETIME
+            .saturating_sub(session.opened.elapsed())
+            .min(IDLE.saturating_sub(session.touched.elapsed()))
+            .as_millis() as u64;
+        let valid_for_ms = remaining.min(grant_remaining);
+        if valid_for_ms == 0 {
+            return Err(ContractError::InvalidAuthority);
+        }
+        Ok(PresentationStatus {
+            ticket: PresentationTicket {
+                session_id: session.reader.source().lease.lease_id.clone(),
+                document: session.access.document.clone(),
+                authority: session.access.authority.clone(),
+                generation: state.generation.clone(),
+            },
+            phase: if session.delivered == session.metadata.blob.byte_length.value() {
+                PresentationPhase::Ready
+            } else {
+                PresentationPhase::Loading
+            },
+            valid_for_ms,
+            check_after_ms: valid_for_ms.min(1000),
+        })
+    }
+    /// Explicit new selection; never a renewal of an old ticket or grant.
+    pub fn open_presentation(
+        &mut self,
+        access: &DocumentAccess,
+    ) -> Result<DocumentPresentationInfo> {
+        if self.poisoned {
+            return Err(ContractError::Unknown.into());
+        }
+        let previous: Vec<_> = self
+            .sessions
+            .iter()
+            .filter(|(_, session)| session.presentation.is_some())
+            .map(|(id, _)| id.clone())
+            .collect();
+        for id in previous {
+            self.close_session(&id)?;
+        }
+        let session = self.open(access, DocumentReadPurpose::Render)?;
+        self.sessions
+            .get_mut(&session.session_id)
+            .ok_or(ContractError::NotFound)?
+            .presentation = Some(PresentationState {
+            generation: Revision::new(1),
+            active: true,
+        });
+        let ticket = PresentationTicket {
+            session_id: session.session_id.clone(),
+            document: access.document.clone(),
+            authority: access.authority.clone(),
+            generation: Revision::new(1),
+        };
+        let status = self.check_presentation(&ticket)?;
+        Ok(DocumentPresentationInfo { session, status })
+    }
+    pub fn read_presentation_chunk(
+        &mut self,
+        ticket: &PresentationTicket,
+        max_bytes: usize,
+    ) -> Result<DocumentReadChunk> {
+        self.read_chunk_mode(&ticket.session_id, max_bytes, Some(ticket))
+    }
+    /// Status refresh never extends idle, absolute or grant expiry. Host must
+    /// clear cached output on any error and may display only phase Ready.
+    pub fn check_presentation(
+        &mut self,
+        ticket: &PresentationTicket,
+    ) -> Result<PresentationStatus> {
+        if self.poisoned {
+            return Err(ContractError::Unknown.into());
+        }
+        self.sweep()?;
+        self.require_presentation_ticket(ticket, true)?;
+        let session = self
+            .sessions
+            .remove(&ticket.session_id)
+            .ok_or(ContractError::NotFound)?;
+        let result = (|| -> CoreResult<PresentationStatus> {
+            let tx = sql(self.store.database().transaction())?;
+            let status = self.presentation_status_in_transaction(&tx, &session)?;
+            tx.commit().map_err(|_| ContractError::Unknown)?;
+            Ok(status)
+        })();
+        match result {
+            Ok(status) => {
+                self.sessions.insert(ticket.session_id.clone(), session);
+                Ok(status)
+            }
+            Err(error) => self.release(session, Err(error)),
+        }
+    }
+    pub fn advance_presentation_frame(
+        &mut self,
+        ticket: &PresentationTicket,
+    ) -> Result<PresentationStatus> {
+        let checked = self.check_presentation(ticket)?;
+        if checked.phase != PresentationPhase::Ready {
+            return Err(ContractError::InvalidPayload.into());
+        }
+        let next = {
+            let session = self
+                .sessions
+                .get_mut(&ticket.session_id)
+                .ok_or(ContractError::NotFound)?;
+            let state = session
+                .presentation
+                .as_mut()
+                .ok_or(ContractError::InvalidAuthority)?;
+            state.generation = state.generation.next()?;
+            session.touched = Instant::now();
+            PresentationTicket {
+                generation: state.generation.clone(),
+                ..ticket.clone()
+            }
+        };
+        self.check_presentation(&next)
+    }
+    pub fn close_presentation(&mut self, ticket: &PresentationTicket) -> Result<()> {
+        if !self.sessions.contains_key(&ticket.session_id) {
+            return Ok(());
+        }
+        self.require_presentation_ticket(ticket, false)?;
+        self.close_session(&ticket.session_id)
+    }
+    pub fn take_presentation_invalidations(&mut self) -> PresentationInvalidations {
+        std::mem::take(&mut self.presentation_invalidations)
+    }
     pub fn is_current(&mut self, id: &str) -> Result<bool> {
+        if self
+            .sessions
+            .get(id)
+            .is_some_and(|session| session.presentation.is_some())
+        {
+            return Err(ContractError::UnsupportedOperation.into());
+        }
         self.sweep()?;
         let Some(mut session) = self.sessions.remove(id) else {
             return Ok(false);
@@ -374,6 +649,16 @@ impl DocumentReaderHost {
         }
     }
     pub fn close(&mut self, id: &str) -> Result<()> {
+        if self
+            .sessions
+            .get(id)
+            .is_some_and(|session| session.presentation.is_some())
+        {
+            return Err(ContractError::UnsupportedOperation.into());
+        }
+        self.close_session(id)
+    }
+    fn close_session(&mut self, id: &str) -> Result<()> {
         match self.sessions.remove(id) {
             Some(session) => self.release(session, Ok(())),
             None => Ok(()),
