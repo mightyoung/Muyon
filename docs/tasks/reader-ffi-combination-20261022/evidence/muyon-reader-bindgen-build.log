@@ -1,0 +1,16 @@
+    Blocking waiting for file lock on artifact directory
+   Compiling muyon-core v0.1.0 (/workspace/Muyon-reader-ffi-combination-20261022/crates/muyon-core)
+warning: method `document_publish_candidate_in_transaction` is never used
+   --> muyon-core/src/documents/candidate.rs:297:19
+    |
+ 62 | impl BusinessStore {
+    | ------------------ method in this implementation
+...
+297 |     pub(crate) fn document_publish_candidate_in_transaction(
+    |                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: `muyon-core` (lib) generated 1 warning
+   Compiling muyon-android-ffi v0.1.0 (/workspace/Muyon-reader-ffi-combination-20261022/crates/muyon-android-ffi)
+    Finished `dev` profile [unoptimized] target(s) in 25.61s

@@ -1,0 +1,18 @@
+{
+  "source_commit": "1eb944e05c4377f1394ad6991b304170e5187446",
+  "base": "a5acfba1cc87db348c9078313e0f84bb361e0590",
+  "files": {
+    "crates/muyon-core/src/artifacts/local_interactions.rs": "b54c147c38c9628b00679b215945037c5ffa8cbe0c043f709250ce6d4e86354d",
+    "crates/muyon-core/src/artifacts/local_interactions/source_tests.rs": "c107eb7a38fac27d07302ffa9dc8893724257320c3daed22d0abdeedab5c51b2",
+    "crates/muyon-core/src/artifacts/local_interactions/tests.rs": "c483aad458df1088f9ddc96824aecb60e5aef1dec10fefdf5bef9228cc31dec5",
+    "crates/muyon-core/src/artifacts/local_sources.rs": "52b3a4e9eda179d43535218da7452dc68ad98a8c6635e582678399d0b6b3e364",
+    "crates/muyon-core/src/artifacts/mod.rs": "2ca104e9440f5288e482a589efede316ea0f5f8deb9f4f573cb6ffcedda125c1",
+    "crates/muyon-core/src/artifacts/project_access.rs": "1315229f4065581ef8dc6e90f022a879469ee0853caa83bc443b92cff1157fd3",
+    "crates/muyon-core/src/artifacts/save_journal.rs": "2d635f415aaee183a341385892972f6f2426026947a018a6adaf761ecb07c229",
+    "crates/muyon-core/src/group_runtime/bridge.rs": "ccbc5c5166aa2abdd580ca3be7473715f6b194a764f1b7c52a8ce70b5d71b403",
+    "crates/muyon-core/src/group_runtime/store.rs": "0b1b7ec30e749bf224d907570cc7c851b18411852346c2aa4a1bf60e7e9e53ed",
+    "crates/muyon-core/src/lib.rs": "76d98724f1e6463a2e57e882e8745be768f7af03094a08c240eaeb3bf6efd316",
+    "crates/muyon-core/tests/group_runtime_bridge.rs": "ab6712f072bb8cd495ef322e8776e962eaa3ac966999181f23baa65af930a538",
+    "crates/muyon-core/tests/group_runtime_store.rs": "1d927cbcde5e831089250463b626db9a23327925b981f3f1973854fd83b56ca4"
+  }
+}

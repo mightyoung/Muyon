@@ -1,0 +1,982 @@
+   Compiling muyon-core v0.1.0 (/workspace/Muyon-artifact-group-combination-20261022/crates/muyon-core)
+warning: unused import: `CandidateStatus`
+  --> muyon-core/tests/../src/documents/mod.rs:22:37
+   |
+22 | pub use candidate::{CandidateState, CandidateStatus};
+   |                                     ^^^^^^^^^^^^^^^
+   |
+   = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused import: `CandidateStatus`
+  --> muyon-core/src/bin/../documents/mod.rs:22:37
+   |
+22 | pub use candidate::{CandidateState, CandidateStatus};
+   |                                     ^^^^^^^^^^^^^^^
+   |
+   = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+   Compiling muyon-android-ffi v0.1.0 (/workspace/Muyon-artifact-group-combination-20261022/crates/muyon-android-ffi)
+warning: unused imports: `CandidateState` and `CandidateStatus`
+  --> muyon-core/src/bin/../documents/mod.rs:22:21
+   |
+22 | pub use candidate::{CandidateState, CandidateStatus};
+   |                     ^^^^^^^^^^^^^^  ^^^^^^^^^^^^^^^
+   |
+   = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+warning: `muyon-core` (bin "business_worker" test) generated 1 warning (run `cargo fix --bin "business_worker" -p muyon-core --tests` to apply 1 suggestion)
+warning: `muyon-core` (test "group_runtime_store") generated 1 warning (run `cargo fix --test "group_runtime_store" -p muyon-core` to apply 1 suggestion)
+warning: `muyon-core` (bin "business_worker") generated 1 warning (run `cargo fix --bin "business_worker" -p muyon-core` to apply 1 suggestion)
+warning: `muyon-core` (test "group_runtime_bridge") generated 1 warning (1 duplicate)
+    Finished `test` profile [unoptimized] target(s) in 18.33s
+     Running unittests src/lib.rs (/tmp/muyon-combination-target/debug/deps/muyon_android_product-1c28df6200c71325)
+
+running 27 tests
+test document_bridge_tests::deleted_project_and_chunk_limit_errors_never_yield_successful_bytes ... ok
+test document_bridge_tests::actual_metadata_and_bytes_mark_eof_closed_not_display_authority ... ok
+test document_bridge_tests::foreign_service_generation_and_project_never_borrow_a_live_reader ... ok
+test document_bridge_tests::eight_invalidated_native_ids_do_not_block_fresh_authorized_admission ... ok
+test document_bridge_tests::forged_or_inspect_only_grants_do_not_open_or_issue_read_permission ... ok
+test document_bridge_tests::evidence_uses_real_text_explicit_citations_and_exact_query_snapshot ... ok
+test document_bridge_tests::owner_release_closes_only_its_sessions_and_evidence ... ok
+test document_bridge_tests::pdf_processing_remains_unsupported_and_never_claims_a_renderer ... ok
+test document_bridge_tests::processing_cache_is_not_a_grant_and_other_sessions_cannot_read_it ... ok
+test document_bridge_tests::revoked_current_grant_discards_bytes_and_publishes_invalidation ... ok
+test document_bridge_tests::readonly_annotations_and_explicit_shutdown_do_not_claim_a_display_lease ... ok
+test local_draft_bridge_tests::local_draft_bridge_registers_reads_saves_and_looks_up_original_after_restart ... ok
+test local_draft_bridge_tests::prepared_attempt_is_discovered_and_fenced_after_native_restart ... ok
+test tests::another_root_and_ordinary_chat_cannot_bypass_an_unknown_child ... ok
+test tests::configuring_a_new_budget_never_manufactures_pricing_authority_or_sends ... ok
+test tests::imported_raw_metadata_is_preserved_but_never_an_unbounded_binder_reply ... ok
+test tests::child_plan_stays_blocked_and_cannot_bypass_an_unknown_root_request ... ok
+test tests::open_never_initializes_or_wipes_missing_or_existing_store ... ok
+test tests::production_startup_never_collects_unknown_uploads_or_intent_retained_pins ... ok
+test tests::production_open_recovers_interrupted_upload_and_collects_only_unreferenced_objects ... ok
+test tests::received_confirmation_and_legacy_unknown_are_never_cleared_or_replayed ... ok
+test tests::recovery_seal_refuses_an_already_queued_late_confirmation ... ok
+test tests::research_project_confirmation_not_received_recovers_without_a_write ... ok
+test tests::unreceived_confirmation_is_sealed_without_resubmitting_after_restart ... ok
+test tests::review_is_explicit_and_duplicate_confirmation_returns_original_receipt ... ok
+test tests::long_unicode_pages_are_bounded_and_the_201st_supplier_is_accessible ... ok
+test document_bridge_tests::eight_actually_idle_expired_sessions_allow_fresh_open_without_manual_checks ... ok
+
+test result: ok. 27 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 16.03s
+
+     Running unittests src/lib.rs (/tmp/muyon-combination-target/debug/deps/muyon_core-7fb0d7c08fd3f168)
+
+running 152 tests
+test artifacts::local_interactions::source_tests::persisted_source_cannot_pair_an_evidence_id_with_another_real_document ... ok
+test artifacts::local_interactions::source_tests::actual_evidence_identity_quote_and_source_scope_are_required ... ok
+test artifacts::local_interactions::source_tests::fresh_source_authority_restores_same_draft_and_invalidates_old_preview ... ok
+test artifacts::local_interactions::source_tests::revocation_hook_is_atomic_and_never_replays_original_intents ... ok
+test artifacts::local_interactions::source_tests::resolved_proof_is_bound_to_same_store_and_resolving_actor ... ok
+test artifacts::local_interactions::source_tests::receipt_tail_source_revocation_rolls_back_state_and_receipt_preserving_pending ... ok
+test artifacts::local_interactions::source_tests::source_head_change_invalidates_frozen_preview_without_waiting_for_lease ... ok
+test artifacts::local_interactions::source_tests::unsupported_message_or_unresolved_evidence_cannot_issue_binding ... ok
+test artifacts::local_interactions::tests::actor_scope_epoch_generation_and_expiry_do_not_rebind_local_values ... ok
+test artifacts::local_interactions::tests::binding_issue_checks_the_exact_requested_field_policy_after_its_write ... ok
+test artifacts::local_interactions::tests::changed_allowlist_invalidates_frozen_confirmation_without_retargeting_values ... ok
+test artifacts::local_interactions::tests::binding_and_project_generation_changes_invalidate_prepared_confirmation ... ok
+test artifacts::local_interactions::tests::draft_restart_cas_human_sticky_and_typed_allowlist ... ok
+test artifacts::local_interactions::tests::confirmation_binds_original_values_and_edit_invalidates_preview ... ok
+test artifacts::local_interactions::tests::explicit_choices_are_human_selections_and_suggestions_do_not_select ... ok
+test artifacts::local_interactions::tests::feedback_exact_revision_permission_and_receipt_tail_revocation ... ok
+test artifacts::local_interactions::tests::fields_are_typed_and_zero_component_revision_matches_existing_ui_contract ... ok
+test artifacts::local_interactions::tests::human_selection_does_not_relabel_suggested_text_as_human_content ... ok
+test artifacts::local_interactions::tests::pending_draft_save_is_locked_and_lookup_is_private_read_only ... ok
+test artifacts::local_interactions::tests::mutation_only_binding_can_be_revoked_without_read_permission ... ok
+test artifacts::local_interactions::tests::receipt_tail_cannot_change_the_allowed_field_policy ... ok
+test artifacts::tests::exact_scope_and_write_permission_are_required ... ok
+test artifacts::local_interactions::tests::uncertain_preview_write_and_corrupt_original_review_never_submit ... ok
+test artifacts::tests::failed_publication_rolls_back_artifact_and_document_heads ... ok
+test artifacts::tests::invalid_sources_schema_and_oversized_rows_fail_closed ... ok
+test artifacts::tests::human_revision_is_atomic_and_generated_cannot_overwrite_it ... ok
+test artifacts::tests::revocation_deletion_wrong_project_and_missing_source_deny_history ... ok
+test artifacts::tests::restart_restores_exact_snapshot_and_source_advance_fails_closed ... ok
+test artifacts::workflow_tests::catalog_requires_independent_project_grant_and_returns_inventory_only ... ok
+test artifacts::workflow_tests::effect_unknown_uses_original_lookup_without_writing_a_rejection ... ok
+test artifacts::workflow_tests::independent_project_grants_reject_expiry_generation_epoch_and_project_changes ... ok
+test artifacts::workflow_tests::historical_output_and_source_require_explicit_core_history_policy ... ok
+test artifacts::workflow_tests::pending_storage_failure_never_reexecutes_and_lookup_never_writes ... ok
+test artifacts::workflow_tests::own_receipt_permission_never_implies_discovery_or_another_actors_journal ... ok
+test artifacts::workflow_tests::receipt_write_failure_rolls_back_publication_and_keeps_pending_without_retry ... ok
+test artifacts::workflow_tests::rejected_projection_requires_a_durable_terminal_row ... ok
+test artifacts::workflow_tests::revise_receipt_is_atomic_and_survives_later_head_change ... ok
+test artifacts::workflow_tests::save_journal_duplicates_return_original_receipt_and_parameter_change_conflicts ... ok
+test blobs::tests::corrupt_existing_object_and_dangling_symlink_are_never_replaced ... ok
+test blobs::tests::deleting_rejects_new_read_or_same_digest_upload ... ok
+test blobs::tests::failed_ledger_after_solidification_keeps_staging_and_object_independent ... ok
+test blobs::tests::file_and_upload_logical_length_quotas_precede_hashing_and_writing ... ok
+test blobs::tests::gc_and_publish_barrier_preserves_either_upload_pin_or_reference ... ok
+test blobs::tests::gc_and_reader_barrier_covers_reader_after_upload_pin_release ... ok
+test blobs::tests::kill_fixture ... ok
+test blobs::tests::partial_publication_copy_is_not_reused_and_unknown_uploads_are_not_cleaned ... ok
+test blobs::tests::pending_unknown_never_expire_and_lookup_does_not_recover ... ok
+test blobs::tests::pinned_state_alone_does_not_replace_a_durable_upload_pin ... ok
+test blobs::tests::publication_binds_expected_bytes_project_revision_and_real_transaction ... ok
+test artifacts::local_interactions::tests::receipt_tail_policy_changes_keep_feedback_and_original_pending_atomic ... ok
+test blobs::tests::real_paper_effect_receipt_and_blob_reference_survive_or_roll_back_together ... ok
+test blobs::tests::rename_then_failed_pin_commit_can_retry_existing_target_without_overwrite ... ok
+test bot_definitions::tests::archive_type_changed_between_transactions_rejects ... ok
+test bot_definitions::tests::cas_scope_and_changed_confirmation_reject_without_definition ... ok
+test bot_definitions::tests::committed_receipt_and_definition_survive_restart_without_replaying ... ok
+test bot_definitions::tests::corrupted_archive_and_unknown_schema_fail_closed ... ok
+test bot_definitions::tests::creates_only_after_confirm_and_original_intent_is_idempotent ... ok
+test bot_definitions::tests::insert_draft_lifecycle_rolls_back ... ok
+test bot_definitions::tests::insert_draft_revision_rolls_back ... ok
+test artifacts::workflow_tests::receipt_tail_invalidation_rolls_back_all_effects_and_preserves_original_pending ... ok
+test bot_definitions::tests::insert_draft_scope_rolls_back ... ok
+test bot_definitions::tests::old_prepared_review_is_sealed_and_explicit_cancel_allows_new_review ... ok
+test bot_definitions::tests::pending_unknown_never_reexecutes_and_archive_replay_cannot_clear_stop ... ok
+test bot_definitions::tests::pending_update_project_deletion_cannot_commit_effect ... ok
+test bot_definitions::tests::project_deleted_exactly_between_pending_and_effect_must_not_commit ... ok
+
+running 1 test
+test bot_definitions::tests::receipt_update_failure_rolls_back_definition_and_keeps_original_pending ... ok
+test bot_definitions::tests::real_child_process_kill_preserves_pending_and_original_lookup ... ok
+test bot_definitions::tests::source_registry_ddl_changed_between_transactions_rejects ... ok
+test bot_definitions::tests::tail_definition_blob_storage_rolls_back ... ok
+test bot_definitions::tests::tail_archive_blob_storage_rolls_back ... ok
+test bot_definitions::tests::tail_definition_identity_tampering_rolls_back ... ok
+test bot_definitions::tests::tail_definition_tampering_rolls_back ... ok
+test bot_definitions::tests::tail_digest_blob_storage_rolls_back ... ok
+test bot_definitions::tests::tail_draft_lifecycle_rolls_back ... ok
+test bot_definitions::tests::tail_draft_revision_rolls_back ... ok
+test bot_definitions::tests::tail_draft_scope_rolls_back ... ok
+test bot_definitions::tests::tail_frozen_blob_storage_rolls_back ... ok
+test blobs::tests::real_sigkill_and_reopen_at_twelve_cross_media_windows ... ok
+test bot_definitions::tests::tail_intent_identity_tampering_rolls_back ... ok
+test bot_definitions::tests::tail_original_intent_rename_rolls_back ... ok
+test bot_definitions::tests::tail_owner_epoch_rolls_back ... ok
+test bot_definitions::tests::tail_project_deletion_rolls_back ... ok
+test bot_definitions::tests::tail_receipt_blob_storage_rolls_back ... ok
+test bot_definitions::tests::tail_receipt_tampering_rolls_back ... ok
+test bot_definitions::tests::tail_source_registry_version_rolls_back ... ok
+test document_edit::engine_protocol::tests::expired_host_preparation_is_rejected_without_sleep_or_clock_override_api ... ok
+test bot_definitions::tests::tail_source_registry_workspace_rolls_back ... ok
+test bot_definitions::tests::tail_workspace_change_rolls_back ... ok
+test documents::candidate_tests::duplicate_preparation_is_query_only_and_conflicting_binding_is_rejected ... ok
+test documents::candidate_tests::expiry_after_durable_pin_is_unknown_and_never_source_success ... ok
+test documents::candidate_tests::late_seal_failure_leaves_unpublished_object_and_query_only_unknown ... ok
+test documents::candidate_tests::missing_pin_or_corrupt_object_is_query_only_unknown ... ok
+test documents::candidate_tests::new_bytes_are_private_sealed_unvalidated_and_never_publish ... ok
+test documents::candidate_tests::oversize_nonpayload_fields_fail_before_status_decode ... ok
+test documents::candidate_tests::partial_staging_restart_preserves_candidate_without_blocking_unrelated_gc ... ok
+test documents::candidate_tests::reservation_failure_has_no_upload_or_output_effect ... ok
+test documents::candidate_tests::restart_retains_prepared_pin_but_never_adopts_original_execution_authority ... ok
+test documents::candidate_tests::revocation_conflict_invalid_input_and_foreign_publication_fail_closed ... ok
+test documents::candidate_tests::source_head_advance_rejects_old_candidate_without_latest_substitution ... ok
+test documents::history_tests::advancing_parent_head_does_not_reuse_old_history_policy ... ok
+test documents::history_tests::canonical_history_corruption_and_missing_revision_are_not_substituted ... ok
+test artifacts::local_interactions::source_tests::revocation_hook_processes_more_than_one_batch_without_blocking_revocation ... ok
+test documents::history_tests::historical_and_parent_revocation_expiry_generation_and_project_are_current ... ok
+test documents::history_tests::historical_identity_scope_schema_and_read_only_policy_fail_closed ... ok
+test documents::history_tests::old_policy_is_not_inherited_by_a_new_parent_grant_generation ... ok
+test documents::history_tests::text_label_roundtrips_without_default_utf8_or_reader_capability ... ok
+test documents::history_tests::history_denies_without_explicit_target_policy_and_then_reads_exact_snapshot ... ok
+test documents::history_tests::wrong_history_schema_is_rejected_without_changing_document_store ... ok
+test documents::reader_tests::authenticated_snapshot_never_delivers_mutated_disk_bytes_even_with_resampled_stamp ... ok
+test documents::reader_tests::cleanup_failure_withholds_bytes_and_poisoned_host_refuses_new_sessions ... ok
+test documents::reader_tests::corrupt_oversize_blob_length_is_rejected_without_creating_reader_pin ... ok
+test documents::reader_tests::bounded_sessions_idle_absolute_lifetime_and_invalid_chunk_release_pins ... ok
+test documents::reader_tests::dropping_host_releases_sessions_before_reopening_same_store ... ok
+test documents::reader_tests::deleted_pin_or_same_length_corruption_invalidates_session ... ok
+test documents::reader_tests::eof_cleanup_time_revocation_withholds_prepared_chunk ... ok
+test documents::reader_tests::exact_metadata_and_sequential_bytes_close_at_eof ... ok
+test documents::reader_tests::inspect_grant_cannot_open_bytes_and_forged_scope_never_substitutes_source ... ok
+test documents::candidate_tests::candidate_gc_crosses_page_boundary_preserving_exact_objects_and_project_quotas ... ok
+test documents::reader_tests::one_shot_callback_failure_and_cleanup_failure_return_no_success_or_pin ... ok
+test documents::reader_tests::generation_epoch_expiry_and_project_deletion_revoke_existing_sessions ... ok
+test documents::reader_tests::one_shot_cleanup_time_revocation_withholds_prepared_output ... ok
+test documents::reader_tests::one_shot_view_is_live_bounded_and_tail_rechecks_expiry_before_delivery ... ok
+test documents::reader_tests::open_commit_rejection_maps_to_unknown_and_cleans_original_pin ... ok
+test documents::reader_tests::open_failure_after_pin_creation_rolls_back_without_exposing_a_session ... ok
+test documents::storage_tests::clone_and_late_receipt_failure_roll_back_together ... ok
+test documents::storage_tests::clone_late_metadata_failure_and_revision_overflow_leave_original_intact ... ok
+test documents::reader_tests::revoked_or_advanced_session_never_delivers_cached_bytes ... ok
+test documents::storage_tests::clone_reference_requires_same_project_ready_source_and_unique_reference ... ok
+test documents::storage_tests::clone_rejects_changed_source_stale_base_and_foreign_transaction ... ok
+test documents::storage_tests::clone_verifies_real_source_file_hash_and_missing_file ... ok
+test documents::storage_tests::copy_clone_commits_same_bytes_and_revision_without_upload_or_staging ... ok
+test documents::storage_tests::tail_grant_rejects_foreign_transaction_and_mismatched_document_binding ... ok
+test documents::storage_tests::tail_grant_rechecks_revocation_expiry_generation_epoch_and_project ... ok
+test documents::storage_tests::tail_grant_survives_own_cas_without_authorizing_old_revision_reads ... ok
+test evidence::store::tests::actual_registered_pdf_and_ocr_have_unsupported_receipt_not_fake_content ... ok
+test evidence::store::tests::changed_current_revision_never_rebinds_old_evidence ... ok
+test evidence::store::tests::inspect_is_not_readtext_and_failure_opens_no_reader ... ok
+test evidence::store::tests::corrupt_controlled_blob_never_uses_previous_cache_as_success ... ok
+test evidence::store::tests::malformed_saved_text_is_failed_processing_not_saved_or_index_success ... ok
+test evidence::store::tests::original_unknown_intents_are_not_looked_up_retried_or_changed ... ok
+test evidence::store::tests::owner_delivery_transaction_excludes_other_sqlite_writer ... ok
+test evidence::store::tests::processing_errors_release_actual_reader_pins_without_new_intents ... ok
+test evidence::store::tests::reader_lease_and_grant_mutation_in_same_transaction_block_delivery ... ok
+test evidence::store::tests::real_saved_text_readtext_grant_produces_processing_receipt_and_exact_quote ... ok
+test evidence::store::tests::persisted_revocation_expiry_generation_epoch_and_project_deletion_deny_cached_results ... ok
+test evidence::store::tests::unknown_pdf_and_relabelled_pdf_never_gain_utf8_processing ... ok
+test review_lifecycle::tests::committed_claims_are_preserved_and_partial_committed_schema_is_refused ... ok
+test review_lifecycle::tests::empty_file_from_interrupted_creation_initializes_without_replacement ... ok
+test review_lifecycle::tests::uncommitted_ddl_reopens_and_initializes_the_original_database ... ok
+test documents::candidate_tests::candidate_count_and_expected_byte_admission_limits_precede_file_writes ... ok
+test research::resource_tests::real_opaque_uploads_are_not_aggregated_when_sealing_or_importing ... ok
+test documents::reader_tests::thirty_mib_stream_hash_cost_is_linear_and_chunk_bytes_are_exact ... ok
+
+test result: ok. 152 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 13.37s
+
+     Running unittests src/bin/business_worker.rs (/tmp/muyon-combination-target/debug/deps/business_worker-7336c54e8bb9fae8)
+
+running 65 tests
+test blobs::tests::failed_ledger_after_solidification_keeps_staging_and_object_independent ... ok
+test blobs::tests::file_and_upload_logical_length_quotas_precede_hashing_and_writing ... ok
+test blobs::tests::deleting_rejects_new_read_or_same_digest_upload ... ok
+test blobs::tests::kill_fixture ... ok
+test blobs::tests::gc_and_publish_barrier_preserves_either_upload_pin_or_reference ... ok
+test blobs::tests::corrupt_existing_object_and_dangling_symlink_are_never_replaced ... ok
+test blobs::tests::gc_and_reader_barrier_covers_reader_after_upload_pin_release ... ok
+test blobs::tests::pinned_state_alone_does_not_replace_a_durable_upload_pin ... ok
+test blobs::tests::publication_binds_expected_bytes_project_revision_and_real_transaction ... ok
+test blobs::tests::partial_publication_copy_is_not_reused_and_unknown_uploads_are_not_cleaned ... ok
+test blobs::tests::rename_then_failed_pin_commit_can_retry_existing_target_without_overwrite ... ok
+test blobs::tests::pending_unknown_never_expire_and_lookup_does_not_recover ... ok
+test blobs::tests::real_paper_effect_receipt_and_blob_reference_survive_or_roll_back_together ... ok
+test documents::candidate_tests::duplicate_preparation_is_query_only_and_conflicting_binding_is_rejected ... ok
+test documents::candidate_tests::expiry_after_durable_pin_is_unknown_and_never_source_success ... ok
+test documents::candidate_tests::late_seal_failure_leaves_unpublished_object_and_query_only_unknown ... ok
+test documents::candidate_tests::missing_pin_or_corrupt_object_is_query_only_unknown ... ok
+test documents::candidate_tests::new_bytes_are_private_sealed_unvalidated_and_never_publish ... ok
+test documents::candidate_tests::oversize_nonpayload_fields_fail_before_status_decode ... ok
+test documents::candidate_tests::partial_staging_restart_preserves_candidate_without_blocking_unrelated_gc ... ok
+test documents::candidate_tests::reservation_failure_has_no_upload_or_output_effect ... ok
+test documents::candidate_tests::restart_retains_prepared_pin_but_never_adopts_original_execution_authority ... ok
+test documents::candidate_tests::revocation_conflict_invalid_input_and_foreign_publication_fail_closed ... ok
+test documents::candidate_tests::source_head_advance_rejects_old_candidate_without_latest_substitution ... ok
+test documents::history_tests::advancing_parent_head_does_not_reuse_old_history_policy ... ok
+test documents::history_tests::canonical_history_corruption_and_missing_revision_are_not_substituted ... ok
+test documents::history_tests::historical_and_parent_revocation_expiry_generation_and_project_are_current ... ok
+test documents::history_tests::historical_identity_scope_schema_and_read_only_policy_fail_closed ... ok
+test documents::history_tests::history_denies_without_explicit_target_policy_and_then_reads_exact_snapshot ... ok
+test documents::history_tests::old_policy_is_not_inherited_by_a_new_parent_grant_generation ... ok
+test documents::history_tests::text_label_roundtrips_without_default_utf8_or_reader_capability ... ok
+test documents::history_tests::wrong_history_schema_is_rejected_without_changing_document_store ... ok
+test blobs::tests::real_sigkill_and_reopen_at_twelve_cross_media_windows ... ok
+test documents::reader_tests::authenticated_snapshot_never_delivers_mutated_disk_bytes_even_with_resampled_stamp ... ok
+test documents::reader_tests::cleanup_failure_withholds_bytes_and_poisoned_host_refuses_new_sessions ... ok
+test documents::reader_tests::corrupt_oversize_blob_length_is_rejected_without_creating_reader_pin ... ok
+test documents::reader_tests::bounded_sessions_idle_absolute_lifetime_and_invalid_chunk_release_pins ... ok
+test documents::reader_tests::dropping_host_releases_sessions_before_reopening_same_store ... ok
+test documents::reader_tests::deleted_pin_or_same_length_corruption_invalidates_session ... ok
+test documents::candidate_tests::candidate_gc_crosses_page_boundary_preserving_exact_objects_and_project_quotas ... ok
+test documents::reader_tests::eof_cleanup_time_revocation_withholds_prepared_chunk ... ok
+test documents::reader_tests::exact_metadata_and_sequential_bytes_close_at_eof ... ok
+test documents::reader_tests::inspect_grant_cannot_open_bytes_and_forged_scope_never_substitutes_source ... ok
+test documents::reader_tests::one_shot_callback_failure_and_cleanup_failure_return_no_success_or_pin ... ok
+test documents::reader_tests::one_shot_cleanup_time_revocation_withholds_prepared_output ... ok
+test documents::reader_tests::one_shot_view_is_live_bounded_and_tail_rechecks_expiry_before_delivery ... ok
+test documents::reader_tests::open_commit_rejection_maps_to_unknown_and_cleans_original_pin ... ok
+test documents::reader_tests::open_failure_after_pin_creation_rolls_back_without_exposing_a_session ... ok
+test documents::reader_tests::generation_epoch_expiry_and_project_deletion_revoke_existing_sessions ... ok
+test documents::storage_tests::clone_and_late_receipt_failure_roll_back_together ... ok
+test documents::reader_tests::revoked_or_advanced_session_never_delivers_cached_bytes ... ok
+test documents::storage_tests::clone_late_metadata_failure_and_revision_overflow_leave_original_intact ... ok
+test documents::storage_tests::clone_reference_requires_same_project_ready_source_and_unique_reference ... ok
+test documents::storage_tests::clone_rejects_changed_source_stale_base_and_foreign_transaction ... ok
+test documents::storage_tests::clone_verifies_real_source_file_hash_and_missing_file ... ok
+test documents::storage_tests::copy_clone_commits_same_bytes_and_revision_without_upload_or_staging ... ok
+test documents::storage_tests::tail_grant_rechecks_revocation_expiry_generation_epoch_and_project ... ok
+test documents::storage_tests::tail_grant_rejects_foreign_transaction_and_mismatched_document_binding ... ok
+test documents::storage_tests::tail_grant_survives_own_cas_without_authorizing_old_revision_reads ... ok
+test review_lifecycle::tests::committed_claims_are_preserved_and_partial_committed_schema_is_refused ... ok
+test review_lifecycle::tests::empty_file_from_interrupted_creation_initializes_without_replacement ... ok
+test review_lifecycle::tests::uncommitted_ddl_reopens_and_initializes_the_original_database ... ok
+test research::resource_tests::real_opaque_uploads_are_not_aggregated_when_sealing_or_importing ... ok
+test documents::candidate_tests::candidate_count_and_expected_byte_admission_limits_precede_file_writes ... ok
+test documents::reader_tests::thirty_mib_stream_hash_cost_is_linear_and_chunk_bytes_are_exact ... ok
+
+test result: ok. 65 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 12.01s
+
+     Running tests/agent_child_tools.rs (/tmp/muyon-combination-target/debug/deps/agent_child_tools-cf09538303ba18bd)
+
+running 3 tests
+test preprepared_plan_cannot_bypass_a_later_unknown_request ... ok
+test child_tool_subset_is_priced_and_enforced_on_the_actual_model_response ... ok
+test confirmation_preview_contains_the_exact_prior_history_and_wire_fields ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/agent_owner.rs (/tmp/muyon-combination-target/debug/deps/agent_owner-7da9b30bdcdaf4ee)
+
+running 11 tests
+test cancel_before_attempt_releases_only_held_identity_and_is_not_replayable ... ok
+test complete_chat_usage_settles_once_and_restores_bounded_conversation_history ... ok
+test cancelled_claim_with_empty_response_never_refunds_attempt_count_after_restart ... ok
+test config_or_credential_changes_deny_dispatch_and_suppress_revoked_disclosure ... ok
+test fixed_transport_diagnostic_survives_reopen_without_settlement_or_raw_text ... ok
+test cumulative_budget_survives_reconfiguration_and_unknown_is_not_refunded ... ok
+test fresh_product_settings_and_blocked_chat_plan_do_not_inherit_canary_authority ... ok
+test reserve_claim_exactly_once_and_unknown_never_resends_after_reopen ... ok
+test malformed_or_over_bound_usage_keeps_unknown_hold_without_answer ... ok
+test validated_search_sources_and_empty_result_follow_existing_settlement_contract ... ok
+test process_death_after_reservation_or_claim_keeps_original_hold_without_replay ... ok
+
+test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+     Running tests/agent_product.rs (/tmp/muyon-combination-target/debug/deps/agent_product-35c7377eb89a95f0)
+
+running 6 tests
+test missing_live_owners_are_explicitly_unavailable_without_synthetic_fallback ... ok
+test response_requires_full_terminal_answer_and_usage_not_http_success ... ok
+test tools_reject_writes_scope_injection_duplicate_keys_and_unbounded_pages ... ok
+test old_epoch_read_scope_cannot_be_reused_after_service_restart ... ok
+test suppliers_are_current_database_reads_and_deleted_records_are_not_context ... ok
+test newly_added_paper_is_read_from_selected_project_without_raw_json_or_blob_path ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+     Running tests/agent_tools.rs (/tmp/muyon-combination-target/debug/deps/agent_tools-6224e9c99cacc20d)
+
+running 7 tests
+test cancellation_restart_and_unknown_never_resume_or_approve_tool_disclosure ... ok
+test disclosure_is_not_inferred_from_budget_or_copied_to_new_scope_or_generation ... ok
+test production_unbound_proof_never_auto_sends_approved_tool_followup ... ok
+test read_call_requires_exact_visible_disclosure_then_new_followup_identity_and_budget ... ok
+test cancelled_or_changed_suggestion_is_revalidated_before_any_business_commit ... ok
+test malformed_function_calls_remain_unknown_and_have_no_business_effect ... ok
+test suggestion_only_prepares_then_requires_original_committed_receipt_and_disclosure ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
+
+     Running tests/agent_workflow.rs (/tmp/muyon-combination-target/debug/deps/agent_workflow-e59c0f9604ca72a9)
+
+running 16 tests
+test disabled_skill_blocks_existing_queued_work_and_invalid_arguments_do_not_create_children ... ok
+test disabling_a_skill_permanently_revokes_its_prepared_remote_plan ... ok
+test actual_owner_settlement_completes_remote_child_without_accepted_answer_shortcut ... ok
+test cancellation_after_settlement_preserves_answers_and_releases_active_child_slots ... ok
+test local_child_reads_actual_supplier_and_emits_only_host_activity ... ok
+test paper_skill_reads_selected_project_and_skill_settings_do_not_leak_between_projects ... ok
+test attempted_unknown_retains_owner_hold_and_late_cancelled_response_is_not_published ... ok
+test prepared_child_and_normal_chat_are_rechecked_after_another_child_becomes_unknown ... ok
+test recovery_is_read_only_and_never_replays_and_owner_is_exclusive ... ok
+test remote_tool_allowlist_is_compiled_skill_metadata_and_not_instructions_in_task ... ok
+test scope_forgery_unknown_actions_and_fields_are_rejected ... ok
+test skill_toggle_digest_and_child_budgets_are_real ... ok
+test real_owner_followup_chain_tracks_leaf_unknown_and_cancels_every_known_request ... ok
+test real_owner_blocked_plan_binds_unique_child_and_cancellation_is_not_fake_completion ... ok
+test unproven_tool_followup_is_blocked_not_confirmable_and_polling_keeps_original_budget ... ok
+test large_real_local_results_keep_complete_storage_but_project_bounded_honest_previews ... ok
+
+test result: ok. 16 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.14s
+
+     Running tests/archive.rs (/tmp/muyon-combination-target/debug/deps/archive-2bb426103b40ce3b)
+
+running 13 tests
+test accepts_unsigned_descriptor ... ok
+test actual_archive409_encoder_round_trip_fixture ... ok
+test contract_entries_bind_exact_snapshot_digest_and_length ... ok
+test directories_validated_but_not_exposed ... ok
+test overlap_guard ... ok
+test descriptor_and_decoded_content_are_independent_checks ... ok
+test refuses_overlapping_ranges_and_unknown_extra_fields ... ok
+test rejects_path_aliases_links_and_special_files ... ok
+test rejects_offsets_local_conflicts_flags_zip64_and_quotas ... ok
+test stored_deflated_and_signed_descriptor_metadata ... ok
+test symlink_guard ... ok
+test traversal_guard ... ok
+test all_truncations_fail_without_panicking ... ok
+
+test result: ok. 13 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/blobs.rs (/tmp/muyon-combination-target/debug/deps/blobs-e9a44ceb640ef1af)
+
+running 8 tests
+test archive_upload_uses_actual_archive409_metadata_reader ... ok
+test equal_content_reuses_verified_object_but_retains_independent_upload_pins ... ok
+test durable_upload_and_repeatable_lease_reads ... ok
+test input_is_opaque_and_chunks_and_kinds_are_bounded ... ok
+test controlled_paths_refuse_symlinks_and_preserve_outside_files ... ok
+test persistent_reader_pin_outlives_upload_pin_until_explicit_close ... ok
+test private_snapshot_survives_source_removal_and_does_not_overwrite_corruption ... ok
+test lookup_is_read_only_and_restart_reconciliation_is_explicit ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+     Running tests/bot_drafts.rs (/tmp/muyon-combination-target/debug/deps/bot_drafts-1e581ea850dca95c)
+
+running 26 tests
+test canonical_envelope_tamper_limit_revision_and_trailing_data_refuse ... ok
+test altered_schema_workspace_and_signed_long_overflow_refuse ... ok
+test empty_archive_null_projection_survives_read_and_restart ... ok
+test exclusive_owner_and_competing_editors_do_not_lose_updates ... ok
+test exact_preparation_binding_idempotency_and_committed_editor_survive_callback_loss ... ok
+test archive_storage_null_oversize_blob_and_invalid_text_refuse ... ok
+test failed_commit_keeps_original_pointer_and_lookup_fences_queued_dispatch ... ok
+test failed_receipt_insert_rolls_back_archive_revision_and_attempt ... ok
+test legacy_receipt_without_journal_or_editor_remains_queryable_after_upgrade ... ok
+test draft_capacity_preserves_existing_records_and_receipts ... ok
+test large_valid_canonical_archive_roundtrips_without_projection_truncation ... ok
+test live_project_revocation_is_checked_even_for_original_receipts ... ok
+test original_receipt_blob_or_oversize_storage_refuses ... ok
+test partial_schema_never_resets_or_imports ... ok
+test original_receipt_is_atomic_idempotent_and_survives_callback_loss ... ok
+test preparation_is_durable_discoverable_and_never_replays_after_restart ... ok
+test original_unknown_and_reserved_ledgers_are_untouched ... ok
+test preparation_pointer_failure_rolls_back_new_original_row ... ok
+test project_query_storage_fault_is_unknown_not_scope_denial ... ok
+test preparation_scope_schema_and_foreign_pointer_fail_closed ... ok
+test receipt_and_journal_terminal_transition_are_one_commit ... ok
+test restart_and_null_project_are_real_registry_facts ... ok
+test stored_archive_and_receipt_tamper_refuse ... ok
+test wrong_scope_binding_generation_lifecycle_and_missing_attempt_refuse ... ok
+test structurally_invalid_rehashed_archive_cannot_add_fields ... ok
+test receipt_capacity_does_not_evict_originals ... ok
+
+test result: ok. 26 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.92s
+
+     Running tests/business.rs (/tmp/muyon-combination-target/debug/deps/business-f71be8435bc03405)
+
+running 14 tests
+test cross_process_owner_lock_is_released_only_after_process_exit ... ok
+test corrupt_receipt_tail_rolls_back_all_effects_and_never_reexecutes_pending ... ok
+test duplicate_binding_conflict_cas_and_same_name_new_intent ... ok
+test grant_expiring_during_actual_sql_rejects_and_rolls_back_the_effect ... ok
+test current_schema_label_does_not_authorize_a_missing_required_table_or_column ... ok
+test initialize_is_explicit_and_never_truncates_or_migrates ... ok
+test project_create_and_reads_are_persistent_workspace_bound_operations ... ok
+test old_schema_v1_missing_tail_table_is_refused_without_changing_pending_identity ... ok
+test sigkill_after_actual_sql_rolls_back_and_original_pending_cannot_redispatch ... ok
+test real_grants_expiry_revoke_generation_scope_and_epoch_are_required ... ok
+test sqlite_constraints_and_corrupt_files_have_fixed_typed_errors ... ok
+test sigkill_after_commit_before_reply_recovers_exact_original_receipt ... ok
+test supplier_full_payload_update_soft_delete_restore_and_original_receipt ... ok
+test sqlite_revocation_transaction_barrier_precedes_business_admission ... ok
+
+test result: ok. 14 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.14s
+
+     Running tests/contract.rs (/tmp/muyon-combination-target/debug/deps/contract-5ad74dec0f12ea7c)
+
+running 10 tests
+test ct02_file_metadata_bounds_and_binding_are_checked ... ok
+test ct01_revisions_are_lossless_canonical_text ... ok
+test ct01_eight_fields_normalize_with_dart_rules ... ok
+test ct01_reuses_supplier_name_boundary_vectors ... ok
+test ct03_receipt_and_unknown_states_have_distinct_invariants ... ok
+test ct03_every_security_fact_changes_retry_binding ... ok
+test ct02_manual_paper_requires_project_title_and_blob ... ok
+test ct02_import_is_opaque_metadata_not_manual_paper ... ok
+test ct04_strict_decode_rejects_duplicates_unknown_and_versions ... ok
+test ct04_digest_order_and_fixture_round_trip ... ok
+
+test result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/contract_vectors_additional.rs (/tmp/muyon-combination-target/debug/deps/contract_vectors_additional-1fa951b33ce3f93a)
+
+running 1 test
+test ct01_ct04_shared_codec_vectors_use_real_contract_and_lossless_wire_text ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+     Running tests/document_edit_candidates.rs (/tmp/muyon-combination-target/debug/deps/document_edit_candidates-1b411a4e4ad21300)
+
+running 12 tests
+test exact_confirm_same_intent_scope_and_copy_routes_are_separate ... ok
+test candidate_corruption_and_equal_source_bytes_are_not_edited_success ... ok
+test cancellation_and_source_change_prevent_new_staging_without_rollback ... ok
+test last_candidate_write_expiry_rolls_back_to_query_only_unknown ... ok
+test last_candidate_write_generation_rolls_back_to_query_only_unknown ... ok
+test last_candidate_write_epoch_rolls_back_to_query_only_unknown ... ok
+test last_candidate_write_revocation_rolls_back_to_query_only_unknown ... ok
+test schema2_host_mapping_prepares_only_unvalidated_candidate_and_obeys_revocation ... ok
+test prepared_candidate_restart_never_implies_confirmation_validation_or_document_success ... ok
+test unknown_ingestion_queries_original_intent_and_never_replays_after_restart ... ok
+test unpublished_candidate_bytes_require_fresh_explicit_edit_confirmation_not_source_read ... ok
+test copy_and_edited_candidates_share_the_same_total_byte_budget ... ok
+
+test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.09s
+
+     Running tests/document_edit_core_bridge.rs (/tmp/muyon-combination-target/debug/deps/document_edit_core_bridge-969db63fd17079b9)
+
+running 8 tests
+test bridge_creates_real_private_new_bytes_pin_without_document_success ... ok
+test actual_core_pin_then_expiry_is_unknown_and_fresh_grant_cannot_resume ... ok
+test bridge_checks_core_operation_identity_and_claim_corruption ... ok
+test cancellation_and_claim_tail_revocation_block_before_any_core_file_work ... ok
+test gateway_claim_with_no_core_reservation_stays_unknown_without_retry ... ok
+test core_late_seal_failure_retains_pin_and_unknown_is_never_replayed ... ok
+test first_core_preparation_requires_fresh_confirmation_and_a_stored_candidate ... ok
+test restart_and_fresh_grant_query_original_without_confirmation_or_repreparation ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.07s
+
+     Running tests/document_edit_engine_protocol.rs (/tmp/muyon-combination-target/debug/deps/document_edit_engine_protocol-c5d45401fb3797fb)
+
+running 6 tests
+test numeric_cell_bounds_and_metadata_format_are_strict ... ok
+test real_metadata_maps_exact_identity_and_preserves_numeric_literals ... ok
+test identity_and_hash_errors_are_distinct_from_environment_hold ... ok
+test apparently_real_status_requires_source_hash_and_simulated_diagnostics_are_hard_rejected ... ok
+test unknown_keys_versions_duplicate_keys_and_oversize_receipts_fail_closed ... ok
+test six_response_fixtures_can_never_mint_an_engine_commit_permit ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/document_edit_gateway.rs (/tmp/muyon-combination-target/debug/deps/document_edit_gateway-3ff5cba4d04d4f2c)
+
+running 19 tests
+test a_different_hash_candidate_cannot_borrow_the_copy_only_publication_route ... ok
+test a_copy_claim_that_cannot_store_its_candidate_is_query_only_after_restart ... ok
+test cancellation_is_not_rollback_and_cannot_erase_a_committed_receipt ... ok
+test candidate_and_original_receipt_survive_restart_without_replay ... ok
+test candidate_reopens_but_new_effect_requires_an_explicit_fresh_confirmation ... ok
+test copy_publication_uses_new_metadata_reference_without_new_upload_or_staging_files ... ok
+test confirmation_is_exact_and_revocation_stops_publication ... ok
+test corrupt_oversize_persisted_metadata_is_rejected_before_payload_decode ... ok
+test corrupt_candidate_never_validates_or_publishes ... ok
+test duplicate_intent_binds_original_and_never_creates_second_upload ... ok
+test frozen_source_title_cannot_change_without_changing_the_reviewed_copy_plan ... ok
+test live_engine_envelope_cannot_be_confused_with_a_validated_copy_intent ... ok
+test late_copy_duplicate_is_only_an_authorized_original_result_query ... ok
+test prepare_is_durable_without_confirmation_or_engine_success ... ok
+test persisted_receipt_title_must_match_frozen_reviewed_source ... ok
+test receipt_tail_failure_rolls_back_cas_and_restart_unknown_never_replays ... ok
+test reading_a_newer_different_blob_does_not_authorize_old_candidate_bytes ... ok
+test grant_revoked_or_expired_by_last_receipt_write_rolls_back_the_entire_publish ... ok
+test two_original_intents_cannot_publish_the_same_source_revision ... ok
+
+test result: ok. 19 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.10s
+
+     Running tests/document_edit_policy_epoch.rs (/tmp/muyon-combination-target/debug/deps/document_edit_policy_epoch-8811b899a1e4ba0c)
+
+running 1 test
+test tightened_schema1_preview_cannot_reuse_legacy_binding ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/document_edit_schema2.rs (/tmp/muyon-combination-target/debug/deps/document_edit_schema2-a3d861f058b808eb)
+
+running 6 tests
+test expanded_tree_matches_python_ascii_json_bytes_and_hashes ... ok
+test schema2_digest_binds_locator_tree_format_source_operation_and_intent ... ok
+test schema2_refuses_wrong_format_locator_run_text_and_xml_space_change ... ok
+test matching_schema2_response_is_held_and_simulation_or_version_never_admitted ... ok
+test schema2_maps_true_format_exact_locator_and_local_run_hash ... ok
+test duplicate_attributes_limits_and_tree_identity_fail_closed ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/document_edit_transactions.rs (/tmp/muyon-combination-target/debug/deps/document_edit_transactions-41041a9359a1eeb6)
+
+running 28 tests
+test apply_requires_an_immutable_copy_with_a_distinct_identity ... ok
+test candidate_mismatch_and_missing_validation_do_not_advance ... ok
+test cancellation_preserves_unknown_and_committed_outcomes ... ok
+test cancel_before_late_commit_receipt_or_unknown_keeps_recovery_open ... ok
+test cross_scope_is_rejected_even_for_read ... ok
+test commit_needs_durable_matching_receipt_and_cannot_repeat ... ok
+test double_click_does_not_reapply ... ok
+test every_boundary_requires_facts_and_live_authority ... ok
+test export_requires_committed_revision_and_matching_copy ... ok
+test each_validation_dimension_and_formula_unknown_fails_closed ... ok
+test identity_requires_all_binding_fields ... ok
+test host_observations_reject_paths_in_opaque_candidate_and_authority_ids ... ok
+test commit_and_original_intent_recovery_require_exact_next_revision_without_overflow ... ok
+test original_intent_query_with_new_read_authority_does_not_replay_old_confirmation ... ok
+test preview_never_confirms_or_supplies_missing_authority ... ok
+test prior_candidate_cannot_be_attached_to_a_different_patch_or_intent ... ok
+test readonly_capability_is_never_edit_permission ... ok
+test reissued_authority_does_not_reuse_confirmation ... ok
+test revocation_cannot_hide_an_uncertain_original_outcome ... ok
+test revocation_does_not_prevent_local_cancel_request ... ok
+test stale_confirmation_is_rejected ... ok
+test rollback_is_a_new_bound_transaction_not_a_cancel_side_effect ... ok
+test unknown_capability_or_missing_operation_permission_never_advances ... ok
+test unknown_apply_recovers_original_candidate_without_replay ... ok
+test stale_source_and_failed_cas_preserve_candidate_as_conflict ... ok
+test unknown_queries_original_intent_and_never_replays ... ok
+test validation_failure_is_terminal_and_cannot_commit ... ok
+test unvalidated_commit_is_refused ... ok
+
+test result: ok. 28 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/document_storage.rs (/tmp/muyon-combination-target/debug/deps/document_storage-9089c6822b82bb4e)
+
+running 15 tests
+test annotation_cas_tombstones_and_ai_provenance_are_durable ... ok
+test corrupted_revision_keys_or_missing_snapshot_fail_closed ... ok
+test expires_deleted_project_and_missing_permissions_fail_closed ... ok
+test delete_expiry_at_publication_tail_preserves_previous_annotation ... ok
+test export_is_deterministic_sidecar_data_with_origin_and_tombstones ... ok
+test foreign_upload_and_bad_schema_are_rejected_without_partial_metadata ... ok
+test grant_scope_revision_epoch_generation_and_revoke_are_current ... ok
+test invalid_or_cross_revision_anchors_do_not_leave_rows ... ok
+test immutable_document_revisions_invalidate_access_and_preserve_old_anchors ... ok
+test late_annotation_failure_rolls_back_history ... ok
+test late_metadata_failure_rolls_back_blob_publication_and_head ... ok
+test save_expiry_at_publication_tail_rolls_back_sidecar_and_history ... ok
+test oversized_persistent_payloads_are_rejected_before_decode ... ok
+test synthetic_metadata_blob_and_annotation_survive_reopen ... ok
+test writes_cannot_strand_existing_annotations_above_read_budget ... ok
+
+test result: ok. 15 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.72s
+
+     Running tests/documents.rs (/tmp/muyon-combination-target/debug/deps/documents-adfc26ae7ac2c2df)
+
+running 18 tests
+test cached_metadata_never_bypasses_revocation_or_unknown_authority ... ok
+test anchors_are_bound_to_identity_revision_and_format ... ok
+test current_host_and_operation_capability_must_both_allow_read ... ok
+test capability_for_other_operation_or_format_grants_nothing ... ok
+test declared_format_never_enables_a_reader ... ok
+test each_missing_pdf_geometry_field_remains_unresolved ... ok
+test invalid_document_metadata_is_rejected_and_revision_is_preserved ... ok
+test host_errors_and_invalid_or_stale_lease_fail_closed ... ok
+test nonfinite_empty_overflowing_and_invalid_normalized_rectangles_fail ... ok
+test normalized_regions_preserve_explicit_rotation_and_reject_invalid_crop ... ok
+test pdf_geometry_keeps_unknowns_without_guessing ... ok
+test read_contract_cannot_admit_edit_even_when_both_lists_allow_it ... ok
+test old_revision_or_other_document_is_rejected ... ok
+test structured_anchors_validate_ids_ranges_and_package_parts ... ok
+test stale_grant_epoch_generation_and_id_are_rejected ... ok
+test unsupported_and_gated_capabilities_deny ... ok
+test visible_pdf_selection_must_fit_the_declared_crop ... ok
+test workspace_and_project_are_exact_not_wildcards ... ok
+
+test result: ok. 18 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/evidence_local.rs (/tmp/muyon-combination-target/debug/deps/evidence_local-344787e1d24bc699)
+
+running 16 tests
+test anchored_request_and_inspect_do_not_expand_to_whole_text ... ok
+test cache_access_rechecks_revision_scope_and_revocation ... ok
+test debug_never_discloses_cached_text_after_revocation ... ok
+test changed_blob_and_authority_invalidate_existing_derivation ... ok
+test body_citations_and_candidates_are_separate_and_citation_numbers_are_stable ... ok
+test citation_order_is_explicit_and_repeated_processing_has_same_identity ... ok
+test forged_ranges_source_and_page_do_not_resolve ... ok
+test failed_decoding_empty_and_changed_bytes_are_distinct_from_success ... ok
+test every_derived_delivery_rechecks_permission_after_computation ... ok
+test no_read_permission_never_gains_whole_text ... ok
+test revocation_between_checks_never_delivers_extraction ... ok
+test pdf_and_ocr_never_manufacture_content ... ok
+test unknown_format_never_becomes_utf8_by_caller_assertion ... ok
+test synthetic_text_has_real_receipt_and_bound_utf8_anchor ... ok
+test source_identity_separates_same_bytes_across_scope_document_and_revision ... ok
+test limits_reject_overlarge_queries_invalid_limits_and_oversized_sources ... ok
+
+test result: ok. 16 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.08s
+
+     Running tests/group_governance.rs (/tmp/muyon-combination-target/debug/deps/group_governance-9b6956e0bbef9658)
+
+running 21 tests
+test all_duplicate_states_only_lookup_and_submitted_blocks_new_dispatch ... ok
+test collaborator_cannot_self_authorize_even_as_coordinator ... ok
+test budget_overflow_and_exhaustion_never_become_zero_cost ... ok
+test depth_two_and_foreign_parent_are_rejected ... ok
+test duplicate_command_returns_only_original_receipt_even_when_unknown ... ok
+test cycles_missing_dependencies_and_duplicate_nodes_are_rejected ... ok
+test deterministic_ready_order_uses_node_identity_and_dependencies ... ok
+test duplicate_request_identity_and_stale_config_are_not_valid_host_views ... ok
+test human_admin_can_only_narrow_existing_grant ... ok
+test failed_dependencies_do_not_run_and_cancelled_children_keep_lifetime_slots ... ok
+test eight_lifetime_children_and_two_active_slots_are_hard_caps ... ok
+test every_authority_layer_and_member_scope_must_allow_the_request ... ok
+test ledger_corruption_and_unsupported_status_fail_closed ... ok
+test non_member_is_rejected ... ok
+test represented_coordinator_modes_never_execute ... ok
+test modes_roundtrip_by_explicit_name_and_unknown_fails_closed ... ok
+test rounds_count_original_dispatch_history_across_restarts_and_stops ... ok
+test unknown_child_blocks_even_when_request_and_budget_projection_omit_it ... ok
+test stale_host_epoch_leader_epoch_or_configuration_never_executes ... ok
+test unsupported_versions_and_ownerless_groups_are_rejected ... ok
+test unknown_budget_keeps_reserve_and_blocks_new_command ... ok
+
+test result: ok. 21 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/group_runtime.rs (/tmp/muyon-combination-target/debug/deps/group_runtime-6de0bed1933ac263)
+
+running 20 tests
+test exact_budget_allows_zero_reservation_without_hiding_unknown_usage ... ok
+test coordinator_cannot_manage_and_wrong_leader_cannot_propose ... ok
+test explicit_modes_choose_task_leader_without_changing_default ... ok
+test all_modes_use_same_deterministic_host_gates ... ok
+test handoff_does_not_restore_permissions_when_returning_to_previous_leader ... ok
+test handoff_rejects_active_fixed_stopped_and_cross_scope_materials ... ok
+test handoff_epoch_is_bounded_atomic_and_permissions_only_narrow ... ok
+test projection_and_advice_share_round_budget_and_capacity_boundaries ... ok
+test restored_limits_and_snapshot_fences_fail_closed ... ok
+test parallel_results_keep_dissent_and_deduplicate_primary_sources ... ok
+test scheduling_projection_preserves_unknown_hold_and_stop_is_monotonic ... ok
+test result_requires_original_host_receipt_artifact_and_matching_member ... ok
+test scopes_budget_rounds_capacity_and_dag_are_not_bypassed ... ok
+test stale_epoch_results_are_archived_and_original_lookup_survives_handoff ... ok
+test summaries_keep_artifact_and_speaker_attribution_and_failures ... ok
+test stopped_and_deadline_preserve_lookup_without_dispatch ... ok
+test second_parallel_advice_requires_updated_authoritative_ledger ... ok
+test unknown_resolution_keeps_earlier_dissent_and_source_versions ... ok
+test unknown_can_resolve_only_with_new_original_receipt_event ... ok
+test unknown_submitted_prepared_and_child_unknown_gate_handoff_and_new_work ... ok
+
+test result: ok. 20 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/group_runtime_bridge.rs (/tmp/muyon-combination-target/debug/deps/group_runtime_bridge-0383cabd657e1d74)
+
+running 100 tests
+test blobs::tests::deleting_rejects_new_read_or_same_digest_upload ... ok
+test blobs::tests::failed_ledger_after_solidification_keeps_staging_and_object_independent ... ok
+test blobs::tests::corrupt_existing_object_and_dangling_symlink_are_never_replaced ... ok
+test blobs::tests::file_and_upload_logical_length_quotas_precede_hashing_and_writing ... ok
+test actual_workflow_projection_follows_child_conversation_and_preserves_unknown_cost ... ok
+test blobs::tests::kill_fixture ... ok
+test blobs::tests::gc_and_publish_barrier_preserves_either_upload_pin_or_reference ... ok
+test blobs::tests::gc_and_reader_barrier_covers_reader_after_upload_pin_release ... ok
+test blobs::tests::pinned_state_alone_does_not_replace_a_durable_upload_pin ... ok
+test blobs::tests::partial_publication_copy_is_not_reused_and_unknown_uploads_are_not_cleaned ... ok
+test blobs::tests::publication_binds_expected_bytes_project_revision_and_real_transaction ... ok
+test blobs::tests::pending_unknown_never_expire_and_lookup_does_not_recover ... ok
+test blobs::tests::rename_then_failed_pin_commit_can_retry_existing_target_without_overwrite ... ok
+test bridge_json_is_strict_and_cannot_nominate_host_scope_or_authority ... ok
+test configuration_preparation_does_not_turn_coordinator_into_manager ... ok
+test configuration_preparation_validates_mode_member_scope_without_issuing_grants ... ok
+test blobs::tests::real_paper_effect_receipt_and_blob_reference_survive_or_roll_back_together ... ok
+test configure_defaults_are_real_cas_writes_and_running_tasks_keep_mode_and_members ... ok
+test configuration_run_witness_checks_receipt_and_consumption_tail_mutations ... ok
+test configure_rejects_unknown_modes_stale_cas_and_invalid_fixed_leader ... ok
+test configure_tail_expiry_rolls_back_defaults_and_legacy_capture ... ok
+test configuring_legacy_records_freezes_the_previous_actual_mode_before_defaults_change ... ok
+test blobs::tests::real_sigkill_and_reopen_at_twelve_cross_media_windows ... ok
+test documents::candidate_tests::duplicate_preparation_is_query_only_and_conflicting_binding_is_rejected ... ok
+test documents::candidate_tests::expiry_after_durable_pin_is_unknown_and_never_source_success ... ok
+test documents::candidate_tests::late_seal_failure_leaves_unpublished_object_and_query_only_unknown ... ok
+test documents::candidate_tests::missing_pin_or_corrupt_object_is_query_only_unknown ... ok
+test documents::candidate_tests::new_bytes_are_private_sealed_unvalidated_and_never_publish ... ok
+test documents::candidate_tests::oversize_nonpayload_fields_fail_before_status_decode ... ok
+test documents::candidate_tests::partial_staging_restart_preserves_candidate_without_blocking_unrelated_gc ... ok
+test documents::candidate_tests::reservation_failure_has_no_upload_or_output_effect ... ok
+test documents::candidate_tests::restart_retains_prepared_pin_but_never_adopts_original_execution_authority ... ok
+test documents::candidate_tests::revocation_conflict_invalid_input_and_foreign_publication_fail_closed ... ok
+test documents::candidate_tests::candidate_gc_crosses_page_boundary_preserving_exact_objects_and_project_quotas ... ok
+test documents::history_tests::advancing_parent_head_does_not_reuse_old_history_policy ... ok
+test documents::candidate_tests::source_head_advance_rejects_old_candidate_without_latest_substitution ... ok
+test documents::history_tests::canonical_history_corruption_and_missing_revision_are_not_substituted ... ok
+test documents::history_tests::historical_and_parent_revocation_expiry_generation_and_project_are_current ... ok
+test documents::history_tests::historical_identity_scope_schema_and_read_only_policy_fail_closed ... ok
+test documents::history_tests::history_denies_without_explicit_target_policy_and_then_reads_exact_snapshot ... ok
+test documents::history_tests::text_label_roundtrips_without_default_utf8_or_reader_capability ... ok
+test documents::history_tests::old_policy_is_not_inherited_by_a_new_parent_grant_generation ... ok
+test documents::history_tests::wrong_history_schema_is_rejected_without_changing_document_store ... ok
+test documents::reader_tests::authenticated_snapshot_never_delivers_mutated_disk_bytes_even_with_resampled_stamp ... ok
+test documents::reader_tests::cleanup_failure_withholds_bytes_and_poisoned_host_refuses_new_sessions ... ok
+test documents::reader_tests::corrupt_oversize_blob_length_is_rejected_without_creating_reader_pin ... ok
+test documents::reader_tests::bounded_sessions_idle_absolute_lifetime_and_invalid_chunk_release_pins ... ok
+test documents::reader_tests::dropping_host_releases_sessions_before_reopening_same_store ... ok
+test documents::reader_tests::deleted_pin_or_same_length_corruption_invalidates_session ... ok
+test documents::reader_tests::eof_cleanup_time_revocation_withholds_prepared_chunk ... ok
+test documents::reader_tests::exact_metadata_and_sequential_bytes_close_at_eof ... ok
+test documents::reader_tests::inspect_grant_cannot_open_bytes_and_forged_scope_never_substitutes_source ... ok
+test documents::reader_tests::one_shot_callback_failure_and_cleanup_failure_return_no_success_or_pin ... ok
+test documents::reader_tests::generation_epoch_expiry_and_project_deletion_revoke_existing_sessions ... ok
+test documents::reader_tests::one_shot_cleanup_time_revocation_withholds_prepared_output ... ok
+test documents::reader_tests::open_commit_rejection_maps_to_unknown_and_cleans_original_pin ... ok
+test documents::reader_tests::one_shot_view_is_live_bounded_and_tail_rechecks_expiry_before_delivery ... ok
+test documents::reader_tests::open_failure_after_pin_creation_rolls_back_without_exposing_a_session ... ok
+test documents::reader_tests::revoked_or_advanced_session_never_delivers_cached_bytes ... ok
+test documents::storage_tests::clone_and_late_receipt_failure_roll_back_together ... ok
+test documents::storage_tests::clone_late_metadata_failure_and_revision_overflow_leave_original_intact ... ok
+test documents::storage_tests::clone_reference_requires_same_project_ready_source_and_unique_reference ... ok
+test documents::storage_tests::clone_rejects_changed_source_stale_base_and_foreign_transaction ... ok
+test documents::storage_tests::clone_verifies_real_source_file_hash_and_missing_file ... ok
+test documents::storage_tests::copy_clone_commits_same_bytes_and_revision_without_upload_or_staging ... ok
+test documents::storage_tests::tail_grant_rechecks_revocation_expiry_generation_epoch_and_project ... ok
+test documents::storage_tests::tail_grant_rejects_foreign_transaction_and_mismatched_document_binding ... ok
+test documents::storage_tests::tail_grant_survives_own_cas_without_authorizing_old_revision_reads ... ok
+test group_lists_and_get_are_persisted_and_paginated_with_management_separate_from_coordination ... ok
+test live_owner_absence_is_explicit_and_local_intent_receipts_are_actual ... ok
+test local_configuration_remains_readable_when_real_owner_has_no_configuration ... ok
+test migration_preservation_normal_reads_and_later_v2_bindings_remain_usable_without_replay ... ok
+test migration_preservation_rejects_journal_row_injection ... ok
+test migration_preservation_rejects_legacy_pending_deletion ... ok
+test migration_preservation_rejects_legacy_receipt_rewrite ... ok
+test migration_preservation_rejects_original_binding_injection ... ok
+test mode_catalog_and_configuration_prepare_default_only_new_groups_to_host_only ... ok
+test parent_configure_group_trigger_cannot_replace_intended_mode_and_leader ... ok
+test parent_exact_revision_trigger_preserves_new_revision_but_undoes_configuration ... ok
+test parent_normal_explicit_modes_and_fixed_leader_persist_and_start_real_local_runs ... ok
+test parent_original_binding_insert_cannot_commit_a_corrupted_pending_journal ... ok
+test parent_original_binding_receipt_and_consume_tail_damage_returns_pending_and_rolls_back ... ok
+test parent_original_binding_suppression_and_tampering_roll_back_pending_transaction ... ok
+test parent_pending_register_binding_tamper_and_missing_metadata_do_not_claim_identity ... ok
+test parent_pending_register_recovery_reads_original_after_failure_and_restart_without_group ... ok
+test parent_v1_identity_migration_storage_failure_rolls_back_schema_without_identity_backfill ... ok
+test parent_v1_migration_preserves_journal_without_fabricating_missing_original_identity ... ok
+test regression_existing_run_keeps_removed_members_and_handoff_mode ... ok
+test regression_legacy_capture_survives_configuration_tail ... ok
+test regression_tool_pending_cost_projection ... ok
+test actual_workflow_rows_remain_complete_when_display_events_are_truncated ... ok
+test review_lifecycle::tests::committed_claims_are_preserved_and_partial_committed_schema_is_refused ... ok
+test review_lifecycle::tests::empty_file_from_interrupted_creation_initializes_without_replacement ... ok
+test review_lifecycle::tests::uncommitted_ddl_reopens_and_initializes_the_original_database ... ok
+test run_view_shows_deadline_without_turning_a_local_proposal_into_a_completion ... ok
+test stale_native_ui_scope_cannot_read_after_owner_epoch_rotation ... ok
+test workflow_owner_absence_and_missing_real_root_do_not_fabricate_ready_state ... ok
+test documents::candidate_tests::candidate_count_and_expected_byte_admission_limits_precede_file_writes ... ok
+test research::resource_tests::real_opaque_uploads_are_not_aggregated_when_sealing_or_importing ... ok
+test documents::reader_tests::thirty_mib_stream_hash_cost_is_linear_and_chunk_bytes_are_exact ... ok
+
+test result: ok. 100 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 12.56s
+
+     Running tests/group_runtime_store.rs (/tmp/muyon-combination-target/debug/deps/group_runtime_store-e9aa33f3b06563f4)
+
+running 112 tests
+test blobs::tests::deleting_rejects_new_read_or_same_digest_upload ... ok
+test blobs::tests::failed_ledger_after_solidification_keeps_staging_and_object_independent ... ok
+test blobs::tests::corrupt_existing_object_and_dangling_symlink_are_never_replaced ... ok
+test blobs::tests::file_and_upload_logical_length_quotas_precede_hashing_and_writing ... ok
+test blobs::tests::kill_fixture ... ok
+test a_new_run_id_cannot_reset_the_same_registered_root_lifetime ... ok
+test blobs::tests::gc_and_reader_barrier_covers_reader_after_upload_pin_release ... ok
+test blobs::tests::gc_and_publish_barrier_preserves_either_upload_pin_or_reference ... ok
+test blobs::tests::partial_publication_copy_is_not_reused_and_unknown_uploads_are_not_cleaned ... ok
+test blobs::tests::pinned_state_alone_does_not_replace_a_durable_upload_pin ... ok
+test blobs::tests::publication_binds_expected_bytes_project_revision_and_real_transaction ... ok
+test blobs::tests::rename_then_failed_pin_commit_can_retry_existing_target_without_overwrite ... ok
+test blobs::tests::pending_unknown_never_expire_and_lookup_does_not_recover ... ok
+test changed_pending_is_rolled_back_before_original_journal_commit ... ok
+test business_commit_failure_rolls_back_receipt_event_stop_and_grant ... ok
+test consume_tail_admission_id_is_checked ... ok
+test consume_tail_epoch_is_checked_after_this_transaction_consumption ... ok
+test consume_tail_generation_is_checked_after_this_transaction_consumption ... ok
+test consume_tail_expiry_is_checked_after_this_transaction_consumption ... ok
+test blobs::tests::real_paper_effect_receipt_and_blob_reference_survive_or_roll_back_together ... ok
+test consume_tail_grant_readmission_is_checked ... ok
+test consume_tail_project_is_checked_after_this_transaction_consumption ... ok
+test consume_tail_group_scope_is_checked_after_this_transaction_consumption ... ok
+test documents::candidate_tests::duplicate_preparation_is_query_only_and_conflicting_binding_is_rejected ... ok
+test documents::candidate_tests::expiry_after_durable_pin_is_unknown_and_never_source_success ... ok
+test documents::candidate_tests::late_seal_failure_leaves_unpublished_object_and_query_only_unknown ... ok
+test documents::candidate_tests::missing_pin_or_corrupt_object_is_query_only_unknown ... ok
+test documents::candidate_tests::new_bytes_are_private_sealed_unvalidated_and_never_publish ... ok
+test documents::candidate_tests::oversize_nonpayload_fields_fail_before_status_decode ... ok
+test documents::candidate_tests::partial_staging_restart_preserves_candidate_without_blocking_unrelated_gc ... ok
+test documents::candidate_tests::reservation_failure_has_no_upload_or_output_effect ... ok
+test documents::candidate_tests::restart_retains_prepared_pin_but_never_adopts_original_execution_authority ... ok
+test documents::candidate_tests::revocation_conflict_invalid_input_and_foreign_publication_fail_closed ... ok
+test documents::candidate_tests::source_head_advance_rejects_old_candidate_without_latest_substitution ... ok
+test documents::history_tests::advancing_parent_head_does_not_reuse_old_history_policy ... ok
+test documents::history_tests::canonical_history_corruption_and_missing_revision_are_not_substituted ... ok
+test documents::history_tests::historical_and_parent_revocation_expiry_generation_and_project_are_current ... ok
+test documents::history_tests::historical_identity_scope_schema_and_read_only_policy_fail_closed ... ok
+test documents::history_tests::history_denies_without_explicit_target_policy_and_then_reads_exact_snapshot ... ok
+test documents::history_tests::old_policy_is_not_inherited_by_a_new_parent_grant_generation ... ok
+test documents::history_tests::text_label_roundtrips_without_default_utf8_or_reader_capability ... ok
+test documents::history_tests::wrong_history_schema_is_rejected_without_changing_document_store ... ok
+test blobs::tests::real_sigkill_and_reopen_at_twelve_cross_media_windows ... ok
+test documents::reader_tests::authenticated_snapshot_never_delivers_mutated_disk_bytes_even_with_resampled_stamp ... ok
+test documents::reader_tests::cleanup_failure_withholds_bytes_and_poisoned_host_refuses_new_sessions ... ok
+test documents::reader_tests::corrupt_oversize_blob_length_is_rejected_without_creating_reader_pin ... ok
+test documents::reader_tests::bounded_sessions_idle_absolute_lifetime_and_invalid_chunk_release_pins ... ok
+test documents::reader_tests::dropping_host_releases_sessions_before_reopening_same_store ... ok
+test documents::reader_tests::deleted_pin_or_same_length_corruption_invalidates_session ... ok
+test documents::reader_tests::eof_cleanup_time_revocation_withholds_prepared_chunk ... ok
+test documents::reader_tests::exact_metadata_and_sequential_bytes_close_at_eof ... ok
+test documents::reader_tests::inspect_grant_cannot_open_bytes_and_forged_scope_never_substitutes_source ... ok
+test documents::reader_tests::one_shot_callback_failure_and_cleanup_failure_return_no_success_or_pin ... ok
+test documents::reader_tests::one_shot_cleanup_time_revocation_withholds_prepared_output ... ok
+test documents::candidate_tests::candidate_gc_crosses_page_boundary_preserving_exact_objects_and_project_quotas ... ok
+test documents::reader_tests::generation_epoch_expiry_and_project_deletion_revoke_existing_sessions ... ok
+test documents::reader_tests::open_commit_rejection_maps_to_unknown_and_cleans_original_pin ... ok
+test documents::reader_tests::one_shot_view_is_live_bounded_and_tail_rechecks_expiry_before_delivery ... ok
+test documents::reader_tests::open_failure_after_pin_creation_rolls_back_without_exposing_a_session ... ok
+test documents::storage_tests::clone_and_late_receipt_failure_roll_back_together ... ok
+test documents::reader_tests::revoked_or_advanced_session_never_delivers_cached_bytes ... ok
+test documents::storage_tests::clone_late_metadata_failure_and_revision_overflow_leave_original_intact ... ok
+test documents::storage_tests::clone_reference_requires_same_project_ready_source_and_unique_reference ... ok
+test documents::storage_tests::clone_rejects_changed_source_stale_base_and_foreign_transaction ... ok
+test documents::storage_tests::clone_verifies_real_source_file_hash_and_missing_file ... ok
+test documents::storage_tests::tail_grant_rechecks_revocation_expiry_generation_epoch_and_project ... ok
+test documents::storage_tests::copy_clone_commits_same_bytes_and_revision_without_upload_or_staging ... ok
+test documents::storage_tests::tail_grant_rejects_foreign_transaction_and_mismatched_document_binding ... ok
+test documents::storage_tests::tail_grant_survives_own_cas_without_authorizing_old_revision_reads ... ok
+test events_tail_epoch_change_revokes_local_commit ... ok
+test events_tail_expiry_revokes_local_commit ... ok
+test events_tail_generation_change_revokes_local_commit ... ok
+test events_tail_group_scope_change_revokes_local_commit ... ok
+test events_tail_project_delete_revokes_local_commit ... ok
+test events_tail_revoke_is_not_mistaken_for_this_transaction_consumption ... ok
+test failed_request_chain_read_during_handoff_is_inconclusive_not_rejected ... ok
+test existing_original_can_be_registered_for_reconciliation_after_stop ... ok
+test grant_revocation_and_changed_payload_do_not_create_business_facts ... ok
+test failed_request_chain_read_keeps_original_unknown_and_local_observation_pending ... ok
+test handoff_and_stop_cas_survive_reopen_and_do_not_replay ... ok
+test handoff_requires_original_owner_even_before_any_node_is_bound ... ok
+test handoff_narrowing_is_task_local_and_does_not_silently_change_group_defaults ... ok
+test original_identity_storage_failure_is_pending_not_definitive_not_found ... ok
+test observed_dissent_and_original_artifact_survive_unknown_resolution_and_restart ... ok
+test receipt_tail_binding_change_is_checked ... ok
+test real_original_unknown_is_scoped_query_only_and_holds_are_unchanged ... ok
+test receipt_tail_epoch_change_revokes_local_commit ... ok
+test receipt_tail_expiry_revokes_local_commit ... ok
+test receipt_tail_failure_rolls_back_epoch_count_revision_grant_and_event ... ok
+test receipt_tail_generation_change_revokes_local_commit ... ok
+test receipt_tail_group_scope_change_revokes_local_commit ... ok
+test receipt_tail_project_delete_revokes_local_commit ... ok
+test receipt_tail_revoke_is_not_mistaken_for_this_transaction_consumption ... ok
+test register_tail_checks_the_newly_persisted_group_scope ... ok
+test registration_is_real_durable_scoped_fact_and_not_an_account_or_execution_grant ... ok
+test rejected_commit_failure_is_pending_without_committing_rejected_receipt ... ok
+test rejected_receipt_tail_tampering_returns_original_pending_instead_of_fabricated_rejection ... ok
+test rejected_update_ignored_returns_original_pending_instead_of_fabricated_rejection ... ok
+test rejected_write_sql_failure_is_pending_without_a_terminal_receipt ... ok
+test review_lifecycle::tests::committed_claims_are_preserved_and_partial_committed_schema_is_refused ... ok
+test review_lifecycle::tests::empty_file_from_interrupted_creation_initializes_without_replacement ... ok
+test review_lifecycle::tests::uncommitted_ddl_reopens_and_initializes_the_original_database ... ok
+test schedule_is_only_durable_pending_advice_and_grants_are_consumed ... ok
+test stale_revision_and_failed_sql_leave_no_partial_group_effect ... ok
+test stale_source_version_cannot_enter_persisted_summary ... ok
+test stop_does_not_cancel_original_request_or_free_hold ... ok
+test two_unsubmitted_nodes_can_be_invalidated_atomically_on_handoff ... ok
+test wire_claim_without_persisted_grant_and_member_management_are_denied ... ok
+test wrong_conversation_cannot_be_linked_and_memory_capabilities_cannot_expand_grants ... ok
+test documents::candidate_tests::candidate_count_and_expected_byte_admission_limits_precede_file_writes ... ok
+test research::resource_tests::real_opaque_uploads_are_not_aggregated_when_sealing_or_importing ... ok
+test documents::reader_tests::thirty_mib_stream_hash_cost_is_linear_and_chunk_bytes_are_exact ... ok
+
+test result: ok. 112 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 11.46s
+
+     Running tests/research.rs (/tmp/muyon-combination-target/debug/deps/research-fd3d568756fffb65)
+
+running 16 tests
+test committed_paper_after_process_kill_recovers_original_receipt_and_private_pdf ... ok
+test directory_and_real_stored_zip_produce_equivalent_records_and_bad_decoded_crc_fails ... ok
+test api26_eleven_record_deflated_import_with_three_identical_empty_logs_commits ... ok
+test cited_same_revision_changes_reject_atomically_and_next_revision_is_retained ... ok
+test forged_wire_records_and_snapshot_project_changes_do_not_become_imports ... ok
+test explicit_ambiguous_binding_choice_survives_refresh ... ok
+test import_domain_tail_tampering_rolls_back_records_source_and_publication ... ok
+test malformed_jsonl_paths_and_no_recognized_material_are_rejected_before_publication ... ok
+test loose_imported_metadata_uses_fallback_title_and_does_not_apply_manual_constraints ... ok
+test manual_kind_project_and_exact_upload_binding_cannot_be_forged ... ok
+test imported_raw_json_duplicate_revisions_and_material_binding_are_preserved ... ok
+test receipt_fault_rolls_back_paper_publication_and_cancel_blocks_original_retry ... ok
+test prefixed_skill_root_arxiv_manifest_binds_verified_pdf_hash ... ok
+test manual_pdf_is_real_private_persistent_and_shares_catalog_with_import ... ok
+test refresh_only_removes_missing_uncited_entries_and_keeps_cited_document_bytes ... ok
+test jsonl_larger_than_wire_limit_uses_small_verified_source_ref_command ... ok
+
+test result: ok. 16 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.47s
+
+     Running tests/resource_boundaries_additional.rs (/tmp/muyon-combination-target/debug/deps/resource_boundaries_additional-b3826402265fc921)
+
+running 3 tests
+test zip_metadata_exact_expansion_and_member_count_and_one_over ... ok
+test actual_pdf_and_document_exact_thirty_mib_and_one_extra_byte ... ok
+test seal_actual_total_exact_one_fifty_mib_then_one_byte_and_member_count_refuse_without_effects ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 30.37s
+
+     Running tests/store_admission_additional.rs (/tmp/muyon-combination-target/debug/deps/store_admission_additional-3084f4476043e4f9)
+
+running 3 tests
+test real_os_file_size_write_failure_has_no_business_or_receipt_effect ... ok
+test sqlite_rejects_pending_domain_history_business_history_and_receipt_writes_atomically ... ok
+test os_process_races_preserve_original_intent_and_reject_stale_cas_after_owner_exit ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+

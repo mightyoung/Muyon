@@ -1,0 +1,2852 @@
+Diff in /workspace/Muyon-reader-ffi-combination-20261022/crates/muyon-android-ffi/src/document_bridge.rs:15:
+ };
+ use serde::Serialize;
+ use serde_json::json;
+-use std::{collections::BTreeMap, ops::Deref, time::{Duration, Instant}};
++use std::{
++    collections::BTreeMap,
++    ops::Deref,
++    time::{Duration, Instant},
++};
+ 
+ type Result<T> = std::result::Result<T, ProductError>;
+ const MAX_WIRE: usize = 262144;
+Diff in /workspace/Muyon-reader-ffi-combination-20261022/crates/muyon-android-ffi/src/document_bridge.rs:51:
+     pub session_active: bool,
+ }
+ #[derive(Clone, Copy, uniffi::Enum)]
+-pub enum DocumentReadOperation { ReadText, Render }
++pub enum DocumentReadOperation {
++    ReadText,
++    Render,
++}
+ impl From<DocumentReadOperation> for DocumentReadPurpose {
+     fn from(value: DocumentReadOperation) -> Self {
+-        match value { DocumentReadOperation::ReadText => Self::ReadText, DocumentReadOperation::Render => Self::Render }
++        match value {
++            DocumentReadOperation::ReadText => Self::ReadText,
++            DocumentReadOperation::Render => Self::Render,
++        }
+     }
+ }
+ #[derive(Clone, Copy, uniffi::Enum)]
+Diff in /workspace/Muyon-reader-ffi-combination-20261022/crates/muyon-android-ffi/src/document_bridge.rs:61:
+-pub enum DocumentEvidenceKind { Utf8Text, Pdf, Ocr }
++pub enum DocumentEvidenceKind {
++    Utf8Text,
++    Pdf,
++    Ocr,
++}
+ impl From<DocumentEvidenceKind> for InputKind {
+     fn from(value: DocumentEvidenceKind) -> Self {
+-        match value { DocumentEvidenceKind::Utf8Text => Self::Utf8Text, DocumentEvidenceKind::Pdf => Self::Pdf, DocumentEvidenceKind::Ocr => Self::Ocr }
++        match value {
++            DocumentEvidenceKind::Utf8Text => Self::Utf8Text,
++            DocumentEvidenceKind::Pdf => Self::Pdf,
++            DocumentEvidenceKind::Ocr => Self::Ocr,
++        }
+     }
+ }
+ #[derive(Clone, uniffi::Record)]
+Diff in /workspace/Muyon-reader-ffi-combination-20261022/crates/muyon-android-ffi/src/document_bridge.rs:76:
+     pub body: String,
+     pub cited_indices: Vec<u32>,
+ }
+-fn failure(code: &'static str) -> ProductError { ProductError::Failure { code: code.into() } }
++fn failure(code: &'static str) -> ProductError {
++    ProductError::Failure { code: code.into() }
++}
+ fn identifier(value: &str) -> Result<()> {
+-    if value.is_empty() || value.len() > 128 || !value.bytes().all(|b| b.is_ascii_alphanumeric() || b"-_.:".contains(&b)) {
++    if value.is_empty()
++        || value.len() > 128
++        || !value
++            .bytes()
++            .all(|b| b.is_ascii_alphanumeric() || b"-_.:".contains(&b))
++    {
+         Err(failure("DOCUMENT_INVALID_REQUEST"))
+-    } else { Ok(()) }
++    } else {
++        Ok(())
++    }
+ }
+ fn scope(value: &DocumentReaderScope) -> Result<()> {
+     identifier(&value.service_session)?;
+Diff in /workspace/Muyon-reader-ffi-combination-20261022/crates/muyon-android-ffi/src/document_bridge.rs:87:
+     identifier(&value.generation)?;
+-    identifier(value.project.as_deref().ok_or_else(|| failure("DOCUMENT_SCOPE_MISMATCH"))?)
++    identifier(
++        value
++            .project
++            .as_deref()
++            .ok_or_else(|| failure("DOCUMENT_SCOPE_MISMATCH"))?,
++    )
+ }
+ fn same_scope(expected: &DocumentReaderScope, actual: &DocumentReaderScope) -> Result<()> {
+     scope(actual)?;
+Diff in /workspace/Muyon-reader-ffi-combination-20261022/crates/muyon-android-ffi/src/document_bridge.rs:92:
+-    if expected != actual { return Err(failure("DOCUMENT_SCOPE_MISMATCH")); }
++    if expected != actual {
++        return Err(failure("DOCUMENT_SCOPE_MISMATCH"));
++    }
+     Ok(())
+ }
+ fn encode<T: Serialize>(value: &T) -> Result<String> {
+Diff in /workspace/Muyon-reader-ffi-combination-20261022/crates/muyon-android-ffi/src/document_bridge.rs:96:
+     let raw = serde_json::to_string(value).map_err(|_| failure("DOCUMENT_UNAVAILABLE"))?;
+-    if raw.len() > MAX_WIRE { return Err(failure("DOCUMENT_LIMIT")); }
++    if raw.len() > MAX_WIRE {
++        return Err(failure("DOCUMENT_LIMIT"));
++    }
+     Ok(raw)
+ }
+ fn core_error(error: ContractError) -> ProductError {
+Diff in /workspace/Muyon-reader-ffi-combination-20261022/crates/muyon-android-ffi/src/document_bridge.rs:101:
+     let code = match error {
+         ContractError::InvalidAuthority => "DOCUMENT_ACCESS_DENIED",
+         ContractError::ScopeMismatch => "DOCUMENT_SCOPE_MISMATCH",
+-        ContractError::RevisionConflict | ContractError::BindingMismatch | ContractError::NotFound => "DOCUMENT_SOURCE_INVALIDATED",
++        ContractError::RevisionConflict
++        | ContractError::BindingMismatch
++        | ContractError::NotFound => "DOCUMENT_SOURCE_INVALIDATED",
+         ContractError::TextLimit | ContractError::RawLimit => "DOCUMENT_LIMIT",
+-        ContractError::InvalidIdentity | ContractError::InvalidJson | ContractError::InvalidVersion
+-        | ContractError::InvalidRevision | ContractError::InvalidPayload | ContractError::Required => "DOCUMENT_INVALID_REQUEST",
++        ContractError::InvalidIdentity
++        | ContractError::InvalidJson
++        | ContractError::InvalidVersion
++        | ContractError::InvalidRevision
++        | ContractError::InvalidPayload
++        | ContractError::Required => "DOCUMENT_INVALID_REQUEST",
+         _ => "DOCUMENT_UNAVAILABLE",
+     };
+     failure(code)
+Diff in /workspace/Muyon-reader-ffi-combination-20261022/crates/muyon-android-ffi/src/document_bridge.rs:114:
+     core_id: String,
+     reference: DocumentRef,
+ }
+-struct QuerySnapshot { id: String, hits: Vec<EvidenceRef> }
++struct QuerySnapshot {
++    id: String,
++    hits: Vec<EvidenceRef>,
++}
+ struct ProcessingEntry {
+     scope: DocumentReaderScope,
+     access: DocumentAccess,
+Diff in /workspace/Muyon-reader-ffi-combination-20261022/crates/muyon-android-ffi/src/document_bridge.rs:124:
+     touched: Instant,
+ }
+ impl ProcessingEntry {
+-    fn expired(&self) -> bool { self.opened.elapsed() >= LIFE || self.touched.elapsed() >= IDLE }
++    fn expired(&self) -> bool {
++        self.opened.elapsed() >= LIFE || self.touched.elapsed() >= IDLE
++    }
+ }
+ /// Owns exactly the original BusinessStore through the canonical facade. Deref
+ /// keeps existing business/draft callsites on the SAME connection and owner lock.
+Diff in /workspace/Muyon-reader-ffi-combination-20261022/crates/muyon-android-ffi/src/document_bridge.rs:140:
+ }
+ impl Deref for DocumentBridge {
+     type Target = BusinessStore;
+-    fn deref(&self) -> &BusinessStore { self.host.store() }
++    fn deref(&self) -> &BusinessStore {
++        self.host.store()
++    }
+ }
+ impl DocumentBridge {
+     pub(crate) fn new(store: BusinessStore, workspace: String, epoch: String) -> Self {
+Diff in /workspace/Muyon-reader-ffi-combination-20261022/crates/muyon-android-ffi/src/document_bridge.rs:147:
+-        Self { host: DocumentReaderHost::new(store), workspace, epoch, reads: BTreeMap::new(),
+-            processing: BTreeMap::new(), cleanup_blocked: false, evidence_cleanup_failed: false, stopped: false }
++        Self {
++            host: DocumentReaderHost::new(store),
++            workspace,
++            epoch,
++            reads: BTreeMap::new(),
++            processing: BTreeMap::new(),
++            cleanup_blocked: false,
++            evidence_cleanup_failed: false,
++            stopped: false,
++        }
+     }
+     fn ready(&self) -> Result<()> {
+-        if self.stopped { return Err(failure("DOCUMENT_READER_STOPPED")); }
+-        if self.cleanup_blocked { return Err(failure("DOCUMENT_CLEANUP_REQUIRED")); }
++        if self.stopped {
++            return Err(failure("DOCUMENT_READER_STOPPED"));
++        }
++        if self.cleanup_blocked {
++            return Err(failure("DOCUMENT_CLEANUP_REQUIRED"));
++        }
+         Ok(())
+     }
+     fn access(&self, request: &DocumentAccessRequest) -> Result<DocumentAccess> {
+Diff in /workspace/Muyon-reader-ffi-combination-20261022/crates/muyon-android-ffi/src/document_bridge.rs:156:
+         self.ready()?;
+         scope(&request.scope)?;
+         identifier(&request.grant_id)?;
+-        if request.document_ref_json.len() > 8192 { return Err(failure("DOCUMENT_LIMIT")); }
++        if request.document_ref_json.len() > 8192 {
++            return Err(failure("DOCUMENT_LIMIT"));
++        }
+         let document: DocumentRef = serde_json::from_str(&request.document_ref_json)
+             .map_err(|_| failure("DOCUMENT_INVALID_REQUEST"))?;
+-        if document.scope().workspace_id != self.workspace || document.scope().project_id != request.scope.project {
++        if document.scope().workspace_id != self.workspace
++            || document.scope().project_id != request.scope.project
++        {
+             return Err(failure("DOCUMENT_SCOPE_MISMATCH"));
+         }
+         let generation = Revision::parse(&request.grant_generation).map_err(core_error)?;
+Diff in /workspace/Muyon-reader-ffi-combination-20261022/crates/muyon-android-ffi/src/document_bridge.rs:166:
+-        if generation.value() == 0 { return Err(failure("DOCUMENT_ACCESS_DENIED")); }
+-        Ok(DocumentAccess { document, authority: AuthorityBinding {
+-            grant_id: request.grant_id.clone(), generation, owner_epoch: self.epoch.clone(),
+-        } })
++        if generation.value() == 0 {
++            return Err(failure("DOCUMENT_ACCESS_DENIED"));
++        }
++        Ok(DocumentAccess {
++            document,
++            authority: AuthorityBinding {
++                grant_id: request.grant_id.clone(),
++                generation,
++                owner_epoch: self.epoch.clone(),
++            },
++        })
+     }
+     fn reader_result<T>(&mut self, result: std::result::Result<T, DocumentReadError>) -> Result<T> {
+         match result {
+Diff in /workspace/Muyon-reader-ffi-combination-20261022/crates/muyon-android-ffi/src/document_bridge.rs:178:
+             }
+         }
+     }
+-    fn evidence_result<T>(&mut self, result: std::result::Result<T, StoreEvidenceError>) -> Result<T> {
++    fn evidence_result<T>(
++        &mut self,
++        result: std::result::Result<T, StoreEvidenceError>,
++    ) -> Result<T> {
+         match result {
+             Ok(value) => Ok(value),
+             Err(StoreEvidenceError::Core(error)) => Err(core_error(error)),
+Diff in /workspace/Muyon-reader-ffi-combination-20261022/crates/muyon-android-ffi/src/document_bridge.rs:192:
+                 EvidenceError::SourceMismatch => "DOCUMENT_SOURCE_INVALIDATED",
+                 EvidenceError::LimitExceeded => "DOCUMENT_LIMIT",
+                 EvidenceError::NotAvailable => "DOCUMENT_EVIDENCE_UNAVAILABLE",
+-                EvidenceError::InvalidRequest | EvidenceError::InvalidAnchor => "DOCUMENT_INVALID_REQUEST",
++                EvidenceError::InvalidRequest | EvidenceError::InvalidAnchor => {
++                    "DOCUMENT_INVALID_REQUEST"
++                }
+             })),
+         }
+     }
+Diff in /workspace/Muyon-reader-ffi-combination-20261022/crates/muyon-android-ffi/src/document_bridge.rs:205:
+     }
+     pub(crate) fn annotations(&mut self, request: DocumentAccessRequest) -> Result<String> {
+         let access = self.access(&request)?;
+-        let annotations = self.host.store().list_annotations(&access).map_err(core_error)?;
+-        let out = encode(&json!({"schema":1,"status":"listed","annotations":annotations,"annotation_editing":false}))?;
++        let annotations = self
++            .host
++            .store()
++            .list_annotations(&access)
++            .map_err(core_error)?;
++        let out = encode(
++            &json!({"schema":1,"status":"listed","annotations":annotations,"annotation_editing":false}),
++        )?;
+         self.deliver(&access, None, out)
+     }
+-    pub(crate) fn open(&mut self, request: DocumentAccessRequest, purpose: DocumentReadOperation) -> Result<String> {
++    pub(crate) fn open(
++        &mut self,
++        request: DocumentAccessRequest,
++        purpose: DocumentReadOperation,
++    ) -> Result<String> {
+         let access = self.access(&request)?;
+         if self.reads.len() >= 8 {
+             // Admission only: explicit checks hash the whole source. Never run
+Diff in /workspace/Muyon-reader-ffi-combination-20261022/crates/muyon-android-ffi/src/document_bridge.rs:216:
+             // these for each chunk; core read_chunk already validates its lease.
+-            let known: Vec<_> = self.reads.iter().map(|(id, lease)| (id.clone(), lease.core_id.clone())).collect();
++            let known: Vec<_> = self
++                .reads
++                .iter()
++                .map(|(id, lease)| (id.clone(), lease.core_id.clone()))
++                .collect();
+             for (id, core_id) in known {
+                 let result = self.host.is_current(&core_id);
+-                if !self.reader_result(result)? { self.reads.remove(&id); }
++                if !self.reader_result(result)? {
++                    self.reads.remove(&id);
++                }
+             }
+-            if self.reads.len() >= 8 { return Err(failure("DOCUMENT_LIMIT")); }
++            if self.reads.len() >= 8 {
++                return Err(failure("DOCUMENT_LIMIT"));
++            }
+         }
+         let id = opaque_id("document-reader")?;
+         let result = self.host.open(&access, purpose.into());
+Diff in /workspace/Muyon-reader-ffi-combination-20261022/crates/muyon-android-ffi/src/document_bridge.rs:226:
+         let info = self.reader_result(result)?;
+-        self.reads.insert(id.clone(), ReadLease { scope: request.scope, core_id: info.session_id,
+-            reference: info.metadata.document.clone() });
++        self.reads.insert(
++            id.clone(),
++            ReadLease {
++                scope: request.scope,
++                core_id: info.session_id,
++                reference: info.metadata.document.clone(),
++            },
++        );
+         if info.metadata.blob.byte_length.value() > MAX_STREAM {
+-            let lease = self.reads.get(&id).ok_or_else(|| failure("DOCUMENT_UNAVAILABLE"))?;
+-            let request = DocumentReadUseRequest { scope: lease.scope.clone(), read_session_id: id };
++            let lease = self
++                .reads
++                .get(&id)
++                .ok_or_else(|| failure("DOCUMENT_UNAVAILABLE"))?;
++            let request = DocumentReadUseRequest {
++                scope: lease.scope.clone(),
++                read_session_id: id,
++            };
+             self.close(request)?;
+             return Err(failure("DOCUMENT_LIMIT"));
+         }
+Diff in /workspace/Muyon-reader-ffi-combination-20261022/crates/muyon-android-ffi/src/document_bridge.rs:238:
+             "expiry_status":"enforced_by_core_not_exposed","annotation_editing":false,
+             "safety_status":"not_assessed","display_lease":false}));
+         if result.is_err() {
+-            let lease = self.reads.get(&id).ok_or_else(|| failure("DOCUMENT_UNAVAILABLE"))?;
+-            self.close(DocumentReadUseRequest { scope: lease.scope.clone(), read_session_id: id })?;
++            let lease = self
++                .reads
++                .get(&id)
++                .ok_or_else(|| failure("DOCUMENT_UNAVAILABLE"))?;
++            self.close(DocumentReadUseRequest {
++                scope: lease.scope.clone(),
++                read_session_id: id,
++            })?;
+         }
+         result
+     }
+Diff in /workspace/Muyon-reader-ffi-combination-20261022/crates/muyon-android-ffi/src/document_bridge.rs:246:
+-    fn read_identity(&self, request: &DocumentReadUseRequest) -> Result<Option<(String, DocumentRef)>> {
++    fn read_identity(
++        &self,
++        request: &DocumentReadUseRequest,
++    ) -> Result<Option<(String, DocumentRef)>> {
+         scope(&request.scope)?;
+         identifier(&request.read_session_id)?;
+         match self.reads.get(&request.read_session_id) {
+Diff in /workspace/Muyon-reader-ffi-combination-20261022/crates/muyon-android-ffi/src/document_bridge.rs:250:
+             None => Ok(None),
+-            Some(lease) => { same_scope(&lease.scope, &request.scope)?; Ok(Some((lease.core_id.clone(), lease.reference.clone()))) }
++            Some(lease) => {
++                same_scope(&lease.scope, &request.scope)?;
++                Ok(Some((lease.core_id.clone(), lease.reference.clone())))
++            }
+         }
+     }
+     pub(crate) fn check(&mut self, request: DocumentReadUseRequest) -> Result<String> {
+Diff in /workspace/Muyon-reader-ffi-combination-20261022/crates/muyon-android-ffi/src/document_bridge.rs:255:
+         self.ready()?;
+         let Some((id, reference)) = self.read_identity(&request)? else {
+-            return encode(&json!({"schema":1,"status":"invalidated","read_session_id":request.read_session_id}));
++            return encode(
++                &json!({"schema":1,"status":"invalidated","read_session_id":request.read_session_id}),
++            );
+         };
+         let result = self.host.is_current(&id);
+         let current = self.reader_result(result)?;
+Diff in /workspace/Muyon-reader-ffi-combination-20261022/crates/muyon-android-ffi/src/document_bridge.rs:261:
+-        if !current { self.reads.remove(&request.read_session_id); }
+-        encode(&json!({"schema":1,"status":if current {"current"} else {"invalidated"},
++        if !current {
++            self.reads.remove(&request.read_session_id);
++        }
++        encode(
++            &json!({"schema":1,"status":if current {"current"} else {"invalidated"},
+             "read_session_id":request.read_session_id,"document":reference,
+-            "expires_at_ms":null,"expiry_status":"enforced_by_core_not_exposed"}))
++            "expires_at_ms":null,"expiry_status":"enforced_by_core_not_exposed"}),
++        )
+     }
+-    pub(crate) fn chunk(&mut self, request: DocumentReadUseRequest, max_bytes: u32) -> Result<DocumentReadChunkResult> {
++    pub(crate) fn chunk(
++        &mut self,
++        request: DocumentReadUseRequest,
++        max_bytes: u32,
++    ) -> Result<DocumentReadChunkResult> {
+         self.ready()?;
+-        let (id, _) = self.read_identity(&request)?.ok_or_else(|| failure("DOCUMENT_SOURCE_INVALIDATED"))?;
++        let (id, _) = self
++            .read_identity(&request)?
++            .ok_or_else(|| failure("DOCUMENT_SOURCE_INVALIDATED"))?;
+         let result = self.host.read_chunk(&id, max_bytes as usize);
+         match result {
+             Ok(chunk) => {
+Diff in /workspace/Muyon-reader-ffi-combination-20261022/crates/muyon-android-ffi/src/document_bridge.rs:272:
+-                if chunk.eof { self.reads.remove(&request.read_session_id); }
+-                Ok(DocumentReadChunkResult { offset: chunk.offset.as_str().into(), bytes: chunk.bytes,
+-                    eof: chunk.eof, session_active: !chunk.eof })
++                if chunk.eof {
++                    self.reads.remove(&request.read_session_id);
++                }
++                Ok(DocumentReadChunkResult {
++                    offset: chunk.offset.as_str().into(),
++                    bytes: chunk.bytes,
++                    eof: chunk.eof,
++                    session_active: !chunk.eof,
++                })
+             }
+             Err(error) => {
+-                if !matches!(error, DocumentReadError::Cleanup { .. }) { self.reads.remove(&request.read_session_id); }
++                if !matches!(error, DocumentReadError::Cleanup { .. }) {
++                    self.reads.remove(&request.read_session_id);
++                }
+                 self.reader_result(Err(error))
+             }
+         }
+Diff in /workspace/Muyon-reader-ffi-combination-20261022/crates/muyon-android-ffi/src/document_bridge.rs:281:
+     }
+     pub(crate) fn close(&mut self, request: DocumentReadUseRequest) -> Result<()> {
+-        let Some((id, _)) = self.read_identity(&request)? else { return Ok(()); };
++        let Some((id, _)) = self.read_identity(&request)? else {
++            return Ok(());
++        };
+         let result = self.host.close(&id);
+         self.reader_result(result)?;
+         self.reads.remove(&request.read_session_id);
+Diff in /workspace/Muyon-reader-ffi-combination-20261022/crates/muyon-android-ffi/src/document_bridge.rs:288:
+     }
+     pub(crate) fn release_owner(&mut self, owner: &str) -> Result<()> {
+         identifier(owner)?;
+-        let closing: Vec<_> = self.reads.iter().filter(|(_, lease)| lease.scope.service_session == owner)
+-            .map(|(id, lease)| DocumentReadUseRequest { scope: lease.scope.clone(), read_session_id: id.clone() }).collect();
++        let closing: Vec<_> = self
++            .reads
++            .iter()
++            .filter(|(_, lease)| lease.scope.service_session == owner)
++            .map(|(id, lease)| DocumentReadUseRequest {
++                scope: lease.scope.clone(),
++                read_session_id: id.clone(),
++            })
++            .collect();
+         let mut first = None;
+         for request in closing {
+-            if let Err(error) = self.close(request) { if first.is_none() { first = Some(error); } }
++            if let Err(error) = self.close(request) {
++                if first.is_none() {
++                    first = Some(error);
++                }
++            }
+         }
+-        self.processing.retain(|_, entry| entry.scope.service_session != owner);
+-        if let Some(error) = first { return Err(error); }
+-        if self.cleanup_blocked { return Err(failure("DOCUMENT_CLEANUP_REQUIRED")); }
++        self.processing
++            .retain(|_, entry| entry.scope.service_session != owner);
++        if let Some(error) = first {
++            return Err(error);
++        }
++        if self.cleanup_blocked {
++            return Err(failure("DOCUMENT_CLEANUP_REQUIRED"));
++        }
+         Ok(())
+     }
+     /// Explicit trusted Service shutdown: invalidates every document output, not
+Diff in /workspace/Muyon-reader-ffi-combination-20261022/crates/muyon-android-ffi/src/document_bridge.rs:307:
+         let result = self.host.close_all();
+         self.reader_result(result)?;
+         self.reads.clear();
+-        if self.evidence_cleanup_failed { return Err(failure("DOCUMENT_CLEANUP_REQUIRED")); }
++        if self.evidence_cleanup_failed {
++            return Err(failure("DOCUMENT_CLEANUP_REQUIRED"));
++        }
+         Ok(())
+     }
+     fn take_processing(&mut self, request: &DocumentEvidenceUseRequest) -> Result<ProcessingEntry> {
+Diff in /workspace/Muyon-reader-ffi-combination-20261022/crates/muyon-android-ffi/src/document_bridge.rs:315:
+         scope(&request.scope)?;
+         identifier(&request.processing_id)?;
+         self.processing.retain(|_, entry| !entry.expired());
+-        let entry = self.processing.get(&request.processing_id).ok_or_else(|| failure("DOCUMENT_EVIDENCE_SESSION_INVALIDATED"))?;
++        let entry = self
++            .processing
++            .get(&request.processing_id)
++            .ok_or_else(|| failure("DOCUMENT_EVIDENCE_SESSION_INVALIDATED"))?;
+         same_scope(&entry.scope, &request.scope)?;
+-        self.processing.remove(&request.processing_id).ok_or_else(|| failure("DOCUMENT_EVIDENCE_SESSION_INVALIDATED"))
++        self.processing
++            .remove(&request.processing_id)
++            .ok_or_else(|| failure("DOCUMENT_EVIDENCE_SESSION_INVALIDATED"))
+     }
+     fn validate_query(&self, context: &DocumentEvidenceUseRequest, query_id: &str) -> Result<()> {
+         self.ready()?;
+Diff in /workspace/Muyon-reader-ffi-combination-20261022/crates/muyon-android-ffi/src/document_bridge.rs:324:
+         scope(&context.scope)?;
+         identifier(&context.processing_id)?;
+         identifier(query_id)?;
+-        let entry = self.processing.get(&context.processing_id).ok_or_else(|| failure("DOCUMENT_EVIDENCE_SESSION_INVALIDATED"))?;
++        let entry = self
++            .processing
++            .get(&context.processing_id)
++            .ok_or_else(|| failure("DOCUMENT_EVIDENCE_SESSION_INVALIDATED"))?;
+         same_scope(&entry.scope, &context.scope)?;
+-        if entry.expired() { return Err(failure("DOCUMENT_EVIDENCE_SESSION_INVALIDATED")); }
++        if entry.expired() {
++            return Err(failure("DOCUMENT_EVIDENCE_SESSION_INVALIDATED"));
++        }
+         if entry.query.as_ref().map(|query| query.id.as_str()) != Some(query_id) {
+             return Err(failure("DOCUMENT_EVIDENCE_QUERY_STALE"));
+         }
+Diff in /workspace/Muyon-reader-ffi-combination-20261022/crates/muyon-android-ffi/src/document_bridge.rs:335:
+     /// StoreEvidence's older adapter validates before cleanup. Gate owned output
+     /// through the corrected PUBLIC facade; no nested transaction or delivery in
+     /// its callback. Exact historical metadata must still match, never latest.
+-    fn deliver(&mut self, access: &DocumentAccess, expected: Option<&DocumentMetadata>, out: String) -> Result<String> {
+-        let result = self.host.store().with_document_source(access, DocumentReadPurpose::ReadText, 2_000_000, |view| {
+-            if expected.is_some_and(|metadata| metadata != view.metadata()) {
+-                return Err(ContractError::BindingMismatch);
+-            }
+-            Ok(out)
+-        });
++    fn deliver(
++        &mut self,
++        access: &DocumentAccess,
++        expected: Option<&DocumentMetadata>,
++        out: String,
++    ) -> Result<String> {
++        let result = self.host.store().with_document_source(
++            access,
++            DocumentReadPurpose::ReadText,
++            2_000_000,
++            |view| {
++                if expected.is_some_and(|metadata| metadata != view.metadata()) {
++                    return Err(ContractError::BindingMismatch);
++                }
++                Ok(out)
++            },
++        );
+         self.reader_result(result)
+     }
+     fn deliver_processing(&mut self, entry: &ProcessingEntry, out: String) -> Result<String> {
+Diff in /workspace/Muyon-reader-ffi-combination-20261022/crates/muyon-android-ffi/src/document_bridge.rs:348:
+         let out = self.deliver(&entry.access, Some(entry.processing.source_metadata()), out)?;
+         // Work and cleanup can cross the idle/absolute deadline. Check before
+         // resetting touched or publishing, including error paths that drop entry.
+-        if entry.expired() { return Err(failure("DOCUMENT_EVIDENCE_SESSION_INVALIDATED")); }
++        if entry.expired() {
++            return Err(failure("DOCUMENT_EVIDENCE_SESSION_INVALIDATED"));
++        }
+         Ok(out)
+     }
+-    pub(crate) fn process(&mut self, request: DocumentAccessRequest, kind: DocumentEvidenceKind) -> Result<String> {
++    pub(crate) fn process(
++        &mut self,
++        request: DocumentAccessRequest,
++        kind: DocumentEvidenceKind,
++    ) -> Result<String> {
+         let access = self.access(&request)?;
+         self.processing.retain(|_, entry| !entry.expired());
+-        if self.processing.len() >= MAX_PROCESSING { return Err(failure("DOCUMENT_LIMIT")); }
++        if self.processing.len() >= MAX_PROCESSING {
++            return Err(failure("DOCUMENT_LIMIT"));
++        }
+         let id = opaque_id("document-evidence")?;
+         let result = StoreEvidence::new(self.host.store()).process(&access, kind.into());
+         let processing = self.evidence_result(result)?;
+Diff in /workspace/Muyon-reader-ffi-combination-20261022/crates/muyon-android-ffi/src/document_bridge.rs:361:
+-        let out = encode(&json!({"schema":1,"status":"processed","processing_id":id,"projection":processing.projection()}))?;
++        let out = encode(
++            &json!({"schema":1,"status":"processed","processing_id":id,"projection":processing.projection()}),
++        )?;
+         let out = self.deliver(&access, Some(processing.source_metadata()), out)?;
+         let now = Instant::now();
+-        self.processing.insert(id, ProcessingEntry { scope: request.scope, access, processing, query: None, opened: now, touched: now });
++        self.processing.insert(
++            id,
++            ProcessingEntry {
++                scope: request.scope,
++                access,
++                processing,
++                query: None,
++                opened: now,
++                touched: now,
++            },
++        );
+         Ok(out)
+     }
+-    pub(crate) fn query(&mut self, context: DocumentEvidenceUseRequest, query: String, limit: u32) -> Result<String> {
+-        if query.trim().is_empty() || query.len() > 4096 || query.contains('\0') || limit == 0 || limit as usize > MAX_HITS {
++    pub(crate) fn query(
++        &mut self,
++        context: DocumentEvidenceUseRequest,
++        query: String,
++        limit: u32,
++    ) -> Result<String> {
++        if query.trim().is_empty()
++            || query.len() > 4096
++            || query.contains('\0')
++            || limit == 0
++            || limit as usize > MAX_HITS
++        {
+             return Err(failure("DOCUMENT_INVALID_REQUEST"));
+         }
+         let query_id = opaque_id("document-query")?;
+Diff in /workspace/Muyon-reader-ffi-combination-20261022/crates/muyon-android-ffi/src/document_bridge.rs:372:
+         let mut entry = self.take_processing(&context)?;
+-        let result = StoreEvidence::new(self.host.store()).find_literal(&entry.access, &entry.processing, &query, limit as usize);
++        let result = StoreEvidence::new(self.host.store()).find_literal(
++            &entry.access,
++            &entry.processing,
++            &query,
++            limit as usize,
++        );
+         let hits = self.evidence_result(result)?;
+-        let out = encode(&json!({"schema":1,"status":"queried","processing_id":context.processing_id,"query_id":query_id,"hits":hits}))?;
++        let out = encode(
++            &json!({"schema":1,"status":"queried","processing_id":context.processing_id,"query_id":query_id,"hits":hits}),
++        )?;
+         entry.query = Some(QuerySnapshot { id: query_id, hits });
+         let out = self.deliver_processing(&entry, out)?;
+         entry.touched = Instant::now();
+Diff in /workspace/Muyon-reader-ffi-combination-20261022/crates/muyon-android-ffi/src/document_bridge.rs:379:
+         self.processing.insert(context.processing_id, entry);
+         Ok(out)
+     }
+-    pub(crate) fn quote(&mut self, context: DocumentEvidenceUseRequest, query_id: String, evidence_id: String) -> Result<String> {
++    pub(crate) fn quote(
++        &mut self,
++        context: DocumentEvidenceUseRequest,
++        query_id: String,
++        evidence_id: String,
++    ) -> Result<String> {
+         self.validate_query(&context, &query_id)?;
+         identifier(&evidence_id)?;
+         let mut entry = self.take_processing(&context)?;
+Diff in /workspace/Muyon-reader-ffi-combination-20261022/crates/muyon-android-ffi/src/document_bridge.rs:386:
+-        let hit = entry.query.as_ref().and_then(|query| query.hits.iter().find(|hit| hit.evidence_id == evidence_id))
+-            .cloned().ok_or_else(|| failure("DOCUMENT_INVALID_REQUEST"))?;
+-        let result = StoreEvidence::new(self.host.store()).open(&entry.access, &entry.processing, &hit);
++        let hit = entry
++            .query
++            .as_ref()
++            .and_then(|query| query.hits.iter().find(|hit| hit.evidence_id == evidence_id))
++            .cloned()
++            .ok_or_else(|| failure("DOCUMENT_INVALID_REQUEST"))?;
++        let result =
++            StoreEvidence::new(self.host.store()).open(&entry.access, &entry.processing, &hit);
+         let quote = self.evidence_result(result)?;
+-        let out = encode(&json!({"schema":1,"status":"quoted","processing_id":context.processing_id,"query_id":query_id,"evidence":hit,"quote":quote}))?;
++        let out = encode(
++            &json!({"schema":1,"status":"quoted","processing_id":context.processing_id,"query_id":query_id,"evidence":hit,"quote":quote}),
++        )?;
+         let out = self.deliver_processing(&entry, out)?;
+         entry.touched = Instant::now();
+         self.processing.insert(context.processing_id, entry);
+Diff in /workspace/Muyon-reader-ffi-combination-20261022/crates/muyon-android-ffi/src/document_bridge.rs:395:
+     }
+     pub(crate) fn answer(&mut self, request: DocumentEvidenceAnswerRequest) -> Result<String> {
+         self.validate_query(&request.context, &request.query_id)?;
+-        if request.body.len() > 65536 || request.cited_indices.len() > MAX_HITS { return Err(failure("DOCUMENT_LIMIT")); }
++        if request.body.len() > 65536 || request.cited_indices.len() > MAX_HITS {
++            return Err(failure("DOCUMENT_LIMIT"));
++        }
+         let mut entry = self.take_processing(&request.context)?;
+-        let hits = &entry.query.as_ref().ok_or_else(|| failure("DOCUMENT_EVIDENCE_QUERY_STALE"))?.hits;
+-        let indices: Vec<_> = request.cited_indices.iter().map(|index| *index as usize).collect();
+-        let result = StoreEvidence::new(self.host.store()).answer(&entry.access, &entry.processing, &request.body, hits, &indices);
++        let hits = &entry
++            .query
++            .as_ref()
++            .ok_or_else(|| failure("DOCUMENT_EVIDENCE_QUERY_STALE"))?
++            .hits;
++        let indices: Vec<_> = request
++            .cited_indices
++            .iter()
++            .map(|index| *index as usize)
++            .collect();
++        let result = StoreEvidence::new(self.host.store()).answer(
++            &entry.access,
++            &entry.processing,
++            &request.body,
++            hits,
++            &indices,
++        );
+         let answer = self.evidence_result(result)?;
+-        let out = encode(&json!({"schema":1,"status":"projected","processing_id":request.context.processing_id,"query_id":request.query_id,"answer":answer}))?;
++        let out = encode(
++            &json!({"schema":1,"status":"projected","processing_id":request.context.processing_id,"query_id":request.query_id,"answer":answer}),
++        )?;
+         let out = self.deliver_processing(&entry, out)?;
+         entry.touched = Instant::now();
+         self.processing.insert(request.context.processing_id, entry);
+Diff in /workspace/Muyon-reader-ffi-combination-20261022/crates/muyon-android-ffi/src/document_bridge.rs:410:
+     pub(crate) fn close_evidence(&mut self, request: DocumentEvidenceUseRequest) -> Result<()> {
+         scope(&request.scope)?;
+         identifier(&request.processing_id)?;
+-        if let Some(entry) = self.processing.get(&request.processing_id) { same_scope(&entry.scope, &request.scope)?; }
++        if let Some(entry) = self.processing.get(&request.processing_id) {
++            same_scope(&entry.scope, &request.scope)?;
++        }
+         self.processing.remove(&request.processing_id);
+         Ok(())
+     }
+Diff in /workspace/Muyon-reader-ffi-combination-20261022/crates/muyon-android-ffi/src/document_bridge_tests.rs:2:
+ //! No renderer, Android PFD, model/search or user files. These tests are NOT_RUN until compiled.
+ use super::*;
+ use muyon_core::{blobs::BlobKind, documents::*};
+-use std::{fs, path::PathBuf, sync::atomic::{AtomicUsize, Ordering}, time::{SystemTime, UNIX_EPOCH}};
++use std::{
++    fs,
++    path::PathBuf,
++    sync::atomic::{AtomicUsize, Ordering},
++    time::{SystemTime, UNIX_EPOCH},
++};
+ static NEXT: AtomicUsize = AtomicUsize::new(0);
+ const TEXT: &[u8] = b"original literal evidence\nanother literal passage\n";
+-struct Fixture { core: Arc<ProductCore>, root: PathBuf, request: DocumentAccessRequest, access: DocumentAccess }
++struct Fixture {
++    core: Arc<ProductCore>,
++    root: PathBuf,
++    request: DocumentAccessRequest,
++    access: DocumentAccess,
++}
+ impl Fixture {
+     fn new(bytes: &[u8], format: DocumentFormat, operations: &[DocumentOperation]) -> Self {
+-        let root = std::env::temp_dir().join(format!("muyon-doc-ffi-{}-{}",std::process::id(),NEXT.fetch_add(1,Ordering::Relaxed)));
+-        let core = ProductCore::open(root.to_str().unwrap().into(),"workspace".into(),"epoch".into(),true).unwrap();
++        let root = std::env::temp_dir().join(format!(
++            "muyon-doc-ffi-{}-{}",
++            std::process::id(),
++            NEXT.fetch_add(1, Ordering::Relaxed)
++        ));
++        let core = ProductCore::open(
++            root.to_str().unwrap().into(),
++            "workspace".into(),
++            "epoch".into(),
++            true,
++        )
++        .unwrap();
+         let access = {
+             let state = core.state.lock().unwrap();
+             let store = &state.store;
+Diff in /workspace/Muyon-reader-ffi-combination-20261022/crates/muyon-android-ffi/src/document_bridge_tests.rs:16:
+             let mut command = CommandEnvelope {
+-                protocol_version:1,business_version:1,intent_id:"synthetic-project".into(),
+-                scope:Scope {workspace_id:"workspace".into(),project_id:Some("project".into())},
+-                expected_revision:Revision::new(0),
+-                authority:AuthorityBinding {grant_id:"project-grant".into(),generation:Revision::new(1),owner_epoch:"epoch".into()},
+-                plan_id:"synthetic-plan".into(),plan_digest:"0".repeat(64),
+-                command:Operation::ProjectCreate {project_id:"project".into(),name:"Synthetic".into()},
++                protocol_version: 1,
++                business_version: 1,
++                intent_id: "synthetic-project".into(),
++                scope: Scope {
++                    workspace_id: "workspace".into(),
++                    project_id: Some("project".into()),
++                },
++                expected_revision: Revision::new(0),
++                authority: AuthorityBinding {
++                    grant_id: "project-grant".into(),
++                    generation: Revision::new(1),
++                    owner_epoch: "epoch".into(),
++                },
++                plan_id: "synthetic-plan".into(),
++                plan_digest: "0".repeat(64),
++                command: Operation::ProjectCreate {
++                    project_id: "project".into(),
++                    name: "Synthetic".into(),
++                },
+             };
+-            command.plan_digest=command.expected_plan_digest().unwrap();
+-            store.issue_grant_trusted(&command,None).unwrap();
+-            assert_eq!(store.execute(&command).unwrap().status,ExecutionStatus::Committed);
++            command.plan_digest = command.expected_plan_digest().unwrap();
++            store.issue_grant_trusted(&command, None).unwrap();
++            assert_eq!(
++                store.execute(&command).unwrap().status,
++                ExecutionStatus::Committed
++            );
+             store.initialize_documents_trusted().unwrap();
+-            let upload=store.begin_upload("project").unwrap();
+-            for chunk in bytes.chunks(65536) { store.append_chunk(&upload.upload_id,chunk).unwrap(); }
+-            let blob=store.finish_blob(&upload.upload_id,BlobKind::Document).unwrap();
+-            let metadata=store.register_document_trusted("project","document","Synthetic original",format,&blob).unwrap();
+-            let authority=AuthorityBinding {grant_id:"document-grant".into(),generation:Revision::new(1),owner_epoch:"epoch".into()};
+-            let expiry=SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_millis() as u64+25_000;
+-            store.issue_document_grant_trusted(&metadata.document,&authority,operations,expiry).unwrap();
+-            DocumentAccess {document:metadata.document,authority}
++            let upload = store.begin_upload("project").unwrap();
++            for chunk in bytes.chunks(65536) {
++                store.append_chunk(&upload.upload_id, chunk).unwrap();
++            }
++            let blob = store
++                .finish_blob(&upload.upload_id, BlobKind::Document)
++                .unwrap();
++            let metadata = store
++                .register_document_trusted(
++                    "project",
++                    "document",
++                    "Synthetic original",
++                    format,
++                    &blob,
++                )
++                .unwrap();
++            let authority = AuthorityBinding {
++                grant_id: "document-grant".into(),
++                generation: Revision::new(1),
++                owner_epoch: "epoch".into(),
++            };
++            let expiry = SystemTime::now()
++                .duration_since(UNIX_EPOCH)
++                .unwrap()
++                .as_millis() as u64
++                + 25_000;
++            store
++                .issue_document_grant_trusted(&metadata.document, &authority, operations, expiry)
++                .unwrap();
++            DocumentAccess {
++                document: metadata.document,
++                authority,
++            }
+         };
+-        let request=DocumentAccessRequest {
+-            scope:DocumentReaderScope {service_session:"service-session".into(),generation:"generation-1".into(),project:Some("project".into())},
+-            document_ref_json:serde_json::to_string(&access.document).unwrap(),
+-            grant_id:access.authority.grant_id.clone(),grant_generation:"1".into(),
++        let request = DocumentAccessRequest {
++            scope: DocumentReaderScope {
++                service_session: "service-session".into(),
++                generation: "generation-1".into(),
++                project: Some("project".into()),
++            },
++            document_ref_json: serde_json::to_string(&access.document).unwrap(),
++            grant_id: access.authority.grant_id.clone(),
++            grant_generation: "1".into(),
+         };
+-        Self {core,root,request,access}
++        Self {
++            core,
++            root,
++            request,
++            access,
++        }
+     }
+-    fn text() -> Self { Self::new(TEXT,DocumentFormat::Text,&[DocumentOperation::Inspect,DocumentOperation::ReadText]) }
++    fn text() -> Self {
++        Self::new(
++            TEXT,
++            DocumentFormat::Text,
++            &[DocumentOperation::Inspect, DocumentOperation::ReadText],
++        )
++    }
+     fn open(&self) -> DocumentReadUseRequest {
+-        let value:Value=serde_json::from_str(&self.core.document_read_open(self.request.clone(),DocumentReadOperation::ReadText).unwrap()).unwrap();
+-        assert_eq!(value["display_lease"],false);
+-        assert_eq!(value["safety_status"],"not_assessed");
++        let value: Value = serde_json::from_str(
++            &self
++                .core
++                .document_read_open(self.request.clone(), DocumentReadOperation::ReadText)
++                .unwrap(),
++        )
++        .unwrap();
++        assert_eq!(value["display_lease"], false);
++        assert_eq!(value["safety_status"], "not_assessed");
+         assert!(value["expires_at_ms"].is_null());
+-        DocumentReadUseRequest {scope:self.request.scope.clone(),read_session_id:value["read_session_id"].as_str().unwrap().into()}
++        DocumentReadUseRequest {
++            scope: self.request.scope.clone(),
++            read_session_id: value["read_session_id"].as_str().unwrap().into(),
++        }
+     }
+     fn process(&self) -> DocumentEvidenceUseRequest {
+-        let value:Value=serde_json::from_str(&self.core.document_evidence_process(self.request.clone(),DocumentEvidenceKind::Utf8Text).unwrap()).unwrap();
+-        assert_eq!(value["projection"]["processing"]["extraction"],"available");
+-        assert_eq!(value["projection"]["processing"]["index"],"not_run");
++        let value: Value = serde_json::from_str(
++            &self
++                .core
++                .document_evidence_process(self.request.clone(), DocumentEvidenceKind::Utf8Text)
++                .unwrap(),
++        )
++        .unwrap();
++        assert_eq!(value["projection"]["processing"]["extraction"], "available");
++        assert_eq!(value["projection"]["processing"]["index"], "not_run");
+         assert!(value.get("saved").is_none());
+-        DocumentEvidenceUseRequest {scope:self.request.scope.clone(),processing_id:value["processing_id"].as_str().unwrap().into()}
++        DocumentEvidenceUseRequest {
++            scope: self.request.scope.clone(),
++            processing_id: value["processing_id"].as_str().unwrap().into(),
++        }
+     }
+ }
+-impl Drop for Fixture { fn drop(&mut self) {
+-    let _=self.core.document_read_release_owner(self.request.scope.service_session.clone());
+-    let _=fs::remove_dir_all(&self.root);
+-} }
+-fn value(raw:String) -> Value { serde_json::from_str(&raw).unwrap() }
++impl Drop for Fixture {
++    fn drop(&mut self) {
++        let _ = self
++            .core
++            .document_read_release_owner(self.request.scope.service_session.clone());
++        let _ = fs::remove_dir_all(&self.root);
++    }
++}
++fn value(raw: String) -> Value {
++    serde_json::from_str(&raw).unwrap()
++}
+ 
+ #[test]
+ fn actual_metadata_and_bytes_mark_eof_closed_not_display_authority() {
+Diff in /workspace/Muyon-reader-ffi-combination-20261022/crates/muyon-android-ffi/src/document_bridge_tests.rs:68:
+-    let f=Fixture::text();
+-    let metadata=value(f.core.document_metadata(f.request.clone()).unwrap());
+-    assert_eq!(metadata["document"]["document"],serde_json::to_value(&f.access.document).unwrap());
+-    assert_eq!(metadata["annotation_editing"],false);
+-    let opened=f.open();
+-    let mut bytes=Vec::new();
++    let f = Fixture::text();
++    let metadata = value(f.core.document_metadata(f.request.clone()).unwrap());
++    assert_eq!(
++        metadata["document"]["document"],
++        serde_json::to_value(&f.access.document).unwrap()
++    );
++    assert_eq!(metadata["annotation_editing"], false);
++    let opened = f.open();
++    let mut bytes = Vec::new();
+     loop {
+-        let chunk=f.core.document_read_chunk(opened.clone(),7).unwrap();
+-        assert_eq!(chunk.offset.parse::<usize>().unwrap(),bytes.len());
++        let chunk = f.core.document_read_chunk(opened.clone(), 7).unwrap();
++        assert_eq!(chunk.offset.parse::<usize>().unwrap(), bytes.len());
+         bytes.extend_from_slice(&chunk.bytes);
+-        if chunk.eof { assert!(!chunk.session_active); break; }
++        if chunk.eof {
++            assert!(!chunk.session_active);
++            break;
++        }
+         assert!(chunk.session_active);
+     }
+-    assert_eq!(bytes,TEXT);
+-    let closed=value(f.core.document_read_check(opened.clone()).unwrap());
+-    assert_eq!(closed["status"],"invalidated");
++    assert_eq!(bytes, TEXT);
++    let closed = value(f.core.document_read_check(opened.clone()).unwrap());
++    assert_eq!(closed["status"], "invalidated");
+     f.core.document_read_close(opened).unwrap();
+ }
+ 
+Diff in /workspace/Muyon-reader-ffi-combination-20261022/crates/muyon-android-ffi/src/document_bridge_tests.rs:87:
+ #[test]
+ fn foreign_service_generation_and_project_never_borrow_a_live_reader() {
+-    let f=Fixture::text();let opened=f.open();
+-    let mut wrong=opened.clone();wrong.scope.service_session="other".into();
+-    assert!(f.core.document_read_chunk(wrong.clone(),7).is_err());
++    let f = Fixture::text();
++    let opened = f.open();
++    let mut wrong = opened.clone();
++    wrong.scope.service_session = "other".into();
++    assert!(f.core.document_read_chunk(wrong.clone(), 7).is_err());
+     assert!(f.core.document_read_close(wrong).is_err());
+-    let mut wrong=opened.clone();wrong.scope.generation="old".into();
++    let mut wrong = opened.clone();
++    wrong.scope.generation = "old".into();
+     assert!(f.core.document_read_check(wrong).is_err());
+-    let mut wrong=opened.clone();wrong.scope.project=Some("other".into());
+-    assert!(f.core.document_read_chunk(wrong,7).is_err());
+-    assert_eq!(value(f.core.document_read_check(opened.clone()).unwrap())["status"],"current");
++    let mut wrong = opened.clone();
++    wrong.scope.project = Some("other".into());
++    assert!(f.core.document_read_chunk(wrong, 7).is_err());
++    assert_eq!(
++        value(f.core.document_read_check(opened.clone()).unwrap())["status"],
++        "current"
++    );
+     f.core.document_read_close(opened).unwrap();
+ }
+ 
+Diff in /workspace/Muyon-reader-ffi-combination-20261022/crates/muyon-android-ffi/src/document_bridge_tests.rs:101:
+ #[test]
+ fn forged_or_inspect_only_grants_do_not_open_or_issue_read_permission() {
+-    let f=Fixture::new(TEXT,DocumentFormat::Text,&[DocumentOperation::Inspect]);
++    let f = Fixture::new(TEXT, DocumentFormat::Text, &[DocumentOperation::Inspect]);
+     assert!(f.core.document_metadata(f.request.clone()).is_ok());
+-    assert!(f.core.document_read_open(f.request.clone(),DocumentReadOperation::ReadText).is_err());
+-    let mut forged=f.request.clone();forged.grant_id="unissued".into();
++    assert!(f
++        .core
++        .document_read_open(f.request.clone(), DocumentReadOperation::ReadText)
++        .is_err());
++    let mut forged = f.request.clone();
++    forged.grant_id = "unissued".into();
+     assert!(f.core.document_metadata(forged).is_err());
+-    let mut wrong=f.request.clone();wrong.scope.project=Some("other".into());
++    let mut wrong = f.request.clone();
++    wrong.scope.project = Some("other".into());
+     assert!(f.core.document_metadata(wrong).is_err());
+-    let mut wrong=f.request.clone();
+-    let mut reference:Value=serde_json::from_str(&wrong.document_ref_json).unwrap();
+-    reference["scope"]["workspace_id"]=json!("other");wrong.document_ref_json=reference.to_string();
++    let mut wrong = f.request.clone();
++    let mut reference: Value = serde_json::from_str(&wrong.document_ref_json).unwrap();
++    reference["scope"]["workspace_id"] = json!("other");
++    wrong.document_ref_json = reference.to_string();
+     assert!(f.core.document_metadata(wrong).is_err());
+ }
+ 
+Diff in /workspace/Muyon-reader-ffi-combination-20261022/crates/muyon-android-ffi/src/document_bridge_tests.rs:116:
+ #[test]
+ fn revoked_current_grant_discards_bytes_and_publishes_invalidation() {
+-    let f=Fixture::text();let opened=f.open();
+-    f.core.state.lock().unwrap().store.revoke_document_grant_trusted(&f.access.authority).unwrap();
+-    assert!(f.core.document_read_chunk(opened.clone(),7).is_err());
+-    assert_eq!(value(f.core.document_read_check(opened).unwrap())["status"],"invalidated");
++    let f = Fixture::text();
++    let opened = f.open();
++    f.core
++        .state
++        .lock()
++        .unwrap()
++        .store
++        .revoke_document_grant_trusted(&f.access.authority)
++        .unwrap();
++    assert!(f.core.document_read_chunk(opened.clone(), 7).is_err());
++    assert_eq!(
++        value(f.core.document_read_check(opened).unwrap())["status"],
++        "invalidated"
++    );
+ }
+ 
+ #[test]
+Diff in /workspace/Muyon-reader-ffi-combination-20261022/crates/muyon-android-ffi/src/document_bridge_tests.rs:125:
+ fn deleted_project_and_chunk_limit_errors_never_yield_successful_bytes() {
+-    let f=Fixture::text();let opened=f.open();
+-    assert!(f.core.document_read_chunk(opened.clone(),65537).is_err());
+-    assert_eq!(value(f.core.document_read_check(opened).unwrap())["status"],"invalidated");
+-    let opened=f.open();
+-    let db=muyon_core::sqlite::Db::open(f.root.join("business-v2.sqlite").to_str().unwrap(),false,false).unwrap();
+-    db.exec("UPDATE projects SET deleted=1 WHERE id='project'",&[]).unwrap();
+-    assert!(f.core.document_read_chunk(opened,7).is_err());
++    let f = Fixture::text();
++    let opened = f.open();
++    assert!(f.core.document_read_chunk(opened.clone(), 65537).is_err());
++    assert_eq!(
++        value(f.core.document_read_check(opened).unwrap())["status"],
++        "invalidated"
++    );
++    let opened = f.open();
++    let db = muyon_core::sqlite::Db::open(
++        f.root.join("business-v2.sqlite").to_str().unwrap(),
++        false,
++        false,
++    )
++    .unwrap();
++    db.exec("UPDATE projects SET deleted=1 WHERE id='project'", &[])
++        .unwrap();
++    assert!(f.core.document_read_chunk(opened, 7).is_err());
+ }
+ 
+ #[test]
+Diff in /workspace/Muyon-reader-ffi-combination-20261022/crates/muyon-android-ffi/src/document_bridge_tests.rs:136:
+ fn evidence_uses_real_text_explicit_citations_and_exact_query_snapshot() {
+-    let f=Fixture::new(TEXT,DocumentFormat::Text,&[DocumentOperation::ReadText]);
+-    let context=f.process();
+-    let query=value(f.core.document_evidence_query(context.clone(),"literal".into(),8).unwrap());
+-    assert_eq!(query["hits"].as_array().unwrap().len(),2);
+-    let query_id=query["query_id"].as_str().unwrap().to_owned();
+-    let evidence_id=query["hits"][0]["evidence_id"].as_str().unwrap().to_owned();
+-    let quote=value(f.core.document_evidence_quote(context.clone(),query_id.clone(),evidence_id.clone()).unwrap());
+-    assert_eq!(quote["quote"],"literal");
+-    let uncited=value(f.core.document_evidence_answer(DocumentEvidenceAnswerRequest {
+-        context:context.clone(),query_id:query_id.clone(),body:"body [1] is not a citation".into(),cited_indices:vec![],
+-    }).unwrap());
+-    assert!(uncited["answer"]["citations"].as_array().unwrap().is_empty());
+-    let cited=value(f.core.document_evidence_answer(DocumentEvidenceAnswerRequest {
+-        context:context.clone(),query_id:query_id.clone(),body:"explicit passage".into(),cited_indices:vec![0],
+-    }).unwrap());
+-    assert_eq!(cited["answer"]["citations"][0]["number"],1);
++    let f = Fixture::new(TEXT, DocumentFormat::Text, &[DocumentOperation::ReadText]);
++    let context = f.process();
++    let query = value(
++        f.core
++            .document_evidence_query(context.clone(), "literal".into(), 8)
++            .unwrap(),
++    );
++    assert_eq!(query["hits"].as_array().unwrap().len(), 2);
++    let query_id = query["query_id"].as_str().unwrap().to_owned();
++    let evidence_id = query["hits"][0]["evidence_id"].as_str().unwrap().to_owned();
++    let quote = value(
++        f.core
++            .document_evidence_quote(context.clone(), query_id.clone(), evidence_id.clone())
++            .unwrap(),
++    );
++    assert_eq!(quote["quote"], "literal");
++    let uncited = value(
++        f.core
++            .document_evidence_answer(DocumentEvidenceAnswerRequest {
++                context: context.clone(),
++                query_id: query_id.clone(),
++                body: "body [1] is not a citation".into(),
++                cited_indices: vec![],
++            })
++            .unwrap(),
++    );
++    assert!(uncited["answer"]["citations"]
++        .as_array()
++        .unwrap()
++        .is_empty());
++    let cited = value(
++        f.core
++            .document_evidence_answer(DocumentEvidenceAnswerRequest {
++                context: context.clone(),
++                query_id: query_id.clone(),
++                body: "explicit passage".into(),
++                cited_indices: vec![0],
++            })
++            .unwrap(),
++    );
++    assert_eq!(cited["answer"]["citations"][0]["number"], 1);
+     assert!(cited["answer"]["citations"][0]["evidence"]["page_index_zero_based"].is_null());
+     assert!(cited["answer"]["independent_support_count"].is_null());
+-    f.core.document_evidence_query(context.clone(),"another".into(),8).unwrap();
+-    assert!(f.core.document_evidence_quote(context,query_id,evidence_id).is_err());
++    f.core
++        .document_evidence_query(context.clone(), "another".into(), 8)
++        .unwrap();
++    assert!(f
++        .core
++        .document_evidence_quote(context, query_id, evidence_id)
++        .is_err());
+ }
+ 
+ #[test]
+Diff in /workspace/Muyon-reader-ffi-combination-20261022/crates/muyon-android-ffi/src/document_bridge_tests.rs:160:
+ fn processing_cache_is_not_a_grant_and_other_sessions_cannot_read_it() {
+-    let f=Fixture::text();let context=f.process();
+-    let mut foreign=context.clone();foreign.scope.service_session="other".into();
+-    assert!(f.core.document_evidence_query(foreign,"literal".into(),8).is_err());
+-    f.core.state.lock().unwrap().store.revoke_document_grant_trusted(&f.access.authority).unwrap();
+-    assert!(f.core.document_evidence_query(context,"literal".into(),8).is_err());
++    let f = Fixture::text();
++    let context = f.process();
++    let mut foreign = context.clone();
++    foreign.scope.service_session = "other".into();
++    assert!(f
++        .core
++        .document_evidence_query(foreign, "literal".into(), 8)
++        .is_err());
++    f.core
++        .state
++        .lock()
++        .unwrap()
++        .store
++        .revoke_document_grant_trusted(&f.access.authority)
++        .unwrap();
++    assert!(f
++        .core
++        .document_evidence_query(context, "literal".into(), 8)
++        .is_err());
+ }
+ 
+ #[test]
+Diff in /workspace/Muyon-reader-ffi-combination-20261022/crates/muyon-android-ffi/src/document_bridge_tests.rs:169:
+ fn pdf_processing_remains_unsupported_and_never_claims_a_renderer() {
+-    let f=Fixture::new(b"%PDF-1.4\nsynthetic only\n%%EOF\n",DocumentFormat::Pdf,&[DocumentOperation::ReadText]);
+-    let result=value(f.core.document_evidence_process(f.request.clone(),DocumentEvidenceKind::Pdf).unwrap());
+-    assert_eq!(result["projection"]["processing"]["extraction"],"unsupported");
+-    assert_eq!(result["projection"]["processing"]["index"],"not_run");
++    let f = Fixture::new(
++        b"%PDF-1.4\nsynthetic only\n%%EOF\n",
++        DocumentFormat::Pdf,
++        &[DocumentOperation::ReadText],
++    );
++    let result = value(
++        f.core
++            .document_evidence_process(f.request.clone(), DocumentEvidenceKind::Pdf)
++            .unwrap(),
++    );
++    assert_eq!(
++        result["projection"]["processing"]["extraction"],
++        "unsupported"
++    );
++    assert_eq!(result["projection"]["processing"]["index"], "not_run");
+     assert!(result.get("saved").is_none());
+ }
+ 
+Diff in /workspace/Muyon-reader-ffi-combination-20261022/crates/muyon-android-ffi/src/document_bridge_tests.rs:177:
+ #[test]
+ fn owner_release_closes_only_its_sessions_and_evidence() {
+-    let f=Fixture::text();let first=f.open();let context=f.process();
+-    let mut other=f.request.clone();other.scope.service_session="second-session".into();
+-    let result=value(f.core.document_read_open(other.clone(),DocumentReadOperation::ReadText).unwrap());
+-    let other_use=DocumentReadUseRequest {scope:other.scope,read_session_id:result["read_session_id"].as_str().unwrap().into()};
+-    f.core.document_read_release_owner(f.request.scope.service_session.clone()).unwrap();
+-    assert_eq!(value(f.core.document_read_check(first).unwrap())["status"],"invalidated");
+-    assert!(f.core.document_evidence_query(context,"literal".into(),8).is_err());
+-    assert_eq!(value(f.core.document_read_check(other_use.clone()).unwrap())["status"],"current");
++    let f = Fixture::text();
++    let first = f.open();
++    let context = f.process();
++    let mut other = f.request.clone();
++    other.scope.service_session = "second-session".into();
++    let result = value(
++        f.core
++            .document_read_open(other.clone(), DocumentReadOperation::ReadText)
++            .unwrap(),
++    );
++    let other_use = DocumentReadUseRequest {
++        scope: other.scope,
++        read_session_id: result["read_session_id"].as_str().unwrap().into(),
++    };
++    f.core
++        .document_read_release_owner(f.request.scope.service_session.clone())
++        .unwrap();
++    assert_eq!(
++        value(f.core.document_read_check(first).unwrap())["status"],
++        "invalidated"
++    );
++    assert!(f
++        .core
++        .document_evidence_query(context, "literal".into(), 8)
++        .is_err());
++    assert_eq!(
++        value(f.core.document_read_check(other_use.clone()).unwrap())["status"],
++        "current"
++    );
+     f.core.document_read_close(other_use).unwrap();
+ }
+ 
+Diff in /workspace/Muyon-reader-ffi-combination-20261022/crates/muyon-android-ffi/src/document_bridge_tests.rs:190:
+ #[test]
+ fn eight_invalidated_native_ids_do_not_block_fresh_authorized_admission() {
+-    let f=Fixture::text();
+-    let old:Vec<_>=(0..8).map(|_| f.open()).collect();
+-    assert!(f.core.document_read_open(f.request.clone(),DocumentReadOperation::ReadText).is_err());
+-    let mut authority=f.access.authority.clone();authority.generation=Revision::new(2);
+-    let expiry=SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_millis() as u64+25_000;
+-    f.core.state.lock().unwrap().store.issue_document_grant_trusted(&f.access.document,&authority,
+-        &[DocumentOperation::Inspect,DocumentOperation::ReadText],expiry).unwrap();
+-    let mut request=f.request.clone();request.grant_generation="2".into();
+-    let fresh=value(f.core.document_read_open(request.clone(),DocumentReadOperation::ReadText).unwrap());
+-    let use_request=DocumentReadUseRequest {scope:request.scope,read_session_id:fresh["read_session_id"].as_str().unwrap().into()};
+-    assert_eq!(f.core.document_read_chunk(use_request,65536).unwrap().bytes,TEXT);
+-    for previous in old { assert_eq!(value(f.core.document_read_check(previous).unwrap())["status"],"invalidated"); }
++    let f = Fixture::text();
++    let old: Vec<_> = (0..8).map(|_| f.open()).collect();
++    assert!(f
++        .core
++        .document_read_open(f.request.clone(), DocumentReadOperation::ReadText)
++        .is_err());
++    let mut authority = f.access.authority.clone();
++    authority.generation = Revision::new(2);
++    let expiry = SystemTime::now()
++        .duration_since(UNIX_EPOCH)
++        .unwrap()
++        .as_millis() as u64
++        + 25_000;
++    f.core
++        .state
++        .lock()
++        .unwrap()
++        .store
++        .issue_document_grant_trusted(
++            &f.access.document,
++            &authority,
++            &[DocumentOperation::Inspect, DocumentOperation::ReadText],
++            expiry,
++        )
++        .unwrap();
++    let mut request = f.request.clone();
++    request.grant_generation = "2".into();
++    let fresh = value(
++        f.core
++            .document_read_open(request.clone(), DocumentReadOperation::ReadText)
++            .unwrap(),
++    );
++    let use_request = DocumentReadUseRequest {
++        scope: request.scope,
++        read_session_id: fresh["read_session_id"].as_str().unwrap().into(),
++    };
++    assert_eq!(
++        f.core
++            .document_read_chunk(use_request, 65536)
++            .unwrap()
++            .bytes,
++        TEXT
++    );
++    for previous in old {
++        assert_eq!(
++            value(f.core.document_read_check(previous).unwrap())["status"],
++            "invalidated"
++        );
++    }
+ }
+ 
+ #[test]
+Diff in /workspace/Muyon-reader-ffi-combination-20261022/crates/muyon-android-ffi/src/document_bridge_tests.rs:207:
+ fn eight_actually_idle_expired_sessions_allow_fresh_open_without_manual_checks() {
+-    let f=Fixture::text();
+-    for _ in 0..8 { f.open(); }
++    let f = Fixture::text();
++    for _ in 0..8 {
++        f.open();
++    }
+     // Actual monotonic core expiry: no private core hook, widened limit or fake clock.
+     std::thread::sleep(std::time::Duration::from_secs(16));
+-    let mut fresh_authority=f.access.authority.clone();fresh_authority.grant_id="fresh-after-idle".into();
+-    let expiry=SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_millis() as u64+25_000;
+-    f.core.state.lock().unwrap().store.issue_document_grant_trusted(&f.access.document,&fresh_authority,
+-        &[DocumentOperation::ReadText],expiry).unwrap();
+-    let mut request=f.request.clone();request.grant_id=fresh_authority.grant_id;
+-    let fresh=value(f.core.document_read_open(request.clone(),DocumentReadOperation::ReadText).unwrap());
+-    let use_request=DocumentReadUseRequest {scope:request.scope,read_session_id:fresh["read_session_id"].as_str().unwrap().into()};
+-    assert_eq!(f.core.document_read_chunk(use_request,65536).unwrap().bytes,TEXT);
++    let mut fresh_authority = f.access.authority.clone();
++    fresh_authority.grant_id = "fresh-after-idle".into();
++    let expiry = SystemTime::now()
++        .duration_since(UNIX_EPOCH)
++        .unwrap()
++        .as_millis() as u64
++        + 25_000;
++    f.core
++        .state
++        .lock()
++        .unwrap()
++        .store
++        .issue_document_grant_trusted(
++            &f.access.document,
++            &fresh_authority,
++            &[DocumentOperation::ReadText],
++            expiry,
++        )
++        .unwrap();
++    let mut request = f.request.clone();
++    request.grant_id = fresh_authority.grant_id;
++    let fresh = value(
++        f.core
++            .document_read_open(request.clone(), DocumentReadOperation::ReadText)
++            .unwrap(),
++    );
++    let use_request = DocumentReadUseRequest {
++        scope: request.scope,
++        read_session_id: fresh["read_session_id"].as_str().unwrap().into(),
++    };
++    assert_eq!(
++        f.core
++            .document_read_chunk(use_request, 65536)
++            .unwrap()
++            .bytes,
++        TEXT
++    );
+ }
+ 
+ #[test]
+Diff in /workspace/Muyon-reader-ffi-combination-20261022/crates/muyon-android-ffi/src/document_bridge_tests.rs:223:
+ fn readonly_annotations_and_explicit_shutdown_do_not_claim_a_display_lease() {
+-    let f=Fixture::text();let read=f.open();let processing=f.process();
+-    let annotations=value(f.core.document_annotations(f.request.clone()).unwrap());
++    let f = Fixture::text();
++    let read = f.open();
++    let processing = f.process();
++    let annotations = value(f.core.document_annotations(f.request.clone()).unwrap());
+     assert!(annotations["annotations"].as_array().unwrap().is_empty());
+-    assert_eq!(annotations["annotation_editing"],false);
++    assert_eq!(annotations["annotation_editing"], false);
+     f.core.document_read_shutdown().unwrap();
+-    assert!(f.core.document_read_chunk(read,7).is_err());
++    assert!(f.core.document_read_chunk(read, 7).is_err());
+     assert!(f.core.document_metadata(f.request.clone()).is_err());
+-    assert!(f.core.document_evidence_query(processing,"literal".into(),8).is_err());
+-    assert!(f.core.document_read_open(f.request.clone(),DocumentReadOperation::ReadText).is_err());
++    assert!(f
++        .core
++        .document_evidence_query(processing, "literal".into(), 8)
++        .is_err());
++    assert!(f
++        .core
++        .document_read_open(f.request.clone(), DocumentReadOperation::ReadText)
++        .is_err());
+ }
+ 
+Diff in /workspace/Muyon-reader-ffi-combination-20261022/crates/muyon-android-ffi/src/lib.rs:18:
+ };
+ 
+ mod document_bridge;
++use document_bridge::DocumentBridge;
+ pub use document_bridge::{
+     DocumentAccessRequest, DocumentEvidenceAnswerRequest, DocumentEvidenceKind,
+     DocumentEvidenceUseRequest, DocumentReadChunkResult, DocumentReadOperation,
+Diff in /workspace/Muyon-reader-ffi-combination-20261022/crates/muyon-android-ffi/src/lib.rs:24:
+     DocumentReadUseRequest, DocumentReaderScope,
+ };
+-use document_bridge::DocumentBridge;
+ #[cfg(test)]
+ mod document_bridge_tests;
+ 
+Diff in /workspace/Muyon-reader-ffi-combination-20261022/crates/muyon-android-ffi/src/lib.rs:311:
+     }
+ 
+     /// Private trusted Service only: exact existing grant references, no issuer.
+-    pub fn document_metadata(&self, request: DocumentAccessRequest) -> Result<String, ProductError> {
++    pub fn document_metadata(
++        &self,
++        request: DocumentAccessRequest,
++    ) -> Result<String, ProductError> {
+         document_call(self, |bridge| bridge.metadata(request))
+     }
+-    pub fn document_annotations(&self, request: DocumentAccessRequest) -> Result<String, ProductError> {
++    pub fn document_annotations(
++        &self,
++        request: DocumentAccessRequest,
++    ) -> Result<String, ProductError> {
+         document_call(self, |bridge| bridge.annotations(request))
+     }
+-    pub fn document_read_open(&self, request: DocumentAccessRequest, purpose: DocumentReadOperation) -> Result<String, ProductError> {
++    pub fn document_read_open(
++        &self,
++        request: DocumentAccessRequest,
++        purpose: DocumentReadOperation,
++    ) -> Result<String, ProductError> {
+         document_call(self, |bridge| bridge.open(request, purpose))
+     }
+-    pub fn document_read_check(&self, request: DocumentReadUseRequest) -> Result<String, ProductError> {
++    pub fn document_read_check(
++        &self,
++        request: DocumentReadUseRequest,
++    ) -> Result<String, ProductError> {
+         document_call(self, |bridge| bridge.check(request))
+     }
+-    pub fn document_read_chunk(&self, request: DocumentReadUseRequest, max_bytes: u32) -> Result<DocumentReadChunkResult, ProductError> {
++    pub fn document_read_chunk(
++        &self,
++        request: DocumentReadUseRequest,
++        max_bytes: u32,
++    ) -> Result<DocumentReadChunkResult, ProductError> {
+         document_call(self, |bridge| bridge.chunk(request, max_bytes))
+     }
+     pub fn document_read_close(&self, request: DocumentReadUseRequest) -> Result<(), ProductError> {
+Diff in /workspace/Muyon-reader-ffi-combination-20261022/crates/muyon-android-ffi/src/lib.rs:336:
+     pub fn document_read_shutdown(&self) -> Result<(), ProductError> {
+         document_call(self, DocumentBridge::shutdown)
+     }
+-    pub fn document_evidence_process(&self, request: DocumentAccessRequest, kind: DocumentEvidenceKind) -> Result<String, ProductError> {
++    pub fn document_evidence_process(
++        &self,
++        request: DocumentAccessRequest,
++        kind: DocumentEvidenceKind,
++    ) -> Result<String, ProductError> {
+         document_call(self, |bridge| bridge.process(request, kind))
+     }
+-    pub fn document_evidence_query(&self, context: DocumentEvidenceUseRequest, query: String, limit: u32) -> Result<String, ProductError> {
++    pub fn document_evidence_query(
++        &self,
++        context: DocumentEvidenceUseRequest,
++        query: String,
++        limit: u32,
++    ) -> Result<String, ProductError> {
+         document_call(self, |bridge| bridge.query(context, query, limit))
+     }
+-    pub fn document_evidence_quote(&self, context: DocumentEvidenceUseRequest, query_id: String, evidence_id: String) -> Result<String, ProductError> {
++    pub fn document_evidence_quote(
++        &self,
++        context: DocumentEvidenceUseRequest,
++        query_id: String,
++        evidence_id: String,
++    ) -> Result<String, ProductError> {
+         document_call(self, |bridge| bridge.quote(context, query_id, evidence_id))
+     }
+-    pub fn document_evidence_answer(&self, request: DocumentEvidenceAnswerRequest) -> Result<String, ProductError> {
++    pub fn document_evidence_answer(
++        &self,
++        request: DocumentEvidenceAnswerRequest,
++    ) -> Result<String, ProductError> {
+         document_call(self, |bridge| bridge.answer(request))
+     }
+-    pub fn document_evidence_close(&self, context: DocumentEvidenceUseRequest) -> Result<(), ProductError> {
++    pub fn document_evidence_close(
++        &self,
++        context: DocumentEvidenceUseRequest,
++    ) -> Result<(), ProductError> {
+         document_call(self, |bridge| bridge.close_evidence(context))
+     }
+ 
+Diff in /workspace/Muyon-reader-ffi-combination-20261022/crates/muyon-android-ffi/src/document_bridge.rs:15:
+ };
+ use serde::Serialize;
+ use serde_json::json;
+-use std::{collections::BTreeMap, ops::Deref, time::{Duration, Instant}};
++use std::{
++    collections::BTreeMap,
++    ops::Deref,
++    time::{Duration, Instant},
++};
+ 
+ type Result<T> = std::result::Result<T, ProductError>;
+ const MAX_WIRE: usize = 262144;
+Diff in /workspace/Muyon-reader-ffi-combination-20261022/crates/muyon-android-ffi/src/document_bridge.rs:51:
+     pub session_active: bool,
+ }
+ #[derive(Clone, Copy, uniffi::Enum)]
+-pub enum DocumentReadOperation { ReadText, Render }
++pub enum DocumentReadOperation {
++    ReadText,
++    Render,
++}
+ impl From<DocumentReadOperation> for DocumentReadPurpose {
+     fn from(value: DocumentReadOperation) -> Self {
+-        match value { DocumentReadOperation::ReadText => Self::ReadText, DocumentReadOperation::Render => Self::Render }
++        match value {
++            DocumentReadOperation::ReadText => Self::ReadText,
++            DocumentReadOperation::Render => Self::Render,
++        }
+     }
+ }
+ #[derive(Clone, Copy, uniffi::Enum)]
+Diff in /workspace/Muyon-reader-ffi-combination-20261022/crates/muyon-android-ffi/src/document_bridge.rs:61:
+-pub enum DocumentEvidenceKind { Utf8Text, Pdf, Ocr }
++pub enum DocumentEvidenceKind {
++    Utf8Text,
++    Pdf,
++    Ocr,
++}
+ impl From<DocumentEvidenceKind> for InputKind {
+     fn from(value: DocumentEvidenceKind) -> Self {
+-        match value { DocumentEvidenceKind::Utf8Text => Self::Utf8Text, DocumentEvidenceKind::Pdf => Self::Pdf, DocumentEvidenceKind::Ocr => Self::Ocr }
++        match value {
++            DocumentEvidenceKind::Utf8Text => Self::Utf8Text,
++            DocumentEvidenceKind::Pdf => Self::Pdf,
++            DocumentEvidenceKind::Ocr => Self::Ocr,
++        }
+     }
+ }
+ #[derive(Clone, uniffi::Record)]
+Diff in /workspace/Muyon-reader-ffi-combination-20261022/crates/muyon-android-ffi/src/document_bridge.rs:76:
+     pub body: String,
+     pub cited_indices: Vec<u32>,
+ }
+-fn failure(code: &'static str) -> ProductError { ProductError::Failure { code: code.into() } }
++fn failure(code: &'static str) -> ProductError {
++    ProductError::Failure { code: code.into() }
++}
+ fn identifier(value: &str) -> Result<()> {
+-    if value.is_empty() || value.len() > 128 || !value.bytes().all(|b| b.is_ascii_alphanumeric() || b"-_.:".contains(&b)) {
++    if value.is_empty()
++        || value.len() > 128
++        || !value
++            .bytes()
++            .all(|b| b.is_ascii_alphanumeric() || b"-_.:".contains(&b))
++    {
+         Err(failure("DOCUMENT_INVALID_REQUEST"))
+-    } else { Ok(()) }
++    } else {
++        Ok(())
++    }
+ }
+ fn scope(value: &DocumentReaderScope) -> Result<()> {
+     identifier(&value.service_session)?;
+Diff in /workspace/Muyon-reader-ffi-combination-20261022/crates/muyon-android-ffi/src/document_bridge.rs:87:
+     identifier(&value.generation)?;
+-    identifier(value.project.as_deref().ok_or_else(|| failure("DOCUMENT_SCOPE_MISMATCH"))?)
++    identifier(
++        value
++            .project
++            .as_deref()
++            .ok_or_else(|| failure("DOCUMENT_SCOPE_MISMATCH"))?,
++    )
+ }
+ fn same_scope(expected: &DocumentReaderScope, actual: &DocumentReaderScope) -> Result<()> {
+     scope(actual)?;
+Diff in /workspace/Muyon-reader-ffi-combination-20261022/crates/muyon-android-ffi/src/document_bridge.rs:92:
+-    if expected != actual { return Err(failure("DOCUMENT_SCOPE_MISMATCH")); }
++    if expected != actual {
++        return Err(failure("DOCUMENT_SCOPE_MISMATCH"));
++    }
+     Ok(())
+ }
+ fn encode<T: Serialize>(value: &T) -> Result<String> {
+Diff in /workspace/Muyon-reader-ffi-combination-20261022/crates/muyon-android-ffi/src/document_bridge.rs:96:
+     let raw = serde_json::to_string(value).map_err(|_| failure("DOCUMENT_UNAVAILABLE"))?;
+-    if raw.len() > MAX_WIRE { return Err(failure("DOCUMENT_LIMIT")); }
++    if raw.len() > MAX_WIRE {
++        return Err(failure("DOCUMENT_LIMIT"));
++    }
+     Ok(raw)
+ }
+ fn core_error(error: ContractError) -> ProductError {
+Diff in /workspace/Muyon-reader-ffi-combination-20261022/crates/muyon-android-ffi/src/document_bridge.rs:101:
+     let code = match error {
+         ContractError::InvalidAuthority => "DOCUMENT_ACCESS_DENIED",
+         ContractError::ScopeMismatch => "DOCUMENT_SCOPE_MISMATCH",
+-        ContractError::RevisionConflict | ContractError::BindingMismatch | ContractError::NotFound => "DOCUMENT_SOURCE_INVALIDATED",
++        ContractError::RevisionConflict
++        | ContractError::BindingMismatch
++        | ContractError::NotFound => "DOCUMENT_SOURCE_INVALIDATED",
+         ContractError::TextLimit | ContractError::RawLimit => "DOCUMENT_LIMIT",
+-        ContractError::InvalidIdentity | ContractError::InvalidJson | ContractError::InvalidVersion
+-        | ContractError::InvalidRevision | ContractError::InvalidPayload | ContractError::Required => "DOCUMENT_INVALID_REQUEST",
++        ContractError::InvalidIdentity
++        | ContractError::InvalidJson
++        | ContractError::InvalidVersion
++        | ContractError::InvalidRevision
++        | ContractError::InvalidPayload
++        | ContractError::Required => "DOCUMENT_INVALID_REQUEST",
+         _ => "DOCUMENT_UNAVAILABLE",
+     };
+     failure(code)
+Diff in /workspace/Muyon-reader-ffi-combination-20261022/crates/muyon-android-ffi/src/document_bridge.rs:114:
+     core_id: String,
+     reference: DocumentRef,
+ }
+-struct QuerySnapshot { id: String, hits: Vec<EvidenceRef> }
++struct QuerySnapshot {
++    id: String,
++    hits: Vec<EvidenceRef>,
++}
+ struct ProcessingEntry {
+     scope: DocumentReaderScope,
+     access: DocumentAccess,
+Diff in /workspace/Muyon-reader-ffi-combination-20261022/crates/muyon-android-ffi/src/document_bridge.rs:124:
+     touched: Instant,
+ }
+ impl ProcessingEntry {
+-    fn expired(&self) -> bool { self.opened.elapsed() >= LIFE || self.touched.elapsed() >= IDLE }
++    fn expired(&self) -> bool {
++        self.opened.elapsed() >= LIFE || self.touched.elapsed() >= IDLE
++    }
+ }
+ /// Owns exactly the original BusinessStore through the canonical facade. Deref
+ /// keeps existing business/draft callsites on the SAME connection and owner lock.
+Diff in /workspace/Muyon-reader-ffi-combination-20261022/crates/muyon-android-ffi/src/document_bridge.rs:140:
+ }
+ impl Deref for DocumentBridge {
+     type Target = BusinessStore;
+-    fn deref(&self) -> &BusinessStore { self.host.store() }
++    fn deref(&self) -> &BusinessStore {
++        self.host.store()
++    }
+ }
+ impl DocumentBridge {
+     pub(crate) fn new(store: BusinessStore, workspace: String, epoch: String) -> Self {
+Diff in /workspace/Muyon-reader-ffi-combination-20261022/crates/muyon-android-ffi/src/document_bridge.rs:147:
+-        Self { host: DocumentReaderHost::new(store), workspace, epoch, reads: BTreeMap::new(),
+-            processing: BTreeMap::new(), cleanup_blocked: false, evidence_cleanup_failed: false, stopped: false }
++        Self {
++            host: DocumentReaderHost::new(store),
++            workspace,
++            epoch,
++            reads: BTreeMap::new(),
++            processing: BTreeMap::new(),
++            cleanup_blocked: false,
++            evidence_cleanup_failed: false,
++            stopped: false,
++        }
+     }
+     fn ready(&self) -> Result<()> {
+-        if self.stopped { return Err(failure("DOCUMENT_READER_STOPPED")); }
+-        if self.cleanup_blocked { return Err(failure("DOCUMENT_CLEANUP_REQUIRED")); }
++        if self.stopped {
++            return Err(failure("DOCUMENT_READER_STOPPED"));
++        }
++        if self.cleanup_blocked {
++            return Err(failure("DOCUMENT_CLEANUP_REQUIRED"));
++        }
+         Ok(())
+     }
+     fn access(&self, request: &DocumentAccessRequest) -> Result<DocumentAccess> {
+Diff in /workspace/Muyon-reader-ffi-combination-20261022/crates/muyon-android-ffi/src/document_bridge.rs:156:
+         self.ready()?;
+         scope(&request.scope)?;
+         identifier(&request.grant_id)?;
+-        if request.document_ref_json.len() > 8192 { return Err(failure("DOCUMENT_LIMIT")); }
++        if request.document_ref_json.len() > 8192 {
++            return Err(failure("DOCUMENT_LIMIT"));
++        }
+         let document: DocumentRef = serde_json::from_str(&request.document_ref_json)
+             .map_err(|_| failure("DOCUMENT_INVALID_REQUEST"))?;
+-        if document.scope().workspace_id != self.workspace || document.scope().project_id != request.scope.project {
++        if document.scope().workspace_id != self.workspace
++            || document.scope().project_id != request.scope.project
++        {
+             return Err(failure("DOCUMENT_SCOPE_MISMATCH"));
+         }
+         let generation = Revision::parse(&request.grant_generation).map_err(core_error)?;
+Diff in /workspace/Muyon-reader-ffi-combination-20261022/crates/muyon-android-ffi/src/document_bridge.rs:166:
+-        if generation.value() == 0 { return Err(failure("DOCUMENT_ACCESS_DENIED")); }
+-        Ok(DocumentAccess { document, authority: AuthorityBinding {
+-            grant_id: request.grant_id.clone(), generation, owner_epoch: self.epoch.clone(),
+-        } })
++        if generation.value() == 0 {
++            return Err(failure("DOCUMENT_ACCESS_DENIED"));
++        }
++        Ok(DocumentAccess {
++            document,
++            authority: AuthorityBinding {
++                grant_id: request.grant_id.clone(),
++                generation,
++                owner_epoch: self.epoch.clone(),
++            },
++        })
+     }
+     fn reader_result<T>(&mut self, result: std::result::Result<T, DocumentReadError>) -> Result<T> {
+         match result {
+Diff in /workspace/Muyon-reader-ffi-combination-20261022/crates/muyon-android-ffi/src/document_bridge.rs:178:
+             }
+         }
+     }
+-    fn evidence_result<T>(&mut self, result: std::result::Result<T, StoreEvidenceError>) -> Result<T> {
++    fn evidence_result<T>(
++        &mut self,
++        result: std::result::Result<T, StoreEvidenceError>,
++    ) -> Result<T> {
+         match result {
+             Ok(value) => Ok(value),
+             Err(StoreEvidenceError::Core(error)) => Err(core_error(error)),
+Diff in /workspace/Muyon-reader-ffi-combination-20261022/crates/muyon-android-ffi/src/document_bridge.rs:192:
+                 EvidenceError::SourceMismatch => "DOCUMENT_SOURCE_INVALIDATED",
+                 EvidenceError::LimitExceeded => "DOCUMENT_LIMIT",
+                 EvidenceError::NotAvailable => "DOCUMENT_EVIDENCE_UNAVAILABLE",
+-                EvidenceError::InvalidRequest | EvidenceError::InvalidAnchor => "DOCUMENT_INVALID_REQUEST",
++                EvidenceError::InvalidRequest | EvidenceError::InvalidAnchor => {
++                    "DOCUMENT_INVALID_REQUEST"
++                }
+             })),
+         }
+     }
+Diff in /workspace/Muyon-reader-ffi-combination-20261022/crates/muyon-android-ffi/src/document_bridge.rs:205:
+     }
+     pub(crate) fn annotations(&mut self, request: DocumentAccessRequest) -> Result<String> {
+         let access = self.access(&request)?;
+-        let annotations = self.host.store().list_annotations(&access).map_err(core_error)?;
+-        let out = encode(&json!({"schema":1,"status":"listed","annotations":annotations,"annotation_editing":false}))?;
++        let annotations = self
++            .host
++            .store()
++            .list_annotations(&access)
++            .map_err(core_error)?;
++        let out = encode(
++            &json!({"schema":1,"status":"listed","annotations":annotations,"annotation_editing":false}),
++        )?;
+         self.deliver(&access, None, out)
+     }
+-    pub(crate) fn open(&mut self, request: DocumentAccessRequest, purpose: DocumentReadOperation) -> Result<String> {
++    pub(crate) fn open(
++        &mut self,
++        request: DocumentAccessRequest,
++        purpose: DocumentReadOperation,
++    ) -> Result<String> {
+         let access = self.access(&request)?;
+         if self.reads.len() >= 8 {
+             // Admission only: explicit checks hash the whole source. Never run
+Diff in /workspace/Muyon-reader-ffi-combination-20261022/crates/muyon-android-ffi/src/document_bridge.rs:216:
+             // these for each chunk; core read_chunk already validates its lease.
+-            let known: Vec<_> = self.reads.iter().map(|(id, lease)| (id.clone(), lease.core_id.clone())).collect();
++            let known: Vec<_> = self
++                .reads
++                .iter()
++                .map(|(id, lease)| (id.clone(), lease.core_id.clone()))
++                .collect();
+             for (id, core_id) in known {
+                 let result = self.host.is_current(&core_id);
+-                if !self.reader_result(result)? { self.reads.remove(&id); }
++                if !self.reader_result(result)? {
++                    self.reads.remove(&id);
++                }
+             }
+-            if self.reads.len() >= 8 { return Err(failure("DOCUMENT_LIMIT")); }
++            if self.reads.len() >= 8 {
++                return Err(failure("DOCUMENT_LIMIT"));
++            }
+         }
+         let id = opaque_id("document-reader")?;
+         let result = self.host.open(&access, purpose.into());
+Diff in /workspace/Muyon-reader-ffi-combination-20261022/crates/muyon-android-ffi/src/document_bridge.rs:226:
+         let info = self.reader_result(result)?;
+-        self.reads.insert(id.clone(), ReadLease { scope: request.scope, core_id: info.session_id,
+-            reference: info.metadata.document.clone() });
++        self.reads.insert(
++            id.clone(),
++            ReadLease {
++                scope: request.scope,
++                core_id: info.session_id,
++                reference: info.metadata.document.clone(),
++            },
++        );
+         if info.metadata.blob.byte_length.value() > MAX_STREAM {
+-            let lease = self.reads.get(&id).ok_or_else(|| failure("DOCUMENT_UNAVAILABLE"))?;
+-            let request = DocumentReadUseRequest { scope: lease.scope.clone(), read_session_id: id };
++            let lease = self
++                .reads
++                .get(&id)
++                .ok_or_else(|| failure("DOCUMENT_UNAVAILABLE"))?;
++            let request = DocumentReadUseRequest {
++                scope: lease.scope.clone(),
++                read_session_id: id,
++            };
+             self.close(request)?;
+             return Err(failure("DOCUMENT_LIMIT"));
+         }
+Diff in /workspace/Muyon-reader-ffi-combination-20261022/crates/muyon-android-ffi/src/document_bridge.rs:238:
+             "expiry_status":"enforced_by_core_not_exposed","annotation_editing":false,
+             "safety_status":"not_assessed","display_lease":false}));
+         if result.is_err() {
+-            let lease = self.reads.get(&id).ok_or_else(|| failure("DOCUMENT_UNAVAILABLE"))?;
+-            self.close(DocumentReadUseRequest { scope: lease.scope.clone(), read_session_id: id })?;
++            let lease = self
++                .reads
++                .get(&id)
++                .ok_or_else(|| failure("DOCUMENT_UNAVAILABLE"))?;
++            self.close(DocumentReadUseRequest {
++                scope: lease.scope.clone(),
++                read_session_id: id,
++            })?;
+         }
+         result
+     }
+Diff in /workspace/Muyon-reader-ffi-combination-20261022/crates/muyon-android-ffi/src/document_bridge.rs:246:
+-    fn read_identity(&self, request: &DocumentReadUseRequest) -> Result<Option<(String, DocumentRef)>> {
++    fn read_identity(
++        &self,
++        request: &DocumentReadUseRequest,
++    ) -> Result<Option<(String, DocumentRef)>> {
+         scope(&request.scope)?;
+         identifier(&request.read_session_id)?;
+         match self.reads.get(&request.read_session_id) {
+Diff in /workspace/Muyon-reader-ffi-combination-20261022/crates/muyon-android-ffi/src/document_bridge.rs:250:
+             None => Ok(None),
+-            Some(lease) => { same_scope(&lease.scope, &request.scope)?; Ok(Some((lease.core_id.clone(), lease.reference.clone()))) }
++            Some(lease) => {
++                same_scope(&lease.scope, &request.scope)?;
++                Ok(Some((lease.core_id.clone(), lease.reference.clone())))
++            }
+         }
+     }
+     pub(crate) fn check(&mut self, request: DocumentReadUseRequest) -> Result<String> {
+Diff in /workspace/Muyon-reader-ffi-combination-20261022/crates/muyon-android-ffi/src/document_bridge.rs:255:
+         self.ready()?;
+         let Some((id, reference)) = self.read_identity(&request)? else {
+-            return encode(&json!({"schema":1,"status":"invalidated","read_session_id":request.read_session_id}));
++            return encode(
++                &json!({"schema":1,"status":"invalidated","read_session_id":request.read_session_id}),
++            );
+         };
+         let result = self.host.is_current(&id);
+         let current = self.reader_result(result)?;
+Diff in /workspace/Muyon-reader-ffi-combination-20261022/crates/muyon-android-ffi/src/document_bridge.rs:261:
+-        if !current { self.reads.remove(&request.read_session_id); }
+-        encode(&json!({"schema":1,"status":if current {"current"} else {"invalidated"},
++        if !current {
++            self.reads.remove(&request.read_session_id);
++        }
++        encode(
++            &json!({"schema":1,"status":if current {"current"} else {"invalidated"},
+             "read_session_id":request.read_session_id,"document":reference,
+-            "expires_at_ms":null,"expiry_status":"enforced_by_core_not_exposed"}))
++            "expires_at_ms":null,"expiry_status":"enforced_by_core_not_exposed"}),
++        )
+     }
+-    pub(crate) fn chunk(&mut self, request: DocumentReadUseRequest, max_bytes: u32) -> Result<DocumentReadChunkResult> {
++    pub(crate) fn chunk(
++        &mut self,
++        request: DocumentReadUseRequest,
++        max_bytes: u32,
++    ) -> Result<DocumentReadChunkResult> {
+         self.ready()?;
+-        let (id, _) = self.read_identity(&request)?.ok_or_else(|| failure("DOCUMENT_SOURCE_INVALIDATED"))?;
++        let (id, _) = self
++            .read_identity(&request)?
++            .ok_or_else(|| failure("DOCUMENT_SOURCE_INVALIDATED"))?;
+         let result = self.host.read_chunk(&id, max_bytes as usize);
+         match result {
+             Ok(chunk) => {
+Diff in /workspace/Muyon-reader-ffi-combination-20261022/crates/muyon-android-ffi/src/document_bridge.rs:272:
+-                if chunk.eof { self.reads.remove(&request.read_session_id); }
+-                Ok(DocumentReadChunkResult { offset: chunk.offset.as_str().into(), bytes: chunk.bytes,
+-                    eof: chunk.eof, session_active: !chunk.eof })
++                if chunk.eof {
++                    self.reads.remove(&request.read_session_id);
++                }
++                Ok(DocumentReadChunkResult {
++                    offset: chunk.offset.as_str().into(),
++                    bytes: chunk.bytes,
++                    eof: chunk.eof,
++                    session_active: !chunk.eof,
++                })
+             }
+             Err(error) => {
+-                if !matches!(error, DocumentReadError::Cleanup { .. }) { self.reads.remove(&request.read_session_id); }
++                if !matches!(error, DocumentReadError::Cleanup { .. }) {
++                    self.reads.remove(&request.read_session_id);
++                }
+                 self.reader_result(Err(error))
+             }
+         }
+Diff in /workspace/Muyon-reader-ffi-combination-20261022/crates/muyon-android-ffi/src/document_bridge.rs:281:
+     }
+     pub(crate) fn close(&mut self, request: DocumentReadUseRequest) -> Result<()> {
+-        let Some((id, _)) = self.read_identity(&request)? else { return Ok(()); };
++        let Some((id, _)) = self.read_identity(&request)? else {
++            return Ok(());
++        };
+         let result = self.host.close(&id);
+         self.reader_result(result)?;
+         self.reads.remove(&request.read_session_id);
+Diff in /workspace/Muyon-reader-ffi-combination-20261022/crates/muyon-android-ffi/src/document_bridge.rs:288:
+     }
+     pub(crate) fn release_owner(&mut self, owner: &str) -> Result<()> {
+         identifier(owner)?;
+-        let closing: Vec<_> = self.reads.iter().filter(|(_, lease)| lease.scope.service_session == owner)
+-            .map(|(id, lease)| DocumentReadUseRequest { scope: lease.scope.clone(), read_session_id: id.clone() }).collect();
++        let closing: Vec<_> = self
++            .reads
++            .iter()
++            .filter(|(_, lease)| lease.scope.service_session == owner)
++            .map(|(id, lease)| DocumentReadUseRequest {
++                scope: lease.scope.clone(),
++                read_session_id: id.clone(),
++            })
++            .collect();
+         let mut first = None;
+         for request in closing {
+-            if let Err(error) = self.close(request) { if first.is_none() { first = Some(error); } }
++            if let Err(error) = self.close(request) {
++                if first.is_none() {
++                    first = Some(error);
++                }
++            }
+         }
+-        self.processing.retain(|_, entry| entry.scope.service_session != owner);
+-        if let Some(error) = first { return Err(error); }
+-        if self.cleanup_blocked { return Err(failure("DOCUMENT_CLEANUP_REQUIRED")); }
++        self.processing
++            .retain(|_, entry| entry.scope.service_session != owner);
++        if let Some(error) = first {
++            return Err(error);
++        }
++        if self.cleanup_blocked {
++            return Err(failure("DOCUMENT_CLEANUP_REQUIRED"));
++        }
+         Ok(())
+     }
+     /// Explicit trusted Service shutdown: invalidates every document output, not
+Diff in /workspace/Muyon-reader-ffi-combination-20261022/crates/muyon-android-ffi/src/document_bridge.rs:307:
+         let result = self.host.close_all();
+         self.reader_result(result)?;
+         self.reads.clear();
+-        if self.evidence_cleanup_failed { return Err(failure("DOCUMENT_CLEANUP_REQUIRED")); }
++        if self.evidence_cleanup_failed {
++            return Err(failure("DOCUMENT_CLEANUP_REQUIRED"));
++        }
+         Ok(())
+     }
+     fn take_processing(&mut self, request: &DocumentEvidenceUseRequest) -> Result<ProcessingEntry> {
+Diff in /workspace/Muyon-reader-ffi-combination-20261022/crates/muyon-android-ffi/src/document_bridge.rs:315:
+         scope(&request.scope)?;
+         identifier(&request.processing_id)?;
+         self.processing.retain(|_, entry| !entry.expired());
+-        let entry = self.processing.get(&request.processing_id).ok_or_else(|| failure("DOCUMENT_EVIDENCE_SESSION_INVALIDATED"))?;
++        let entry = self
++            .processing
++            .get(&request.processing_id)
++            .ok_or_else(|| failure("DOCUMENT_EVIDENCE_SESSION_INVALIDATED"))?;
+         same_scope(&entry.scope, &request.scope)?;
+-        self.processing.remove(&request.processing_id).ok_or_else(|| failure("DOCUMENT_EVIDENCE_SESSION_INVALIDATED"))
++        self.processing
++            .remove(&request.processing_id)
++            .ok_or_else(|| failure("DOCUMENT_EVIDENCE_SESSION_INVALIDATED"))
+     }
+     fn validate_query(&self, context: &DocumentEvidenceUseRequest, query_id: &str) -> Result<()> {
+         self.ready()?;
+Diff in /workspace/Muyon-reader-ffi-combination-20261022/crates/muyon-android-ffi/src/document_bridge.rs:324:
+         scope(&context.scope)?;
+         identifier(&context.processing_id)?;
+         identifier(query_id)?;
+-        let entry = self.processing.get(&context.processing_id).ok_or_else(|| failure("DOCUMENT_EVIDENCE_SESSION_INVALIDATED"))?;
++        let entry = self
++            .processing
++            .get(&context.processing_id)
++            .ok_or_else(|| failure("DOCUMENT_EVIDENCE_SESSION_INVALIDATED"))?;
+         same_scope(&entry.scope, &context.scope)?;
+-        if entry.expired() { return Err(failure("DOCUMENT_EVIDENCE_SESSION_INVALIDATED")); }
++        if entry.expired() {
++            return Err(failure("DOCUMENT_EVIDENCE_SESSION_INVALIDATED"));
++        }
+         if entry.query.as_ref().map(|query| query.id.as_str()) != Some(query_id) {
+             return Err(failure("DOCUMENT_EVIDENCE_QUERY_STALE"));
+         }
+Diff in /workspace/Muyon-reader-ffi-combination-20261022/crates/muyon-android-ffi/src/document_bridge.rs:335:
+     /// StoreEvidence's older adapter validates before cleanup. Gate owned output
+     /// through the corrected PUBLIC facade; no nested transaction or delivery in
+     /// its callback. Exact historical metadata must still match, never latest.
+-    fn deliver(&mut self, access: &DocumentAccess, expected: Option<&DocumentMetadata>, out: String) -> Result<String> {
+-        let result = self.host.store().with_document_source(access, DocumentReadPurpose::ReadText, 2_000_000, |view| {
+-            if expected.is_some_and(|metadata| metadata != view.metadata()) {
+-                return Err(ContractError::BindingMismatch);
+-            }
+-            Ok(out)
+-        });
++    fn deliver(
++        &mut self,
++        access: &DocumentAccess,
++        expected: Option<&DocumentMetadata>,
++        out: String,
++    ) -> Result<String> {
++        let result = self.host.store().with_document_source(
++            access,
++            DocumentReadPurpose::ReadText,
++            2_000_000,
++            |view| {
++                if expected.is_some_and(|metadata| metadata != view.metadata()) {
++                    return Err(ContractError::BindingMismatch);
++                }
++                Ok(out)
++            },
++        );
+         self.reader_result(result)
+     }
+     fn deliver_processing(&mut self, entry: &ProcessingEntry, out: String) -> Result<String> {
+Diff in /workspace/Muyon-reader-ffi-combination-20261022/crates/muyon-android-ffi/src/document_bridge.rs:348:
+         let out = self.deliver(&entry.access, Some(entry.processing.source_metadata()), out)?;
+         // Work and cleanup can cross the idle/absolute deadline. Check before
+         // resetting touched or publishing, including error paths that drop entry.
+-        if entry.expired() { return Err(failure("DOCUMENT_EVIDENCE_SESSION_INVALIDATED")); }
++        if entry.expired() {
++            return Err(failure("DOCUMENT_EVIDENCE_SESSION_INVALIDATED"));
++        }
+         Ok(out)
+     }
+-    pub(crate) fn process(&mut self, request: DocumentAccessRequest, kind: DocumentEvidenceKind) -> Result<String> {
++    pub(crate) fn process(
++        &mut self,
++        request: DocumentAccessRequest,
++        kind: DocumentEvidenceKind,
++    ) -> Result<String> {
+         let access = self.access(&request)?;
+         self.processing.retain(|_, entry| !entry.expired());
+-        if self.processing.len() >= MAX_PROCESSING { return Err(failure("DOCUMENT_LIMIT")); }
++        if self.processing.len() >= MAX_PROCESSING {
++            return Err(failure("DOCUMENT_LIMIT"));
++        }
+         let id = opaque_id("document-evidence")?;
+         let result = StoreEvidence::new(self.host.store()).process(&access, kind.into());
+         let processing = self.evidence_result(result)?;
+Diff in /workspace/Muyon-reader-ffi-combination-20261022/crates/muyon-android-ffi/src/document_bridge.rs:361:
+-        let out = encode(&json!({"schema":1,"status":"processed","processing_id":id,"projection":processing.projection()}))?;
++        let out = encode(
++            &json!({"schema":1,"status":"processed","processing_id":id,"projection":processing.projection()}),
++        )?;
+         let out = self.deliver(&access, Some(processing.source_metadata()), out)?;
+         let now = Instant::now();
+-        self.processing.insert(id, ProcessingEntry { scope: request.scope, access, processing, query: None, opened: now, touched: now });
++        self.processing.insert(
++            id,
++            ProcessingEntry {
++                scope: request.scope,
++                access,
++                processing,
++                query: None,
++                opened: now,
++                touched: now,
++            },
++        );
+         Ok(out)
+     }
+-    pub(crate) fn query(&mut self, context: DocumentEvidenceUseRequest, query: String, limit: u32) -> Result<String> {
+-        if query.trim().is_empty() || query.len() > 4096 || query.contains('\0') || limit == 0 || limit as usize > MAX_HITS {
++    pub(crate) fn query(
++        &mut self,
++        context: DocumentEvidenceUseRequest,
++        query: String,
++        limit: u32,
++    ) -> Result<String> {
++        if query.trim().is_empty()
++            || query.len() > 4096
++            || query.contains('\0')
++            || limit == 0
++            || limit as usize > MAX_HITS
++        {
+             return Err(failure("DOCUMENT_INVALID_REQUEST"));
+         }
+         let query_id = opaque_id("document-query")?;
+Diff in /workspace/Muyon-reader-ffi-combination-20261022/crates/muyon-android-ffi/src/document_bridge.rs:372:
+         let mut entry = self.take_processing(&context)?;
+-        let result = StoreEvidence::new(self.host.store()).find_literal(&entry.access, &entry.processing, &query, limit as usize);
++        let result = StoreEvidence::new(self.host.store()).find_literal(
++            &entry.access,
++            &entry.processing,
++            &query,
++            limit as usize,
++        );
+         let hits = self.evidence_result(result)?;
+-        let out = encode(&json!({"schema":1,"status":"queried","processing_id":context.processing_id,"query_id":query_id,"hits":hits}))?;
++        let out = encode(
++            &json!({"schema":1,"status":"queried","processing_id":context.processing_id,"query_id":query_id,"hits":hits}),
++        )?;
+         entry.query = Some(QuerySnapshot { id: query_id, hits });
+         let out = self.deliver_processing(&entry, out)?;
+         entry.touched = Instant::now();
+Diff in /workspace/Muyon-reader-ffi-combination-20261022/crates/muyon-android-ffi/src/document_bridge.rs:379:
+         self.processing.insert(context.processing_id, entry);
+         Ok(out)
+     }
+-    pub(crate) fn quote(&mut self, context: DocumentEvidenceUseRequest, query_id: String, evidence_id: String) -> Result<String> {
++    pub(crate) fn quote(
++        &mut self,
++        context: DocumentEvidenceUseRequest,
++        query_id: String,
++        evidence_id: String,
++    ) -> Result<String> {
+         self.validate_query(&context, &query_id)?;
+         identifier(&evidence_id)?;
+         let mut entry = self.take_processing(&context)?;
+Diff in /workspace/Muyon-reader-ffi-combination-20261022/crates/muyon-android-ffi/src/document_bridge.rs:386:
+-        let hit = entry.query.as_ref().and_then(|query| query.hits.iter().find(|hit| hit.evidence_id == evidence_id))
+-            .cloned().ok_or_else(|| failure("DOCUMENT_INVALID_REQUEST"))?;
+-        let result = StoreEvidence::new(self.host.store()).open(&entry.access, &entry.processing, &hit);
++        let hit = entry
++            .query
++            .as_ref()
++            .and_then(|query| query.hits.iter().find(|hit| hit.evidence_id == evidence_id))
++            .cloned()
++            .ok_or_else(|| failure("DOCUMENT_INVALID_REQUEST"))?;
++        let result =
++            StoreEvidence::new(self.host.store()).open(&entry.access, &entry.processing, &hit);
+         let quote = self.evidence_result(result)?;
+-        let out = encode(&json!({"schema":1,"status":"quoted","processing_id":context.processing_id,"query_id":query_id,"evidence":hit,"quote":quote}))?;
++        let out = encode(
++            &json!({"schema":1,"status":"quoted","processing_id":context.processing_id,"query_id":query_id,"evidence":hit,"quote":quote}),
++        )?;
+         let out = self.deliver_processing(&entry, out)?;
+         entry.touched = Instant::now();
+         self.processing.insert(context.processing_id, entry);
+Diff in /workspace/Muyon-reader-ffi-combination-20261022/crates/muyon-android-ffi/src/document_bridge.rs:395:
+     }
+     pub(crate) fn answer(&mut self, request: DocumentEvidenceAnswerRequest) -> Result<String> {
+         self.validate_query(&request.context, &request.query_id)?;
+-        if request.body.len() > 65536 || request.cited_indices.len() > MAX_HITS { return Err(failure("DOCUMENT_LIMIT")); }
++        if request.body.len() > 65536 || request.cited_indices.len() > MAX_HITS {
++            return Err(failure("DOCUMENT_LIMIT"));
++        }
+         let mut entry = self.take_processing(&request.context)?;
+-        let hits = &entry.query.as_ref().ok_or_else(|| failure("DOCUMENT_EVIDENCE_QUERY_STALE"))?.hits;
+-        let indices: Vec<_> = request.cited_indices.iter().map(|index| *index as usize).collect();
+-        let result = StoreEvidence::new(self.host.store()).answer(&entry.access, &entry.processing, &request.body, hits, &indices);
++        let hits = &entry
++            .query
++            .as_ref()
++            .ok_or_else(|| failure("DOCUMENT_EVIDENCE_QUERY_STALE"))?
++            .hits;
++        let indices: Vec<_> = request
++            .cited_indices
++            .iter()
++            .map(|index| *index as usize)
++            .collect();
++        let result = StoreEvidence::new(self.host.store()).answer(
++            &entry.access,
++            &entry.processing,
++            &request.body,
++            hits,
++            &indices,
++        );
+         let answer = self.evidence_result(result)?;
+-        let out = encode(&json!({"schema":1,"status":"projected","processing_id":request.context.processing_id,"query_id":request.query_id,"answer":answer}))?;
++        let out = encode(
++            &json!({"schema":1,"status":"projected","processing_id":request.context.processing_id,"query_id":request.query_id,"answer":answer}),
++        )?;
+         let out = self.deliver_processing(&entry, out)?;
+         entry.touched = Instant::now();
+         self.processing.insert(request.context.processing_id, entry);
+Diff in /workspace/Muyon-reader-ffi-combination-20261022/crates/muyon-android-ffi/src/document_bridge.rs:410:
+     pub(crate) fn close_evidence(&mut self, request: DocumentEvidenceUseRequest) -> Result<()> {
+         scope(&request.scope)?;
+         identifier(&request.processing_id)?;
+-        if let Some(entry) = self.processing.get(&request.processing_id) { same_scope(&entry.scope, &request.scope)?; }
++        if let Some(entry) = self.processing.get(&request.processing_id) {
++            same_scope(&entry.scope, &request.scope)?;
++        }
+         self.processing.remove(&request.processing_id);
+         Ok(())
+     }
+Diff in /workspace/Muyon-reader-ffi-combination-20261022/crates/muyon-android-ffi/src/document_bridge_tests.rs:2:
+ //! No renderer, Android PFD, model/search or user files. These tests are NOT_RUN until compiled.
+ use super::*;
+ use muyon_core::{blobs::BlobKind, documents::*};
+-use std::{fs, path::PathBuf, sync::atomic::{AtomicUsize, Ordering}, time::{SystemTime, UNIX_EPOCH}};
++use std::{
++    fs,
++    path::PathBuf,
++    sync::atomic::{AtomicUsize, Ordering},
++    time::{SystemTime, UNIX_EPOCH},
++};
+ static NEXT: AtomicUsize = AtomicUsize::new(0);
+ const TEXT: &[u8] = b"original literal evidence\nanother literal passage\n";
+-struct Fixture { core: Arc<ProductCore>, root: PathBuf, request: DocumentAccessRequest, access: DocumentAccess }
++struct Fixture {
++    core: Arc<ProductCore>,
++    root: PathBuf,
++    request: DocumentAccessRequest,
++    access: DocumentAccess,
++}
+ impl Fixture {
+     fn new(bytes: &[u8], format: DocumentFormat, operations: &[DocumentOperation]) -> Self {
+-        let root = std::env::temp_dir().join(format!("muyon-doc-ffi-{}-{}",std::process::id(),NEXT.fetch_add(1,Ordering::Relaxed)));
+-        let core = ProductCore::open(root.to_str().unwrap().into(),"workspace".into(),"epoch".into(),true).unwrap();
++        let root = std::env::temp_dir().join(format!(
++            "muyon-doc-ffi-{}-{}",
++            std::process::id(),
++            NEXT.fetch_add(1, Ordering::Relaxed)
++        ));
++        let core = ProductCore::open(
++            root.to_str().unwrap().into(),
++            "workspace".into(),
++            "epoch".into(),
++            true,
++        )
++        .unwrap();
+         let access = {
+             let state = core.state.lock().unwrap();
+             let store = &state.store;
+Diff in /workspace/Muyon-reader-ffi-combination-20261022/crates/muyon-android-ffi/src/document_bridge_tests.rs:16:
+             let mut command = CommandEnvelope {
+-                protocol_version:1,business_version:1,intent_id:"synthetic-project".into(),
+-                scope:Scope {workspace_id:"workspace".into(),project_id:Some("project".into())},
+-                expected_revision:Revision::new(0),
+-                authority:AuthorityBinding {grant_id:"project-grant".into(),generation:Revision::new(1),owner_epoch:"epoch".into()},
+-                plan_id:"synthetic-plan".into(),plan_digest:"0".repeat(64),
+-                command:Operation::ProjectCreate {project_id:"project".into(),name:"Synthetic".into()},
++                protocol_version: 1,
++                business_version: 1,
++                intent_id: "synthetic-project".into(),
++                scope: Scope {
++                    workspace_id: "workspace".into(),
++                    project_id: Some("project".into()),
++                },
++                expected_revision: Revision::new(0),
++                authority: AuthorityBinding {
++                    grant_id: "project-grant".into(),
++                    generation: Revision::new(1),
++                    owner_epoch: "epoch".into(),
++                },
++                plan_id: "synthetic-plan".into(),
++                plan_digest: "0".repeat(64),
++                command: Operation::ProjectCreate {
++                    project_id: "project".into(),
++                    name: "Synthetic".into(),
++                },
+             };
+-            command.plan_digest=command.expected_plan_digest().unwrap();
+-            store.issue_grant_trusted(&command,None).unwrap();
+-            assert_eq!(store.execute(&command).unwrap().status,ExecutionStatus::Committed);
++            command.plan_digest = command.expected_plan_digest().unwrap();
++            store.issue_grant_trusted(&command, None).unwrap();
++            assert_eq!(
++                store.execute(&command).unwrap().status,
++                ExecutionStatus::Committed
++            );
+             store.initialize_documents_trusted().unwrap();
+-            let upload=store.begin_upload("project").unwrap();
+-            for chunk in bytes.chunks(65536) { store.append_chunk(&upload.upload_id,chunk).unwrap(); }
+-            let blob=store.finish_blob(&upload.upload_id,BlobKind::Document).unwrap();
+-            let metadata=store.register_document_trusted("project","document","Synthetic original",format,&blob).unwrap();
+-            let authority=AuthorityBinding {grant_id:"document-grant".into(),generation:Revision::new(1),owner_epoch:"epoch".into()};
+-            let expiry=SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_millis() as u64+25_000;
+-            store.issue_document_grant_trusted(&metadata.document,&authority,operations,expiry).unwrap();
+-            DocumentAccess {document:metadata.document,authority}
++            let upload = store.begin_upload("project").unwrap();
++            for chunk in bytes.chunks(65536) {
++                store.append_chunk(&upload.upload_id, chunk).unwrap();
++            }
++            let blob = store
++                .finish_blob(&upload.upload_id, BlobKind::Document)
++                .unwrap();
++            let metadata = store
++                .register_document_trusted(
++                    "project",
++                    "document",
++                    "Synthetic original",
++                    format,
++                    &blob,
++                )
++                .unwrap();
++            let authority = AuthorityBinding {
++                grant_id: "document-grant".into(),
++                generation: Revision::new(1),
++                owner_epoch: "epoch".into(),
++            };
++            let expiry = SystemTime::now()
++                .duration_since(UNIX_EPOCH)
++                .unwrap()
++                .as_millis() as u64
++                + 25_000;
++            store
++                .issue_document_grant_trusted(&metadata.document, &authority, operations, expiry)
++                .unwrap();
++            DocumentAccess {
++                document: metadata.document,
++                authority,
++            }
+         };
+-        let request=DocumentAccessRequest {
+-            scope:DocumentReaderScope {service_session:"service-session".into(),generation:"generation-1".into(),project:Some("project".into())},
+-            document_ref_json:serde_json::to_string(&access.document).unwrap(),
+-            grant_id:access.authority.grant_id.clone(),grant_generation:"1".into(),
++        let request = DocumentAccessRequest {
++            scope: DocumentReaderScope {
++                service_session: "service-session".into(),
++                generation: "generation-1".into(),
++                project: Some("project".into()),
++            },
++            document_ref_json: serde_json::to_string(&access.document).unwrap(),
++            grant_id: access.authority.grant_id.clone(),
++            grant_generation: "1".into(),
+         };
+-        Self {core,root,request,access}
++        Self {
++            core,
++            root,
++            request,
++            access,
++        }
+     }
+-    fn text() -> Self { Self::new(TEXT,DocumentFormat::Text,&[DocumentOperation::Inspect,DocumentOperation::ReadText]) }
++    fn text() -> Self {
++        Self::new(
++            TEXT,
++            DocumentFormat::Text,
++            &[DocumentOperation::Inspect, DocumentOperation::ReadText],
++        )
++    }
+     fn open(&self) -> DocumentReadUseRequest {
+-        let value:Value=serde_json::from_str(&self.core.document_read_open(self.request.clone(),DocumentReadOperation::ReadText).unwrap()).unwrap();
+-        assert_eq!(value["display_lease"],false);
+-        assert_eq!(value["safety_status"],"not_assessed");
++        let value: Value = serde_json::from_str(
++            &self
++                .core
++                .document_read_open(self.request.clone(), DocumentReadOperation::ReadText)
++                .unwrap(),
++        )
++        .unwrap();
++        assert_eq!(value["display_lease"], false);
++        assert_eq!(value["safety_status"], "not_assessed");
+         assert!(value["expires_at_ms"].is_null());
+-        DocumentReadUseRequest {scope:self.request.scope.clone(),read_session_id:value["read_session_id"].as_str().unwrap().into()}
++        DocumentReadUseRequest {
++            scope: self.request.scope.clone(),
++            read_session_id: value["read_session_id"].as_str().unwrap().into(),
++        }
+     }
+     fn process(&self) -> DocumentEvidenceUseRequest {
+-        let value:Value=serde_json::from_str(&self.core.document_evidence_process(self.request.clone(),DocumentEvidenceKind::Utf8Text).unwrap()).unwrap();
+-        assert_eq!(value["projection"]["processing"]["extraction"],"available");
+-        assert_eq!(value["projection"]["processing"]["index"],"not_run");
++        let value: Value = serde_json::from_str(
++            &self
++                .core
++                .document_evidence_process(self.request.clone(), DocumentEvidenceKind::Utf8Text)
++                .unwrap(),
++        )
++        .unwrap();
++        assert_eq!(value["projection"]["processing"]["extraction"], "available");
++        assert_eq!(value["projection"]["processing"]["index"], "not_run");
+         assert!(value.get("saved").is_none());
+-        DocumentEvidenceUseRequest {scope:self.request.scope.clone(),processing_id:value["processing_id"].as_str().unwrap().into()}
++        DocumentEvidenceUseRequest {
++            scope: self.request.scope.clone(),
++            processing_id: value["processing_id"].as_str().unwrap().into(),
++        }
+     }
+ }
+-impl Drop for Fixture { fn drop(&mut self) {
+-    let _=self.core.document_read_release_owner(self.request.scope.service_session.clone());
+-    let _=fs::remove_dir_all(&self.root);
+-} }
+-fn value(raw:String) -> Value { serde_json::from_str(&raw).unwrap() }
++impl Drop for Fixture {
++    fn drop(&mut self) {
++        let _ = self
++            .core
++            .document_read_release_owner(self.request.scope.service_session.clone());
++        let _ = fs::remove_dir_all(&self.root);
++    }
++}
++fn value(raw: String) -> Value {
++    serde_json::from_str(&raw).unwrap()
++}
+ 
+ #[test]
+ fn actual_metadata_and_bytes_mark_eof_closed_not_display_authority() {
+Diff in /workspace/Muyon-reader-ffi-combination-20261022/crates/muyon-android-ffi/src/document_bridge_tests.rs:68:
+-    let f=Fixture::text();
+-    let metadata=value(f.core.document_metadata(f.request.clone()).unwrap());
+-    assert_eq!(metadata["document"]["document"],serde_json::to_value(&f.access.document).unwrap());
+-    assert_eq!(metadata["annotation_editing"],false);
+-    let opened=f.open();
+-    let mut bytes=Vec::new();
++    let f = Fixture::text();
++    let metadata = value(f.core.document_metadata(f.request.clone()).unwrap());
++    assert_eq!(
++        metadata["document"]["document"],
++        serde_json::to_value(&f.access.document).unwrap()
++    );
++    assert_eq!(metadata["annotation_editing"], false);
++    let opened = f.open();
++    let mut bytes = Vec::new();
+     loop {
+-        let chunk=f.core.document_read_chunk(opened.clone(),7).unwrap();
+-        assert_eq!(chunk.offset.parse::<usize>().unwrap(),bytes.len());
++        let chunk = f.core.document_read_chunk(opened.clone(), 7).unwrap();
++        assert_eq!(chunk.offset.parse::<usize>().unwrap(), bytes.len());
+         bytes.extend_from_slice(&chunk.bytes);
+-        if chunk.eof { assert!(!chunk.session_active); break; }
++        if chunk.eof {
++            assert!(!chunk.session_active);
++            break;
++        }
+         assert!(chunk.session_active);
+     }
+-    assert_eq!(bytes,TEXT);
+-    let closed=value(f.core.document_read_check(opened.clone()).unwrap());
+-    assert_eq!(closed["status"],"invalidated");
++    assert_eq!(bytes, TEXT);
++    let closed = value(f.core.document_read_check(opened.clone()).unwrap());
++    assert_eq!(closed["status"], "invalidated");
+     f.core.document_read_close(opened).unwrap();
+ }
+ 
+Diff in /workspace/Muyon-reader-ffi-combination-20261022/crates/muyon-android-ffi/src/document_bridge_tests.rs:87:
+ #[test]
+ fn foreign_service_generation_and_project_never_borrow_a_live_reader() {
+-    let f=Fixture::text();let opened=f.open();
+-    let mut wrong=opened.clone();wrong.scope.service_session="other".into();
+-    assert!(f.core.document_read_chunk(wrong.clone(),7).is_err());
++    let f = Fixture::text();
++    let opened = f.open();
++    let mut wrong = opened.clone();
++    wrong.scope.service_session = "other".into();
++    assert!(f.core.document_read_chunk(wrong.clone(), 7).is_err());
+     assert!(f.core.document_read_close(wrong).is_err());
+-    let mut wrong=opened.clone();wrong.scope.generation="old".into();
++    let mut wrong = opened.clone();
++    wrong.scope.generation = "old".into();
+     assert!(f.core.document_read_check(wrong).is_err());
+-    let mut wrong=opened.clone();wrong.scope.project=Some("other".into());
+-    assert!(f.core.document_read_chunk(wrong,7).is_err());
+-    assert_eq!(value(f.core.document_read_check(opened.clone()).unwrap())["status"],"current");
++    let mut wrong = opened.clone();
++    wrong.scope.project = Some("other".into());
++    assert!(f.core.document_read_chunk(wrong, 7).is_err());
++    assert_eq!(
++        value(f.core.document_read_check(opened.clone()).unwrap())["status"],
++        "current"
++    );
+     f.core.document_read_close(opened).unwrap();
+ }
+ 
+Diff in /workspace/Muyon-reader-ffi-combination-20261022/crates/muyon-android-ffi/src/document_bridge_tests.rs:101:
+ #[test]
+ fn forged_or_inspect_only_grants_do_not_open_or_issue_read_permission() {
+-    let f=Fixture::new(TEXT,DocumentFormat::Text,&[DocumentOperation::Inspect]);
++    let f = Fixture::new(TEXT, DocumentFormat::Text, &[DocumentOperation::Inspect]);
+     assert!(f.core.document_metadata(f.request.clone()).is_ok());
+-    assert!(f.core.document_read_open(f.request.clone(),DocumentReadOperation::ReadText).is_err());
+-    let mut forged=f.request.clone();forged.grant_id="unissued".into();
++    assert!(f
++        .core
++        .document_read_open(f.request.clone(), DocumentReadOperation::ReadText)
++        .is_err());
++    let mut forged = f.request.clone();
++    forged.grant_id = "unissued".into();
+     assert!(f.core.document_metadata(forged).is_err());
+-    let mut wrong=f.request.clone();wrong.scope.project=Some("other".into());
++    let mut wrong = f.request.clone();
++    wrong.scope.project = Some("other".into());
+     assert!(f.core.document_metadata(wrong).is_err());
+-    let mut wrong=f.request.clone();
+-    let mut reference:Value=serde_json::from_str(&wrong.document_ref_json).unwrap();
+-    reference["scope"]["workspace_id"]=json!("other");wrong.document_ref_json=reference.to_string();
++    let mut wrong = f.request.clone();
++    let mut reference: Value = serde_json::from_str(&wrong.document_ref_json).unwrap();
++    reference["scope"]["workspace_id"] = json!("other");
++    wrong.document_ref_json = reference.to_string();
+     assert!(f.core.document_metadata(wrong).is_err());
+ }
+ 
+Diff in /workspace/Muyon-reader-ffi-combination-20261022/crates/muyon-android-ffi/src/document_bridge_tests.rs:116:
+ #[test]
+ fn revoked_current_grant_discards_bytes_and_publishes_invalidation() {
+-    let f=Fixture::text();let opened=f.open();
+-    f.core.state.lock().unwrap().store.revoke_document_grant_trusted(&f.access.authority).unwrap();
+-    assert!(f.core.document_read_chunk(opened.clone(),7).is_err());
+-    assert_eq!(value(f.core.document_read_check(opened).unwrap())["status"],"invalidated");
++    let f = Fixture::text();
++    let opened = f.open();
++    f.core
++        .state
++        .lock()
++        .unwrap()
++        .store
++        .revoke_document_grant_trusted(&f.access.authority)
++        .unwrap();
++    assert!(f.core.document_read_chunk(opened.clone(), 7).is_err());
++    assert_eq!(
++        value(f.core.document_read_check(opened).unwrap())["status"],
++        "invalidated"
++    );
+ }
+ 
+ #[test]
+Diff in /workspace/Muyon-reader-ffi-combination-20261022/crates/muyon-android-ffi/src/document_bridge_tests.rs:125:
+ fn deleted_project_and_chunk_limit_errors_never_yield_successful_bytes() {
+-    let f=Fixture::text();let opened=f.open();
+-    assert!(f.core.document_read_chunk(opened.clone(),65537).is_err());
+-    assert_eq!(value(f.core.document_read_check(opened).unwrap())["status"],"invalidated");
+-    let opened=f.open();
+-    let db=muyon_core::sqlite::Db::open(f.root.join("business-v2.sqlite").to_str().unwrap(),false,false).unwrap();
+-    db.exec("UPDATE projects SET deleted=1 WHERE id='project'",&[]).unwrap();
+-    assert!(f.core.document_read_chunk(opened,7).is_err());
++    let f = Fixture::text();
++    let opened = f.open();
++    assert!(f.core.document_read_chunk(opened.clone(), 65537).is_err());
++    assert_eq!(
++        value(f.core.document_read_check(opened).unwrap())["status"],
++        "invalidated"
++    );
++    let opened = f.open();
++    let db = muyon_core::sqlite::Db::open(
++        f.root.join("business-v2.sqlite").to_str().unwrap(),
++        false,
++        false,
++    )
++    .unwrap();
++    db.exec("UPDATE projects SET deleted=1 WHERE id='project'", &[])
++        .unwrap();
++    assert!(f.core.document_read_chunk(opened, 7).is_err());
+ }
+ 
+ #[test]
+Diff in /workspace/Muyon-reader-ffi-combination-20261022/crates/muyon-android-ffi/src/document_bridge_tests.rs:136:
+ fn evidence_uses_real_text_explicit_citations_and_exact_query_snapshot() {
+-    let f=Fixture::new(TEXT,DocumentFormat::Text,&[DocumentOperation::ReadText]);
+-    let context=f.process();
+-    let query=value(f.core.document_evidence_query(context.clone(),"literal".into(),8).unwrap());
+-    assert_eq!(query["hits"].as_array().unwrap().len(),2);
+-    let query_id=query["query_id"].as_str().unwrap().to_owned();
+-    let evidence_id=query["hits"][0]["evidence_id"].as_str().unwrap().to_owned();
+-    let quote=value(f.core.document_evidence_quote(context.clone(),query_id.clone(),evidence_id.clone()).unwrap());
+-    assert_eq!(quote["quote"],"literal");
+-    let uncited=value(f.core.document_evidence_answer(DocumentEvidenceAnswerRequest {
+-        context:context.clone(),query_id:query_id.clone(),body:"body [1] is not a citation".into(),cited_indices:vec![],
+-    }).unwrap());
+-    assert!(uncited["answer"]["citations"].as_array().unwrap().is_empty());
+-    let cited=value(f.core.document_evidence_answer(DocumentEvidenceAnswerRequest {
+-        context:context.clone(),query_id:query_id.clone(),body:"explicit passage".into(),cited_indices:vec![0],
+-    }).unwrap());
+-    assert_eq!(cited["answer"]["citations"][0]["number"],1);
++    let f = Fixture::new(TEXT, DocumentFormat::Text, &[DocumentOperation::ReadText]);
++    let context = f.process();
++    let query = value(
++        f.core
++            .document_evidence_query(context.clone(), "literal".into(), 8)
++            .unwrap(),
++    );
++    assert_eq!(query["hits"].as_array().unwrap().len(), 2);
++    let query_id = query["query_id"].as_str().unwrap().to_owned();
++    let evidence_id = query["hits"][0]["evidence_id"].as_str().unwrap().to_owned();
++    let quote = value(
++        f.core
++            .document_evidence_quote(context.clone(), query_id.clone(), evidence_id.clone())
++            .unwrap(),
++    );
++    assert_eq!(quote["quote"], "literal");
++    let uncited = value(
++        f.core
++            .document_evidence_answer(DocumentEvidenceAnswerRequest {
++                context: context.clone(),
++                query_id: query_id.clone(),
++                body: "body [1] is not a citation".into(),
++                cited_indices: vec![],
++            })
++            .unwrap(),
++    );
++    assert!(uncited["answer"]["citations"]
++        .as_array()
++        .unwrap()
++        .is_empty());
++    let cited = value(
++        f.core
++            .document_evidence_answer(DocumentEvidenceAnswerRequest {
++                context: context.clone(),
++                query_id: query_id.clone(),
++                body: "explicit passage".into(),
++                cited_indices: vec![0],
++            })
++            .unwrap(),
++    );
++    assert_eq!(cited["answer"]["citations"][0]["number"], 1);
+     assert!(cited["answer"]["citations"][0]["evidence"]["page_index_zero_based"].is_null());
+     assert!(cited["answer"]["independent_support_count"].is_null());
+-    f.core.document_evidence_query(context.clone(),"another".into(),8).unwrap();
+-    assert!(f.core.document_evidence_quote(context,query_id,evidence_id).is_err());
++    f.core
++        .document_evidence_query(context.clone(), "another".into(), 8)
++        .unwrap();
++    assert!(f
++        .core
++        .document_evidence_quote(context, query_id, evidence_id)
++        .is_err());
+ }
+ 
+ #[test]
+Diff in /workspace/Muyon-reader-ffi-combination-20261022/crates/muyon-android-ffi/src/document_bridge_tests.rs:160:
+ fn processing_cache_is_not_a_grant_and_other_sessions_cannot_read_it() {
+-    let f=Fixture::text();let context=f.process();
+-    let mut foreign=context.clone();foreign.scope.service_session="other".into();
+-    assert!(f.core.document_evidence_query(foreign,"literal".into(),8).is_err());
+-    f.core.state.lock().unwrap().store.revoke_document_grant_trusted(&f.access.authority).unwrap();
+-    assert!(f.core.document_evidence_query(context,"literal".into(),8).is_err());
++    let f = Fixture::text();
++    let context = f.process();
++    let mut foreign = context.clone();
++    foreign.scope.service_session = "other".into();
++    assert!(f
++        .core
++        .document_evidence_query(foreign, "literal".into(), 8)
++        .is_err());
++    f.core
++        .state
++        .lock()
++        .unwrap()
++        .store
++        .revoke_document_grant_trusted(&f.access.authority)
++        .unwrap();
++    assert!(f
++        .core
++        .document_evidence_query(context, "literal".into(), 8)
++        .is_err());
+ }
+ 
+ #[test]
+Diff in /workspace/Muyon-reader-ffi-combination-20261022/crates/muyon-android-ffi/src/document_bridge_tests.rs:169:
+ fn pdf_processing_remains_unsupported_and_never_claims_a_renderer() {
+-    let f=Fixture::new(b"%PDF-1.4\nsynthetic only\n%%EOF\n",DocumentFormat::Pdf,&[DocumentOperation::ReadText]);
+-    let result=value(f.core.document_evidence_process(f.request.clone(),DocumentEvidenceKind::Pdf).unwrap());
+-    assert_eq!(result["projection"]["processing"]["extraction"],"unsupported");
+-    assert_eq!(result["projection"]["processing"]["index"],"not_run");
++    let f = Fixture::new(
++        b"%PDF-1.4\nsynthetic only\n%%EOF\n",
++        DocumentFormat::Pdf,
++        &[DocumentOperation::ReadText],
++    );
++    let result = value(
++        f.core
++            .document_evidence_process(f.request.clone(), DocumentEvidenceKind::Pdf)
++            .unwrap(),
++    );
++    assert_eq!(
++        result["projection"]["processing"]["extraction"],
++        "unsupported"
++    );
++    assert_eq!(result["projection"]["processing"]["index"], "not_run");
+     assert!(result.get("saved").is_none());
+ }
+ 
+Diff in /workspace/Muyon-reader-ffi-combination-20261022/crates/muyon-android-ffi/src/document_bridge_tests.rs:177:
+ #[test]
+ fn owner_release_closes_only_its_sessions_and_evidence() {
+-    let f=Fixture::text();let first=f.open();let context=f.process();
+-    let mut other=f.request.clone();other.scope.service_session="second-session".into();
+-    let result=value(f.core.document_read_open(other.clone(),DocumentReadOperation::ReadText).unwrap());
+-    let other_use=DocumentReadUseRequest {scope:other.scope,read_session_id:result["read_session_id"].as_str().unwrap().into()};
+-    f.core.document_read_release_owner(f.request.scope.service_session.clone()).unwrap();
+-    assert_eq!(value(f.core.document_read_check(first).unwrap())["status"],"invalidated");
+-    assert!(f.core.document_evidence_query(context,"literal".into(),8).is_err());
+-    assert_eq!(value(f.core.document_read_check(other_use.clone()).unwrap())["status"],"current");
++    let f = Fixture::text();
++    let first = f.open();
++    let context = f.process();
++    let mut other = f.request.clone();
++    other.scope.service_session = "second-session".into();
++    let result = value(
++        f.core
++            .document_read_open(other.clone(), DocumentReadOperation::ReadText)
++            .unwrap(),
++    );
++    let other_use = DocumentReadUseRequest {
++        scope: other.scope,
++        read_session_id: result["read_session_id"].as_str().unwrap().into(),
++    };
++    f.core
++        .document_read_release_owner(f.request.scope.service_session.clone())
++        .unwrap();
++    assert_eq!(
++        value(f.core.document_read_check(first).unwrap())["status"],
++        "invalidated"
++    );
++    assert!(f
++        .core
++        .document_evidence_query(context, "literal".into(), 8)
++        .is_err());
++    assert_eq!(
++        value(f.core.document_read_check(other_use.clone()).unwrap())["status"],
++        "current"
++    );
+     f.core.document_read_close(other_use).unwrap();
+ }
+ 
+Diff in /workspace/Muyon-reader-ffi-combination-20261022/crates/muyon-android-ffi/src/document_bridge_tests.rs:190:
+ #[test]
+ fn eight_invalidated_native_ids_do_not_block_fresh_authorized_admission() {
+-    let f=Fixture::text();
+-    let old:Vec<_>=(0..8).map(|_| f.open()).collect();
+-    assert!(f.core.document_read_open(f.request.clone(),DocumentReadOperation::ReadText).is_err());
+-    let mut authority=f.access.authority.clone();authority.generation=Revision::new(2);
+-    let expiry=SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_millis() as u64+25_000;
+-    f.core.state.lock().unwrap().store.issue_document_grant_trusted(&f.access.document,&authority,
+-        &[DocumentOperation::Inspect,DocumentOperation::ReadText],expiry).unwrap();
+-    let mut request=f.request.clone();request.grant_generation="2".into();
+-    let fresh=value(f.core.document_read_open(request.clone(),DocumentReadOperation::ReadText).unwrap());
+-    let use_request=DocumentReadUseRequest {scope:request.scope,read_session_id:fresh["read_session_id"].as_str().unwrap().into()};
+-    assert_eq!(f.core.document_read_chunk(use_request,65536).unwrap().bytes,TEXT);
+-    for previous in old { assert_eq!(value(f.core.document_read_check(previous).unwrap())["status"],"invalidated"); }
++    let f = Fixture::text();
++    let old: Vec<_> = (0..8).map(|_| f.open()).collect();
++    assert!(f
++        .core
++        .document_read_open(f.request.clone(), DocumentReadOperation::ReadText)
++        .is_err());
++    let mut authority = f.access.authority.clone();
++    authority.generation = Revision::new(2);
++    let expiry = SystemTime::now()
++        .duration_since(UNIX_EPOCH)
++        .unwrap()
++        .as_millis() as u64
++        + 25_000;
++    f.core
++        .state
++        .lock()
++        .unwrap()
++        .store
++        .issue_document_grant_trusted(
++            &f.access.document,
++            &authority,
++            &[DocumentOperation::Inspect, DocumentOperation::ReadText],
++            expiry,
++        )
++        .unwrap();
++    let mut request = f.request.clone();
++    request.grant_generation = "2".into();
++    let fresh = value(
++        f.core
++            .document_read_open(request.clone(), DocumentReadOperation::ReadText)
++            .unwrap(),
++    );
++    let use_request = DocumentReadUseRequest {
++        scope: request.scope,
++        read_session_id: fresh["read_session_id"].as_str().unwrap().into(),
++    };
++    assert_eq!(
++        f.core
++            .document_read_chunk(use_request, 65536)
++            .unwrap()
++            .bytes,
++        TEXT
++    );
++    for previous in old {
++        assert_eq!(
++            value(f.core.document_read_check(previous).unwrap())["status"],
++            "invalidated"
++        );
++    }
+ }
+ 
+ #[test]
+Diff in /workspace/Muyon-reader-ffi-combination-20261022/crates/muyon-android-ffi/src/document_bridge_tests.rs:207:
+ fn eight_actually_idle_expired_sessions_allow_fresh_open_without_manual_checks() {
+-    let f=Fixture::text();
+-    for _ in 0..8 { f.open(); }
++    let f = Fixture::text();
++    for _ in 0..8 {
++        f.open();
++    }
+     // Actual monotonic core expiry: no private core hook, widened limit or fake clock.
+     std::thread::sleep(std::time::Duration::from_secs(16));
+-    let mut fresh_authority=f.access.authority.clone();fresh_authority.grant_id="fresh-after-idle".into();
+-    let expiry=SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_millis() as u64+25_000;
+-    f.core.state.lock().unwrap().store.issue_document_grant_trusted(&f.access.document,&fresh_authority,
+-        &[DocumentOperation::ReadText],expiry).unwrap();
+-    let mut request=f.request.clone();request.grant_id=fresh_authority.grant_id;
+-    let fresh=value(f.core.document_read_open(request.clone(),DocumentReadOperation::ReadText).unwrap());
+-    let use_request=DocumentReadUseRequest {scope:request.scope,read_session_id:fresh["read_session_id"].as_str().unwrap().into()};
+-    assert_eq!(f.core.document_read_chunk(use_request,65536).unwrap().bytes,TEXT);
++    let mut fresh_authority = f.access.authority.clone();
++    fresh_authority.grant_id = "fresh-after-idle".into();
++    let expiry = SystemTime::now()
++        .duration_since(UNIX_EPOCH)
++        .unwrap()
++        .as_millis() as u64
++        + 25_000;
++    f.core
++        .state
++        .lock()
++        .unwrap()
++        .store
++        .issue_document_grant_trusted(
++            &f.access.document,
++            &fresh_authority,
++            &[DocumentOperation::ReadText],
++            expiry,
++        )
++        .unwrap();
++    let mut request = f.request.clone();
++    request.grant_id = fresh_authority.grant_id;
++    let fresh = value(
++        f.core
++            .document_read_open(request.clone(), DocumentReadOperation::ReadText)
++            .unwrap(),
++    );
++    let use_request = DocumentReadUseRequest {
++        scope: request.scope,
++        read_session_id: fresh["read_session_id"].as_str().unwrap().into(),
++    };
++    assert_eq!(
++        f.core
++            .document_read_chunk(use_request, 65536)
++            .unwrap()
++            .bytes,
++        TEXT
++    );
+ }
+ 
+ #[test]
+Diff in /workspace/Muyon-reader-ffi-combination-20261022/crates/muyon-android-ffi/src/document_bridge_tests.rs:223:
+ fn readonly_annotations_and_explicit_shutdown_do_not_claim_a_display_lease() {
+-    let f=Fixture::text();let read=f.open();let processing=f.process();
+-    let annotations=value(f.core.document_annotations(f.request.clone()).unwrap());
++    let f = Fixture::text();
++    let read = f.open();
++    let processing = f.process();
++    let annotations = value(f.core.document_annotations(f.request.clone()).unwrap());
+     assert!(annotations["annotations"].as_array().unwrap().is_empty());
+-    assert_eq!(annotations["annotation_editing"],false);
++    assert_eq!(annotations["annotation_editing"], false);
+     f.core.document_read_shutdown().unwrap();
+-    assert!(f.core.document_read_chunk(read,7).is_err());
++    assert!(f.core.document_read_chunk(read, 7).is_err());
+     assert!(f.core.document_metadata(f.request.clone()).is_err());
+-    assert!(f.core.document_evidence_query(processing,"literal".into(),8).is_err());
+-    assert!(f.core.document_read_open(f.request.clone(),DocumentReadOperation::ReadText).is_err());
++    assert!(f
++        .core
++        .document_evidence_query(processing, "literal".into(), 8)
++        .is_err());
++    assert!(f
++        .core
++        .document_read_open(f.request.clone(), DocumentReadOperation::ReadText)
++        .is_err());
+ }
+ 

@@ -3,6 +3,8 @@
 db60fe7dccc99aea197ee4b1397079550e0f3a548e4f815802b88a62b0825798  evidence/muyon-next-bindgen-build.log
 e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  evidence/muyon-next-bindgen-repeat.log
 e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  evidence/muyon-next-bindgen.log
+cd3709bd678c49eedf1b029cc1791ba241ae7eacaa254432f735565f2d5b3aca  evidence/muyon-next-bot-bool-strict.log
+360feb22eb4a5025783bf2c7c14131892238ae87c02b7eec9ef653a83f0c930b  evidence/muyon-next-bot-bool-tests.log
 2b0da3dcf1d97f6aa59c0ae4a69bb14be60c59998100d8e50d25191167cccddf  evidence/muyon-next-bot-definitions-apply.log
 f8220c88ae4f901a2d4dff9c1270bc96b53caeb62e49ad1703296fd501d981a3  evidence/muyon-next-bridge-apply.log
 9012d692d02b7e17df4594232de122a16dfe78b8d733c70fa6deaf1c75a239ec  evidence/muyon-next-core-apply.log

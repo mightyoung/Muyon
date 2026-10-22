@@ -1,0 +1,17 @@
+[
+  {
+    "check": "native-tests",
+    "exit": 127,
+    "status": "NOT_RUN"
+  },
+  {
+    "check": "fmt",
+    "exit": 127,
+    "status": "NOT_RUN"
+  },
+  {
+    "check": "strict-clippy",
+    "exit": 127,
+    "status": "NOT_RUN"
+  }
+]

@@ -1,0 +1,34 @@
+[
+  {
+    "slice": "service",
+    "base": "f7072ca2b46d629a7fd8b85e19717261a7dd3af4",
+    "pin": "7c85bc8f85779be0e15c6486699d1d39d3cc2a74",
+    "paths": [
+      "apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/agentipc/ProductService.kt"
+    ],
+    "commit": "d91b0ff363bcf45fda99c5a54b6801628861010b"
+  },
+  {
+    "slice": "snapshot",
+    "base": "faeef3aec3a9407d7c15490dcdb33866413e7453",
+    "pin": "97969f9ab6728e8022b3ff7b7a069a655e94c9d8",
+    "paths": [
+      "crates/muyon-core/src/blobs.rs",
+      "crates/muyon-core/src/documents",
+      "docs/tasks/document-core-contracts-20261022"
+    ],
+    "commit": "f18b5931b9b242fd67303c9783ced13e1fc615df"
+  },
+  {
+    "slice": "reader-ffi",
+    "base": "7bb89a713c0ce5678a8c4cae7fc5e24612d88362",
+    "pin": "466424b13400c3f88b0cfec815ce3450c41b3cff",
+    "paths": [
+      "crates/muyon-android-ffi/src/lib.rs",
+      "crates/muyon-android-ffi/src/document_bridge.rs",
+      "crates/muyon-android-ffi/src/document_bridge_tests.rs",
+      "docs/tasks/reader-evidence-ffi-20261022"
+    ],
+    "commit": "85cac12d44f7adf7e6f0751f924af9fe419aa423"
+  }
+]

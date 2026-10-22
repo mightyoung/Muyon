@@ -1,0 +1,14 @@
+{
+  "crates/muyon-android-ffi/src/lib.rs": {
+    "before": "cfd375dbb50942ed61270c1b5320e0a571bbf6e55bd96cf8ec9c4770bea15ddf",
+    "formatted": "38cbf4344b1469af1631a51e7905fe648dfd152b12b361c6b547a71dc46005ff"
+  },
+  "crates/muyon-android-ffi/src/document_bridge.rs": {
+    "before": "86be13f06524e5c86301b9df200e3c632d95f582d9bf264a7d28cee51ddd4d0e",
+    "formatted": "fb650bf86498b67f5208cecdf3cb9d48cbcdb627abcdc873a7fcaff94f3f2688"
+  },
+  "crates/muyon-android-ffi/src/document_bridge_tests.rs": {
+    "before": "2b39d05da9ead9f88f65f4cb560375cc3358965fc256affcd6cb7dde77938eda",
+    "formatted": "fe7412c24109883c29aa845b40abe4ff7a1873d4c4304ad5b7417e15dced7b2f"
+  }
+}

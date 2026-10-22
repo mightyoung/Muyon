@@ -1,0 +1,4 @@
+$ cargo test --manifest-path crates/Cargo.toml -p muyon-android-ffi document_bridge_tests --offline
+[Errno 2] No such file or directory: 'cargo'
+
+exit=127

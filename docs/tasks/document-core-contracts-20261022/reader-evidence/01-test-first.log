@@ -1,0 +1,5 @@
+2026-10-22 06:27:07.509120+00:00
+Tests authored before implementation at interface e177a900.
+$ cargo test --offline --locked --manifest-path crates/Cargo.toml -p muyon-core --lib documents::reader_tests
+[Errno 2] No such file or directory: 'cargo'
+exit=127 NOT_RUN; not an observed red test.

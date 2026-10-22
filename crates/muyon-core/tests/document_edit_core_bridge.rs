@@ -235,7 +235,6 @@ fn restart_and_fresh_grant_query_original_without_confirmation_or_repreparation(
     let b = ready(&s, &a, "restart");
     let g = EditedCandidateJournal::initialize_trusted(&s).unwrap();
     let original = g.prepare_core_candidate_trusted(&b, &a).unwrap();
-    drop(g);
     drop(s);
     let s = f.reopen("epoch-2");
     assert_eq!(
