@@ -31,7 +31,7 @@ Build/runtime results are appended only after current commands terminate.
 
 New source snapshot/Host-Shell/Reader/cards45/Bot17/contrast/package-checks
 commands passed. Original configuration runner exit1: omitted existing Archive
-source, unresolved DraftArchiveEdits/RestoredBotSetupDraft. Raw failure retained;
+source, unresolved SetupDraftArchive/ArchivedSetupEdits/RestoredBotSetupDraft. Raw failure retained;
 external full actual-source compiler command passes original5/5 checks, no
 owner script/code change. Commands and raw logs archived under evidence/offline.
 
@@ -54,7 +54,12 @@ Clean offline assembleDebug + assembleDebugAndroidTest + lintDebug PASS2m28s,
 78tasks77executed/1up-to-date. Normal online-mode cached assembleDebug PASS17s,
 39tasks2executed/37up-to-date; no fresh dependency/tool install. Exact full commands
 and properties in evidence/product-command.json and normal-command.json.
-Only analytics.settings warning for inaccessible HOME; no settings changed.
+Build warnings retained in the original log: inaccessible HOME analytics.settings;
+SDK XML parser supports up to v3 but encountered v4; unable to strip six libraries,
+packaged unchanged: libandroidx.graphics.path.so,libjnidispatch.so,
+libmuyon_android_product.so,libmuyon_local_embedding.so,libonnxruntime.so,
+libonnxruntime4j_jni.so. No HOME/SDK/permission setting or library bytes were changed
+to suppress these warnings; successful build does not mean warning-free output.
 
 Actual product package gate/model gate/apksigner verify PASS: minSdk26,target36,
 com.mightyoung.muyon.product,version0.1.0/debug,arm64-v8a+x86_64.
@@ -146,3 +151,16 @@ Post-validation version note: develop advanced to022389b4d1d6fbf1f1bd7eead592597
 viaPR85. Read-only fetch/diff confirmed only6Markdown files relative to3aae,
 no runtime code change. Per fixed-source instruction this APK remains honestly
 3aae and is not rebuilt/relabelled for that docs-only merge.
+
+## Reporting precision correction (append-only evidence history)
+
+Original runner unresolved types are SetupDraftArchive,ArchivedSetupEdits and
+RestoredBotSetupDraft, not DraftArchiveEdits. Original runner exit1 and the
+external same-source5/5 run remain separate historical results.
+
+Device log22:05:42.763 also retains ActivityManager unbind DeadObjectException
+for BotNativeAcceptanceService around the fixture process kill; this is a system
+warning during the isolated fixture teardown, not a product ANR or warning-free
+run. Raw logs,PNGs,APKs,license ZIP and their recorded hashes/source identity are
+unchanged. This correction changes only this report and does not rerun historical
+commands or retroactively make the old runner pass.
