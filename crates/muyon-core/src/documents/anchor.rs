@@ -27,6 +27,7 @@ pub struct PdfAnchor {
     pub rotation: Option<PageRotation>,
     /// Unrotated PDF crop box in PDF user-space; None means unknown.
     pub crop: Option<Rect>,
+    /// Visible selection region. With known user-space crop, must fit inside it.
     pub region: Rect,
 }
 #[derive(Clone, Debug, PartialEq)]
@@ -55,6 +56,16 @@ impl DocumentAnchor {
                         || p.region.x + p.region.width > 1.0 || p.region.y + p.region.height > 1.0)
                 {
                     return Err(ReadInvalidation::InvalidAnchor);
+                }
+                if p.coordinates == CoordinateSystem::PdfUserSpace {
+                    if let Some(crop) = p.crop {
+                        if p.region.x < crop.x || p.region.y < crop.y
+                            || p.region.x + p.region.width > crop.x + crop.width
+                            || p.region.y + p.region.height > crop.y + crop.height
+                        {
+                            return Err(ReadInvalidation::InvalidAnchor);
+                        }
+                    }
                 }
                 if p.coordinates == CoordinateSystem::Unknown || p.rotation.is_none()
                     || p.crop.is_none() || p.page_index_zero_based.is_none()

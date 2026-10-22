@@ -104,12 +104,12 @@ fn host_errors_and_invalid_or_stale_lease_fail_closed() {
         fn resolve_current(&self, _: &ReadRequest) -> Result<CurrentDocument, ReadInvalidation> { Err(ReadInvalidation::HostUnavailable) }
     }
     assert_eq!(validate_read(&Missing, &request(), &capabilities()), Err(ReadInvalidation::HostUnavailable));
-    for generation in [0, 1] {
-        let h = host();
-        h.current.borrow_mut().source.lease.generation = Revision::new(generation);
-        h.current.borrow_mut().source.lease.owner_epoch = "old".into();
-        assert_eq!(validate_read(&h, &request(), &capabilities()), Err(ReadInvalidation::AuthorityUnavailable));
-    }
+    let h = host();
+    h.current.borrow_mut().source.lease.generation = Revision::new(0);
+    assert_eq!(validate_read(&h, &request(), &capabilities()), Err(ReadInvalidation::AuthorityUnavailable));
+    let h = host();
+    h.current.borrow_mut().source.lease.owner_epoch = "old".into();
+    assert_eq!(validate_read(&h, &request(), &capabilities()), Err(ReadInvalidation::AuthorityUnavailable));
 }
 #[test]
 fn read_contract_cannot_admit_edit_even_when_both_lists_allow_it() {
@@ -131,6 +131,30 @@ fn pdf_geometry_keeps_unknowns_without_guessing() {
     assert_eq!(validate_read(&host(), &r, &capabilities()), Err(ReadInvalidation::AnchorUnresolved));
 }
 #[test]
+fn each_missing_pdf_geometry_field_remains_unresolved() {
+    let mut page = pdf(); page.page_index_zero_based = None;
+    let mut rotation = pdf(); rotation.rotation = None;
+    let mut crop = pdf(); crop.crop = None;
+    let mut coordinates = pdf(); coordinates.coordinates = CoordinateSystem::Unknown;
+    for p in [page, rotation, crop, coordinates] {
+        let a = DocumentAnchor { document: request().document, location: AnchorLocation::Pdf(p) };
+        assert_eq!(a.validate_for(&a.document), Ok(AnchorStatus::UnresolvedGeometry));
+    }
+}
+#[test]
+fn normalized_regions_preserve_explicit_rotation_and_reject_invalid_crop() {
+    for rotation in [PageRotation::Degrees0, PageRotation::Degrees90, PageRotation::Degrees180, PageRotation::Degrees270] {
+        let p = PdfAnchor { rotation: Some(rotation), coordinates: CoordinateSystem::CropNormalizedTopLeft, region: Rect { x: 0.0, y: 0.0, width: 1.0, height: 1.0 }, ..pdf() };
+        let a = DocumentAnchor { document: request().document, location: AnchorLocation::Pdf(p.clone()) };
+        assert_eq!(a.validate_for(&a.document), Ok(AnchorStatus::StructurallyValid));
+        assert_eq!(a.location, AnchorLocation::Pdf(p));
+    }
+    for crop in [Rect { width: 0.0, ..pdf().crop.unwrap() }, Rect { x: f64::NAN, ..pdf().crop.unwrap() }] {
+        let a = DocumentAnchor { document: request().document, location: AnchorLocation::Pdf(PdfAnchor { crop: Some(crop), ..pdf() }) };
+        assert_eq!(a.validate_for(&a.document), Err(ReadInvalidation::InvalidAnchor));
+    }
+}
+#[test]
 fn nonfinite_empty_overflowing_and_invalid_normalized_rectangles_fail() {
     for region in [Rect { x: f64::NAN, ..pdf().region }, Rect { width: 0.0, ..pdf().region }, Rect { height: -1.0, ..pdf().region }, Rect { x: f64::MAX, width: f64::MAX, ..pdf().region }, Rect { x: f64::INFINITY, ..pdf().region }] {
         let a = DocumentAnchor { document: request().document, location: AnchorLocation::Pdf(PdfAnchor { region, ..pdf() }) };
@@ -147,6 +171,15 @@ fn anchors_are_bound_to_identity_revision_and_format() {
     assert_eq!(a.validate_for(&document("other", 1, DocumentFormat::Pdf)), Err(ReadInvalidation::ScopeMismatch));
     let wrong = DocumentAnchor { document: document("project", 1, DocumentFormat::Docx), location: a.location };
     assert_eq!(wrong.validate_for(&wrong.document), Err(ReadInvalidation::FormatMismatch));
+}
+#[test]
+fn visible_pdf_selection_must_fit_the_declared_crop() {
+    for region in [Rect { x: 700.0, ..pdf().region }, Rect { x: -11.0, ..pdf().region }, Rect { y: 779.0, height: 2.0, ..pdf().region }] {
+        let a = DocumentAnchor { document: request().document, location: AnchorLocation::Pdf(PdfAnchor { region, ..pdf() }) };
+        assert_eq!(a.validate_for(&a.document), Err(ReadInvalidation::InvalidAnchor));
+    }
+    let a = DocumentAnchor { document: request().document, location: AnchorLocation::Pdf(PdfAnchor { region: pdf().crop.unwrap(), ..pdf() }) };
+    assert_eq!(a.validate_for(&a.document), Ok(AnchorStatus::StructurallyValid));
 }
 #[test]
 fn structured_anchors_validate_ids_ranges_and_package_parts() {
