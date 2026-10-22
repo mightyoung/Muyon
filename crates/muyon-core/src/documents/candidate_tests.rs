@@ -142,7 +142,7 @@ fn oversize_nonpayload_fields_fail_before_status_decode() {
         let tx = store.database().transaction().unwrap(); store.database().exec(mutation, &[]).unwrap();
         // No nested lookup transaction: inspect the same mutation via direct
         // source publication gate, which must reject before producing authority.
-        assert!(store.document_publish_candidate_in_transaction(&tx, &access, "candidate").is_err());
+        assert_eq!(store.document_publish_candidate_in_transaction(&tx, &access, "candidate"), Err(ContractError::StorageCorrupt));
         drop(tx);
     }
 }
@@ -183,4 +183,17 @@ fn missing_pin_or_corrupt_object_is_query_only_unknown() {
     store.database().exec("DELETE FROM blob_pins WHERE kind='upload'", &[]).unwrap();
     assert_eq!(store.lookup_document_candidate(&access, "candidate").unwrap().state, CandidateState::PreparationUnknown);
     assert_eq!(store.database().query("SELECT * FROM document_revisions", &[]).unwrap().len(), 1);
+}
+#[test]
+fn source_head_advance_rejects_old_candidate_without_latest_substitution() {
+    let (_f, store, access) = setup();
+    let original = store.read_document(&access).unwrap();
+    store.prepare_document_candidate_trusted(&access, "candidate", "operation", NEW_BYTES).unwrap();
+    let tx = store.database().transaction().unwrap();
+    store.document_access_in_transaction(&tx, &access, &[DocumentOperation::StructuredEdit]).unwrap();
+    store.document_clone_in_transaction(&tx, &access.document, "Source advanced", &original.blob).unwrap();
+    tx.commit().unwrap();
+    assert_eq!(store.lookup_document_candidate(&access, "candidate"), Err(ContractError::RevisionConflict));
+    assert_eq!(store.database().query("SELECT state FROM document_candidates_v1", &[]).unwrap()[0][0].as_deref(), Some("sealed_unvalidated"));
+    assert_eq!(store.database().query("SELECT * FROM document_revisions", &[]).unwrap().len(), 2);
 }
