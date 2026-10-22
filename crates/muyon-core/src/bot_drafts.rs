@@ -303,8 +303,8 @@ fn bound(rec: &Record, b: &DraftBinding, version: bool) -> Result<()> {
 }
 fn descriptor(store: &BusinessStore, r: &Record) -> Result<Value> {
     let mut out = json!({"schema":1,"owner_kind":"local_workspace","namespace_id":r.namespace,"workspace_id":store.workspace_id(),"conversation_id":r.conversation,"project_id":r.project,"draft_id":r.draft,"registry_generation":r.generation,"stored_revision":r.revision,"lifecycle":"editing_only","archive_present":r.archive.is_some()});
-    out["save_attempt"] = serde_json::to_value(journal_pointer(store, r)?)
-        .map_err(|_| "local_draft_unavailable")?;
+    out["save_attempt"] =
+        serde_json::to_value(journal_pointer(store, r)?).map_err(|_| "local_draft_unavailable")?;
     Ok(out)
 }
 fn scalar(store: &BusinessStore, query: &str) -> Result<usize> {
@@ -400,9 +400,11 @@ fn original(
     }
     let preparation = journal_attempt(store, key, r, attempt)?;
     if let Some(p) = &preparation {
-        if p.state != "committed" || p.expected_stored_revision != cell(row, 4)?
+        if p.state != "committed"
+            || p.expected_stored_revision != cell(row, 4)?
             || p.next_stored_revision != cell(row, 5)?
-            || p.exported_memory_revision != cell(row, 6)? || p.archive_digest != h
+            || p.exported_memory_revision != cell(row, 6)?
+            || p.archive_digest != h
         {
             return Err("local_draft_corrupt");
         }
@@ -468,8 +470,8 @@ pub fn save(
         return serde_json::to_value(receipt).map_err(|_| "local_draft_unavailable");
     }
     bound(&r, b, true)?;
-    let preparation = journal_attempt(store, &key, &r, attempt)?
-        .ok_or("local_draft_not_prepared")?;
+    let preparation =
+        journal_attempt(store, &key, &r, attempt)?.ok_or("local_draft_not_prepared")?;
     if preparation.state != "prepared" {
         return Err("local_draft_terminal");
     }
@@ -563,8 +565,7 @@ pub fn lookup_save(
         sql(tx.commit())?;
         return serde_json::to_value(receipt).map_err(|_| "local_draft_unavailable");
     }
-    let p = journal_attempt(store, &key, &r, attempt)?
-        .ok_or("local_draft_attempt_not_found")?;
+    let p = journal_attempt(store, &key, &r, attempt)?.ok_or("local_draft_attempt_not_found")?;
     let terminal = if p.state == "prepared" {
         if journal_pointer(store, &r)?.as_ref() != Some(&p) {
             return Err("local_draft_corrupt");
@@ -660,16 +661,24 @@ fn journal_attempt(
     if cell(row, 0)? != r.draft || cell(row, 1)? != key {
         return Err("local_draft_attempt_conflict");
     }
-    let p: SavePreparation = serde_json::from_str(cell(row, 3)?)
-        .map_err(|_| "local_draft_corrupt")?;
-    if p.schema != 1 || p.owner_kind != "local_workspace"
-        || p.namespace_id != r.namespace || p.workspace_id != store.workspace_id()
-        || p.conversation_id != r.conversation || p.project_id != r.project
-        || p.draft_id != r.draft || p.registry_generation != r.generation
-        || p.attempt_id != attempt || p.state != cell(row, 2)?
+    let p: SavePreparation =
+        serde_json::from_str(cell(row, 3)?).map_err(|_| "local_draft_corrupt")?;
+    if p.schema != 1
+        || p.owner_kind != "local_workspace"
+        || p.namespace_id != r.namespace
+        || p.workspace_id != store.workspace_id()
+        || p.conversation_id != r.conversation
+        || p.project_id != r.project
+        || p.draft_id != r.draft
+        || p.registry_generation != r.generation
+        || p.attempt_id != attempt
+        || p.state != cell(row, 2)?
         || !["prepared", "committed", "not_committed"].contains(&p.state.as_str())
         || p.archive_digest.len() != 64
-        || !p.archive_digest.bytes().all(|b| b.is_ascii_digit() || (b'a'..=b'f').contains(&b))
+        || !p
+            .archive_digest
+            .bytes()
+            .all(|b| b.is_ascii_digit() || (b'a'..=b'f').contains(&b))
     {
         return Err("local_draft_corrupt");
     }
@@ -712,10 +721,12 @@ fn journal_pointer(store: &BusinessStore, r: &Record) -> Result<Option<SavePrepa
     uuid(attempt).map_err(|_| "local_draft_corrupt")?;
     let key = scope_key(store, r)?;
     let p = journal_attempt(store, &key, r, attempt)
-        .map_err(|error| if error == "local_draft_attempt_conflict" {
-            "local_draft_corrupt"
-        } else {
-            error
+        .map_err(|error| {
+            if error == "local_draft_attempt_conflict" {
+                "local_draft_corrupt"
+            } else {
+                error
+            }
         })?
         .ok_or("local_draft_corrupt")?;
     let receipt = original(store, &key, r, attempt)?;
@@ -757,12 +768,16 @@ pub fn prepare_save(
     revisions: SaveRevisions<'_>,
     archive: &[u8],
 ) -> Result<Value> {
-    let SaveRevisions { exported_memory_revision, host_editor_revision } = revisions;
+    let SaveRevisions {
+        exported_memory_revision,
+        host_editor_revision,
+    } = revisions;
     uuid(attempt)?;
     number(exported_memory_revision)?;
     number(host_editor_revision)?;
     let next = number(&b.expected_stored_revision)?
-        .checked_add(1).ok_or("local_draft_version")?;
+        .checked_add(1)
+        .ok_or("local_draft_version")?;
     let h = archive_check(archive, next)?;
     let tx = sql(store.database().transaction())?;
     let key = scope(store, conversation, project)?;
@@ -772,15 +787,24 @@ pub fn prepare_save(
     journal_schema(store, true)?;
     let existing = journal_attempt(store, &key, &r, attempt)?;
     let p = SavePreparation {
-        schema: 1, owner_kind: "local_workspace".into(), namespace_id: ns,
-        workspace_id: store.workspace_id().into(), conversation_id: r.conversation.clone(),
-        project_id: r.project.clone(), draft_id: r.draft.clone(),
-        registry_generation: r.generation.clone(), attempt_id: attempt.into(),
+        schema: 1,
+        owner_kind: "local_workspace".into(),
+        namespace_id: ns,
+        workspace_id: store.workspace_id().into(),
+        conversation_id: r.conversation.clone(),
+        project_id: r.project.clone(),
+        draft_id: r.draft.clone(),
+        registry_generation: r.generation.clone(),
+        attempt_id: attempt.into(),
         expected_stored_revision: b.expected_stored_revision.clone(),
         next_stored_revision: next.to_string(),
         exported_memory_revision: exported_memory_revision.into(),
-        host_editor_revision: host_editor_revision.into(), archive_digest: h,
-        state: existing.as_ref().map_or("prepared", |old| old.state.as_str()).into(),
+        host_editor_revision: host_editor_revision.into(),
+        archive_digest: h,
+        state: existing
+            .as_ref()
+            .map_or("prepared", |old| old.state.as_str())
+            .into(),
     };
     if let Some(old) = existing {
         if old != p {
@@ -803,8 +827,12 @@ pub fn prepare_save(
     }
     if scalar(store, "SELECT COUNT(*) FROM local_bot_save_attempts_v1")? >= MAX_RECEIPTS
         || scalar(store, "SELECT COUNT(*) FROM local_bot_draft_saves")?
-            .checked_add(scalar(store, "SELECT COUNT(*) FROM local_bot_save_attempts_v1 WHERE state='prepared'")?)
-            .ok_or("local_draft_corrupt")? >= MAX_RECEIPTS
+            .checked_add(scalar(
+                store,
+                "SELECT COUNT(*) FROM local_bot_save_attempts_v1 WHERE state='prepared'",
+            )?)
+            .ok_or("local_draft_corrupt")?
+            >= MAX_RECEIPTS
     {
         return Err("local_draft_capacity");
     }

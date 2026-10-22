@@ -70,9 +70,27 @@ fn save(
     memory: &str,
     archive: &[u8],
 ) -> Result<Value, &'static str> {
-    prepare_save(store, conversation, project, binding, attempt,
-        SaveRevisions { exported_memory_revision: memory, host_editor_revision: memory }, archive)?;
-    muyon_core::bot_drafts::save(store, conversation, project, binding, attempt, memory, archive)
+    prepare_save(
+        store,
+        conversation,
+        project,
+        binding,
+        attempt,
+        SaveRevisions {
+            exported_memory_revision: memory,
+            host_editor_revision: memory,
+        },
+        archive,
+    )?;
+    muyon_core::bot_drafts::save(
+        store,
+        conversation,
+        project,
+        binding,
+        attempt,
+        memory,
+        archive,
+    )
 }
 
 #[test]
@@ -570,7 +588,19 @@ fn preparation_is_durable_discoverable_and_never_replays_after_restart() {
         muyon_core::bot_drafts::save(&s, C, None, &b, A, "17", &archive(1)).unwrap_err(),
         "local_draft_not_prepared"
     );
-    let prepared = prepare_save(&s, C, None, &b, A, SaveRevisions { exported_memory_revision: "17", host_editor_revision: "42" }, &archive(1)).unwrap();
+    let prepared = prepare_save(
+        &s,
+        C,
+        None,
+        &b,
+        A,
+        SaveRevisions {
+            exported_memory_revision: "17",
+            host_editor_revision: "42",
+        },
+        &archive(1),
+    )
+    .unwrap();
     assert_eq!(prepared["state"], "prepared");
     assert_eq!(prepared["host_editor_revision"], "42");
     assert_eq!(prepared["next_stored_revision"], "1");
@@ -579,7 +609,19 @@ fn preparation_is_durable_discoverable_and_never_replays_after_restart() {
     assert_eq!(resolve(&s, C, None).unwrap()["save_attempt"], prepared);
     assert_eq!(read(&s, C, None, &b).unwrap()["status"], "not_saved");
     assert_eq!(
-        prepare_save(&s, C, None, &b, B, SaveRevisions { exported_memory_revision: "18", host_editor_revision: "43" }, &archive(1)).unwrap_err(),
+        prepare_save(
+            &s,
+            C,
+            None,
+            &b,
+            B,
+            SaveRevisions {
+                exported_memory_revision: "18",
+                host_editor_revision: "43"
+            },
+            &archive(1)
+        )
+        .unwrap_err(),
         "local_draft_pending"
     );
     let terminal = lookup_save(&s, C, None, &b.namespace_id, &b.draft_id, A).unwrap();
@@ -591,8 +633,23 @@ fn preparation_is_durable_discoverable_and_never_replays_after_restart() {
         muyon_core::bot_drafts::save(&s, C, None, &b, A, "17", &archive(1)).unwrap_err(),
         "local_draft_terminal"
     );
-    assert_eq!(lookup_save(&s, C, None, &b.namespace_id, &b.draft_id, A).unwrap(), terminal);
-    prepare_save(&s, C, None, &b, B, SaveRevisions { exported_memory_revision: "18", host_editor_revision: "43" }, &archive(1)).unwrap();
+    assert_eq!(
+        lookup_save(&s, C, None, &b.namespace_id, &b.draft_id, A).unwrap(),
+        terminal
+    );
+    prepare_save(
+        &s,
+        C,
+        None,
+        &b,
+        B,
+        SaveRevisions {
+            exported_memory_revision: "18",
+            host_editor_revision: "43",
+        },
+        &archive(1),
+    )
+    .unwrap();
     assert_eq!(resolve(&s, C, None).unwrap()["stored_revision"], "0");
 }
 
@@ -601,17 +658,68 @@ fn exact_preparation_binding_idempotency_and_committed_editor_survive_callback_l
     let f = Fixture::new();
     let s = f.open();
     let b = binding(&resolve(&s, C, None).unwrap());
-    let first = prepare_save(&s, C, None, &b, A, SaveRevisions { exported_memory_revision: "17", host_editor_revision: "42" }, &archive(1)).unwrap();
-    assert_eq!(prepare_save(&s, C, None, &b, A, SaveRevisions { exported_memory_revision: "17", host_editor_revision: "42" }, &archive(1)).unwrap(), first);
+    let first = prepare_save(
+        &s,
+        C,
+        None,
+        &b,
+        A,
+        SaveRevisions {
+            exported_memory_revision: "17",
+            host_editor_revision: "42",
+        },
+        &archive(1),
+    )
+    .unwrap();
     assert_eq!(
-        prepare_save(&s, C, None, &b, A, SaveRevisions { exported_memory_revision: "17", host_editor_revision: "43" }, &archive(1)).unwrap_err(),
+        prepare_save(
+            &s,
+            C,
+            None,
+            &b,
+            A,
+            SaveRevisions {
+                exported_memory_revision: "17",
+                host_editor_revision: "42"
+            },
+            &archive(1)
+        )
+        .unwrap(),
+        first
+    );
+    assert_eq!(
+        prepare_save(
+            &s,
+            C,
+            None,
+            &b,
+            A,
+            SaveRevisions {
+                exported_memory_revision: "17",
+                host_editor_revision: "43"
+            },
+            &archive(1)
+        )
+        .unwrap_err(),
         "local_draft_attempt_conflict"
     );
     assert_eq!(
         muyon_core::bot_drafts::save(&s, C, None, &b, A, "18", &archive(1)).unwrap_err(),
         "local_draft_attempt_conflict"
     );
-    assert!(prepare_save(&s, B, None, &b, A, SaveRevisions { exported_memory_revision: "17", host_editor_revision: "42" }, &archive(1)).is_err());
+    assert!(prepare_save(
+        &s,
+        B,
+        None,
+        &b,
+        A,
+        SaveRevisions {
+            exported_memory_revision: "17",
+            host_editor_revision: "42"
+        },
+        &archive(1)
+    )
+    .is_err());
     let receipt = muyon_core::bot_drafts::save(&s, C, None, &b, A, "17", &archive(1)).unwrap();
     assert_eq!(receipt["host_editor_revision"], "42");
     drop(s);
@@ -619,11 +727,29 @@ fn exact_preparation_binding_idempotency_and_committed_editor_survive_callback_l
     let current = resolve(&s, C, None).unwrap();
     assert_eq!(current["save_attempt"]["state"], "committed");
     assert_eq!(current["save_attempt"]["attempt_id"], A);
-    assert_eq!(lookup_save(&s, C, None, &b.namespace_id, &b.draft_id, A).unwrap(), receipt);
+    assert_eq!(
+        lookup_save(&s, C, None, &b.namespace_id, &b.draft_id, A).unwrap(),
+        receipt
+    );
     let next = binding(&current);
-    prepare_save(&s, C, None, &next, B, SaveRevisions { exported_memory_revision: "18", host_editor_revision: "43" }, &archive(2)).unwrap();
+    prepare_save(
+        &s,
+        C,
+        None,
+        &next,
+        B,
+        SaveRevisions {
+            exported_memory_revision: "18",
+            host_editor_revision: "43",
+        },
+        &archive(2),
+    )
+    .unwrap();
     muyon_core::bot_drafts::save(&s, C, None, &next, B, "18", &archive(2)).unwrap();
-    assert_eq!(lookup_save(&s, C, None, &b.namespace_id, &b.draft_id, A).unwrap(), receipt);
+    assert_eq!(
+        lookup_save(&s, C, None, &b.namespace_id, &b.draft_id, A).unwrap(),
+        receipt
+    );
     assert!(receipt.get("saved").is_none());
 }
 
@@ -632,7 +758,19 @@ fn failed_commit_keeps_original_pointer_and_lookup_fences_queued_dispatch() {
     let f = Fixture::new();
     let s = f.open();
     let b = binding(&resolve(&s, C, None).unwrap());
-    prepare_save(&s, C, None, &b, A, SaveRevisions { exported_memory_revision: "17", host_editor_revision: "42" }, &archive(1)).unwrap();
+    prepare_save(
+        &s,
+        C,
+        None,
+        &b,
+        A,
+        SaveRevisions {
+            exported_memory_revision: "17",
+            host_editor_revision: "42",
+        },
+        &archive(1),
+    )
+    .unwrap();
     f.db().exec("CREATE TRIGGER journal_receipt_fail BEFORE INSERT ON local_bot_draft_saves BEGIN SELECT RAISE(ABORT,'synthetic'); END", &[]).unwrap();
     assert!(muyon_core::bot_drafts::save(&s, C, None, &b, A, "17", &archive(1)).is_err());
     drop(s);
@@ -642,7 +780,9 @@ fn failed_commit_keeps_original_pointer_and_lookup_fences_queued_dispatch() {
     assert_eq!(discovered["save_attempt"]["state"], "prepared");
     assert_eq!(discovered["save_attempt"]["attempt_id"], A);
     lookup_save(&s, C, None, &b.namespace_id, &b.draft_id, A).unwrap();
-    f.db().exec("DROP TRIGGER journal_receipt_fail", &[]).unwrap();
+    f.db()
+        .exec("DROP TRIGGER journal_receipt_fail", &[])
+        .unwrap();
     assert_eq!(
         muyon_core::bot_drafts::save(&s, C, None, &b, A, "17", &archive(1)).unwrap_err(),
         "local_draft_terminal"
@@ -654,11 +794,25 @@ fn preparation_scope_schema_and_foreign_pointer_fail_closed() {
     let f = Fixture::new();
     let s = f.open();
     let b = binding(&resolve(&s, C, None).unwrap());
-    prepare_save(&s, C, None, &b, A, SaveRevisions { exported_memory_revision: "17", host_editor_revision: "42" }, &archive(1)).unwrap();
+    prepare_save(
+        &s,
+        C,
+        None,
+        &b,
+        A,
+        SaveRevisions {
+            exported_memory_revision: "17",
+            host_editor_revision: "42",
+        },
+        &archive(1),
+    )
+    .unwrap();
     assert!(lookup_save(&s, B, None, &b.namespace_id, &b.draft_id, A).is_err());
     f.db().exec("UPDATE local_bot_save_pointer_v1 SET attempt_id='32345678-1234-4234-8234-123456789abc'", &[]).unwrap();
     assert_eq!(resolve(&s, C, None).unwrap_err(), "local_draft_corrupt");
-    f.db().exec("DROP TABLE local_bot_save_pointer_v1", &[]).unwrap();
+    f.db()
+        .exec("DROP TABLE local_bot_save_pointer_v1", &[])
+        .unwrap();
     assert_eq!(resolve(&s, C, None).unwrap_err(), "local_draft_schema");
 }
 
@@ -670,7 +824,10 @@ fn legacy_receipt_without_journal_or_editor_remains_queryable_after_upgrade() {
     let b = binding(&d);
     let bytes = archive(1);
     let hex: String = bytes.iter().map(|v| format!("{v:02x}")).collect();
-    let digest: String = Sha256::digest(&bytes).iter().map(|v| format!("{v:02x}")).collect();
+    let digest: String = Sha256::digest(&bytes)
+        .iter()
+        .map(|v| format!("{v:02x}"))
+        .collect();
     let key = serde_json::to_string(&("workspace", C, Option::<&str>::None)).unwrap();
     let legacy = serde_json::json!({
         "schema":1,"owner_kind":"local_workspace","namespace_id":b.namespace_id,
@@ -680,14 +837,53 @@ fn legacy_receipt_without_journal_or_editor_remains_queryable_after_upgrade() {
         "attempt_id":A,"exported_memory_revision":"17","archive_digest":digest,
         "status":"committed_local_storage"
     });
-    f.db().exec("UPDATE local_bot_drafts SET stored_revision='1',archive_hex=?,archive_digest=?", &[&hex, &digest]).unwrap();
-    f.db().exec("INSERT INTO local_bot_draft_saves VALUES(?,?,?,?,?,'0','1','17',?,?)", &[A,&b.namespace_id,&b.draft_id,&key,"1",&digest,&legacy.to_string()]).unwrap();
-    assert_eq!(lookup_save(&s, C, None, &b.namespace_id, &b.draft_id, A).unwrap(), legacy);
+    f.db()
+        .exec(
+            "UPDATE local_bot_drafts SET stored_revision='1',archive_hex=?,archive_digest=?",
+            &[&hex, &digest],
+        )
+        .unwrap();
+    f.db()
+        .exec(
+            "INSERT INTO local_bot_draft_saves VALUES(?,?,?,?,?,'0','1','17',?,?)",
+            &[
+                A,
+                &b.namespace_id,
+                &b.draft_id,
+                &key,
+                "1",
+                &digest,
+                &legacy.to_string(),
+            ],
+        )
+        .unwrap();
+    assert_eq!(
+        lookup_save(&s, C, None, &b.namespace_id, &b.draft_id, A).unwrap(),
+        legacy
+    );
     assert!(resolve(&s, C, None).unwrap()["save_attempt"].is_null());
-    assert_eq!(muyon_core::bot_drafts::save(&s, C, None, &b, A, "17", &bytes).unwrap(), legacy);
+    assert_eq!(
+        muyon_core::bot_drafts::save(&s, C, None, &b, A, "17", &bytes).unwrap(),
+        legacy
+    );
     let next = binding(&resolve(&s, C, None).unwrap());
-    prepare_save(&s, C, None, &next, B, SaveRevisions { exported_memory_revision: "18", host_editor_revision: "43" }, &archive(2)).unwrap();
-    assert_eq!(lookup_save(&s, C, None, &b.namespace_id, &b.draft_id, A).unwrap(), legacy);
+    prepare_save(
+        &s,
+        C,
+        None,
+        &next,
+        B,
+        SaveRevisions {
+            exported_memory_revision: "18",
+            host_editor_revision: "43",
+        },
+        &archive(2),
+    )
+    .unwrap();
+    assert_eq!(
+        lookup_save(&s, C, None, &b.namespace_id, &b.draft_id, A).unwrap(),
+        legacy
+    );
 }
 
 #[test]
@@ -695,12 +891,42 @@ fn preparation_pointer_failure_rolls_back_new_original_row() {
     let f = Fixture::new();
     let s = f.open();
     let b = binding(&resolve(&s, C, None).unwrap());
-    prepare_save(&s, C, None, &b, A, SaveRevisions { exported_memory_revision: "17", host_editor_revision: "42" }, &archive(1)).unwrap();
+    prepare_save(
+        &s,
+        C,
+        None,
+        &b,
+        A,
+        SaveRevisions {
+            exported_memory_revision: "17",
+            host_editor_revision: "42",
+        },
+        &archive(1),
+    )
+    .unwrap();
     lookup_save(&s, C, None, &b.namespace_id, &b.draft_id, A).unwrap();
     f.db().exec("CREATE TRIGGER pointer_fail BEFORE UPDATE ON local_bot_save_pointer_v1 BEGIN SELECT RAISE(ABORT,'synthetic'); END", &[]).unwrap();
-    assert!(prepare_save(&s, C, None, &b, B, SaveRevisions { exported_memory_revision: "18", host_editor_revision: "43" }, &archive(1)).is_err());
-    assert_eq!(lookup_save(&s, C, None, &b.namespace_id, &b.draft_id, B).unwrap_err(), "local_draft_attempt_not_found");
-    assert_eq!(resolve(&s, C, None).unwrap()["save_attempt"]["attempt_id"], A);
+    assert!(prepare_save(
+        &s,
+        C,
+        None,
+        &b,
+        B,
+        SaveRevisions {
+            exported_memory_revision: "18",
+            host_editor_revision: "43"
+        },
+        &archive(1)
+    )
+    .is_err());
+    assert_eq!(
+        lookup_save(&s, C, None, &b.namespace_id, &b.draft_id, B).unwrap_err(),
+        "local_draft_attempt_not_found"
+    );
+    assert_eq!(
+        resolve(&s, C, None).unwrap()["save_attempt"]["attempt_id"],
+        A
+    );
 }
 
 #[test]
@@ -708,12 +934,33 @@ fn receipt_and_journal_terminal_transition_are_one_commit() {
     let f = Fixture::new();
     let s = f.open();
     let b = binding(&resolve(&s, C, None).unwrap());
-    prepare_save(&s, C, None, &b, A, SaveRevisions { exported_memory_revision: "17", host_editor_revision: "42" }, &archive(1)).unwrap();
+    prepare_save(
+        &s,
+        C,
+        None,
+        &b,
+        A,
+        SaveRevisions {
+            exported_memory_revision: "17",
+            host_editor_revision: "42",
+        },
+        &archive(1),
+    )
+    .unwrap();
     f.db().exec("CREATE TRIGGER terminal_fail BEFORE UPDATE ON local_bot_save_attempts_v1 WHEN NEW.state='committed' BEGIN SELECT RAISE(ABORT,'synthetic'); END", &[]).unwrap();
     assert!(muyon_core::bot_drafts::save(&s, C, None, &b, A, "17", &archive(1)).is_err());
     let current = resolve(&s, C, None).unwrap();
     assert_eq!(current["stored_revision"], "0");
     assert_eq!(current["save_attempt"]["state"], "prepared");
-    assert_eq!(f.db().query("SELECT COUNT(*) FROM local_bot_draft_saves", &[]).unwrap()[0][0].as_deref(), Some("0"));
-    assert_eq!(lookup_save(&s, C, None, &b.namespace_id, &b.draft_id, A).unwrap()["status"], "not_committed_local_storage");
+    assert_eq!(
+        f.db()
+            .query("SELECT COUNT(*) FROM local_bot_draft_saves", &[])
+            .unwrap()[0][0]
+            .as_deref(),
+        Some("0")
+    );
+    assert_eq!(
+        lookup_save(&s, C, None, &b.namespace_id, &b.draft_id, A).unwrap()["status"],
+        "not_committed_local_storage"
+    );
 }
