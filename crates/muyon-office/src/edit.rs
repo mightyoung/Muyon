@@ -8,7 +8,8 @@ use crate::xml::{escape_text, simple_text, Kind, Tok, NS_PKG_REL, NS_R, NS_S, NS
 const WORD_MAIN: &str = "word/document.xml";
 
 fn valid_text(s: &str) -> bool {
-    s.chars().all(|c| (c >= ' ' || c == '\t') && c != '\u{FFFE}' && c != '\u{FFFF}' && c != '\u{FEFF}')
+    s.chars()
+        .all(|c| (c >= ' ' || c == '\t') && c != '\u{FFFE}' && c != '\u{FFFF}' && c != '\u{FEFF}')
 }
 
 impl Package {
@@ -23,7 +24,9 @@ impl Package {
             return Err(OfficeError::InvalidReplacement("expected text is empty"));
         }
         if replacement.is_empty() || !valid_text(replacement) {
-            return Err(OfficeError::InvalidReplacement("replacement empty or has control characters"));
+            return Err(OfficeError::InvalidReplacement(
+                "replacement empty or has control characters",
+            ));
         }
         let (bytes, toks) = self.tokens(WORD_MAIN)?;
         let mut hits: Vec<(usize, (usize, usize))> = Vec::new();
@@ -51,8 +54,12 @@ impl Package {
             ));
         }
         let escaped_size = replacement.bytes().try_fold(0usize, |n, b| {
-            n.checked_add(match b { b'&' => 5, b'<' | b'>' => 4, _ => 1 })
-                .ok_or(OfficeError::LimitExceeded("part size"))
+            n.checked_add(match b {
+                b'&' => 5,
+                b'<' | b'>' => 4,
+                _ => 1,
+            })
+            .ok_or(OfficeError::LimitExceeded("part size"))
         })?;
         self.check_rewrite_size(WORD_MAIN, splice_size(bytes.len(), range, escaped_size)?)?;
         let patched = splice(&bytes, range, escape_text(replacement).as_bytes())?;
@@ -76,7 +83,9 @@ impl Package {
             return Err(OfficeError::InvalidReplacement("cell reference"));
         }
         if !is_plain_number(expected) || !is_plain_number(replacement) {
-            return Err(OfficeError::InvalidReplacement("value must be a plain finite number"));
+            return Err(OfficeError::InvalidReplacement(
+                "value must be a plain finite number",
+            ));
         }
         let part = self.resolve_sheet(sheet)?;
         let (bytes, toks) = self.tokens(&part)?;
@@ -135,7 +144,10 @@ impl Package {
     }
 
     fn check_edit_inputs(&self, inputs: &[&str]) -> Result<()> {
-        if inputs.iter().any(|s| s.len() > self.limits.max_text || s.len() > self.limits.max_part) {
+        if inputs
+            .iter()
+            .any(|s| s.len() > self.limits.max_text || s.len() > self.limits.max_part)
+        {
             return Err(OfficeError::LimitExceeded("edit input size"));
         }
         Ok(())
@@ -163,14 +175,19 @@ impl Package {
         let rel = rels
             .iter()
             .find(|t| {
-                (t.is(Kind::Start, NS_PKG_REL, "Relationship") || t.is(Kind::Empty, NS_PKG_REL, "Relationship"))
+                (t.is(Kind::Start, NS_PKG_REL, "Relationship")
+                    || t.is(Kind::Empty, NS_PKG_REL, "Relationship"))
                     && t.attr("Id") == Some(rid)
             })
             .ok_or(OfficeError::NotFound)?;
         if rel.attr("TargetMode") == Some("External") {
             return Err(OfficeError::Unsupported("external sheet target"));
         }
-        if !rel.attr("Type").map(|t| t.ends_with("/worksheet")).unwrap_or(false) {
+        if !rel
+            .attr("Type")
+            .map(|t| t.ends_with("/worksheet"))
+            .unwrap_or(false)
+        {
             return Err(OfficeError::Unsupported("not a worksheet relationship"));
         }
         let target = rel.attr("Target").ok_or(OfficeError::NotFound)?;
@@ -178,7 +195,11 @@ impl Package {
             Some(abs) => abs.to_owned(),
             None => format!("xl/{target}"),
         };
-        if path.split('/').any(|s| s == ".." || s == "." || s.is_empty()) || path.contains('\\') {
+        if path
+            .split('/')
+            .any(|s| s == ".." || s == "." || s.is_empty())
+            || path.contains('\\')
+        {
             return Err(OfficeError::UnsafePath);
         }
         if !self.has_part(&path) {
@@ -213,5 +234,8 @@ fn is_plain_number(s: &str) -> bool {
         None => true,
         Some(e) => digits(e.strip_prefix(['-', '+']).unwrap_or(e)),
     };
-    digits(int) && frac.map(digits).unwrap_or(true) && exp_ok && s.parse::<f64>().map(f64::is_finite).unwrap_or(false)
+    digits(int)
+        && frac.map(digits).unwrap_or(true)
+        && exp_ok
+        && s.parse::<f64>().map(f64::is_finite).unwrap_or(false)
 }

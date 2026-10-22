@@ -71,7 +71,7 @@ fn safe_name(name: &str) -> bool {
         && !name.starts_with('/')
         && !name.contains('\\')
         && !name.contains('\0')
-        && name.split('/').all(|s| s != ".." && s != "." )
+        && name.split('/').all(|s| s != ".." && s != ".")
 }
 
 fn read_limited<R: Read>(r: &mut R, limit: usize) -> Result<Vec<u8>> {
@@ -99,7 +99,9 @@ impl Package {
         let mut part_sizes = Vec::with_capacity(archive.len());
         let mut total = 0usize;
         for i in 0..archive.len() {
-            let mut f = archive.by_index(i).map_err(|_| OfficeError::MalformedArchive)?;
+            let mut f = archive
+                .by_index(i)
+                .map_err(|_| OfficeError::MalformedArchive)?;
             let name = f.name().map_err(|_| OfficeError::UnsafePath)?.into_owned();
             if !safe_name(&name) {
                 return Err(OfficeError::UnsafePath);
@@ -110,16 +112,27 @@ impl Package {
             // Declared sizes are not trusted: count real decompressed bytes with a hard cap.
             // A trailing slash is not proof that an entry has no payload.
             let remaining = limits.max_expanded.saturating_sub(total);
-            let n = std::io::copy(&mut f.by_ref().take((remaining as u64).saturating_add(1)), &mut std::io::sink())
-                .map_err(|_| OfficeError::MalformedArchive)? as usize;
-            total = total.checked_add(n).ok_or(OfficeError::LimitExceeded("expanded size"))?;
+            let n = std::io::copy(
+                &mut f.by_ref().take((remaining as u64).saturating_add(1)),
+                &mut std::io::sink(),
+            )
+            .map_err(|_| OfficeError::MalformedArchive)? as usize;
+            total = total
+                .checked_add(n)
+                .ok_or(OfficeError::LimitExceeded("expanded size"))?;
             if total > limits.max_expanded {
                 return Err(OfficeError::LimitExceeded("expanded size"));
             }
             names.push(name);
             part_sizes.push(n);
         }
-        Ok(Package { bytes: bytes.to_vec(), names, part_sizes, expanded: total, limits: limits.clone() })
+        Ok(Package {
+            bytes: bytes.to_vec(),
+            names,
+            part_sizes,
+            expanded: total,
+            limits: limits.clone(),
+        })
     }
 
     pub fn part_names(&self) -> &[String] {
@@ -172,21 +185,24 @@ impl Package {
         let mut writer = ZipWriter::new(BoundedArchive::new(self.limits.max_archive));
         let mut replaced = false;
         for i in 0..archive.len() {
-            let file = archive.by_index_raw(i).map_err(|_| OfficeError::MalformedArchive)?;
+            let file = archive
+                .by_index_raw(i)
+                .map_err(|_| OfficeError::MalformedArchive)?;
             if file.name().map(|n| n == target).unwrap_or(false) {
-                let mut options = SimpleFileOptions::default()
-                    .compression_method(CompressionMethod::Deflated);
+                let mut options =
+                    SimpleFileOptions::default().compression_method(CompressionMethod::Deflated);
                 if let Some(t) = file.last_modified() {
                     options = options.last_modified_time(t);
                 }
                 if let Some(mode) = file.unix_mode() {
                     options = options.unix_permissions(mode);
                 }
-                let name = file.name().map_err(|_| OfficeError::UnsafePath)?.into_owned();
+                let name = file
+                    .name()
+                    .map_err(|_| OfficeError::UnsafePath)?
+                    .into_owned();
                 drop(file);
-                writer
-                    .start_file(name, options)
-                    .map_err(write_error)?;
+                writer.start_file(name, options).map_err(write_error)?;
                 writer.write_all(new_content).map_err(io_write_error)?;
                 replaced = true;
             } else {
@@ -196,10 +212,7 @@ impl Package {
         if !replaced {
             return Err(OfficeError::MissingPart(target.to_owned()));
         }
-        let candidate = writer
-            .finish()
-            .map_err(write_error)?
-            .inner.into_inner();
+        let candidate = writer.finish().map_err(write_error)?.inner.into_inner();
         if candidate.len() > self.limits.max_archive {
             return Err(OfficeError::LimitExceeded("archive size"));
         }
@@ -216,9 +229,14 @@ impl Package {
         if size > self.limits.max_part {
             return Err(OfficeError::LimitExceeded("part size"));
         }
-        let index = self.names.iter().position(|n| n == target)
+        let index = self
+            .names
+            .iter()
+            .position(|n| n == target)
             .ok_or_else(|| OfficeError::MissingPart(target.to_owned()))?;
-        let expanded = self.expanded.checked_sub(self.part_sizes[index])
+        let expanded = self
+            .expanded
+            .checked_sub(self.part_sizes[index])
             .and_then(|n| n.checked_add(size))
             .ok_or(OfficeError::LimitExceeded("expanded size"))?;
         if expanded > self.limits.max_expanded {
@@ -245,14 +263,16 @@ pub(crate) fn splice_size(size: usize, range: (usize, usize), replacement: usize
     if range.0 > range.1 || range.1 > size {
         return Err(OfficeError::InvalidReplacement("splice range"));
     }
-    (size - (range.1 - range.0)).checked_add(replacement)
+    (size - (range.1 - range.0))
+        .checked_add(replacement)
         .ok_or(OfficeError::LimitExceeded("part size"))
 }
 
 pub(crate) fn splice(src: &[u8], range: (usize, usize), replacement: &[u8]) -> Result<Vec<u8>> {
     let size = splice_size(src.len(), range, replacement.len())?;
     let mut out = Vec::new();
-    out.try_reserve_exact(size).map_err(|_| OfficeError::LimitExceeded("part size"))?;
+    out.try_reserve_exact(size)
+        .map_err(|_| OfficeError::LimitExceeded("part size"))?;
     out.extend_from_slice(&src[..range.0]);
     out.extend_from_slice(replacement);
     out.extend_from_slice(&src[range.1..]);
@@ -261,29 +281,51 @@ pub(crate) fn splice(src: &[u8], range: (usize, usize), replacement: &[u8]) -> R
 
 /// ZIP must seek to update headers, but cannot grow its buffer past the archive
 /// budget, including raw-copy members and the final central directory.
-struct BoundedArchive { inner: Cursor<Vec<u8>>, limit: usize }
+struct BoundedArchive {
+    inner: Cursor<Vec<u8>>,
+    limit: usize,
+}
 impl BoundedArchive {
-    fn new(limit: usize) -> Self { Self { inner: Cursor::new(Vec::new()), limit } }
+    fn new(limit: usize) -> Self {
+        Self {
+            inner: Cursor::new(Vec::new()),
+            limit,
+        }
+    }
 }
 impl Write for BoundedArchive {
     fn write(&mut self, bytes: &[u8]) -> std::io::Result<usize> {
-        let end = usize::try_from(self.inner.position()).ok().and_then(|p| p.checked_add(bytes.len()))
+        let end = usize::try_from(self.inner.position())
+            .ok()
+            .and_then(|p| p.checked_add(bytes.len()))
             .filter(|end| *end <= self.limit)
             .ok_or_else(|| std::io::Error::from(std::io::ErrorKind::FileTooLarge))?;
         let additional = end.saturating_sub(self.inner.get_ref().len());
-        self.inner.get_mut().try_reserve_exact(additional)
+        self.inner
+            .get_mut()
+            .try_reserve_exact(additional)
             .map_err(|_| std::io::Error::from(std::io::ErrorKind::FileTooLarge))?;
         self.inner.write(bytes)
     }
-    fn flush(&mut self) -> std::io::Result<()> { Ok(()) }
+    fn flush(&mut self) -> std::io::Result<()> {
+        Ok(())
+    }
 }
 impl Seek for BoundedArchive {
-    fn seek(&mut self, from: SeekFrom) -> std::io::Result<u64> { self.inner.seek(from) }
+    fn seek(&mut self, from: SeekFrom) -> std::io::Result<u64> {
+        self.inner.seek(from)
+    }
 }
 fn io_write_error(error: std::io::Error) -> OfficeError {
-    if error.kind() == std::io::ErrorKind::FileTooLarge { OfficeError::LimitExceeded("archive size") }
-    else { OfficeError::MalformedArchive }
+    if error.kind() == std::io::ErrorKind::FileTooLarge {
+        OfficeError::LimitExceeded("archive size")
+    } else {
+        OfficeError::MalformedArchive
+    }
 }
 fn write_error(error: zip::result::ZipError) -> OfficeError {
-    match error { zip::result::ZipError::Io(error) => io_write_error(error), _ => OfficeError::MalformedArchive }
+    match error {
+        zip::result::ZipError::Io(error) => io_write_error(error),
+        _ => OfficeError::MalformedArchive,
+    }
 }

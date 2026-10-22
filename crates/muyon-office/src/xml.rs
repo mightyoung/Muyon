@@ -78,7 +78,9 @@ fn decode_entities(raw: &str, in_attr: bool) -> Result<String> {
     while let Some(p) = rest.find('&') {
         out.push_str(&rest[..p]);
         let after = &rest[p + 1..];
-        let semi = after.find(';').ok_or(OfficeError::MalformedXml("unterminated entity"))?;
+        let semi = after
+            .find(';')
+            .ok_or(OfficeError::MalformedXml("unterminated entity"))?;
         let name = &after[..semi];
         match name {
             "amp" => out.push('&'),
@@ -156,17 +158,27 @@ pub fn tokenize(bytes: &[u8], limits: &XmlLimits) -> Result<Vec<Tok>> {
                     return Err(OfficeError::MalformedXml("text outside root"));
                 }
             } else {
-                push_text(&mut toks, decode_entities(raw, false)?, (i, end), false, scopes.len());
+                push_text(
+                    &mut toks,
+                    decode_entities(raw, false)?,
+                    (i, end),
+                    false,
+                    scopes.len(),
+                );
             }
             i = end;
             continue;
         }
         let rest = &src[i..];
         if rest.starts_with("<!--") {
-            let end = rest.find("-->").ok_or(OfficeError::MalformedXml("unterminated comment"))?;
+            let end = rest
+                .find("-->")
+                .ok_or(OfficeError::MalformedXml("unterminated comment"))?;
             i += end + 3;
         } else if rest.starts_with("<![CDATA[") {
-            let end = rest.find("]]>").ok_or(OfficeError::MalformedXml("unterminated CDATA"))?;
+            let end = rest
+                .find("]]>")
+                .ok_or(OfficeError::MalformedXml("unterminated CDATA"))?;
             if scopes.is_empty() {
                 return Err(OfficeError::MalformedXml("CDATA outside root"));
             }
@@ -176,12 +188,18 @@ pub fn tokenize(bytes: &[u8], limits: &XmlLimits) -> Result<Vec<Tok>> {
         } else if rest.starts_with("<!") {
             return Err(OfficeError::DtdNotAllowed);
         } else if rest.starts_with("<?") {
-            let end = rest.find("?>").ok_or(OfficeError::MalformedXml("unterminated PI"))?;
+            let end = rest
+                .find("?>")
+                .ok_or(OfficeError::MalformedXml("unterminated PI"))?;
             i += end + 2;
         } else if rest.starts_with("</") {
-            let close = rest.find('>').ok_or(OfficeError::MalformedXml("unterminated end tag"))?;
+            let close = rest
+                .find('>')
+                .ok_or(OfficeError::MalformedXml("unterminated end tag"))?;
             let qname = rest[2..close].trim_end();
-            let scope = scopes.pop().ok_or(OfficeError::MalformedXml("unbalanced end tag"))?;
+            let scope = scopes
+                .pop()
+                .ok_or(OfficeError::MalformedXml("unbalanced end tag"))?;
             if scope.qname != qname {
                 return Err(OfficeError::MalformedXml("mismatched end tag"));
             }
@@ -280,18 +298,28 @@ pub fn tokenize(bytes: &[u8], limits: &XmlLimits) -> Result<Vec<Tok>> {
                     plain.push((n, v));
                 }
             }
-            scopes.push(Scope { qname: qname.clone(), decls });
+            scopes.push(Scope {
+                qname: qname.clone(),
+                decls,
+            });
             let (ns, local) = split_name(&scopes, &qname)?;
             let mut attrs = Vec::new();
             for (n, v) in plain {
                 let (ans, alocal) = match n.split_once(':') {
                     Some((pre, l)) => (
-                        Some(lookup(&scopes, pre).ok_or(OfficeError::MalformedXml("unknown prefix"))?),
+                        Some(
+                            lookup(&scopes, pre)
+                                .ok_or(OfficeError::MalformedXml("unknown prefix"))?,
+                        ),
                         l.to_owned(),
                     ),
                     None => (None, n),
                 };
-                attrs.push(Attr { ns: ans, local: alocal, value: v });
+                attrs.push(Attr {
+                    ns: ans,
+                    local: alocal,
+                    value: v,
+                });
             }
             if scopes.len() > limits.max_depth {
                 return Err(OfficeError::LimitExceeded("xml depth"));
@@ -327,9 +355,15 @@ fn scope_for_end(remaining: &[Scope], popped: &Scope) -> Vec<Scope> {
     // End-tag names must resolve with the popped element's own declarations in scope.
     let mut v: Vec<Scope> = remaining
         .iter()
-        .map(|s| Scope { qname: s.qname.clone(), decls: s.decls.clone() })
+        .map(|s| Scope {
+            qname: s.qname.clone(),
+            decls: s.decls.clone(),
+        })
         .collect();
-    v.push(Scope { qname: popped.qname.clone(), decls: popped.decls.clone() });
+    v.push(Scope {
+        qname: popped.qname.clone(),
+        decls: popped.decls.clone(),
+    });
     v
 }
 
@@ -375,7 +409,9 @@ pub fn simple_text(toks: &[Tok], k: usize) -> Option<(String, (usize, usize), bo
         (Some(e), _) if e.kind == Kind::End && e.depth == start.depth => {
             Some((String::new(), (start.span.1, start.span.1), true))
         }
-        (Some(t), Some(e)) if t.kind == Kind::Text && e.kind == Kind::End && e.depth == start.depth => {
+        (Some(t), Some(e))
+            if t.kind == Kind::Text && e.kind == Kind::End && e.depth == start.depth =>
+        {
             Some((t.text.clone(), t.span, !t.cdata))
         }
         _ => None,

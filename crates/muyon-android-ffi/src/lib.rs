@@ -1173,7 +1173,10 @@ mod tests {
     use super::*;
     #[test]
     fn office_ffi_extracts_edits_and_refuses_without_state() {
-        let root = concat!(env!("CARGO_MANIFEST_DIR"), "/../../tools/document_fidelity/");
+        let root = concat!(
+            env!("CARGO_MANIFEST_DIR"),
+            "/../../tools/document_fidelity/"
+        );
         let docx = std::fs::read(format!("{root}fixtures_subsets/simple-run.docx")).unwrap();
         let sections = office_extract_text(docx.clone()).unwrap();
         assert!(!sections.is_empty());
