@@ -1,0 +1,9 @@
+{"candidate": true, "clock": 10, "credential": true, "eligible": true, "engine": "executed", "mode": "normal", "reasons": [], "spawn": true, "status": "candidate_validated"}
+{"candidate": true, "clock": 10, "credential": true, "eligible": true, "engine": "executed", "mode": "ready_close_worker", "reasons": [], "spawn": true, "status": "candidate_validated"}
+{"candidate": false, "clock": 0, "credential": false, "eligible": false, "engine": "not_run", "mode": "ready_finish", "reasons": ["lease_expired_before_spawn"], "spawn": false, "status": "held"}
+{"candidate": true, "clock": 10, "credential": true, "eligible": true, "engine": "executed", "mode": "cancel_closes_worker_returns_false", "reasons": [], "spawn": true, "status": "candidate_validated"}
+{"candidate": false, "clock": 20, "credential": false, "eligible": false, "engine": "unknown", "mode": "execution_ttl", "reasons": ["engine_execution_not_verified"], "spawn": true, "status": "held"}
+{"candidate": false, "clock": 10, "credential": false, "eligible": false, "engine": "unknown", "mode": "execution_finish", "reasons": ["engine_execution_not_verified"], "spawn": true, "status": "held"}
+{"candidate": false, "clock": 20, "credential": false, "eligible": false, "engine": "executed", "mode": "terminal_ttl", "reasons": ["host_validator_credential_not_issued"], "spawn": true, "status": "failed"}
+{"candidate": false, "clock": 10, "credential": false, "eligible": false, "engine": "executed", "mode": "terminal_finish", "reasons": ["host_validator_credential_not_issued"], "spawn": true, "status": "failed"}
+PASS: normal path and execution/terminal TTL/close checks; REPRODUCED: ready callback phase close still spawns.

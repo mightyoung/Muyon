@@ -1,0 +1,10 @@
+{"mode": "spawn_uncertain", "started": null, "engine": "unknown", "status": "outcome_unknown", "calls": ["reserve", "ready", "spawn", "reconcile", "quarantine"]}
+{"mode": "spawn_reconciled", "started": true, "engine": "unknown", "status": "failed", "calls": ["reserve", "ready", "spawn", "reconcile", "terminate", "reap", "cleanup"]}
+{"mode": "reserve_error", "started": false, "engine": "not_run", "status": "outcome_unknown", "calls": ["reserve", "reconcile", "quarantine"]}
+{"mode": "exit", "started": true, "engine": "unknown", "status": "failed", "calls": ["reserve", "ready", "spawn", "measure", "poll", "terminate", "reap", "cleanup"]}
+{"mode": "execution_operation_deadline", "status": "timed_out", "reasons": ["deadline_during_terminal_proof"]}
+{"mode": "terminal_operation_deadline", "status": "timed_out", "reasons": ["deadline_during_terminal_proof"]}
+{"mode": "default_missing_execution", "status": "held", "reasons": ["engine_execution_not_verified"]}
+{"mode": "terminal_failure_none", "callback_calls": 1, "issued": [false, false]}
+{"mode": "terminal_failure_exception", "callback_calls": 1, "issued": [false, false]}
+PASS: uncertain spawn truthfulness, operation deadlines, missing execution HOLD, failed issuance no-retry.

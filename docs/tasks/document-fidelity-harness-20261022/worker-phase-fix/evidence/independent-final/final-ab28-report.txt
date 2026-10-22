@@ -1,0 +1,57 @@
+Final independent fixed-SHA source review
+Reviewed source commit: ab28bb0899bd6eb17d98ace9f8b0db0d25d8e205
+Original comparison base: 7fb2c8ef82b30ee6572119016c8bb906733c129d
+Previous reviewed fix: fa2aa13a6f7dc1189b68b11b96b28524b4500e46
+Immutable review snapshot: /tmp/final-ab28-snapshot (git archive of exact final commit).
+Scope: runner source/docs, fake trusted-host/OS API semantics only.
+Conclusion: no remaining actionable findings in reviewed scope. Original three corrections and both adjacent P2 callback-reentry findings verified fixed; normal synthetic candidate-validation path preserved. Final result is source-contract approval only, not production execution/isolation qualification.
+
+Checks and evidence
+1. Worker lifecycle / stopped phase revocation
+- authority.py:176 onward: irreversible close_worker_stage revokes preissued worker capabilities; worker mint and consumption reject closed parent phase, consumption checks parent state.
+- launcher.py closes worker stage before stopping/draining, normal/nonzero reap, uncertain reconciliation, cleanup and quarantine.
+- 28-test runner suite includes fresh/preissued permit callback matrix for cancellation, successful exit/reap, unknown reap and uncertain spawn.
+- Normal successful fake candidate and credential consumption remain valid after closing only worker stage; admission is kept separately for validation.
+
+2. Admission TTL and verifier post-callback closure
+- authority.py:145 and :161 recheck lease with fresh trusted backend time after execution and terminal callbacks.
+- Independent fake probes advance10->20, expiry15, deadline50: execution returns held; terminal returns failed. Both withhold candidate/credential and txn eligibility.
+- Reentrant finish during either callback also withholds candidate/credential.
+- Independent operation-deadline probes advance to51 with longer admission: both return timed_out with no candidate/credential. Terminal/execution results are never reported as candidate_validated after deadline.
+
+3. Engine-entry versus spawn evidence
+- Spawn handle sets worker_process_started=true, engine_execution=unknown.
+- Only exact authenticated-session HostExecutionEvidence with matching request/engine/binding and bounded proof ID can set executed.
+- Missing default TrustedHostSession.verify_execution remains None/HOLD; JSON/wrong engine/scope rejected by runner tests.
+- Nonzero exit remains unknown engine execution, never executed merely from spawn.
+
+4. Ready callback reentry finding fixed
+- authority.py:104-106 checks closed/worker_closed/ready again after verify_ready.
+- authority.py:82-87 check_worker_lease requires active admission plus claimed, ready and open worker phase.
+- launcher.py:117 calls check_worker_lease immediately before spawn.
+- Independent ready callback close_worker_stage and finish now reject before spawn; pre-spawn cancel callback closing worker phase and returning False likewise rejects before spawn.
+- Fixed-SHA probe outputs show spawn=false, candidate=false, credential=false, eligible=false for all three variants.
+
+5. Terminal credential duplicate issuance finding fixed
+- authority.py:153-157 reserves credential_attempted before verify_terminal; nested call cannot pass the guard.
+- Independent direct-API nested issuance probe output: nested_minted=false, outer_minted=true, both_consumptions=[false,true]. Ordinary synthetic candidate validation still works.
+- Independent callback returns None and callback raises RuntimeError cases: two attempted calls invoke callback only once and mint zero credentials. Failure does not reopen issuance.
+
+6. Uncertain spawn truthfulness
+- Host spawn attempt starts worker_process_started=None and engine_execution=unknown before calling executor.spawn.
+- Unknown spawn reconciliation remains None/unknown and outcome_unknown; known reconciled process handle becomes true/unknown, with drain/reap/cleanup and no candidate/credential.
+- Reserve failure before spawn remains false/not_run. Nonzero known process exit remains true/unknown.
+
+Raw evidence / reproducible scripts
+/tmp/final-ab28-runner.log: python3 -m unittest discover -s tools/document_fidelity/adapters/runner/tests -v; 28 tests OK (0.354s).
+/tmp/final-ab28-legacy.log: python3 -m unittest discover -s tools/document_fidelity/tests -v; 60 tests OK (0.617s).
+/tmp/final-ab28-probe.py and /tmp/final-ab28-probe.log: eight independent synthetic normal/closure/TTL cases, all assertions pass.
+/tmp/final-ab28-reentrant-credential.py and /tmp/final-ab28-reentrant-credential.log: direct nested issuance, only outer capability minted and consumable.
+/tmp/final-ab28-extra-probe.py and /tmp/final-ab28-extra-probe.log: uncertain spawn, pre-spawn reserve failure, nonzero exit, operation deadlines, default execution HOLD, terminal failure no-retry; all assertions pass.
+Prior fa2 report and raw logs remain untouched under /tmp/worker-phase-fa2-*.
+
+Limits and remaining blockers
+- All host proofs and credentials above are synthetic FakeHostSession/FakeHostOS trusted application API objects; they are NOT real credentials, native isolation evidence, authenticated worker IPC or actual engine execution evidence.
+- Real HostSession provider, kernel HostOSBackend, worker IPC bootstrap/authenticated engine-entry observation remain unimplemented/unqualified, preserving HOLD without trusted integration. Core still needs current-time credential consume and atomic auth/scope/revision/idempotency/cancel CAS.
+- No third-party engine import/execution, worker CLI, actual subprocess test, bwrap/unshare/namespace/isolation operation, denied UID-map retry/workaround, installs, system/permission changes or real credential issuance occurred.
+- Reviewer's writes are confined to /tmp. Repository/source unchanged by reviewer. No denied or pending tool action; no review blocker remains. Production qualification gaps above remain intentionally unresolved.

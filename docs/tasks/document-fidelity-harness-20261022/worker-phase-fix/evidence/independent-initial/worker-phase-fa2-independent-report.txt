@@ -1,0 +1,39 @@
+Independent read-only review
+Reviewed commit: fa2aa13a6f7dc1189b68b11b96b28524b4500e46
+Compared base: 7fb2c8ef82b30ee6572119016c8bb906733c129d
+Scope: runner source, its tests, PLAN-AND-PROTOCOL.md and changed task docs.
+Result: original three corrections verified, but NOT approved as final: two adjacent callback-reentry correctness findings.
+
+Evidence integrity
+- Initial repository HEAD was exactly reviewed SHA, clean worktree.
+- Shared worktree changed during follow-up; immutable snapshot exported with git archive to /tmp/worker-phase-fa2-snapshot. Both test suites and all final probe logs were rerun against that snapshot. An interim failed run against the changing worktree was overwritten by the frozen-SHA run; no interim result is used as reviewed-SHA evidence.
+- No repository writes or commits were made by reviewer. Temporary files and git-archive snapshot only.
+
+Verified original corrections
+1. Worker capabilities: close_worker_stage runs before stop/drain/reap/reconcile/cleanup/quarantine and revokes preissued children. consume_worker_permit rereads parent worker_closed/closed; issue rejects worker_closed. Existing callback matrix covers cancellation, normal reaping, uncertain reaping, uncertain spawn, fresh/preissued permits.
+2. Terminal verifier admission TTL: issue_credential rereads trusted backend time after callback. Fake admission expires15, terminal callback advances10->20 under operation deadline50; result failed, candidate/credential absent, txn_eligible false. Execution verifier TTL and reentrant finish likewise reject.
+3. Execution accounting: known spawn handle sets only worker_process_started, engine execution remains unknown until exact typed HostExecutionEvidence from registered session. Nonzero exit is not evidence. Missing/JSON/wrong engine/wrong binding evidence stays HOLD. Base TrustedHostSession.verify_execution returns None.
+4. Normal trusted-API synthetic candidate validation still succeeds; synthetic validator remains bound, expiring and one-use in ordinary path. Simulation remains inert and ineligible. These are test-object semantics, NOT real host credential/isolation/runtime evidence.
+
+Finding 1 [P2] Reentrant close during ready approval still permits spawn
+Location: tools/document_fidelity/adapters/runner/authority.py:96-98; launcher.py:117-119.
+The RLock permits verify_ready to call close_worker_stage. approve_ready checks worker_closed only before this callback and unconditionally commits ready afterward. The launcher then checks the admission lease, whose check deliberately does not check worker_closed, and calls spawn. A pre-spawn cancellation callback that closes worker stage but returns False gives the same result.
+Reproduction: /tmp/worker-phase-fa2-independent-probe.py modes ready_close_worker and cancel_closes_worker_returns_false. Both show spawn=true, status=candidate_validated, candidate/credential/eligible=true under explicit synthetic session.
+Impact: an irreversible worker-phase close does not prevent later process launch. Worker permits remain blocked, so this is not evidence of a third-party engine authorization bypass. Synthetic success depends on the fake session's fabricated verification and must not be represented as production execution.
+Suggested fix: recheck phase/closed/ready after verify_ready; before spawn require a live claimed ready worker phase rather than an admission-only lease check. Preserve admission for post-reap validation.
+
+Finding 2 [P2] Terminal verifier reentry can mint two one-use credentials
+Location: tools/document_fidelity/adapters/runner/authority.py:145-154.
+credential_issued is checked before verify_terminal and written only after callback. The verifier can reenter issue_credential once under RLock. Both calls observe no issued credential; each mints a distinct validator for the same attempt/receipt. Both can be consumed before finish. This preexisting adjacent contract gap is retained by the modified function, not introduced by this diff.
+Reproduction: /tmp/worker-phase-fa2-reentrant-credential.py; output nested_minted=true, outer_minted=true, distinct=true, both_consumptions=[true,true]. Uses only explicit FakeHostSession/OS API synthetic objects.
+Impact: service API single-issuance/replay invariant is not reentry-safe. Ordinary launcher.finish revokes the nested cap if still unconsumed, limiting normal path exposure; arbitrary malicious trusted service code is outside stated threat boundary. No external JSON bypass or durable core commit is shown; core CAS/idempotency remains an additional required check.
+Suggested fix: reserve issuance/in-flight state before invoking terminal verifier, or recheck credential_issued after callback and deny second mint; ensure exception/negative-evidence behavior remains fail closed.
+
+Raw evidence
+/tmp/worker-phase-fa2-independent-runner.log: 25 tests OK, fixed snapshot.
+/tmp/worker-phase-fa2-independent-legacy.log: 60 tests OK, fixed snapshot.
+/tmp/worker-phase-fa2-independent-probe.py and .log: 8 pure synthetic cases and exact result fields.
+/tmp/worker-phase-fa2-reentrant-credential.py and .log: nested issuance reproduction.
+
+Restrictions observed / remaining limitations
+No third-party engine imports/execution, worker CLI, actual subprocess tests, namespace/sandbox operations, bwrap/unshare retries or workarounds, installs, credentials, system/permission changes. FakeHostSession/FakeHostOS are synthetic trusted application API test doubles only. Real HostSession, kernel HostOSBackend and authenticated worker IPC remain absent/unqualified; production default remains HOLD. Tests do not upgrade simulation or JSON to production capability, and do not prove real engine roundtrip or isolation.
