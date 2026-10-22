@@ -1,0 +1,10 @@
+docs/tasks/mig20-group-migration-preservation-fix-20261022/evidence/02-migration-preservation-green.log:53: new blank line at EOF.
+docs/tasks/mig20-group-migration-preservation-fix-20261022/evidence/final-bridge.stdout.log:58: new blank line at EOF.
+docs/tasks/mig20-group-migration-preservation-fix-20261022/evidence/final-cargo.stdout.log:406: new blank line at EOF.
+docs/tasks/mig20-group-migration-preservation-fix-20261022/evidence/final-governance.stdout.log:26: new blank line at EOF.
+docs/tasks/mig20-group-migration-preservation-fix-20261022/evidence/final-runtime.stdout.log:25: new blank line at EOF.
+docs/tasks/mig20-group-migration-preservation-fix-20261022/evidence/final-store.stdout.log:70: new blank line at EOF.
+docs/tasks/mig20-group-migration-preservation-fix-20261022/evidence/independent-current-5-GREEN.log:55: new blank line at EOF.
+docs/tasks/mig20-group-migration-preservation-fix-20261022/evidence/independent-current-extra-3-GREEN.log:48: new blank line at EOF.
+docs/tasks/mig20-group-migration-preservation-fix-20261022/evidence/independent-current-extra-4-GREEN.log:49: new blank line at EOF.
+docs/tasks/mig20-group-migration-preservation-fix-20261022/evidence/independent-native-regression.log:157: new blank line at EOF.

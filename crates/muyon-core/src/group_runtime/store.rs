@@ -291,8 +291,12 @@ impl BusinessStore {
             return Err(ContractError::ScopeMismatch);
         }
         let bindings = io(db.query("SELECT sql FROM sqlite_master WHERE type='table' AND name='group_runtime_intent_bindings'", &[]))?;
+        let mut legacy_journal = None;
         match cell(&rows[0], 1)? {
             "1" if bindings.is_empty() => {
+                // Capture all original column bytes/NULLs BEFORE migration writes.
+                // Version UPDATE triggers must not erase, rewrite or inject history.
+                legacy_journal = Some(io(db.query("SELECT intent_id,workspace,project_id,group_id,binding_digest,status,receipt FROM group_runtime_local_intents ORDER BY intent_id", &[]))?);
                 // Explicit, atomic extension migration; never invent principals
                 // or reconstruct missing historical commands from group defaults.
                 io(db.exec(INTENT_BINDINGS_DDL, &[]))?;
@@ -311,6 +315,16 @@ impl BusinessStore {
             || io(db.query("SELECT sql FROM sqlite_master WHERE type='table' AND name='group_runtime_intent_bindings'", &[]))? != vec![vec![Some(INTENT_BINDINGS_DDL.into())]] {
             return Err(ContractError::Storage);
         }
+        if let Some(expected) = legacy_journal {
+            let actual = io(db.query("SELECT intent_id,workspace,project_id,group_id,binding_digest,status,receipt FROM group_runtime_local_intents ORDER BY intent_id", &[]))?;
+            if actual != expected
+                || !io(db.query("SELECT 1 FROM group_runtime_intent_bindings LIMIT 1", &[]))?
+                    .is_empty()
+            {
+                return Err(ContractError::Storage);
+            }
+        }
+        // Only reads follow all migration writes; commit this verified transaction.
         io(tx.commit())
     }
     fn group_check(&self, c: &GroupCommand) -> Result<()> {

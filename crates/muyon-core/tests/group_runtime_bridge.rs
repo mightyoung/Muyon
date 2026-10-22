@@ -1254,3 +1254,153 @@ fn parent_original_binding_insert_cannot_commit_a_corrupted_pending_journal() {
         .unwrap()
         .is_empty());
 }
+
+fn legacy_migration_fixture() -> (Fixture, BusinessStore) {
+    let f = Fixture::new();
+    let s = f.init();
+    start(&s);
+    assert_eq!(
+        apply(&s, &command("legacy-rejected", 99, config("fixed"))).status,
+        LocalStatus::Rejected
+    );
+    s.database().exec("CREATE TRIGGER fail_legacy_group BEFORE INSERT ON group_runtime_groups WHEN NEW.group_id='legacy-group' BEGIN SELECT RAISE(ABORT,'synthetic legacy registration failure'); END",&[]).unwrap();
+    let mut c = command("legacy-pending", 0, registration());
+    c.group_id = "legacy-group".into();
+    assert_eq!(apply(&s, &c).status, LocalStatus::PendingOriginal);
+    s.database()
+        .exec("DROP TABLE group_runtime_intent_bindings", &[])
+        .unwrap();
+    s.database()
+        .exec("UPDATE group_runtime_schema SET version='1'", &[])
+        .unwrap();
+    (f, s)
+}
+fn check_legacy_migration_fault(sql: &str) {
+    let (_f, s) = legacy_migration_fixture();
+    let before = s
+        .database()
+        .query(
+            "SELECT * FROM group_runtime_local_intents ORDER BY intent_id",
+            &[],
+        )
+        .unwrap();
+    assert_eq!(before.len(), 4);
+    s.database().exec(&format!("CREATE TRIGGER damage_migration AFTER UPDATE ON group_runtime_schema WHEN OLD.version='1' AND NEW.version='2' BEGIN {sql}; END"),&[]).unwrap();
+    let result = s.initialize_group_runtime();
+    let after = s
+        .database()
+        .query(
+            "SELECT * FROM group_runtime_local_intents ORDER BY intent_id",
+            &[],
+        )
+        .unwrap();
+    println!("MIGRATION_FAULT={sql}\nRESULT={result:?}\nBEFORE={before:?}\nAFTER={after:?}");
+    assert_eq!(result, Err(ContractError::Storage));
+    assert_eq!(after, before);
+    assert_eq!(
+        s.database()
+            .query("SELECT version FROM group_runtime_schema", &[])
+            .unwrap()[0][0]
+            .as_deref(),
+        Some("1")
+    );
+    assert!(s.database().query("SELECT name FROM sqlite_master WHERE type='table' AND name='group_runtime_intent_bindings'",&[]).unwrap().is_empty());
+}
+#[test]
+fn migration_preservation_rejects_legacy_pending_deletion() {
+    check_legacy_migration_fault(
+        "DELETE FROM group_runtime_local_intents WHERE intent_id='legacy-pending'",
+    );
+}
+#[test]
+fn migration_preservation_rejects_legacy_receipt_rewrite() {
+    check_legacy_migration_fault("UPDATE group_runtime_local_intents SET receipt='{\"synthetic\":\"changed\"}' WHERE intent_id='register'");
+}
+#[test]
+fn migration_preservation_rejects_journal_row_injection() {
+    check_legacy_migration_fault("INSERT INTO group_runtime_local_intents SELECT 'injected-intent',workspace,project_id,group_id,binding_digest,'pending',NULL FROM group_runtime_local_intents WHERE intent_id='legacy-pending'");
+}
+#[test]
+fn migration_preservation_rejects_original_binding_injection() {
+    check_legacy_migration_fault("INSERT INTO group_runtime_intent_bindings SELECT intent_id,'{}' FROM group_runtime_local_intents WHERE intent_id='legacy-pending'");
+}
+#[test]
+fn migration_preservation_normal_reads_and_later_v2_bindings_remain_usable_without_replay() {
+    let (_f, s) = legacy_migration_fixture();
+    let before = s
+        .database()
+        .query(
+            "SELECT * FROM group_runtime_local_intents ORDER BY intent_id",
+            &[],
+        )
+        .unwrap();
+    s.initialize_group_runtime().unwrap();
+    assert_eq!(
+        s.database()
+            .query(
+                "SELECT * FROM group_runtime_local_intents ORDER BY intent_id",
+                &[]
+            )
+            .unwrap(),
+        before
+    );
+    assert!(s
+        .database()
+        .query("SELECT * FROM group_runtime_intent_bindings", &[])
+        .unwrap()
+        .is_empty());
+    for (intent, status) in [("register", "committed"), ("legacy-rejected", "rejected")] {
+        let raw=json!({"schema_version":1,"request":{"operation":"local_intent","group_id":"group","intent_id":intent}}).to_string();
+        let value = s.group_ui_read(&ui_scope(&s), &raw, None, None).unwrap();
+        assert_eq!(value["local_intent"]["status"], status);
+        assert_eq!(
+            value["local_intent"]["identity_source"],
+            "current_group_management"
+        );
+    }
+    let raw=json!({"schema_version":1,"request":{"operation":"local_intent","group_id":"legacy-group","intent_id":"legacy-pending"}}).to_string();
+    assert_eq!(
+        s.group_ui_read(&ui_scope(&s), &raw, None, None)
+            .unwrap_err(),
+        ContractError::Unknown
+    );
+    assert_eq!(
+        s.database()
+            .query(
+                "SELECT * FROM group_runtime_local_intents ORDER BY intent_id",
+                &[]
+            )
+            .unwrap(),
+        before
+    );
+    assert!(s
+        .database()
+        .query(
+            "SELECT * FROM group_runtime_groups WHERE group_id='legacy-group'",
+            &[]
+        )
+        .unwrap()
+        .is_empty());
+    assert_eq!(
+        apply(&s, &command("post-migration-config", 2, config("fixed"))).status,
+        LocalStatus::Committed
+    );
+    let bindings = s
+        .database()
+        .query(
+            "SELECT * FROM group_runtime_intent_bindings ORDER BY intent_id",
+            &[],
+        )
+        .unwrap();
+    assert_eq!(bindings.len(), 1);
+    s.initialize_group_runtime().unwrap();
+    assert_eq!(
+        s.database()
+            .query(
+                "SELECT * FROM group_runtime_intent_bindings ORDER BY intent_id",
+                &[]
+            )
+            .unwrap(),
+        bindings
+    );
+}
