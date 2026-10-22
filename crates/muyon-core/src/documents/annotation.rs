@@ -15,7 +15,11 @@ impl AnnotationAuthor {
             Self::Human { actor_id } => valid_id(actor_id),
             Self::Ai { agent_id, run_id } => valid_id(agent_id) && valid_id(run_id),
         };
-        if valid { Ok(()) } else { Err(ContractError::InvalidIdentity) }
+        if valid {
+            Ok(())
+        } else {
+            Err(ContractError::InvalidIdentity)
+        }
     }
 }
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
@@ -29,13 +33,17 @@ impl AnnotationBody {
         let text = |value: &str, limit: usize| {
             if value.trim().is_empty() || value.len() > limit || value.contains('\0') {
                 Err(ContractError::InvalidPayload)
-            } else { Ok(()) }
+            } else {
+                Ok(())
+            }
         };
         match self {
             Self::Comment { text: value } => text(value, 8192),
             Self::Highlight { quote, note } => {
                 text(quote, 16384)?;
-                if let Some(note) = note { text(note, 8192)?; }
+                if let Some(note) = note {
+                    text(note, 8192)?;
+                }
                 Ok(())
             }
         }
@@ -43,7 +51,10 @@ impl AnnotationBody {
 }
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
-pub enum StoredAnchorState { Current, Stale }
+pub enum StoredAnchorState {
+    Current,
+    Stale,
+}
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct AnnotationRecord {

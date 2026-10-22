@@ -3,17 +3,17 @@
 //! A valid reference/anchor/capability declaration never proves actual file
 //! reading, rendering, target resolution, editing or native format fidelity.
 pub mod anchor;
+pub mod annotation;
 pub mod capability;
 pub mod identity;
-pub mod annotation;
 pub mod storage;
 #[cfg(test)]
 mod storage_tests;
 use crate::contract::{AuthorityBinding, FileSource};
 pub use anchor::*;
+pub use annotation::*;
 pub use capability::*;
 pub use identity::DocumentRef;
-pub use annotation::*;
 pub use storage::{DocumentAccess, DocumentMetadata};
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]

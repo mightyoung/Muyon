@@ -21,8 +21,13 @@ struct StoredDocumentRef {
 impl<'de> Deserialize<'de> for DocumentRef {
     fn deserialize<D: Deserializer<'de>>(decoder: D) -> Result<Self, D::Error> {
         let value = StoredDocumentRef::deserialize(decoder)?;
-        Self::new(value.scope, &value.document_id, value.revision, value.format)
-            .map_err(|_| serde::de::Error::custom("invalid document identity"))
+        Self::new(
+            value.scope,
+            &value.document_id,
+            value.revision,
+            value.format,
+        )
+        .map_err(|_| serde::de::Error::custom("invalid document identity"))
     }
 }
 impl DocumentRef {
