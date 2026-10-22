@@ -1,0 +1,11 @@
+
+running 1 test
+test bot_definitions::tests::independent_entry_revoked_cannot_be_restored_by_insert ... FAILED
+
+failures:
+
+failures:
+    bot_definitions::tests::independent_entry_revoked_cannot_be_restored_by_insert
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 115 filtered out; finished in 0.01s
+

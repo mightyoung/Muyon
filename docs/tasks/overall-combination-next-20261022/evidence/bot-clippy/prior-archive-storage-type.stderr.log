@@ -1,0 +1,14 @@
+   Compiling muyon-core v0.1.0 (/workspace/bot-clippy-combination/crates/muyon-core)
+    Finished `test` profile [unoptimized] target(s) in 5.65s
+     Running unittests src/lib.rs (/tmp/bot-clippy-current-target/debug/deps/muyon_core-bc6cc4b5a97d75f0)
+
+thread 'bot_definitions::tests::archive_type_changed_between_transactions_rejects' (14480) panicked at muyon-core/src/bot_definitions/tests.rs:695:23:
+called `Result::unwrap_err()` on an `Ok` value: CreateReceipt { intent_id: "22222222-2222-4222-8222-222222222222", review_digest: "b28fa34732cea8c103a1c8d2eb5c8af25ed35ae4d9bf33ffe04d4a6a649cdf82", status: Committed, definition: Some(BotDefinition { id: "bot-ffdf4470c46e28a1b43936f6186ba9997676b63551f256c11f355773a7ff362b", name: "论文助手", purpose: "整理文献", role: "研究员", runnable: false, unavailable_reason: "provider_not_configured" }) }
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+thread 'bot_definitions::tests::independent_registry_archive_blob_rejects' (14486) panicked at muyon-core/src/bot_definitions/tests.rs:438:16:
+called `Result::unwrap_err()` on an `Ok` value: CreateReceipt { intent_id: "22222222-2222-4222-8222-222222222222", review_digest: "52b9d9b10c622bd82879afc385062d9f89d6600685ad39649334816cda86f0e9", status: Committed, definition: Some(BotDefinition { id: "bot-33108441c8942a73c033acc6e9aa46f95cd1d34668e7875953400077efe9dbfb", name: "论文助手", purpose: "整理文献", role: "研究员", runnable: false, unavailable_reason: "provider_not_configured" }) }
+
+thread 'bot_definitions::tests::tail_archive_blob_storage_rolls_back' (14502) panicked at muyon-core/src/bot_definitions/tests.rs:438:16:
+called `Result::unwrap_err()` on an `Ok` value: CreateReceipt { intent_id: "22222222-2222-4222-8222-222222222222", review_digest: "0f44dca6f62ad03c41d37b88a4a51f50be81794ca2031fdace97b6ab21b661bf", status: Committed, definition: Some(BotDefinition { id: "bot-29721729e87c530dc15c52047052fd32e34fd0fba95866c5a8d1d9e7ba1822cb", name: "论文助手", purpose: "整理文献", role: "研究员", runnable: false, unavailable_reason: "provider_not_configured" }) }
+error: test failed, to rerun pass `-p muyon-core --lib`

@@ -1,0 +1,11 @@
+   Compiling muyon-core v0.1.0 (/workspace/bot-clippy-combination/crates/muyon-core)
+    Finished `test` profile [unoptimized] target(s) in 6.03s
+     Running unittests src/lib.rs (/tmp/bot-clippy-current-target/debug/deps/muyon_core-bc6cc4b5a97d75f0)
+
+thread 'bot_definitions::tests::independent_registry_schema_rejects' (14330) panicked at muyon-core/src/bot_definitions/tests.rs:438:16:
+called `Result::unwrap_err()` on an `Ok` value: CreateReceipt { intent_id: "22222222-2222-4222-8222-222222222222", review_digest: "150b878f3dd60e73b20d8f8dfa1df3f55aab042b38238e7a75e439b972d7929a", status: Committed, definition: Some(BotDefinition { id: "bot-49a273af293a64eed90010c82c90c9d6c8a1d9f6d403311a60adddfc43a97ad5", name: "论文助手", purpose: "整理文献", role: "研究员", runnable: false, unavailable_reason: "provider_not_configured" }) }
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+thread 'bot_definitions::tests::tail_source_registry_version_rolls_back' (14359) panicked at muyon-core/src/bot_definitions/tests.rs:438:16:
+called `Result::unwrap_err()` on an `Ok` value: CreateReceipt { intent_id: "22222222-2222-4222-8222-222222222222", review_digest: "4675090672daea64a616e9361d9e8931e89629ad69cd235361b400e2dd6391cd", status: Committed, definition: Some(BotDefinition { id: "bot-c2b822603a576cea13dd2382eec62713e57dd0b1d7e57e83e8e0bf705f06107a", name: "论文助手", purpose: "整理文献", role: "研究员", runnable: false, unavailable_reason: "provider_not_configured" }) }
+error: test failed, to rerun pass `-p muyon-core --lib`

@@ -1,0 +1,20 @@
+   Compiling muyon-core v0.1.0 (/workspace/bot-clippy-combination/crates/muyon-core)
+warning: unused variable: `key`
+   --> muyon-core/src/bot_definitions.rs:256:9
+    |
+256 |     let key = scope(store, conversation, project)?;
+    |         ^^^ help: if this is intentional, prefix it with an underscore: `_key`
+    |
+    = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+
+warning: `muyon-core` (lib test) generated 1 warning (run `cargo fix --lib -p muyon-core --tests` to apply 1 suggestion)
+    Finished `test` profile [unoptimized] target(s) in 5.27s
+     Running unittests src/lib.rs (/tmp/bot-clippy-current-target/debug/deps/muyon_core-bc6cc4b5a97d75f0)
+
+thread 'bot_definitions::tests::insert_draft_scope_rolls_back' (14148) panicked at muyon-core/src/bot_definitions/tests.rs:438:16:
+called `Result::unwrap_err()` on an `Ok` value: CreateReceipt { intent_id: "22222222-2222-4222-8222-222222222222", review_digest: "e42ddad707147027df4b60a0ae7b5154093ff6470ef48878cea4f36d8c60d53a", status: Committed, definition: Some(BotDefinition { id: "bot-038237e94ebac7418db6ca7fa7c267aae07d2fb6ee7db3e8563c0c6e169535f9", name: "论文助手", purpose: "整理文献", role: "研究员", runnable: false, unavailable_reason: "provider_not_configured" }) }
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+thread 'bot_definitions::tests::tail_draft_scope_rolls_back' (14165) panicked at muyon-core/src/bot_definitions/tests.rs:438:16:
+called `Result::unwrap_err()` on an `Ok` value: CreateReceipt { intent_id: "22222222-2222-4222-8222-222222222222", review_digest: "e6a905e4b68cee279b44ab3ccbc7dfe5aa48c9e362860fd9c3956aff4fdd8776", status: Committed, definition: Some(BotDefinition { id: "bot-e9688cfbdc79c06e7a64bf5a7229020d718a6bcbefa100dc241177e773b28ce8", name: "论文助手", purpose: "整理文献", role: "研究员", runnable: false, unavailable_reason: "provider_not_configured" }) }
+error: test failed, to rerun pass `-p muyon-core --lib`

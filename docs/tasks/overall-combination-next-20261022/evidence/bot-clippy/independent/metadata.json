@@ -1,0 +1,49 @@
+{
+  "kind": "new_independent_minimal_boolean_equivalence_review",
+  "head": "c65d6e3ec1ed1f50566bde705729c221f4c9f90a",
+  "combination": "b13af1124ed1b078609a3b36fcf4f56e5ec27567",
+  "exactly_one_source_line_change": true,
+  "all_other_source_bytes_unchanged": true,
+  "test_files_unchanged": true,
+  "scope_schema_type_cas_tail_guards_unchanged": true,
+  "combination_source_matches_parent_source_before_patch": true,
+  "before_sha256": "3d6452678f668d5de7018d3f6c3f83c2be09ce49342d15bf04e65e47638cd4e0",
+  "after_sha256": "a5e4df8b8d097055a8e7702afb4597ea01372fdf89bf3883e8a3d087a7e7fae9",
+  "helper_source": "fn main() {\n let mut count=0usize;\n for i in 0..3usize { for a in 0u16..=255 { for b in 0u16..=255 {\n  let bytes=[a as u8,b as u8]; let flags=&bytes[..];\n  let old = !matches!(flags, [0, 1]) && !(i == 2 && matches!(flags, [1, 0]));\n  let new = !(matches!(flags, [0, 1]) || i == 2 && matches!(flags, [1, 0]));\n  assert_eq!(old,new,\"index={i} bytes={a},{b}\"); count+=1;\n }}}\n println!(\"PASS actual Rust expressions equivalent for {count} index/two-byte combinations\");\n}\n",
+  "helper_sha256": "1594cd495f5be1f5e59477e4d5f1440b54c2910786e05857697e0f40356a58f2",
+  "RUSTUP_TOOLCHAIN": "1.93.0",
+  "steps": [
+    {
+      "command_argv": [
+        "/tmp/bot-cargo/bin/rustc",
+        "--edition=2021",
+        "/tmp/bot-clippy-equivalence-independent.rs",
+        "-o",
+        "/tmp/bot-clippy-equivalence-independent"
+      ],
+      "cwd": "/workspace/bot-setup-draft",
+      "utc_start": "2026-10-22T07:12:59.697845Z",
+      "utc_end": "2026-10-22T07:12:59.768741Z",
+      "exit_code": 0
+    },
+    {
+      "command_argv": [
+        "/tmp/bot-clippy-equivalence-independent"
+      ],
+      "cwd": "/workspace/bot-setup-draft",
+      "utc_start": "2026-10-22T07:12:59.768769Z",
+      "utc_end": "2026-10-22T07:12:59.774419Z",
+      "exit_code": 0
+    }
+  ],
+  "scope_limit": "No full combination tests or strictClippy rerun performed by this reviewer. Existing full strictClippy remains failed for other owner dead-code. No older dependency runner or active combination worktree source accessed.",
+  "evidence_sha256": {
+    "check-1.stdout.log": "0630ab55f4a7cd6c232edf2273e4171af77190760122918164e459f895286b97",
+    "combination-handoff.log": "03c1dd1ff364093ec04f495e7f4e4218c6aa35a3e05f87cad27d959287966dd5",
+    "reviewed-commit.diff.log": "de13bace6380b030a81fc92594edf4486063abd1b60e07ec492c5251ee10f69e",
+    "check-1.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "check-0.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "combination-strict.log": "0eda368b498c34a1acb642e095c17557afac959e7eda03f6149fe585d583b225",
+    "check-0.stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

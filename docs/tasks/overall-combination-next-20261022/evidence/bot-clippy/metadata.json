@@ -1,0 +1,374 @@
+{
+  "combination": "b13af1124ed1b078609a3b36fcf4f56e5ec27567",
+  "patch_commit": "c65d6e3ec1ed1f50566bde705729c221f4c9f90a",
+  "started_utc": "2026-10-22T07:12:31.584565+00:00",
+  "commands": [
+    {
+      "label": "rustc",
+      "argv": [
+        "/tmp/bot-cargo/bin/rustc",
+        "--version"
+      ],
+      "cwd": "/workspace/bot-clippy-combination",
+      "started_utc": "2026-10-22T07:12:31.592553+00:00",
+      "ended_utc": "2026-10-22T07:12:31.611872+00:00",
+      "exit_code": 0
+    },
+    {
+      "label": "clippy",
+      "argv": [
+        "/tmp/bot-cargo/bin/cargo",
+        "clippy",
+        "--version"
+      ],
+      "cwd": "/workspace/bot-clippy-combination",
+      "started_utc": "2026-10-22T07:12:31.611889+00:00",
+      "ended_utc": "2026-10-22T07:12:31.648877+00:00",
+      "exit_code": 0
+    },
+    {
+      "label": "fmt",
+      "argv": [
+        "/tmp/bot-cargo/bin/rustfmt",
+        "--edition",
+        "2021",
+        "--check",
+        "crates/muyon-core/src/bot_definitions.rs"
+      ],
+      "cwd": "/workspace/bot-clippy-combination",
+      "started_utc": "2026-10-22T07:12:31.648894+00:00",
+      "ended_utc": "2026-10-22T07:12:31.679965+00:00",
+      "exit_code": 0
+    },
+    {
+      "label": "baseline33",
+      "argv": [
+        "/tmp/bot-cargo/bin/cargo",
+        "test",
+        "--manifest-path",
+        "crates/Cargo.toml",
+        "-p",
+        "muyon-core",
+        "--lib",
+        "bot_definitions",
+        "--",
+        "--test-threads=1",
+        "--nocapture"
+      ],
+      "cwd": "/workspace/bot-clippy-combination",
+      "started_utc": "2026-10-22T07:12:31.679985+00:00",
+      "ended_utc": "2026-10-22T07:12:38.378461+00:00",
+      "exit_code": 0
+    },
+    {
+      "label": "extra5",
+      "argv": [
+        "/tmp/bot-cargo/bin/cargo",
+        "test",
+        "--manifest-path",
+        "crates/Cargo.toml",
+        "-p",
+        "muyon-core",
+        "--lib",
+        "bot_definitions::tests::independent_",
+        "--",
+        "--test-threads=1",
+        "--nocapture"
+      ],
+      "cwd": "/workspace/bot-clippy-combination",
+      "started_utc": "2026-10-22T07:12:38.379044+00:00",
+      "ended_utc": "2026-10-22T07:12:43.809654+00:00",
+      "exit_code": 0
+    },
+    {
+      "label": "delete-entry",
+      "argv": [
+        "/tmp/bot-cargo/bin/cargo",
+        "test",
+        "--manifest-path",
+        "crates/Cargo.toml",
+        "-p",
+        "muyon-core",
+        "--lib",
+        "independent_entry_revoked_",
+        "--",
+        "--test-threads=1",
+        "--nocapture"
+      ],
+      "cwd": "/workspace/bot-clippy-combination",
+      "started_utc": "2026-10-22T07:12:43.809873+00:00",
+      "ended_utc": "2026-10-22T07:12:49.124539+00:00",
+      "exit_code": 101
+    },
+    {
+      "label": "delete-tail",
+      "argv": [
+        "/tmp/bot-cargo/bin/cargo",
+        "test",
+        "--manifest-path",
+        "crates/Cargo.toml",
+        "-p",
+        "muyon-core",
+        "--lib",
+        "bot_definitions",
+        "--",
+        "--test-threads=1",
+        "--nocapture"
+      ],
+      "cwd": "/workspace/bot-clippy-combination",
+      "started_utc": "2026-10-22T07:12:49.124747+00:00",
+      "ended_utc": "2026-10-22T07:12:55.218415+00:00",
+      "exit_code": 101
+    },
+    {
+      "label": "prior-tail-verification",
+      "argv": [
+        "/tmp/bot-cargo/bin/cargo",
+        "test",
+        "--manifest-path",
+        "crates/Cargo.toml",
+        "-p",
+        "muyon-core",
+        "--lib",
+        "bot_definitions",
+        "--",
+        "--test-threads=1",
+        "--nocapture"
+      ],
+      "cwd": "/workspace/bot-clippy-combination",
+      "started_utc": "2026-10-22T07:12:55.218764+00:00",
+      "ended_utc": "2026-10-22T07:13:01.382868+00:00",
+      "exit_code": 101
+    },
+    {
+      "label": "prior-live-project",
+      "argv": [
+        "/tmp/bot-cargo/bin/cargo",
+        "test",
+        "--manifest-path",
+        "crates/Cargo.toml",
+        "-p",
+        "muyon-core",
+        "--lib",
+        "bot_definitions",
+        "--",
+        "--test-threads=1",
+        "--nocapture"
+      ],
+      "cwd": "/workspace/bot-clippy-combination",
+      "started_utc": "2026-10-22T07:13:01.383097+00:00",
+      "ended_utc": "2026-10-22T07:13:06.949694+00:00",
+      "exit_code": 101
+    },
+    {
+      "label": "prior-source-scope-key",
+      "argv": [
+        "/tmp/bot-cargo/bin/cargo",
+        "test",
+        "--manifest-path",
+        "crates/Cargo.toml",
+        "-p",
+        "muyon-core",
+        "--lib",
+        "bot_definitions",
+        "--",
+        "--test-threads=1",
+        "--nocapture"
+      ],
+      "cwd": "/workspace/bot-clippy-combination",
+      "started_utc": "2026-10-22T07:13:06.950061+00:00",
+      "ended_utc": "2026-10-22T07:13:12.556686+00:00",
+      "exit_code": 101
+    },
+    {
+      "label": "prior-tail-epoch",
+      "argv": [
+        "/tmp/bot-cargo/bin/cargo",
+        "test",
+        "--manifest-path",
+        "crates/Cargo.toml",
+        "-p",
+        "muyon-core",
+        "--lib",
+        "bot_definitions",
+        "--",
+        "--test-threads=1",
+        "--nocapture"
+      ],
+      "cwd": "/workspace/bot-clippy-combination",
+      "started_utc": "2026-10-22T07:13:12.556920+00:00",
+      "ended_utc": "2026-10-22T07:13:18.530666+00:00",
+      "exit_code": 101
+    },
+    {
+      "label": "prior-source-registry-version",
+      "argv": [
+        "/tmp/bot-cargo/bin/cargo",
+        "test",
+        "--manifest-path",
+        "crates/Cargo.toml",
+        "-p",
+        "muyon-core",
+        "--lib",
+        "bot_definitions",
+        "--",
+        "--test-threads=1",
+        "--nocapture"
+      ],
+      "cwd": "/workspace/bot-clippy-combination",
+      "started_utc": "2026-10-22T07:13:18.530883+00:00",
+      "ended_utc": "2026-10-22T07:13:24.873748+00:00",
+      "exit_code": 101
+    },
+    {
+      "label": "prior-persistent-workspace",
+      "argv": [
+        "/tmp/bot-cargo/bin/cargo",
+        "test",
+        "--manifest-path",
+        "crates/Cargo.toml",
+        "-p",
+        "muyon-core",
+        "--lib",
+        "bot_definitions",
+        "--",
+        "--test-threads=1",
+        "--nocapture"
+      ],
+      "cwd": "/workspace/bot-clippy-combination",
+      "started_utc": "2026-10-22T07:13:24.874154+00:00",
+      "ended_utc": "2026-10-22T07:13:30.571816+00:00",
+      "exit_code": 101
+    },
+    {
+      "label": "prior-archive-storage-type",
+      "argv": [
+        "/tmp/bot-cargo/bin/cargo",
+        "test",
+        "--manifest-path",
+        "crates/Cargo.toml",
+        "-p",
+        "muyon-core",
+        "--lib",
+        "bot_definitions",
+        "--",
+        "--test-threads=1",
+        "--nocapture"
+      ],
+      "cwd": "/workspace/bot-clippy-combination",
+      "started_utc": "2026-10-22T07:13:30.572057+00:00",
+      "ended_utc": "2026-10-22T07:13:36.544463+00:00",
+      "exit_code": 101
+    },
+    {
+      "label": "prior-receipt-storage-type",
+      "argv": [
+        "/tmp/bot-cargo/bin/cargo",
+        "test",
+        "--manifest-path",
+        "crates/Cargo.toml",
+        "-p",
+        "muyon-core",
+        "--lib",
+        "bot_definitions",
+        "--",
+        "--test-threads=1",
+        "--nocapture"
+      ],
+      "cwd": "/workspace/bot-clippy-combination",
+      "started_utc": "2026-10-22T07:13:36.544679+00:00",
+      "ended_utc": "2026-10-22T07:13:42.096174+00:00",
+      "exit_code": 101
+    },
+    {
+      "label": "bot-nonminimal-lint",
+      "argv": [
+        "/tmp/bot-cargo/bin/cargo",
+        "clippy",
+        "--manifest-path",
+        "crates/Cargo.toml",
+        "-p",
+        "muyon-core",
+        "--lib",
+        "--",
+        "-D",
+        "clippy::nonminimal_bool"
+      ],
+      "cwd": "/workspace/bot-clippy-combination",
+      "started_utc": "2026-10-22T07:13:42.096409+00:00",
+      "ended_utc": "2026-10-22T07:13:49.287589+00:00",
+      "exit_code": 0
+    },
+    {
+      "label": "workspace-strict",
+      "argv": [
+        "/tmp/bot-cargo/bin/cargo",
+        "clippy",
+        "--manifest-path",
+        "crates/Cargo.toml",
+        "--workspace",
+        "--all-targets",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "cwd": "/workspace/bot-clippy-combination",
+      "started_utc": "2026-10-22T07:13:49.287608+00:00",
+      "ended_utc": "2026-10-22T07:14:03.189888+00:00",
+      "exit_code": 101
+    }
+  ],
+  "protected_sha256": {
+    "crates/muyon-core/src/bot_drafts.rs": "04e326766840fb1341c8b68661e69aaab5f50270536dee3c00cd4c2d58532668",
+    "crates/muyon-android-ffi/src/lib.rs": "7b0fc2c4556250f00b618b979d6b69ed744ce75dfe0182d6cb91571e3c95a3bd",
+    "apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/productbridge/muyon_android_product.kt": "e406384f87abe0caac6455b1786b619c123718d94ebf7f91d077a5e229fec0a4"
+  },
+  "module_sha256": "a5e4df8b8d097055a8e7702afb4597ea01372fdf89bf3883e8a3d087a7e7fae9",
+  "test_sha256": "87f5f210db6acd256770f212a904332d4a712df74811d8f5b06129e3fe693564",
+  "equivalence_cases": 196608,
+  "environment_override": {
+    "RUSTUP_HOME": "/tmp/bot-rustup",
+    "CARGO_HOME": "/tmp/bot-cargo",
+    "RUSTUP_TOOLCHAIN": "1.93.0",
+    "CARGO_TARGET_DIR": "/tmp/bot-clippy-current-target",
+    "LIBRARY_PATH": "/tmp/bot-sqlite-link"
+  },
+  "workspace_strict_exit_code": 101,
+  "ended_utc": "2026-10-22T07:14:03.190453+00:00",
+  "log_sha256": {
+    "baseline33.stderr.log": "2554d4638ca45c6778774a79dcb8043c335c5e9b4bcb9b2d16d0c23007fe2e57",
+    "baseline33.stdout.log": "025ebcf6723277c84ee3a771851a1f9752be960170960372a57d9ba652a2bdca",
+    "bot-nonminimal-lint.stderr.log": "114b6668b3b325367166f340f6ae2a9382925a31d92fc604a27aeb402977b0e1",
+    "bot-nonminimal-lint.stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "clippy.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "clippy.stdout.log": "df8eb5bfbd1a7a30227423062e07073b17619b16cd8727d0a7a9f6be42b1445e",
+    "delete-entry.stderr.log": "d05589d3d1ad499a13b4d2523c7d752cff2e643041ea17e9237e9baaa42d7d64",
+    "delete-entry.stdout.log": "e59afda5585c14c2d3a10c42ba31052deeab205242bceec60cbad9253455bb15",
+    "delete-tail.stderr.log": "f4c85682d9275f8a88e88389e7966c6f6a3a09dcee28823fe57d0ef88cae53c7",
+    "delete-tail.stdout.log": "681996bc89ca77bd55741ed6f27a67585b62ed9cf3fd2ee5990b26feb0a955a9",
+    "extra5.stderr.log": "7d12fb8a703dfd47d8183d666dcd73cca58f34b85e3a0a0881171671b71a9923",
+    "extra5.stdout.log": "19b39c8f4f6ae723398d4e447274248352afadf283a3dba804ef9eec2fe4d213",
+    "fmt.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "fmt.stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "prior-archive-storage-type.stderr.log": "e57442a2f16fba149a7bc3f8a1a7faf8f2a1e8e35992f106a00450f445e3d7e4",
+    "prior-archive-storage-type.stdout.log": "9c9da2fb0d1e7bd88e6f87ae0c8acac80d84be54071e892d1b25278a31c18c80",
+    "prior-live-project.stderr.log": "aa3fa6119ac1855f717b0e76db2159a6389dc6e3714bfe0ce1c052c6bc6d0e32",
+    "prior-live-project.stdout.log": "8e233a710637dbfb2ed13acd0868a4e26adfff96282a434d601e2b43659064eb",
+    "prior-persistent-workspace.stderr.log": "d084c624c804209cb5a9bda7572959757dc93c5cbbb347ff792ef8af8bb4c81e",
+    "prior-persistent-workspace.stdout.log": "6435be8c2cb3173f807d1d6e767a984619b1ffe0eb42b4aedd4c8181c6d5da55",
+    "prior-receipt-storage-type.stderr.log": "1406f497cb942e710cccef53e31bf6850bcef83f548860089350ac16665bf6a4",
+    "prior-receipt-storage-type.stdout.log": "4ea6f56fb8b1856d0ebf6f2efc7ebd653cc75917eccd00c2bb1d12680fd29e22",
+    "prior-source-registry-version.stderr.log": "2480e9cfb6a4a831bc283a032a3aa9754e9dc2d54bf3779b459c8655b928e2a9",
+    "prior-source-registry-version.stdout.log": "23c71d4b8448cd92ebccd7644f197c4d0a1bd0b0598c415e4ad452875c37c34a",
+    "prior-source-scope-key.stderr.log": "8bf805dbcc683692aabb170bf959872ed5a20f6f92dd6e6bc2874c1cb51df855",
+    "prior-source-scope-key.stdout.log": "775f55d20cc450a9fe4b45e0aed338461aa8b30fa2a50d812324afd2aac5ec19",
+    "prior-tail-epoch.stderr.log": "8fbc2abc57509cb1e65c0e4972ca083412e4eb1e4ba42dcfa718ee777d78c5d3",
+    "prior-tail-epoch.stdout.log": "df75bbd65e27994ef8aad12824894937b400de00231786c4398ea62ce8c07c6b",
+    "prior-tail-verification.stderr.log": "06c0e416569ec2406f8f75453622875594422bccc278f611f612b73e5d2f8768",
+    "prior-tail-verification.stdout.log": "681996bc89ca77bd55741ed6f27a67585b62ed9cf3fd2ee5990b26feb0a955a9",
+    "rustc.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "rustc.stdout.log": "a2d88be55921309c5e126c58ad4a9040d034419589b58684cb44dfd13e14f66e",
+    "workspace-strict.stderr.log": "6cfa7cbcf4a5b2a14591a2709966958dbef6a3aa9fde63bd26d7dcb6060a4669",
+    "workspace-strict.stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

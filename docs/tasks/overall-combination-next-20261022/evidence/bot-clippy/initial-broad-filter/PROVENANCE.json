@@ -1,0 +1,5 @@
+{
+  "outcome": "capture harness assertion failed; Rust baseline33 and broad extra filter7 both passed. Broad independent_ filter also matched two unrelated current-combination tests. Raw logs preserved; subsequent run narrows filter to bot_definitions::tests::independent_. No product test failure claimed.",
+  "combination": "b13af1124ed1b078609a3b36fcf4f56e5ec27567",
+  "patch": "c65d6e3ec1ed1f50566bde705729c221f4c9f90a"
+}

@@ -1,0 +1,35 @@
+    Checking typenum v1.20.1
+    Checking muyon-core-agent-lab v0.1.0 (/workspace/bot-clippy-combination/experiments/redesign/core-agent-lab/core)
+    Checking serde_core v1.0.229
+    Checking const-oid v0.10.2
+    Checking zmij v1.0.23
+    Checking cfg-if v1.0.5
+    Checking cpufeatures v0.3.1
+    Checking memchr v2.8.3
+    Checking muyon-plugin-contract-lab v0.1.0 (/workspace/bot-clippy-combination/experiments/redesign/plugin-contract-lab/core)
+    Checking itoa v1.0.18
+    Checking tinyvec v1.13.3
+    Checking muyon-rust-agent-host-lab v0.1.0 (/workspace/bot-clippy-combination/experiments/redesign/rust-agent-host-lab/core)
+    Checking hybrid-array v0.4.15
+    Checking unicode-normalization v0.1.25
+    Checking block-buffer v0.12.1
+    Checking crypto-common v0.2.2
+    Checking serde_json v1.0.154
+    Checking serde v1.0.229
+    Checking digest v0.11.3
+    Checking sha2 v0.11.1
+    Checking muyon-web-search-lab v0.1.0 (/workspace/bot-clippy-combination/experiments/redesign/web-search-lab/core)
+    Checking muyon-core v0.1.0 (/workspace/bot-clippy-combination/crates/muyon-core)
+warning: method `document_publish_candidate_in_transaction` is never used
+   --> muyon-core/src/documents/candidate.rs:297:19
+    |
+ 62 | impl BusinessStore {
+    | ------------------ method in this implementation
+...
+297 |     pub(crate) fn document_publish_candidate_in_transaction(
+    |                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: `muyon-core` (lib) generated 1 warning
+    Finished `dev` profile [unoptimized] target(s) in 7.15s

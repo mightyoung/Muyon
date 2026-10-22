@@ -1,0 +1,27 @@
+   Compiling muyon-core v0.1.0 (/workspace/bot-clippy-combination/crates/muyon-core)
+warning: unused import: `agent::ReadScope`
+ --> muyon-core/src/bot_definitions.rs:4:5
+  |
+4 |     agent::ReadScope,
+  |     ^^^^^^^^^^^^^^^^
+  |
+  = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+warning: `muyon-core` (lib test) generated 1 warning (run `cargo fix --lib -p muyon-core --tests` to apply 1 suggestion)
+    Finished `test` profile [unoptimized] target(s) in 5.26s
+     Running unittests src/lib.rs (/tmp/bot-clippy-current-target/debug/deps/muyon_core-bc6cc4b5a97d75f0)
+
+thread 'bot_definitions::tests::independent_entry_revoked_cannot_be_restored_by_insert' (14062) panicked at muyon-core/src/bot_definitions/tests.rs:713:20:
+called `Result::unwrap_err()` on an `Ok` value: CreateReceipt { intent_id: "22222222-2222-4222-8222-222222222222", review_digest: "c26464f2dadb158cffe1d8079ab1cbab3ec7416b21173cbbe15d10727d5e2fac", status: Committed, definition: Some(BotDefinition { id: "bot-04b92e4aa816c883197942bd53836bbd83510c7d455857ebe3c7ccc070d19708", name: "论文助手", purpose: "整理文献", role: "研究员", runnable: false, unavailable_reason: "provider_not_configured" }) }
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+thread 'bot_definitions::tests::pending_update_project_deletion_cannot_commit_effect' (14072) panicked at muyon-core/src/bot_definitions/tests.rs:571:5:
+assertion failed: confirm_create_trusted(f.store(), CONVERSATION, Some("p1"), INTENT,
+        &r.review_digest).is_err()
+
+thread 'bot_definitions::tests::project_deleted_exactly_between_pending_and_effect_must_not_commit' (14073) panicked at muyon-core/src/bot_definitions/tests.rs:405:23:
+called `Result::unwrap_err()` on an `Ok` value: CreateReceipt { intent_id: "22222222-2222-4222-8222-222222222222", review_digest: "25ad958d91b657c88fc33cc6c73454194e412e60b31b4b43720adb95d36e6f71", status: Committed, definition: Some(BotDefinition { id: "bot-47681b4cc080a71e997fddee2f02028e84617302ee4a23930cd43fa22fa654e4", name: "论文助手", purpose: "整理文献", role: "研究员", runnable: false, unavailable_reason: "provider_not_configured" }) }
+
+thread 'bot_definitions::tests::tail_project_deletion_rolls_back' (14091) panicked at muyon-core/src/bot_definitions/tests.rs:438:16:
+called `Result::unwrap_err()` on an `Ok` value: CreateReceipt { intent_id: "22222222-2222-4222-8222-222222222222", review_digest: "6d3bcf200dad166244f43a3a5f536e36c95d723728ade0f48c5330c1c68284ac", status: Committed, definition: Some(BotDefinition { id: "bot-b984f04d58a346db7c3c058d47be40079b54b4760e9eb92093aa1c836705650d", name: "论文助手", purpose: "整理文献", role: "研究员", runnable: false, unavailable_reason: "provider_not_configured" }) }
+error: test failed, to rerun pass `-p muyon-core --lib`

@@ -1,0 +1,119 @@
+ Downloading crates ...
+  Downloaded cargo_metadata v0.23.1
+  Downloaded askama_macros v0.16.1
+  Downloaded askama_parser v0.16.1
+  Downloaded glob v0.3.4
+  Downloaded camino v1.2.6
+  Downloaded askama_derive v0.16.1
+  Downloaded bitflags v2.13.2
+  Downloaded autocfg v1.5.1
+  Downloaded goblin v0.8.2
+  Downloaded equivalent v1.0.3
+  Downloaded bytes v1.12.1
+  Downloaded anyhow v1.0.104
+  Downloaded heck v0.5.0
+  Downloaded indexmap v2.14.2
+  Downloaded askama v0.16.1
+  Downloaded minimal-lexical v0.2.1
+  Downloaded fs-err v3.3.2
+  Downloaded linux-raw-sys v0.12.1
+  Downloaded percent-encoding v2.3.2
+  Downloaded scroll v0.12.0
+  Downloaded rustc-hash v2.1.3
+  Downloaded plain v0.2.3
+  Downloaded scroll_derive v0.12.1
+  Downloaded getrandom v0.4.3
+  Downloaded fastrand v2.5.0
+  Downloaded nom v7.1.3
+  Downloaded once_cell v1.21.4
+  Downloaded libc v0.2.191
+  Downloaded serde_spanned v1.1.2
+  Downloaded log v0.4.34
+  Downloaded errno v0.3.14
+  Downloaded cargo-platform v0.3.3
+  Downloaded rustix v1.1.5
+  Downloaded static_assertions v1.1.0
+  Downloaded tempfile v3.27.0
+  Downloaded toml v1.1.8+spec-1.1.0
+  Downloaded thiserror v2.0.21
+  Downloaded textwrap v0.16.4
+  Downloaded toml_writer v1.1.3+spec-1.1.0
+  Downloaded uniffi v0.32.2
+  Downloaded toml_datetime v1.1.2+spec-1.1.0
+  Downloaded thiserror-impl v2.0.21
+  Downloaded toml_parser v1.1.5+spec-1.1.0
+  Downloaded syn v2.0.119
+  Downloaded hashbrown v0.17.1
+  Downloaded semver v1.0.28
+  Downloaded uniffi_internal_macros v0.32.2
+  Downloaded unicode-width v0.2.2
+  Downloaded uniffi_udl v0.32.2
+  Downloaded weedle2 v5.0.0
+  Downloaded uniffi_pipeline v0.32.2
+  Downloaded uniffi_meta v0.32.2
+  Downloaded uniffi_macros v0.32.2
+  Downloaded uniffi_core v0.32.2
+  Downloaded winnow v1.0.4
+  Downloaded basic-toml v0.1.10
+  Downloaded smawk v0.3.3
+  Downloaded siphasher v1.0.4
+  Downloaded uniffi_bindgen v0.32.2
+   Compiling proc-macro2 v1.0.107
+   Compiling quote v1.0.47
+   Compiling serde_core v1.0.229
+   Compiling serde_json v1.0.154
+   Compiling libc v0.2.191
+   Compiling getrandom v0.4.3
+   Compiling rustix v1.1.5
+   Compiling anyhow v1.0.104
+   Compiling equivalent v1.0.3
+   Compiling hashbrown v0.17.1
+   Compiling syn v3.0.9
+   Compiling indexmap v2.14.2
+   Compiling syn v2.0.119
+   Compiling serde_derive v1.0.229
+   Compiling bitflags v2.13.2
+   Compiling linux-raw-sys v0.12.1
+   Compiling autocfg v1.5.1
+   Compiling once_cell v1.21.4
+   Compiling fastrand v2.5.0
+   Compiling fs-err v3.3.2
+   Compiling tempfile v3.27.0
+   Compiling camino v1.2.6
+   Compiling thiserror v2.0.21
+   Compiling winnow v1.0.4
+   Compiling heck v0.5.0
+    Checking serde v1.0.229
+   Compiling toml_parser v1.1.5+spec-1.1.0
+    Checking muyon-core v0.1.0 (/workspace/bot-clippy-combination/crates/muyon-core)
+   Compiling uniffi_internal_macros v0.32.2
+   Compiling thiserror-impl v2.0.21
+   Compiling toml_datetime v1.1.2+spec-1.1.0
+   Compiling uniffi_pipeline v0.32.2
+   Compiling serde_spanned v1.1.2
+   Compiling siphasher v1.0.4
+   Compiling toml_writer v1.1.3+spec-1.1.0
+   Compiling toml v1.1.8+spec-1.1.0
+   Compiling uniffi_meta v0.32.2
+    Checking cargo-platform v0.3.3
+    Checking semver v1.0.28
+    Checking static_assertions v1.1.0
+    Checking bytes v1.12.1
+    Checking cargo_metadata v0.23.1
+   Compiling uniffi_macros v0.32.2
+    Checking uniffi_core v0.32.2
+error: method `document_publish_candidate_in_transaction` is never used
+   --> muyon-core/src/documents/candidate.rs:297:19
+    |
+ 62 | impl BusinessStore {
+    | ------------------ method in this implementation
+...
+297 |     pub(crate) fn document_publish_candidate_in_transaction(
+    |                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = note: `-D dead-code` implied by `-D warnings`
+    = help: to override `-D warnings` add `#[allow(dead_code)]`
+
+    Checking uniffi v0.32.2
+error: could not compile `muyon-core` (lib) due to 1 previous error
+warning: build failed, waiting for other jobs to finish...

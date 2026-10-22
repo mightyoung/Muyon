@@ -1,0 +1,10 @@
+
+running 5 tests
+test bot_definitions::tests::independent_entry_revoked_cannot_be_restored_by_insert ... ok
+test bot_definitions::tests::independent_registry_archive_blob_rejects ... ok
+test bot_definitions::tests::independent_registry_digest_blob_rejects ... ok
+test bot_definitions::tests::independent_registry_schema_rejects ... ok
+test bot_definitions::tests::independent_registry_workspace_rejects ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 111 filtered out; finished in 0.04s
+

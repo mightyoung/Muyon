@@ -1,0 +1,7 @@
+{
+  "tested_combination": "b13af1124ed1b078609a3b36fcf4f56e5ec27567",
+  "tested_patch": "c65d6e3ec1ed1f50566bde705729c221f4c9f90a",
+  "code_commit_on_current_base": "3066475d6a8dd19e25e8608de81eaf2cab881727",
+  "assertion": "module file and one-line patch byte-identical; provider/test/FFI/binding input hashes unchanged; raw capture files copied without editing from author/independent capture directories",
+  "capture_script": "capture.py is original audit driver, tied to original producer paths and uncommitted patch atop b13; reproduce direct commands in HANDOFF rather than replacing provider with an old runner"
+}

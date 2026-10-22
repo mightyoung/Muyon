@@ -1,0 +1,80 @@
+   Compiling muyon-core v0.1.0 (/workspace/bot-clippy-combination/crates/muyon-core)
+    Finished `test` profile [unoptimized] target(s) in 5.82s
+     Running unittests src/lib.rs (/tmp/bot-clippy-current-target/debug/deps/muyon_core-bc6cc4b5a97d75f0)
+
+thread 'bot_definitions::tests::independent_registry_archive_blob_rejects' (13869) panicked at muyon-core/src/bot_definitions/tests.rs:438:16:
+called `Result::unwrap_err()` on an `Ok` value: CreateReceipt { intent_id: "22222222-2222-4222-8222-222222222222", review_digest: "be992e2f8062b99ab55f4dae9cf7e934b15f51a117e972fcfbe41cb708689d45", status: Committed, definition: Some(BotDefinition { id: "bot-794e724a5528259103a2ea2728e9815da7c15e6a7699360b90689bfe64fe91a4", name: "论文助手", purpose: "整理文献", role: "研究员", runnable: false, unavailable_reason: "provider_not_configured" }) }
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+thread 'bot_definitions::tests::independent_registry_digest_blob_rejects' (13870) panicked at muyon-core/src/bot_definitions/tests.rs:438:16:
+called `Result::unwrap_err()` on an `Ok` value: CreateReceipt { intent_id: "22222222-2222-4222-8222-222222222222", review_digest: "1d214f551e6c8e6053164febb430bdcb39cb7539647cd33b990b1ac697f01b90", status: Committed, definition: Some(BotDefinition { id: "bot-bac80d342bd4905b25a7bdab8c3203ff120522c185139ac3c0bb12a0ac5cc698", name: "论文助手", purpose: "整理文献", role: "研究员", runnable: false, unavailable_reason: "provider_not_configured" }) }
+
+thread 'bot_definitions::tests::independent_registry_schema_rejects' (13871) panicked at muyon-core/src/bot_definitions/tests.rs:438:16:
+called `Result::unwrap_err()` on an `Ok` value: CreateReceipt { intent_id: "22222222-2222-4222-8222-222222222222", review_digest: "c7952c25faaf1845114554365f5fea67057abc5c056bbd76f0cd083792da240a", status: Committed, definition: Some(BotDefinition { id: "bot-3dd322994b19a76d881eccd8376fc2cfc73fa88e5994e44dd92c2459a1d018dd", name: "论文助手", purpose: "整理文献", role: "研究员", runnable: false, unavailable_reason: "provider_not_configured" }) }
+
+thread 'bot_definitions::tests::independent_registry_workspace_rejects' (13872) panicked at muyon-core/src/bot_definitions/tests.rs:438:16:
+called `Result::unwrap_err()` on an `Ok` value: CreateReceipt { intent_id: "22222222-2222-4222-8222-222222222222", review_digest: "c69a26a88326b652ee5351e1a82ca237406f13ff74dd7f2ca77f9b5cd0ba5d26", status: Committed, definition: Some(BotDefinition { id: "bot-1ef97705cfc37f4cc66b1e7f02b0dcdfe2a19e9ba2f1a7035a5440f57dd4a744", name: "论文助手", purpose: "整理文献", role: "研究员", runnable: false, unavailable_reason: "provider_not_configured" }) }
+
+thread 'bot_definitions::tests::insert_draft_lifecycle_rolls_back' (13873) panicked at muyon-core/src/bot_definitions/tests.rs:438:16:
+called `Result::unwrap_err()` on an `Ok` value: CreateReceipt { intent_id: "22222222-2222-4222-8222-222222222222", review_digest: "83ca1ae04cb0af87c38e8589ac139b2a47c31c133748ef6ac26fe5f4de0cc773", status: Committed, definition: Some(BotDefinition { id: "bot-8a496e33e41f0ce4e38a644bbbb80ea045df9fc47c3a463926816fda6b9e4128", name: "论文助手", purpose: "整理文献", role: "研究员", runnable: false, unavailable_reason: "provider_not_configured" }) }
+
+thread 'bot_definitions::tests::insert_draft_revision_rolls_back' (13874) panicked at muyon-core/src/bot_definitions/tests.rs:438:16:
+called `Result::unwrap_err()` on an `Ok` value: CreateReceipt { intent_id: "22222222-2222-4222-8222-222222222222", review_digest: "0035374b90e599d81a491db56853e6fe0908dca43c25a1e6924ed52ef679d689", status: Committed, definition: Some(BotDefinition { id: "bot-3808077f1342da2e7d837fd9f3c04a50fb25f7895d67fcbb61e0569d479276f3", name: "论文助手", purpose: "整理文献", role: "研究员", runnable: false, unavailable_reason: "provider_not_configured" }) }
+
+thread 'bot_definitions::tests::insert_draft_scope_rolls_back' (13875) panicked at muyon-core/src/bot_definitions/tests.rs:438:16:
+called `Result::unwrap_err()` on an `Ok` value: CreateReceipt { intent_id: "22222222-2222-4222-8222-222222222222", review_digest: "223d57a2edba0e7a3a77d3abad899246bc76241b8f78d912c2d46c6e0d6669ee", status: Committed, definition: Some(BotDefinition { id: "bot-a9088d26d657d424b1eba127d08eb21ba55142a77b82d368648481084bf67ab2", name: "论文助手", purpose: "整理文献", role: "研究员", runnable: false, unavailable_reason: "provider_not_configured" }) }
+
+thread 'bot_definitions::tests::tail_archive_blob_storage_rolls_back' (13885) panicked at muyon-core/src/bot_definitions/tests.rs:438:16:
+called `Result::unwrap_err()` on an `Ok` value: CreateReceipt { intent_id: "22222222-2222-4222-8222-222222222222", review_digest: "0fe58b491a0c954ce8a33c51cdf06efa74b4be1d7d07a08c0849abaa7b2e0172", status: Committed, definition: Some(BotDefinition { id: "bot-ab5c295528b2a405f1db96659792b476cc108d9df69787b5f4940116198c5053", name: "论文助手", purpose: "整理文献", role: "研究员", runnable: false, unavailable_reason: "provider_not_configured" }) }
+
+thread 'bot_definitions::tests::tail_definition_blob_storage_rolls_back' (13886) panicked at muyon-core/src/bot_definitions/tests.rs:438:16:
+called `Result::unwrap_err()` on an `Ok` value: CreateReceipt { intent_id: "22222222-2222-4222-8222-222222222222", review_digest: "83fa5feb6fc00edf7d8edbdc72848d342a67bd7bea8561380c2a28899ab92e22", status: Committed, definition: Some(BotDefinition { id: "bot-a3f745c985d39c1a53285e479542b9991eb2262125a3c8ee0532526b7a8104ad", name: "论文助手", purpose: "整理文献", role: "研究员", runnable: false, unavailable_reason: "provider_not_configured" }) }
+
+thread 'bot_definitions::tests::tail_definition_identity_tampering_rolls_back' (13887) panicked at muyon-core/src/bot_definitions/tests.rs:438:16:
+called `Result::unwrap_err()` on an `Ok` value: CreateReceipt { intent_id: "22222222-2222-4222-8222-222222222222", review_digest: "25c743cd1b8cb8b9e1c185de32b3b38aad2d3892ade0880e6c170b3b11601e78", status: Committed, definition: Some(BotDefinition { id: "bot-f87eec65644e5c8bcd18323be6f0986acdf0f98d4e29583205db7e562de12d99", name: "论文助手", purpose: "整理文献", role: "研究员", runnable: false, unavailable_reason: "provider_not_configured" }) }
+
+thread 'bot_definitions::tests::tail_definition_tampering_rolls_back' (13888) panicked at muyon-core/src/bot_definitions/tests.rs:438:16:
+called `Result::unwrap_err()` on an `Ok` value: CreateReceipt { intent_id: "22222222-2222-4222-8222-222222222222", review_digest: "9de83588d8a422003e75b09217a853651dc88a1695d176839e17a97f3fc25616", status: Committed, definition: Some(BotDefinition { id: "bot-1d2689cf6e06bd318fe813e4f30f101186193b096c6263fb0efbd13f4ee1fb2b", name: "论文助手", purpose: "整理文献", role: "研究员", runnable: false, unavailable_reason: "provider_not_configured" }) }
+
+thread 'bot_definitions::tests::tail_digest_blob_storage_rolls_back' (13889) panicked at muyon-core/src/bot_definitions/tests.rs:438:16:
+called `Result::unwrap_err()` on an `Ok` value: CreateReceipt { intent_id: "22222222-2222-4222-8222-222222222222", review_digest: "e83e9fa94b3e98b9299d5a1b62591d45afdce4dd44097b2c8ba722677def771e", status: Committed, definition: Some(BotDefinition { id: "bot-43ff3465cc0e690fdc2baf9711dd88ad18e63ec8a0b6e1b277424bc53574444a", name: "论文助手", purpose: "整理文献", role: "研究员", runnable: false, unavailable_reason: "provider_not_configured" }) }
+
+thread 'bot_definitions::tests::tail_draft_lifecycle_rolls_back' (13890) panicked at muyon-core/src/bot_definitions/tests.rs:438:16:
+called `Result::unwrap_err()` on an `Ok` value: CreateReceipt { intent_id: "22222222-2222-4222-8222-222222222222", review_digest: "9cb1aa4b4e8122e8a314e49c23fce967122e1beb99636bf8108549bf80dd3e23", status: Committed, definition: Some(BotDefinition { id: "bot-96168293340301b63af1382611976dc204ededc15953e93e4b733ee61cb5fcb0", name: "论文助手", purpose: "整理文献", role: "研究员", runnable: false, unavailable_reason: "provider_not_configured" }) }
+
+thread 'bot_definitions::tests::tail_draft_revision_rolls_back' (13891) panicked at muyon-core/src/bot_definitions/tests.rs:438:16:
+called `Result::unwrap_err()` on an `Ok` value: CreateReceipt { intent_id: "22222222-2222-4222-8222-222222222222", review_digest: "d722bc4e2cd8936be78e584e09e10cb6427b7280abbbcb9b571f71f2c851e719", status: Committed, definition: Some(BotDefinition { id: "bot-26c3df54de670e83772ae265ef2c4448efceab19b610674c7933287e5c8abfbb", name: "论文助手", purpose: "整理文献", role: "研究员", runnable: false, unavailable_reason: "provider_not_configured" }) }
+
+thread 'bot_definitions::tests::tail_draft_scope_rolls_back' (13892) panicked at muyon-core/src/bot_definitions/tests.rs:438:16:
+called `Result::unwrap_err()` on an `Ok` value: CreateReceipt { intent_id: "22222222-2222-4222-8222-222222222222", review_digest: "d72efb401acc1b30bfbaf5fa90fb1bf996dd5ccb3e3674c7a2c8bd328712701d", status: Committed, definition: Some(BotDefinition { id: "bot-c588f04a3d3b0d034d07176d09d166c03c01aec1ff872f8406c2314ba2c5f92f", name: "论文助手", purpose: "整理文献", role: "研究员", runnable: false, unavailable_reason: "provider_not_configured" }) }
+
+thread 'bot_definitions::tests::tail_frozen_blob_storage_rolls_back' (13893) panicked at muyon-core/src/bot_definitions/tests.rs:438:16:
+called `Result::unwrap_err()` on an `Ok` value: CreateReceipt { intent_id: "22222222-2222-4222-8222-222222222222", review_digest: "d2c615d332d2a3b39ec8d977efdf5baccca3c015517da0eff5857f994499dec9", status: Committed, definition: Some(BotDefinition { id: "bot-51a772de850be3ea8e764dfa44a3a725408fcdb7bf186cd04150a284a041450d", name: "论文助手", purpose: "整理文献", role: "研究员", runnable: false, unavailable_reason: "provider_not_configured" }) }
+
+thread 'bot_definitions::tests::tail_intent_identity_tampering_rolls_back' (13894) panicked at muyon-core/src/bot_definitions/tests.rs:438:16:
+called `Result::unwrap_err()` on an `Ok` value: CreateReceipt { intent_id: "22222222-2222-4222-8222-222222222222", review_digest: "2c711741907b82f4e7aa657689ce9012ac4434354c6927215f4fa9d09962466b", status: Committed, definition: Some(BotDefinition { id: "bot-b5ef6ef2327d7e064981adf2510c121dfad831e2f68d5816dafd71c2708dc997", name: "论文助手", purpose: "整理文献", role: "研究员", runnable: false, unavailable_reason: "provider_not_configured" }) }
+
+thread 'bot_definitions::tests::tail_original_intent_rename_rolls_back' (13895) panicked at muyon-core/src/bot_definitions/tests.rs:438:16:
+called `Result::unwrap_err()` on an `Ok` value: CreateReceipt { intent_id: "22222222-2222-4222-8222-222222222222", review_digest: "d7963b88ace096530a29061ab3871cbaffde099599df6ea0fd7f21c3994b4a3b", status: Committed, definition: Some(BotDefinition { id: "bot-8a402283672554f4acca98d03c34131d61a93ca6b24b7a9e13694c8782c07f5a", name: "论文助手", purpose: "整理文献", role: "研究员", runnable: false, unavailable_reason: "provider_not_configured" }) }
+
+thread 'bot_definitions::tests::tail_owner_epoch_rolls_back' (13896) panicked at muyon-core/src/bot_definitions/tests.rs:438:16:
+called `Result::unwrap_err()` on an `Ok` value: CreateReceipt { intent_id: "22222222-2222-4222-8222-222222222222", review_digest: "012200fd19682c8e736cad934b249ceb9c7c795c88d6440a00320868c81f6efa", status: Committed, definition: Some(BotDefinition { id: "bot-98fe8c5e2a2683516293c7ea20075e63b31fb5e2f2fa4fe5dfc2bb8f1595c773", name: "论文助手", purpose: "整理文献", role: "研究员", runnable: false, unavailable_reason: "provider_not_configured" }) }
+
+thread 'bot_definitions::tests::tail_project_deletion_rolls_back' (13897) panicked at muyon-core/src/bot_definitions/tests.rs:438:16:
+called `Result::unwrap_err()` on an `Ok` value: CreateReceipt { intent_id: "22222222-2222-4222-8222-222222222222", review_digest: "b55f8ece4a4ab36c139337c7ee04762ddfe17c4d08c878d0f5a938f020c2bf3d", status: Committed, definition: Some(BotDefinition { id: "bot-e0e2847f73eabbe7d01994c20205579dcc22cfdf52041b8d92e393242b5a1dd9", name: "论文助手", purpose: "整理文献", role: "研究员", runnable: false, unavailable_reason: "provider_not_configured" }) }
+
+thread 'bot_definitions::tests::tail_receipt_blob_storage_rolls_back' (13898) panicked at muyon-core/src/bot_definitions/tests.rs:438:16:
+called `Result::unwrap_err()` on an `Ok` value: CreateReceipt { intent_id: "22222222-2222-4222-8222-222222222222", review_digest: "b5b6a33dfed98a57960e22f481a8936e35418ee4eab66619030d0f8ba38d39ab", status: Committed, definition: Some(BotDefinition { id: "bot-23e1f519992f93020bdad5646eb697b51780e1479ec97fe058c34180d5882da2", name: "论文助手", purpose: "整理文献", role: "研究员", runnable: false, unavailable_reason: "provider_not_configured" }) }
+
+thread 'bot_definitions::tests::tail_receipt_tampering_rolls_back' (13899) panicked at muyon-core/src/bot_definitions/tests.rs:438:16:
+called `Result::unwrap_err()` on an `Ok` value: CreateReceipt { intent_id: "22222222-2222-4222-8222-222222222222", review_digest: "7bcf303ce5b8556516e6d7a2c195ab0bddee15d71cead71f8dabacf6d49d1cc3", status: Committed, definition: Some(BotDefinition { id: "bot-9e4b69db62a4151f65d0140cd095e520a068bc192ac6e57fe22441036cfaddee", name: "论文助手", purpose: "整理文献", role: "研究员", runnable: false, unavailable_reason: "provider_not_configured" }) }
+
+thread 'bot_definitions::tests::tail_source_registry_version_rolls_back' (13900) panicked at muyon-core/src/bot_definitions/tests.rs:438:16:
+called `Result::unwrap_err()` on an `Ok` value: CreateReceipt { intent_id: "22222222-2222-4222-8222-222222222222", review_digest: "1c5338646d113d0d02831f5866c30c3f7dc1b661c32695b55b1e749ebf280766", status: Committed, definition: Some(BotDefinition { id: "bot-3706845c68e0d9795898331c2a6af7969d37162e070aa46908d87cf27d541950", name: "论文助手", purpose: "整理文献", role: "研究员", runnable: false, unavailable_reason: "provider_not_configured" }) }
+
+thread 'bot_definitions::tests::tail_source_registry_workspace_rolls_back' (13901) panicked at muyon-core/src/bot_definitions/tests.rs:438:16:
+called `Result::unwrap_err()` on an `Ok` value: CreateReceipt { intent_id: "22222222-2222-4222-8222-222222222222", review_digest: "c6ff29051c2eeb68b810fbe31129bc05e2db89ff80f931b88d7d94eefd081ce2", status: Committed, definition: Some(BotDefinition { id: "bot-d427d139b5b54a75794410d377436e2aea3d9bfb5ddd78f8833340dc7b283efe", name: "论文助手", purpose: "整理文献", role: "研究员", runnable: false, unavailable_reason: "provider_not_configured" }) }
+
+thread 'bot_definitions::tests::tail_workspace_change_rolls_back' (13902) panicked at muyon-core/src/bot_definitions/tests.rs:438:16:
+called `Result::unwrap_err()` on an `Ok` value: CreateReceipt { intent_id: "22222222-2222-4222-8222-222222222222", review_digest: "4ea1fa578c67fba6dbf840c5d23e8cfd27d08fb982a1464a4b60ac9c7a2d381e", status: Committed, definition: Some(BotDefinition { id: "bot-759ee923581a1a9e1d1592c22d4ae3c963bedfff44dca3508295cd033ab6162a", name: "论文助手", purpose: "整理文献", role: "研究员", runnable: false, unavailable_reason: "provider_not_configured" }) }
+error: test failed, to rerun pass `-p muyon-core --lib`

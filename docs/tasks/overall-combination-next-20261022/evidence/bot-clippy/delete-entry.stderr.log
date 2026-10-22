@@ -1,0 +1,8 @@
+   Compiling muyon-core v0.1.0 (/workspace/bot-clippy-combination/crates/muyon-core)
+    Finished `test` profile [unoptimized] target(s) in 5.28s
+     Running unittests src/lib.rs (/tmp/bot-clippy-current-target/debug/deps/muyon_core-bc6cc4b5a97d75f0)
+
+thread 'bot_definitions::tests::independent_entry_revoked_cannot_be_restored_by_insert' (13803) panicked at muyon-core/src/bot_definitions/tests.rs:713:20:
+called `Result::unwrap_err()` on an `Ok` value: CreateReceipt { intent_id: "22222222-2222-4222-8222-222222222222", review_digest: "e8e307b838fc06116ce4f15e983340f6f476ed2e38a30c6254556df4f33091a4", status: Committed, definition: Some(BotDefinition { id: "bot-4bd496de2ca2450cb831b9c195727a386d5691a9ca847a52ab03a4e2516eecde", name: "论文助手", purpose: "整理文献", role: "研究员", runnable: false, unavailable_reason: "provider_not_configured" }) }
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+error: test failed, to rerun pass `-p muyon-core --lib`
