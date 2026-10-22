@@ -10,12 +10,13 @@ import androidx.compose.ui.unit.dp
 
 /** Reader source is composed; access remains closed until the authoritative host bridge exists. */
 @Composable
-fun DocumentCapabilitiesScreen(onOpenExistingProjectMaterials: () -> Unit) {
+fun DocumentCapabilitiesScreen(readerSurface: ActivityReaderSurface? = null, project: String? = null, onOpenExistingProjectMaterials: () -> Unit) {
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(20.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)) {
         Text("公共文档能力", style = MaterialTheme.typography.headlineSmall)
         Text("公共阅读尚未连接已授权文件。接通后可查看 PDF 页面和 Word、PPT、Excel 文本预览；Office 预览不保留原版式。")
         Text("现有项目 PDF 资料入口保留；公共能力不会扩大科研或供应商的数据范围与授权。")
+        readerSurface?.let { ReaderSelectionSurface(it, project) }
         Button(onClick = onOpenExistingProjectMaterials, modifier = Modifier.heightIn(min = 48.dp)) {
             Text("打开现有项目资料")
         }

@@ -63,3 +63,11 @@ strict decoder/passive state delivery and exact logs. Service verified=false/pre
 unavailable and all shell persistence actions/buttons remain closed. Ordinary read
 never invokes outcome lookup/fence; cold history cannot acknowledge a new editor.
 Do not enable save/restore/query solely from decoded host-advertised operation flags.
+
+Reader Activity surface slice: READER-ACTIVITY-SURFACE.md documents real Activity
+construction/lifecycle/window/project/route fences, exact typed row gesture adapter,
+local pre-Host stale rejection and exact resource cleanup. No real catalog/principal/
+reauthorization Host port is installed: production remains explicitly unavailable.
+Native presentation binding662ae/01e1 was read only; original Host owner must supply
+private binding/catalog, serialized native selection fence and current policy bridge.
+Local observationId/time is not a native original issuance attempt or grant deadline.
