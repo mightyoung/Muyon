@@ -4,6 +4,21 @@
 
 原件、已定/建议及图号入口见[完整归档](../design/2026-10-22/README.md)，来源与 SHA-256 见[清单](../design/2026-10-22/sources.json)，[证据修正](../design/2026-10-22/EVIDENCE-NOTES.md)区分历史和当前候选。原编号保留；下表是原总纲的阶段映射，不新建重复主任务。
 
+用户追加要求全部 UI 改动开发并行执行、对应改动任务与素材推送远端。三份[原始吉祥物和 m 图标](../design/2026-10-22/brand-originals/README.md)已真实下载归档，与生成示例分开，不收入第三方私人参考截图。具体 UI 开发任务由父任务即将派发，任务名、分支与 writer 尚待回报；本归档不代派、不将此授权或计划记成开发完成。
+
+## 父任务派发后的 UI 并行队列（2026-10-22 增补）
+
+下表取代上段“即将派发”的较早状态：父任务已创建四条任务并报告 started，均登记为**进行中**，不是开发完成。只读远端核对时四分支尚未可见，因此没有可登记的远端交付 SHA/报告；后续由执行者实际提交补齐，不虚构 GitHub 链接或写者。
+
+| 任务分支 | 范围/唯一职责 | 状态 | 交付 SHA/报告 |
+|---|---|---|---|
+| `task/ui-foundation-20261022` | 统一主题与基础组件 | 进行中（父任务 started 回报） | 待交付 |
+| `task/ui-shell-20261022` | 唯一 MainActivity / ChatScreen 生产 UI 接线执行者 | 进行中（父任务 started 回报） | 待交付 |
+| `task/ui-action-cards-20261022` | 原生操作卡片 | 进行中（父任务 started 回报） | 待交付 |
+| `task/ui-agent-configuration-20261022` | Bot/群组配置界面 | 进行中（父任务 started 回报） | 待交付 |
+
+Bot 草稿底座已交付远端 `task/bot-setup-draft-20261022` @ **`79cf88974f6a44cb8e30df0e81d827a9376303b1`**，已通过只读 ls-remote、fetch 与该提交报告核对。[固定报告 `docs/tasks/bot-setup-draft-20261022/REPORT.md`](https://github.com/mightyoung/Muyon/blob/79cf88974f6a44cb8e30df0e81d827a9376303b1/docs/tasks/bot-setup-draft-20261022/REPORT.md)记录 **11/11 离线 PASS**，仅独立 Kotlin 内存状态合同；此归档未重跑该产品检查。尚无持久重启恢复、正式 Agent 创建、生产接线、APK/设备验收，不能把底座交付当配置 UI 完成。后续配置线程应复用该合同并按明确接线任务补齐剩余边界。
+
 | 阶段 | 原编号与交付 | 依赖与验收 | 本分支状态 |
 |---|---|---|---|
 | 0 证据对齐 | U08/U13；候选、CI、设备、费用版本 | 完整 SHA、同候选 build/device/回执；I04 拒绝边界保留 | 远端与 CI 只读快照已归档；设备/费用 HOLD 未闭合 |
