@@ -153,7 +153,7 @@ Actual presentation binding01e1 is available and is the next integration depende
 ## Exact owner handoff now available
 
 NATIVE-READER-POLICY-V1.md supersedes the earlier semantic-only endpoint requests:
-six precise native request/output contracts, observed real authorization fields,
+seven precise native request/output contracts (including genuine presentation continuation handoff), observed real authorization fields,
 natural TTL vs terminal revoke/foreign generation, original-attempt reconciliation
 (which may fence), atomic root-chain revoke including existing hooks, retention and
 mandatory tests. Proposed ABI names are explicit, not generated APIs. Host source
