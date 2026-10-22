@@ -1,0 +1,143 @@
+{
+  "$defs": {
+    "sha256": {
+      "maxLength": 64,
+      "minLength": 64,
+      "pattern": "^[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "source_sha": {
+      "maxLength": 40,
+      "minLength": 40,
+      "pattern": "^[0-9a-f]{40}$",
+      "type": "string"
+    }
+  },
+  "$id": "urn:muyon:android-rust-bridge:bridge-inputs:2",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "android_binding_sha256": {
+      "$ref": "#/$defs/sha256"
+    },
+    "android_config_sha256": {
+      "$ref": "#/$defs/sha256"
+    },
+    "build_identity": {
+      "$ref": "#/$defs/source_sha"
+    },
+    "format_version": {
+      "const": 2,
+      "type": "integer"
+    },
+    "jna": {
+      "additionalProperties": false,
+      "properties": {
+        "aar_sha256": {
+          "const": "b57125cb7d16253f0d65a80f7d3a4c3664effa711b8bdbb7f87fb572ce1624ed",
+          "type": "string"
+        },
+        "jni_sha256": {
+          "additionalProperties": false,
+          "properties": {
+            "arm64-v8a": {
+              "const": "abc26e994517bcaa3309acdb0a27373864086c7569c89d3087b8626fada9ef06",
+              "type": "string"
+            },
+            "x86_64": {
+              "const": "3809247e9b804a05ed8377b87d545cf5b5e97f960f75e725bc8497b40260e417",
+              "type": "string"
+            }
+          },
+          "required": [
+            "arm64-v8a",
+            "x86_64"
+          ],
+          "type": "object"
+        },
+        "version": {
+          "const": "5.19.1",
+          "type": "string"
+        }
+      },
+      "required": [
+        "version",
+        "aar_sha256",
+        "jni_sha256"
+      ],
+      "type": "object"
+    },
+    "min_api": {
+      "const": 26,
+      "type": "integer"
+    },
+    "namespace": {
+      "const": "muyon_android_contract_bridge",
+      "type": "string"
+    },
+    "protocol": {
+      "const": 1,
+      "type": "integer"
+    },
+    "rust_libraries": {
+      "additionalProperties": false,
+      "properties": {
+        "arm64-v8a": {
+          "additionalProperties": false,
+          "properties": {
+            "path": {
+              "const": "jniLibs/arm64-v8a/libmuyon_android_contract_bridge.so",
+              "type": "string"
+            },
+            "sha256": {
+              "$ref": "#/$defs/sha256"
+            }
+          },
+          "required": [
+            "path",
+            "sha256"
+          ],
+          "type": "object"
+        },
+        "x86_64": {
+          "additionalProperties": false,
+          "properties": {
+            "path": {
+              "const": "jniLibs/x86_64/libmuyon_android_contract_bridge.so",
+              "type": "string"
+            },
+            "sha256": {
+              "$ref": "#/$defs/sha256"
+            }
+          },
+          "required": [
+            "path",
+            "sha256"
+          ],
+          "type": "object"
+        }
+      },
+      "required": [
+        "arm64-v8a",
+        "x86_64"
+      ],
+      "type": "object"
+    },
+    "source_sha": {
+      "$ref": "#/$defs/source_sha"
+    }
+  },
+  "required": [
+    "format_version",
+    "source_sha",
+    "build_identity",
+    "protocol",
+    "namespace",
+    "android_binding_sha256",
+    "android_config_sha256",
+    "min_api",
+    "rust_libraries",
+    "jna"
+  ],
+  "type": "object"
+}

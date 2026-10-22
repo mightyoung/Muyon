@@ -1,0 +1,10 @@
+<?xml version='1.0' encoding='utf-8'?>
+<testsuite name="formatted/external-probes" tests="3" failures="0" errors="0" skipped="0">
+  <properties>
+    <property name="origin" value="derived libtest output; invocation/binary overlaps, not independent business cases" />
+    <property name="raw_sha256" value="4cb70780435339b5192892c6ca241ad5c60b4f46475e8fc6754dd8ce1cb73765" />
+  </properties>
+  <testcase classname="external core-API probes (not FFI)" name="independent_save_first_keeps_captured_editor_and_original_after_later_save" />
+  <testcase classname="external core-API probes (not FFI)" name="independent_lookup_fence_is_a_write_and_rejects_late_raw_save" />
+  <testcase classname="external core-API probes (not FFI)" name="independent_lookup_save_race_has_one_consistent_terminal_outcome" />
+</testsuite>

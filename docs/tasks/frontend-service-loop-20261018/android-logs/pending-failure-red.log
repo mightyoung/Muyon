@@ -1,0 +1,12 @@
+experiments/redesign/android-compose-lab/state/src/test/kotlin/com/mightyoung/muyon/androidlab/PendingChatActionChecks.kt:13:19: error: unresolved reference 'fail'.
+    check(refused.fail())
+                  ^^^^
+experiments/redesign/android-compose-lab/state/src/test/kotlin/com/mightyoung/muyon/androidlab/PendingChatActionChecks.kt:15:20: error: unresolved reference 'fail'.
+    check(!refused.fail())
+                   ^^^^
+experiments/redesign/android-compose-lab/state/src/test/kotlin/com/mightyoung/muyon/androidlab/PendingChatActionChecks.kt:17:20: error: unresolved reference 'ChatReadCompletion'.
+    val completion=ChatReadCompletion{value->check(value==null);deliveries++}
+                   ^^^^^^^^^^^^^^^^^^
+experiments/redesign/android-compose-lab/state/src/test/kotlin/com/mightyoung/muyon/androidlab/PendingChatActionChecks.kt:17:39: error: cannot infer type for value parameter 'value'. Specify it explicitly.
+    val completion=ChatReadCompletion{value->check(value==null);deliveries++}
+                                      ^^^^^

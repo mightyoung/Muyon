@@ -1,0 +1,2 @@
+Code generation complete, formatting with ktlint (use --no-format to disable)
+Warning: Unable to auto-format muyon_android_product.kt using ktlint: Os { code: 2, kind: NotFound, message: "No such file or directory" }

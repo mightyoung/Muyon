@@ -1,0 +1,62 @@
+[
+  {
+    "name": "reader-fixed-all-green",
+    "models_commit": "8d2b7931fa6b9194338ec81f1add8110075b92bc",
+    "parser_commit": "8d2b7931fa6b9194338ec81f1add8110075b92bc",
+    "checks_commit": "8d2b7931fa6b9194338ec81f1add8110075b92bc",
+    "isolated_shared_probe": false,
+    "sha256": {
+      "DocumentReaderModels.kt": "cddb2403725a102287fd4980d6ea8ca2b07fce479d2cd1386b5a6c97709d8440",
+      "OfficeTextPreview.kt": "37efc87a9dbee0172e8c4ee68599820ebbd6c6a72a86bf8fd4114989c8c1fc23",
+      "DocumentReaderChecks.kt": "30b9695fb135a43cb069cb1a9c97c741e6639a712a3855faaeb75a275b94040f"
+    },
+    "compile_exit": 0,
+    "runner_exit": 0,
+    "expected_runner_exit": 0
+  },
+  {
+    "name": "reader-inline-phonetic-red",
+    "models_commit": "8d2b7931fa6b9194338ec81f1add8110075b92bc",
+    "parser_commit": "3d2be1e783652735b79e9b58f6461d88ce131dc4",
+    "checks_commit": "8d2b7931fa6b9194338ec81f1add8110075b92bc",
+    "isolated_shared_probe": false,
+    "sha256": {
+      "DocumentReaderModels.kt": "cddb2403725a102287fd4980d6ea8ca2b07fce479d2cd1386b5a6c97709d8440",
+      "OfficeTextPreview.kt": "8135ca11ed6ac8ee4570e10f2c9798dc60451ca39a063c26764753a208f48e7b",
+      "DocumentReaderChecks.kt": "30b9695fb135a43cb069cb1a9c97c741e6639a712a3855faaeb75a275b94040f"
+    },
+    "compile_exit": 0,
+    "runner_exit": 1,
+    "expected_runner_exit": 1
+  },
+  {
+    "name": "reader-shared-phonetic-red",
+    "models_commit": "8d2b7931fa6b9194338ec81f1add8110075b92bc",
+    "parser_commit": "3d2be1e783652735b79e9b58f6461d88ce131dc4",
+    "checks_commit": "8d2b7931fa6b9194338ec81f1add8110075b92bc",
+    "isolated_shared_probe": true,
+    "sha256": {
+      "DocumentReaderModels.kt": "cddb2403725a102287fd4980d6ea8ca2b07fce479d2cd1386b5a6c97709d8440",
+      "OfficeTextPreview.kt": "8135ca11ed6ac8ee4570e10f2c9798dc60451ca39a063c26764753a208f48e7b",
+      "DocumentReaderChecks.kt": "4e9d4e6df55486298d42a26d0ee8efde2c87580b73ceab5191c802586c87989c"
+    },
+    "compile_exit": 0,
+    "runner_exit": 1,
+    "expected_runner_exit": 1
+  },
+  {
+    "name": "reader-highlight-empty-red",
+    "models_commit": "3d2be1e783652735b79e9b58f6461d88ce131dc4",
+    "parser_commit": "8d2b7931fa6b9194338ec81f1add8110075b92bc",
+    "checks_commit": "8d2b7931fa6b9194338ec81f1add8110075b92bc",
+    "isolated_shared_probe": false,
+    "sha256": {
+      "DocumentReaderModels.kt": "3490ae6294d954c606dbf89d5beba6f62ed1cee4551f0eb5bab3cf33b32c8cf9",
+      "OfficeTextPreview.kt": "37efc87a9dbee0172e8c4ee68599820ebbd6c6a72a86bf8fd4114989c8c1fc23",
+      "DocumentReaderChecks.kt": "30b9695fb135a43cb069cb1a9c97c741e6639a712a3855faaeb75a275b94040f"
+    },
+    "compile_exit": 0,
+    "runner_exit": 1,
+    "expected_runner_exit": 1
+  }
+]

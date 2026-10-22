@@ -1,0 +1,14 @@
+docs/tasks/mig20-group-grant-tail-fix-20261022/evidence/02-first-green.log:90: new blank line at EOF.
+docs/tasks/mig20-group-grant-tail-fix-20261022/evidence/04-focused-green.log:94: new blank line at EOF.
+docs/tasks/mig20-group-grant-tail-fix-20261022/evidence/06-identity-and-commit-green.log:97: new blank line at EOF.
+docs/tasks/mig20-group-grant-tail-fix-20261022/evidence/final-cargo.stdout.log:348: new blank line at EOF.
+docs/tasks/mig20-group-grant-tail-fix-20261022/evidence/final-governance.stdout.log:26: new blank line at EOF.
+docs/tasks/mig20-group-grant-tail-fix-20261022/evidence/final-runtime.stdout.log:25: new blank line at EOF.
+docs/tasks/mig20-group-grant-tail-fix-20261022/evidence/final-store.stdout.log:70: new blank line at EOF.
+docs/tasks/mig20-group-grant-tail-fix-20261022/evidence/independent-candidate-suite.log:93: new blank line at EOF.
+docs/tasks/mig20-group-grant-tail-fix-20261022/evidence/independent-final-suite.log:96: new blank line at EOF.
+docs/tasks/mig20-group-grant-tail-fix-20261022/evidence/independent-identity-read-fixed.log:34: new blank line at EOF.
+docs/tasks/mig20-group-grant-tail-fix-20261022/evidence/intermediate-final-cargo.stdout.log:345: new blank line at EOF.
+docs/tasks/mig20-group-grant-tail-fix-20261022/evidence/intermediate-final-governance.stdout.log:26: new blank line at EOF.
+docs/tasks/mig20-group-grant-tail-fix-20261022/evidence/intermediate-final-runtime.stdout.log:25: new blank line at EOF.
+docs/tasks/mig20-group-grant-tail-fix-20261022/evidence/intermediate-final-store.stdout.log:67: new blank line at EOF.

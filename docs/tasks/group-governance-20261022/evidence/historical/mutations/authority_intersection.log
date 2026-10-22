@@ -1,0 +1,39 @@
+
+running 20 tests
+test budget_overflow_and_exhaustion_never_become_zero_cost ... ok
+test cycles_missing_dependencies_and_duplicate_nodes_are_rejected ... ok
+test depth_two_and_foreign_parent_are_rejected ... ok
+test all_duplicate_states_only_lookup_and_submitted_blocks_new_dispatch ... ok
+test collaborator_cannot_self_authorize_even_as_coordinator ... ok
+test duplicate_request_identity_and_stale_config_are_not_valid_host_views ... ok
+test duplicate_command_returns_only_original_receipt_even_when_unknown ... ok
+test deterministic_ready_order_uses_node_identity_and_dependencies ... ok
+test eight_lifetime_children_and_two_active_slots_are_hard_caps ... ok
+test failed_dependencies_do_not_run_and_cancelled_children_keep_lifetime_slots ... ok
+test human_admin_can_only_narrow_existing_grant ... ok
+test every_authority_layer_and_member_scope_must_allow_the_request ... FAILED
+test ledger_corruption_and_unsupported_status_fail_closed ... ok
+test modes_roundtrip_by_explicit_name_and_unknown_fails_closed ... ok
+test non_member_is_rejected ... ok
+test stale_host_epoch_leader_epoch_or_configuration_never_executes ... ok
+test rounds_count_original_dispatch_history_across_restarts_and_stops ... ok
+test represented_coordinator_modes_never_execute ... ok
+test unknown_budget_keeps_reserve_and_blocks_new_command ... ok
+test unsupported_versions_and_ownerless_groups_are_rejected ... ok
+
+failures:
+
+---- every_authority_layer_and_member_scope_must_allow_the_request stdout ----
+
+thread 'every_authority_layer_and_member_scope_must_allow_the_request' (4284) panicked at /tmp/muyon-group-mutations/authority_intersection/tests/group_governance.rs:252:9:
+assertion `left == right` failed
+  left: Ok(Eligible { child_id: "a" })
+ right: Err(ScopeDenied)
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    every_authority_layer_and_member_scope_must_allow_the_request
+
+test result: FAILED. 19 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+

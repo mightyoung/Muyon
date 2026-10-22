@@ -1,0 +1,8 @@
+{
+  "defusedxml": {
+    "status": "not_installed"
+  },
+  "observation": "Static source checks lxml availability and OPENPYXL_LXML, defusedxml availability and OPENPYXL_DEFUSEDXML. No module imported; no environment values read or changed. Runtime selected parser NOT_RUN.",
+  "source_path": "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/site-packages/openpyxl/xml/__init__.py",
+  "source_sha256": "0392a3d065a4e5723ecc9c5b00be6f229a55fc08041cb46f786bbc44ae5ced4d"
+}

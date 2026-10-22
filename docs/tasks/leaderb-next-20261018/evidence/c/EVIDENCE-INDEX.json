@@ -1,0 +1,281 @@
+{
+  "final_source_sha": "fdc9aea120925229aa592c3551efab9b3f67a825",
+  "history_outcomes": {
+    "01-structural-red.log": {
+      "exit": 101,
+      "scope": "uncommitted first API-missing RED"
+    },
+    "02-semantic-red.log": {
+      "exit": 101,
+      "scope": "uncommitted runtime RED not_implemented"
+    },
+    "03-initial-implementation.log": {
+      "exit": 101,
+      "scope": "missing private run directory; initial new facade failed"
+    },
+    "04-first-green.log": {
+      "exit": 101,
+      "scope": "historical filename is NOT outcome: native_binding_turn failed"
+    },
+    "05-first-green.log": {
+      "exit": 101,
+      "scope": "historical filename is NOT outcome: mode test failed because chmod matched existing0600"
+    },
+    "06-review-green.log": {
+      "exit": 101,
+      "scope": "historical filename is NOT outcome: missing CStr import build failure"
+    },
+    "07-review-green.log": {
+      "exit": 0,
+      "scope": "11 tests precommit implementation"
+    },
+    "08-android-check.log": {
+      "exit": 0,
+      "scope": "precommit1.99.1 Android check, not linking"
+    },
+    "09-fixed-5a6e637a-tests.log": {
+      "exit": 0,
+      "source_sha": "5a6e637a97ded490c08d6371ebaa94adb778d1e8",
+      "scope": "supplier12/runtime2 Rust1.99.1"
+    },
+    "10-fixed-5a6e637a-android-check.log": {
+      "exit": 0,
+      "source_sha": "5a6e637a97ded490c08d6371ebaa94adb778d1e8",
+      "scope": "Rust1.99.1 Androidcheck"
+    },
+    "11-pinned-1.99.0-tests.log": {
+      "exit": 0,
+      "source_sha": "5a6e637a97ded490c08d6371ebaa94adb778d1e8",
+      "scope": "supplier12/runtime2 pinnedRust1.99.0; untracked workflow present"
+    },
+    "ci-invalid-a4f8604e.json": {
+      "source_sha": "a4f8604ec7439da2dc66fb6145101d9f9e25fc5f",
+      "scope": "run39102103856 completed/failure; zerojobs invalid runner.temp context"
+    }
+  },
+  "historical_uncommitted_source_snapshots": "not retained; logs are contemporaneous but not exact committed source proof",
+  "files": [
+    {
+      "path": "FINAL-READBACK.json",
+      "bytes": 525,
+      "sha256": "03171382063df10646f4b47a5624be5a6db6bcc6f45b2b4536bdd6433dd65976"
+    },
+    {
+      "path": "HANDOFF.md",
+      "bytes": 4738,
+      "sha256": "c9fc6546e0a5447f65d150a0b721dfbb159aff2ca90a9fb2672075eb73219d39"
+    },
+    {
+      "path": "author/MANIFEST.json",
+      "bytes": 719123,
+      "sha256": "879c2a61a1b246960b3833469f1c5e0d93339ff9802b2c83dd4e32e9ee8841b6"
+    },
+    {
+      "path": "author/android-lib-check.log",
+      "bytes": 2197,
+      "sha256": "7b8c3ff32fc25a6d1730967bbbd661695df04e2405673d493bfea33e001a27c6"
+    },
+    {
+      "path": "author/diff-check.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "author/format.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "author/offline-service-runtime.log",
+      "bytes": 2230,
+      "sha256": "24bf1965ececa682b9a8a9e1806515da5043f9ef159eeb6b03c59d22c5972de4"
+    },
+    {
+      "path": "author/run-final.py",
+      "bytes": 2594,
+      "sha256": "a67c03f9d525619299916724e1193aaf14b270807241c8154e32b439d0f17150"
+    },
+    {
+      "path": "author/supplier-store.log",
+      "bytes": 3401,
+      "sha256": "88ad200941eb99542477a9bf4d3d22cf4c5448dc56c38730043036d0abfc9b74"
+    },
+    {
+      "path": "author-final/artifact-download-failure.json",
+      "bytes": 417,
+      "sha256": "ae22e9ee3372fffcd6ebfae8893d3a2049326e996399d19559bb0e5fbe796da2"
+    },
+    {
+      "path": "author-final/assert-exact-checkout-and-preserve-source-hashes.log",
+      "bytes": 58,
+      "sha256": "e82cb835f22ca3017ff1636b423d2a2c45b1ea71efad9e12e9af8fbbd4c1201e"
+    },
+    {
+      "path": "author-final/cancel-a4-generic.log",
+      "bytes": 47,
+      "sha256": "63798604cfcb9292977e6f0add9d61442c1abd3c1020f1f36b07cebb4369f9f3"
+    },
+    {
+      "path": "author-final/cancel-fdc-generic.log",
+      "bytes": 54,
+      "sha256": "bb3203fec356fd554e4c0c4902a97055c682a8f9ae929c1ec4cf83b3e18e27a0"
+    },
+    {
+      "path": "author-final/ci-artifact-metadata.json",
+      "bytes": 787,
+      "sha256": "1dc5d8ff8ea93352b494f22928abf0cbbda9cc7efbb7f515608f0de3d169596d"
+    },
+    {
+      "path": "author-final/ci-full.log.gz",
+      "bytes": 8913,
+      "sha256": "01ed8cb2cf6a8623c9bf33e6e7b94a83ce41f6a329371f782992c221f0ef7ed4"
+    },
+    {
+      "path": "author-final/ci-terminal.json",
+      "bytes": 1458,
+      "sha256": "b292d6ee8664563d8b3f9af1da3062c824f5514b09cc88197ca643415d1b6f0c"
+    },
+    {
+      "path": "author-final/generic-a4-terminal.json",
+      "bytes": 207,
+      "sha256": "aace8408cb80a5defbcc0676ec2f6f081183943d5050384e3520839a4f9bc174"
+    },
+    {
+      "path": "author-final/generic-fdc-terminal.json",
+      "bytes": 207,
+      "sha256": "02f28e8b2f557173bb4acc19ea7253cf23b4b7e61a0cd9e973d0d567233f4c15"
+    },
+    {
+      "path": "author-final/github-env.txt",
+      "bytes": 84,
+      "sha256": "48b7f417aa64ab54de34f969652d09300af6d9e187a05ef32a817ec5ff1b48bd"
+    },
+    {
+      "path": "author-final/install-pinned-tested-rust.log",
+      "bytes": 472,
+      "sha256": "6527a1aa39119aacac6b29ec8e321badc53b15454df2d5d0115c3c12bc651b73"
+    },
+    {
+      "path": "author-final/local-workflow-results.json",
+      "bytes": 575,
+      "sha256": "bacce89e4ee0977c244130017d0850c8d34a107ca23ef91d45409fff46257ac9"
+    },
+    {
+      "path": "author-final/run-workflow-local.py",
+      "bytes": 1586,
+      "sha256": "1565e63edf52fde756a475dc22114931d01e43d6677d39b1f7670a6663ada58a"
+    },
+    {
+      "path": "author-final/scoped-registered-business-read-and-android-compile-checks.log",
+      "bytes": 8337,
+      "sha256": "cc2759fb96fce9621c2db63e788f4ab505a38f1d096c2a35e66eade1557d819a"
+    },
+    {
+      "path": "author-final/verify-source-integrity-after-checks.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "author-final/workflow-raw/android-lib-check.log",
+      "bytes": 2197,
+      "sha256": "309009684f099f02d0b14703734e7d69c51813ac1eb2011692017e1691a0508d"
+    },
+    {
+      "path": "author-final/workflow-raw/offline-service-runtime.log",
+      "bytes": 2369,
+      "sha256": "80cd11a98e4cf41559e68f43ea9f0f9390a0b6e77f3cc39454f5012514273e67"
+    },
+    {
+      "path": "author-final/workflow-raw/results.json",
+      "bytes": 1163,
+      "sha256": "afd738356e5d55de347f2005353d0ff71b65627aad486652fd4ed0464e05ec3a"
+    },
+    {
+      "path": "author-final/workflow-raw/source-after.json",
+      "bytes": 358038,
+      "sha256": "87f098b821d0b3d714be4e04f010187735280bec1d7f07d7deaa71e16e78a625"
+    },
+    {
+      "path": "author-final/workflow-raw/source-before.json",
+      "bytes": 358017,
+      "sha256": "bdbe65a99aef1b4d8a9c7ea944d2750f63003fab55b8a87cea6b315ccc0b4b53"
+    },
+    {
+      "path": "author-final/workflow-raw/supplier-store.log",
+      "bytes": 3768,
+      "sha256": "2cb244356d5d2cded737d5a785c504a34e9478d10aea37947f064ced6eff1774"
+    },
+    {
+      "path": "author-final/workflow-raw/toolchain.log",
+      "bytes": 472,
+      "sha256": "6527a1aa39119aacac6b29ec8e321badc53b15454df2d5d0115c3c12bc651b73"
+    },
+    {
+      "path": "history/01-structural-red.log",
+      "bytes": 2687,
+      "sha256": "ad19f680c0180987ee60b8e1e0dbdf5a69a20cf3cb4cf618b1c481ef7d9ed2eb"
+    },
+    {
+      "path": "history/02-semantic-red.log",
+      "bytes": 2789,
+      "sha256": "54491d22af82f70fa4e4129a87ec8188bb6c7d542d71a6bcd0a5e00653e615b0"
+    },
+    {
+      "path": "history/03-initial-implementation.log",
+      "bytes": 3611,
+      "sha256": "ea80ecc8fdd18e16e586eed0a5bfa45ffe0ba7cb83e23b8918a9661e5f077e65"
+    },
+    {
+      "path": "history/04-first-green.log",
+      "bytes": 3977,
+      "sha256": "c793767b4fe5fd522ec5964a3f189d1b33ce218f9d3a3cc2e7ed188e7136eab2"
+    },
+    {
+      "path": "history/05-first-green.log",
+      "bytes": 3687,
+      "sha256": "9a445ca50e618dfd0d8a6b9d7134cc10f30dfbbca7b46fda1646e1d436628b24"
+    },
+    {
+      "path": "history/06-review-green.log",
+      "bytes": 2403,
+      "sha256": "5b929570f568c0afe3506a94830134eec0ff1de54e01a9073ff9a78c306f8abc"
+    },
+    {
+      "path": "history/07-review-green.log",
+      "bytes": 3453,
+      "sha256": "6f0e7ac9b91c0d3790f28bb3e2198246e8cba7bfa5692223130f803b13f24adc"
+    },
+    {
+      "path": "history/08-android-check.log",
+      "bytes": 2197,
+      "sha256": "af2ad22f0df6f6427271b1c7aaa9545fec93bf755d56d2f1f00d0cb83315428a"
+    },
+    {
+      "path": "history/09-fixed-5a6e637a-tests.log",
+      "bytes": 3885,
+      "sha256": "1fe1aa781977bab06a3d7a3f7cd6e18a2b42d57f77353d64133f81b977332ab1"
+    },
+    {
+      "path": "history/10-fixed-5a6e637a-android-check.log",
+      "bytes": 1850,
+      "sha256": "9675226676ac20f60bd0df5716fae63913f6a187c60a9d2a68ff0fee87d3b7de"
+    },
+    {
+      "path": "history/11-pinned-1.99.0-tests.log",
+      "bytes": 4127,
+      "sha256": "cc630203a4d5e276f7d936ed3eb3155e67faffec593554372a76da83164b06c5"
+    },
+    {
+      "path": "history/ci-invalid-a4f8604e.html",
+      "bytes": 188051,
+      "sha256": "d7d3b6cfb5ebd27df47817d1a323ef8867dfa7dbfd90fbd5db944cdd232151e8"
+    },
+    {
+      "path": "history/ci-invalid-a4f8604e.json",
+      "bytes": 11919,
+      "sha256": "d1864638d89ff16a5fb22cde63596f276f9dc639feb34bf03f5760d31e20153b"
+    }
+  ],
+  "raw_artifact_download": "HTTP403; metadata/full workflow log retained, artifact not locally available",
+  "integrator_correction": "Corrected authored HANDOFF remote SQLite version3.45.1 to3.46.1 against unchanged raw install-pinned-tested-rust.log line10; reviewer independently identified correction. Raw evidence unchanged."
+}

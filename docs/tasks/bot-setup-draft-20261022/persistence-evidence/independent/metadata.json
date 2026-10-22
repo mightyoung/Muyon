@@ -1,0 +1,55 @@
+{
+  "kind": "new_independent_persistence_rerun",
+  "notice": "New offline independent run; not reconstructed previous evidence. No product/UI/store integration proven.",
+  "cwd": "/workspace/bot-setup-draft",
+  "command_argv": [
+    "env",
+    "KOTLINC=/tmp/bot-setup-tools/kotlinc/bin/kotlinc",
+    "apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/run-offline-checks.sh"
+  ],
+  "utc_started_at": "2026-10-22T05:05:00.125060Z",
+  "utc_finished_at": "2026-10-22T05:05:07.288581Z",
+  "exit_code": 0,
+  "head": "49ad2a8dfe7fe65bad600d985f9e1631252191da",
+  "head_after": "49ad2a8dfe7fe65bad600d985f9e1631252191da",
+  "source_sha256_before": {
+    "apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupDraft.kt": "2becb6c2a44ba2fe862e3cfe3df31528c91bb37e04bc6835a749c54f4e5eb2f5",
+    "apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/agents/setup/SetupDraftArchive.kt": "5ff652109765a429fd427379a4eabaf0d82e6159ae57bceafbd4955c2f03dbc1",
+    "apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupPersistenceChecks.kt": "8f9f8f838ddc12c1ffecab5778ea4ac3d68ba9639e37e40d90c62e933ed093d8",
+    "apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/run-offline-checks.sh": "7eeffbc77eb86f5da1ac6510700d5ba0eed7929ccb36aa4c771eb51b518c8fda",
+    "apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupDraftChecks.kt": "420afa32cf65542f72531d6cead970ef008f11bfe211178853709ab744f10804"
+  },
+  "source_sha256_after": {
+    "apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupDraft.kt": "2becb6c2a44ba2fe862e3cfe3df31528c91bb37e04bc6835a749c54f4e5eb2f5",
+    "apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/agents/setup/SetupDraftArchive.kt": "5ff652109765a429fd427379a4eabaf0d82e6159ae57bceafbd4955c2f03dbc1",
+    "apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupPersistenceChecks.kt": "8f9f8f838ddc12c1ffecab5778ea4ac3d68ba9639e37e40d90c62e933ed093d8",
+    "apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/run-offline-checks.sh": "7eeffbc77eb86f5da1ac6510700d5ba0eed7929ccb36aa4c771eb51b518c8fda",
+    "apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupDraftChecks.kt": "420afa32cf65542f72531d6cead970ef008f11bfe211178853709ab744f10804"
+  },
+  "versions": {
+    "java": {
+      "command": [
+        "java",
+        "-version"
+      ],
+      "exit_code": 0
+    },
+    "kotlin": {
+      "command": [
+        "/tmp/bot-setup-tools/kotlinc/bin/kotlinc",
+        "-version"
+      ],
+      "exit_code": 0
+    }
+  },
+  "compiler_zip_sha256": "302d1d8e671e5c3207e6ed62ff11fb555462a628e22a1158254dcaaf7e7394bc",
+  "evidence_sha256": {
+    "java-version.stderr.log": "bf61371a588e139353579c26bedbc9693004380fe8e053aa012cb6f7d2c43f20",
+    "java-version.stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "kotlin-version.stderr.log": "66a17105b1a6dfa2764b499aaf01107c29f15e848196c82aed2cc00d41d52458",
+    "kotlin-version.stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "started-at-utc.txt": "c1d86e427600ac354cde287ef286a6e90df3a1a317f1e06f610a604e0c3ab17d",
+    "stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout.log": "c4f13aef5453061ef4d6e011c48836bdc9b06db06221a5ba0550392560539cba"
+  }
+}

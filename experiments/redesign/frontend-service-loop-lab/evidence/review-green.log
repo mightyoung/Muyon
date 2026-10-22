@@ -1,0 +1,23 @@
+test_answer_delta_byte_limit_is_1024 (test_contract.EventTests.test_answer_delta_byte_limit_is_1024) ... ok
+test_binder_loss_and_unknown_only_reconcile_never_resubmit (test_contract.EventTests.test_binder_loss_and_unknown_only_reconcile_never_resubmit) ... ok
+test_binder_loss_clears_answer_and_still_accepts_receipt_metadata (test_contract.EventTests.test_binder_loss_clears_answer_and_still_accepts_receipt_metadata) ... ok
+test_cancel_is_request_not_fabricated_terminal (test_contract.EventTests.test_cancel_is_request_not_fabricated_terminal) ... ok
+test_completion_requires_durable_success_receipt (test_contract.EventTests.test_completion_requires_durable_success_receipt) ... ok
+test_display_invalidation_clears_and_blocks_business_until_host_reauthorization (test_contract.EventTests.test_display_invalidation_clears_and_blocks_business_until_host_reauthorization) ... ok
+test_malformed_or_unbounded_events_atomic_rejection (test_contract.EventTests.test_malformed_or_unbounded_events_atomic_rejection) ... ok
+test_object_schema_version_required (test_contract.EventTests.test_object_schema_version_required) ... ok
+test_opaque_receipt_is_utf8_not_identifier (test_contract.EventTests.test_opaque_receipt_is_utf8_not_identifier) ... ok
+test_order_and_replay_are_deterministic (test_contract.EventTests.test_order_and_replay_are_deterministic) ... ok
+test_original_receipt_and_current_projection_separate (test_contract.EventTests.test_original_receipt_and_current_projection_separate) ... ok
+test_projection_requires_matching_object_revision_and_original_receipt (test_contract.EventTests.test_projection_requires_matching_object_revision_and_original_receipt) ... ok
+test_reconnect_lookup_uses_new_lease_without_rewriting_admitted_epoch (test_contract.EventTests.test_reconnect_lookup_uses_new_lease_without_rewriting_admitted_epoch) ... ok
+test_wrong_identity_stale_lease_and_run_cannot_mutate (test_contract.EventTests.test_wrong_identity_stale_lease_and_run_cannot_mutate) ... ok
+test_authority_and_transport_fields_never_accepted (test_contract.SubmissionTests.test_authority_and_transport_fields_never_accepted) ... ok
+test_missing_wrong_type_and_overflow_rejected (test_contract.SubmissionTests.test_missing_wrong_type_and_overflow_rejected) ... ok
+test_selected_supplier_only_and_no_path_like_identifiers (test_contract.SubmissionTests.test_selected_supplier_only_and_no_path_like_identifiers) ... ok
+test_typed_bounded_submission (test_contract.SubmissionTests.test_typed_bounded_submission) ... ok
+
+----------------------------------------------------------------------
+Ran 18 tests in 0.001s
+
+OK

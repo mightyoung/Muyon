@@ -1,0 +1,11 @@
+--- baseline-module.rs
++++ unknown_budget-module.rs
+@@ -276,7 +276,7 @@
+         return Err(Error::Stopped);
+     }
+     // Submitted is unresolved too: absence of an unknown marker is not a receipt.
+-    if !host.budget.unknown_request_ids.is_empty()
++    if false
+         || host
+             .commands
+             .iter()

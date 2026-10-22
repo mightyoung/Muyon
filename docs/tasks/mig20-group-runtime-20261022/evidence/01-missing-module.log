@@ -1,0 +1,8 @@
+error: couldn't find file `crates/muyon-core/tests/../src/group_runtime/mod.rs`
+ --> crates/muyon-core/tests/group_runtime.rs:5:1
+  |
+5 | mod group_runtime;
+  | ^^^^^^^^^^^^^^^^^^
+
+error: aborting due to 1 previous error
+

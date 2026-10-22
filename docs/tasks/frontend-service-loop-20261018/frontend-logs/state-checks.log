@@ -1,0 +1,186 @@
+PASS default and ordered destinations
+PASS selection changes page without modifying previous state
+PASS 899 and 900 logical width boundary
+PASS invalid width rejected
+PASS raw draft survives navigation without normalization
+PASS draft focus and scroll retained together
+PASS page memories and prior state remain independent
+PASS width changes do not own or replace state
+PASS negative list coordinates rejected
+PASS Rust port has no connected or success default
+PASS interrupted keeps explicit unknown warning
+PASS cancelling never claims cancelled
+PASS platform task note takes priority
+PASS platform ownership cannot erase interrupted warning
+PASS ordinary queued waiting and running copy
+PASS paused failed succeeded and cancelled stay distinct
+PASS local UI: empty local session never fabricates a message
+PASS local UI: draft remains exact raw UTF16
+PASS local UI: blank local note does not create records
+PASS local UI: nonblank local note can be saved
+PASS local UI: local save preserves text and clears only composer
+PASS local UI: repeated empty save cannot duplicate a note
+PASS local UI: local note ids stay unique and ordered
+PASS local UI: new conversation retains prior unsaved draft
+PASS local UI: conversation switching retains individual scroll and focus
+PASS local UI: invalid conversation selection changes nothing
+PASS local UI: selection closes overlay but keeps search query
+PASS local UI: create resets history filter and closes overlay
+PASS local UI: history filter searches own title and note text
+PASS local UI: record filter exposes only user saved content
+PASS local UI: rename opens correct current title
+PASS local UI: rename cancellation leaves title unchanged
+PASS local UI: rename confirmation preserves exact title
+PASS local UI: blank rename cannot overwrite title
+PASS local UI: record details bind exact conversation and note
+PASS local UI: invalid note or rename cannot invent an overlay
+PASS local UI: local preferences retain drafts without changing host capability
+PASS local UI: snapshot selection and ids remain valid after many sessions
+22/22 local UI state checks passed; no model or Rust action executed
+PASS conversation candidate: platform snapshot rejects oversized text without truncating live state
+PASS conversation candidate: snapshot restores two independent drafts and selected conversation
+PASS conversation candidate: restore preserves user records and preferences but dismisses transient overlay
+PASS conversation candidate: repeated restoration never adds assistant messages or execution results
+PASS conversation candidate: every truncated snapshot is rejected
+PASS conversation candidate: incompatible version and trailing payload are rejected
+PASS conversation candidate: invalid selection enum counts and coordinates are rejected
+PASS conversation candidate: duplicate conversation and note identifiers are rejected
+8/8 conversation snapshot checks passed; Android rendering NOT_RUN
+PASS diagnostic construction never calls native
+PASS diagnostic validation requires actual handshake
+PASS diagnostic handshake is worker only and busy before entry
+PASS diagnostic missing library has safe unavailable result
+PASS diagnostic handshake rejects protocol mismatch
+PASS diagnostic handshake rejects build mismatch
+PASS diagnostic handshake rejects model mismatch
+PASS diagnostic handshake rejects execute mismatch
+PASS diagnostic handshake rejects read mismatch
+PASS diagnostic handshake rejects write mismatch
+PASS diagnostic handshake rejects attachment mismatch
+PASS diagnostic four variants carry internal bounded identifiers and unsigned counts
+PASS diagnostic report rejects id mismatch
+PASS diagnostic report rejects variant mismatch
+PASS diagnostic report rejects protocol mismatch
+PASS diagnostic report rejects build mismatch
+PASS diagnostic native typed UNSUPPORTED_PROTOCOL remains closed and slot releases
+PASS diagnostic native typed INVALID_REQUEST_ID remains closed and slot releases
+PASS diagnostic native typed DECLARATION_REJECTED remains closed and slot releases
+PASS diagnostic native typed INTERNAL_FAILURE remains closed and slot releases
+PASS diagnostic unexpected native error never exposes raw reason
+PASS diagnostic expired handshake cannot publish readiness
+PASS diagnostic detached lease cannot start work
+PASS diagnostic rejected worker submission releases admission
+PASS diagnostic delayed delivery rechecks lease and current snapshot
+PASS diagnostic blocking native across dismiss stays single flight until actual return
+PASS diagnostic blocking native across timeout stays single flight until actual return
+PASS diagnostic blocking native across holder recreation stays single flight until actual return
+PASS diagnostic listener reentrant detach cannot deadlock admission
+29/29 diagnostic coordinator checks passed; native FFI/Android runtime NOT_RUN
+PASS B service precontroller initializing has no native identity or admission
+PASS B service new connection ignores late constructor transport update
+PASS B service connection rejects invalid native meta and lease
+PASS B service fresh lease is invisible and reconciles before explicit user submit
+PASS B service busy explicit double click never creates a second submit
+PASS B service invalid user request identities cannot become native work
+PASS B service native initializing recovery and closed remain unavailable
+PASS B service old display lease cannot apply a later terminal
+PASS B service old connection cannot erase original known terminal
+PASS B service lower revision cannot regress same run
+PASS B service higher revision cannot turn a settled run back into running
+PASS B service equal revision requires identical authoritative snapshot
+PASS B service same live connect is idempotent without dropping observations
+PASS B service old epoch rejects active replies after reconnect
+PASS B service current recovers lost request without producing submit
+PASS B service status wrong request variant source or durable binding conflicts
+PASS B service historical lookup is separate from a newer active run
+PASS B service historical source build and admitted epoch stay original
+PASS B service unknown transport is not native failed cancelled or no admission
+PASS B service recorded read success remains success when run is cancelled
+PASS B service settled no admission is distinct and cannot regress
+PASS B service completed requires actual task receipt identity and reason none
+PASS B service malformed IDs and negative revision rejected without defaults
+PASS B service all sealed snapshot variants have a valid sibling
+PASS B service multiple visible activity identities do not release the last lease early
+PASS B service old visibility ACK cannot enable a newer invisible state
+PASS B service rotation retains run identity but cannot clear issued stop
+PASS B service release invalidates old observation and does not claim native closed
+PASS B service panel detach is not visibility release
+PASS B service post terminal new request requires explicit user action
+PASS B service bootstrap late constructor is explicitly retired and drained
+PASS B service bootstrap initialized object settles before install and does not repeat
+PASS B service bootstrap retirement during actual constructor discards late object
+PASS B service bootstrap failure never installs invented Ready
+PASS B service blocked observation cannot queue another observation but control runs
+PASS B service control lane is bounded independently and releases after error
+PASS B service RPC rejection cannot strand its local lane
+PASS B service new lease forwards existing activity visibility without implicit start
+PASS B service known terminal cannot be erased by a later empty current
+PASS B service closed service phase cannot reopen on a later revision
+PASS B service retirement after initialize waiter returns still performs close settlement
+PASS B service historical lookup rejects a different original request binding
+PASS B service different historical observation keys may share service revision
+PASS B service old status ticket cannot replace a newer explicitly selected run
+PASS B service retirement signal handoff cannot settle before actual stop signal
+PASS B service new historical selection rejects reverse delivery at revision 3
+PASS B service new historical selection rejects reverse delivery at revision 2
+PASS B service settlement pump coalesces requests without a waiting queue
+PASS B service settlement requested during return stays with actual waiter
+PASS B service settlement rejection and failure do not strand next explicit request
+PASS B service blocked settlement admits no concurrent waiter and preserves new request
+PASS B service concurrent settlement request is not acknowledged before rejected dispatch
+PASS B service throwing failure listener cannot strand accepted settlement request
+PASS B service retirement holder reserves one construction before any object exists
+RETENTION_PUBLICATION_REACHED
+PASS B service retirement holder publishes strong object before first await
+RETENTION_RETIRE_FAILURE_REACHED
+PASS B service throwing retirement retains original object and denies replacement
+RETENTION_AWAIT_EXCEPTION_REACHED
+PASS B service throwing await exception retains original object without retry
+RETENTION_AWAIT_LINKAGE_REACHED
+PASS B service throwing await linkage retains original object without retry
+PASS B service nonclosed settlement retains owner until later actual closed cleanup
+RETENTION_CLEANUP_FAILURE_REACHED
+PASS B service closed with throwing handle cleanup retains owner until successful cleanup
+PASS B service stale retirement token cannot clear replacement after genuine cleanup
+PASS B service definite preobject failure releases only its unpublished reservation
+PASS B service destroyed service late constructor remains owned through explicit retirement
+PASS B service zero active handle cleanup succeeds once and seals future calls
+PASS B service inflight handle call prevents cleanup while disposal seals replacement admission
+HANDLE_CLEANUP_FAILURE_REACHED
+PASS B service throwing generated cleanup stays sealed incomplete without implicit retry
+PASS B service nonclosed or nondisposing settlement cannot seal or release handle
+HANDLE_LAST_RETURN_REACHED
+PASS B service last active return hands sealed cleanup to existing background owner exactly once
+68/68 B service state checks passed; Android Binder/native runtime NOT_RUN
+PASS B IPC local initialization remains distinct from native metadata
+PASS B IPC connected lease and actual native phase survive codec
+PASS B IPC all six snapshot shapes retain original identity and receipt
+PASS B IPC queued admission differs from original existing result
+PASS B IPC control rejection busy and unknown use closed units
+PASS B IPC truncated trailing and wrong version bytes cannot become a result
+PASS B IPC oversize bytes and unstructured input are rejected
+PASS B IPC invalid native identity protocol and build cannot be encoded
+PASS B IPC invalid completed result is not repaired into success
+PASS B IPC actual typed start refusal requires reconciliation without fabricating terminal
+PASS B IPC uncertain transport and unrelated control cannot clear pending start
+PASS B IPC stale start refusal cannot clear a replacement connection pending request
+12/12 B IPC codec checks passed; Android Parcel/Binder runtime NOT_RUN
+PASS B liveness private keys never repeat after dead token replacement
+PASS B liveness same live token links once and keeps its native correlation key
+PASS B liveness released live tombstone consumes capacity and cannot resurrect
+PASS B liveness death during link cannot gain a native lease
+PASS B liveness death inside native connect rejects late lease and stops original key again
+PASS B liveness late original death callback cannot remove replacement
+PASS B liveness unknown lease cannot tombstone a registered client
+PASS B liveness inflight same token connect returns busy without second native call
+PASS B liveness native connect and gone listeners execute outside registry lock
+PASS B liveness failed death-link setup cannot create an unobserved native lease
+PASS B liveness acknowledged release cannot be revived by inflight repeat connect
+PASS B liveness dispose unlinks live and released tokens without claiming native stop
+PASS B liveness dispose during death-link setup detaches the eventual link
+PASS B liveness dispose rejects late native connect and stops only its original key
+PASS B liveness unlink callback executes outside registry admission lock
+DISPOSAL_UNLINK_FAILURE_REACHED
+PASS B liveness dispose attempts second unlink when first unlink fails
+16/16 B liveness checks passed; real Binder death/process runtime NOT_RUN
+16/16 pure JVM state checks passed; Compose/Android runtime NOT_RUN

@@ -1,0 +1,21 @@
+{
+  "argv": [
+    "cargo",
+    "build",
+    "--offline",
+    "--locked",
+    "--manifest-path",
+    "crates/Cargo.toml",
+    "-p",
+    "muyon-android-ffi",
+    "--features",
+    "bindings"
+  ],
+  "cwd": "/workspace/Muyon-post-pr101-office-bot-20261022",
+  "source_sha": "bc8fea61744530c1f2e38e65b0273a434c3bd5a8",
+  "dirty_source": false,
+  "start_utc": "2026-10-22T19:02:49.206127+00:00",
+  "exit_code": 0,
+  "duration_seconds": 261.871,
+  "end_utc": "2026-10-22T19:07:10.879223+00:00"
+}

@@ -1,0 +1,7 @@
+{
+  "gate": "PASS",
+  "source_sha": "f2f9928a0a35afeb2d5956d3bc2d69406adcc503",
+  "input_hash": "185aa9e83d689ae0101865e29fde9deeaf4f689ac42e337dc452fe523e8cfc9a",
+  "files": 276,
+  "algorithm": "same sorted source-file SHA256 lines then SHA256 as build-native.sh"
+}

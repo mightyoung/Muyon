@@ -1,0 +1,15 @@
+{
+  "action": "one direct raw job-log read",
+  "target": "GET /repos/mightyoung/Muyon/actions/jobs/117726786359/logs",
+  "run_id": 39144821029,
+  "outcome": "denied",
+  "reason": "GitHub redirected to Actions result storage; storage returned HTTP403 Forbidden",
+  "attempts": 1,
+  "raw_log_received": false,
+  "retry_or_alternate_log_or_artifact_download": false,
+  "signed_storage_url_retained": false,
+  "independent_metadata_received": ["run", "jobs/steps", "check annotations"],
+  "metadata_limit": "API26 step exited1; individual test outcomes and exact failure cause unavailable",
+  "remaining_blocker": "Raw failure evidence inaccessible; cannot establish actual Compose chat E2E success or diagnose device failure",
+  "old_job117717160270_and_old_archive_accessed": false
+}

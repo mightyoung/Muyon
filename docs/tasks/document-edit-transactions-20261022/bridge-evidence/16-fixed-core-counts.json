@@ -1,0 +1,133 @@
+{
+  "dependency": "faeef3aec3a9407d7c15490dcdb33866413e7453",
+  "executions": 321,
+  "failed": 0,
+  "target_summaries": [
+    {
+      "target": "Running unittests src/lib.rs (/workspace/document-edit-combination/crates/target/debug/deps/muyon_core-2a7e4c27110d8df5)",
+      "passed": 49,
+      "failed": 0
+    },
+    {
+      "target": "Running unittests src/bin/business_worker.rs (/workspace/document-edit-combination/crates/target/debug/deps/business_worker-45a7d36cec2f925e)",
+      "passed": 48,
+      "failed": 0
+    },
+    {
+      "target": "Running tests/agent_child_tools.rs (/workspace/document-edit-combination/crates/target/debug/deps/agent_child_tools-d0ba16b0783b103e)",
+      "passed": 3,
+      "failed": 0
+    },
+    {
+      "target": "Running tests/agent_owner.rs (/workspace/document-edit-combination/crates/target/debug/deps/agent_owner-bb86e7ea9b2a79bc)",
+      "passed": 11,
+      "failed": 0
+    },
+    {
+      "target": "Running tests/agent_product.rs (/workspace/document-edit-combination/crates/target/debug/deps/agent_product-dc254bbc2025aa5c)",
+      "passed": 6,
+      "failed": 0
+    },
+    {
+      "target": "Running tests/agent_tools.rs (/workspace/document-edit-combination/crates/target/debug/deps/agent_tools-8e8daef86d68811c)",
+      "passed": 7,
+      "failed": 0
+    },
+    {
+      "target": "Running tests/agent_workflow.rs (/workspace/document-edit-combination/crates/target/debug/deps/agent_workflow-061a00697e7ad279)",
+      "passed": 16,
+      "failed": 0
+    },
+    {
+      "target": "Running tests/archive.rs (/workspace/document-edit-combination/crates/target/debug/deps/archive-1784288275737d1a)",
+      "passed": 13,
+      "failed": 0
+    },
+    {
+      "target": "Running tests/blobs.rs (/workspace/document-edit-combination/crates/target/debug/deps/blobs-0f331ea1fd85722a)",
+      "passed": 8,
+      "failed": 0
+    },
+    {
+      "target": "Running tests/business.rs (/workspace/document-edit-combination/crates/target/debug/deps/business-fa83d6f353ac0c7a)",
+      "passed": 14,
+      "failed": 0
+    },
+    {
+      "target": "Running tests/contract.rs (/workspace/document-edit-combination/crates/target/debug/deps/contract-8d5f31589ed69529)",
+      "passed": 10,
+      "failed": 0
+    },
+    {
+      "target": "Running tests/contract_vectors_additional.rs (/workspace/document-edit-combination/crates/target/debug/deps/contract_vectors_additional-d2478d877350c296)",
+      "passed": 1,
+      "failed": 0
+    },
+    {
+      "target": "Running tests/document_edit_candidates.rs (/workspace/document-edit-combination/crates/target/debug/deps/document_edit_candidates-5aadd013767c6a58)",
+      "passed": 12,
+      "failed": 0
+    },
+    {
+      "target": "Running tests/document_edit_core_bridge.rs (/workspace/document-edit-combination/crates/target/debug/deps/document_edit_core_bridge-a90b6da0d225d9fd)",
+      "passed": 8,
+      "failed": 0
+    },
+    {
+      "target": "Running tests/document_edit_engine_protocol.rs (/workspace/document-edit-combination/crates/target/debug/deps/document_edit_engine_protocol-75149560f16948bf)",
+      "passed": 6,
+      "failed": 0
+    },
+    {
+      "target": "Running tests/document_edit_gateway.rs (/workspace/document-edit-combination/crates/target/debug/deps/document_edit_gateway-9b44abc2f132bcca)",
+      "passed": 19,
+      "failed": 0
+    },
+    {
+      "target": "Running tests/document_edit_policy_epoch.rs (/workspace/document-edit-combination/crates/target/debug/deps/document_edit_policy_epoch-17fbed5742635f6a)",
+      "passed": 1,
+      "failed": 0
+    },
+    {
+      "target": "Running tests/document_edit_schema2.rs (/workspace/document-edit-combination/crates/target/debug/deps/document_edit_schema2-8f573f9c81170e45)",
+      "passed": 6,
+      "failed": 0
+    },
+    {
+      "target": "Running tests/document_edit_transactions.rs (/workspace/document-edit-combination/crates/target/debug/deps/document_edit_transactions-f02515a5fa77725f)",
+      "passed": 28,
+      "failed": 0
+    },
+    {
+      "target": "Running tests/document_storage.rs (/workspace/document-edit-combination/crates/target/debug/deps/document_storage-82a040f591837445)",
+      "passed": 15,
+      "failed": 0
+    },
+    {
+      "target": "Running tests/documents.rs (/workspace/document-edit-combination/crates/target/debug/deps/documents-128e9953fc3320a8)",
+      "passed": 18,
+      "failed": 0
+    },
+    {
+      "target": "Running tests/research.rs (/workspace/document-edit-combination/crates/target/debug/deps/research-c649e88602eb965d)",
+      "passed": 16,
+      "failed": 0
+    },
+    {
+      "target": "Running tests/resource_boundaries_additional.rs (/workspace/document-edit-combination/crates/target/debug/deps/resource_boundaries_additional-91311a42a4b5b2ea)",
+      "passed": 3,
+      "failed": 0
+    },
+    {
+      "target": "Running tests/store_admission_additional.rs (/workspace/document-edit-combination/crates/target/debug/deps/store_admission_additional-307af038d54764cf)",
+      "passed": 3,
+      "failed": 0
+    },
+    {
+      "target": "Doc-tests muyon_core",
+      "passed": 0,
+      "failed": 0
+    }
+  ],
+  "note": "Worker includes real document cfg(test) modules: executions overlap source coverage; do not sum filtered reruns."
+}

@@ -1,0 +1,22 @@
+   Compiling muyon-office v0.1.0 (/workspace/office-rust-boundary-red/crates/muyon-office)
+    Finished `test` profile [unoptimized] target(s) in 0.19s
+     Running tests/boundaries.rs (/workspace/office-rust-boundary-fix-tools/target-red/debug/deps/boundaries-6ae2ccd92e95a42a)
+
+running 1 test
+test expanded_budget_counts_payload_even_on_directory_named_entries ... FAILED
+
+failures:
+
+---- expanded_budget_counts_payload_even_on_directory_named_entries stdout ----
+
+thread 'expanded_budget_counts_payload_even_on_directory_named_entries' (10964) panicked at muyon-office/tests/boundaries.rs:187:5:
+assertion failed: matches!(Package::open(&bytes, &over), Err(OfficeError::LimitExceeded(_)))
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    expanded_budget_counts_payload_even_on_directory_named_entries
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 11 filtered out; finished in 0.00s
+
+error: test failed, to rerun pass `-p muyon-office --test boundaries`

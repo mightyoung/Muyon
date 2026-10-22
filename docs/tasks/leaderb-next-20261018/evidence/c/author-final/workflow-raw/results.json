@@ -1,0 +1,55 @@
+[
+  {
+    "name": "supplier-store",
+    "command": [
+      "cargo",
+      "+1.99.0",
+      "test",
+      "--manifest-path",
+      "experiments/redesign/rust-agent-host-lab/core/Cargo.toml",
+      "--locked",
+      "--offline",
+      "--test",
+      "supplier_store",
+      "--",
+      "--nocapture"
+    ],
+    "exit": 0,
+    "source_sha": "fdc9aea120925229aa592c3551efab9b3f67a825"
+  },
+  {
+    "name": "offline-service-runtime",
+    "command": [
+      "cargo",
+      "+1.99.0",
+      "test",
+      "--manifest-path",
+      "experiments/redesign/rust-agent-host-lab/core/Cargo.toml",
+      "--locked",
+      "--offline",
+      "--test",
+      "service_runtime",
+      "--",
+      "--nocapture"
+    ],
+    "exit": 0,
+    "source_sha": "fdc9aea120925229aa592c3551efab9b3f67a825"
+  },
+  {
+    "name": "android-lib-check",
+    "command": [
+      "cargo",
+      "+1.99.0",
+      "check",
+      "--manifest-path",
+      "experiments/redesign/rust-agent-host-lab/core/Cargo.toml",
+      "--locked",
+      "--offline",
+      "--target",
+      "aarch64-linux-android",
+      "--lib"
+    ],
+    "exit": 0,
+    "source_sha": "fdc9aea120925229aa592c3551efab9b3f67a825"
+  }
+]

@@ -1,0 +1,139 @@
+error[E0599]: no method named `status` found for struct `group_runtime::Runtime` in the current scope
+   --> crates/muyon-core/tests/group_runtime.rs:158:15
+    |
+158 |  assert_eq!(r.status(&s,1).unwrap(),SchedulingState::Ready{available_slots:2});
+    |               ^^^^^^ method not found in `group_runtime::Runtime`
+    |
+   ::: crates/muyon-core/tests/../src/group_runtime/mod.rs:60:1
+    |
+ 60 | pub struct Runtime {
+    | ------------------ method `status` not found for this struct
+
+error[E0599]: no method named `status` found for struct `group_runtime::Runtime` in the current scope
+   --> crates/muyon-core/tests/group_runtime.rs:160:15
+    |
+160 |  assert_eq!(r.status(&s,1).unwrap(),SchedulingState::Reconciling{request_ids:set(&["original"])});
+    |               ^^^^^^ method not found in `group_runtime::Runtime`
+    |
+   ::: crates/muyon-core/tests/../src/group_runtime/mod.rs:60:1
+    |
+ 60 | pub struct Runtime {
+    | ------------------ method `status` not found for this struct
+
+error[E0599]: no method named `status` found for struct `group_runtime::Runtime` in the current scope
+   --> crates/muyon-core/tests/group_runtime.rs:161:50
+    |
+161 |  let held=s.budget.clone();r.stop();assert_eq!(r.status(&s,101).unwrap(),SchedulingState::Stopped);assert_eq!(s.budget,held);
+    |                                                  ^^^^^^ method not found in `group_runtime::Runtime`
+    |
+   ::: crates/muyon-core/tests/../src/group_runtime/mod.rs:60:1
+    |
+ 60 | pub struct Runtime {
+    | ------------------ method `status` not found for this struct
+
+error[E0433]: cannot find type `SchedulingState` in this scope
+   --> crates/muyon-core/tests/group_runtime.rs:161:74
+    |
+161 |  let held=s.budget.clone();r.stop();assert_eq!(r.status(&s,101).unwrap(),SchedulingState::Stopped);assert_eq!(s.budget,held);
+    |                                                                          ^^^^^^^^^^^^^^^ use of undeclared type `SchedulingState`
+
+error[E0599]: no method named `status` found for struct `group_runtime::Runtime` in the current scope
+   --> crates/muyon-core/tests/group_runtime.rs:163:15
+    |
+163 |  assert_eq!(r.status(&s,1).unwrap(),SchedulingState::Stopped);
+    |               ^^^^^^ method not found in `group_runtime::Runtime`
+    |
+   ::: crates/muyon-core/tests/../src/group_runtime/mod.rs:60:1
+    |
+ 60 | pub struct Runtime {
+    | ------------------ method `status` not found for this struct
+
+error[E0433]: cannot find type `SchedulingState` in this scope
+   --> crates/muyon-core/tests/group_runtime.rs:163:37
+    |
+163 |  assert_eq!(r.status(&s,1).unwrap(),SchedulingState::Stopped);
+    |                                     ^^^^^^^^^^^^^^^ use of undeclared type `SchedulingState`
+
+error[E0609]: no field `results` on type `group_runtime::Summary`
+   --> crates/muyon-core/tests/group_runtime.rs:170:25
+    |
+170 |  assert_eq!(r.summary().results["x"],a);assert_eq!(r.summary().results["y"],b);assert_eq!(r.summary().failed,set(&["y"]));
+    |                         ^^^^^^^ unknown field
+    |
+    = note: available fields are: `completed`, `failed`, `unknown`, `claims`
+
+error[E0609]: no field `results` on type `group_runtime::Summary`
+   --> crates/muyon-core/tests/group_runtime.rs:170:64
+    |
+170 |  assert_eq!(r.summary().results["x"],a);assert_eq!(r.summary().results["y"],b);assert_eq!(r.summary().failed,set(&["y"]));
+    |                                                                ^^^^^^^ unknown field
+    |
+    = note: available fields are: `completed`, `failed`, `unknown`, `claims`
+
+error[E0599]: no method named `status` found for struct `group_runtime::Runtime` in the current scope
+   --> crates/muyon-core/tests/group_runtime.rs:176:15
+    |
+176 |  assert_eq!(r.status(&s,1).unwrap(),SchedulingState::RoundLimit);
+    |               ^^^^^^ method not found in `group_runtime::Runtime`
+    |
+   ::: crates/muyon-core/tests/../src/group_runtime/mod.rs:60:1
+    |
+ 60 | pub struct Runtime {
+    | ------------------ method `status` not found for this struct
+
+error[E0433]: cannot find type `SchedulingState` in this scope
+   --> crates/muyon-core/tests/group_runtime.rs:176:37
+    |
+176 |  assert_eq!(r.status(&s,1).unwrap(),SchedulingState::RoundLimit);
+    |                                     ^^^^^^^^^^^^^^^ use of undeclared type `SchedulingState`
+
+error[E0599]: no method named `status` found for struct `group_runtime::Runtime` in the current scope
+   --> crates/muyon-core/tests/group_runtime.rs:179:37
+    |
+179 |  assert_eq!(runtime(Mode::HostOnly).status(&s,1).unwrap(),SchedulingState::BudgetLimit);
+    |                                     ^^^^^^ method not found in `group_runtime::Runtime`
+    |
+   ::: crates/muyon-core/tests/../src/group_runtime/mod.rs:60:1
+    |
+ 60 | pub struct Runtime {
+    | ------------------ method `status` not found for this struct
+
+error[E0433]: cannot find type `SchedulingState` in this scope
+   --> crates/muyon-core/tests/group_runtime.rs:179:59
+    |
+179 |  assert_eq!(runtime(Mode::HostOnly).status(&s,1).unwrap(),SchedulingState::BudgetLimit);
+    |                                                           ^^^^^^^^^^^^^^^ use of undeclared type `SchedulingState`
+
+error[E0599]: no method named `status` found for struct `group_runtime::Runtime` in the current scope
+   --> crates/muyon-core/tests/group_runtime.rs:181:37
+    |
+181 |  assert_eq!(runtime(Mode::HostOnly).status(&s,1).unwrap(),SchedulingState::Ready{available_slots:0});
+    |                                     ^^^^^^ method not found in `group_runtime::Runtime`
+    |
+   ::: crates/muyon-core/tests/../src/group_runtime/mod.rs:60:1
+    |
+ 60 | pub struct Runtime {
+    | ------------------ method `status` not found for this struct
+
+error[E0433]: cannot find type `SchedulingState` in this scope
+   --> crates/muyon-core/tests/group_runtime.rs:158:37
+    |
+158 |  assert_eq!(r.status(&s,1).unwrap(),SchedulingState::Ready{available_slots:2});
+    |                                     ^^^^^^^^^^^^^^^ use of undeclared type `SchedulingState`
+
+error[E0433]: cannot find type `SchedulingState` in this scope
+   --> crates/muyon-core/tests/group_runtime.rs:160:37
+    |
+160 |  assert_eq!(r.status(&s,1).unwrap(),SchedulingState::Reconciling{request_ids:set(&["original"])});
+    |                                     ^^^^^^^^^^^^^^^ use of undeclared type `SchedulingState`
+
+error[E0433]: cannot find type `SchedulingState` in this scope
+   --> crates/muyon-core/tests/group_runtime.rs:181:59
+    |
+181 |  assert_eq!(runtime(Mode::HostOnly).status(&s,1).unwrap(),SchedulingState::Ready{available_slots:0});
+    |                                                           ^^^^^^^^^^^^^^^ use of undeclared type `SchedulingState`
+
+error: aborting due to 16 previous errors
+
+Some errors have detailed explanations: E0433, E0599, E0609.
+For more information about an error, try `rustc --explain E0433`.

@@ -1,0 +1,686 @@
+﻿2026-10-18T07:01:31.6944320Z Current runner version: '2.337.0'
+2026-10-18T07:01:31.6965060Z ##[group]Runner Image Provisioner
+2026-10-18T07:01:31.6965891Z Hosted Compute Agent
+2026-10-18T07:01:31.6966383Z Version: 20261012.601
+2026-10-18T07:01:31.6966978Z Commit: f3dc54e1fb89da6852db922499a0233137369e1d
+2026-10-18T07:01:31.6967581Z Build Date: 2026-10-12T17:48:21Z
+2026-10-18T07:01:31.6968125Z Worker ID: {8f96fc26-d1b3-483e-b0ab-005aa9ddfbee}
+2026-10-18T07:01:31.6968792Z Region: westus3
+2026-10-18T07:01:31.6969246Z Cloud: Azure
+2026-10-18T07:01:31.6969709Z ##[endgroup]
+2026-10-18T07:01:31.6971062Z ##[group]Operating System
+2026-10-18T07:01:31.6971579Z Ubuntu
+2026-10-18T07:01:31.6972097Z 24.04.5
+2026-10-18T07:01:31.6972520Z LTS
+2026-10-18T07:01:31.6973001Z ##[endgroup]
+2026-10-18T07:01:31.6973469Z ##[group]Runner Image
+2026-10-18T07:01:31.6973982Z Image: ubuntu-24.04
+2026-10-18T07:01:31.6974517Z Version: 20261012.334.1
+2026-10-18T07:01:31.6975540Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20261012.334/images/ubuntu/Ubuntu2404-Readme.md
+2026-10-18T07:01:31.6976854Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20261012.334
+2026-10-18T07:01:31.6977647Z ##[endgroup]
+2026-10-18T07:01:31.6978590Z ##[group]GITHUB_TOKEN Permissions
+2026-10-18T07:01:31.6980193Z Contents: read
+2026-10-18T07:01:31.6980871Z Metadata: read
+2026-10-18T07:01:31.6981334Z ##[endgroup]
+2026-10-18T07:01:31.6983104Z Secret source: Actions
+2026-10-18T07:01:31.6983971Z Cache mode: write
+2026-10-18T07:01:31.6984526Z Prepare workflow directory
+2026-10-18T07:01:31.7301093Z Prepare all required actions
+2026-10-18T07:01:31.7340956Z Getting action download info
+2026-10-18T07:01:32.0245139Z Download action repository 'actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683' (SHA:11bd71901bbe5b1630ceea73d27597364c9af683)
+2026-10-18T07:01:32.1541360Z Download action repository 'actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00' (SHA:c5195efecf7bdfc987ee8bae7a71cb8b11521c00)
+2026-10-18T07:01:33.0879430Z Download action repository 'actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02' (SHA:ea165f8d65b6e75b540449e92b4886f43607fa02)
+2026-10-18T07:01:33.3962878Z Complete job name: compile
+2026-10-18T07:01:33.4715341Z ##[group]Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+2026-10-18T07:01:33.4716928Z with:
+2026-10-18T07:01:33.4717722Z   ref: 73a582d3c948d70450a45da4205435a715eeb6b4
+2026-10-18T07:01:33.4718719Z   persist-credentials: false
+2026-10-18T07:01:33.4719768Z   repository: mightyoung/Muyon
+2026-10-18T07:01:33.4726722Z   token: ***
+2026-10-18T07:01:33.4727547Z   ssh-strict: true
+2026-10-18T07:01:33.4728304Z   ssh-user: git
+2026-10-18T07:01:33.4729015Z   clean: true
+2026-10-18T07:01:33.4729838Z   sparse-checkout-cone-mode: true
+2026-10-18T07:01:33.4730854Z   fetch-depth: 1
+2026-10-18T07:01:33.4731620Z   fetch-tags: false
+2026-10-18T07:01:33.4732435Z   show-progress: true
+2026-10-18T07:01:33.4733211Z   lfs: false
+2026-10-18T07:01:33.4734015Z   submodules: false
+2026-10-18T07:01:33.4734782Z   set-safe-directory: true
+2026-10-18T07:01:33.4735913Z env:
+2026-10-18T07:01:33.4736805Z   LAB_DIRECTORY: experiments/redesign/android-compose-lab
+2026-10-18T07:01:33.4738019Z   GRADLE_VERSION: 8.13
+2026-10-18T07:01:33.4739184Z   GRADLE_SHA256: 20f1b1176237254a6fc204d8434196fa11a4cfb387567519c61556e8710aed78
+2026-10-18T07:01:33.4740454Z ##[endgroup]
+2026-10-18T07:01:33.5594907Z Syncing repository: mightyoung/Muyon
+2026-10-18T07:01:33.5597674Z ##[group]Getting Git version info
+2026-10-18T07:01:33.5599049Z Working directory is '/home/runner/work/Muyon/Muyon'
+2026-10-18T07:01:33.5601212Z [command]/usr/bin/git version
+2026-10-18T07:01:33.5654866Z git version 2.55.0
+2026-10-18T07:01:33.5691408Z ##[endgroup]
+2026-10-18T07:01:33.5702410Z Temporarily overriding HOME='/home/runner/work/_temp/1a7bb70d-244b-451c-9621-a348a61713a2' before making global git config changes
+2026-10-18T07:01:33.5706422Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-18T07:01:33.5709308Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/Muyon/Muyon
+2026-10-18T07:01:33.5745349Z Deleting the contents of '/home/runner/work/Muyon/Muyon'
+2026-10-18T07:01:33.5750816Z ##[group]Initializing the repository
+2026-10-18T07:01:33.5754786Z [command]/usr/bin/git init /home/runner/work/Muyon/Muyon
+2026-10-18T07:01:33.5842972Z hint: Using 'master' as the name for the initial branch. This default branch name
+2026-10-18T07:01:33.5845154Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+2026-10-18T07:01:33.5846730Z hint: to use in all of your new repositories, which will suppress this warning,
+2026-10-18T07:01:33.5848075Z hint: call:
+2026-10-18T07:01:33.5848846Z hint:
+2026-10-18T07:01:33.5850104Z hint: 	git config --global init.defaultBranch <name>
+2026-10-18T07:01:33.5851803Z hint:
+2026-10-18T07:01:33.5852857Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+2026-10-18T07:01:33.5854448Z hint: 'development'. The just-created branch can be renamed via this command:
+2026-10-18T07:01:33.5855745Z hint:
+2026-10-18T07:01:33.5856578Z hint: 	git branch -m <name>
+2026-10-18T07:01:33.5857432Z hint:
+2026-10-18T07:01:33.5858917Z hint: Disable this message with "git config set advice.defaultBranchName false"
+2026-10-18T07:01:33.5861282Z Initialized empty Git repository in /home/runner/work/Muyon/Muyon/.git/
+2026-10-18T07:01:33.5865222Z [command]/usr/bin/git remote add origin https://github.com/mightyoung/Muyon
+2026-10-18T07:01:33.5901717Z ##[endgroup]
+2026-10-18T07:01:33.5903137Z ##[group]Disabling automatic garbage collection
+2026-10-18T07:01:33.5905044Z [command]/usr/bin/git config --local gc.auto 0
+2026-10-18T07:01:33.5936313Z ##[endgroup]
+2026-10-18T07:01:33.5938261Z ##[group]Setting up auth
+2026-10-18T07:01:33.5942896Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-18T07:01:33.5974192Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-18T07:01:33.6303643Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-18T07:01:33.6336135Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-18T07:01:33.6532868Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+2026-10-18T07:01:33.6569896Z ##[endgroup]
+2026-10-18T07:01:33.6571262Z ##[group]Fetching the repository
+2026-10-18T07:01:33.6578074Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin 73a582d3c948d70450a45da4205435a715eeb6b4
+2026-10-18T07:01:37.0292336Z From https://github.com/mightyoung/Muyon
+2026-10-18T07:01:37.0293686Z  * branch            73a582d3c948d70450a45da4205435a715eeb6b4 -> FETCH_HEAD
+2026-10-18T07:01:37.0311676Z ##[endgroup]
+2026-10-18T07:01:37.0312255Z ##[group]Determining the checkout info
+2026-10-18T07:01:37.0312879Z ##[endgroup]
+2026-10-18T07:01:37.0313366Z [command]/usr/bin/git sparse-checkout disable
+2026-10-18T07:01:37.0355342Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+2026-10-18T07:01:37.0384969Z ##[group]Checking out the ref
+2026-10-18T07:01:37.0388583Z [command]/usr/bin/git checkout --progress --force 73a582d3c948d70450a45da4205435a715eeb6b4
+2026-10-18T07:01:37.4540983Z Note: switching to '73a582d3c948d70450a45da4205435a715eeb6b4'.
+2026-10-18T07:01:37.4541714Z 
+2026-10-18T07:01:37.4542012Z You are in 'detached HEAD' state. You can look around, make experimental
+2026-10-18T07:01:37.4542667Z changes and commit them, and you can discard any commits you make in this
+2026-10-18T07:01:37.4543298Z state without impacting any branches by switching back to a branch.
+2026-10-18T07:01:37.4543777Z 
+2026-10-18T07:01:37.4544087Z If you want to create a new branch to retain commits you create, you may
+2026-10-18T07:01:37.4545139Z do so (now or later) by using -c with the switch command. Example:
+2026-10-18T07:01:37.4545513Z 
+2026-10-18T07:01:37.4545693Z   git switch -c <new-branch-name>
+2026-10-18T07:01:37.4545953Z 
+2026-10-18T07:01:37.4546109Z Or undo this operation with:
+2026-10-18T07:01:37.4546345Z 
+2026-10-18T07:01:37.4546482Z   git switch -
+2026-10-18T07:01:37.4546704Z 
+2026-10-18T07:01:37.4547004Z Turn off this advice by setting config variable advice.detachedHead to false
+2026-10-18T07:01:37.4547457Z 
+2026-10-18T07:01:37.4547795Z HEAD is now at 73a582d ci(android): keep log collection separate from required device tests
+2026-10-18T07:01:37.4570563Z ##[endgroup]
+2026-10-18T07:01:37.4647920Z [command]/usr/bin/git log -1 --format=%H
+2026-10-18T07:01:37.4672358Z 73a582d3c948d70450a45da4205435a715eeb6b4
+2026-10-18T07:01:37.4681436Z ##[group]Removing auth
+2026-10-18T07:01:37.4685100Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-18T07:01:37.4715102Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-18T07:01:37.4912143Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-18T07:01:37.4939100Z http.https://github.com/.extraheader
+2026-10-18T07:01:37.4945022Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+2026-10-18T07:01:37.4976905Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-18T07:01:37.5175361Z ##[endgroup]
+2026-10-18T07:01:37.5359274Z ##[group]Run mkdir -p "$RUNNER_TEMP/muyon-compose-evidence" "$RUNNER_TEMP/muyon-compose-android-user"
+2026-10-18T07:01:37.5359956Z [36;1mmkdir -p "$RUNNER_TEMP/muyon-compose-evidence" "$RUNNER_TEMP/muyon-compose-android-user"[0m
+2026-10-18T07:01:37.5360380Z [36;1m{[0m
+2026-10-18T07:01:37.5360818Z [36;1m  printf 'GRADLE_USER_HOME=%s\n' "$RUNNER_TEMP/muyon-compose-gradle-cache"[0m
+2026-10-18T07:01:37.5361281Z [36;1m  printf 'ANDROID_USER_HOME=%s\n' "$RUNNER_TEMP/muyon-compose-android-user"[0m
+2026-10-18T07:01:37.5361721Z [36;1m  printf 'LOG_DIRECTORY=%s\n' "$RUNNER_TEMP/muyon-compose-evidence"[0m
+2026-10-18T07:01:37.5362050Z [36;1m} >> "$GITHUB_ENV"[0m
+2026-10-18T07:01:37.5584490Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2026-10-18T07:01:37.5584881Z env:
+2026-10-18T07:01:37.5585155Z   LAB_DIRECTORY: experiments/redesign/android-compose-lab
+2026-10-18T07:01:37.5585462Z   GRADLE_VERSION: 8.13
+2026-10-18T07:01:37.5585860Z   GRADLE_SHA256: 20f1b1176237254a6fc204d8434196fa11a4cfb387567519c61556e8710aed78
+2026-10-18T07:01:37.5586213Z ##[endgroup]
+2026-10-18T07:01:37.5804181Z ##[group]Run actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00
+2026-10-18T07:01:37.5804586Z with:
+2026-10-18T07:01:37.5804801Z   distribution: temurin
+2026-10-18T07:01:37.5805032Z   java-version: 17
+2026-10-18T07:01:37.5805242Z   java-package: jdk
+2026-10-18T07:01:37.5805453Z   check-latest: false
+2026-10-18T07:01:37.5805665Z   server-id: github
+2026-10-18T07:01:37.5805876Z   server-username: GITHUB_ACTOR
+2026-10-18T07:01:37.5806115Z   server-password: GITHUB_TOKEN
+2026-10-18T07:01:37.5806352Z   overwrite-settings: true
+2026-10-18T07:01:37.5806581Z   job-status: success
+2026-10-18T07:01:37.5808548Z   token: ***
+2026-10-18T07:01:37.5808745Z env:
+2026-10-18T07:01:37.5808991Z   LAB_DIRECTORY: experiments/redesign/android-compose-lab
+2026-10-18T07:01:37.5809288Z   GRADLE_VERSION: 8.13
+2026-10-18T07:01:37.5809601Z   GRADLE_SHA256: 20f1b1176237254a6fc204d8434196fa11a4cfb387567519c61556e8710aed78
+2026-10-18T07:01:37.5810064Z   GRADLE_USER_HOME: /home/runner/work/_temp/muyon-compose-gradle-cache
+2026-10-18T07:01:37.5810459Z   ANDROID_USER_HOME: /home/runner/work/_temp/muyon-compose-android-user
+2026-10-18T07:01:37.5811196Z   LOG_DIRECTORY: /home/runner/work/_temp/muyon-compose-evidence
+2026-10-18T07:01:37.5811498Z ##[endgroup]
+2026-10-18T07:01:37.7093723Z ##[group]Installed distributions
+2026-10-18T07:01:37.7247560Z Resolved Java 17.0.20+1 from tool-cache
+2026-10-18T07:01:37.7256082Z (node:2119) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-18T07:01:37.7256844Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-18T07:01:37.7257495Z Setting Java 17.0.20+1 as the default
+2026-10-18T07:01:37.7258711Z Creating toolchains.xml for JDK version 17 from temurin
+2026-10-18T07:01:37.7314908Z Writing to /home/runner/.m2/toolchains.xml
+2026-10-18T07:01:37.7315230Z 
+2026-10-18T07:01:37.7315370Z Java configuration:
+2026-10-18T07:01:37.7315728Z   Distribution: temurin
+2026-10-18T07:01:37.7316093Z   Version: 17.0.20+1
+2026-10-18T07:01:37.7316483Z   Path: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.20-1/x64
+2026-10-18T07:01:37.7316750Z 
+2026-10-18T07:01:37.7317077Z ##[endgroup]
+2026-10-18T07:01:37.7334574Z Creating settings.xml with server-id: github
+2026-10-18T07:01:37.7334919Z Writing to /home/runner/.m2/settings.xml
+2026-10-18T07:01:37.7454412Z ##[group]Run mkdir -p "$LOG_DIRECTORY" "$ANDROID_USER_HOME"
+2026-10-18T07:01:37.7454822Z [36;1mmkdir -p "$LOG_DIRECTORY" "$ANDROID_USER_HOME"[0m
+2026-10-18T07:01:37.7455170Z [36;1mgit rev-parse HEAD > "$LOG_DIRECTORY/source-sha.txt"[0m
+2026-10-18T07:01:37.7455576Z [36;1mgit ls-files -z "$LAB_DIRECTORY" .github/workflows/android-compose-lab.yml |[0m
+2026-10-18T07:01:37.7456023Z [36;1m  sort -z | xargs -0 sha256sum > "$LOG_DIRECTORY/source-files.sha256"[0m
+2026-10-18T07:01:37.7456350Z [36;1m{[0m
+2026-10-18T07:01:37.7456561Z [36;1m  java -version 2>&1[0m
+2026-10-18T07:01:37.7456878Z [36;1m  printf '%s\n' 'Gradle=8.13; AGP=8.11.1; Kotlin/ComposeCompiler=2.2.20'[0m
+2026-10-18T07:01:37.7457290Z [36;1m  printf '%s\n' 'ComposeBOM=2025.09.01; compileSdk=36; buildTools=35.0.0'[0m
+2026-10-18T07:01:37.7457721Z [36;1m  printf '%s\n' 'Android installation/runtime/emulator/rendering=NOT_RUN'[0m
+2026-10-18T07:01:37.7458076Z [36;1m} > "$LOG_DIRECTORY/tool-pins.txt"[0m
+2026-10-18T07:01:37.7530517Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2026-10-18T07:01:37.7531299Z env:
+2026-10-18T07:01:37.7531612Z   LAB_DIRECTORY: experiments/redesign/android-compose-lab
+2026-10-18T07:01:37.7531992Z   GRADLE_VERSION: 8.13
+2026-10-18T07:01:37.7532468Z   GRADLE_SHA256: 20f1b1176237254a6fc204d8434196fa11a4cfb387567519c61556e8710aed78
+2026-10-18T07:01:37.7533101Z   GRADLE_USER_HOME: /home/runner/work/_temp/muyon-compose-gradle-cache
+2026-10-18T07:01:37.7533625Z   ANDROID_USER_HOME: /home/runner/work/_temp/muyon-compose-android-user
+2026-10-18T07:01:37.7534017Z   LOG_DIRECTORY: /home/runner/work/_temp/muyon-compose-evidence
+2026-10-18T07:01:37.7534416Z   JAVA_HOME: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.20-1/x64
+2026-10-18T07:01:37.7534887Z   JAVA_HOME_17_X64: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.20-1/x64
+2026-10-18T07:01:37.7535333Z ##[endgroup]
+2026-10-18T07:01:39.0423287Z ##[group]Run distribution="$RUNNER_TEMP/gradle-$GRADLE_VERSION-bin.zip"
+2026-10-18T07:01:39.0423723Z [36;1mdistribution="$RUNNER_TEMP/gradle-$GRADLE_VERSION-bin.zip"[0m
+2026-10-18T07:01:39.0424073Z [36;1mcurl --fail --location --retry 3 --output "$distribution" \[0m
+2026-10-18T07:01:39.0424463Z [36;1m  "https://services.gradle.org/distributions/gradle-$GRADLE_VERSION-bin.zip"[0m
+2026-10-18T07:01:39.0424861Z [36;1mprintf '%s  %s\n' "$GRADLE_SHA256" "$distribution" |[0m
+2026-10-18T07:01:39.0425200Z [36;1m  sha256sum --check | tee "$LOG_DIRECTORY/gradle-checksum.txt"[0m
+2026-10-18T07:01:39.0425564Z [36;1munzip -q "$distribution" -d "$RUNNER_TEMP/muyon-compose-tools"[0m
+2026-10-18T07:01:39.0425966Z [36;1m"$RUNNER_TEMP/muyon-compose-tools/gradle-$GRADLE_VERSION/bin/gradle" --version \[0m
+2026-10-18T07:01:39.0426312Z [36;1m  > "$LOG_DIRECTORY/gradle-version.txt"[0m
+2026-10-18T07:01:39.0483429Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2026-10-18T07:01:39.0483768Z env:
+2026-10-18T07:01:39.0483996Z   LAB_DIRECTORY: experiments/redesign/android-compose-lab
+2026-10-18T07:01:39.0484254Z   GRADLE_VERSION: 8.13
+2026-10-18T07:01:39.0484530Z   GRADLE_SHA256: 20f1b1176237254a6fc204d8434196fa11a4cfb387567519c61556e8710aed78
+2026-10-18T07:01:39.0484912Z   GRADLE_USER_HOME: /home/runner/work/_temp/muyon-compose-gradle-cache
+2026-10-18T07:01:39.0485276Z   ANDROID_USER_HOME: /home/runner/work/_temp/muyon-compose-android-user
+2026-10-18T07:01:39.0485630Z   LOG_DIRECTORY: /home/runner/work/_temp/muyon-compose-evidence
+2026-10-18T07:01:39.0485973Z   JAVA_HOME: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.20-1/x64
+2026-10-18T07:01:39.0486337Z   JAVA_HOME_17_X64: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.20-1/x64
+2026-10-18T07:01:39.0486629Z ##[endgroup]
+2026-10-18T07:01:39.0667281Z   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+2026-10-18T07:01:39.0667822Z                                  Dload  Upload   Total   Spent    Left  Speed
+2026-10-18T07:01:39.0668035Z 
+2026-10-18T07:01:39.1180160Z   0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+2026-10-18T07:01:39.1180861Z 100   169  100   169    0     0   3288      0 --:--:-- --:--:-- --:--:--  3313
+2026-10-18T07:01:39.2741533Z 
+2026-10-18T07:01:39.2742106Z   0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+2026-10-18T07:01:39.6712888Z 
+2026-10-18T07:01:39.6713314Z 100  130M  100  130M    0     0   216M      0 --:--:-- --:--:-- --:--:--  216M
+2026-10-18T07:01:39.7660058Z /home/runner/work/_temp/gradle-8.13-bin.zip: OK
+2026-10-18T07:01:41.8259233Z ##[group]Run sdk_root="${ANDROID_HOME:-${ANDROID_SDK_ROOT:-}}"
+2026-10-18T07:01:41.8259604Z [36;1msdk_root="${ANDROID_HOME:-${ANDROID_SDK_ROOT:-}}"[0m
+2026-10-18T07:01:41.8259866Z [36;1mtest -n "$sdk_root"[0m
+2026-10-18T07:01:41.8260129Z [36;1mmanager="$sdk_root/cmdline-tools/latest/bin/sdkmanager"[0m
+2026-10-18T07:01:41.8260426Z [36;1mtest -x "$manager"[0m
+2026-10-18T07:01:41.8260928Z [36;1m"$manager" --version > "$LOG_DIRECTORY/sdkmanager-version.txt"[0m
+2026-10-18T07:01:41.8261246Z [36;1m"$manager" --sdk_root="$sdk_root" --install \[0m
+2026-10-18T07:01:41.8261527Z [36;1m  'platforms;android-36' 'build-tools;35.0.0' 2>&1 |[0m
+2026-10-18T07:01:41.8261799Z [36;1m  tee "$LOG_DIRECTORY/sdk-packages.txt"[0m
+2026-10-18T07:01:41.8262073Z [36;1mtest -f "$sdk_root/platforms/android-36/android.jar"[0m
+2026-10-18T07:01:41.8262350Z [36;1mtest -x "$sdk_root/build-tools/35.0.0/aapt2"[0m
+2026-10-18T07:01:41.8262665Z [36;1mprintf 'ANDROID_HOME=%s\n' "$sdk_root" >> "$GITHUB_ENV"[0m
+2026-10-18T07:01:41.8318605Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2026-10-18T07:01:41.8318869Z env:
+2026-10-18T07:01:41.8319083Z   LAB_DIRECTORY: experiments/redesign/android-compose-lab
+2026-10-18T07:01:41.8319338Z   GRADLE_VERSION: 8.13
+2026-10-18T07:01:41.8319613Z   GRADLE_SHA256: 20f1b1176237254a6fc204d8434196fa11a4cfb387567519c61556e8710aed78
+2026-10-18T07:01:41.8320009Z   GRADLE_USER_HOME: /home/runner/work/_temp/muyon-compose-gradle-cache
+2026-10-18T07:01:41.8320359Z   ANDROID_USER_HOME: /home/runner/work/_temp/muyon-compose-android-user
+2026-10-18T07:01:41.8320910Z   LOG_DIRECTORY: /home/runner/work/_temp/muyon-compose-evidence
+2026-10-18T07:01:41.8321258Z   JAVA_HOME: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.20-1/x64
+2026-10-18T07:01:41.8321630Z   JAVA_HOME_17_X64: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.20-1/x64
+2026-10-18T07:01:41.8321917Z ##[endgroup]
+2026-10-18T07:01:46.6430411Z Loading package information...                                                  
+2026-10-18T07:01:46.7309872Z Loading local repository...                                                     
+2026-10-18T07:01:46.7313071Z [                                       ] 3% Loading local repository...        
+2026-10-18T07:01:48.3860329Z [                                       ] 3% Fetch remote repository...         
+2026-10-18T07:01:48.7935705Z [=                                      ] 3% Fetch remote repository...         
+2026-10-18T07:01:48.8461076Z [=                                      ] 4% Fetch remote repository...         
+2026-10-18T07:01:48.8729898Z [=                                      ] 5% Fetch remote repository...         
+2026-10-18T07:01:48.9101593Z [==                                     ] 5% Fetch remote repository...         
+2026-10-18T07:01:48.9457117Z [==                                     ] 6% Fetch remote repository...         
+2026-10-18T07:01:49.0241953Z [==                                     ] 7% Fetch remote repository...         
+2026-10-18T07:01:49.0275675Z [==                                     ] 7% Computing updates...               
+2026-10-18T07:01:49.0331688Z [===                                    ] 8% Computing updates...               
+2026-10-18T07:01:49.0386215Z [===                                    ] 10% Computing updates...              
+2026-10-18T07:01:49.0393487Z [=======================================] 100% Computing updates...             
+2026-10-18T07:01:49.0393933Z 
+2026-10-18T07:01:49.0613677Z ##[group]Run set +e
+2026-10-18T07:01:49.0613915Z [36;1mset +e[0m
+2026-10-18T07:01:49.0614186Z [36;1m"$RUNNER_TEMP/muyon-compose-tools/gradle-$GRADLE_VERSION/bin/gradle" \[0m
+2026-10-18T07:01:49.0614580Z [36;1m  --no-daemon --stacktrace --console=plain -p "$LAB_DIRECTORY" \[0m
+2026-10-18T07:01:49.0614988Z [36;1m  :state:check :app:assembleDebug :app:assembleDebugAndroidTest \[0m
+2026-10-18T07:01:49.0615342Z [36;1m  :app:compileDebugUnitTestKotlin :app:lintDebug 2>&1 |[0m
+2026-10-18T07:01:49.0615632Z [36;1m  tee "$LOG_DIRECTORY/required-build.log"[0m
+2026-10-18T07:01:49.0615880Z [36;1mgradle_exit=${PIPESTATUS[0]}[0m
+2026-10-18T07:01:49.0616090Z [36;1mset -e[0m
+2026-10-18T07:01:49.0616266Z [36;1mrequired_exit=$gradle_exit[0m
+2026-10-18T07:01:49.0616486Z [36;1mif [[ $gradle_exit -eq 0 ]]; then[0m
+2026-10-18T07:01:49.0616836Z [36;1m  for marker in '16/16 pure JVM state checks passed' '22/22 local UI state checks passed'; do[0m
+2026-10-18T07:01:49.0617302Z [36;1m    if ! grep -Fq "$marker" "$LOG_DIRECTORY/required-build.log"; then[0m
+2026-10-18T07:01:49.0617588Z [36;1m      required_exit=1[0m
+2026-10-18T07:01:49.0617781Z [36;1m    fi[0m
+2026-10-18T07:01:49.0617937Z [36;1m  done[0m
+2026-10-18T07:01:49.0618089Z [36;1mfi[0m
+2026-10-18T07:01:49.0618358Z [36;1mprintf 'gradle_exit=%s\nrequired_exit=%s\n' "$gradle_exit" "$required_exit" \[0m
+2026-10-18T07:01:49.0618697Z [36;1m  > "$LOG_DIRECTORY/required-exit.txt"[0m
+2026-10-18T07:01:49.0618929Z [36;1mexit "$required_exit"[0m
+2026-10-18T07:01:49.0675183Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2026-10-18T07:01:49.0675460Z env:
+2026-10-18T07:01:49.0675682Z   LAB_DIRECTORY: experiments/redesign/android-compose-lab
+2026-10-18T07:01:49.0675943Z   GRADLE_VERSION: 8.13
+2026-10-18T07:01:49.0676225Z   GRADLE_SHA256: 20f1b1176237254a6fc204d8434196fa11a4cfb387567519c61556e8710aed78
+2026-10-18T07:01:49.0676635Z   GRADLE_USER_HOME: /home/runner/work/_temp/muyon-compose-gradle-cache
+2026-10-18T07:01:49.0677004Z   ANDROID_USER_HOME: /home/runner/work/_temp/muyon-compose-android-user
+2026-10-18T07:01:49.0677349Z   LOG_DIRECTORY: /home/runner/work/_temp/muyon-compose-evidence
+2026-10-18T07:01:49.0677692Z   JAVA_HOME: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.20-1/x64
+2026-10-18T07:01:49.0678070Z   JAVA_HOME_17_X64: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.20-1/x64
+2026-10-18T07:01:49.0678385Z   ANDROID_HOME: /usr/local/lib/android/sdk
+2026-10-18T07:01:49.0678603Z ##[endgroup]
+2026-10-18T07:01:49.6483084Z To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/8.13/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+2026-10-18T07:01:51.1474744Z Daemon will be stopped at the end of the build 
+2026-10-18T07:02:36.2491483Z 
+2026-10-18T07:02:36.2521692Z > Configure project :app
+2026-10-18T07:02:36.2523910Z w: file:///home/runner/work/Muyon/Muyon/experiments/redesign/android-compose-lab/app/build.gradle.kts:82:61: Unnecessary non-null assertion (!!) on a non-null receiver of type String
+2026-10-18T07:02:39.7472765Z 
+2026-10-18T07:02:39.7477384Z > Task :state:checkKotlinGradlePluginConfigurationErrors SKIPPED
+2026-10-18T07:02:44.3475443Z > Task :state:processResources NO-SOURCE
+2026-10-18T07:02:44.3501500Z > Task :state:processTestResources NO-SOURCE
+2026-10-18T07:02:44.3502167Z > Task :app:preBuild UP-TO-DATE
+2026-10-18T07:02:44.3502800Z > Task :app:preDebugBuild UP-TO-DATE
+2026-10-18T07:02:44.3503293Z > Task :app:mergeDebugNativeDebugMetadata NO-SOURCE
+2026-10-18T07:02:54.7473426Z > Task :state:compileKotlin
+2026-10-18T07:03:01.3507826Z > Task :state:compileJava NO-SOURCE
+2026-10-18T07:03:01.3521776Z > Task :state:classes UP-TO-DATE
+2026-10-18T07:03:01.4481666Z > Task :state:jar
+2026-10-18T07:03:01.5511927Z > Task :app:checkKotlinGradlePluginConfigurationErrors SKIPPED
+2026-10-18T07:03:01.5543535Z > Task :app:generateDebugBuildConfig
+2026-10-18T07:03:02.7473964Z > Task :app:compileDebugAidl
+2026-10-18T07:03:02.7491060Z > Task :app:generateDebugResValues
+2026-10-18T07:03:02.9481724Z > Task :app:checkDebugAarMetadata
+2026-10-18T07:03:02.9513702Z > Task :app:mapDebugSourceSetPaths
+2026-10-18T07:03:02.9541673Z > Task :app:generateDebugResources
+2026-10-18T07:03:04.9530222Z > Task :app:packageDebugResources
+2026-10-18T07:03:07.1481868Z > Task :app:parseDebugLocalResources
+2026-10-18T07:03:07.1527693Z > Task :app:createDebugCompatibleScreenManifests
+2026-10-18T07:03:07.1571634Z > Task :app:extractDeepLinksDebug
+2026-10-18T07:03:07.2531730Z > Task :app:mergeDebugResources
+2026-10-18T07:03:07.8473244Z > Task :app:processDebugMainManifest
+2026-10-18T07:03:08.1497875Z > Task :app:processDebugManifest
+2026-10-18T07:03:08.1540438Z > Task :app:processDebugManifestForPackage
+2026-10-18T07:03:08.1581594Z > Task :app:javaPreCompileDebug
+2026-10-18T07:03:09.2476647Z > Task :app:mergeDebugShaders
+2026-10-18T07:03:09.3531580Z > Task :app:compileDebugShaders NO-SOURCE
+2026-10-18T07:03:09.3532192Z > Task :app:generateDebugAssets UP-TO-DATE
+2026-10-18T07:03:09.4501720Z > Task :app:mergeDebugAssets
+2026-10-18T07:03:09.5502907Z > Task :app:compressDebugAssets
+2026-10-18T07:03:09.5526630Z > Task :app:desugarDebugFileDependencies
+2026-10-18T07:03:09.8481554Z > Task :app:processDebugResources
+2026-10-18T07:03:10.7521670Z > Task :app:checkDebugDuplicateClasses
+2026-10-18T07:03:11.8503276Z > Task :state:compileTestKotlin
+2026-10-18T07:03:12.8501651Z > Task :state:compileTestJava NO-SOURCE
+2026-10-18T07:03:12.8621726Z > Task :state:testClasses UP-TO-DATE
+2026-10-18T07:03:13.6531403Z 
+2026-10-18T07:03:13.6631661Z > Task :state:checkState
+2026-10-18T07:03:13.6691578Z PASS default and ordered destinations
+2026-10-18T07:03:13.6733315Z PASS selection changes page without modifying previous state
+2026-10-18T07:03:13.6811608Z PASS 899 and 900 logical width boundary
+2026-10-18T07:03:13.6861533Z PASS invalid width rejected
+2026-10-18T07:03:13.6905913Z PASS raw draft survives navigation without normalization
+2026-10-18T07:03:13.7021622Z PASS draft focus and scroll retained together
+2026-10-18T07:03:13.7051315Z PASS page memories and prior state remain independent
+2026-10-18T07:03:13.7051816Z PASS width changes do not own or replace state
+2026-10-18T07:03:13.7056050Z PASS negative list coordinates rejected
+2026-10-18T07:03:13.7081294Z PASS Rust port has no connected or success default
+2026-10-18T07:03:13.7111603Z PASS interrupted keeps explicit unknown warning
+2026-10-18T07:03:13.7131123Z PASS cancelling never claims cancelled
+2026-10-18T07:03:13.7151230Z PASS platform task note takes priority
+2026-10-18T07:03:13.7181169Z PASS platform ownership cannot erase interrupted warning
+2026-10-18T07:03:13.7191555Z PASS ordinary queued waiting and running copy
+2026-10-18T07:03:13.7211379Z PASS paused failed succeeded and cancelled stay distinct
+2026-10-18T07:03:13.7241483Z PASS 31 pending chat cancellation/late bootstrap checks; Android runtime NOT_RUN
+2026-10-18T07:03:13.7251217Z PASS 15 chat read UTF-8 bounds and immutable identity checks; Binder/native NOT_RUN
+2026-10-18T07:03:13.7281196Z PASS frontend input/status policy (21 assertions; no Android/model execution)
+2026-10-18T07:03:13.7301200Z PASS local UI: empty local session never fabricates a message
+2026-10-18T07:03:13.7331294Z PASS local UI: draft remains exact raw UTF16
+2026-10-18T07:03:13.7341126Z PASS local UI: blank local note does not create records
+2026-10-18T07:03:13.7371183Z PASS local UI: nonblank local note can be saved
+2026-10-18T07:03:13.7391363Z PASS local UI: local save preserves text and clears only composer
+2026-10-18T07:03:13.7411350Z PASS local UI: repeated empty save cannot duplicate a note
+2026-10-18T07:03:13.7431150Z PASS local UI: local note ids stay unique and ordered
+2026-10-18T07:03:13.7451379Z PASS local UI: new conversation retains prior unsaved draft
+2026-10-18T07:03:13.7481254Z PASS local UI: conversation switching retains individual scroll and focus
+2026-10-18T07:03:13.7491178Z PASS local UI: invalid conversation selection changes nothing
+2026-10-18T07:03:13.7516339Z PASS local UI: selection closes overlay but keeps search query
+2026-10-18T07:03:13.7516971Z PASS local UI: create resets history filter and closes overlay
+2026-10-18T07:03:13.7517493Z PASS local UI: history filter searches own title and note text
+2026-10-18T07:03:13.7518049Z PASS local UI: record filter exposes only user saved content
+2026-10-18T07:03:13.7518565Z PASS local UI: rename opens correct current title
+2026-10-18T07:03:13.7519099Z PASS local UI: rename cancellation leaves title unchanged
+2026-10-18T07:03:13.7519638Z PASS local UI: rename confirmation preserves exact title
+2026-10-18T07:03:13.7520291Z PASS local UI: blank rename cannot overwrite title
+2026-10-18T07:03:13.7521141Z PASS local UI: record details bind exact conversation and note
+2026-10-18T07:03:13.7521774Z PASS local UI: invalid note or rename cannot invent an overlay
+2026-10-18T07:03:13.7522493Z PASS local UI: local preferences retain drafts without changing host capability
+2026-10-18T07:03:13.7523248Z PASS local UI: snapshot selection and ids remain valid after many sessions
+2026-10-18T07:03:13.7523979Z 22/22 local UI state checks passed; no model or Rust action executed
+2026-10-18T07:03:13.7524830Z PASS conversation candidate: platform snapshot rejects oversized text without truncating live state
+2026-10-18T07:03:13.7525834Z PASS conversation candidate: snapshot restores two independent drafts and selected conversation
+2026-10-18T07:03:13.7526857Z PASS conversation candidate: restore preserves user records and preferences but dismisses transient overlay
+2026-10-18T07:03:13.7527885Z PASS conversation candidate: repeated restoration never adds assistant messages or execution results
+2026-10-18T07:03:13.7528771Z PASS conversation candidate: every truncated snapshot is rejected
+2026-10-18T07:03:13.7529540Z PASS conversation candidate: incompatible version and trailing payload are rejected
+2026-10-18T07:03:13.7530393Z PASS conversation candidate: invalid selection enum counts and coordinates are rejected
+2026-10-18T07:03:13.7531423Z PASS conversation candidate: duplicate conversation and note identifiers are rejected
+2026-10-18T07:03:13.7532220Z 8/8 conversation snapshot checks passed; Android rendering NOT_RUN
+2026-10-18T07:03:13.7532838Z PASS diagnostic construction never calls native
+2026-10-18T07:03:13.7533387Z PASS diagnostic validation requires actual handshake
+2026-10-18T07:03:13.7534023Z PASS diagnostic handshake is worker only and busy before entry
+2026-10-18T07:03:13.7561293Z PASS diagnostic missing library has safe unavailable result
+2026-10-18T07:03:13.7565075Z PASS diagnostic handshake rejects protocol mismatch
+2026-10-18T07:03:13.7565657Z PASS diagnostic handshake rejects build mismatch
+2026-10-18T07:03:13.7566185Z PASS diagnostic handshake rejects model mismatch
+2026-10-18T07:03:13.7566699Z PASS diagnostic handshake rejects execute mismatch
+2026-10-18T07:03:13.7567220Z PASS diagnostic handshake rejects read mismatch
+2026-10-18T07:03:13.7568138Z PASS diagnostic handshake rejects write mismatch
+2026-10-18T07:03:13.7568667Z PASS diagnostic handshake rejects attachment mismatch
+2026-10-18T07:03:13.7569335Z PASS diagnostic four variants carry internal bounded identifiers and unsigned counts
+2026-10-18T07:03:13.7569981Z PASS diagnostic report rejects id mismatch
+2026-10-18T07:03:13.7570808Z PASS diagnostic report rejects variant mismatch
+2026-10-18T07:03:13.7571341Z PASS diagnostic report rejects protocol mismatch
+2026-10-18T07:03:13.7571816Z PASS diagnostic report rejects build mismatch
+2026-10-18T07:03:13.7572435Z PASS diagnostic native typed UNSUPPORTED_PROTOCOL remains closed and slot releases
+2026-10-18T07:03:13.7573187Z PASS diagnostic native typed INVALID_REQUEST_ID remains closed and slot releases
+2026-10-18T07:03:13.7573940Z PASS diagnostic native typed DECLARATION_REJECTED remains closed and slot releases
+2026-10-18T07:03:13.7574691Z PASS diagnostic native typed INTERNAL_FAILURE remains closed and slot releases
+2026-10-18T07:03:13.7575388Z PASS diagnostic unexpected native error never exposes raw reason
+2026-10-18T07:03:13.7576149Z PASS diagnostic expired handshake cannot publish readiness
+2026-10-18T07:03:13.7576689Z PASS diagnostic detached lease cannot start work
+2026-10-18T07:03:13.7577223Z PASS diagnostic rejected worker submission releases admission
+2026-10-18T07:03:13.7577827Z PASS diagnostic delayed delivery rechecks lease and current snapshot
+2026-10-18T07:03:13.7578552Z PASS diagnostic blocking native across dismiss stays single flight until actual return
+2026-10-18T07:03:13.7579363Z PASS diagnostic blocking native across timeout stays single flight until actual return
+2026-10-18T07:03:13.7580192Z PASS diagnostic blocking native across holder recreation stays single flight until actual return
+2026-10-18T07:03:13.7585282Z PASS diagnostic listener reentrant detach cannot deadlock admission
+2026-10-18T07:03:13.7586070Z 29/29 diagnostic coordinator checks passed; native FFI/Android runtime NOT_RUN
+2026-10-18T07:03:13.7586866Z PASS B service precontroller initializing has no native identity or admission
+2026-10-18T07:03:13.7587639Z PASS B service new connection ignores late constructor transport update
+2026-10-18T07:03:13.7588340Z PASS B service connection rejects invalid native meta and lease
+2026-10-18T07:03:13.7589037Z PASS B service fresh lease is invisible and reconciles before explicit user submit
+2026-10-18T07:03:13.7589771Z PASS B service busy explicit double click never creates a second submit
+2026-10-18T07:03:13.7590474Z PASS B service invalid user request identities cannot become native work
+2026-10-18T07:03:13.7591408Z PASS B service native initializing recovery and closed remain unavailable
+2026-10-18T07:03:13.7592088Z PASS B service old display lease cannot apply a later terminal
+2026-10-18T07:03:13.7592712Z PASS B service old connection cannot erase original known terminal
+2026-10-18T07:03:13.7593343Z PASS B service lower revision cannot regress same run
+2026-10-18T07:03:13.7594012Z PASS B service higher revision cannot turn a settled run back into running
+2026-10-18T07:03:13.7594751Z PASS B service equal revision requires identical authoritative snapshot
+2026-10-18T07:03:13.7595483Z PASS B service same live connect is idempotent without dropping observations
+2026-10-18T07:03:13.7596200Z PASS B service old epoch rejects active replies after reconnect
+2026-10-18T07:03:13.7596988Z PASS B service current recovers lost request without producing submit
+2026-10-18T07:03:13.7597752Z PASS B service status wrong request variant source or durable binding conflicts
+2026-10-18T07:03:13.7598510Z PASS B service historical lookup is separate from a newer active run
+2026-10-18T07:03:13.7599205Z PASS B service historical source build and admitted epoch stay original
+2026-10-18T07:03:13.7599934Z PASS B service unknown transport is not native failed cancelled or no admission
+2026-10-18T07:03:13.7600812Z PASS B service recorded read success remains success when run is cancelled
+2026-10-18T07:03:13.7601797Z PASS B service settled no admission is distinct and cannot regress
+2026-10-18T07:03:13.7602552Z PASS B service completed requires actual task receipt identity and reason none
+2026-10-18T07:03:13.7603343Z PASS B service malformed IDs and negative revision rejected without defaults
+2026-10-18T07:03:13.7604081Z PASS B service all sealed snapshot variants have a valid sibling
+2026-10-18T07:03:13.7604852Z PASS B service multiple visible activity identities do not release the last lease early
+2026-10-18T07:03:13.7605654Z PASS B service old visibility ACK cannot enable a newer invisible state
+2026-10-18T07:03:13.7606392Z PASS B service rotation retains run identity but cannot clear issued stop
+2026-10-18T07:03:13.7607191Z PASS B service release invalidates old observation and does not claim native closed
+2026-10-18T07:03:13.7607926Z PASS B service panel detach is not visibility release
+2026-10-18T07:03:13.7608587Z PASS B service post terminal new request requires explicit user action
+2026-10-18T07:03:13.7609368Z PASS B service bootstrap late constructor is explicitly retired and drained
+2026-10-18T07:03:13.7610362Z PASS B service bootstrap initialized object settles before install and does not repeat
+2026-10-18T07:03:13.7641366Z PASS B service bootstrap retirement during actual constructor discards late object
+2026-10-18T07:03:13.7671252Z PASS B service bootstrap failure never installs invented Ready
+2026-10-18T07:03:13.7701282Z PASS B service blocked observation cannot queue another observation but control runs
+2026-10-18T07:03:13.7702085Z PASS B service control lane is bounded independently and releases after error
+2026-10-18T07:03:13.7731270Z PASS B service RPC rejection cannot strand its local lane
+2026-10-18T07:03:13.7761390Z PASS B service new lease forwards existing activity visibility without implicit start
+2026-10-18T07:03:13.7765165Z PASS B service known terminal cannot be erased by a later empty current
+2026-10-18T07:03:13.7765963Z PASS B service closed service phase cannot reopen on a later revision
+2026-10-18T07:03:13.7766818Z PASS B service retirement after initialize waiter returns still performs close settlement
+2026-10-18T07:03:13.7767676Z PASS B service historical lookup rejects a different original request binding
+2026-10-18T07:03:13.7768445Z PASS B service different historical observation keys may share service revision
+2026-10-18T07:03:13.7769124Z PASS B service old status ticket cannot replace a newer explicitly selected run
+2026-10-18T07:03:13.7769763Z PASS B service retirement signal handoff cannot settle before actual stop signal
+2026-10-18T07:03:13.7770408Z PASS B service new historical selection rejects reverse delivery at revision 3
+2026-10-18T07:03:13.7771324Z PASS B service new historical selection rejects reverse delivery at revision 2
+2026-10-18T07:03:13.7801518Z PASS B service settlement pump coalesces requests without a waiting queue
+2026-10-18T07:03:13.7831422Z PASS B service settlement requested during return stays with actual waiter
+2026-10-18T07:03:13.7851347Z PASS B service settlement rejection and failure do not strand next explicit request
+2026-10-18T07:03:13.7861565Z PASS B service blocked settlement admits no concurrent waiter and preserves new request
+2026-10-18T07:03:13.7899238Z PASS B service concurrent settlement request is not acknowledged before rejected dispatch
+2026-10-18T07:03:13.7914896Z PASS B service throwing failure listener cannot strand accepted settlement request
+2026-10-18T07:03:13.7915698Z PASS B service retirement holder reserves one construction before any object exists
+2026-10-18T07:03:13.7916334Z RETENTION_PUBLICATION_REACHED
+2026-10-18T07:03:13.7916865Z PASS B service retirement holder publishes strong object before first await
+2026-10-18T07:03:13.7917426Z RETENTION_RETIRE_FAILURE_REACHED
+2026-10-18T07:03:13.7917985Z PASS B service throwing retirement retains original object and denies replacement
+2026-10-18T07:03:13.7918563Z RETENTION_AWAIT_EXCEPTION_REACHED
+2026-10-18T07:03:13.7919097Z PASS B service throwing await exception retains original object without retry
+2026-10-18T07:03:13.7920136Z RETENTION_AWAIT_LINKAGE_REACHED
+2026-10-18T07:03:13.7920836Z PASS B service throwing await linkage retains original object without retry
+2026-10-18T07:03:13.7921534Z PASS B service nonclosed settlement retains owner until later actual closed cleanup
+2026-10-18T07:03:13.7922087Z RETENTION_CLEANUP_FAILURE_REACHED
+2026-10-18T07:03:13.7922618Z PASS B service closed with throwing handle cleanup retains owner until successful cleanup
+2026-10-18T07:03:13.7923316Z PASS B service stale retirement token cannot clear replacement after genuine cleanup
+2026-10-18T07:03:13.7923998Z PASS B service definite preobject failure releases only its unpublished reservation
+2026-10-18T07:03:13.7924711Z PASS B service destroyed service late constructor remains owned through explicit retirement
+2026-10-18T07:03:13.7925398Z PASS B service zero active handle cleanup succeeds once and seals future calls
+2026-10-18T07:03:13.7926223Z PASS B service inflight handle call prevents cleanup while disposal seals replacement admission
+2026-10-18T07:03:13.7926819Z HANDLE_CLEANUP_FAILURE_REACHED
+2026-10-18T07:03:13.7927561Z PASS B service throwing generated cleanup stays sealed incomplete without implicit retry
+2026-10-18T07:03:13.7928267Z PASS B service nonclosed or nondisposing settlement cannot seal or release handle
+2026-10-18T07:03:13.7928808Z HANDLE_LAST_RETURN_REACHED
+2026-10-18T07:03:13.7929346Z PASS B service last active return hands sealed cleanup to existing background owner exactly once
+2026-10-18T07:03:13.7930023Z 68/68 B service state checks passed; Android Binder/native runtime NOT_RUN
+2026-10-18T07:03:13.7930909Z PASS B IPC local initialization remains distinct from native metadata
+2026-10-18T07:03:13.7938542Z PASS B IPC connected lease and actual native phase survive codec
+2026-10-18T07:03:13.7939182Z PASS B IPC all six snapshot shapes retain original identity and receipt
+2026-10-18T07:03:13.7939823Z PASS B IPC queued admission differs from original existing result
+2026-10-18T07:03:13.7940423Z PASS B IPC control rejection busy and unknown use closed units
+2026-10-18T07:03:13.7941223Z PASS B IPC truncated trailing and wrong version bytes cannot become a result
+2026-10-18T07:03:13.7941867Z PASS B IPC oversize bytes and unstructured input are rejected
+2026-10-18T07:03:13.7942501Z PASS B IPC invalid native identity protocol and build cannot be encoded
+2026-10-18T07:03:13.7943147Z PASS B IPC invalid completed result is not repaired into success
+2026-10-18T07:03:13.7943896Z PASS B IPC actual typed start refusal requires reconciliation without fabricating terminal
+2026-10-18T07:03:13.7944683Z PASS B IPC uncertain transport and unrelated control cannot clear pending start
+2026-10-18T07:03:13.7945456Z PASS B IPC stale start refusal cannot clear a replacement connection pending request
+2026-10-18T07:03:13.7946192Z 12/12 B IPC codec checks passed; Android Parcel/Binder runtime NOT_RUN
+2026-10-18T07:03:13.7946872Z PASS B liveness private keys never repeat after dead token replacement
+2026-10-18T07:03:13.7947583Z PASS B liveness same live token links once and keeps its native correlation key
+2026-10-18T07:03:13.7948379Z PASS B liveness released live tombstone consumes capacity and cannot resurrect
+2026-10-18T07:03:13.7949071Z PASS B liveness death during link cannot gain a native lease
+2026-10-18T07:03:13.7949777Z PASS B liveness death inside native connect rejects late lease and stops original key again
+2026-10-18T07:03:13.7950522Z PASS B liveness late original death callback cannot remove replacement
+2026-10-18T07:03:13.7951300Z PASS B liveness unknown lease cannot tombstone a registered client
+2026-10-18T07:03:13.7951996Z PASS B liveness inflight same token connect returns busy without second native call
+2026-10-18T07:03:13.7952783Z PASS B liveness native connect and gone listeners execute outside registry lock
+2026-10-18T07:03:13.7953545Z PASS B liveness failed death-link setup cannot create an unobserved native lease
+2026-10-18T07:03:13.7954319Z PASS B liveness acknowledged release cannot be revived by inflight repeat connect
+2026-10-18T07:03:13.7955301Z PASS B liveness dispose unlinks live and released tokens without claiming native stop
+2026-10-18T07:03:13.7956064Z PASS B liveness dispose during death-link setup detaches the eventual link
+2026-10-18T07:03:13.7956804Z PASS B liveness dispose rejects late native connect and stops only its original key
+2026-10-18T07:03:13.7957547Z PASS B liveness unlink callback executes outside registry admission lock
+2026-10-18T07:03:13.7958119Z DISPOSAL_UNLINK_FAILURE_REACHED
+2026-10-18T07:03:13.7958670Z PASS B liveness dispose attempts second unlink when first unlink fails
+2026-10-18T07:03:13.7959366Z 16/16 B liveness checks passed; real Binder death/process runtime NOT_RUN
+2026-10-18T07:03:13.7960032Z 16/16 pure JVM state checks passed; Compose/Android runtime NOT_RUN
+2026-10-18T07:03:13.7960482Z 
+2026-10-18T07:03:13.7960814Z > Task :state:test SKIPPED
+2026-10-18T07:03:13.7961170Z > Task :state:check
+2026-10-18T07:03:40.6501687Z > Task :app:compileDebugKotlin
+2026-10-18T07:03:43.6473764Z > Task :app:mergeExtDexDebug
+2026-10-18T07:04:03.9503553Z > Task :app:compileDebugJavaWithJavac
+2026-10-18T07:04:05.4472890Z > Task :app:dexBuilderDebug
+2026-10-18T07:04:05.4473402Z > Task :app:mergeDebugGlobalSynthetics
+2026-10-18T07:04:05.4492263Z > Task :app:processDebugJavaRes
+2026-10-18T07:04:05.9503431Z > Task :app:mergeDebugJniLibFolders
+2026-10-18T07:04:06.1493358Z > Task :app:mergeLibDexDebug
+2026-10-18T07:04:06.2481767Z > Task :app:mergeDebugNativeLibs
+2026-10-18T07:04:06.2491175Z > Task :app:mergeProjectDexDebug
+2026-10-18T07:04:06.4473353Z > Task :app:mergeDebugJavaResource
+2026-10-18T07:04:07.4497708Z > Task :app:validateSigningDebug
+2026-10-18T07:04:07.4520907Z > Task :app:writeDebugAppMetadata
+2026-10-18T07:04:07.4538532Z 
+2026-10-18T07:04:07.4571361Z > Task :app:stripDebugDebugSymbols
+2026-10-18T07:04:07.4581604Z Unable to strip the following libraries, packaging them as they are: libandroidx.graphics.path.so. Run with --info option to learn more.
+2026-10-18T07:04:07.4611983Z 
+2026-10-18T07:04:07.4619207Z > Task :app:writeDebugSigningConfigVersions
+2026-10-18T07:04:07.4660000Z > Task :app:preDebugAndroidTestBuild SKIPPED
+2026-10-18T07:04:07.5478421Z > Task :app:compileDebugAndroidTestAidl NO-SOURCE
+2026-10-18T07:04:07.5498325Z > Task :app:bundleDebugClassesToCompileJar
+2026-10-18T07:04:09.5475713Z > Task :app:processDebugAndroidTestManifest
+2026-10-18T07:04:09.5501164Z > Task :app:generateDebugAndroidTestBuildConfig
+2026-10-18T07:04:09.6479461Z > Task :app:checkDebugAndroidTestAarMetadata
+2026-10-18T07:04:09.6486532Z > Task :app:packageDebug
+2026-10-18T07:04:09.6487206Z > Task :app:createDebugApkListingFileRedirect
+2026-10-18T07:04:09.6487924Z > Task :app:assembleDebug
+2026-10-18T07:04:09.6488406Z > Task :app:generateDebugAndroidTestResValues
+2026-10-18T07:04:09.6491727Z > Task :app:mapDebugAndroidTestSourceSetPaths
+2026-10-18T07:04:09.6492372Z > Task :app:generateDebugAndroidTestResources
+2026-10-18T07:04:09.8484595Z > Task :app:javaPreCompileDebugAndroidTest
+2026-10-18T07:04:09.8494554Z > Task :app:mergeDebugAndroidTestShaders
+2026-10-18T07:04:09.8495323Z > Task :app:compileDebugAndroidTestShaders NO-SOURCE
+2026-10-18T07:04:09.8495980Z > Task :app:generateDebugAndroidTestAssets UP-TO-DATE
+2026-10-18T07:04:09.9472864Z > Task :app:mergeDebugAndroidTestAssets
+2026-10-18T07:04:09.9493017Z > Task :app:compressDebugAndroidTestAssets
+2026-10-18T07:04:09.9493485Z > Task :app:desugarDebugAndroidTestFileDependencies
+2026-10-18T07:04:09.9493900Z > Task :app:mergeDebugAndroidTestResources
+2026-10-18T07:04:10.1542178Z > Task :app:checkDebugAndroidTestDuplicateClasses
+2026-10-18T07:04:11.7501880Z > Task :app:processDebugAndroidTestResources
+2026-10-18T07:04:12.3497497Z > Task :app:mergeLibDexDebugAndroidTest
+2026-10-18T07:04:12.3514115Z > Task :app:mergeDebugAndroidTestJniLibFolders
+2026-10-18T07:04:12.3542974Z > Task :app:mergeDebugAndroidTestNativeLibs NO-SOURCE
+2026-10-18T07:04:12.3571439Z > Task :app:stripDebugAndroidTestDebugSymbols NO-SOURCE
+2026-10-18T07:04:12.3617779Z > Task :app:validateSigningDebugAndroidTest
+2026-10-18T07:04:12.3619207Z > Task :app:writeDebugAndroidTestSigningConfigVersions
+2026-10-18T07:04:12.9491928Z > Task :app:mergeExtDexDebugAndroidTest
+2026-10-18T07:04:13.9501633Z > Task :app:compileDebugUnitTestKotlin
+2026-10-18T07:04:14.6481817Z > Task :app:compileDebugAndroidTestKotlin
+2026-10-18T07:04:15.3473591Z > Task :app:generateDebugAndroidTestLintModel
+2026-10-18T07:04:15.7489750Z > Task :app:compileDebugAndroidTestJavaWithJavac
+2026-10-18T07:04:15.8478872Z > Task :app:dexBuilderDebugAndroidTest
+2026-10-18T07:04:15.8479788Z > Task :app:mergeDebugAndroidTestGlobalSynthetics
+2026-10-18T07:04:15.8480416Z > Task :app:processDebugAndroidTestJavaRes
+2026-10-18T07:04:15.9480094Z > Task :app:extractProguardFiles
+2026-10-18T07:04:15.9492850Z > Task :app:mergeProjectDexDebugAndroidTest
+2026-10-18T07:04:16.0473957Z > Task :app:generateDebugLintReportModel
+2026-10-18T07:04:16.0474628Z > Task :app:preDebugUnitTestBuild UP-TO-DATE
+2026-10-18T07:04:16.0479015Z > Task :app:mergeDebugAndroidTestJavaResource
+2026-10-18T07:04:16.0480372Z > Task :app:generateDebugUnitTestLintModel
+2026-10-18T07:04:20.7476135Z > Task :app:packageDebugAndroidTest
+2026-10-18T07:04:20.7482581Z > Task :app:createDebugAndroidTestApkListingFileRedirect
+2026-10-18T07:04:20.7483069Z > Task :app:assembleDebugAndroidTest
+2026-10-18T07:04:30.7474811Z > Task :app:lintAnalyzeDebugUnitTest
+2026-10-18T07:04:32.9475454Z > Task :app:lintAnalyzeDebugAndroidTest
+2026-10-18T07:04:46.0472561Z > Task :app:lintAnalyzeDebug
+2026-10-18T07:04:51.5472199Z 
+2026-10-18T07:04:51.5492048Z > Task :app:lintReportDebug
+2026-10-18T07:04:51.5493101Z Wrote HTML report to file:///home/runner/work/Muyon/Muyon/experiments/redesign/android-compose-lab/app/build/reports/lint-results-debug.html
+2026-10-18T07:04:51.5493995Z 
+2026-10-18T07:04:51.5494326Z > Task :app:lintDebug
+2026-10-18T07:04:51.5494661Z 
+2026-10-18T07:04:51.5494902Z BUILD SUCCESSFUL in 3m 2s
+2026-10-18T07:04:51.5495298Z 81 actionable tasks: 81 executed
+2026-10-18T07:04:51.9375177Z ##[group]Run mkdir -p "$LOG_DIRECTORY"
+2026-10-18T07:04:51.9375473Z [36;1mmkdir -p "$LOG_DIRECTORY"[0m
+2026-10-18T07:04:51.9375728Z [36;1mif [[ ! -f "$LOG_DIRECTORY/required-exit.txt" ]]; then[0m
+2026-10-18T07:04:51.9376118Z [36;1m  printf 'gradle_exit=NOT_RUN\nrequired_exit=NOT_RUN\n' > "$LOG_DIRECTORY/required-exit.txt"[0m
+2026-10-18T07:04:51.9376446Z [36;1mfi[0m
+2026-10-18T07:04:51.9376720Z [36;1mprintf '%s\n' 'Android installation/runtime=NOT_RUN' 'Compose rendering=NOT_RUN' \[0m
+2026-10-18T07:04:51.9377156Z [36;1m  'Rust integration runtime=NOT_RUN' 'WorkBuddy pixel fidelity=UNVERIFIED' \[0m
+2026-10-18T07:04:51.9377504Z [36;1m  > "$LOG_DIRECTORY/unexecuted-boundaries.txt"[0m
+2026-10-18T07:04:51.9433562Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2026-10-18T07:04:51.9433819Z env:
+2026-10-18T07:04:51.9434023Z   LAB_DIRECTORY: experiments/redesign/android-compose-lab
+2026-10-18T07:04:51.9434273Z   GRADLE_VERSION: 8.13
+2026-10-18T07:04:51.9434574Z   GRADLE_SHA256: 20f1b1176237254a6fc204d8434196fa11a4cfb387567519c61556e8710aed78
+2026-10-18T07:04:51.9434959Z   GRADLE_USER_HOME: /home/runner/work/_temp/muyon-compose-gradle-cache
+2026-10-18T07:04:51.9435305Z   ANDROID_USER_HOME: /home/runner/work/_temp/muyon-compose-android-user
+2026-10-18T07:04:51.9435632Z   LOG_DIRECTORY: /home/runner/work/_temp/muyon-compose-evidence
+2026-10-18T07:04:51.9435965Z   JAVA_HOME: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.20-1/x64
+2026-10-18T07:04:51.9436327Z   JAVA_HOME_17_X64: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.20-1/x64
+2026-10-18T07:04:51.9436626Z   ANDROID_HOME: /usr/local/lib/android/sdk
+2026-10-18T07:04:51.9436833Z ##[endgroup]
+2026-10-18T07:04:51.9598417Z ##[group]Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+2026-10-18T07:04:51.9598909Z with:
+2026-10-18T07:04:51.9599203Z   name: android-compose-lab-evidence-39106128442-1
+2026-10-18T07:04:51.9599645Z   path: /home/runner/work/_temp/muyon-compose-evidence
+2026-10-18T07:04:51.9600028Z   if-no-files-found: warn
+2026-10-18T07:04:51.9600512Z   retention-days: 7
+2026-10-18T07:04:51.9600934Z   compression-level: 6
+2026-10-18T07:04:51.9601191Z   overwrite: false
+2026-10-18T07:04:51.9601442Z   include-hidden-files: false
+2026-10-18T07:04:51.9601722Z env:
+2026-10-18T07:04:51.9602010Z   LAB_DIRECTORY: experiments/redesign/android-compose-lab
+2026-10-18T07:04:51.9602394Z   GRADLE_VERSION: 8.13
+2026-10-18T07:04:51.9602818Z   GRADLE_SHA256: 20f1b1176237254a6fc204d8434196fa11a4cfb387567519c61556e8710aed78
+2026-10-18T07:04:51.9603426Z   GRADLE_USER_HOME: /home/runner/work/_temp/muyon-compose-gradle-cache
+2026-10-18T07:04:51.9604036Z   ANDROID_USER_HOME: /home/runner/work/_temp/muyon-compose-android-user
+2026-10-18T07:04:51.9604578Z   LOG_DIRECTORY: /home/runner/work/_temp/muyon-compose-evidence
+2026-10-18T07:04:51.9605116Z   JAVA_HOME: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.20-1/x64
+2026-10-18T07:04:51.9605710Z   JAVA_HOME_17_X64: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.20-1/x64
+2026-10-18T07:04:51.9606199Z   ANDROID_HOME: /usr/local/lib/android/sdk
+2026-10-18T07:04:51.9606531Z ##[endgroup]
+2026-10-18T07:04:52.0968634Z (node:2770) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-18T07:04:52.0969377Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-18T07:04:52.1034901Z With the provided path, there will be 10 files uploaded
+2026-10-18T07:04:52.1039778Z Artifact name is valid!
+2026-10-18T07:04:52.1040184Z Root directory input is valid!
+2026-10-18T07:04:52.4330337Z Beginning upload of artifact content to blob storage
+2026-10-18T07:04:52.4588265Z (node:2770) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+2026-10-18T07:04:52.6771703Z Uploaded bytes 11824
+2026-10-18T07:04:52.7383362Z Finished uploading artifact content to blob storage!
+2026-10-18T07:04:52.7384082Z SHA256 digest of uploaded artifact zip is ff00863f102176d7fd00c608dac42b694d8e7aea8f9cb3c162eb780b3e1f35a1
+2026-10-18T07:04:52.7385805Z Finalizing artifact upload
+2026-10-18T07:04:53.0015413Z Artifact android-compose-lab-evidence-39106128442-1.zip successfully finalized. Artifact ID 12128786953
+2026-10-18T07:04:53.0016138Z Artifact android-compose-lab-evidence-39106128442-1 has been successfully uploaded! Final size is 11824 bytes. Artifact ID is 12128786953
+2026-10-18T07:04:53.0021291Z Artifact download URL: https://github.com/mightyoung/Muyon/actions/runs/39106128442/artifacts/12128786953
+2026-10-18T07:04:53.0182567Z Post job cleanup.
+2026-10-18T07:04:53.1222383Z (node:2783) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-18T07:04:53.1222999Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-18T07:04:53.1367028Z Post job cleanup.
+2026-10-18T07:04:53.2064616Z [command]/usr/bin/git version
+2026-10-18T07:04:53.2099249Z git version 2.55.0
+2026-10-18T07:04:53.2138155Z Temporarily overriding HOME='/home/runner/work/_temp/b5cf95fc-02bd-41b0-abc3-17b734521b0f' before making global git config changes
+2026-10-18T07:04:53.2146583Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-18T07:04:53.2147583Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/Muyon/Muyon
+2026-10-18T07:04:53.2208555Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-18T07:04:53.2237775Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-18T07:04:53.2479384Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-18T07:04:53.2518348Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-18T07:04:53.2938326Z Cleaning up orphan processes
+2026-10-18T07:04:53.3208075Z Terminate orphan process: pid (2490) (java)
+2026-10-18T07:04:53.3224363Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683, actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00, actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+

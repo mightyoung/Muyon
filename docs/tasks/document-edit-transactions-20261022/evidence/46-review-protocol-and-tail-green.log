@@ -1,0 +1,33 @@
+   Compiling muyon-core v0.1.0 (/workspace/document-edit-durable-combination/crates/muyon-core)
+    Finished `test` profile [unoptimized] target(s) in 5.19s
+     Running tests/document_edit_engine_protocol.rs (/workspace/document-edit-combination/crates/target/debug/deps/document_edit_engine_protocol-e52837b697f52b2d)
+
+running 6 tests
+test numeric_cell_bounds_and_metadata_format_are_strict ... ok
+test real_metadata_maps_exact_identity_and_preserves_numeric_literals ... ok
+test identity_and_hash_errors_are_distinct_from_environment_hold ... ok
+test apparently_real_status_requires_source_hash_and_simulated_diagnostics_are_hard_rejected ... ok
+test six_response_fixtures_can_never_mint_an_engine_commit_permit ... ok
+test unknown_keys_versions_duplicate_keys_and_oversize_receipts_fail_closed ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/document_edit_gateway.rs (/workspace/document-edit-combination/crates/target/debug/deps/document_edit_gateway-9524898dbf45656f)
+
+running 13 tests
+test candidate_reopens_but_new_effect_requires_an_explicit_fresh_confirmation ... ok
+test candidate_and_original_receipt_survive_restart_without_replay ... ok
+test a_copy_claim_that_cannot_store_its_candidate_is_query_only_after_restart ... ok
+test cancellation_is_not_rollback_and_cannot_erase_a_committed_receipt ... ok
+test confirmation_is_exact_and_revocation_stops_publication ... ok
+test corrupt_oversize_persisted_metadata_is_rejected_before_payload_decode ... ok
+test corrupt_candidate_never_validates_or_publishes ... ok
+test prepare_is_durable_without_confirmation_or_engine_success ... ok
+test duplicate_intent_binds_original_and_never_creates_second_upload ... ok
+test late_copy_duplicate_is_only_an_authorized_original_result_query ... ok
+test receipt_tail_failure_rolls_back_cas_and_restart_unknown_never_replays ... ok
+test two_original_intents_cannot_publish_the_same_source_revision ... ok
+test grant_revoked_or_expired_by_last_receipt_write_rolls_back_the_entire_publish ... ok
+
+test result: ok. 13 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.08s
+

@@ -1,0 +1,23 @@
+    Finished `test` profile [unoptimized] target(s) in 0.03s
+     Running tests/evidence_local.rs (/tmp/muyon-combination-target/debug/deps/evidence_local-73945266da081d61)
+
+running 16 tests
+test cache_access_rechecks_revision_scope_and_revocation ... ok
+test changed_blob_and_authority_invalidate_existing_derivation ... ok
+test anchored_request_and_inspect_do_not_expand_to_whole_text ... ok
+test citation_order_is_explicit_and_repeated_processing_has_same_identity ... ok
+test debug_never_discloses_cached_text_after_revocation ... ok
+test body_citations_and_candidates_are_separate_and_citation_numbers_are_stable ... ok
+test forged_ranges_source_and_page_do_not_resolve ... ok
+test every_derived_delivery_rechecks_permission_after_computation ... ok
+test no_read_permission_never_gains_whole_text ... ok
+test failed_decoding_empty_and_changed_bytes_are_distinct_from_success ... ok
+test revocation_between_checks_never_delivers_extraction ... ok
+test source_identity_separates_same_bytes_across_scope_document_and_revision ... ok
+test pdf_and_ocr_never_manufacture_content ... ok
+test unknown_format_never_becomes_utf8_by_caller_assertion ... ok
+test synthetic_text_has_real_receipt_and_bound_utf8_anchor ... ok
+test limits_reject_overlarge_queries_invalid_limits_and_oversized_sources ... ok
+
+test result: ok. 16 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.08s
+

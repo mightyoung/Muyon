@@ -1,0 +1,22 @@
+   Compiling muyon-core v0.1.0 (/workspace/document-edit-durable-combination/crates/muyon-core)
+    Finished `test` profile [unoptimized] target(s) in 0.34s
+     Running tests/document_edit_gateway.rs (/workspace/document-edit-combination/crates/target/debug/deps/document_edit_gateway-9524898dbf45656f)
+
+running 1 test
+test persisted_receipt_title_must_match_frozen_reviewed_source ... FAILED
+
+failures:
+
+---- persisted_receipt_title_must_match_frozen_reviewed_source stdout ----
+
+thread 'persisted_receipt_title_must_match_frozen_reviewed_source' panicked at muyon-core/tests/document_edit_gateway.rs:794:122:
+called `Result::unwrap()` on an `Err` value: "SQLite 8: attempt to write a readonly database"
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    persisted_receipt_title_must_match_frozen_reviewed_source
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 18 filtered out; finished in 0.01s
+
+error: test failed, to rerun pass `-p muyon-core --test document_edit_gateway`

@@ -1,0 +1,16 @@
+   Compiling muyon-core v0.1.0 (/tmp/muyon-document-durable-check.HuqkpAc8/crates/muyon-core)
+    Finished `test` profile [unoptimized] target(s) in 5.40s
+     Running tests/document_edit_candidates.rs (/workspace/document-edit-combination/crates/target/debug/deps/document_edit_candidates-ef54b164ac608172)
+
+running 8 tests
+test candidate_corruption_and_equal_source_bytes_are_not_edited_success ... ok
+test cancellation_and_source_change_prevent_new_staging_without_rollback ... ok
+test exact_confirm_same_intent_scope_and_copy_routes_are_separate ... ok
+test unknown_ingestion_queries_original_intent_and_never_replays_after_restart ... ok
+test prepared_candidate_restart_never_implies_confirmation_validation_or_document_success ... ok
+test candidate_write_tail_revocation_rolls_back_bytes_and_reopen_preserves_unknown ... ok
+test unpublished_candidate_bytes_require_fresh_explicit_edit_confirmation_not_source_read ... ok
+test copy_and_edited_candidates_share_the_same_total_byte_budget ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.96s
+

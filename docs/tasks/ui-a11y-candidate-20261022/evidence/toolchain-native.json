@@ -1,0 +1,24 @@
+{
+  "rustc": "rustc 1.93.1 (01f6ddf75 2026-02-11)",
+  "cargo": "cargo 1.93.1 (083ac5135 2025-12-15)",
+  "cmake": "cmake version 3.22.1-g37088a8",
+  "ndk": "Pkg.Desc = Android NDK\nPkg.Revision = 28.2.13676358\nPkg.BaseRevision = 28.2.13676358\nPkg.ReleaseName = r28c\n",
+  "packages": [
+    {
+      "package": "ndk/28.2.13676358",
+      "license_refs": [
+        "android-sdk-license"
+      ],
+      "sample": "toolchains/llvm/prebuilt/linux-x86_64/bin/clang",
+      "sha256": "6156dd4e5e466333197a00b8d20bca72c292186643b749dcaaa3aa9164afb1de"
+    },
+    {
+      "package": "cmake/3.22.1",
+      "license_refs": [
+        "android-sdk-license"
+      ],
+      "sample": "bin/cmake",
+      "sha256": "c8c39aee0443330e9b1866e1d85cc2405a4eec5dfbb468c5017c3eaecb4964f5"
+    }
+  ]
+}

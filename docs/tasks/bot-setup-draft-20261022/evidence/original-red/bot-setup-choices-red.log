@@ -1,0 +1,12 @@
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupDraftChecks.kt:123:17: error: unresolved reference 'choices'.
+        check(d.choices().capabilities.single().version == "v2")
+                ^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupDraftChecks.kt:123:49: error: unresolved reference 'version'.
+        check(d.choices().capabilities.single().version == "v2")
+                                                ^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupDraftChecks.kt:124:17: error: unresolved reference 'choices'.
+        check(d.choices().materials.single().available == false)
+                ^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupDraftChecks.kt:124:46: error: unresolved reference 'available'.
+        check(d.choices().materials.single().available == false)
+                                             ^^^^^^^^^

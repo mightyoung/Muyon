@@ -1,0 +1,14 @@
+{
+  "argv": [
+    "python3",
+    "-B",
+    "scripts/test_retirement_prerequisites.py"
+  ],
+  "cwd": "/workspace/Muyon-post-pr103-retirement-20261022",
+  "source_sha": "974a7fcd65d29a7d31c5b6a12f9eb5e79e918679",
+  "dirty_source": false,
+  "start_utc": "2026-10-22T20:39:13.996364+00:00",
+  "exit_code": 0,
+  "duration_seconds": 12.483,
+  "end_utc": "2026-10-22T20:39:26.112047+00:00"
+}

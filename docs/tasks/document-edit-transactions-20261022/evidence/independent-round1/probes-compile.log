@@ -1,0 +1,36 @@
+warning: variants `Recalculated`, `Unknown`, and `Failed` are never constructed
+  --> /workspace/Muyon/crates/muyon-core/src/document_edit/mod.rs:58:41
+   |
+58 | pub enum FormulaStatus { NotApplicable, Recalculated, Unknown, Failed }
+   |          -------------                  ^^^^^^^^^^^^  ^^^^^^^  ^^^^^^
+   |          |
+   |          variants in this enum
+   |
+   = note: `FormulaStatus` has derived impls for the traits `Debug` and `Clone`, but these are intentionally ignored during dead code analysis
+   = note: `#[warn(dead_code)]` on by default
+
+warning: variant `Export` is never constructed
+  --> /workspace/Muyon/crates/muyon-core/src/document_edit/mod.rs:94:5
+   |
+89 | pub enum Command {
+   |          ------- variant in this enum
+...
+94 |     Export(Option<ExportReceipt>),
+   |     ^^^^^^
+   |
+   = note: `Command` has derived impls for the traits `Debug` and `Clone`, but these are intentionally ignored during dead code analysis
+
+warning: methods `candidate` and `rollback` are never used
+   --> /workspace/Muyon/crates/muyon-core/src/document_edit/mod.rs:120:12
+    |
+113 | impl Transaction {
+    | ---------------- methods in this implementation
+...
+120 |     pub fn candidate(&self) -> Option<&Candidate> { self.candidate.as_ref() }
+    |            ^^^^^^^^^
+...
+209 |     pub fn rollback(&self, next: Binding) -> Result<Self, Error> {
+    |            ^^^^^^^^
+
+warning: 3 warnings emitted
+

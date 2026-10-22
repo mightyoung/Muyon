@@ -1,0 +1,8 @@
+Traceback (most recent call last):
+  File "/workspace/Muyon/docs/tasks/document-core-contracts-20261022/persistence-evidence/sql_smoke.py", line 69, in <module>
+    rows = db.execute(statement("SELECT annotation_id,revision,payload FROM document_annotations"), ("project", "document")).fetchall()
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/Muyon/docs/tasks/document-core-contracts-20261022/persistence-evidence/sql_smoke.py", line 30, in statement
+    assert len(found) == 1, (prefix, found)
+           ^^^^^^^^^^^^^^^
+AssertionError: ('SELECT annotation_id,revision,payload FROM document_annotations', [])

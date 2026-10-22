@@ -1,0 +1,44 @@
+{
+  "kind": "new_independent_semantic_negative_checks",
+  "head": "49ad2a8dfe7fe65bad600d985f9e1631252191da",
+  "cwd": "/workspace/bot-setup-draft",
+  "steps": [
+    {
+      "command_argv": [
+        "/tmp/bot-setup-tools/kotlinc/bin/kotlinc",
+        "apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupDraft.kt",
+        "apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/agents/setup/SetupDraftArchive.kt",
+        "/tmp/BotSetupArchiveIndependentNegative.kt",
+        "-include-runtime",
+        "-d",
+        "/tmp/bot-setup-archive-independent-negative.jar"
+      ],
+      "utc_started_at": "2026-10-22T05:05:47.335092Z",
+      "utc_finished_at": "2026-10-22T05:05:55.937326Z",
+      "exit_code": 0
+    },
+    {
+      "command_argv": [
+        "java",
+        "-jar",
+        "/tmp/bot-setup-archive-independent-negative.jar"
+      ],
+      "utc_started_at": "2026-10-22T05:05:55.937350Z",
+      "utc_finished_at": "2026-10-22T05:05:56.053335Z",
+      "exit_code": 0
+    }
+  ],
+  "source_sha256": {
+    "apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupDraft.kt": "2becb6c2a44ba2fe862e3cfe3df31528c91bb37e04bc6835a749c54f4e5eb2f5",
+    "apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/agents/setup/SetupDraftArchive.kt": "5ff652109765a429fd427379a4eabaf0d82e6159ae57bceafbd4955c2f03dbc1"
+  },
+  "helper_path": "/tmp/BotSetupArchiveIndependentNegative.kt",
+  "helper_sha256": "9fdedd1e9756af8f44abd8d97e22e77c5be088eabb4e0bd883d494cfa25481bb",
+  "helper_source": "package com.mightyoung.muyon.product.agents.setup\n\nimport java.io.ByteArrayOutputStream\nimport java.io.DataOutputStream\nimport java.security.MessageDigest\n\nfun main() {\n    fun seal(bytes: ByteArray) = bytes + MessageDigest.getInstance(\"SHA-256\").digest(bytes)\n    fun payload(role: String = \"文献整理助手\", origin: Int = 1, locked: Int = 0,\n        template: String? = \"paper-organizer\", version: Int = 1, name: String = \"论文助手\"): ByteArray {\n        val bytes = ByteArrayOutputStream()\n        DataOutputStream(bytes).use { out ->\n            fun text(value: String) { val raw = value.toByteArray(Charsets.UTF_8); out.writeInt(raw.size); out.write(raw) }\n            fun field(value: String, from: Int, lock: Int) { out.writeByte(from); out.writeByte(lock); text(value) }\n            out.writeInt(0x4D594244); out.writeInt(1); out.writeLong(7)\n            field(name, 0, 1); field(\"文献\", 0, 1); field(role, origin, locked)\n            out.writeByte(if (template == null) 0 else 1)\n            if (template != null) { text(template); out.writeInt(version) }\n        }\n        return bytes.toByteArray()\n    }\n    var n = 0\n    fun rejects(label: String, data: ByteArray) {\n        check(runCatching { BotSetupDraft.restoreDraft(seal(data), \"trusted-new-scope\", \"new-draft\") }.exceptionOrNull() is IllegalArgumentException)\n        n++; println(\"PASS independent semantic negative: $label\")\n    }\n    val valid = payload()\n    check(BotSetupDraft.restoreDraft(seal(valid), \"host\", \"new-id\").draft.snapshot().role.value == \"文献整理助手\")\n    rejects(\"known template wrong role\", payload(role = \"不同角色\"))\n    rejects(\"unknown template id\", payload(template = \"unreviewed-template\"))\n    rejects(\"unknown template version\", payload(version = 2))\n    rejects(\"template role illegally locked\", payload(locked = 1))\n    rejects(\"user role with template provenance\", payload(origin = 0, locked = 1))\n    rejects(\"template role missing provenance\", payload(template = null))\n    rejects(\"user role improperly unlocked\", payload(origin = 0, locked = 0, template = null))\n    rejects(\"empty user name locked\", payload(name = \"\"))\n    rejects(\"decoded UTF16 name bound\", payload(name = \"n\".repeat(61)))\n    rejects(\"decoded forbidden format character\", payload(name = \"\\u200B\"))\n    var cuts = 0\n    for (size in 0 until valid.size) {\n        check(runCatching { BotSetupDraft.restoreDraft(seal(valid.copyOf(size)), \"host\", \"new-id\") }.exceptionOrNull() is IllegalArgumentException)\n        cuts++\n    }\n    println(\"PASS independent semantic negative: $cuts resealed payload truncations\")\n    println(\"PASS $n semantic cases plus $cuts resealed truncations; one valid control\")\n}\n",
+  "log_sha256": {
+    "negative-1.stdout.log": "be2f5e0f34ac1cddf9f127b379b39837a0f087c4b455d7aa295a1cf1d78eaeed",
+    "negative-0.stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "negative-1.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "negative-0.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

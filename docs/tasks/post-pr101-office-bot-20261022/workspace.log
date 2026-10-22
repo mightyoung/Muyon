@@ -1,0 +1,6 @@
+BEGIN {"argv": ["cargo", "test", "--offline", "--locked", "--manifest-path", "crates/Cargo.toml", "--workspace", "--all-targets"], "cwd": "/workspace/Muyon-post-pr101-office-bot-20261022", "source_sha": "bc8fea61744530c1f2e38e65b0273a434c3bd5a8", "dirty_source": false, "start_utc": "2026-10-22T18:56:59.103282+00:00"}
+error: no matching package named `zip` found
+location searched: crates.io index
+required by package `muyon-office v0.1.0 (/workspace/Muyon-post-pr101-office-bot-20261022/crates/muyon-office)`
+As a reminder, you're using offline mode (--offline) which can sometimes cause surprising resolution failures, if this error is too confusing you may wish to retry without `--offline`.
+END {"argv": ["cargo", "test", "--offline", "--locked", "--manifest-path", "crates/Cargo.toml", "--workspace", "--all-targets"], "cwd": "/workspace/Muyon-post-pr101-office-bot-20261022", "source_sha": "bc8fea61744530c1f2e38e65b0273a434c3bd5a8", "dirty_source": false, "start_utc": "2026-10-22T18:56:59.103282+00:00", "exit_code": 101, "duration_seconds": 0.711, "end_utc": "2026-10-22T18:56:59.673286+00:00"}

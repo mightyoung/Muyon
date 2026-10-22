@@ -1,0 +1,72 @@
+   Compiling proc-macro2 v1.0.107
+   Compiling unicode-ident v1.0.27
+   Compiling quote v1.0.47
+    Checking cfg-if v1.0.5
+    Checking typenum v1.20.1
+   Compiling serde_core v1.0.229
+    Checking memchr v2.8.3
+    Checking const-oid v0.10.2
+   Compiling syn v3.0.9
+   Compiling serde v1.0.229
+    Checking hybrid-array v0.4.15
+    Checking cpufeatures v0.3.1
+   Compiling zmij v1.0.23
+   Compiling serde_json v1.0.154
+    Checking block-buffer v0.12.1
+    Checking crypto-common v0.2.2
+    Checking muyon-core-agent-lab v0.1.0 (/workspace/office-rust-boundary-review/experiments/redesign/core-agent-lab/core)
+    Checking digest v0.11.3
+    Checking sha2 v0.11.1
+    Checking itoa v1.0.18
+    Checking muyon-plugin-contract-lab v0.1.0 (/workspace/office-rust-boundary-review/experiments/redesign/plugin-contract-lab/core)
+    Checking muyon-rust-agent-host-lab v0.1.0 (/workspace/office-rust-boundary-review/experiments/redesign/rust-agent-host-lab/core)
+    Checking tinyvec v1.13.3
+    Checking unicode-normalization v0.1.25
+   Compiling libc v0.2.191
+   Compiling getrandom v0.4.3
+   Compiling serde_derive v1.0.229
+   Compiling anyhow v1.0.104
+   Compiling rustix v1.1.5
+    Checking hashbrown v0.17.1
+    Checking equivalent v1.0.3
+    Checking muyon-web-search-lab v0.1.0 (/workspace/office-rust-boundary-review/experiments/redesign/web-search-lab/core)
+    Checking indexmap v2.14.2
+   Compiling syn v2.0.119
+   Compiling linux-raw-sys v0.12.1
+   Compiling bitflags v2.13.2
+    Checking zlib-rs v0.6.8
+    Checking muyon-core v0.1.0 (/workspace/office-rust-boundary-review/crates/muyon-core)
+    Checking flate2 v1.1.10
+    Checking crc32fast v1.5.3
+   Compiling once_cell v1.21.4
+   Compiling fastrand v2.5.0
+   Compiling autocfg v1.5.1
+    Checking typed-path v0.12.4
+   Compiling fs-err v3.3.2
+   Compiling tempfile v3.27.0
+    Checking zip v9.0.5
+   Compiling winnow v1.0.4
+   Compiling uniffi_internal_macros v0.32.2
+   Compiling heck v0.5.0
+   Compiling camino v1.2.6
+   Compiling thiserror v2.0.21
+   Compiling toml_parser v1.1.5+spec-1.1.0
+   Compiling uniffi_pipeline v0.32.2
+   Compiling serde_spanned v1.1.2
+   Compiling toml_datetime v1.1.2+spec-1.1.0
+   Compiling thiserror-impl v2.0.21
+   Compiling siphasher v1.0.4
+   Compiling toml_writer v1.1.3+spec-1.1.0
+   Compiling toml v1.1.8+spec-1.1.0
+   Compiling uniffi_meta v0.32.2
+    Checking muyon-office v0.1.0 (/workspace/office-rust-boundary-review/crates/muyon-office)
+    Checking cargo-platform v0.3.3
+    Checking semver v1.0.28
+    Checking static_assertions v1.1.0
+    Checking bytes v1.12.1
+   Compiling uniffi_macros v0.32.2
+    Checking cargo_metadata v0.23.1
+    Checking uniffi_core v0.32.2
+    Checking uniffi v0.32.2
+    Checking muyon-android-ffi v0.1.0 (/workspace/office-rust-boundary-review/crates/muyon-android-ffi)
+    Finished `dev` profile [unoptimized] target(s) in 17.74s

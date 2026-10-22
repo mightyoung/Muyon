@@ -1,0 +1,58 @@
+{
+  "at_utc": "2026-10-22T06:31:54.388754+00:00",
+  "raw_log_and_standard_patch_bytes_preserved": true,
+  "results": [
+    {
+      "argv": [
+        "git",
+        "diff",
+        "--cached",
+        "--check"
+      ],
+      "exit_status": 2,
+      "stdout": "docs/tasks/local-workspace-bot-provider-20261022/independent-verification/save-preparation-20261022/format/format-commit.patch:44: trailing whitespace.\n+ \ndocs/tasks/local-workspace-bot-provider-20261022/independent-verification/save-preparation-20261022/format/format-commit.patch:358: trailing whitespace.\n+ \ndocs/tasks/local-workspace-bot-provider-20261022/independent-verification/save-preparation-20261022/format/format-commit.patch:427: trailing whitespace.\n+ \ndocs/tasks/local-workspace-bot-provider-20261022/independent-verification/save-preparation-20261022/format/format-commit.patch:533: trailing whitespace.\n+ \ndocs/tasks/local-workspace-bot-provider-20261022/independent-verification/save-preparation-20261022/format/format-commit.patch:593: trailing whitespace.\n+ \ndocs/tasks/local-workspace-bot-provider-20261022/independent-verification/save-preparation-20261022/format/format-commit.patch:664: trailing whitespace.\n+ \ndocs/tasks/local-workspace-bot-provider-20261022/independent-verification/save-preparation-20261022/format/format-commit.patch:711: trailing whitespace.\n+ \ndocs/tasks/local-workspace-bot-provider-20261022/independent-verification/save-preparation-20261022/format/format-commit.patch:750: trailing whitespace.\n+-- \ndocs/tasks/local-workspace-bot-provider-20261022/independent-verification/save-preparation-20261022/format/format-commit.patch:752: new blank line at EOF.\ndocs/tasks/local-workspace-bot-provider-20261022/independent-verification/save-preparation-20261022/formatted/core-full.stdout.log:304: new blank line at EOF.\ndocs/tasks/local-workspace-bot-provider-20261022/independent-verification/save-preparation-20261022/formatted/provider-targeted.stdout.log:31: new blank line at EOF.\ndocs/tasks/local-workspace-bot-provider-20261022/independent-verification/save-preparation-20261022/formatted/race/probe-tests.stdout.log:9: new blank line at EOF.\ndocs/tasks/local-workspace-bot-provider-20261022/independent-verification/save-preparation-20261022/original/core-full.stdout.log:304: new blank line at EOF.\ndocs/tasks/local-workspace-bot-provider-20261022/independent-verification/save-preparation-20261022/original/provider-targeted.stdout.log:31: new blank line at EOF.\ndocs/tasks/local-workspace-bot-provider-20261022/independent-verification/save-preparation-20261022/original/race/probe-tests.stdout.log:9: new blank line at EOF.\ndocs/tasks/local-workspace-bot-provider-20261022/independent-verification/save-preparation-20261022/original/scoped-fmt.stdout.log:193: trailing whitespace.\n+ \ndocs/tasks/local-workspace-bot-provider-20261022/independent-verification/save-preparation-20261022/original/scoped-fmt.stdout.log:262: trailing whitespace.\n+ \ndocs/tasks/local-workspace-bot-provider-20261022/independent-verification/save-preparation-20261022/original/scoped-fmt.stdout.log:369: trailing whitespace.\n+ \ndocs/tasks/local-workspace-bot-provider-20261022/independent-verification/save-preparation-20261022/original/scoped-fmt.stdout.log:430: trailing whitespace.\n+ \ndocs/tasks/local-workspace-bot-provider-20261022/independent-verification/save-preparation-20261022/original/scoped-fmt.stdout.log:501: trailing whitespace.\n+ \ndocs/tasks/local-workspace-bot-provider-20261022/independent-verification/save-preparation-20261022/original/scoped-fmt.stdout.log:548: trailing whitespace.\n+ \ndocs/tasks/local-workspace-bot-provider-20261022/independent-verification/save-preparation-20261022/original/scoped-fmt.stdout.log:588: trailing whitespace.\n+ \ndocs/tasks/local-workspace-bot-provider-20261022/independent-verification/save-preparation-20261022/original/scoped-fmt.stdout.log:617: trailing whitespace.\n+ \n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "git",
+        "diff",
+        "--cached",
+        "--check",
+        "--",
+        ".",
+        ":(exclude)docs/tasks/local-workspace-bot-provider-20261022/independent-verification/save-preparation-20261022/**/*.log"
+      ],
+      "exit_status": 2,
+      "stdout": "docs/tasks/local-workspace-bot-provider-20261022/independent-verification/save-preparation-20261022/format/format-commit.patch:44: trailing whitespace.\n+ \ndocs/tasks/local-workspace-bot-provider-20261022/independent-verification/save-preparation-20261022/format/format-commit.patch:358: trailing whitespace.\n+ \ndocs/tasks/local-workspace-bot-provider-20261022/independent-verification/save-preparation-20261022/format/format-commit.patch:427: trailing whitespace.\n+ \ndocs/tasks/local-workspace-bot-provider-20261022/independent-verification/save-preparation-20261022/format/format-commit.patch:533: trailing whitespace.\n+ \ndocs/tasks/local-workspace-bot-provider-20261022/independent-verification/save-preparation-20261022/format/format-commit.patch:593: trailing whitespace.\n+ \ndocs/tasks/local-workspace-bot-provider-20261022/independent-verification/save-preparation-20261022/format/format-commit.patch:664: trailing whitespace.\n+ \ndocs/tasks/local-workspace-bot-provider-20261022/independent-verification/save-preparation-20261022/format/format-commit.patch:711: trailing whitespace.\n+ \ndocs/tasks/local-workspace-bot-provider-20261022/independent-verification/save-preparation-20261022/format/format-commit.patch:750: trailing whitespace.\n+-- \ndocs/tasks/local-workspace-bot-provider-20261022/independent-verification/save-preparation-20261022/format/format-commit.patch:752: new blank line at EOF.\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "git",
+        "diff",
+        "--cached",
+        "--check",
+        "--",
+        ".",
+        ":(exclude)docs/tasks/local-workspace-bot-provider-20261022/independent-verification/save-preparation-20261022/**/*.log",
+        ":(exclude)docs/tasks/local-workspace-bot-provider-20261022/independent-verification/save-preparation-20261022/format/format-commit.patch"
+      ],
+      "exit_status": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "git",
+        "show",
+        "--check",
+        "--oneline",
+        "111e51178645bdcf147a8a24a0caf3a76755db39"
+      ],
+      "exit_status": 0,
+      "stdout": "111e5117 style(bot-provider): format durable save preparation and native facade\n",
+      "stderr": ""
+    }
+  ]
+}

@@ -1,0 +1,4 @@
+FAILED helper attempt: replaying archived rustfmt suggestions initially included a presentation-only final blank line in hunk matching; assertion rejected before writing any source. Fixed replay trims presentation trailing newlines.
+FAILED helper attempt: new-test formatting script first ran from evidence subdirectory and raised FileNotFoundError before writing source. Re-ran from repository root.
+FAILED helper attempt: FFI format-only assertion stripped whitespace but not rustfmt-added optional trailing commas; source comparison assertion failed. Corrected normalization includes optional trailing commas before delimiters. No FFI logic/interface changed.
+These are helper failures, not Rust test runs or replacements for the preserved actual14 RED.

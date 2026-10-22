@@ -1,0 +1,9 @@
+{
+  "source_sha": "d28e8d3ed08d2185198284794dd116e3d6eb3290",
+  "execution_location": "/workspace/Muyon (static inventory, not Android runtime)",
+  "files": {
+    ".github/workflows/service-durable-owner.yml": "d98e6ba056ef110e2007cfe6af2a4f6123c05787e46cee8546af5125bb0f2c9b",
+    "experiments/redesign/android-compose-lab/app/src/main/kotlin/com/mightyoung/muyon/androidlab/agentipc/DurableServiceHostOwner.kt": "c0e6d79ec1381c1ab4e6aba88f4c57d9fb53a996f37cf1bcacb87a539bad4542",
+    "experiments/redesign/android-compose-lab/app/src/androidTest/kotlin/com/mightyoung/muyon/androidlab/agentipc/DurableServiceHostOwnerTest.kt": "0d819919af12a114c34536310f05a43d9c6cfeb8cb24ff81e0593d09b7583fa1"
+  }
+}

@@ -1,0 +1,6 @@
+error: rustc 1.90.0 is not supported by the following package:
+  cargo-platform@0.3.3 requires rustc 1.91
+Either upgrade rustc or select compatible dependency versions with
+`cargo update <name>@<current-ver> --precise <compatible-ver>`
+where `<compatible-ver>` is the latest version supporting rustc 1.90.0
+

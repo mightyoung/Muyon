@@ -1,0 +1,7 @@
+Traceback (most recent call last):
+  File "/workspace/Muyon-host-resume-20261022/apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/chat/persistence/check-prepare-binding.py", line 7, in <module>
+    ROOT = Path(__file__).resolve().parents[15]
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/pathlib.py", line 282, in __getitem__
+    raise IndexError(idx)
+IndexError: 15

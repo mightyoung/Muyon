@@ -1,0 +1,33 @@
+{
+  "source_commit": "79dca05ba6ff84dbc8a60d0838951aec6720227a",
+  "build_id": "79dca05ba6ff84dbc8a60d0838951aec6720227a:cbc8b291d425d3a291ddb30bfe8c3baa81d33c6a385b06bdc626216bc00b1f11",
+  "crates_tree": "911c4754d096e50c6e47884a9c2c5f81c7d43d0d",
+  "apk": {
+    "path": "/private/tmp/muyon-workflows-79dca05b.apk",
+    "bytes": 435831129,
+    "sha256": "4007f227f0cb17c3bba0b7ef5c7115ed7901efd24883390354d5c07198a23720"
+  },
+  "test_apk": {
+    "path": "/private/tmp/muyon-workflows-79dca05b-androidTest.apk",
+    "bytes": 1321557,
+    "sha256": "8f8179145ea3d98f380116aaff8815e951a50a544db7482eb6b44b90db8279a6"
+  },
+  "device_methods": 54,
+  "rust_tests": 143,
+  "rust_suites": 16,
+  "lint": {
+    "errors": 0,
+    "warnings": 33,
+    "hints": 6
+  },
+  "screens": {
+    "screens/01-local-child-result.png": {
+      "sha256": "36e51b6c3ffdf4f5ac9073912c9767e0f8d167b266e6e803bab21693f456b8b4",
+      "bytes": 35257
+    },
+    "screens/02-collapsed-chat.png": {
+      "sha256": "e93ab1412a8cc74f177dc4a9c10a43c5b31ceb4a778fcc1ee536bb21602b977f",
+      "bytes": 22612
+    }
+  }
+}

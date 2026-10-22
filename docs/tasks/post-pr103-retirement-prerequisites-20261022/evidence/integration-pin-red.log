@@ -1,0 +1,68 @@
+test_checker_rejects_missing_manifest (__main__.FrozenSchema.test_checker_rejects_missing_manifest) ... ok
+test_exact_historical_source_bytes_are_preserved (__main__.FrozenSchema.test_exact_historical_source_bytes_are_preserved) ... ok
+test_fixed_witness_rejects_manifest_blob_mutations (__main__.FrozenSchema.test_fixed_witness_rejects_manifest_blob_mutations) ... ok
+test_fixed_witness_rejects_synchronized_fixture_and_manifest_tampering (__main__.FrozenSchema.test_fixed_witness_rejects_synchronized_fixture_and_manifest_tampering) ... ok
+test_historical_manifest_cannot_remove_all_references (__main__.FrozenSchema.test_historical_manifest_cannot_remove_all_references) ... ok
+test_historical_reference_manifest_matches_fixed_git_objects (__main__.FrozenSchema.test_historical_reference_manifest_matches_fixed_git_objects) ... ok
+test_missing_history_is_failure_not_a_silent_skip (__main__.FrozenSchema.test_missing_history_is_failure_not_a_silent_skip) ... ok
+test_reference_checker_rejects_corruption_and_missing_file (__main__.FrozenSchema.test_reference_checker_rejects_corruption_and_missing_file) ... ok
+test_rust_test_consumes_frozen_reference_without_removing_assertions (__main__.FrozenSchema.test_rust_test_consumes_frozen_reference_without_removing_assertions) ... ok
+test_any_failed_child_fails_the_gate (__main__.IndependentLaya.test_any_failed_child_fails_the_gate) ... ok
+test_both_workflows_have_unconditional_independent_job (__main__.IndependentLaya.test_both_workflows_have_unconditional_independent_job) ... ok
+test_original_check_explicitly_fails_for_every_non_success_laya_result (__main__.IndependentLaya.test_original_check_explicitly_fails_for_every_non_success_laya_result) ... ok
+test_original_flutter_jobs_and_triggers_are_preserved (__main__.IndependentLaya.test_original_flutter_jobs_and_triggers_are_preserved) ... ok
+test_provenance_is_required_in_both_independent_jobs (__main__.IndependentLaya.test_provenance_is_required_in_both_independent_jobs) ... 
+  test_provenance_is_required_in_both_independent_jobs (__main__.IndependentLaya.test_provenance_is_required_in_both_independent_jobs) (workflow='ci') ... FAIL
+  test_provenance_is_required_in_both_independent_jobs (__main__.IndependentLaya.test_provenance_is_required_in_both_independent_jobs) (workflow='verify') ... FAIL
+test_runner_executes_all_four_from_correct_directory_without_flutter (__main__.IndependentLaya.test_runner_executes_all_four_from_correct_directory_without_flutter) ... ok
+
+======================================================================
+FAIL: test_provenance_is_required_in_both_independent_jobs (__main__.IndependentLaya.test_provenance_is_required_in_both_independent_jobs) (workflow='ci')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/Muyon-post-pr103-retirement-20261022/scripts/test_retirement_prerequisites.py", line 32, in test_provenance_is_required_in_both_independent_jobs
+    self.assertEqual(shlex.split(fetch[0]['run']), ['git', 'fetch', '--no-tags', '--depth=1', 'origin', *PROVENANCE_PINS])
+AssertionError: Lists differ: ['git[160 chars]3c71afb4e4c1e5def', 'c130008bbc40d78e85d10058030da9da4aca38f0'] != ['git[160 chars]3c71afb4e4c1e5def', '4d15b990f725d41a43b86fcd2b170b2219a6f766']
+
+First differing element 8:
+'c130008bbc40d78e85d10058030da9da4aca38f0'
+'4d15b990f725d41a43b86fcd2b170b2219a6f766'
+
+  ['git',
+   'fetch',
+   '--no-tags',
+   '--depth=1',
+   'origin',
+   '214b4031deb38ca7dfd35ee86396089eb48157d5',
+   '01e56cc2d729dab70e1b1def05c3aa93b28f421a',
+   '8c5995515fa14ca3592a1c33c71afb4e4c1e5def',
+-  'c130008bbc40d78e85d10058030da9da4aca38f0']
++  '4d15b990f725d41a43b86fcd2b170b2219a6f766']
+
+======================================================================
+FAIL: test_provenance_is_required_in_both_independent_jobs (__main__.IndependentLaya.test_provenance_is_required_in_both_independent_jobs) (workflow='verify')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/Muyon-post-pr103-retirement-20261022/scripts/test_retirement_prerequisites.py", line 32, in test_provenance_is_required_in_both_independent_jobs
+    self.assertEqual(shlex.split(fetch[0]['run']), ['git', 'fetch', '--no-tags', '--depth=1', 'origin', *PROVENANCE_PINS])
+AssertionError: Lists differ: ['git[160 chars]3c71afb4e4c1e5def', 'c130008bbc40d78e85d10058030da9da4aca38f0'] != ['git[160 chars]3c71afb4e4c1e5def', '4d15b990f725d41a43b86fcd2b170b2219a6f766']
+
+First differing element 8:
+'c130008bbc40d78e85d10058030da9da4aca38f0'
+'4d15b990f725d41a43b86fcd2b170b2219a6f766'
+
+  ['git',
+   'fetch',
+   '--no-tags',
+   '--depth=1',
+   'origin',
+   '214b4031deb38ca7dfd35ee86396089eb48157d5',
+   '01e56cc2d729dab70e1b1def05c3aa93b28f421a',
+   '8c5995515fa14ca3592a1c33c71afb4e4c1e5def',
+-  'c130008bbc40d78e85d10058030da9da4aca38f0']
++  '4d15b990f725d41a43b86fcd2b170b2219a6f766']
+
+----------------------------------------------------------------------
+Ran 15 tests in 7.410s
+
+FAILED (failures=2)

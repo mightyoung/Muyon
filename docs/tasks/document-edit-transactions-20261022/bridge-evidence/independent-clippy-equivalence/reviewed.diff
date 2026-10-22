@@ -1,0 +1,35 @@
+diff --git a/crates/muyon-core/src/document_edit/edited_candidates.rs b/crates/muyon-core/src/document_edit/edited_candidates.rs
+index 5fe15040..a1960a30 100644
+--- a/crates/muyon-core/src/document_edit/edited_candidates.rs
++++ b/crates/muyon-core/src/document_edit/edited_candidates.rs
+@@ -66,7 +66,7 @@ fn hex(bytes: &[u8]) -> String {
+ fn bytes(r: &Record) -> Result<Vec<u8>> {
+     let text = r.bytes.as_deref().ok_or(ContractError::NotFound)?;
+     if text.len() > MAX_CANDIDATE * 2
+-        || text.len() % 2 != 0
++        || !text.len().is_multiple_of(2)
+         || !text
+             .bytes()
+             .all(|b| b.is_ascii_digit() || (b'a'..=b'f').contains(&b))
+diff --git a/crates/muyon-core/src/document_edit/gateway.rs b/crates/muyon-core/src/document_edit/gateway.rs
+index 254a67e6..784bda14 100644
+--- a/crates/muyon-core/src/document_edit/gateway.rs
++++ b/crates/muyon-core/src/document_edit/gateway.rs
+@@ -88,7 +88,7 @@ fn hex(bytes: &[u8]) -> String {
+ }
+ fn unhex(s: &str) -> Result<Vec<u8>> {
+     if s.is_empty()
+-        || s.len() % 2 != 0
++        || !s.len().is_multiple_of(2)
+         || s.len() as u64 > MAX_DOCUMENT_BYTES * 2
+         || !s
+             .bytes()
+@@ -393,7 +393,7 @@ impl<'a> DocumentEditGateway<'a> {
+         let digest = copy_plan_digest(&source, intent)?;
+         let b = Binding {
+             document: source.document.clone(),
+-            patch_digest: digest.into(),
++            patch_digest: digest,
+             intent_id: intent.into(),
+             rollback_target: None,
+         };

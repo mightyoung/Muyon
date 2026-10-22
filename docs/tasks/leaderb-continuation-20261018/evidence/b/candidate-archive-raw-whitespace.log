@@ -1,0 +1,13 @@
+docs/tasks/hy-memory-governance-20261018/evidence/archive-raw-whitespace.log:3: trailing whitespace.
+++ 
+docs/tasks/hy-memory-governance-20261018/evidence/exact-e85bc003-2.log:49: new blank line at EOF.
+docs/tasks/hy-memory-governance-20261018/evidence/review-final-fmt.log:17: trailing whitespace.
++ 
+docs/tasks/hy-memory-governance-20261018/evidence/review-final-fmt.log:17: new blank line at EOF.
+docs/tasks/hy-memory-governance-20261018/evidence/review-final-v2-2.log:49: new blank line at EOF.
+docs/tasks/hy-memory-governance-20261018/evidence/review-suite-01.log:37: new blank line at EOF.
+docs/tasks/hy-memory-governance-20261018/evidence/review-suite-02.log:48: new blank line at EOF.
+docs/tasks/hy-memory-governance-20261018/evidence/rust-green-01.log:38: new blank line at EOF.
+docs/tasks/hy-memory-governance-20261018/evidence/rust-green-02.log:46: new blank line at EOF.
+docs/tasks/hy-memory-governance-20261018/evidence/rust-green-03.log:49: new blank line at EOF.
+docs/tasks/hy-memory-governance-20261018/evidence/rust-green-04.log:50: new blank line at EOF.

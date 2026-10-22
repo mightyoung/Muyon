@@ -1,0 +1,9 @@
+   Compiling muyon-core v0.1.0 (/tmp/muyon-document-durable-check.HuqkpAc8/crates/muyon-core)
+error[E0432]: unresolved import `muyon_core::document_edit::fingerprint`
+ --> muyon-core/tests/document_edit_schema2.rs:1:32
+  |
+1 | use muyon_core::document_edit::fingerprint::{canonical_tree_bytes, local_fingerprint, ExpandedNode};
+  |                                ^^^^^^^^^^^ could not find `fingerprint` in `document_edit`
+
+For more information about this error, try `rustc --explain E0432`.
+error: could not compile `muyon-core` (test "document_edit_schema2") due to 1 previous error

@@ -1,0 +1,15 @@
+
+running 4 tests
+tampered receipt title rejected by lookup, late copy duplicate and committed duplicate; real source title intact
+tail active=0: full metadata/reference/file rollback
+clone+duplicate: unchanged object/staging bytes,inode,length,nlink,mtime; no extra blob/upload; one reference/revision
+test persisted_receipt_title_mismatch_is_rejected_by_every_receipt_delivery ... ok
+test real_clone_and_duplicates_do_not_write_source_or_create_upload ... ok
+test current_inspect_unknown_query_cannot_reconfirm_or_replay ... ok
+tail expires_at_ms='0': full metadata/reference/file rollback
+tail generation='2': full metadata/reference/file rollback
+tail owner_epoch='other': full metadata/reference/file rollback
+test receipt_tail_authority_mutations_roll_back_all_references_and_files ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.06s
+

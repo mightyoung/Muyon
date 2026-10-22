@@ -1,0 +1,38 @@
+<?xml version='1.0' encoding='utf-8'?>
+<testsuite name="historical/mutations/lifetime_cap.log" tests="20" failures="2" errors="0" skipped="0">
+  <properties>
+    <property name="origin" value="derived from retained raw libtest output; not native JUnit" />
+    <property name="raw_sha256" value="1f60abd7a8031465b42cf3973cb6b2d87f132756e11917d6db97670eb824cff1" />
+  </properties>
+  <testcase classname="lifetime_cap" name="all_duplicate_states_only_lookup_and_submitted_blocks_new_dispatch" />
+  <testcase classname="lifetime_cap" name="budget_overflow_and_exhaustion_never_become_zero_cost" />
+  <testcase classname="lifetime_cap" name="collaborator_cannot_self_authorize_even_as_coordinator" />
+  <testcase classname="lifetime_cap" name="cycles_missing_dependencies_and_duplicate_nodes_are_rejected" />
+  <testcase classname="lifetime_cap" name="depth_two_and_foreign_parent_are_rejected" />
+  <testcase classname="lifetime_cap" name="duplicate_command_returns_only_original_receipt_even_when_unknown" />
+  <testcase classname="lifetime_cap" name="duplicate_request_identity_and_stale_config_are_not_valid_host_views" />
+  <testcase classname="lifetime_cap" name="eight_lifetime_children_and_two_active_slots_are_hard_caps">
+    <failure message="libtest reported FAILED; see sibling raw log">thread 'eight_lifetime_children_and_two_active_slots_are_hard_caps' (3953) panicked at /tmp/muyon-group-mutations/lifetime_cap/tests/group_governance.rs:293:5:
+assertion `left == right` failed
+  left: Ok(Eligible { child_id: "a" })
+ right: Err(ChildLimit)
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace</failure>
+  </testcase>
+  <testcase classname="lifetime_cap" name="every_authority_layer_and_member_scope_must_allow_the_request" />
+  <testcase classname="lifetime_cap" name="failed_dependencies_do_not_run_and_cancelled_children_keep_lifetime_slots">
+    <failure message="libtest reported FAILED; see sibling raw log">thread 'failed_dependencies_do_not_run_and_cancelled_children_keep_lifetime_slots' (3955) panicked at /tmp/muyon-group-mutations/lifetime_cap/tests/group_governance.rs:458:5:
+assertion `left == right` failed
+  left: Ok(Eligible { child_id: "a" })
+ right: Err(ChildLimit)</failure>
+  </testcase>
+  <testcase classname="lifetime_cap" name="human_admin_can_only_narrow_existing_grant" />
+  <testcase classname="lifetime_cap" name="ledger_corruption_and_unsupported_status_fail_closed" />
+  <testcase classname="lifetime_cap" name="modes_roundtrip_by_explicit_name_and_unknown_fails_closed" />
+  <testcase classname="lifetime_cap" name="non_member_is_rejected" />
+  <testcase classname="lifetime_cap" name="represented_coordinator_modes_never_execute" />
+  <testcase classname="lifetime_cap" name="rounds_count_original_dispatch_history_across_restarts_and_stops" />
+  <testcase classname="lifetime_cap" name="stale_host_epoch_leader_epoch_or_configuration_never_executes" />
+  <testcase classname="lifetime_cap" name="unknown_budget_keeps_reserve_and_blocks_new_command" />
+  <testcase classname="lifetime_cap" name="unsupported_versions_and_ownerless_groups_are_rejected" />
+  <testcase classname="lifetime_cap" name="deterministic_ready_order_uses_node_identity_and_dependencies" />
+</testsuite>

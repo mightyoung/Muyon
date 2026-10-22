@@ -1,0 +1,7 @@
+    Blocking waiting for file lock on build directory
+    Checking muyon-core-agent-lab v0.1.0 (/private/tmp/muyon-android-refactor-20261020/experiments/redesign/core-agent-lab/core)
+    Checking muyon-plugin-contract-lab v0.1.0 (/private/tmp/muyon-android-refactor-20261020/experiments/redesign/plugin-contract-lab/core)
+    Checking muyon-rust-agent-host-lab v0.1.0 (/private/tmp/muyon-android-refactor-20261020/experiments/redesign/rust-agent-host-lab/core)
+    Checking muyon-web-search-lab v0.1.0 (/private/tmp/muyon-android-refactor-20261020/experiments/redesign/web-search-lab/core)
+    Checking muyon-core v0.1.0 (/private/tmp/muyon-android-refactor-20261020/crates/muyon-core)
+    Finished `dev` profile [unoptimized] target(s) in 4.15s

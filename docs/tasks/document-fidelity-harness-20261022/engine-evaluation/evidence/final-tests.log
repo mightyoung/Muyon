@@ -1,0 +1,37 @@
+test_docx_split_runs_comment_bookmark_header (test_engine_evaluation.ComplexFixtureTests.test_docx_split_runs_comment_bookmark_header) ... ok
+test_two_deterministic_packages_and_operation_contracts (test_engine_evaluation.ComplexFixtureTests.test_two_deterministic_packages_and_operation_contracts) ... ok
+test_xlsx_stale_formula_cache_and_hidden_date_merge_comment (test_engine_evaluation.ComplexFixtureTests.test_xlsx_stale_formula_cache_and_hidden_date_merge_comment) ... ok
+test_installed_metadata_or_explicit_absence (test_engine_evaluation.InventoryTests.test_installed_metadata_or_explicit_absence) ... ok
+test_local_license_hash_and_missing_origin (test_engine_evaluation.InventoryTests.test_local_license_hash_and_missing_origin) ... ok
+test_active_formulas_and_cfb (test_harness.AdditionalBoundaryTests.test_active_formulas_and_cfb) ... ok
+test_corrupt_deflate_is_structured_rejection (test_harness.AdditionalBoundaryTests.test_corrupt_deflate_is_structured_rejection) ... ok
+test_duplicate_and_crc_corruption (test_harness.AdditionalBoundaryTests.test_duplicate_and_crc_corruption) ... ok
+test_fifo_input_rejects_without_waiting_for_writer (test_harness.AdditionalBoundaryTests.test_fifo_input_rejects_without_waiting_for_writer) ... ok
+test_fixture_generation_reproducible_and_usable (test_harness.AdditionalBoundaryTests.test_fixture_generation_reproducible_and_usable) ... ok
+test_forged_eocd_count_rejected_before_zipfile_allocation (test_harness.AdditionalBoundaryTests.test_forged_eocd_count_rejected_before_zipfile_allocation) ... ok
+test_limits_and_deep_xml (test_harness.AdditionalBoundaryTests.test_limits_and_deep_xml) ... ok
+test_local_header_encryption_and_flags_disagreement (test_harness.AdditionalBoundaryTests.test_local_header_encryption_and_flags_disagreement) ... ok
+test_pdf_obfuscated_names (test_harness.AdditionalBoundaryTests.test_pdf_obfuscated_names) ... ok
+test_relationship_declared_mime_required (test_harness.AdditionalBoundaryTests.test_relationship_declared_mime_required) ... ok
+test_relationship_escape_and_missing_target (test_harness.AdditionalBoundaryTests.test_relationship_escape_and_missing_target) ... ok
+test_relationship_type_and_declared_mime_required (test_harness.AdditionalBoundaryTests.test_relationship_type_and_declared_mime_required) ... ok
+test_second_unsupported_office_main_is_ambiguous (test_harness.AdditionalBoundaryTests.test_second_unsupported_office_main_is_ambiguous) ... ok
+test_unused_content_type_cannot_be_empty (test_harness.AdditionalBoundaryTests.test_unused_content_type_cannot_be_empty) ... ok
+test_cli_stdout_and_original_untouched (test_harness.HarnessTests.test_cli_stdout_and_original_untouched) ... ok
+test_compare_unknown_loss_and_changes_fail (test_harness.HarnessTests.test_compare_unknown_loss_and_changes_fail) ... ok
+test_duplicate_symlink_and_encryption (test_harness.HarnessTests.test_duplicate_symlink_and_encryption) ... ok
+test_invalid_archive_and_plaintext_not_ooxml (test_harness.HarnessTests.test_invalid_archive_and_plaintext_not_ooxml) ... ok
+test_macro_external_and_embedded_recorded (test_harness.HarnessTests.test_macro_external_and_embedded_recorded) ... ok
+test_masquerade (test_harness.HarnessTests.test_masquerade) ... ok
+test_missing_main_and_root_relationship (test_harness.HarnessTests.test_missing_main_and_root_relationship) ... ok
+test_pdf_preflight_never_certifies_safety (test_harness.HarnessTests.test_pdf_preflight_never_certifies_safety) ... ok
+test_three_formats_and_honest_dimensions (test_harness.HarnessTests.test_three_formats_and_honest_dimensions) ... ok
+test_unsafe_archive_paths (test_harness.HarnessTests.test_unsafe_archive_paths) ... ok
+test_wrong_content_type_and_root (test_harness.HarnessTests.test_wrong_content_type_and_root) ... ok
+test_xml_entities_utf16_and_malformed (test_harness.HarnessTests.test_xml_entities_utf16_and_malformed) ... ok
+test_zip_bomb_ratio_and_member_limit (test_harness.HarnessTests.test_zip_bomb_ratio_and_member_limit) ... ok
+
+----------------------------------------------------------------------
+Ran 32 tests in 0.275s
+
+OK

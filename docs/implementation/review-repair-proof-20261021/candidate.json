@@ -1,0 +1,33 @@
+{
+  "source_commit": "9c1fb4a9e8aa0b85f1c896938278085ee8cdc0ad",
+  "build_id": "9c1fb4a9e8aa0b85f1c896938278085ee8cdc0ad:707dff5340d754c9f5e4d0c71f856a16957eb4d08d1ae63da4accbe4bdff6079",
+  "crates_tree": "bf3f0df0ab41caaf7fd85f7234f1523aeeee8c4f",
+  "apk": "/private/tmp/muyon-workflows-9c1fb4a9.apk",
+  "apk_sha256": "7a2958a06da0093c20e15c49c757645d72cd72edf101a62fdaae64e691f91bdd",
+  "test_apk": "/private/tmp/muyon-workflows-9c1fb4a9-androidTest.apk",
+  "test_apk_sha256": "4911ffc5052420fc1654815ad182908a96428e3b15dfc9e8da84972e18d3d7e1",
+  "installed": [
+    {
+      "package": "com.mightyoung.muyon.product",
+      "sha256": "7a2958a06da0093c20e15c49c757645d72cd72edf101a62fdaae64e691f91bdd",
+      "matches_candidate": true
+    },
+    {
+      "package": "com.mightyoung.muyon.product.test",
+      "sha256": "4911ffc5052420fc1654815ad182908a96428e3b15dfc9e8da84972e18d3d7e1",
+      "matches_candidate": true
+    }
+  ],
+  "device_methods": 63,
+  "rust_executions": 157,
+  "python_tests": 7,
+  "lint": {
+    "errors": 0,
+    "warnings": 33,
+    "hints": 6
+  },
+  "screen_hashes": {
+    "02-collapsed-chat.png": "f990dcd3bf54a234be485fb22728e52ed813dccea0efed637597c2c006e157a0",
+    "01-local-child-result.png": "4b335813ade07865a4429b4fa218203258a9089a8a4dced7c40aca2357e3bb5c"
+  }
+}

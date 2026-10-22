@@ -87,6 +87,57 @@ EVIDENCE = None
 WIRE_KEYS = ['wire_sent_bytes', 'wire_received_bytes', 'wire_total_bytes']
 
 
+def wire_status_diagnostic(directory, actual):
+    """Bounded metadata only: no payloads, paths, config strings or environment."""
+    def number(value):
+        text = str(value)
+        return text if text.isascii() and text.isdecimal() and len(text) <= 20 else '<invalid>'
+
+    def code(value):
+        text = str(value)
+        return text if 0 < len(text) <= 64 and all(c in 'abcdefghijklmnopqrstuvwxyz0123456789_' for c in text) else '<other>'
+
+    result = {key: code(actual.get(key, '')) for key in ['status', 'reason']}
+    for key in ['steps', 'model_calls', 'provider_position', 'wire_sent_bytes',
+                'wire_received_bytes', 'wire_total_bytes', 'context_bytes',
+                'output_bytes', 'total_units']:
+        result[key] = number(actual.get(key, '<missing>'))
+    try:
+        # Bound input before allocation/decoding; this is metadata, never a task reader.
+        with (directory / 'task.db').open('rb') as stream:
+            raw = stream.read(1_048_577)
+        if len(raw) > 1_048_576:
+            raise ValueError('diagnostic task limit')
+        lines = raw.decode('utf-8').splitlines()
+        if not lines or lines[0] != 'CORE_TASK_V1':
+            raise ValueError('diagnostic task format')
+        configs = [line.partition('\t')[2] for line in lines[1:]
+                   if line.partition('\t')[0] == 'wire_config_hex']
+        if len(configs) != 1 or len(configs[0]) > 16384:
+            raise ValueError('diagnostic config limit')
+        config = json.loads(bytes.fromhex(configs[0]))
+        if not isinstance(config, dict):
+            raise ValueError('diagnostic config type')
+        result['wire_limits'] = {key: number(config.get(key, '<missing>'))
+                                 for key in ['chunk', 'idle_ms', 'total_ms', 'max_total']}
+        result['requests'] = {'count': 0, 'bytes': 0}
+        result['emitted'] = {'count': 0, 'bytes': 0}
+        with os.scandir(directory / 'wire-capture') as entries:
+            for index, entry in enumerate(entries):
+                if index >= 512:
+                    result['capture_scan_truncated'] = True
+                    break
+                kind = ('requests' if entry.name.startswith('request-') and entry.name.endswith('.json')
+                        else 'emitted' if entry.name.startswith('emitted-') and entry.name.endswith('.sse') else None)
+                if kind and entry.is_file(follow_symlinks=False):
+                    result[kind]['count'] += 1
+                    result[kind]['bytes'] += entry.stat(follow_symlinks=False).st_size
+    except Exception:
+        # Diagnostic metadata must never replace the assertion under investigation.
+        result['metadata'] = 'unavailable'
+    return 'WIRE_STATUS_DIAGNOSTIC ' + json.dumps(result, sort_keys=True)
+
+
 def wait_rust_ack(child, boundary, timeout=20):
     selector = selectors.DefaultSelector()
     try:
@@ -226,7 +277,8 @@ class WireProcessTests(unittest.TestCase):
         return physical
 
     def assert_happy(self, directory, actual, value='wire-value', call_id='call_native_1', turns=2):
-        self.assertEqual(actual['status'], 'completed')
+        self.assertEqual(actual['status'], 'completed',
+                         wire_status_diagnostic(directory, actual) if actual['status'] != 'completed' else None)
         physical = self.assert_effects(directory, 1)
         receipt = physical['rows'][0][7]
         self.assertEqual(bytes.fromhex(physical['value']).decode(), value)

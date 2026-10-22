@@ -1,0 +1,13 @@
+{
+  "gate": "PASS",
+  "runtime_identity_records": 4,
+  "native_build_id": "f2f9928a0a35afeb2d5956d3bc2d69406adcc503:185aa9e83d689ae0101865e29fde9deeaf4f689ac42e337dc452fe523e8cfc9a",
+  "installed_app_apk_sha256": "8901f7c67f548d056d0a897845a2e2cfe6a28f2f2a661be7bd92695ad7b50d28",
+  "native_entry_sha256": {
+    "lib/arm64-v8a/libmuyon_android_product.so": "38b8c0eed5589263d67315008cb5d1294dc1386d5582831b015980a92a053345",
+    "lib/arm64-v8a/libmuyon_local_embedding.so": "844ce34174dbdf7827574e3456c372e58c815e2158c5345c65464ddfdfaf86e4",
+    "lib/x86_64/libmuyon_android_product.so": "f5d467b8dcb4f3e7ad3c50228c96ca17ee959e83bbb9ef4a915368532d6cfc79",
+    "lib/x86_64/libmuyon_local_embedding.so": "176d06eb565c8f6d84b47471fd57ba83f810b3ce93906a460d034093c79af48d"
+  },
+  "boundary": "actual device runtime/install identity; three fixed Bot tests only; no production enablement"
+}

@@ -1,0 +1,35 @@
+warning: variants `Recalculated`, `Unknown`, and `Failed` are never constructed
+  --> crates/muyon-core/tests/../src/document_edit/mod.rs:58:41
+   |
+58 | pub enum FormulaStatus { NotApplicable, Recalculated, Unknown, Failed }
+   |          -------------                  ^^^^^^^^^^^^  ^^^^^^^  ^^^^^^
+   |          |
+   |          variants in this enum
+   |
+   = note: `FormulaStatus` has derived impls for the traits `Debug` and `Clone`, but these are intentionally ignored during dead code analysis
+   = note: `#[warn(dead_code)]` on by default
+
+warning: 1 warning emitted
+
+
+running 17 tests
+test candidate_mismatch_and_missing_validation_do_not_advance ... ok
+test cancellation_preserves_unknown_and_committed_outcomes ... ok
+test apply_requires_an_immutable_copy_with_a_distinct_identity ... ok
+test commit_needs_durable_matching_receipt_and_cannot_repeat ... ok
+test cross_scope_is_rejected_even_for_read ... ok
+test export_requires_committed_revision_and_matching_copy ... ok
+test every_boundary_requires_facts_and_live_authority ... ok
+test double_click_does_not_reapply ... ok
+test identity_requires_all_binding_fields ... ok
+test reissued_authority_does_not_reuse_confirmation ... ok
+test preview_never_confirms_or_supplies_missing_authority ... ok
+test stale_source_and_failed_cas_preserve_candidate_as_conflict ... ok
+test unknown_queries_original_intent_and_never_replays ... ok
+test stale_confirmation_is_rejected ... ok
+test unvalidated_commit_is_refused ... ok
+test rollback_is_a_new_bound_transaction_not_a_cancel_side_effect ... ok
+test validation_failure_is_terminal_and_cannot_commit ... ok
+
+test result: ok. 17 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

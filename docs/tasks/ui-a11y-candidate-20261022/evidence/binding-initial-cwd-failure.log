@@ -1,0 +1,5 @@
+error running cargo metadata
+
+Caused by:
+    `cargo metadata` exited with an error: error: could not find `Cargo.toml` in `/workspace/muyon-ui-candidate` or any parent directory
+    

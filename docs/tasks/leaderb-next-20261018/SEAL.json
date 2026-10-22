@@ -1,0 +1,10 @@
+{
+  "stopped_at_utc": "2026-10-18T06:23:35.652177+00:00",
+  "source_and_record_writers_stopped_after_this_commit": true,
+  "local_active_builders": [],
+  "exited_zombies_count": 67,
+  "a_generic_terminal": "UNKNOWN; remote original run not cancelled/rerun",
+  "index_sha256": "23bd8d8c1a3e1b76309dae3722f4615c02dc83c662402e3e288cdc13dd40f6b2",
+  "i04": "DENIED_BEFORE_EXECUTION/BLOCKED",
+  "transfer": "Parent may explicitly assign successor; no automatic merge or integration authority transfer"
+}

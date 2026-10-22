@@ -1,0 +1,60 @@
+test_hidden_protected_and_merged_preview_blocks_fake_dispatch (tools.document_fidelity.tests.test_text_subsets.PreviewTests.test_hidden_protected_and_merged_preview_blocks_fake_dispatch) ... ok
+test_hidden_sheet_preview_and_unchanged_decimal_serialization_rule (tools.document_fidelity.tests.test_text_subsets.PreviewTests.test_hidden_sheet_preview_and_unchanged_decimal_serialization_rule) ... ok
+test_preview_visible_target_and_lexical_values (tools.document_fidelity.tests.test_text_subsets.PreviewTests.test_preview_visible_target_and_lexical_values) ... ok
+test_docx_complexity_and_locator_conflicts_block_dispatch (tools.document_fidelity.tests.test_text_subsets.TextSubsetTests.test_docx_complexity_and_locator_conflicts_block_dispatch) ... ok
+test_explicit_v2_text_and_v1_numeric_compatibility (tools.document_fidelity.tests.test_text_subsets.TextSubsetTests.test_explicit_v2_text_and_v1_numeric_compatibility) ... ERROR
+test_non_target_node_and_unknown_parts_never_change (tools.document_fidelity.tests.test_text_subsets.TextSubsetTests.test_non_target_node_and_unknown_parts_never_change) ... FAIL
+test_pptx_complexity_and_shape_identity_conflicts_block_dispatch (tools.document_fidelity.tests.test_text_subsets.TextSubsetTests.test_pptx_complexity_and_shape_identity_conflicts_block_dispatch) ... ok
+test_simple_text_preview_and_fake_pipeline (tools.document_fidelity.tests.test_text_subsets.TextSubsetTests.test_simple_text_preview_and_fake_pipeline) ... 
+  test_simple_text_preview_and_fake_pipeline (tools.document_fidelity.tests.test_text_subsets.TextSubsetTests.test_simple_text_preview_and_fake_pipeline) (fmt='docx') ... FAIL
+  test_simple_text_preview_and_fake_pipeline (tools.document_fidelity.tests.test_text_subsets.TextSubsetTests.test_simple_text_preview_and_fake_pipeline) (fmt='pptx') ... FAIL
+test_workers_do_not_import_third_party_engines (tools.document_fidelity.tests.test_text_subsets.TextSubsetTests.test_workers_do_not_import_third_party_engines) ... ok
+
+======================================================================
+ERROR: test_explicit_v2_text_and_v1_numeric_compatibility (tools.document_fidelity.tests.test_text_subsets.TextSubsetTests.test_explicit_v2_text_and_v1_numeric_compatibility)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/document-fidelity/tools/document_fidelity/tests/test_text_subsets.py", line 86, in test_explicit_v2_text_and_v1_numeric_compatibility
+    r=text_request(source,fmt);self.assertEqual(r,parse_request(r))
+                                                  ^^^^^^^^^^^^^^^^
+  File "/workspace/document-fidelity/tools/document_fidelity/adapters/protocol.py", line 40, in parse_request
+    raise ValueError('unsupported_schema')
+ValueError: unsupported_schema
+
+======================================================================
+FAIL: test_non_target_node_and_unknown_parts_never_change (tools.document_fidelity.tests.test_text_subsets.TextSubsetTests.test_non_target_node_and_unknown_parts_never_change)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/document-fidelity/tools/document_fidelity/tests/test_text_subsets.py", line 105, in test_non_target_node_and_unknown_parts_never_change
+    self.assertEqual('simulation_failed',out['status'],out)
+AssertionError: 'simulation_failed' != 'rejected'
+- simulation_failed
++ rejected
+ : {'schema_version': 1, 'status': 'rejected', 'reasons': ['request_or_preflight_or_precondition_rejected'], 'engine_execution': 'not_run', 'real_roundtrip': 'not_run', 'fake_executor_used': True, 'fidelity': 'unknown', 'safety': 'unknown', 'dimensions': {'render': 'not_run', 'recalc': 'not_run', 'visual': 'not_run', 'annotation': 'not_run'}}
+
+======================================================================
+FAIL: test_simple_text_preview_and_fake_pipeline (tools.document_fidelity.tests.test_text_subsets.TextSubsetTests.test_simple_text_preview_and_fake_pipeline) (fmt='docx')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/document-fidelity/tools/document_fidelity/tests/test_text_subsets.py", line 95, in test_simple_text_preview_and_fake_pipeline
+    self.assertEqual('simulated_validated',out['status'],out)
+AssertionError: 'simulated_validated' != 'rejected'
+- simulated_validated
++ rejected
+ : {'schema_version': 1, 'status': 'rejected', 'reasons': ['request_or_preflight_or_precondition_rejected'], 'engine_execution': 'not_run', 'real_roundtrip': 'not_run', 'fake_executor_used': True, 'fidelity': 'unknown', 'safety': 'unknown', 'dimensions': {'render': 'not_run', 'recalc': 'not_run', 'visual': 'not_run', 'annotation': 'not_run'}}
+
+======================================================================
+FAIL: test_simple_text_preview_and_fake_pipeline (tools.document_fidelity.tests.test_text_subsets.TextSubsetTests.test_simple_text_preview_and_fake_pipeline) (fmt='pptx')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/document-fidelity/tools/document_fidelity/tests/test_text_subsets.py", line 95, in test_simple_text_preview_and_fake_pipeline
+    self.assertEqual('simulated_validated',out['status'],out)
+AssertionError: 'simulated_validated' != 'rejected'
+- simulated_validated
++ rejected
+ : {'schema_version': 1, 'status': 'rejected', 'reasons': ['request_or_preflight_or_precondition_rejected'], 'engine_execution': 'not_run', 'real_roundtrip': 'not_run', 'fake_executor_used': True, 'fidelity': 'unknown', 'safety': 'unknown', 'dimensions': {'render': 'not_run', 'recalc': 'not_run', 'visual': 'not_run', 'annotation': 'not_run'}}
+
+----------------------------------------------------------------------
+Ran 9 tests in 0.036s
+
+FAILED (failures=3, errors=1)

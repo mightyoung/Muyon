@@ -1,0 +1,77 @@
+   Compiling muyon-core v0.1.0 (/workspace/document-edit-combination/crates/muyon-core)
+error[E0560]: struct `document_edit::HostFacts` has no field named `permissions`
+  --> muyon-core/tests/document_edit_transactions.rs:35:9
+   |
+35 | ...   permissions: vec![DocumentOperation::Inspect,DocumentOperation::ReadText,DocumentOperation::Render,DocumentOperation::StructuredEdi...
+   |       ^^^^^^^^^^^ `document_edit::HostFacts` does not have this field
+   |
+   = note: all struct fields are already assigned
+
+error[E0560]: struct `document_edit::HostFacts` has no field named `capabilities`
+  --> muyon-core/tests/document_edit_transactions.rs:36:9
+   |
+36 |         capabilities,
+   |         ^^^^^^^^^^^^ `document_edit::HostFacts` does not have this field
+   |
+   = note: all struct fields are already assigned
+
+error[E0609]: no field `capabilities` on type `document_edit::HostFacts`
+   --> muyon-core/tests/document_edit_transactions.rs:591:58
+    |
+591 |     let mut t=previewed();let mut f=facts(t.binding());f.capabilities=CapabilityMatrix::default();
+    |                                                          ^^^^^^^^^^^^ unknown field
+    |
+    = note: available fields are: `binding`, `current_revision`, `authority`, `active`
+
+error[E0599]: no variant or associated item named `Capability` found for enum `document_edit::Error` in the current scope
+   --> muyon-core/tests/document_edit_transactions.rs:592:189
+    |
+592 | ...date())},Some(&f)),Err(Error::Capability));
+    |                                  ^^^^^^^^^^ variant or associated item not found in `document_edit::Error`
+    |
+   ::: muyon-core/tests/../src/document_edit/mod.rs:136:1
+    |
+136 | pub enum Error {
+    | -------------- variant or associated item `Capability` not found for this enum
+
+error[E0609]: no field `permissions` on type `document_edit::HostFacts`
+   --> muyon-core/tests/document_edit_transactions.rs:594:36
+    |
+594 |     let mut f=facts(t.binding());f.permissions=vec![DocumentOperation::ReadText];
+    |                                    ^^^^^^^^^^^ unknown field
+    |
+    = note: available fields are: `binding`, `current_revision`, `authority`, `active`
+
+error[E0599]: no variant or associated item named `Permission` found for enum `document_edit::Error` in the current scope
+   --> muyon-core/tests/document_edit_transactions.rs:595:189
+    |
+595 | ...date())},Some(&f)),Err(Error::Permission));
+    |                                  ^^^^^^^^^^ variant or associated item not found in `document_edit::Error`
+    |
+   ::: muyon-core/tests/../src/document_edit/mod.rs:136:1
+    |
+136 | pub enum Error {
+    | -------------- variant or associated item `Permission` not found for this enum
+
+error[E0609]: no field `capabilities` on type `document_edit::HostFacts`
+   --> muyon-core/tests/document_edit_transactions.rs:599:58
+    |
+599 |     let mut t=previewed();let mut f=facts(t.binding());f.capabilities.set(t.binding().document.format(),DocumentOperation::StructuredEdit...
+    |                                                          ^^^^^^^^^^^^ unknown field
+    |
+    = note: available fields are: `binding`, `current_revision`, `authority`, `active`
+
+error[E0599]: no variant or associated item named `Capability` found for enum `document_edit::Error` in the current scope
+   --> muyon-core/tests/document_edit_transactions.rs:600:149
+    |
+600 | ...wrap()}),Some(&f)),Err(Error::Capability));
+    |                                  ^^^^^^^^^^ variant or associated item not found in `document_edit::Error`
+    |
+   ::: muyon-core/tests/../src/document_edit/mod.rs:136:1
+    |
+136 | pub enum Error {
+    | -------------- variant or associated item `Capability` not found for this enum
+
+Some errors have detailed explanations: E0560, E0599, E0609.
+For more information about an error, try `rustc --explain E0560`.
+error: could not compile `muyon-core` (test "document_edit_transactions") due to 8 previous errors

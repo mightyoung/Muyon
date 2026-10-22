@@ -1,0 +1,33 @@
+# Live integration revision — 2026-10-20
+
+This supersedes the implementation status in the earlier DESIGN/RESULT preparation notes. The user confirmed CNY and transferred ownership of DurableServiceHostOwner.kt, ServiceHostBindings.kt, service_host_bridge.rs and generated bindings to this task; WebSearch writers are paused on them. PR98 ddb34971ee2e865fd29fb9f893b0aba49ed069b9 and PR99 9c0073719b001d504c4403ae7a8de6bcc617ca0e were integrated only into this isolated branch. PR99's reported API26 Settings→Send failure remains unresolved; its queued historical handoff is not a passing baseline.
+
+## Same owner and explicit evidence
+
+Retain Compose→existing Binder submitOrdinaryChat→existing Service worker→same Rust Agent→same DurableServiceHostOwner. Search implementations and routes are preserved, not replaced. The original owner callback and withHost remain; regenerated bindings also retain RegisteredToolSettings.snapshot and with_registered_tools/withRegisteredTools.
+
+Keep synthetic exchangeChat and its exact byte-equality receipts unchanged. New typed exchangeLiveChat receives ServiceOwnerRunControl wrapping the original Rust Arc; allowed() observes all existing cancellation/deadline sources. Only trusted non-synthetic authority enables the live 60-second deadline; old runs retain five seconds. Live wire has the exact six fields model/messages/n/stream/max_tokens/thinking, no tools, max_tokens=128, thinking disabled, n=1 and stream=false. Live receipts use a distinct content version with actual token usage and fixed CNY price/proof/batch identities. A missing owner fails instead of selecting a synthetic endpoint. The source flag is frozen by trusted metadata before the first admitted run ID; queued, running, failure, unknown and restore cannot relabel live as synthetic.
+
+## Admission and final settlement
+
+The existing epoch SQLite ledger remains, augmented by the already-reviewed fixed-batch file ledger in the same owner's private root. Fixed batch is muyon-ordinary-chat-20261019-cny1-two-requests; changing epoch, credentials or process cannot reset 1,000,000 micro-CNY/two-attempt authority. A held reservation is durable before handoff. Failed preparation may conservatively consume/stop this batch; no handed-off reservation is refunded.
+
+At handoff the owner revalidates binding, original context/history and capability and commits its one-shot SQLite attempt and batch handoff. TLS connect/handshake and response wait run outside owner/authority locks. Immediately before writing the one bounded POST, the owner reacquires its original guards and revalidates the exact admission, original ancestors, payload and credential generation. A separate watchdog closes the socket after two seconds of writing; it reads only the nonblocking Rust control and never waits for owner locks. Response wait is outside those guards and total transport time is at most 45 seconds under the local watchdog. There is no HTTP retry, redirect, alternate endpoint or reconnect.
+
+HTTP success is only a received candidate; its synthetic-only conversation, exact wire, response ID/model/usage, calculated peak cost upper bound and reservation are saved without headers or key. Rust validates the answer, authority, usage and business receipt and writes its candidate state. The controller then holds its final shared lock, polls control and invokes the local settleChat callback before publishing Completed. No further disk write or control check can reverse success after that point. Every rejected/late/cancelled/failed/uncertain candidate stops the batch and keeps the reservation. Restore/disclosure additionally requires chatSettlement=success; restoring pending is unknown with no transport call.
+
+## Token/price trust basis
+
+The independent architecture re-evaluation accepted the official current deepseek-flash→1017 mapping, pinned official encoder/tokenizer and its complete-byte/merge-only BPE proof as a documented host trust basis. The user did not require a separate legal or per-token parity contract. Trust the supplier's declared model/reference format; do not claim a guarantee about undisclosed supplier behavior. The standalone renderer's isHostedBillingProof=false still correctly says it alone is not installed production authority. The production verifier now parses the exact wire, rejects extra fields and arbitrary user prompts, re-renders all history and binds its conservative token upper bound to the payload digest and fixed provenance.
+
+Input limit 16384 includes full rendered history and framing; output is capped at 128. Peak/cache-miss reservation is 2*input_bound+8*128 integer micro-CNY, at most 33792 per attempt, never an arbitrary JSON-byte currency conversion. Account currency is user-confirmed CNY. Usage-derived peak all-miss cost is a conservative calculated bound, separately named from an account invoice or actual discounted charge.
+
+## Credential and build isolation
+
+Only liveChat declares INTERNET and installs real TLS. Its network security configuration trusts system CAs and disallows cleartext. The non-exported masked credential Activity and existing Service both run in :agent, sharing one Application, store and authority. The UI process cannot install a key through IPC/extras. Input state, autofill, clipboard actions, screenshots, personalized keyboard learning and persistent storage are disabled. A prepared key copy and complete authority snapshot are built before commit; credential generation and state publish under the same authority guard, with no fallible operation after commit. Only process memory retains the key; temporary copies are erased.
+
+liveFixture is a distinct socket-free build without INTERNET, with synthetic protocol responses. It drives the same owner/Agent code but cannot establish provider acceptance. Dedicated device targets cover policy/full-history proof, Android filesystem durability, atomic credential rotation, cancellation/late/rejected/revoked candidate stops, and actual Compose two-turn Service/Agent history. No I04 or containing suite is eligible.
+
+## Review and remaining validation
+
+Independent Rust/ABI review approved the final source and five live test groups plus old 15-case target; independent architecture/HTTPS review found no remaining implementation blocker and requested device evidence for the new combination tests. Its two test-reliability recommendations (cross-thread exception propagation and response-wait lock liveness) were implemented. True supplier acceptance still requires successful exact-source local build/device checks and user secure handover, followed by no more than two ordinary Send actions. No key or model request has occurred at this design revision.

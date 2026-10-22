@@ -1,0 +1,28 @@
+/workspace/office-rust-boundary-fix-tools/unpacked/rustc-1.93.1-x86_64-unknown-linux-gnu ['sh', 'install.sh', '--prefix=/workspace/office-rust-boundary-fix-tools/rust-1.93.1', '--disable-ldconfig']
+install: creating uninstall script at /workspace/office-rust-boundary-fix-tools/rust-1.93.1/lib/rustlib/uninstall.sh
+install: installing component 'rustc'
+
+    rustc installed.
+
+exit 0
+/workspace/office-rust-boundary-fix-tools/unpacked/cargo-1.93.1-x86_64-unknown-linux-gnu ['sh', 'install.sh', '--prefix=/workspace/office-rust-boundary-fix-tools/rust-1.93.1', '--disable-ldconfig']
+install: creating uninstall script at /workspace/office-rust-boundary-fix-tools/rust-1.93.1/lib/rustlib/uninstall.sh
+install: installing component 'cargo'
+
+    cargo installed.
+
+exit 0
+/workspace/office-rust-boundary-fix-tools/unpacked/rust-std-1.93.1-x86_64-unknown-linux-gnu ['sh', 'install.sh', '--prefix=/workspace/office-rust-boundary-fix-tools/rust-1.93.1', '--disable-ldconfig']
+install: creating uninstall script at /workspace/office-rust-boundary-fix-tools/rust-1.93.1/lib/rustlib/uninstall.sh
+install: installing component 'rust-std-x86_64-unknown-linux-gnu'
+
+    rust std installed.
+
+exit 0
+/workspace/office-rust-boundary-fix-tools/unpacked/clippy-1.93.1-x86_64-unknown-linux-gnu ['sh', 'install.sh', '--prefix=/workspace/office-rust-boundary-fix-tools/rust-1.93.1', '--disable-ldconfig']
+install: creating uninstall script at /workspace/office-rust-boundary-fix-tools/rust-1.93.1/lib/rustlib/uninstall.sh
+install: installing component 'clippy-preview'
+
+    clippy installed.
+
+exit 0

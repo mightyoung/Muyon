@@ -1,0 +1,22 @@
+{
+  "A_source": "7965f46beba6f52924e73e99fde6d69c18d985ff",
+  "A_CI": {
+    "run": 39099985492,
+    "status": "completed",
+    "conclusion": "success"
+  },
+  "B_source": "379b1a6d8d5a5830fb3a74924fd5c41cfb234e1c",
+  "B_CI": {
+    "run": 39099707674,
+    "status": "completed",
+    "conclusion": "failure"
+  },
+  "archive": "RAW-EVIDENCE.tar.gz",
+  "bytes": 86711,
+  "sha256": "ea707368c2945b9bb1e3a2b90fd4deb70f904b1df9fc84f387fcff7bf3debff2",
+  "raw_files": 68,
+  "index_sha256": "d8aafa230f7637328a48615532f4a07bed65835f16f0040bb352100d99d4f35a",
+  "verification": "Every archived member reread and matched against exact SHA256/size index. No ELF/ZIP/class files; compiled outputs/tool caches excluded.",
+  "I04": "DENIED_BEFORE_EXECUTION/BLOCKED; not retried",
+  "acceptance": "A partial dependency only; B isolated local24 pass with genuine genericCI failure; no combined product cutover/merge"
+}

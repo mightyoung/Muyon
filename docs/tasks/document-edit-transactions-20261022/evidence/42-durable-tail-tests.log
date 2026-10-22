@@ -1,0 +1,29 @@
+warning: unused import: `contract::Revision`
+ --> muyon-core/src/document_edit/engine_protocol.rs:5:5
+  |
+5 |     contract::Revision,
+  |     ^^^^^^^^^^^^^^^^^^
+  |
+  = note: `#[warn(unused_imports)]` on by default
+
+warning: `muyon-core` (lib) generated 1 warning (run `cargo fix --lib -p muyon-core` to apply 1 suggestion)
+   Compiling muyon-core v0.1.0 (/workspace/document-edit-durable-combination/crates/muyon-core)
+    Finished `test` profile [unoptimized] target(s) in 0.23s
+     Running tests/document_edit_gateway.rs (/workspace/document-edit-combination/crates/target/debug/deps/document_edit_gateway-9524898dbf45656f)
+
+running 12 tests
+test a_copy_claim_that_cannot_store_its_candidate_is_query_only_after_restart ... ok
+test candidate_reopens_but_new_effect_requires_an_explicit_fresh_confirmation ... ok
+test cancellation_is_not_rollback_and_cannot_erase_a_committed_receipt ... ok
+test candidate_and_original_receipt_survive_restart_without_replay ... ok
+test confirmation_is_exact_and_revocation_stops_publication ... ok
+test corrupt_candidate_never_validates_or_publishes ... ok
+test duplicate_intent_binds_original_and_never_creates_second_upload ... ok
+test prepare_is_durable_without_confirmation_or_engine_success ... ok
+test receipt_tail_failure_rolls_back_cas_and_restart_unknown_never_replays ... ok
+test late_copy_duplicate_is_only_an_authorized_original_result_query ... ok
+test two_original_intents_cannot_publish_the_same_source_revision ... ok
+test grant_revoked_or_expired_by_last_receipt_write_rolls_back_the_entire_publish ... ok
+
+test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.07s
+

@@ -1,0 +1,16 @@
+{
+  "device": "emulator-5556",
+  "readback": "adb shell pm path and sha256sum of installed APKs",
+  "packages": [
+    {
+      "package": "com.mightyoung.muyon.product",
+      "installed_sha256": "4007f227f0cb17c3bba0b7ef5c7115ed7901efd24883390354d5c07198a23720",
+      "matches_candidate": true
+    },
+    {
+      "package": "com.mightyoung.muyon.product.test",
+      "installed_sha256": "8f8179145ea3d98f380116aaff8815e951a50a544db7482eb6b44b90db8279a6",
+      "matches_candidate": true
+    }
+  ]
+}

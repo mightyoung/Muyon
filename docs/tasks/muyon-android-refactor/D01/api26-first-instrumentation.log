@@ -1,0 +1,82 @@
+INSTRUMENTATION_STATUS: numtests=2
+INSTRUMENTATION_STATUS: stream=
+com.mightyoung.muyon.androidlab.SearchSendServiceLoopTest:
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=enabledButUnconfiguredOrdinarySendNeverInventsAvailableHostOrSearchResult
+INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.androidlab.SearchSendServiceLoopTest
+INSTRUMENTATION_STATUS: current=1
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: numtests=2
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=enabledButUnconfiguredOrdinarySendNeverInventsAvailableHostOrSearchResult
+INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.androidlab.SearchSendServiceLoopTest
+INSTRUMENTATION_STATUS: current=1
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: numtests=2
+INSTRUMENTATION_STATUS: stream=
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=settingsSaveThenOrdinarySendShowsSourceEmptyAndControlledError
+INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.androidlab.SearchSendServiceLoopTest
+INSTRUMENTATION_STATUS: current=2
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: numtests=2
+INSTRUMENTATION_STATUS: stream=
+Error in settingsSaveThenOrdinarySendShowsSourceEmptyAndControlledError(com.mightyoung.muyon.androidlab.SearchSendServiceLoopTest):
+java.lang.AssertionError: Failed to assert the following: (Text + InputText + EditableText contains '非真实计费' (ignoreCase: false))
+Semantics of the node:
+Node #618 at (l=20.0, t=136.0, r=300.0, b=184.0)px, Tag: 'search-cost'
+Text = '[USD 750/1,000,000 · 合成账本估值，非真实计费]'
+Actions = [ClearTextSubstitution, GetTextLayoutResult, SetTextSubstitution, ShowTextSubstitution]
+Has 11 siblings
+Selector used: (TestTag = 'search-cost')
+
+	at androidx.compose.ui.test.AssertionsKt.assert(Assertions.kt:264)
+	at androidx.compose.ui.test.AssertionsKt.assert$default(Assertions.kt:254)
+	at androidx.compose.ui.test.AssertionsKt.assertTextContains(Assertions.kt:208)
+	at androidx.compose.ui.test.AssertionsKt.assertTextContains$default(Assertions.kt:204)
+	at com.mightyoung.muyon.androidlab.SearchSendServiceLoopTest.settingsSaveThenOrdinarySendShowsSourceEmptyAndControlledError(SearchSendServiceLoopTest.kt:61)
+
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=settingsSaveThenOrdinarySendShowsSourceEmptyAndControlledError
+INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.androidlab.SearchSendServiceLoopTest
+INSTRUMENTATION_STATUS: stack=java.lang.AssertionError: Failed to assert the following: (Text + InputText + EditableText contains '非真实计费' (ignoreCase: false))
+Semantics of the node:
+Node #618 at (l=20.0, t=136.0, r=300.0, b=184.0)px, Tag: 'search-cost'
+Text = '[USD 750/1,000,000 · 合成账本估值，非真实计费]'
+Actions = [ClearTextSubstitution, GetTextLayoutResult, SetTextSubstitution, ShowTextSubstitution]
+Has 11 siblings
+Selector used: (TestTag = 'search-cost')
+
+	at androidx.compose.ui.test.AssertionsKt.assert(Assertions.kt:264)
+	at androidx.compose.ui.test.AssertionsKt.assert$default(Assertions.kt:254)
+	at androidx.compose.ui.test.AssertionsKt.assertTextContains(Assertions.kt:208)
+	at androidx.compose.ui.test.AssertionsKt.assertTextContains$default(Assertions.kt:204)
+	at com.mightyoung.muyon.androidlab.SearchSendServiceLoopTest.settingsSaveThenOrdinarySendShowsSourceEmptyAndControlledError(SearchSendServiceLoopTest.kt:61)
+
+INSTRUMENTATION_STATUS: current=2
+INSTRUMENTATION_STATUS_CODE: -2
+INSTRUMENTATION_RESULT: stream=
+
+Time: 6.48
+There was 1 failure:
+1) settingsSaveThenOrdinarySendShowsSourceEmptyAndControlledError(com.mightyoung.muyon.androidlab.SearchSendServiceLoopTest)
+java.lang.AssertionError: Failed to assert the following: (Text + InputText + EditableText contains '非真实计费' (ignoreCase: false))
+Semantics of the node:
+Node #618 at (l=20.0, t=136.0, r=300.0, b=184.0)px, Tag: 'search-cost'
+Text = '[USD 750/1,000,000 · 合成账本估值，非真实计费]'
+Actions = [ClearTextSubstitution, GetTextLayoutResult, SetTextSubstitution, ShowTextSubstitution]
+Has 11 siblings
+Selector used: (TestTag = 'search-cost')
+
+	at androidx.compose.ui.test.AssertionsKt.assert(Assertions.kt:264)
+	at androidx.compose.ui.test.AssertionsKt.assert$default(Assertions.kt:254)
+	at androidx.compose.ui.test.AssertionsKt.assertTextContains(Assertions.kt:208)
+	at androidx.compose.ui.test.AssertionsKt.assertTextContains$default(Assertions.kt:204)
+	at com.mightyoung.muyon.androidlab.SearchSendServiceLoopTest.settingsSaveThenOrdinarySendShowsSourceEmptyAndControlledError(SearchSendServiceLoopTest.kt:61)
+
+FAILURES!!!
+Tests run: 2,  Failures: 1
+
+
+INSTRUMENTATION_CODE: -1

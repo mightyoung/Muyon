@@ -1,0 +1,6 @@
+PASS back retains user edits and preview uses edited role
+PASS name never grants authority and preview never creates or starts
+PASS invalid blank remains editable and blocks forward
+PASS unknown blocks edits and exposes only original intent query
+PASS unavailable capabilities are never selected by suggestion
+5/5 PASS

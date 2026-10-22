@@ -1,0 +1,3 @@
+Exception in thread "main" java.lang.IllegalStateException: Check failed.
+	at com.mightyoung.muyon.agent.ReceiptObserverChecksKt.main(ReceiptObserverChecks.kt:53)
+	at com.mightyoung.muyon.agent.ReceiptObserverChecksKt.main(ReceiptObserverChecks.kt)

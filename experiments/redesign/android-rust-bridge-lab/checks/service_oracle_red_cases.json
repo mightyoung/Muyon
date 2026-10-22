@@ -1,0 +1,14 @@
+{
+  "version": 1,
+  "author_commit": "b811412677811865d7e5c7a05ca3379b09329fcc",
+  "path": "experiments/redesign/rust-agent-host-lab/core/tests/service_oracle.rs",
+  "blob_sha": "a35c002637fb7f25f919115690e41f13f37ed463",
+  "sha256": "882a88ef85525921a86079c8bb56d4cd2bb9c078124aed8a9e8469056dcf3b73",
+  "red": {
+    "target": "service_oracle",
+    "test": "service_controller_observer_correlates_all_builtin_payloads",
+    "filtered": 0,
+    "native_reach": "AGENT_SERVICE_STUB_REACHED code=internal_failure",
+    "rust_assert": "SERVICE_CONTROLLER_ORACLE_RED: actual successful controller admission must precede private execution evidence"
+  }
+}

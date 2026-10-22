@@ -1,0 +1,26 @@
+{
+  "task": "D02",
+  "acceptance": "RC01",
+  "audit_date": "2026-10-20",
+  "audit_base": "cebc6876c31651d5037dc54a10dfd1c72129dca0",
+  "historical_candidate": "3f1be180bb009a91e659c113ba5b1916e5360332",
+  "status": "BLOCKED",
+  "behavioral_execution": "NOT_RUN",
+  "existing_evidence_audit": "PASS",
+  "historical_denial": "Agent errored: This content was flagged for possible cybersecurity risk.",
+  "denial_source": "docs/tasks/leaderb-next-20261018/evidence/I04-BLOCKED.json",
+  "denial_source_sha256": "5c6ee3cd85a0df5fd6f5fcdc0333ff580d7ff2e055133c2f567c776a079a4868",
+  "handoff_source": "docs/tasks/leaderb-next-20261018/HANDOFF.md",
+  "handoff_source_sha256": "774e7a4ba683ded11ff02ac4bb40200fca75acc5043b604e46b2277b85e3b3a7",
+  "original_requested_handoff_present": false,
+  "recovery_processes_launched": 0,
+  "transport_requests_by_this_audit": 0,
+  "old_403_resources_requested": 0,
+  "new_platform_denial": false,
+  "hold": "PR86/dependent integration remains held; no behavioral pass inferred",
+  "missing": [
+    "Original old-script durable state fixture and independently observed state/identity",
+    "Fixed-candidate script-to-HTTP transition and same-state reopen process/transport evidence",
+    "Observed no-resend and no-fabricated-receipt assertions under original contract"
+  ]
+}

@@ -1,0 +1,35 @@
+   Compiling muyon-office v0.1.0 (/workspace/office-rust-boundary-fix/crates/muyon-office)
+    Finished `test` profile [unoptimized] target(s) in 0.64s
+     Running unittests src/lib.rs (/workspace/office-rust-boundary-fix-tools/target/debug/deps/muyon_office-457142cbaf752f82)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/boundaries.rs (/workspace/office-rust-boundary-fix-tools/target/debug/deps/boundaries-26ea6d622049de21)
+
+running 8 tests
+test direct_rewrite_obeys_part_and_expanded_limits_and_keeps_source ... ok
+test docx_expanded_limit_counts_unchanged_parts ... ok
+ZipWriter::drop: failed to finalize archive: Io(Kind(FileTooLarge))test docx_part_limit_accounts_for_escaped_bytes_before_splice ... ok
+test docx_multibyte_and_archive_equal_and_one_over_are_bounded ... ok
+test highly_compressible_replacement_cannot_hide_expanded_or_part_overflow ... ok
+test docx_input_and_total_text_boundaries_are_not_delayed_until_readback ... ok
+test xlsx_numeric_replacement_cannot_bypass_shared_part_budget ... FAILED
+test inline_and_shared_rich_text_ignore_only_spreadsheet_phonetics_per_cell ... ok
+
+failures:
+
+---- xlsx_numeric_replacement_cannot_bypass_shared_part_budget stdout ----
+
+thread 'xlsx_numeric_replacement_cannot_bypass_shared_part_budget' (4431) panicked at muyon-office/tests/boundaries.rs:142:78:
+called `Result::unwrap()` on an `Err` value: LimitExceeded("part size")
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    xlsx_numeric_replacement_cannot_bypass_shared_part_budget
+
+test result: FAILED. 7 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+error: test failed, to rerun pass `-p muyon-office --test boundaries`

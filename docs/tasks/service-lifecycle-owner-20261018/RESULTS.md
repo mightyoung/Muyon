@@ -1,0 +1,25 @@
+# Actual private Service lifecycle handoff
+
+Draft PR93: https://github.com/mightyoung/Muyon/pull/93 . Base remains PR92 lab/service-durable-owner-20261018 at a150974111afdc716aac3c44ac2cb200a9c1c943. All implementation writers stopped. No merges or HOLD changes.
+
+Final executable source: a971b4f6742eed9aaf93f7ddb9e956278dd7f75c. Final evidence-only SHA will differ only in docs.
+Final scoped CI: https://github.com/mightyoung/Muyon/actions/runs/39130933732 SUCCESS, all four jobs. Rust6+1, both API26 ABI producers, binding reproduction, APK build/lint and named API26 test passed. Actual emulator child4592->4653, phase3 probe_attempts0, receipt aa6b36ed-2133-47bb-abee-8a825858ff88, consumed1/expired1/held0 unchanged.
+
+Exact implemented path: dedicated lifecycle variant manifest -> LifecycleFixtureApplication.acquireServiceHost -> actual AgentRuntimeService background bootstrap AFTER unique slot reservation -> ServiceAdmissionProcessOwner -> retained ServiceHostLease(Installed) -> GeneratedAgentController.open -> genuine generated AgentServiceController.withHost -> generated serviceAdmissionProbe -> Rust Service controller/ServiceHostPorts -> ServiceProviderBridge.prepare/final_admit -> Kotlin generated callbacks -> SAME held DurableServiceHostOwner -> Context filesDir/agent-admission-root/muyon-admission-v1.sqlite.
+
+Lease closes only after generated native close and sealed/no-active-call cleanup; slot then releases. Unknown constructor outcomes retain process-root lease/slot instead of replacement. Cancellation/drop releases held to the existing expired tombstone; unique request identity remains and consumed admissions cannot refund. No old database migration or HTTP path.
+
+Dedicated lifecycle fixture authority only: exact .invalid endpoint/model/existence sentinel/payload/full CallBudget and fixed typed probe operations. Default unconfigured binding denies; fixture can revoke exact existence metadata. No Binder/UI policy/provider command. Ordinary debug/release Application explicitly retains SyntheticLab UI, no production authority/source/profile/reviewer/quota proof is installed. ConfiguredChat readiness still does not reserve or commit and remains transport-unavailable. No real credential values/network/model/real device evidence.
+
+Fixed scheduling receipts are created exclusive/no-follow0600 and fsynced with validated parent before each test schedule. Persisted receipts only suppress scheduling, never authorize approval. Invalid/partial receipts fail closed. After both phases started, new process has zero probe attempts, denied authority, and reads existing opaque receipt/counts from dedicated ledger. New process termination test targets only fresh .lifecycle test APK own :agent after native/lease cleanup and validates exact package/process name, same UID, distinct known PID. This is not the prohibited old script task.db->HTTP->original reopen operation.
+
+Evidence history retained separately:
+- f8d3bfea3606d187479ed6d16621b342eca74760 / CI39129510104 SUCCESS: actual normal Service lifecycle, UI recreation, cancellation/replay/credential metadata revocation, consumed row and normal rebind exhaustion; in-memory fixture ordinal was insufficient for process death, so it is not process-death scheduling evidence.
+- afbed6dc6639f72e3356c3b2156cd335c802685d / CI39130222418 FAILURE: Kotlin compile, no API26 runtime; scoped6+1 and both native ABI jobs passed. Fixed marker code used O_DIRECTORY absent public API36. Separately reproduced exact unresolved reference with pinned Kotlin2.2.20 and public API35 jar, fixed snippet compiles. Original CI compiler line was not available from direct log; new archive retrieval once403, no retry/alternate retrieval. Old prior evidence archive403 was never retried or retrieved.
+- a971b4f6742eed9aaf93f7ddb9e956278dd7f75c / CI39130933732 SUCCESS: final lifecycle and cleaned-own-process recreation zero-probe evidence as above.
+
+Still unproven on Android: injected setup or uncertain native constructor failure, onDestroy while native settlement/callback remains active, in-flight crash/partial-marker fault injection, post-reserve credential revocation race. Clean process termination/recreation does not prove those cases. Native isolated test covers policy drift cleanup. Unknown native constructor intentionally pins until process exit; no production recovery policy is inferred.
+
+Next narrow step: fixed synthetic failure/retention instrumentation composition using existing guarded lease path. Any production source/profile authority, conservative real total-token/spend proof, actual credential handle identity/rotation and retention policy remain explicit future authorization/design decisions. Do not infer production approval from synthetic proof.
+
+PR86/dependency combination HOLD stays. PR90 SHA060e46f1359915e267f849f3807ec1999b29dd8d and Dart cases unchanged/unrun. No broad suite, old I04, original-state reopen, real model/credential/payment/deployment/force-push/delete/merge performed. Tool/dependency downloads and exact CI builds only.

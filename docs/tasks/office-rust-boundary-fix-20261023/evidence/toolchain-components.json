@@ -1,0 +1,26 @@
+[
+  {
+    "package": "rustc",
+    "version": "1.93.1 (01f6ddf75 2026-02-11)",
+    "url": "https://static.rust-lang.org/dist/2026-02-12/rustc-1.93.1-x86_64-unknown-linux-gnu.tar.xz",
+    "sha256": "b9db2636f5a101c4cdaf46a26f8a0c8e4b5767ecdb02ae9c7ccc3ead577732bc"
+  },
+  {
+    "package": "cargo",
+    "version": "0.94.0 (083ac5135 2025-12-15)",
+    "url": "https://static.rust-lang.org/dist/2026-02-12/cargo-1.93.1-x86_64-unknown-linux-gnu.tar.xz",
+    "sha256": "dbf12e8fd2a245a6bdd9f6c8df267cb2c25b0c56866ee91d8321337df0a00ddb"
+  },
+  {
+    "package": "rust-std",
+    "version": "1.93.1 (01f6ddf75 2026-02-11)",
+    "url": "https://static.rust-lang.org/dist/2026-02-12/rust-std-1.93.1-x86_64-unknown-linux-gnu.tar.xz",
+    "sha256": "82c4e41268f1741e4eb68796aeb6ca5042406ae858dd56144155c4ef8d87d8b6"
+  },
+  {
+    "package": "clippy-preview",
+    "version": "0.1.93",
+    "url": "https://static.rust-lang.org/dist/2026-02-12/clippy-1.93.1-x86_64-unknown-linux-gnu.tar.xz",
+    "sha256": "60c0ce83ecc1700de724404a928c30d096c178a610c6707d4f06cee25284cc02"
+  }
+]

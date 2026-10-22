@@ -1,0 +1,8 @@
+Final read-only evidence/report review, /workspace/Muyon-host-bot-native-acceptance-20261022
+No Important or report revision required found.
+REPORT.md accurately retains three device-only cases and states NOT_RUN. Test SHA256 unchanged: 48301773cdf4dc138b8eca16eec77676df46262441cae48d265c8a066a34d01b. All four reviewed SOURCE-SHA256SUMS entries match current source. Production localDraftPortVerifiedForBuild default false, normal root/workspace unchanged.
+final-clean-compile.log: actual :app:clean, compileDebugKotlin, compileReleaseKotlin, compileDebugAndroidTestKotlin, BUILD SUCCESSFUL in1m, 43 actionable tasks:43 executed. Earlier overlapping-cache/fallback logs preserved separately. This is compilation, not native invocation/device acceptance.
+device-attempt-blocked.log: verifyModelAssets FAILED with Prepare fixed offline assets and set muyonModelAssets; no connected execution/test-start phase, BUILD FAILED. Zero device tests executed is accurate. ADB environment uncertainty is reported, not converted to an empty-device-list result.
+Independently parsed actual merged manifests: debug exactly one BotNativeAcceptanceService, exported=false, process=:bot_native_acceptance; release zero entries. Actual compiled debug fixture class present; release fixture class absent. androidTest class output present. No debug fixture leaks into current release outputs.
+ABI log records4/4 tests. Production gates not enabled. Test cases are known-commit process-loss, prepared preset/fence, and discarded-delivery fixture, not actual Binder fault-injection.
+No compiler/device/native command rerun by reviewer. No repository/source/Shell changes. Static diff check passes; preserved raw log whitespace does not alter evidence boundary.

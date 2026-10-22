@@ -1,0 +1,9 @@
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/chat/projection/HostContinuationChecks.kt:24:24: error: unresolved reference 'setupDraft'.
+        call { runtime.setupDraft(session, "workspace", conversation, project, gen, op, it) }
+                       ^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/chat/projection/HostProjectionChecks.kt:84:40: error: unresolved reference 'cardCandidates'.
+        val candidate = call { runtime.cardCandidates("session", "workspace", "conversation", request, "project", generation, it) }
+                                       ^^^^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/chat/projection/HostProjectionChecks.kt:92:31: error: unresolved reference 'cardCandidates'.
+        denied(call { runtime.cardCandidates("session", "workspace", "other", request, "project", generation, it) })
+                              ^^^^^^^^^^^^^^

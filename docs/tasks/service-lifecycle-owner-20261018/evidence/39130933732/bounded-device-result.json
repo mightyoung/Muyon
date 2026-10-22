@@ -1,0 +1,20 @@
+{
+  "source_sha": "a971b4f6742eed9aaf93f7ddb9e956278dd7f75c",
+  "ci_run": 39130933732,
+  "conclusion": "success",
+  "device": "API26 x86_64 google_apis emulator",
+  "application_id": "com.mightyoung.muyon.androidlab.lifecycle",
+  "service_process": "com.mightyoung.muyon.androidlab.lifecycle:agent",
+  "old_agent_pid": 4592,
+  "new_agent_pid": 4653,
+  "schedule_phase": 3,
+  "probe_attempts_after_process_recreation": 0,
+  "admission_identity": "aa6b36ed-2133-47bb-abee-8a825858ff88",
+  "admissions": 1,
+  "consumed": 1,
+  "expired": 1,
+  "held": 0,
+  "synthetic_provider": true,
+  "model_api_called": false,
+  "real_device": false
+}

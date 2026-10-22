@@ -1,0 +1,617 @@
+compile	Required JVM checks and Android source compilation	﻿2026-10-18T12:26:54.8895070Z ##[group]Run set +e
+compile	Required JVM checks and Android source compilation	2026-10-18T12:26:54.8895403Z [36;1mset +e[0m
+compile	Required JVM checks and Android source compilation	2026-10-18T12:26:54.8895778Z [36;1m"$RUNNER_TEMP/muyon-compose-tools/gradle-$GRADLE_VERSION/bin/gradle" \[0m
+compile	Required JVM checks and Android source compilation	2026-10-18T12:26:54.8896314Z [36;1m  --no-daemon --stacktrace --console=plain -p "$LAB_DIRECTORY" \[0m
+compile	Required JVM checks and Android source compilation	2026-10-18T12:26:54.8896825Z [36;1m  :state:check :app:assembleDebug :app:assembleDebugAndroidTest \[0m
+compile	Required JVM checks and Android source compilation	2026-10-18T12:26:54.8897301Z [36;1m  :app:compileDebugUnitTestKotlin :app:lintDebug 2>&1 |[0m
+compile	Required JVM checks and Android source compilation	2026-10-18T12:26:54.8897687Z [36;1m  tee "$LOG_DIRECTORY/required-build.log"[0m
+compile	Required JVM checks and Android source compilation	2026-10-18T12:26:54.8897997Z [36;1mgradle_exit=${PIPESTATUS[0]}[0m
+compile	Required JVM checks and Android source compilation	2026-10-18T12:26:54.8898251Z [36;1mset -e[0m
+compile	Required JVM checks and Android source compilation	2026-10-18T12:26:54.8898459Z [36;1mrequired_exit=$gradle_exit[0m
+compile	Required JVM checks and Android source compilation	2026-10-18T12:26:54.8898748Z [36;1mif [[ $gradle_exit -eq 0 ]]; then[0m
+compile	Required JVM checks and Android source compilation	2026-10-18T12:26:54.8899204Z [36;1m  for marker in '16/16 pure JVM state checks passed' '22/22 local UI state checks passed'; do[0m
+compile	Required JVM checks and Android source compilation	2026-10-18T12:26:54.8899757Z [36;1m    if ! grep -Fq "$marker" "$LOG_DIRECTORY/required-build.log"; then[0m
+compile	Required JVM checks and Android source compilation	2026-10-18T12:26:54.8900157Z [36;1m      required_exit=1[0m
+compile	Required JVM checks and Android source compilation	2026-10-18T12:26:54.8900388Z [36;1m    fi[0m
+compile	Required JVM checks and Android source compilation	2026-10-18T12:26:54.8900571Z [36;1m  done[0m
+compile	Required JVM checks and Android source compilation	2026-10-18T12:26:54.8900751Z [36;1mfi[0m
+compile	Required JVM checks and Android source compilation	2026-10-18T12:26:54.8901084Z [36;1mprintf 'gradle_exit=%s\nrequired_exit=%s\n' "$gradle_exit" "$required_exit" \[0m
+compile	Required JVM checks and Android source compilation	2026-10-18T12:26:54.8901520Z [36;1m  > "$LOG_DIRECTORY/required-exit.txt"[0m
+compile	Required JVM checks and Android source compilation	2026-10-18T12:26:54.8901805Z [36;1mexit "$required_exit"[0m
+compile	Required JVM checks and Android source compilation	2026-10-18T12:26:54.8964700Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+compile	Required JVM checks and Android source compilation	2026-10-18T12:26:54.8965091Z env:
+compile	Required JVM checks and Android source compilation	2026-10-18T12:26:54.8965375Z   LAB_DIRECTORY: experiments/redesign/android-compose-lab
+compile	Required JVM checks and Android source compilation	2026-10-18T12:26:54.8965727Z   GRADLE_VERSION: 8.13
+compile	Required JVM checks and Android source compilation	2026-10-18T12:26:54.8966073Z   GRADLE_SHA256: 20f1b1176237254a6fc204d8434196fa11a4cfb387567519c61556e8710aed78
+compile	Required JVM checks and Android source compilation	2026-10-18T12:26:54.8966577Z   GRADLE_USER_HOME: /home/runner/work/_temp/muyon-compose-gradle-cache
+compile	Required JVM checks and Android source compilation	2026-10-18T12:26:54.8967047Z   ANDROID_USER_HOME: /home/runner/work/_temp/muyon-compose-android-user
+compile	Required JVM checks and Android source compilation	2026-10-18T12:26:54.8967513Z   LOG_DIRECTORY: /home/runner/work/_temp/muyon-compose-evidence
+compile	Required JVM checks and Android source compilation	2026-10-18T12:26:54.8967968Z   JAVA_HOME: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.20-1/x64
+compile	Required JVM checks and Android source compilation	2026-10-18T12:26:54.8968452Z   JAVA_HOME_17_X64: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.20-1/x64
+compile	Required JVM checks and Android source compilation	2026-10-18T12:26:54.8968854Z   ANDROID_HOME: /usr/local/lib/android/sdk
+compile	Required JVM checks and Android source compilation	2026-10-18T12:26:54.8969118Z ##[endgroup]
+compile	Required JVM checks and Android source compilation	2026-10-18T12:26:55.7000509Z To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/8.13/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+compile	Required JVM checks and Android source compilation	2026-10-18T12:26:57.1963064Z Daemon will be stopped at the end of the build 
+compile	Required JVM checks and Android source compilation	2026-10-18T12:27:45.5967899Z 
+compile	Required JVM checks and Android source compilation	2026-10-18T12:27:45.6026073Z > Configure project :app
+compile	Required JVM checks and Android source compilation	2026-10-18T12:27:45.6056134Z w: file:///home/runner/work/Muyon/Muyon/experiments/redesign/android-compose-lab/app/build.gradle.kts:82:61: Unnecessary non-null assertion (!!) on a non-null receiver of type String
+compile	Required JVM checks and Android source compilation	2026-10-18T12:27:49.0958044Z 
+compile	Required JVM checks and Android source compilation	2026-10-18T12:27:49.0966704Z > Task :state:checkKotlinGradlePluginConfigurationErrors SKIPPED
+compile	Required JVM checks and Android source compilation	2026-10-18T12:27:53.6959192Z > Task :state:processResources NO-SOURCE
+compile	Required JVM checks and Android source compilation	2026-10-18T12:27:53.7005779Z > Task :state:processTestResources NO-SOURCE
+compile	Required JVM checks and Android source compilation	2026-10-18T12:27:53.7025183Z > Task :app:preBuild UP-TO-DATE
+compile	Required JVM checks and Android source compilation	2026-10-18T12:27:53.7039765Z > Task :app:preDebugBuild UP-TO-DATE
+compile	Required JVM checks and Android source compilation	2026-10-18T12:27:53.7062949Z > Task :app:mergeDebugNativeDebugMetadata NO-SOURCE
+compile	Required JVM checks and Android source compilation	2026-10-18T12:28:03.2967330Z > Task :app:checkKotlinGradlePluginConfigurationErrors SKIPPED
+compile	Required JVM checks and Android source compilation	2026-10-18T12:28:03.3959826Z > Task :app:generateDebugBuildConfig
+compile	Required JVM checks and Android source compilation	2026-10-18T12:28:03.8976131Z > Task :app:generateDebugResValues
+compile	Required JVM checks and Android source compilation	2026-10-18T12:28:03.9985525Z > Task :app:checkDebugAarMetadata
+compile	Required JVM checks and Android source compilation	2026-10-18T12:28:04.0046657Z > Task :app:compileDebugAidl
+compile	Required JVM checks and Android source compilation	2026-10-18T12:28:04.0975443Z > Task :app:mapDebugSourceSetPaths
+compile	Required JVM checks and Android source compilation	2026-10-18T12:28:04.1004170Z > Task :app:generateDebugResources
+compile	Required JVM checks and Android source compilation	2026-10-18T12:28:05.7975667Z > Task :app:packageDebugResources
+compile	Required JVM checks and Android source compilation	2026-10-18T12:28:06.8958562Z > Task :app:mergeDebugResources
+compile	Required JVM checks and Android source compilation	2026-10-18T12:28:07.4967710Z > Task :app:createDebugCompatibleScreenManifests
+compile	Required JVM checks and Android source compilation	2026-10-18T12:28:07.5972247Z > Task :app:extractDeepLinksDebug
+compile	Required JVM checks and Android source compilation	2026-10-18T12:28:07.6958422Z > Task :app:parseDebugLocalResources
+compile	Required JVM checks and Android source compilation	2026-10-18T12:28:08.1035596Z > Task :app:processDebugMainManifest
+compile	Required JVM checks and Android source compilation	2026-10-18T12:28:08.2970793Z > Task :app:processDebugManifest
+compile	Required JVM checks and Android source compilation	2026-10-18T12:28:08.2985286Z > Task :app:processDebugManifestForPackage
+compile	Required JVM checks and Android source compilation	2026-10-18T12:28:08.3005501Z > Task :app:javaPreCompileDebug
+compile	Required JVM checks and Android source compilation	2026-10-18T12:28:09.1960790Z > Task :app:mergeDebugShaders
+compile	Required JVM checks and Android source compilation	2026-10-18T12:28:09.2022959Z > Task :app:compileDebugShaders NO-SOURCE
+compile	Required JVM checks and Android source compilation	2026-10-18T12:28:09.2074337Z > Task :app:generateDebugAssets UP-TO-DATE
+compile	Required JVM checks and Android source compilation	2026-10-18T12:28:09.2959095Z > Task :app:mergeDebugAssets
+compile	Required JVM checks and Android source compilation	2026-10-18T12:28:09.3995665Z > Task :app:desugarDebugFileDependencies
+compile	Required JVM checks and Android source compilation	2026-10-18T12:28:09.4020201Z > Task :app:compressDebugAssets
+compile	Required JVM checks and Android source compilation	2026-10-18T12:28:09.7015619Z > Task :app:processDebugResources
+compile	Required JVM checks and Android source compilation	2026-10-18T12:28:10.8005673Z > Task :app:mergeDebugJniLibFolders
+compile	Required JVM checks and Android source compilation	2026-10-18T12:28:10.8965847Z > Task :app:checkDebugDuplicateClasses
+compile	Required JVM checks and Android source compilation	2026-10-18T12:28:11.1957929Z > Task :state:compileKotlin
+compile	Required JVM checks and Android source compilation	2026-10-18T12:28:11.7985665Z > Task :app:validateSigningDebug
+compile	Required JVM checks and Android source compilation	2026-10-18T12:28:11.7986278Z > Task :state:compileJava NO-SOURCE
+compile	Required JVM checks and Android source compilation	2026-10-18T12:28:11.7986779Z > Task :state:classes UP-TO-DATE
+compile	Required JVM checks and Android source compilation	2026-10-18T12:28:11.8975542Z > Task :state:jar
+compile	Required JVM checks and Android source compilation	2026-10-18T12:28:41.8975616Z > Task :state:compileTestKotlin
+compile	Required JVM checks and Android source compilation	2026-10-18T12:28:42.0975592Z > Task :app:compileDebugKotlin
+compile	Required JVM checks and Android source compilation	2026-10-18T12:28:47.2959258Z > Task :app:mergeExtDexDebug
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:15.7978955Z > Task :state:compileTestJava NO-SOURCE
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:15.8005289Z > Task :state:testClasses UP-TO-DATE
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.5959170Z 
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.5995275Z > Task :state:checkState
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6112354Z PASS default and ordered destinations
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6198824Z PASS selection changes page without modifying previous state
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6255251Z PASS 899 and 900 logical width boundary
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6315229Z PASS invalid width rejected
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6345288Z PASS raw draft survives navigation without normalization
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6357404Z PASS draft focus and scroll retained together
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6379899Z PASS page memories and prior state remain independent
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6405115Z PASS width changes do not own or replace state
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6415060Z PASS negative list coordinates rejected
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6435209Z PASS Rust port has no connected or success default
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6465185Z PASS interrupted keeps explicit unknown warning
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6495311Z PASS cancelling never claims cancelled
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6515200Z PASS platform task note takes priority
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6525329Z PASS platform ownership cannot erase interrupted warning
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6555413Z PASS ordinary queued waiting and running copy
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6556577Z PASS paused failed succeeded and cancelled stay distinct
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6557677Z PASS 31 pending chat cancellation/late bootstrap checks; Android runtime NOT_RUN
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6558913Z PASS 21 chat read bounds, identity and immutable Service source checks; Binder/native NOT_RUN
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6560149Z PASS frontend input/status policy (21 assertions; no Android/model execution)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6561186Z PASS local UI: empty local session never fabricates a message
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6562015Z PASS local UI: draft remains exact raw UTF16
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6562796Z PASS local UI: blank local note does not create records
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6563673Z PASS local UI: nonblank local note can be saved
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6564759Z PASS local UI: local save preserves text and clears only composer
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6566377Z PASS local UI: repeated empty save cannot duplicate a note
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6611039Z PASS local UI: local note ids stay unique and ordered
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6645854Z PASS local UI: new conversation retains prior unsaved draft
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6647267Z PASS local UI: conversation switching retains individual scroll and focus
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6648080Z PASS local UI: invalid conversation selection changes nothing
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6648770Z PASS local UI: selection closes overlay but keeps search query
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6649391Z PASS local UI: create resets history filter and closes overlay
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6649992Z PASS local UI: history filter searches own title and note text
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6650651Z PASS local UI: record filter exposes only user saved content
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6651285Z PASS local UI: rename opens correct current title
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6651883Z PASS local UI: rename cancellation leaves title unchanged
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6652555Z PASS local UI: rename confirmation preserves exact title
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6653154Z PASS local UI: blank rename cannot overwrite title
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6653772Z PASS local UI: record details bind exact conversation and note
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6654410Z PASS local UI: invalid note or rename cannot invent an overlay
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6655486Z PASS local UI: local preferences retain drafts without changing host capability
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6656369Z PASS local UI: snapshot selection and ids remain valid after many sessions
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6657174Z 22/22 local UI state checks passed; no model or Rust action executed
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6658171Z PASS conversation candidate: platform snapshot rejects oversized text without truncating live state
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6659351Z PASS conversation candidate: snapshot restores two independent drafts and selected conversation
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6660499Z PASS conversation candidate: restore preserves user records and preferences but dismisses transient overlay
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6661714Z PASS conversation candidate: repeated restoration never adds assistant messages or execution results
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6662717Z PASS conversation candidate: every truncated snapshot is rejected
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6663558Z PASS conversation candidate: incompatible version and trailing payload are rejected
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6664947Z PASS conversation candidate: invalid selection enum counts and coordinates are rejected
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6665987Z PASS conversation candidate: duplicate conversation and note identifiers are rejected
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6666906Z 8/8 conversation snapshot checks passed; Android rendering NOT_RUN
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6667628Z PASS diagnostic construction never calls native
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6668259Z PASS diagnostic validation requires actual handshake
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6668956Z PASS diagnostic handshake is worker only and busy before entry
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6669645Z PASS diagnostic missing library has safe unavailable result
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6670628Z PASS diagnostic handshake rejects protocol mismatch
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6671237Z PASS diagnostic handshake rejects build mismatch
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6671814Z PASS diagnostic handshake rejects model mismatch
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6672327Z PASS diagnostic handshake rejects execute mismatch
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6672857Z PASS diagnostic handshake rejects read mismatch
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6673420Z PASS diagnostic handshake rejects write mismatch
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6674021Z PASS diagnostic handshake rejects attachment mismatch
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6675114Z PASS diagnostic four variants carry internal bounded identifiers and unsigned counts
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6676331Z PASS diagnostic report rejects id mismatch
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6676925Z PASS diagnostic report rejects variant mismatch
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6677460Z PASS diagnostic report rejects protocol mismatch
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6678170Z PASS diagnostic report rejects build mismatch
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6678981Z PASS diagnostic native typed UNSUPPORTED_PROTOCOL remains closed and slot releases
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6679889Z PASS diagnostic native typed INVALID_REQUEST_ID remains closed and slot releases
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6680791Z PASS diagnostic native typed DECLARATION_REJECTED remains closed and slot releases
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6682031Z PASS diagnostic native typed INTERNAL_FAILURE remains closed and slot releases
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6682881Z PASS diagnostic unexpected native error never exposes raw reason
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6683627Z PASS diagnostic expired handshake cannot publish readiness
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6684273Z PASS diagnostic detached lease cannot start work
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6685336Z PASS diagnostic rejected worker submission releases admission
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6686219Z PASS diagnostic delayed delivery rechecks lease and current snapshot
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6687144Z PASS diagnostic blocking native across dismiss stays single flight until actual return
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6688164Z PASS diagnostic blocking native across timeout stays single flight until actual return
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6689271Z PASS diagnostic blocking native across holder recreation stays single flight until actual return
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6690287Z PASS diagnostic listener reentrant detach cannot deadlock admission
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6691175Z 29/29 diagnostic coordinator checks passed; native FFI/Android runtime NOT_RUN
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6692264Z PASS B service precontroller initializing has no native identity or admission
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6693175Z PASS B service new connection ignores late constructor transport update
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6693969Z PASS B service connection rejects invalid native meta and lease
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6695315Z PASS B service fresh lease is invisible and reconciles before explicit user submit
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6696244Z PASS B service busy explicit double click never creates a second submit
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6697101Z PASS B service invalid user request identities cannot become native work
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6697971Z PASS B service native initializing recovery and closed remain unavailable
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6698780Z PASS B service old display lease cannot apply a later terminal
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6699525Z PASS B service old connection cannot erase original known terminal
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6700241Z PASS B service lower revision cannot regress same run
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6700977Z PASS B service higher revision cannot turn a settled run back into running
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6701841Z PASS B service equal revision requires identical authoritative snapshot
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6702714Z PASS B service same live connect is idempotent without dropping observations
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6703537Z PASS B service old epoch rejects active replies after reconnect
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6704317Z PASS B service current recovers lost request without producing submit
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6705462Z PASS B service status wrong request variant source or durable binding conflicts
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6706343Z PASS B service historical lookup is separate from a newer active run
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6707453Z PASS B service historical source build and admitted epoch stay original
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6708343Z PASS B service unknown transport is not native failed cancelled or no admission
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6709247Z PASS B service recorded read success remains success when run is cancelled
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6710090Z PASS B service settled no admission is distinct and cannot regress
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6710932Z PASS B service completed requires actual task receipt identity and reason none
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6711858Z PASS B service malformed IDs and negative revision rejected without defaults
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6712691Z PASS B service all sealed snapshot variants have a valid sibling
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6713585Z PASS B service multiple visible activity identities do not release the last lease early
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6716744Z PASS B service old visibility ACK cannot enable a newer invisible state
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6717640Z PASS B service rotation retains run identity but cannot clear issued stop
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6718488Z PASS B service release invalidates old observation and does not claim native closed
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6719236Z PASS B service panel detach is not visibility release
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6719876Z PASS B service post terminal new request requires explicit user action
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6720847Z PASS B service bootstrap late constructor is explicitly retired and drained
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6721673Z PASS B service bootstrap initialized object settles before install and does not repeat
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6722557Z PASS B service bootstrap retirement during actual constructor discards late object
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6723308Z PASS B service bootstrap failure never installs invented Ready
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6724060Z PASS B service blocked observation cannot queue another observation but control runs
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6725190Z PASS B service control lane is bounded independently and releases after error
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6725913Z PASS B service RPC rejection cannot strand its local lane
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6726618Z PASS B service new lease forwards existing activity visibility without implicit start
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6727420Z PASS B service known terminal cannot be erased by a later empty current
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6728165Z PASS B service closed service phase cannot reopen on a later revision
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6728981Z PASS B service retirement after initialize waiter returns still performs close settlement
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6729857Z PASS B service historical lookup rejects a different original request binding
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6730589Z PASS B service different historical observation keys may share service revision
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6731413Z PASS B service old status ticket cannot replace a newer explicitly selected run
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6732232Z PASS B service retirement signal handoff cannot settle before actual stop signal
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6733036Z PASS B service new historical selection rejects reverse delivery at revision 3
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6733848Z PASS B service new historical selection rejects reverse delivery at revision 2
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6734832Z PASS B service settlement pump coalesces requests without a waiting queue
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6735669Z PASS B service settlement requested during return stays with actual waiter
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6736489Z PASS B service settlement rejection and failure do not strand next explicit request
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6737386Z PASS B service blocked settlement admits no concurrent waiter and preserves new request
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6738326Z PASS B service concurrent settlement request is not acknowledged before rejected dispatch
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6739228Z PASS B service throwing failure listener cannot strand accepted settlement request
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6740083Z PASS B service retirement holder reserves one construction before any object exists
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6740737Z RETENTION_PUBLICATION_REACHED
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6741296Z PASS B service retirement holder publishes strong object before first await
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6742079Z RETENTION_RETIRE_FAILURE_REACHED
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6742673Z PASS B service throwing retirement retains original object and denies replacement
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6743312Z RETENTION_AWAIT_EXCEPTION_REACHED
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6743928Z PASS B service throwing await exception retains original object without retry
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6744883Z RETENTION_AWAIT_LINKAGE_REACHED
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6745542Z PASS B service throwing await linkage retains original object without retry
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6746488Z PASS B service nonclosed settlement retains owner until later actual closed cleanup
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6747246Z RETENTION_CLEANUP_FAILURE_REACHED
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6747992Z PASS B service closed with throwing handle cleanup retains owner until successful cleanup
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6749034Z PASS B service stale retirement token cannot clear replacement after genuine cleanup
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6750039Z PASS B service definite preobject failure releases only its unpublished reservation
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6751113Z PASS B service destroyed service late constructor remains owned through explicit retirement
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6752131Z PASS B service zero active handle cleanup succeeds once and seals future calls
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6753402Z PASS B service inflight handle call prevents cleanup while disposal seals replacement admission
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6754246Z HANDLE_CLEANUP_FAILURE_REACHED
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6755427Z PASS B service throwing generated cleanup stays sealed incomplete without implicit retry
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6756462Z PASS B service nonclosed or nondisposing settlement cannot seal or release handle
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6757192Z HANDLE_LAST_RETURN_REACHED
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6757931Z PASS B service last active return hands sealed cleanup to existing background owner exactly once
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6758945Z 68/68 B service state checks passed; Android Binder/native runtime NOT_RUN
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6759786Z PASS B IPC local initialization remains distinct from native metadata
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6760568Z PASS B IPC connected lease and actual native phase survive codec
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6761329Z PASS B IPC all six snapshot shapes retain original identity and receipt
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6762101Z PASS B IPC queued admission differs from original existing result
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6762822Z PASS B IPC control rejection busy and unknown use closed units
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6763599Z PASS B IPC truncated trailing and wrong version bytes cannot become a result
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6764386Z PASS B IPC oversize bytes and unstructured input are rejected
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6765337Z PASS B IPC invalid native identity protocol and build cannot be encoded
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6766036Z PASS B IPC invalid completed result is not repaired into success
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6766827Z PASS B IPC actual typed start refusal requires reconciliation without fabricating terminal
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6767727Z PASS B IPC uncertain transport and unrelated control cannot clear pending start
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6768599Z PASS B IPC stale start refusal cannot clear a replacement connection pending request
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6769384Z 12/12 B IPC codec checks passed; Android Parcel/Binder runtime NOT_RUN
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6770101Z PASS B liveness private keys never repeat after dead token replacement
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6770882Z PASS B liveness same live token links once and keeps its native correlation key
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6771727Z PASS B liveness released live tombstone consumes capacity and cannot resurrect
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6772444Z PASS B liveness death during link cannot gain a native lease
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6773214Z PASS B liveness death inside native connect rejects late lease and stops original key again
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6774086Z PASS B liveness late original death callback cannot remove replacement
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6775000Z PASS B liveness unknown lease cannot tombstone a registered client
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6775709Z PASS B liveness inflight same token connect returns busy without second native call
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6777063Z PASS B liveness native connect and gone listeners execute outside registry lock
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6777846Z PASS B liveness failed death-link setup cannot create an unobserved native lease
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6778648Z PASS B liveness acknowledged release cannot be revived by inflight repeat connect
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6779438Z PASS B liveness dispose unlinks live and released tokens without claiming native stop
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6780190Z PASS B liveness dispose during death-link setup detaches the eventual link
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6780940Z PASS B liveness dispose rejects late native connect and stops only its original key
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6781762Z PASS B liveness unlink callback executes outside registry admission lock
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6782326Z DISPOSAL_UNLINK_FAILURE_REACHED
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6782826Z PASS B liveness dispose attempts second unlink when first unlink fails
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6783502Z 16/16 B liveness checks passed; real Binder death/process runtime NOT_RUN
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6784167Z 16/16 pure JVM state checks passed; Compose/Android runtime NOT_RUN
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6784840Z 
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6784987Z > Task :state:test SKIPPED
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:16.6785311Z > Task :state:check
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:25.5988910Z > Task :app:compileDebugJavaWithJavac
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:27.6978715Z > Task :app:dexBuilderDebug
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:27.7959089Z > Task :app:mergeDebugGlobalSynthetics
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:27.7963255Z > Task :app:processDebugJavaRes
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:28.5965603Z > Task :app:mergeLibDexDebug
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:28.5988591Z > Task :app:writeDebugAppMetadata
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:28.7062436Z > Task :app:mergeDebugNativeLibs
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:28.7115297Z > Task :app:writeDebugSigningConfigVersions
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:28.7135288Z > Task :app:mergeProjectDexDebug
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:28.7156499Z > Task :app:preDebugAndroidTestBuild SKIPPED
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:28.7185222Z > Task :app:compileDebugAndroidTestAidl NO-SOURCE
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:28.7957638Z 
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:28.7961277Z > Task :app:stripDebugDebugSymbols
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:28.7962694Z Unable to strip the following libraries, packaging them as they are: libandroidx.graphics.path.so. Run with --info option to learn more.
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:28.7963913Z 
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:28.7964437Z > Task :app:bundleDebugClassesToCompileJar
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:29.0958148Z > Task :app:mergeDebugJavaResource
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:30.0965723Z > Task :app:processDebugAndroidTestManifest
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:30.0995372Z > Task :app:generateDebugAndroidTestBuildConfig
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:30.1960746Z > Task :app:checkDebugAndroidTestAarMetadata
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:30.1985152Z > Task :app:generateDebugAndroidTestResValues
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:30.2015376Z > Task :app:mapDebugAndroidTestSourceSetPaths
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:30.2016346Z > Task :app:generateDebugAndroidTestResources
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:30.6975854Z > Task :app:javaPreCompileDebugAndroidTest
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:30.7006480Z > Task :app:mergeDebugAndroidTestShaders
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:30.7015320Z > Task :app:compileDebugAndroidTestShaders NO-SOURCE
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:30.7040839Z > Task :app:generateDebugAndroidTestAssets UP-TO-DATE
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:30.7041695Z > Task :app:mergeDebugAndroidTestAssets
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:30.7046157Z > Task :app:compressDebugAndroidTestAssets
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:30.7083998Z > Task :app:desugarDebugAndroidTestFileDependencies
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:30.7958535Z > Task :app:mergeDebugAndroidTestResources
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:30.9035769Z > Task :app:checkDebugAndroidTestDuplicateClasses
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:31.1975589Z > Task :app:processDebugAndroidTestResources
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:33.6986824Z > Task :app:packageDebug
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:33.7078891Z > Task :app:createDebugApkListingFileRedirect
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:33.7126592Z > Task :app:assembleDebug
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:33.7965462Z > Task :app:mergeDebugAndroidTestJniLibFolders
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:33.8025382Z > Task :app:mergeLibDexDebugAndroidTest
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:33.8055170Z > Task :app:mergeDebugAndroidTestNativeLibs NO-SOURCE
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:33.8115339Z > Task :app:stripDebugAndroidTestDebugSymbols NO-SOURCE
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:33.8145162Z > Task :app:validateSigningDebugAndroidTest
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:33.8166566Z > Task :app:writeDebugAndroidTestSigningConfigVersions
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:33.9995990Z > Task :app:mergeExtDexDebugAndroidTest
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:35.5957638Z > Task :app:compileDebugUnitTestKotlin
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:36.8979856Z 
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:36.9035339Z > Task :app:compileDebugAndroidTestKotlin FAILED
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:36.9106502Z e: file:///home/runner/work/Muyon/Muyon/experiments/redesign/android-compose-lab/app/src/androidTest/kotlin/com/mightyoung/muyon/androidlab/agentipc/DurableServiceHostOwnerTest.kt:26:61 Unresolved reference 'ServiceAdmissionAuthority'.
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:36.9136465Z e: file:///home/runner/work/Muyon/Muyon/experiments/redesign/android-compose-lab/app/src/androidTest/kotlin/com/mightyoung/muyon/androidlab/agentipc/DurableServiceHostOwnerTest.kt:28:91 Cannot infer type for value parameter 'binding'. Specify it explicitly.
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:36.9176609Z e: file:///home/runner/work/Muyon/Muyon/experiments/redesign/android-compose-lab/app/src/androidTest/kotlin/com/mightyoung/muyon/androidlab/agentipc/DurableServiceHostOwnerTest.kt:28:100 Cannot infer type for value parameter 'bytes'. Specify it explicitly.
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:36.9236559Z e: file:///home/runner/work/Muyon/Muyon/experiments/redesign/android-compose-lab/app/src/androidTest/kotlin/com/mightyoung/muyon/androidlab/agentipc/DurableServiceHostOwnerTest.kt:28:107 Cannot infer type for value parameter 'budget'. Specify it explicitly.
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:36.9296550Z e: file:///home/runner/work/Muyon/Muyon/experiments/redesign/android-compose-lab/app/src/androidTest/kotlin/com/mightyoung/muyon/androidlab/agentipc/DurableServiceHostOwnerTest.kt:33:27 Unresolved reference 'DurableServiceHostOwner'.
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:36.9356499Z e: file:///home/runner/work/Muyon/Muyon/experiments/redesign/android-compose-lab/app/src/androidTest/kotlin/com/mightyoung/muyon/androidlab/agentipc/DurableServiceHostOwnerTest.kt:35:11 Unresolved reference 'commitAdmission'.
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:36.9400890Z e: file:///home/runner/work/Muyon/Muyon/experiments/redesign/android-compose-lab/app/src/androidTest/kotlin/com/mightyoung/muyon/androidlab/agentipc/DurableServiceHostOwnerTest.kt:36:35 Unresolved reference 'ServiceAdmissionAuthority'.
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:36.9427679Z e: file:///home/runner/work/Muyon/Muyon/experiments/redesign/android-compose-lab/app/src/androidTest/kotlin/com/mightyoung/muyon/androidlab/agentipc/DurableServiceHostOwnerTest.kt:37:9 Unresolved reference 'DurableServiceHostOwner'.
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:36.9456532Z e: file:///home/runner/work/Muyon/Muyon/experiments/redesign/android-compose-lab/app/src/androidTest/kotlin/com/mightyoung/muyon/androidlab/agentipc/DurableServiceHostOwnerTest.kt:40:33 Unresolved reference 'ServiceAdmissionAuthority'.
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:36.9516430Z e: file:///home/runner/work/Muyon/Muyon/experiments/redesign/android-compose-lab/app/src/androidTest/kotlin/com/mightyoung/muyon/androidlab/agentipc/DurableServiceHostOwnerTest.kt:42:66 Unresolved reference 'budget'.
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:36.9576624Z e: file:///home/runner/work/Muyon/Muyon/experiments/redesign/android-compose-lab/app/src/androidTest/kotlin/com/mightyoung/muyon/androidlab/agentipc/DurableServiceHostOwnerTest.kt:45:21 Cannot infer type for type parameter 'T'. Specify it explicitly.
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:36.9636528Z e: file:///home/runner/work/Muyon/Muyon/experiments/redesign/android-compose-lab/app/src/androidTest/kotlin/com/mightyoung/muyon/androidlab/agentipc/DurableServiceHostOwnerTest.kt:45:21 Cannot infer type for type parameter 'R'. Specify it explicitly.
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:36.9689077Z e: file:///home/runner/work/Muyon/Muyon/experiments/redesign/android-compose-lab/app/src/androidTest/kotlin/com/mightyoung/muyon/androidlab/agentipc/DurableServiceHostOwnerTest.kt:45:27 Cannot infer type for type parameter 'T'. Specify it explicitly.
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:36.9740260Z e: file:///home/runner/work/Muyon/Muyon/experiments/redesign/android-compose-lab/app/src/androidTest/kotlin/com/mightyoung/muyon/androidlab/agentipc/DurableServiceHostOwnerTest.kt:48:31 Unresolved reference 'reserveBudget'.
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:36.9766150Z e: file:///home/runner/work/Muyon/Muyon/experiments/redesign/android-compose-lab/app/src/androidTest/kotlin/com/mightyoung/muyon/androidlab/agentipc/DurableServiceHostOwnerTest.kt:49:32 Unresolved reference 'reserveBudget'.
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:36.9798768Z e: file:///home/runner/work/Muyon/Muyon/experiments/redesign/android-compose-lab/app/src/androidTest/kotlin/com/mightyoung/muyon/androidlab/agentipc/DurableServiceHostOwnerTest.kt:51:31 Unresolved reference 'reserveBudget'.
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:36.9858315Z e: file:///home/runner/work/Muyon/Muyon/experiments/redesign/android-compose-lab/app/src/androidTest/kotlin/com/mightyoung/muyon/androidlab/agentipc/DurableServiceHostOwnerTest.kt:56:33 Unresolved reference 'ServiceAdmissionAuthority'.
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:36.9931527Z e: file:///home/runner/work/Muyon/Muyon/experiments/redesign/android-compose-lab/app/src/androidTest/kotlin/com/mightyoung/muyon/androidlab/agentipc/DurableServiceHostOwnerTest.kt:57:21 Cannot infer type for type parameter 'T'. Specify it explicitly.
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:36.9944168Z e: file:///home/runner/work/Muyon/Muyon/experiments/redesign/android-compose-lab/app/src/androidTest/kotlin/com/mightyoung/muyon/androidlab/agentipc/DurableServiceHostOwnerTest.kt:57:21 Cannot infer type for type parameter 'R'. Specify it explicitly.
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:36.9977430Z e: file:///home/runner/work/Muyon/Muyon/experiments/redesign/android-compose-lab/app/src/androidTest/kotlin/com/mightyoung/muyon/androidlab/agentipc/DurableServiceHostOwnerTest.kt:57:27 Cannot infer type for type parameter 'T'. Specify it explicitly.
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.0006510Z e: file:///home/runner/work/Muyon/Muyon/experiments/redesign/android-compose-lab/app/src/androidTest/kotlin/com/mightyoung/muyon/androidlab/agentipc/DurableServiceHostOwnerTest.kt:58:27 Unresolved reference 'reserveBudget'.
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.0036532Z e: file:///home/runner/work/Muyon/Muyon/experiments/redesign/android-compose-lab/app/src/androidTest/kotlin/com/mightyoung/muyon/androidlab/agentipc/DurableServiceHostOwnerTest.kt:61:26 Unresolved reference 'commitAdmission'.
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.0066413Z e: file:///home/runner/work/Muyon/Muyon/experiments/redesign/android-compose-lab/app/src/androidTest/kotlin/com/mightyoung/muyon/androidlab/agentipc/DurableServiceHostOwnerTest.kt:62:26 Unresolved reference 'commitAdmission'.
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.0069931Z e: file:///home/runner/work/Muyon/Muyon/experiments/redesign/android-compose-lab/app/src/androidTest/kotlin/com/mightyoung/muyon/androidlab/agentipc/DurableServiceHostOwnerTest.kt:70:17 Unresolved reference 'ServiceAdmissionAuthority'.
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.0096744Z e: file:///home/runner/work/Muyon/Muyon/experiments/redesign/android-compose-lab/app/src/androidTest/kotlin/com/mightyoung/muyon/androidlab/agentipc/DurableServiceHostOwnerTest.kt:71:26 Cannot infer type for type parameter 'T'. Specify it explicitly.
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.0126633Z e: file:///home/runner/work/Muyon/Muyon/experiments/redesign/android-compose-lab/app/src/androidTest/kotlin/com/mightyoung/muyon/androidlab/agentipc/DurableServiceHostOwnerTest.kt:71:26 Cannot infer type for type parameter 'R'. Specify it explicitly.
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.0156616Z e: file:///home/runner/work/Muyon/Muyon/experiments/redesign/android-compose-lab/app/src/androidTest/kotlin/com/mightyoung/muyon/androidlab/agentipc/DurableServiceHostOwnerTest.kt:71:32 Cannot infer type for type parameter 'T'. Specify it explicitly.
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.0186488Z e: file:///home/runner/work/Muyon/Muyon/experiments/redesign/android-compose-lab/app/src/androidTest/kotlin/com/mightyoung/muyon/androidlab/agentipc/DurableServiceHostOwnerTest.kt:72:27 Unresolved reference 'reserveBudget'.
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.0189868Z e: file:///home/runner/work/Muyon/Muyon/experiments/redesign/android-compose-lab/app/src/androidTest/kotlin/com/mightyoung/muyon/androidlab/agentipc/DurableServiceHostOwnerTest.kt:76:27 Unresolved reference 'credentialHandleExists'.
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.0276548Z e: file:///home/runner/work/Muyon/Muyon/experiments/redesign/android-compose-lab/app/src/androidTest/kotlin/com/mightyoung/muyon/androidlab/agentipc/DurableServiceHostOwnerTest.kt:84:23 Unresolved reference 'ServiceAdmissionAuthority'.
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.0286562Z e: file:///home/runner/work/Muyon/Muyon/experiments/redesign/android-compose-lab/app/src/androidTest/kotlin/com/mightyoung/muyon/androidlab/agentipc/DurableServiceHostOwnerTest.kt:84:59 Cannot infer type for type parameter 'T'. Specify it explicitly.
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.0316740Z e: file:///home/runner/work/Muyon/Muyon/experiments/redesign/android-compose-lab/app/src/androidTest/kotlin/com/mightyoung/muyon/androidlab/agentipc/DurableServiceHostOwnerTest.kt:84:59 Cannot infer type for type parameter 'R'. Specify it explicitly.
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.0340396Z e: file:///home/runner/work/Muyon/Muyon/experiments/redesign/android-compose-lab/app/src/androidTest/kotlin/com/mightyoung/muyon/androidlab/agentipc/DurableServiceHostOwnerTest.kt:84:65 Cannot infer type for type parameter 'T'. Specify it explicitly.
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.0366389Z e: file:///home/runner/work/Muyon/Muyon/experiments/redesign/android-compose-lab/app/src/androidTest/kotlin/com/mightyoung/muyon/androidlab/agentipc/DurableServiceHostOwnerTest.kt:85:26 Unresolved reference 'reviewPayload'.
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.0386542Z e: file:///home/runner/work/Muyon/Muyon/experiments/redesign/android-compose-lab/app/src/androidTest/kotlin/com/mightyoung/muyon/androidlab/agentipc/DurableServiceHostOwnerTest.kt:86:27 Unresolved reference 'reviewPayload'.
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.0406414Z e: file:///home/runner/work/Muyon/Muyon/experiments/redesign/android-compose-lab/app/src/androidTest/kotlin/com/mightyoung/muyon/androidlab/agentipc/DurableServiceHostOwnerTest.kt:89:30 Unresolved reference 'reserveBudget'.
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.0426475Z e: file:///home/runner/work/Muyon/Muyon/experiments/redesign/android-compose-lab/app/src/androidTest/kotlin/com/mightyoung/muyon/androidlab/agentipc/DurableServiceHostOwnerTest.kt:95:33 Unresolved reference 'ServiceAdmissionAuthority'.
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.0456420Z e: file:///home/runner/work/Muyon/Muyon/experiments/redesign/android-compose-lab/app/src/androidTest/kotlin/com/mightyoung/muyon/androidlab/agentipc/DurableServiceHostOwnerTest.kt:96:21 Cannot infer type for type parameter 'T'. Specify it explicitly.
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.0474073Z e: file:///home/runner/work/Muyon/Muyon/experiments/redesign/android-compose-lab/app/src/androidTest/kotlin/com/mightyoung/muyon/androidlab/agentipc/DurableServiceHostOwnerTest.kt:96:21 Cannot infer type for type parameter 'R'. Specify it explicitly.
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.0496663Z e: file:///home/runner/work/Muyon/Muyon/experiments/redesign/android-compose-lab/app/src/androidTest/kotlin/com/mightyoung/muyon/androidlab/agentipc/DurableServiceHostOwnerTest.kt:96:27 Cannot infer type for type parameter 'T'. Specify it explicitly.
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.0526671Z e: file:///home/runner/work/Muyon/Muyon/experiments/redesign/android-compose-lab/app/src/androidTest/kotlin/com/mightyoung/muyon/androidlab/agentipc/DurableServiceHostOwnerTest.kt:96:46 Cannot infer type for type parameter 'T'. Specify it explicitly.
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.0546474Z e: file:///home/runner/work/Muyon/Muyon/experiments/redesign/android-compose-lab/app/src/androidTest/kotlin/com/mightyoung/muyon/androidlab/agentipc/DurableServiceHostOwnerTest.kt:96:46 Cannot infer type for type parameter 'R'. Specify it explicitly.
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.0572471Z e: file:///home/runner/work/Muyon/Muyon/experiments/redesign/android-compose-lab/app/src/androidTest/kotlin/com/mightyoung/muyon/androidlab/agentipc/DurableServiceHostOwnerTest.kt:96:52 Cannot infer type for type parameter 'T'. Specify it explicitly.
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.0606432Z e: file:///home/runner/work/Muyon/Muyon/experiments/redesign/android-compose-lab/app/src/androidTest/kotlin/com/mightyoung/muyon/androidlab/agentipc/DurableServiceHostOwnerTest.kt:99:35 Cannot infer type for type parameter 'T'. Specify it explicitly.
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.0616659Z e: file:///home/runner/work/Muyon/Muyon/experiments/redesign/android-compose-lab/app/src/androidTest/kotlin/com/mightyoung/muyon/androidlab/agentipc/DurableServiceHostOwnerTest.kt:99:52 Cannot infer type for type parameter 'R'. Specify it explicitly.
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.0646585Z e: file:///home/runner/work/Muyon/Muyon/experiments/redesign/android-compose-lab/app/src/androidTest/kotlin/com/mightyoung/muyon/androidlab/agentipc/DurableServiceHostOwnerTest.kt:99:56 Cannot infer type for type parameter 'R'. Specify it explicitly.
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.0666499Z e: file:///home/runner/work/Muyon/Muyon/experiments/redesign/android-compose-lab/app/src/androidTest/kotlin/com/mightyoung/muyon/androidlab/agentipc/DurableServiceHostOwnerTest.kt:99:84 Cannot infer type for type parameter 'V'. Specify it explicitly.
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.0696403Z e: file:///home/runner/work/Muyon/Muyon/experiments/redesign/android-compose-lab/app/src/androidTest/kotlin/com/mightyoung/muyon/androidlab/agentipc/DurableServiceHostOwnerTest.kt:99:93 Cannot infer type for type parameter 'V'. Specify it explicitly.
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.0706530Z e: file:///home/runner/work/Muyon/Muyon/experiments/redesign/android-compose-lab/app/src/androidTest/kotlin/com/mightyoung/muyon/androidlab/agentipc/DurableServiceHostOwnerTest.kt:100:52 Unresolved reference 'reserveBudget'.
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.0736680Z e: file:///home/runner/work/Muyon/Muyon/experiments/redesign/android-compose-lab/app/src/androidTest/kotlin/com/mightyoung/muyon/androidlab/agentipc/DurableServiceHostOwnerTest.kt:101:21 Cannot infer type for type parameter 'T'. Specify it explicitly.
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.0756442Z e: file:///home/runner/work/Muyon/Muyon/experiments/redesign/android-compose-lab/app/src/androidTest/kotlin/com/mightyoung/muyon/androidlab/agentipc/DurableServiceHostOwnerTest.kt:101:21 Cannot infer type for type parameter 'R'. Specify it explicitly.
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.0786421Z e: file:///home/runner/work/Muyon/Muyon/experiments/redesign/android-compose-lab/app/src/androidTest/kotlin/com/mightyoung/muyon/androidlab/agentipc/DurableServiceHostOwnerTest.kt:101:25 Cannot infer type for type parameter 'T'. Specify it explicitly.
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.0796567Z e: file:///home/runner/work/Muyon/Muyon/experiments/redesign/android-compose-lab/app/src/androidTest/kotlin/com/mightyoung/muyon/androidlab/agentipc/DurableServiceHostOwnerTest.kt:101:34 Argument type mismatch: actual type is 'Int', but 'String' was expected.
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.0826649Z e: file:///home/runner/work/Muyon/Muyon/experiments/redesign/android-compose-lab/app/src/androidTest/kotlin/com/mightyoung/muyon/androidlab/agentipc/DurableServiceHostOwnerTest.kt:101:37 Too many arguments for 'fun MatchGroupCollection.get(name: String): MatchGroup?'.
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.0846467Z e: file:///home/runner/work/Muyon/Muyon/experiments/redesign/android-compose-lab/app/src/androidTest/kotlin/com/mightyoung/muyon/androidlab/agentipc/DurableServiceHostOwnerTest.kt:102:40 Cannot infer type for type parameter 'T'. Specify it explicitly.
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.0873680Z e: file:///home/runner/work/Muyon/Muyon/experiments/redesign/android-compose-lab/app/src/androidTest/kotlin/com/mightyoung/muyon/androidlab/agentipc/DurableServiceHostOwnerTest.kt:102:46 Cannot infer type for type parameter 'T'. Specify it explicitly.
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.0906362Z e: file:///home/runner/work/Muyon/Muyon/experiments/redesign/android-compose-lab/app/src/androidTest/kotlin/com/mightyoung/muyon/androidlab/agentipc/DurableServiceHostOwnerTest.kt:105:32 Unresolved reference 'reserveBudget'.
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.0916417Z e: file:///home/runner/work/Muyon/Muyon/experiments/redesign/android-compose-lab/app/src/androidTest/kotlin/com/mightyoung/muyon/androidlab/agentipc/DurableServiceHostOwnerTest.kt:111:49 Unresolved reference 'ServiceAdmissionAuthority'.
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.0936339Z e: file:///home/runner/work/Muyon/Muyon/experiments/redesign/android-compose-lab/app/src/androidTest/kotlin/com/mightyoung/muyon/androidlab/agentipc/DurableServiceHostOwnerTest.kt:117:29 Cannot infer type for type parameter 'T'. Specify it explicitly.
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.0956614Z e: file:///home/runner/work/Muyon/Muyon/experiments/redesign/android-compose-lab/app/src/androidTest/kotlin/com/mightyoung/muyon/androidlab/agentipc/DurableServiceHostOwnerTest.kt:117:29 Cannot infer type for type parameter 'R'. Specify it explicitly.
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.0996453Z e: file:///home/runner/work/Muyon/Muyon/experiments/redesign/android-compose-lab/app/src/androidTest/kotlin/com/mightyoung/muyon/androidlab/agentipc/DurableServiceHostOwnerTest.kt:117:35 Cannot infer type for type parameter 'T'. Specify it explicitly.
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.1005818Z e: file:///home/runner/work/Muyon/Muyon/experiments/redesign/android-compose-lab/app/src/androidTest/kotlin/com/mightyoung/muyon/androidlab/agentipc/DurableServiceHostOwnerTest.kt:119:26 Unresolved reference 'reserveBudget'.
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.1026531Z e: file:///home/runner/work/Muyon/Muyon/experiments/redesign/android-compose-lab/app/src/androidTest/kotlin/com/mightyoung/muyon/androidlab/agentipc/DurableServiceHostOwnerTest.kt:121:26 Unresolved reference 'reserveBudget'.
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.1056340Z e: file:///home/runner/work/Muyon/Muyon/experiments/redesign/android-compose-lab/app/src/androidTest/kotlin/com/mightyoung/muyon/androidlab/agentipc/DurableServiceHostOwnerTest.kt:122:29 Unresolved reference 'reserveBudget'.
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.1075547Z e: file:///home/runner/work/Muyon/Muyon/experiments/redesign/android-compose-lab/app/src/androidTest/kotlin/com/mightyoung/muyon/androidlab/agentipc/DurableServiceHostOwnerTest.kt:127:33 Unresolved reference 'ServiceAdmissionAuthority'.
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.1096465Z e: file:///home/runner/work/Muyon/Muyon/experiments/redesign/android-compose-lab/app/src/androidTest/kotlin/com/mightyoung/muyon/androidlab/agentipc/DurableServiceHostOwnerTest.kt:128:21 Cannot infer type for type parameter 'T'. Specify it explicitly.
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.1126507Z e: file:///home/runner/work/Muyon/Muyon/experiments/redesign/android-compose-lab/app/src/androidTest/kotlin/com/mightyoung/muyon/androidlab/agentipc/DurableServiceHostOwnerTest.kt:128:21 Cannot infer type for type parameter 'R'. Specify it explicitly.
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.1146364Z e: file:///home/runner/work/Muyon/Muyon/experiments/redesign/android-compose-lab/app/src/androidTest/kotlin/com/mightyoung/muyon/androidlab/agentipc/DurableServiceHostOwnerTest.kt:128:27 Cannot infer type for type parameter 'T'. Specify it explicitly.
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.1169039Z e: file:///home/runner/work/Muyon/Muyon/experiments/redesign/android-compose-lab/app/src/androidTest/kotlin/com/mightyoung/muyon/androidlab/agentipc/DurableServiceHostOwnerTest.kt:129:27 Unresolved reference 'reserveBudget'.
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.1206486Z e: file:///home/runner/work/Muyon/Muyon/experiments/redesign/android-compose-lab/app/src/androidTest/kotlin/com/mightyoung/muyon/androidlab/agentipc/DurableServiceHostOwnerTest.kt:146:29 Cannot infer type for type parameter 'T'. Specify it explicitly.
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.1216466Z e: file:///home/runner/work/Muyon/Muyon/experiments/redesign/android-compose-lab/app/src/androidTest/kotlin/com/mightyoung/muyon/androidlab/agentipc/DurableServiceHostOwnerTest.kt:146:29 Cannot infer type for type parameter 'R'. Specify it explicitly.
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.1236337Z e: file:///home/runner/work/Muyon/Muyon/experiments/redesign/android-compose-lab/app/src/androidTest/kotlin/com/mightyoung/muyon/androidlab/agentipc/DurableServiceHostOwnerTest.kt:146:33 Cannot infer type for type parameter 'T'. Specify it explicitly.
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.1266241Z e: file:///home/runner/work/Muyon/Muyon/experiments/redesign/android-compose-lab/app/src/androidTest/kotlin/com/mightyoung/muyon/androidlab/agentipc/DurableServiceHostOwnerTest.kt:146:49 Unresolved reference 'reserveBudget'.
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.1296280Z e: file:///home/runner/work/Muyon/Muyon/experiments/redesign/android-compose-lab/app/src/androidTest/kotlin/com/mightyoung/muyon/androidlab/agentipc/DurableServiceHostOwnerTest.kt:149:18 Unresolved reference 'ServiceAdmissionAuthority'.
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.1306483Z e: file:///home/runner/work/Muyon/Muyon/experiments/redesign/android-compose-lab/app/src/androidTest/kotlin/com/mightyoung/muyon/androidlab/agentipc/DurableServiceHostOwnerTest.kt:149:54 Cannot infer type for type parameter 'T'. Specify it explicitly.
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.1326284Z e: file:///home/runner/work/Muyon/Muyon/experiments/redesign/android-compose-lab/app/src/androidTest/kotlin/com/mightyoung/muyon/androidlab/agentipc/DurableServiceHostOwnerTest.kt:149:54 Cannot infer type for type parameter 'R'. Specify it explicitly.
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.1356343Z e: file:///home/runner/work/Muyon/Muyon/experiments/redesign/android-compose-lab/app/src/androidTest/kotlin/com/mightyoung/muyon/androidlab/agentipc/DurableServiceHostOwnerTest.kt:149:58 Cannot infer type for type parameter 'T'. Specify it explicitly.
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.1366297Z e: file:///home/runner/work/Muyon/Muyon/experiments/redesign/android-compose-lab/app/src/androidTest/kotlin/com/mightyoung/muyon/androidlab/agentipc/DurableServiceHostOwnerTest.kt:149:74 Unresolved reference 'currentProviderMetadata'.
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.1396392Z e: file:///home/runner/work/Muyon/Muyon/experiments/redesign/android-compose-lab/app/src/androidTest/kotlin/com/mightyoung/muyon/androidlab/agentipc/DurableServiceHostOwnerTest.kt:152:24 Unresolved reference 'ServiceAdmissionAuthority'.
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.1416384Z e: file:///home/runner/work/Muyon/Muyon/experiments/redesign/android-compose-lab/app/src/androidTest/kotlin/com/mightyoung/muyon/androidlab/agentipc/DurableServiceHostOwnerTest.kt:152:60 Cannot infer type for type parameter 'T'. Specify it explicitly.
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.1446367Z e: file:///home/runner/work/Muyon/Muyon/experiments/redesign/android-compose-lab/app/src/androidTest/kotlin/com/mightyoung/muyon/androidlab/agentipc/DurableServiceHostOwnerTest.kt:152:60 Cannot infer type for type parameter 'R'. Specify it explicitly.
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.1476362Z e: file:///home/runner/work/Muyon/Muyon/experiments/redesign/android-compose-lab/app/src/androidTest/kotlin/com/mightyoung/muyon/androidlab/agentipc/DurableServiceHostOwnerTest.kt:152:64 Cannot infer type for type parameter 'T'. Specify it explicitly.
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.1479476Z e: file:///home/runner/work/Muyon/Muyon/experiments/redesign/android-compose-lab/app/src/androidTest/kotlin/com/mightyoung/muyon/androidlab/agentipc/DurableServiceHostOwnerTest.kt:152:80 Unresolved reference 'currentScope'.
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.1506170Z e: file:///home/runner/work/Muyon/Muyon/experiments/redesign/android-compose-lab/app/src/androidTest/kotlin/com/mightyoung/muyon/androidlab/agentipc/DurableServiceHostOwnerTest.kt:155:23 Unresolved reference 'ServiceAdmissionAuthority'.
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.1566706Z e: file:///home/runner/work/Muyon/Muyon/experiments/redesign/android-compose-lab/app/src/androidTest/kotlin/com/mightyoung/muyon/androidlab/agentipc/DurableServiceHostOwnerTest.kt:155:63 Cannot infer type for type parameter 'T'. Specify it explicitly.
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.1573366Z e: file:///home/runner/work/Muyon/Muyon/experiments/redesign/android-compose-lab/app/src/androidTest/kotlin/com/mightyoung/muyon/androidlab/agentipc/DurableServiceHostOwnerTest.kt:155:63 Cannot infer type for type parameter 'R'. Specify it explicitly.
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.1616690Z e: file:///home/runner/work/Muyon/Muyon/experiments/redesign/android-compose-lab/app/src/androidTest/kotlin/com/mightyoung/muyon/androidlab/agentipc/DurableServiceHostOwnerTest.kt:155:67 Cannot infer type for type parameter 'T'. Specify it explicitly.
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.1626228Z e: file:///home/runner/work/Muyon/Muyon/experiments/redesign/android-compose-lab/app/src/androidTest/kotlin/com/mightyoung/muyon/androidlab/agentipc/DurableServiceHostOwnerTest.kt:155:83 Unresolved reference 'reserveBudget'.
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.3957724Z 
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.3995482Z > Task :app:generateDebugAndroidTestLintModel
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.4995936Z 
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.5048426Z FAILURE: Build failed with an exception.
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.5074829Z 
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.5105216Z * What went wrong:
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.5125442Z Execution failed for task ':app:compileDebugAndroidTestKotlin'.
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.5165757Z > A failure occurred while executing org.jetbrains.kotlin.compilerRunner.GradleCompilerRunnerWithWorkers$GradleKotlinCompilerWorkAction
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.5185165Z    > Compilation error. See log for more details
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.5185564Z 
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.5185691Z * Try:
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.5186134Z > Run with --info or --debug option to get more log output.
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.5186701Z > Run with --scan to get full insights.
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.5187184Z > Get more help at https://help.gradle.org.
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.5187507Z 
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.5187640Z * Exception is:
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.5188416Z org.gradle.api.tasks.TaskExecutionException: Execution failed for task ':app:compileDebugAndroidTestKotlin'.
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.5189988Z 	at org.gradle.api.internal.tasks.execution.ExecuteActionsTaskExecuter.lambda$executeIfValid$1(ExecuteActionsTaskExecuter.java:130)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.5191355Z 	at org.gradle.internal.Try$Failure.ifSuccessfulOrElse(Try.java:293)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.5192653Z 	at org.gradle.api.internal.tasks.execution.ExecuteActionsTaskExecuter.executeIfValid(ExecuteActionsTaskExecuter.java:128)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.5194997Z 	at org.gradle.api.internal.tasks.execution.ExecuteActionsTaskExecuter.execute(ExecuteActionsTaskExecuter.java:116)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.5197422Z 	at org.gradle.api.internal.tasks.execution.ProblemsTaskPathTrackingTaskExecuter.execute(ProblemsTaskPathTrackingTaskExecuter.java:40)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.5199308Z 	at org.gradle.api.internal.tasks.execution.FinalizePropertiesTaskExecuter.execute(FinalizePropertiesTaskExecuter.java:46)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.5201117Z 	at org.gradle.api.internal.tasks.execution.ResolveTaskExecutionModeExecuter.execute(ResolveTaskExecutionModeExecuter.java:51)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.5202688Z 	at org.gradle.api.internal.tasks.execution.SkipTaskWithNoActionsExecuter.execute(SkipTaskWithNoActionsExecuter.java:57)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.5225558Z 	at org.gradle.api.internal.tasks.execution.SkipOnlyIfTaskExecuter.execute(SkipOnlyIfTaskExecuter.java:74)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.5265595Z 	at org.gradle.api.internal.tasks.execution.CatchExceptionTaskExecuter.execute(CatchExceptionTaskExecuter.java:36)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.5284000Z 	at org.gradle.api.internal.tasks.execution.EventFiringTaskExecuter$1.executeTask(EventFiringTaskExecuter.java:77)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.5305636Z 	at org.gradle.api.internal.tasks.execution.EventFiringTaskExecuter$1.call(EventFiringTaskExecuter.java:55)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.5335844Z 	at org.gradle.api.internal.tasks.execution.EventFiringTaskExecuter$1.call(EventFiringTaskExecuter.java:52)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.5375843Z 	at org.gradle.internal.operations.DefaultBuildOperationRunner$CallableBuildOperationWorker.execute(DefaultBuildOperationRunner.java:210)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.5395924Z 	at org.gradle.internal.operations.DefaultBuildOperationRunner$CallableBuildOperationWorker.execute(DefaultBuildOperationRunner.java:205)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.5398078Z 	at org.gradle.internal.operations.DefaultBuildOperationRunner$2.execute(DefaultBuildOperationRunner.java:67)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.5399492Z 	at org.gradle.internal.operations.DefaultBuildOperationRunner$2.execute(DefaultBuildOperationRunner.java:60)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.5400945Z 	at org.gradle.internal.operations.DefaultBuildOperationRunner.execute(DefaultBuildOperationRunner.java:167)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.5402398Z 	at org.gradle.internal.operations.DefaultBuildOperationRunner.execute(DefaultBuildOperationRunner.java:60)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.5403806Z 	at org.gradle.internal.operations.DefaultBuildOperationRunner.call(DefaultBuildOperationRunner.java:54)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.5405279Z 	at org.gradle.api.internal.tasks.execution.EventFiringTaskExecuter.execute(EventFiringTaskExecuter.java:52)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.5406510Z 	at org.gradle.execution.plan.LocalTaskNodeExecutor.execute(LocalTaskNodeExecutor.java:42)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.5408414Z 	at org.gradle.execution.taskgraph.DefaultTaskExecutionGraph$InvokeNodeExecutorsAction.execute(DefaultTaskExecutionGraph.java:331)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.5410154Z 	at org.gradle.execution.taskgraph.DefaultTaskExecutionGraph$InvokeNodeExecutorsAction.execute(DefaultTaskExecutionGraph.java:318)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.5412108Z 	at org.gradle.execution.taskgraph.DefaultTaskExecutionGraph$BuildOperationAwareExecutionAction.lambda$execute$0(DefaultTaskExecutionGraph.java:314)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.5413857Z 	at org.gradle.internal.operations.CurrentBuildOperationRef.with(CurrentBuildOperationRef.java:85)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.5415733Z 	at org.gradle.execution.taskgraph.DefaultTaskExecutionGraph$BuildOperationAwareExecutionAction.execute(DefaultTaskExecutionGraph.java:314)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.5417632Z 	at org.gradle.execution.taskgraph.DefaultTaskExecutionGraph$BuildOperationAwareExecutionAction.execute(DefaultTaskExecutionGraph.java:303)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.5419171Z 	at org.gradle.execution.plan.DefaultPlanExecutor$ExecutorWorker.execute(DefaultPlanExecutor.java:459)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.5420440Z 	at org.gradle.execution.plan.DefaultPlanExecutor$ExecutorWorker.run(DefaultPlanExecutor.java:376)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.5445521Z 	at org.gradle.internal.concurrent.ExecutorPolicy$CatchAndRecordFailures.onExecute(ExecutorPolicy.java:64)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.5465318Z 	at org.gradle.internal.concurrent.AbstractManagedExecutor$1.run(AbstractManagedExecutor.java:48)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.5496327Z Caused by: org.gradle.workers.internal.DefaultWorkerExecutor$WorkExecutionException: A failure occurred while executing org.jetbrains.kotlin.compilerRunner.GradleCompilerRunnerWithWorkers$GradleKotlinCompilerWorkAction
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.5515673Z 	at org.gradle.workers.internal.DefaultWorkerExecutor$WorkItemExecution.waitForCompletion(DefaultWorkerExecutor.java:287)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.5556785Z 	at org.gradle.internal.work.DefaultAsyncWorkTracker.lambda$waitForItemsAndGatherFailures$2(DefaultAsyncWorkTracker.java:130)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.5585185Z 	at org.gradle.internal.Factories$1.create(Factories.java:31)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.5586294Z 	at org.gradle.internal.work.DefaultWorkerLeaseService.withoutLocks(DefaultWorkerLeaseService.java:335)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.5587687Z 	at org.gradle.internal.work.DefaultWorkerLeaseService.withoutLocks(DefaultWorkerLeaseService.java:318)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.5589044Z 	at org.gradle.internal.work.DefaultWorkerLeaseService.withoutLock(DefaultWorkerLeaseService.java:323)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.5590532Z 	at org.gradle.internal.work.DefaultAsyncWorkTracker.waitForItemsAndGatherFailures(DefaultAsyncWorkTracker.java:126)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.5592143Z 	at org.gradle.internal.work.DefaultAsyncWorkTracker.waitForItemsAndGatherFailures(DefaultAsyncWorkTracker.java:92)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.5593564Z 	at org.gradle.internal.work.DefaultAsyncWorkTracker.waitForAll(DefaultAsyncWorkTracker.java:78)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.5595066Z 	at org.gradle.internal.work.DefaultAsyncWorkTracker.waitForCompletion(DefaultAsyncWorkTracker.java:66)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.5596318Z 	at org.gradle.api.internal.tasks.execution.TaskExecution$3.run(TaskExecution.java:252)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.5597579Z 	at org.gradle.internal.operations.DefaultBuildOperationRunner$1.execute(DefaultBuildOperationRunner.java:30)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.5599028Z 	at org.gradle.internal.operations.DefaultBuildOperationRunner$1.execute(DefaultBuildOperationRunner.java:27)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.5600465Z 	at org.gradle.internal.operations.DefaultBuildOperationRunner$2.execute(DefaultBuildOperationRunner.java:67)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.5601882Z 	at org.gradle.internal.operations.DefaultBuildOperationRunner$2.execute(DefaultBuildOperationRunner.java:60)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.5603314Z 	at org.gradle.internal.operations.DefaultBuildOperationRunner.execute(DefaultBuildOperationRunner.java:167)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.5604923Z 	at org.gradle.internal.operations.DefaultBuildOperationRunner.execute(DefaultBuildOperationRunner.java:60)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.5606346Z 	at org.gradle.internal.operations.DefaultBuildOperationRunner.run(DefaultBuildOperationRunner.java:48)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.5608280Z 	at org.gradle.api.internal.tasks.execution.TaskExecution.executeAction(TaskExecution.java:229)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.5609533Z 	at org.gradle.api.internal.tasks.execution.TaskExecution.executeActions(TaskExecution.java:212)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.5610942Z 	at org.gradle.api.internal.tasks.execution.TaskExecution.executeWithPreviousOutputFiles(TaskExecution.java:195)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.5612280Z 	at org.gradle.api.internal.tasks.execution.TaskExecution.execute(TaskExecution.java:162)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.5613487Z 	at org.gradle.internal.execution.steps.ExecuteStep.executeInternal(ExecuteStep.java:105)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.5674893Z 	at org.gradle.internal.execution.steps.ExecuteStep.access$000(ExecuteStep.java:44)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.5676061Z 	at org.gradle.internal.execution.steps.ExecuteStep$1.call(ExecuteStep.java:59)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.5676982Z 	at org.gradle.internal.execution.steps.ExecuteStep$1.call(ExecuteStep.java:56)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.5678411Z 	at org.gradle.internal.operations.DefaultBuildOperationRunner$CallableBuildOperationWorker.execute(DefaultBuildOperationRunner.java:210)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.5680159Z 	at org.gradle.internal.operations.DefaultBuildOperationRunner$CallableBuildOperationWorker.execute(DefaultBuildOperationRunner.java:205)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.5682128Z 	at org.gradle.internal.operations.DefaultBuildOperationRunner$2.execute(DefaultBuildOperationRunner.java:67)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.5683460Z 	at org.gradle.internal.operations.DefaultBuildOperationRunner$2.execute(DefaultBuildOperationRunner.java:60)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.5685009Z 	at org.gradle.internal.operations.DefaultBuildOperationRunner.execute(DefaultBuildOperationRunner.java:167)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.5686372Z 	at org.gradle.internal.operations.DefaultBuildOperationRunner.execute(DefaultBuildOperationRunner.java:60)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.5687679Z 	at org.gradle.internal.operations.DefaultBuildOperationRunner.call(DefaultBuildOperationRunner.java:54)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.5688825Z 	at org.gradle.internal.execution.steps.ExecuteStep.execute(ExecuteStep.java:56)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.5689932Z 	at org.gradle.internal.execution.steps.ExecuteStep.execute(ExecuteStep.java:44)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.5691002Z 	at org.gradle.internal.execution.steps.CancelExecutionStep.execute(CancelExecutionStep.java:42)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.5692186Z 	at org.gradle.internal.execution.steps.TimeoutStep.executeWithoutTimeout(TimeoutStep.java:75)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.5693334Z 	at org.gradle.internal.execution.steps.TimeoutStep.execute(TimeoutStep.java:55)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.5694778Z 	at org.gradle.internal.execution.steps.PreCreateOutputParentsStep.execute(PreCreateOutputParentsStep.java:50)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.5696321Z 	at org.gradle.internal.execution.steps.PreCreateOutputParentsStep.execute(PreCreateOutputParentsStep.java:28)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.5697871Z 	at org.gradle.internal.execution.steps.RemovePreviousOutputsStep.execute(RemovePreviousOutputsStep.java:67)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.5699395Z 	at org.gradle.internal.execution.steps.RemovePreviousOutputsStep.execute(RemovePreviousOutputsStep.java:37)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.5700985Z 	at org.gradle.internal.execution.steps.BroadcastChangingOutputsStep.execute(BroadcastChangingOutputsStep.java:61)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.5702461Z 	at org.gradle.internal.execution.steps.BroadcastChangingOutputsStep.execute(BroadcastChangingOutputsStep.java:26)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.5704040Z 	at org.gradle.internal.execution.steps.CaptureOutputsAfterExecutionStep.execute(CaptureOutputsAfterExecutionStep.java:69)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.5766517Z 	at org.gradle.internal.execution.steps.CaptureOutputsAfterExecutionStep.execute(CaptureOutputsAfterExecutionStep.java:46)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.5768210Z 	at org.gradle.internal.execution.steps.ResolveInputChangesStep.execute(ResolveInputChangesStep.java:40)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.5769654Z 	at org.gradle.internal.execution.steps.ResolveInputChangesStep.execute(ResolveInputChangesStep.java:29)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.5771054Z 	at org.gradle.internal.execution.steps.BuildCacheStep.executeWithoutCache(BuildCacheStep.java:189)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.5772795Z 	at org.gradle.internal.execution.steps.BuildCacheStep.lambda$execute$1(BuildCacheStep.java:75)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.5773780Z 	at org.gradle.internal.Either$Right.fold(Either.java:175)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.5774870Z 	at org.gradle.internal.execution.caching.CachingState.fold(CachingState.java:62)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.5775963Z 	at org.gradle.internal.execution.steps.BuildCacheStep.execute(BuildCacheStep.java:73)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.5777090Z 	at org.gradle.internal.execution.steps.BuildCacheStep.execute(BuildCacheStep.java:48)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.5778368Z 	at org.gradle.internal.execution.steps.StoreExecutionStateStep.execute(StoreExecutionStateStep.java:46)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.5779818Z 	at org.gradle.internal.execution.steps.StoreExecutionStateStep.execute(StoreExecutionStateStep.java:35)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.5781195Z 	at org.gradle.internal.execution.steps.SkipUpToDateStep.executeBecause(SkipUpToDateStep.java:75)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.5782528Z 	at org.gradle.internal.execution.steps.SkipUpToDateStep.lambda$execute$2(SkipUpToDateStep.java:53)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.5783765Z 	at org.gradle.internal.execution.steps.SkipUpToDateStep.execute(SkipUpToDateStep.java:53)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.5785148Z 	at org.gradle.internal.execution.steps.SkipUpToDateStep.execute(SkipUpToDateStep.java:35)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.5786931Z 	at org.gradle.internal.execution.steps.legacy.MarkSnapshottingInputsFinishedStep.execute(MarkSnapshottingInputsFinishedStep.java:37)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.5788881Z 	at org.gradle.internal.execution.steps.legacy.MarkSnapshottingInputsFinishedStep.execute(MarkSnapshottingInputsFinishedStep.java:27)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.5790706Z 	at org.gradle.internal.execution.steps.ResolveIncrementalCachingStateStep.executeDelegate(ResolveIncrementalCachingStateStep.java:49)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.5792582Z 	at org.gradle.internal.execution.steps.ResolveIncrementalCachingStateStep.executeDelegate(ResolveIncrementalCachingStateStep.java:27)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.5794404Z 	at org.gradle.internal.execution.steps.AbstractResolveCachingStateStep.execute(AbstractResolveCachingStateStep.java:71)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.5859149Z 	at org.gradle.internal.execution.steps.AbstractResolveCachingStateStep.execute(AbstractResolveCachingStateStep.java:39)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.5860846Z 	at org.gradle.internal.execution.steps.ResolveChangesStep.execute(ResolveChangesStep.java:65)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.5862209Z 	at org.gradle.internal.execution.steps.ResolveChangesStep.execute(ResolveChangesStep.java:36)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.5863440Z 	at org.gradle.internal.execution.steps.ValidateStep.execute(ValidateStep.java:107)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.5864849Z 	at org.gradle.internal.execution.steps.ValidateStep.execute(ValidateStep.java:56)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.5866516Z 	at org.gradle.internal.execution.steps.AbstractCaptureStateBeforeExecutionStep.execute(AbstractCaptureStateBeforeExecutionStep.java:64)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.5868628Z 	at org.gradle.internal.execution.steps.AbstractCaptureStateBeforeExecutionStep.execute(AbstractCaptureStateBeforeExecutionStep.java:43)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.5870750Z 	at org.gradle.internal.execution.steps.AbstractSkipEmptyWorkStep.executeWithNonEmptySources(AbstractSkipEmptyWorkStep.java:125)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.5872580Z 	at org.gradle.internal.execution.steps.AbstractSkipEmptyWorkStep.execute(AbstractSkipEmptyWorkStep.java:61)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.5874232Z 	at org.gradle.internal.execution.steps.AbstractSkipEmptyWorkStep.execute(AbstractSkipEmptyWorkStep.java:36)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.5876346Z 	at org.gradle.internal.execution.steps.legacy.MarkSnapshottingInputsStartedStep.execute(MarkSnapshottingInputsStartedStep.java:38)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.5878277Z 	at org.gradle.internal.execution.steps.LoadPreviousExecutionStateStep.execute(LoadPreviousExecutionStateStep.java:36)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.5880080Z 	at org.gradle.internal.execution.steps.LoadPreviousExecutionStateStep.execute(LoadPreviousExecutionStateStep.java:23)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.5881732Z 	at org.gradle.internal.execution.steps.HandleStaleOutputsStep.execute(HandleStaleOutputsStep.java:75)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.5883777Z 	at org.gradle.internal.execution.steps.HandleStaleOutputsStep.execute(HandleStaleOutputsStep.java:41)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.5945760Z 	at org.gradle.internal.execution.steps.AssignMutableWorkspaceStep.lambda$execute$0(AssignMutableWorkspaceStep.java:35)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.5947292Z 	at org.gradle.api.internal.tasks.execution.TaskExecution$4.withWorkspace(TaskExecution.java:289)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.5948725Z 	at org.gradle.internal.execution.steps.AssignMutableWorkspaceStep.execute(AssignMutableWorkspaceStep.java:31)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.5950317Z 	at org.gradle.internal.execution.steps.AssignMutableWorkspaceStep.execute(AssignMutableWorkspaceStep.java:22)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.5951982Z 	at org.gradle.internal.execution.steps.ChoosePipelineStep.execute(ChoosePipelineStep.java:40)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.5953291Z 	at org.gradle.internal.execution.steps.ChoosePipelineStep.execute(ChoosePipelineStep.java:23)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.5955119Z 	at org.gradle.internal.execution.steps.ExecuteWorkBuildOperationFiringStep.lambda$execute$2(ExecuteWorkBuildOperationFiringStep.java:67)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.5957202Z 	at org.gradle.internal.execution.steps.ExecuteWorkBuildOperationFiringStep.execute(ExecuteWorkBuildOperationFiringStep.java:67)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.5959364Z 	at org.gradle.internal.execution.steps.ExecuteWorkBuildOperationFiringStep.execute(ExecuteWorkBuildOperationFiringStep.java:39)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.5960907Z 	at org.gradle.internal.execution.steps.IdentityCacheStep.execute(IdentityCacheStep.java:46)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.5962151Z 	at org.gradle.internal.execution.steps.IdentityCacheStep.execute(IdentityCacheStep.java:34)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.5963313Z 	at org.gradle.internal.execution.steps.IdentifyStep.execute(IdentifyStep.java:48)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.5964401Z 	at org.gradle.internal.execution.steps.IdentifyStep.execute(IdentifyStep.java:35)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.5965855Z 	at org.gradle.internal.execution.impl.DefaultExecutionEngine$1.execute(DefaultExecutionEngine.java:61)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.5967453Z 	at org.gradle.api.internal.tasks.execution.ExecuteActionsTaskExecuter.executeIfValid(ExecuteActionsTaskExecuter.java:127)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.5969147Z 	at org.gradle.api.internal.tasks.execution.ExecuteActionsTaskExecuter.execute(ExecuteActionsTaskExecuter.java:116)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.5970956Z 	at org.gradle.api.internal.tasks.execution.ProblemsTaskPathTrackingTaskExecuter.execute(ProblemsTaskPathTrackingTaskExecuter.java:40)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.5972877Z 	at org.gradle.api.internal.tasks.execution.FinalizePropertiesTaskExecuter.execute(FinalizePropertiesTaskExecuter.java:46)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.6025370Z 	at org.gradle.api.internal.tasks.execution.ResolveTaskExecutionModeExecuter.execute(ResolveTaskExecutionModeExecuter.java:51)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.6027317Z 	at org.gradle.api.internal.tasks.execution.SkipTaskWithNoActionsExecuter.execute(SkipTaskWithNoActionsExecuter.java:57)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.6028924Z 	at org.gradle.api.internal.tasks.execution.SkipOnlyIfTaskExecuter.execute(SkipOnlyIfTaskExecuter.java:74)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.6030485Z 	at org.gradle.api.internal.tasks.execution.CatchExceptionTaskExecuter.execute(CatchExceptionTaskExecuter.java:36)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.6032072Z 	at org.gradle.api.internal.tasks.execution.EventFiringTaskExecuter$1.executeTask(EventFiringTaskExecuter.java:77)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.6033585Z 	at org.gradle.api.internal.tasks.execution.EventFiringTaskExecuter$1.call(EventFiringTaskExecuter.java:55)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.6035206Z 	at org.gradle.api.internal.tasks.execution.EventFiringTaskExecuter$1.call(EventFiringTaskExecuter.java:52)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.6036921Z 	at org.gradle.internal.operations.DefaultBuildOperationRunner$CallableBuildOperationWorker.execute(DefaultBuildOperationRunner.java:210)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.6038845Z 	at org.gradle.internal.operations.DefaultBuildOperationRunner$CallableBuildOperationWorker.execute(DefaultBuildOperationRunner.java:205)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.6040561Z 	at org.gradle.internal.operations.DefaultBuildOperationRunner$2.execute(DefaultBuildOperationRunner.java:67)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.6042367Z 	at org.gradle.internal.operations.DefaultBuildOperationRunner$2.execute(DefaultBuildOperationRunner.java:60)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.6043911Z 	at org.gradle.internal.operations.DefaultBuildOperationRunner.execute(DefaultBuildOperationRunner.java:167)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.6045670Z 	at org.gradle.internal.operations.DefaultBuildOperationRunner.execute(DefaultBuildOperationRunner.java:60)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.6047136Z 	at org.gradle.internal.operations.DefaultBuildOperationRunner.call(DefaultBuildOperationRunner.java:54)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.6048605Z 	at org.gradle.api.internal.tasks.execution.EventFiringTaskExecuter.execute(EventFiringTaskExecuter.java:52)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.6049949Z 	at org.gradle.execution.plan.LocalTaskNodeExecutor.execute(LocalTaskNodeExecutor.java:42)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.6051450Z 	at org.gradle.execution.taskgraph.DefaultTaskExecutionGraph$InvokeNodeExecutorsAction.execute(DefaultTaskExecutionGraph.java:331)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.6053258Z 	at org.gradle.execution.taskgraph.DefaultTaskExecutionGraph$InvokeNodeExecutorsAction.execute(DefaultTaskExecutionGraph.java:318)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.6125679Z 	at org.gradle.execution.taskgraph.DefaultTaskExecutionGraph$BuildOperationAwareExecutionAction.lambda$execute$0(DefaultTaskExecutionGraph.java:314)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.6127839Z 	at org.gradle.internal.operations.CurrentBuildOperationRef.with(CurrentBuildOperationRef.java:85)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.6129523Z 	at org.gradle.execution.taskgraph.DefaultTaskExecutionGraph$BuildOperationAwareExecutionAction.execute(DefaultTaskExecutionGraph.java:314)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.6131512Z 	at org.gradle.execution.taskgraph.DefaultTaskExecutionGraph$BuildOperationAwareExecutionAction.execute(DefaultTaskExecutionGraph.java:303)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.6133170Z 	at org.gradle.execution.plan.DefaultPlanExecutor$ExecutorWorker.execute(DefaultPlanExecutor.java:459)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.6134480Z 	at org.gradle.execution.plan.DefaultPlanExecutor$ExecutorWorker.run(DefaultPlanExecutor.java:376)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.6136045Z 	at org.gradle.internal.concurrent.ExecutorPolicy$CatchAndRecordFailures.onExecute(ExecutorPolicy.java:64)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.6137367Z 	at org.gradle.internal.concurrent.AbstractManagedExecutor$1.run(AbstractManagedExecutor.java:48)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.6138897Z Caused by: org.jetbrains.kotlin.gradle.tasks.CompilationErrorException: Compilation error. See log for more details
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.6140398Z 	at org.jetbrains.kotlin.gradle.tasks.TasksUtilsKt.throwExceptionIfCompilationFailed(tasksUtils.kt:21)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.6141826Z 	at org.jetbrains.kotlin.compilerRunner.GradleKotlinCompilerWork.run(GradleKotlinCompilerWork.kt:119)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.6143614Z 	at org.jetbrains.kotlin.compilerRunner.GradleCompilerRunnerWithWorkers$GradleKotlinCompilerWorkAction.execute(GradleCompilerRunnerWithWorkers.kt:74)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.6145436Z 	at org.gradle.workers.internal.DefaultWorkerServer.execute(DefaultWorkerServer.java:63)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.6146697Z 	at org.gradle.workers.internal.NoIsolationWorkerFactory$1$1.create(NoIsolationWorkerFactory.java:66)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.6148035Z 	at org.gradle.workers.internal.NoIsolationWorkerFactory$1$1.create(NoIsolationWorkerFactory.java:62)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.6149417Z 	at org.gradle.internal.classloader.ClassLoaderUtils.executeInClassloader(ClassLoaderUtils.java:100)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.6150835Z 	at org.gradle.workers.internal.NoIsolationWorkerFactory$1.lambda$execute$0(NoIsolationWorkerFactory.java:62)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.6152042Z 	at org.gradle.workers.internal.AbstractWorker$1.call(AbstractWorker.java:44)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.6152976Z 	at org.gradle.workers.internal.AbstractWorker$1.call(AbstractWorker.java:41)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.6154355Z 	at org.gradle.internal.operations.DefaultBuildOperationRunner$CallableBuildOperationWorker.execute(DefaultBuildOperationRunner.java:210)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.6216791Z 	at org.gradle.internal.operations.DefaultBuildOperationRunner$CallableBuildOperationWorker.execute(DefaultBuildOperationRunner.java:205)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.6218939Z 	at org.gradle.internal.operations.DefaultBuildOperationRunner$2.execute(DefaultBuildOperationRunner.java:67)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.6220463Z 	at org.gradle.internal.operations.DefaultBuildOperationRunner$2.execute(DefaultBuildOperationRunner.java:60)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.6221995Z 	at org.gradle.internal.operations.DefaultBuildOperationRunner.execute(DefaultBuildOperationRunner.java:167)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.6223522Z 	at org.gradle.internal.operations.DefaultBuildOperationRunner.execute(DefaultBuildOperationRunner.java:60)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.6225243Z 	at org.gradle.internal.operations.DefaultBuildOperationRunner.call(DefaultBuildOperationRunner.java:54)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.6226711Z 	at org.gradle.workers.internal.AbstractWorker.executeWrappedInBuildOperation(AbstractWorker.java:41)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.6228085Z 	at org.gradle.workers.internal.NoIsolationWorkerFactory$1.execute(NoIsolationWorkerFactory.java:59)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.6229453Z 	at org.gradle.workers.internal.DefaultWorkerExecutor.lambda$submitWork$0(DefaultWorkerExecutor.java:174)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.6231076Z 	at org.gradle.internal.work.DefaultConditionalExecutionQueue$ExecutionRunner.runExecution(DefaultConditionalExecutionQueue.java:194)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.6233102Z 	at org.gradle.internal.work.DefaultConditionalExecutionQueue$ExecutionRunner.access$700(DefaultConditionalExecutionQueue.java:127)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.6235075Z 	at org.gradle.internal.work.DefaultConditionalExecutionQueue$ExecutionRunner$1.run(DefaultConditionalExecutionQueue.java:169)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.6236302Z 	at org.gradle.internal.Factories$1.create(Factories.java:31)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.6237330Z 	at org.gradle.internal.work.DefaultWorkerLeaseService.withLocks(DefaultWorkerLeaseService.java:263)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.6238744Z 	at org.gradle.internal.work.DefaultWorkerLeaseService.runAsWorkerThread(DefaultWorkerLeaseService.java:127)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.6240248Z 	at org.gradle.internal.work.DefaultWorkerLeaseService.runAsWorkerThread(DefaultWorkerLeaseService.java:132)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.6241897Z 	at org.gradle.internal.work.DefaultConditionalExecutionQueue$ExecutionRunner.runBatch(DefaultConditionalExecutionQueue.java:164)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.6243650Z 	at org.gradle.internal.work.DefaultConditionalExecutionQueue$ExecutionRunner.run(DefaultConditionalExecutionQueue.java:133)
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.6306847Z 	... 2 more
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.6307082Z 
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.6307092Z 
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.6307232Z BUILD FAILED in 2m 42s
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:37.6307637Z 65 actionable tasks: 65 executed
+compile	Required JVM checks and Android source compilation	2026-10-18T12:29:38.1109221Z ##[error]Process completed with exit code 1.
