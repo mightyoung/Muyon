@@ -1,4 +1,4 @@
-# Next combination handoff — native integration verified, product gates pending
+# Next combination handoff — Rust/FFI tested, product gates pending
 
 Old batch frozen remote lab/overall-combination-20261022 atd5a2ff0f, tested code
 7b7d8062: strictClippy0 (authorizedsave-onlyABIallowance), workspace435PASS,
