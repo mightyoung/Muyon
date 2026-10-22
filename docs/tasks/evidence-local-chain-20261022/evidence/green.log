@@ -1,0 +1,35 @@
+warning: methods `document_access_in_transaction` and `document_grant_in_transaction` are never used
+   --> muyon-core/src/documents/storage.rs:211:19
+    |
+ 75 | impl BusinessStore {
+    | ------------------ methods in this implementation
+...
+211 |     pub(crate) fn document_access_in_transaction(
+    |                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+...
+227 |     pub(crate) fn document_grant_in_transaction(
+    |                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: `muyon-core` (lib) generated 1 warning
+   Compiling muyon-core v0.1.0 (/workspace/Muyon/crates/muyon-core)
+    Finished `test` profile [unoptimized] target(s) in 0.27s
+     Running tests/evidence_local.rs (crates/target/debug/deps/evidence_local-1be9f1693f6a1f58)
+
+running 12 tests
+test anchored_request_and_inspect_do_not_expand_to_whole_text ... ok
+test cache_access_rechecks_revision_scope_and_revocation ... ok
+test changed_blob_and_authority_invalidate_existing_derivation ... ok
+test body_citations_and_candidates_are_separate_and_citation_numbers_are_stable ... ok
+test debug_never_discloses_cached_text_after_revocation ... ok
+test citation_order_is_explicit_and_repeated_processing_has_same_identity ... ok
+test failed_decoding_empty_and_changed_bytes_are_distinct_from_success ... ok
+test no_read_permission_never_gains_whole_text ... ok
+test forged_ranges_source_and_page_do_not_resolve ... ok
+test revocation_between_checks_never_delivers_extraction ... ok
+test pdf_and_ocr_never_manufacture_content ... ok
+test synthetic_text_has_real_receipt_and_bound_utf8_anchor ... ok
+
+test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
