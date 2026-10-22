@@ -85,7 +85,7 @@ def inspect(path, limits=None):
                   dimensions={key: dict(status='not_run', reason='No engine installed or invoked')
                               for key in ('structure', 'visual', 'formula', 'annotation', 'render', 'recalc')})
     try:
-        with Path(path).open('rb') as stream:
+        with os.fdopen(os.open(path, os.O_RDONLY | os.O_NONBLOCK), 'rb') as stream:
             if not stat.S_ISREG(os.fstat(stream.fileno()).st_mode):
                 raise ValueError('regular file required')
             data = stream.read(cap['max_file'] + 1)
@@ -138,6 +138,22 @@ def inspect_zip(data, suffix, report, cap):
         return
     if cd_offset + cd_size != end:
         finding(report, 'invalid_zip')
+        return
+    # Walk fixed-size central header fields without allocating ZipInfo objects.
+    # EOCD counts alone are untrusted and may understate the real entry count.
+    cursor, actual_count = cd_offset, 0
+    while cursor < end:
+        if cursor + 46 > end or data[cursor:cursor + 4] != b'PK\x01\x02':
+            finding(report, 'invalid_zip', detail='Malformed central directory')
+            return
+        name_size, extra_size, comment_size = struct.unpack_from('<HHH', data, cursor + 28)
+        cursor += 46 + name_size + extra_size + comment_size
+        actual_count += 1
+        if actual_count > cap['max_members']:
+            finding(report, 'archive_limits')
+            return
+    if cursor != end or actual_count != count:
+        finding(report, 'invalid_zip', detail='Central directory count/length disagreement')
         return
     try:
         with zipfile.ZipFile(io.BytesIO(data)) as archive:
@@ -242,7 +258,8 @@ def inspect_parts(parts, suffix, report, cap):
             except (expat.ExpatError, ET.ParseError, ValueError):
                 finding(report, 'unsafe_or_invalid_xml', name)
     detected = [kind for kind, spec in SPECS.items() if overrides.get(spec[0]) == spec[1]]
-    if len(detected) != 1:
+    declared_mains = [name for name, mime in overrides.items() if mime.lower().endswith('.main+xml')]
+    if len(detected) != 1 or len(declared_mains) != 1:
         finding(report, 'unsupported_main_type', detail='Expected one supported non-macro OOXML main type')
         return
     kind = detected[0]

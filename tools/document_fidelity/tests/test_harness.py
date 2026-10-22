@@ -178,6 +178,30 @@ class AdditionalBoundaryTests(unittest.TestCase):
         p.write_bytes(data)
         self.reject(p, 'invalid_zip')
 
+    def test_second_unsupported_office_main_is_ambiguous(self):
+        members = parts()
+        members['xl/workbook.xml'] = f'<workbook xmlns="{SPECS["xlsx"][2]}"/>'.encode()
+        members['[Content_Types].xml'] = members['[Content_Types].xml'].replace(b'</Types>', b'<Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.template.main+xml"/></Types>')
+        self.reject(self.sample(members=members), 'unsupported_main_type')
+
+    def test_forged_eocd_count_rejected_before_zipfile_allocation(self):
+        from unittest.mock import patch
+        p = self.sample(); data = bytearray(p.read_bytes())
+        end = data.rfind(b'PK\x05\x06')
+        struct.pack_into('<HH', data, end + 8, 1, 1)
+        p.write_bytes(data)
+        # Real malformed bytes, forbid entering the allocating metadata parser.
+        with patch('tools.document_fidelity.harness.zipfile.ZipFile', side_effect=AssertionError('untrusted metadata reached ZipFile')):
+            self.reject(p, 'invalid_zip')
+
+    @unittest.skipUnless(hasattr(__import__('os'), 'mkfifo'), 'POSIX FIFO required')
+    def test_fifo_input_rejects_without_waiting_for_writer(self):
+        import os
+        p = self.dir / 'input.docx'; os.mkfifo(p)
+        r = subprocess.run([sys.executable, '-m', 'tools.document_fidelity.harness', str(p)], capture_output=True, text=True, timeout=2)
+        self.assertEqual(2, r.returncode, r.stderr)
+        self.assertEqual('input_error', json.loads(r.stdout)['findings'][0]['code'])
+
     def test_local_header_encryption_and_flags_disagreement(self):
         for flag, code in ((1, 'encrypted'), (8, 'invalid_zip')):
             with self.subTest(flag=flag):

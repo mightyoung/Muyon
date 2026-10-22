@@ -1,0 +1,50 @@
+test_forged_eocd_count_rejected_before_zipfile_allocation (tools.document_fidelity.tests.test_harness.AdditionalBoundaryTests.test_forged_eocd_count_rejected_before_zipfile_allocation) ... FAIL
+test_fifo_input_rejects_without_waiting_for_writer (tools.document_fidelity.tests.test_harness.AdditionalBoundaryTests.test_fifo_input_rejects_without_waiting_for_writer) ... ERROR
+
+======================================================================
+ERROR: test_fifo_input_rejects_without_waiting_for_writer (tools.document_fidelity.tests.test_harness.AdditionalBoundaryTests.test_fifo_input_rejects_without_waiting_for_writer)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/document-fidelity/tools/document_fidelity/tests/test_harness.py", line 195, in test_fifo_input_rejects_without_waiting_for_writer
+    r = subprocess.run([sys.executable, '-m', 'tools.document_fidelity.harness', str(p)], capture_output=True, text=True, timeout=2)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/subprocess.py", line 550, in run
+    stdout, stderr = process.communicate(input, timeout=timeout)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/subprocess.py", line 1209, in communicate
+    stdout, stderr = self._communicate(input, endtime, timeout)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/subprocess.py", line 2116, in _communicate
+    self._check_timeout(endtime, orig_timeout, stdout, stderr)
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/subprocess.py", line 1253, in _check_timeout
+    raise TimeoutExpired(
+subprocess.TimeoutExpired: Command '['/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3', '-m', 'tools.document_fidelity.harness', '/tmp/tmpxr33sgis/input.docx']' timed out after 2 seconds
+
+======================================================================
+FAIL: test_forged_eocd_count_rejected_before_zipfile_allocation (tools.document_fidelity.tests.test_harness.AdditionalBoundaryTests.test_forged_eocd_count_rejected_before_zipfile_allocation)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/document-fidelity/tools/document_fidelity/tests/test_harness.py", line 189, in test_forged_eocd_count_rejected_before_zipfile_allocation
+    self.reject(p, 'invalid_zip')
+  File "/workspace/document-fidelity/tools/document_fidelity/tests/test_harness.py", line 47, in reject
+    r = inspect(p)
+        ^^^^^^^^^^
+  File "/workspace/document-fidelity/tools/document_fidelity/harness.py", line 113, in inspect
+    inspect_zip(data, suffix, report, cap)
+  File "/workspace/document-fidelity/tools/document_fidelity/harness.py", line 143, in inspect_zip
+    with zipfile.ZipFile(io.BytesIO(data)) as archive:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/unittest/mock.py", line 1139, in __call__
+    return self._mock_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/unittest/mock.py", line 1143, in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/unittest/mock.py", line 1198, in _execute_mock_call
+    raise effect
+AssertionError: untrusted metadata reached ZipFile
+
+----------------------------------------------------------------------
+Ran 2 tests in 2.058s
+
+FAILED (failures=1, errors=1)
