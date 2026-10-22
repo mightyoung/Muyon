@@ -235,10 +235,8 @@ impl BusinessStore {
         view.resolve_current(&view.request()).map_err(|_| ContractError::InvalidAuthority)?;
         self.release_document_reader(&reader.borrow())?;
         drop(reader.into_inner());
-        // Reauthorize after cleanup, without requiring the deliberately deleted
-        // reader pin. A cleanup-triggered revocation/expiry must withhold value.
-        let current = self.document_access_in_transaction(&tx, access, &[purpose.operation()])?;
-        if current != metadata { return Err(ContractError::BindingMismatch.into()); }
+        // Finish cleanup before its delivery check, retaining any durable
+        // authority changes made during cleanup instead of undoing them.
         tx.commit().map_err(|_| ContractError::Unknown)?;
         // The write COMMIT itself may wait. Do not let pre-COMMIT authority
         // authorize output after that wait; this final transaction is read-only.
