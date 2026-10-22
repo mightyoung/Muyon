@@ -89,10 +89,12 @@ impl SaveRequest {
         Ok(())
     }
 }
-fn requires_original_lookup(error: &ContractError) -> bool {
+pub(super) fn requires_original_lookup(error: &ContractError) -> bool {
     matches!(error, ContractError::Unknown | ContractError::Storage | ContractError::StorageBusy | ContractError::StorageConstraint | ContractError::StorageCorrupt | ContractError::StorageIo)
 }
 
+#[derive(Clone, Copy)]
+pub(super) enum JournalDomain { Artifact, Local }
 /// Internal effect phase: a receipt-tail invalidation cannot become a durable
 /// rejection. Its effect transaction must roll back, leaving the original pending.
 pub(super) enum ArtifactSaveFailure {
@@ -103,8 +105,30 @@ impl From<ContractError> for ArtifactSaveFailure {
     fn from(error: ContractError) -> Self { Self::BeforeReceipt(error) }
 }
 impl BusinessStore {
-    fn artifact_save_rows(&self, intent: &str) -> Result<Vec<Vec<Option<String>>>> {
-        sql(self.database().query("SELECT CASE WHEN length(CAST(binding_digest AS BLOB))<=64 THEN binding_digest ELSE NULL END,CASE WHEN length(CAST(request_json AS BLOB))<=65536 THEN request_json ELSE NULL END,CASE WHEN length(CAST(status AS BLOB))<=16 THEN status ELSE NULL END,CASE WHEN length(CAST(receipt_json AS BLOB))<=8192 THEN receipt_json ELSE NULL END,CASE WHEN length(CAST(error AS BLOB))<=128 THEN error ELSE NULL END FROM artifact_save_intents_v1 WHERE intent_id=?", &[intent]))
+    fn artifact_save_rows(&self, intent: &str) -> Result<Vec<Vec<Option<String>>>> { self.journal_rows(JournalDomain::Artifact, intent) }
+    pub(super) fn journal_rows(&self, domain: JournalDomain, intent: &str) -> Result<Vec<Vec<Option<String>>>> {
+        let query = match domain {
+            JournalDomain::Artifact => "SELECT CASE WHEN length(CAST(binding_digest AS BLOB))<=64 THEN binding_digest ELSE NULL END,CASE WHEN length(CAST(request_json AS BLOB))<=65536 THEN request_json ELSE NULL END,CASE WHEN length(CAST(status AS BLOB))<=16 THEN status ELSE NULL END,CASE WHEN length(CAST(receipt_json AS BLOB))<=8192 THEN receipt_json ELSE NULL END,CASE WHEN length(CAST(error AS BLOB))<=128 THEN error ELSE NULL END FROM artifact_save_intents_v1 WHERE intent_id=?",
+            JournalDomain::Local => "SELECT CASE WHEN length(CAST(binding_digest AS BLOB))<=64 THEN binding_digest ELSE NULL END,CASE WHEN length(CAST(request_json AS BLOB))<=65536 THEN request_json ELSE NULL END,CASE WHEN length(CAST(status AS BLOB))<=16 THEN status ELSE NULL END,CASE WHEN length(CAST(receipt_json AS BLOB))<=8192 THEN receipt_json ELSE NULL END,CASE WHEN length(CAST(error AS BLOB))<=128 THEN error ELSE NULL END FROM artifact_local_intents_v1 WHERE intent_id=?",
+        };
+        sql(self.database().query(query, &[intent]))
+    }
+    #[allow(clippy::too_many_arguments)]
+    pub(super) fn journal_pending(&self, domain: JournalDomain, intent: &str, project: &str, actor: &str, digest: &str, json: &str, object_id: &str) -> Result<()> {
+        match domain {
+            JournalDomain::Artifact => sql(self.database().exec("INSERT INTO artifact_save_intents_v1 VALUES(?,?,?,?,?,'pending',NULL,NULL)", &[intent, project, actor, digest, json]))?,
+            JournalDomain::Local => sql(self.database().exec("INSERT INTO artifact_local_intents_v1 VALUES(?,?,?,?,?,'pending',NULL,NULL,?)", &[intent, project, actor, digest, json, object_id]))?,
+        };
+        Ok(())
+    }
+    pub(super) fn journal_commit_receipt(&self, domain: JournalDomain, intent: &str, digest: &str, receipt: &str) -> Result<()> {
+        if receipt.len() > 8192 { return Err(ContractError::TextLimit); }
+        let query = match domain {
+            JournalDomain::Artifact => "UPDATE artifact_save_intents_v1 SET status='committed',receipt_json=?,error=NULL WHERE intent_id=? AND binding_digest=? AND status='pending'",
+            JournalDomain::Local => "UPDATE artifact_local_intents_v1 SET status='committed',receipt_json=?,error=NULL WHERE intent_id=? AND binding_digest=? AND status='pending'",
+        };
+        if sql(self.database().exec(query, &[receipt, intent, digest]))? != 1 { return Err(ContractError::StorageCorrupt); }
+        Ok(())
     }
     fn artifact_save_projection(&self, intent: &str, row: &[Option<String>], access: &ArtifactProjectAccess) -> Result<ArtifactSaveOutcome> {
         let request: SaveRequest = decode(cell(row, 1)?)?;
@@ -155,7 +179,7 @@ impl BusinessStore {
             }
             self.artifact_access(&tx, output, true)?;
             self.artifact_sources(&tx, output, sources)?;
-            sql(self.database().exec("INSERT INTO artifact_save_intents_v1 VALUES(?,?,?,?,?,'pending',NULL,NULL)", &[intent, access.project_id()?, &access.actor_id, digest, json]))?;
+            self.journal_pending(JournalDomain::Artifact, intent, access.project_id()?, &access.actor_id, digest, json, "")?;
             self.artifact_project_authorize(&tx, access, ArtifactProjectOperation::Save)?;
             sql(tx.commit())?; // PENDING_DURABLE: no artifact/document effect yet.
         }
@@ -171,8 +195,8 @@ impl BusinessStore {
             };
             let receipt = ArtifactSaveReceipt { intent_id: intent.into(), binding_digest: digest.into(), scope: access.scope.clone(), actor_id: access.actor_id.clone(), artifact_id: record.artifact_id.clone(), artifact_revision: record.revision.clone(), document: record.document.document.clone() };
             let request: SaveRequest = decode(json)?; request.validate_receipt(&receipt, digest)?;
-            let changed = sql(self.database().exec("UPDATE artifact_save_intents_v1 SET status='committed',receipt_json=?,error=NULL WHERE intent_id=? AND binding_digest=? AND status='pending'", &[&encode(&receipt)?, intent, digest]))?;
-            if changed != 1 { return Err(ArtifactSaveFailure::ReceiptTail(ContractError::StorageCorrupt)); }
+            self.journal_commit_receipt(JournalDomain::Artifact, intent, digest, &encode(&receipt)?)
+                .map_err(ArtifactSaveFailure::ReceiptTail)?;
             // This is the last write. A receipt trigger can invalidate grants
             // after the helpers' earlier checks; recheck every authority here.
             // The output head has advanced on revise: grant-only is correct for
@@ -191,7 +215,8 @@ impl BusinessStore {
             Err(failure) => self.artifact_save_failure_outcome(intent, digest, failure),
         }
     }
-    pub(super) fn artifact_save_failure_outcome(&self, intent: &str, digest: &str, failure: ArtifactSaveFailure) -> Result<ArtifactSaveOutcome> {
+    pub(super) fn artifact_save_failure_outcome(&self, intent: &str, digest: &str, failure: ArtifactSaveFailure) -> Result<ArtifactSaveOutcome> { self.journal_failure_outcome(JournalDomain::Artifact, intent, digest, failure) }
+    pub(super) fn journal_failure_outcome(&self, domain: JournalDomain, intent: &str, digest: &str, failure: ArtifactSaveFailure) -> Result<ArtifactSaveOutcome> {
         let error = match failure {
             ArtifactSaveFailure::ReceiptTail(error) => return Ok(ArtifactSaveOutcome::unknown(error)),
             ArtifactSaveFailure::BeforeReceipt(error) => error,
@@ -204,7 +229,11 @@ impl BusinessStore {
         // Failed effect transaction has dropped and rolled back before a
         // determinate semantic rejection is journaled in a separate transaction.
         let tx = sql(self.database().transaction())?;
-        let changed = sql(self.database().exec("UPDATE artifact_save_intents_v1 SET status='rejected',error=? WHERE intent_id=? AND binding_digest=? AND status='pending'", &[&encode(&error)?, intent, digest]))?;
+        let query = match domain {
+            JournalDomain::Artifact => "UPDATE artifact_save_intents_v1 SET status='rejected',error=? WHERE intent_id=? AND binding_digest=? AND status='pending'",
+            JournalDomain::Local => "UPDATE artifact_local_intents_v1 SET status='rejected',error=? WHERE intent_id=? AND binding_digest=? AND status='pending'",
+        };
+        let changed = sql(self.database().exec(query, &[&encode(&error)?, intent, digest]))?;
         if changed != 1 { return Err(ContractError::StorageCorrupt); }
         sql(tx.commit())?;
         Ok(ArtifactSaveOutcome { status: ArtifactSaveStatus::Rejected, receipt: None, error: Some(error), recovery_action: RecoveryAction::None })

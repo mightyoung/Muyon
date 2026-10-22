@@ -1,5 +1,7 @@
 //! Same-crate source harness exercises actual pub(crate) BusinessStore seams.
 #![allow(dead_code)]
+#[path = "../src/documents/mod.rs"]
+mod documents;
 #[path = "../src/agent/mod.rs"]
 mod agent;
 #[path = "../src/archive.rs"]
@@ -10,8 +12,6 @@ mod blobs;
 mod business;
 #[path = "../src/contract.rs"]
 mod contract;
-#[path = "../src/documents/mod.rs"]
-mod documents;
 #[path = "../src/group_runtime/store.rs"]
 mod group_runtime_store;
 #[path = "../src/research.rs"]
@@ -1139,7 +1139,7 @@ fn rejected_update_ignored_returns_original_pending_instead_of_fabricated_reject
     );
 }
 #[test]
-fn changed_pending_does_not_return_rejected_without_a_persisted_terminal_receipt() {
+fn changed_pending_is_rolled_back_before_original_journal_commit() {
     let f = Fixture::new();
     let s = f.init();
     start(&s);
@@ -1154,19 +1154,27 @@ fn changed_pending_does_not_return_rejected_without_a_persisted_terminal_receipt
     s.issue_group_local_grant_trusted(&c).unwrap();
     s.database().exec("CREATE TRIGGER change_pending AFTER INSERT ON group_runtime_local_intents WHEN NEW.intent_id='reject-changed' BEGIN UPDATE group_runtime_local_intents SET status='committed' WHERE intent_id=NEW.intent_id; END",&[]).unwrap();
     assert_eq!(
-        s.execute_group_local(&c, None).unwrap().status,
-        LocalStatus::PendingOriginal
+        s.execute_group_local(&c, None).unwrap_err(),
+        ContractError::Storage
     );
-    assert_eq!(
-        s.database()
-            .query(
-                "SELECT receipt FROM group_runtime_local_intents WHERE intent_id='reject-changed'",
-                &[]
-            )
-            .unwrap()[0][0],
-        None
-    );
+    assert!(s
+        .database()
+        .query(
+            "SELECT receipt FROM group_runtime_local_intents WHERE intent_id='reject-changed'",
+            &[]
+        )
+        .unwrap()
+        .is_empty());
+    assert!(s
+        .database()
+        .query(
+            "SELECT command FROM group_runtime_intent_bindings WHERE intent_id='reject-changed'",
+            &[]
+        )
+        .unwrap()
+        .is_empty());
 }
+
 #[test]
 fn rejected_receipt_tail_tampering_returns_original_pending_instead_of_fabricated_rejection() {
     let f = Fixture::new();

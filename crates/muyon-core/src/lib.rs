@@ -23,3 +23,6 @@ pub mod group_governance;
 pub mod group_runtime;
 #[path = "group_runtime/store.rs"]
 pub mod group_runtime_store;
+
+#[path = "group_runtime/bridge.rs"]
+pub mod group_runtime_bridge;
