@@ -118,19 +118,19 @@ class ProductService : Service() {
                 tool("confirm_suggestion", request, session, generation, project, planId)
             }
         }, localDraftPort = object : ProductLocalDraftPort {
-            // Release gate: provider316 Rust passed; real FFI/bindings still pending.
-            // Enable only after fixed native + generated bindings + Android checks,
-            // and durable original-attempt recovery across process loss are verified.
+            // Real provider + FFI + generated bindings verified upstream at B88e810.
+            // Release gate remains durable original-attempt recovery across process
+            // loss and actual Android checks; this source now calls the real bridge.
             override val verified = false
-            private fun unavailable(): Nothing = error("local_draft_provider_not_released")
-            override fun resolve(conversation: String, project: String?): JSONObject = unavailable()
-            override fun read(conversation: String, project: String?, namespace: String, draft: String, generation: String, revision: String): JSONObject =
-                unavailable()
+            private fun data(raw: String) = nativeData(raw) as JSONObject
+            override fun resolve(conversation: String, project: String?) = data(open(false).localDraftResolve(conversation, project))
+            override fun read(conversation: String, project: String?, namespace: String, draft: String, generation: String, revision: String) =
+                data(open(false).localDraftRead(conversation, project, namespace, draft, generation, revision))
             override fun save(conversation: String, project: String?, namespace: String, draft: String, generation: String, revision: String,
-                attempt: String, exportedMemoryRevision: String, archive: ByteArray): JSONObject =
-                unavailable()
-            override fun lookup(conversation: String, project: String?, namespace: String, draft: String, attempt: String): JSONObject =
-                unavailable()
+                attempt: String, exportedMemoryRevision: String, archive: ByteArray) =
+                data(open(false).localDraftSave(conversation, project, namespace, draft, generation, revision, attempt, exportedMemoryRevision, archive))
+            override fun lookup(conversation: String, project: String?, namespace: String, draft: String, attempt: String) =
+                data(open(false).localDraftLookupSave(conversation, project, namespace, draft, attempt))
         })
     }
     override fun onBind(intent: Intent): IBinder = messenger.binder

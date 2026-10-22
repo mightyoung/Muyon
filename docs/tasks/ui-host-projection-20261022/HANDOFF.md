@@ -103,3 +103,15 @@ provider316+sole export combo f0ef760ba7253f38be8e26989ca99b82a76acf8b actually 
 provider19/19, core202, scoped fmt0. NULL Rust blocker is now closed. Only real FFI/
 generated bindings/cold-process original binding/Android gates above remain; do not
 keep labeling the fixed NULL issue pending or infer UI acceptance from Rust PASS.
+
+## Actual Service bridge continuation — latest
+
+SERVICE-BINDING-REPORT.md supersedes older missing-FFI/unapplied-callsite text.
+B's exact generated commit8255 is inherited unchanged; current bytes equal B88e810.
+Service now actually calls all four generated methods. Provider verified source+
+sole export is inherited via merge748daf9b; no direct Rust owner edit. Upstream
+Bworkspace405/FFI14 is supporting evidence, not a fresh run of this feature branch.
+Current consumer actual JVM runner and non-author review PASS; Android still NOT_RUN.
+verified=false now only preserves cold-process original-attempt/Android gates, not
+old closed NULL/cache/API gaps. Exact durable pending-journal request is in the report
+for sole Rust owner; it must supply real outstanding original pointer, never latest.
