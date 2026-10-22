@@ -16,6 +16,8 @@ mod storage_tests;
 use crate::contract::{AuthorityBinding, FileSource};
 pub use anchor::*;
 pub use annotation::*;
+// Public API of the library; unused only where this module is path-included by a bin or test.
+#[allow(unused_imports)]
 pub use candidate::{CandidateState, CandidateStatus};
 pub use capability::*;
 #[cfg(test)]

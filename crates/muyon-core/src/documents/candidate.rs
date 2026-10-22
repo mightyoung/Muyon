@@ -294,6 +294,9 @@ impl BusinessStore {
         tx.commit().map_err(|_| ContractError::Unknown)?;
         Ok(status)
     }
+    // Deliberately hard-denied publication hook: only the negative tests call it until a real
+    // validator exists. Scoped to this one item; the hook is neither removed nor enabled.
+    #[cfg_attr(not(test), allow(dead_code))]
     pub(crate) fn document_publish_candidate_in_transaction(
         &self,
         tx: &Transaction<'_>,
