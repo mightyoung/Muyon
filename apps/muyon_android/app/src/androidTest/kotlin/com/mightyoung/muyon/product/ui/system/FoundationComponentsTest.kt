@@ -5,6 +5,8 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.ui.Modifier
 import androidx.compose.runtime.*
+import androidx.compose.material3.LocalContentColor
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.test.*
@@ -15,6 +17,17 @@ import org.junit.Test
 
 class FoundationComponentsTest {
     @get:Rule val compose = createComposeRule()
+
+    @Test fun darkThemeProvidesReadableDefaultContentColorOutsideSurface() {
+        var actual = Color.Unspecified
+        compose.setContent {
+            FoundationTheme(dark = true) {
+                actual = LocalContentColor.current
+                FoundationEmptyState("No content", "Local component example")
+            }
+        }
+        compose.runOnIdle { assertEquals(FoundationTokens.dark.text, actual) }
+    }
 
     @Test fun unresolvedActionsCannotInvokeHost() {
         var calls = 0
@@ -31,6 +44,15 @@ class FoundationComponentsTest {
         listOf("Disabled", "Loading", "Unknown", "Missing").forEach {
             compose.onNodeWithText(it).assertIsNotEnabled()
         }
+        compose.runOnIdle { assertEquals(0, calls) }
+    }
+
+    @Test fun disabledSelectionCannotInvokeHostEvenThroughSemantics() {
+        var calls = 0
+        compose.setContent {
+            FoundationTheme { FoundationSelection("Unavailable choice", false, { calls++ }, enabled = false) }
+        }
+        compose.onNodeWithText("Unavailable choice").assertIsNotEnabled().performClick()
         compose.runOnIdle { assertEquals(0, calls) }
     }
 

@@ -45,7 +45,7 @@ fun FoundationTheme(
     val p = if (dark) FoundationTokens.dark else FoundationTokens.light
     val scheme = if (dark) darkColorScheme() else lightColorScheme()
     val type = Typography()
-    CompositionLocalProvider(LocalFoundationPalette provides p, LocalFoundationReduceMotion provides reduceMotion) {
+    CompositionLocalProvider(LocalFoundationPalette provides p, LocalFoundationReduceMotion provides reduceMotion, LocalContentColor provides p.text) {
         MaterialTheme(
             colorScheme = scheme.copy(
                 primary = p.action, onPrimary = p.onAction,

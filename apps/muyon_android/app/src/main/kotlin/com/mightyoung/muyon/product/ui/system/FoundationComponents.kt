@@ -11,6 +11,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.window.Popup
+import androidx.compose.ui.window.PopupProperties
 import androidx.compose.ui.semantics.*
 import androidx.compose.ui.unit.dp
 
@@ -86,7 +89,7 @@ fun FoundationSelection(
     Row(
         modifier.sizeIn(minWidth = FoundationTokens.minimumTarget, minHeight = FoundationTokens.minimumTarget)
             .toggleable(value = selected, enabled = enabled && onSelectedChange != null,
-                role = Role.Checkbox, onValueChange = { onSelectedChange?.invoke(it) })
+                role = Role.Checkbox, onValueChange = { if (enabled) onSelectedChange?.invoke(it) })
             .padding(horizontal = 8.dp, vertical = 4.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -121,7 +124,7 @@ fun FoundationMenu(
 ) {
     require(items.map { it.id }.distinct().size == items.size)
     require(items.all { it.id.isNotBlank() && it.label.isNotBlank() })
-    DropdownMenu(expanded = expanded, onDismissRequest = onDismiss, modifier = modifier) {
+    val menuItems: @Composable ColumnScope.() -> Unit = {
         items.forEach { item ->
             DropdownMenuItem(
                 text = { Text(item.label) },
@@ -131,6 +134,19 @@ fun FoundationMenu(
                 trailingIcon = if (item.selected) ({ Text("✓", Modifier.clearAndSetSemantics { }) }) else null
             )
         }
+    }
+    if (LocalFoundationReduceMotion.current) {
+        // Popup has no open/close transition. Focusable popup blocks click-through.
+        val maximumHeight = (LocalConfiguration.current.screenHeightDp * .8f).dp
+        if (expanded) Popup(onDismissRequest = onDismiss, properties = PopupProperties(focusable = true)) {
+            Surface(modifier.widthIn(min = 200.dp, max = 320.dp).heightIn(max = maximumHeight),
+                color = LocalFoundationPalette.current.panel, shape = RoundedCornerShape(12.dp),
+                border = BorderStroke(1.dp, LocalFoundationPalette.current.border)) {
+                Column(Modifier.verticalScroll(rememberScrollState()).padding(vertical = 8.dp), content = menuItems)
+            }
+        }
+    } else {
+        DropdownMenu(expanded = expanded, onDismissRequest = onDismiss, modifier = modifier, content = menuItems)
     }
 }
 
