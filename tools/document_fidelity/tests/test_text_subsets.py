@@ -180,4 +180,31 @@ class ExtraBoundaryTests(unittest.TestCase):
             r=text_request(base,'docx');r['operation']['replacement']=text;f=FakeTextExecutor()
             self.assertEqual('rejected',runtime.simulate_for_tests(base,r,f)['status']);self.assertFalse(f.calls)
 
+class ReviewRegressionTests(unittest.TestCase):
+    def test_ambiguous_xlsx_visibility_declarations_never_dispatch(self):
+        base=build_complex_samples()['complex.xlsx']
+        variants=[lambda b:b.replace(b'<sheetData>',b'<sheetFormatPr defaultRowHeight="15"/><sheetFormatPr defaultRowHeight="0"/><sheetData>'),
+                  lambda b:b.replace(b'</sheetData>',b'<row r="1" hidden="1"><c r="D1"><v>7</v></c></row></sheetData>')]
+        for transform in variants:
+            with self.subTest(transform=transform):
+                source=rewrite(base,'xl/worksheets/sheet1.xml',transform);r=request(source);f=FakeExecutor()
+                self.assertEqual('unsupported',runtime.preview_target(source,r)['status'])
+                self.assertEqual('rejected',runtime.simulate_for_tests(source,r,f)['status']);self.assertFalse(f.calls)
+    def test_non_target_docx_text_is_always_leaf(self):
+        base=subset_samples()['simple-run.docx']
+        source=rewrite(base,'word/document.xml',lambda b:b.replace(b'Original </t>',b'Original <b/></t>'))
+        r=text_request(source,'docx');f=FakeTextExecutor()
+        self.assertEqual('unsupported',runtime.preview_target(source,r)['status'])
+        self.assertEqual('rejected',runtime.simulate_for_tests(source,r,f)['status']);self.assertFalse(f.calls)
+    def test_presentation_size_grammar_is_complete(self):
+        base=subset_samples()['simple-shape.pptx']
+        variants=[lambda b:b.replace(b'<sldSz cx="9144000" cy="6858000"/>',b'<sldSz cx="9144000" cy="6858000"><timing/></sldSz>'),
+                  lambda b:b.replace(b'<sldSz ',b'<sldSz unknown="1" '),
+                  lambda b:b.replace(b'<notesSz cx="6858000" cy="9144000"/>',b'<notesSz cx="6858000" cy="9144000"><timing/></notesSz>')]
+        for transform in variants:
+            with self.subTest(transform=transform):
+                source=rewrite(base,'ppt/presentation.xml',transform);r=text_request(source,'pptx');f=FakeTextExecutor()
+                self.assertEqual('unsupported',runtime.preview_target(source,r)['status'])
+                self.assertEqual('rejected',runtime.simulate_for_tests(source,r,f)['status']);self.assertFalse(f.calls)
+
 if __name__=='__main__':unittest.main()

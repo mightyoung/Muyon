@@ -1,0 +1,14 @@
+Independent fresh reviewer /root/text_subset_review reviewed immutable82f630553dc816f079cc30b33b156cebdcea26db vs77a000bcb59dd5de3e40887f03fb612622c09e9e.
+This file is a preserved reviewer report transcript, not a raw suite log file (reviewer did not provide a raw suite artifact path).
+
+Command: python3 -m unittest discover -s tools/document_fidelity/tests -v
+Reviewer reported: Ran57 tests in0.532s; OK.
+Command: PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=. python3 /tmp/text_subset_review_probes.py
+All3 probes reported preview.status=supported,status=simulated_validated,fake_calls=1,validation=pass,real_status=held.
+
+P2 xlsx.py:112 — duplicate sheetFormatPr ignored, defaultRowHeight15 followed by0 previews supported/visible and dispatches.
+P2 docx.py:24 — non-target w:t can contain b child, accepted despite plain text grammar.
+P2 pptx.py:14 — sldSz/notesSz descendants/attributes not screened; nested timing accepted.
+
+Reviewer independently verified8 fixture generations deterministic, disk-equal and every inspect report equals manifest. Prior6 specimens and both prior manifests byte-equal git show77a000.
+No third-party engines, worker CLI, namespace/alternative, network, installation or repo writes in review. Real entry remained HOLD. No execution blocker prevented review.

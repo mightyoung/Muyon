@@ -13,6 +13,10 @@ def prepare(source,raw):
     presentation,_=xlsx.tree(parts['ppt/presentation.xml'])
     if presentation.tag != f'{{{P}}}presentation' or presentation.attrib or [n.tag for n in common.elements(presentation)] != [f'{{{P}}}sldIdLst',f'{{{P}}}sldSz',f'{{{P}}}notesSz']:
         raise ValueError('complex_presentation_unsupported')
+    for name in ('sldSz','notesSz'):
+        node=presentation.find(f'{{{P}}}{name}')
+        if len(node) or set(node.attrib) != {'cx','cy'} or any(not re.fullmatch(r'[1-9][0-9]{0,9}',v) or int(v)>2147483647 for v in node.attrib.values()):
+            raise ValueError('complex_or_invalid_presentation_size')
     if any(n.attrib for n in presentation.findall(f'{{{P}}}sldIdLst')):raise ValueError('complex_slide_list')
     slides=presentation.findall(f'{{{P}}}sldIdLst/{{{P}}}sldId')
     if len(common.elements(presentation.find(f'{{{P}}}sldIdLst'))) != 1 or any(len(n) or set(n.attrib) != {'id',f'{{{OFFICE}}}id'} for n in slides):raise ValueError('complex_slide_identity')

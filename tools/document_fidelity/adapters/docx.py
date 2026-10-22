@@ -12,6 +12,11 @@ def prepare(source,raw):
     tags={f'{{{W}}}{n}' for n in ('document','body','p','r','rPr','t','b','i','sectPr')}
     attrs={f'{{{W}}}t':{f'{{{XML}}}space'},f'{{{W}}}b':{f'{{{W}}}val'},f'{{{W}}}i':{f'{{{W}}}val'}}
     common.screen(root,tags,attrs)
+    for node in root.iter():
+        if node.tag == f'{{{W}}}t' and (len(node) or node.get(f'{{{XML}}}space','default') not in ('default','preserve')):
+            raise ValueError('non_plain_text_node_unsupported')
+        if node.tag in (f'{{{W}}}b',f'{{{W}}}i') and (len(node) or node.get(f'{{{W}}}val','1') not in ('1','0','true','false')):
+            raise ValueError('non_leaf_run_style_unsupported')
     if root.tag != f'{{{W}}}document' or [n.tag for n in common.elements(root)] != [f'{{{W}}}body']:
         raise ValueError('unsupported_document_structure')
     body=common.elements(root)[0];children=common.elements(body)

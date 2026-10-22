@@ -97,6 +97,12 @@ def preview(source, raw):
         if len(links) != 1: raise ValueError('ambiguous_sheet_relation')
         part = posixpath.normpath(posixpath.join('xl',links[0].get('Target','')))
         root, _ = tree(parts[part])
+        for singleton in ('sheetFormatPr','cols','sheetData','mergeCells','sheetProtection'):
+            if len(root.findall(f'{{{S}}}{singleton}')) > 1: raise ValueError('ambiguous_worksheet_declaration')
+        all_rows = root.findall(f'{{{S}}}sheetData/{{{S}}}row')
+        row_ids = [n.get('r','') for n in all_rows]
+        if any(not re.fullmatch(r'[1-9][0-9]{0,6}',r) or int(r) > 1048576 for r in row_ids) or len(row_ids) != len(set(row_ids)):
+            raise ValueError('ambiguous_row_declaration')
         row_index, column_index = cell_address(op['cell'])
         rows = [n for n in root.findall(f'{{{S}}}sheetData/{{{S}}}row') if any(c.get('r') == op['cell'] for c in n.findall(f'{{{S}}}c'))]
         if len(rows) != 1 or rows[0].get('r') != str(row_index): raise ValueError('ambiguous_row')
