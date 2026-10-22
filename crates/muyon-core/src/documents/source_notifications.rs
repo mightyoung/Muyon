@@ -107,6 +107,15 @@ impl BusinessStore {
         sql(tx.commit())?;
         Ok(events)
     }
+    fn document_notification_state(&self, event: &DocumentSourceNotification) -> Result<Option<(Revision, bool)>> {
+        let rows = sql(self.database().query("SELECT CASE WHEN length(CAST(generation AS BLOB))<=20 THEN generation ELSE NULL END,pending FROM document_source_notifications_v1 WHERE project_id=? AND actor_id=? AND object_id=?", &[&event.project_id, &event.actor_id, &event.object_id]))?;
+        if rows.is_empty() { return Ok(None); }
+        if rows.len() != 1 { return Err(ContractError::StorageCorrupt); }
+        let generation = Revision::parse(cell(&rows[0], 0)?)?;
+        if generation.value() == 0 { return Err(ContractError::StorageCorrupt); }
+        let pending = match cell(&rows[0], 1)? { "0" => false, "1" => true, _ => return Err(ContractError::StorageCorrupt) };
+        Ok(Some((generation, pending)))
+    }
     /// Call only after Runtime accepted the corresponding local notification.
     /// Keep tombstones: deleting an acked row could reuse generation1 (ABA).
     pub fn ack_document_source_notifications_trusted(&self, events: &[DocumentSourceNotification]) -> Result<usize> {
@@ -115,17 +124,29 @@ impl BusinessStore {
         let tx = sql(self.database().transaction())?;
         self.document_schema()?;
         if !self.document_notification_schema()? { return Err(ContractError::NotFound); }
-        let mut acknowledged = 0;
-        let mut updated = Vec::new();
+        // Freeze EVERY supplied target before ANY write, including stale and
+        // missing rows. sqlite changes()==0 can hide a successful trigger that
+        // deleted a tombstone and then RAISE(IGNORE)'d the original UPDATE.
+        let mut frozen = Vec::with_capacity(events.len());
         for event in events {
             ids(&event.project_id, &event.actor_id, &event.object_id)?;
             if event.generation.value() == 0 { return Err(ContractError::InvalidRevision); }
+            frozen.push((event, self.document_notification_state(event)?));
+        }
+        let mut acknowledged = 0;
+        for event in events {
             let changed = sql(self.database().exec("UPDATE document_source_notifications_v1 SET pending=0 WHERE project_id=? AND actor_id=? AND object_id=? AND generation=? AND pending=1", &[&event.project_id, &event.actor_id, &event.object_id, event.generation.as_str()]))?;
             if changed > 1 { return Err(ContractError::StorageCorrupt); }
             acknowledged += changed;
-            if changed == 1 { updated.push(event.clone()); }
         }
-        self.verify_document_notification_rows(&updated, "0")?;
+        if !self.document_notification_schema()? { return Err(ContractError::StorageCorrupt); }
+        for (event, before) in frozen {
+            let expected = before.map(|(generation, pending)| {
+                let matched = events.iter().any(|input| input.project_id == event.project_id && input.actor_id == event.actor_id && input.object_id == event.object_id && input.generation == generation);
+                (generation, pending && !matched)
+            });
+            if self.document_notification_state(event)? != expected { return Err(ContractError::StorageCorrupt); }
+        }
         tx.commit().map_err(|_| ContractError::Unknown)?;
         Ok(acknowledged)
     }

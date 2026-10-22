@@ -517,6 +517,7 @@ impl BusinessStore {
             ],
         ))?;
         self.invalidate_document_dependents_in_transaction(tx, &metadata.document)?;
+        self.verify_blob_publication_in_transaction(tx, &reference, project, base.document_id(), &metadata.blob, Some(&finished.upload_id))?;
         if self.current_document(&metadata.document)? != metadata {
             return Err(ContractError::StorageCorrupt);
         }
@@ -587,6 +588,7 @@ impl BusinessStore {
             ],
         ))?;
         self.invalidate_document_dependents_in_transaction(tx, &metadata.document)?;
+        self.verify_blob_publication_in_transaction(tx, &reference, project, base.document_id(), &metadata.blob, None)?;
         if self.current_document(&metadata.document)? != metadata {
             return Err(ContractError::StorageCorrupt);
         }

@@ -771,6 +771,44 @@ impl BusinessStore {
         ))?;
         Ok(expected_blob.clone())
     }
+    /// Read-only publication receipt check AFTER a caller's later SQL writes.
+    /// No path input, file write, upload retry or grant is created here. The
+    /// caller must propagate failure and roll back its entire transaction.
+    pub(crate) fn verify_blob_publication_in_transaction(
+        &self,
+        tx: &Transaction<'_>,
+        reference_id: &str,
+        project_id: &str,
+        target_id: &str,
+        expected: &BlobRef,
+        upload_id: Option<&str>,
+    ) -> Result<()> {
+        if !tx.belongs_to(self.database()) {
+            return Err(ContractError::InvalidAuthority);
+        }
+        identity(reference_id)?;
+        identity(target_id)?;
+        expected.validate()?;
+        let revision = self.project_revision_for_blob(project_id)?;
+        let rows = sql(self.database().query(
+            "SELECT 1 FROM blob_references r JOIN blobs b ON b.digest=r.digest WHERE r.reference_id=? AND r.project_id=? AND r.target_id=? AND r.digest=? AND b.state='ready' AND b.byte_length=?",
+            &[reference_id, project_id, target_id, &expected.digest, expected.byte_length.as_str()],
+        ))?;
+        if rows.len() != 1 {
+            return Err(ContractError::BindingMismatch);
+        }
+        if let Some(upload_id) = upload_id {
+            identity(upload_id)?;
+            let rows = sql(self.database().query(
+                "SELECT 1 FROM blob_uploads u WHERE u.upload_id=? AND u.workspace=? AND u.project_id=? AND u.project_revision=? AND u.owner_epoch=? AND u.state='committed' AND u.digest=? AND u.byte_length=? AND NOT EXISTS(SELECT 1 FROM blob_pins p WHERE p.kind='upload' AND p.upload_id=u.upload_id)",
+                &[upload_id, self.workspace_id(), project_id, &revision, self.owner_epoch(), &expected.digest, expected.byte_length.as_str()],
+            ))?;
+            if rows.len() != 1 {
+                return Err(ContractError::BindingMismatch);
+            }
+        }
+        Ok(())
+    }
     fn open_reader_for(
         &self,
         project: &str,
