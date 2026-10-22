@@ -1,0 +1,31 @@
+{
+  "at_utc": "2026-10-22T06:05:44.982769+00:00",
+  "raw_output_bytes_preserved": true,
+  "results": [
+    {
+      "argv": [
+        "git",
+        "diff",
+        "--cached",
+        "--check"
+      ],
+      "exit_status": 2,
+      "stdout": "docs/tasks/document-core-contracts-20261022/independent-verification/candidate-20261022/original/candidate-targeted.stdout.log:18: new blank line at EOF.\ndocs/tasks/document-core-contracts-20261022/independent-verification/candidate-20261022/original/history-targeted.stdout.log:13: new blank line at EOF.\ndocs/tasks/document-core-contracts-20261022/independent-verification/candidate-20261022/original/pagination-targeted.stdout.log:6: new blank line at EOF.\ndocs/tasks/document-core-contracts-20261022/independent-verification/candidate-20261022/original/scoped-fmt.stdout.log:112: trailing whitespace.\n+ \ndocs/tasks/document-core-contracts-20261022/independent-verification/candidate-20261022/original/scoped-fmt.stdout.log:828: trailing whitespace.\n+ \ndocs/tasks/document-core-contracts-20261022/independent-verification/candidate-20261022/original/scoped-fmt.stdout.log:867: trailing whitespace.\n+ \ndocs/tasks/document-core-contracts-20261022/independent-verification/candidate-20261022/original/scoped-fmt.stdout.log:924: trailing whitespace.\n+ \ndocs/tasks/document-core-contracts-20261022/independent-verification/candidate-20261022/original/scoped-fmt.stdout.log:1353: trailing whitespace.\n+ \ndocs/tasks/document-core-contracts-20261022/independent-verification/candidate-20261022/original/scoped-fmt.stdout.log:1356: trailing whitespace.\n+ \ndocs/tasks/document-core-contracts-20261022/independent-verification/candidate-20261022/original/scoped-fmt.stdout.log:1815: trailing whitespace.\n+ \ndocs/tasks/document-core-contracts-20261022/independent-verification/candidate-20261022/original/scoped-fmt.stdout.log:1836: trailing whitespace.\n+ \ndocs/tasks/document-core-contracts-20261022/independent-verification/candidate-20261022/original/scoped-fmt.stdout.log:2552: trailing whitespace.\n+ \ndocs/tasks/document-core-contracts-20261022/independent-verification/candidate-20261022/original/scoped-fmt.stdout.log:2591: trailing whitespace.\n+ \ndocs/tasks/document-core-contracts-20261022/independent-verification/candidate-20261022/original/scoped-fmt.stdout.log:2648: trailing whitespace.\n+ \ndocs/tasks/document-core-contracts-20261022/independent-verification/candidate-20261022/original/scoped-fmt.stdout.log:3077: trailing whitespace.\n+ \ndocs/tasks/document-core-contracts-20261022/independent-verification/candidate-20261022/original/scoped-fmt.stdout.log:3080: trailing whitespace.\n+ \ndocs/tasks/document-core-contracts-20261022/independent-verification/candidate-20261022/original/scoped-fmt.stdout.log:3539: trailing whitespace.\n+ \ndocs/tasks/document-core-contracts-20261022/independent-verification/candidate-20261022/original/scoped-fmt.stdout.log:3584: trailing whitespace.\n+ \ndocs/tasks/document-core-contracts-20261022/independent-verification/candidate-20261022/original/scoped-fmt.stdout.log:3754: trailing whitespace.\n+ \ndocs/tasks/document-core-contracts-20261022/independent-verification/candidate-20261022/original/text-label-targeted.stdout.log:6: new blank line at EOF.\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "git",
+        "diff",
+        "--cached",
+        "--check",
+        "--",
+        ".",
+        ":(exclude)docs/tasks/document-core-contracts-20261022/independent-verification/candidate-20261022/**/*.log"
+      ],
+      "exit_status": 0,
+      "stdout": "",
+      "stderr": ""
+    }
+  ]
+}

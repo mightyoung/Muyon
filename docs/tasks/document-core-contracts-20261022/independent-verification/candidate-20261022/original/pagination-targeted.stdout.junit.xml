@@ -1,0 +1,8 @@
+<?xml version='1.0' encoding='utf-8'?>
+<testsuite name="pagination-targeted" tests="1" failures="0" errors="0" skipped="0">
+  <properties>
+    <property name="origin" value="derived from actual libtest stdout; not native XML" />
+    <property name="raw_sha256" value="c0810d8a6d1cf28443284d79f0ca5c12b5a35698bf711eb1b8a7526b8edebb33" />
+  </properties>
+  <testcase classname="pagination-targeted" name="documents::candidate_tests::candidate_gc_crosses_page_boundary_preserving_exact_objects_and_project_quotas" />
+</testsuite>

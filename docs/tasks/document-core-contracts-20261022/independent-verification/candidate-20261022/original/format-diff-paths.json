@@ -1,0 +1,8 @@
+[
+  "crates/muyon-core/src/blobs.rs",
+  "crates/muyon-core/src/documents/candidate.rs",
+  "crates/muyon-core/src/documents/candidate_tests.rs",
+  "crates/muyon-core/src/documents/history_tests.rs",
+  "crates/muyon-core/src/documents/mod.rs",
+  "crates/muyon-core/src/documents/storage.rs"
+]

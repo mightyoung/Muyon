@@ -1,0 +1,18 @@
+
+running 13 tests
+test documents::candidate_tests::duplicate_preparation_is_query_only_and_conflicting_binding_is_rejected ... ok
+test documents::candidate_tests::expiry_after_durable_pin_is_unknown_and_never_source_success ... ok
+test documents::candidate_tests::late_seal_failure_leaves_unpublished_object_and_query_only_unknown ... ok
+test documents::candidate_tests::missing_pin_or_corrupt_object_is_query_only_unknown ... ok
+test documents::candidate_tests::oversize_nonpayload_fields_fail_before_status_decode ... ok
+test documents::candidate_tests::new_bytes_are_private_sealed_unvalidated_and_never_publish ... ok
+test documents::candidate_tests::reservation_failure_has_no_upload_or_output_effect ... ok
+test documents::candidate_tests::partial_staging_restart_preserves_candidate_without_blocking_unrelated_gc ... ok
+test documents::candidate_tests::restart_retains_prepared_pin_but_never_adopts_original_execution_authority ... ok
+test documents::candidate_tests::source_head_advance_rejects_old_candidate_without_latest_substitution ... ok
+test documents::candidate_tests::revocation_conflict_invalid_input_and_foreign_publication_fail_closed ... ok
+test documents::candidate_tests::candidate_gc_crosses_page_boundary_preserving_exact_objects_and_project_quotas ... ok
+test documents::candidate_tests::candidate_count_and_expected_byte_admission_limits_precede_file_writes ... ok
+
+test result: ok. 13 passed; 0 failed; 0 ignored; 0 measured; 35 filtered out; finished in 1.25s
+

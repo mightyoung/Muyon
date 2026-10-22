@@ -1,0 +1,6 @@
+
+running 1 test
+test documents::candidate_tests::candidate_gc_crosses_page_boundary_preserving_exact_objects_and_project_quotas ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 47 filtered out; finished in 0.16s
+

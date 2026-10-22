@@ -1,0 +1,8 @@
+<?xml version='1.0' encoding='utf-8'?>
+<testsuite name="text-label-targeted" tests="1" failures="0" errors="0" skipped="0">
+  <properties>
+    <property name="origin" value="derived from actual libtest stdout; not native XML" />
+    <property name="raw_sha256" value="ca24d06adc0d8ada180bbbc68475d8479022931d576523cdd8ae06b65aaa40e2" />
+  </properties>
+  <testcase classname="text-label-targeted" name="documents::history_tests::text_label_roundtrips_without_default_utf8_or_reader_capability" />
+</testsuite>

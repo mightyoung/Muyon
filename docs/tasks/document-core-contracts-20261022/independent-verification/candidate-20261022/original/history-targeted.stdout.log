@@ -1,0 +1,13 @@
+
+running 8 tests
+test documents::history_tests::advancing_parent_head_does_not_reuse_old_history_policy ... ok
+test documents::history_tests::historical_identity_scope_schema_and_read_only_policy_fail_closed ... ok
+test documents::history_tests::canonical_history_corruption_and_missing_revision_are_not_substituted ... ok
+test documents::history_tests::text_label_roundtrips_without_default_utf8_or_reader_capability ... ok
+test documents::history_tests::historical_and_parent_revocation_expiry_generation_and_project_are_current ... ok
+test documents::history_tests::old_policy_is_not_inherited_by_a_new_parent_grant_generation ... ok
+test documents::history_tests::history_denies_without_explicit_target_policy_and_then_reads_exact_snapshot ... ok
+test documents::history_tests::wrong_history_schema_is_rejected_without_changing_document_store ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 40 filtered out; finished in 0.02s
+

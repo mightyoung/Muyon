@@ -1,0 +1,61 @@
+{
+  "invocations": [
+    {
+      "command": "pagination-targeted",
+      "passed": 1,
+      "failed": 0,
+      "ignored": 0,
+      "test_names": [
+        "documents::candidate_tests::candidate_gc_crosses_page_boundary_preserving_exact_objects_and_project_quotas"
+      ]
+    },
+    {
+      "command": "candidate-targeted",
+      "passed": 13,
+      "failed": 0,
+      "ignored": 0,
+      "test_names": [
+        "documents::candidate_tests::duplicate_preparation_is_query_only_and_conflicting_binding_is_rejected",
+        "documents::candidate_tests::expiry_after_durable_pin_is_unknown_and_never_source_success",
+        "documents::candidate_tests::late_seal_failure_leaves_unpublished_object_and_query_only_unknown",
+        "documents::candidate_tests::missing_pin_or_corrupt_object_is_query_only_unknown",
+        "documents::candidate_tests::oversize_nonpayload_fields_fail_before_status_decode",
+        "documents::candidate_tests::new_bytes_are_private_sealed_unvalidated_and_never_publish",
+        "documents::candidate_tests::reservation_failure_has_no_upload_or_output_effect",
+        "documents::candidate_tests::partial_staging_restart_preserves_candidate_without_blocking_unrelated_gc",
+        "documents::candidate_tests::restart_retains_prepared_pin_but_never_adopts_original_execution_authority",
+        "documents::candidate_tests::source_head_advance_rejects_old_candidate_without_latest_substitution",
+        "documents::candidate_tests::revocation_conflict_invalid_input_and_foreign_publication_fail_closed",
+        "documents::candidate_tests::candidate_gc_crosses_page_boundary_preserving_exact_objects_and_project_quotas",
+        "documents::candidate_tests::candidate_count_and_expected_byte_admission_limits_precede_file_writes"
+      ]
+    },
+    {
+      "command": "history-targeted",
+      "passed": 8,
+      "failed": 0,
+      "ignored": 0,
+      "test_names": [
+        "documents::history_tests::advancing_parent_head_does_not_reuse_old_history_policy",
+        "documents::history_tests::historical_identity_scope_schema_and_read_only_policy_fail_closed",
+        "documents::history_tests::canonical_history_corruption_and_missing_revision_are_not_substituted",
+        "documents::history_tests::text_label_roundtrips_without_default_utf8_or_reader_capability",
+        "documents::history_tests::historical_and_parent_revocation_expiry_generation_and_project_are_current",
+        "documents::history_tests::old_policy_is_not_inherited_by_a_new_parent_grant_generation",
+        "documents::history_tests::history_denies_without_explicit_target_policy_and_then_reads_exact_snapshot",
+        "documents::history_tests::wrong_history_schema_is_rejected_without_changing_document_store"
+      ]
+    },
+    {
+      "command": "text-label-targeted",
+      "passed": 1,
+      "failed": 0,
+      "ignored": 0,
+      "test_names": [
+        "documents::history_tests::text_label_roundtrips_without_default_utf8_or_reader_capability"
+      ]
+    }
+  ],
+  "core_full": "Compile failure exit101; zero test cases executed by this invocation. No fabricated JUnit pass.",
+  "counting_note": "Pagination1 is within candidate13; text-label1 is within history8. Repeated invocations and filtered-out cases are not additional independent scenarios."
+}

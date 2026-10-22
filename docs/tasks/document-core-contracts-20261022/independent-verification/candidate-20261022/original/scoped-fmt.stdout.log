@@ -1,0 +1,3905 @@
+Diff in /workspace/Muyon-document-candidate/crates/muyon-core/src/blobs.rs:424:
+         let id = random_id("up_")?;
+         let snapshot = random_id("snap_")?;
+         sql(self.database().exec("INSERT INTO blob_uploads(upload_id,snapshot_id,workspace,project_id,project_revision,owner_epoch,state,byte_length,digest,kind) VALUES(?,?,?,?,?,?,'copying','0',NULL,NULL)", &[&id, &snapshot, self.workspace_id(), project_id, &revision, self.owner_epoch()]))?;
+-        Ok(UploadHandle { upload_id: id, snapshot_id: snapshot })
++        Ok(UploadHandle {
++            upload_id: id,
++            snapshot_id: snapshot,
++        })
+     }
+     /// First materialization only. Never reuse/overwrite a path after an uncertain
+     /// prior call. File creation/fsync are NOT reverted by a later SQL rollback.
+Diff in /workspace/Muyon-document-candidate/crates/muyon-core/src/blobs.rs:434:
+         if upload.state != "copying" || upload.length != 0 {
+             return Err(ContractError::IntentConflict);
+         }
+-        let file = io(OpenOptions::new().write(true).create_new(true).mode(0o600)
+-            .custom_flags(NOFOLLOW).open(self.staging_path(upload_id)?))?;
++        let file = io(OpenOptions::new()
++            .write(true)
++            .create_new(true)
++            .mode(0o600)
++            .custom_flags(NOFOLLOW)
++            .open(self.staging_path(upload_id)?))?;
+         io(file.sync_all())?;
+         sync_dir(&self.root_dir().join("staging"))
+     }
+Diff in /workspace/Muyon-document-candidate/crates/muyon-core/src/blobs.rs:450:
+         expected.validate()?;
+         let upload = self.load_upload(upload_id)?;
+         self.project_revision_for_blob(project_id)?;
+-        if upload.project != project_id || upload.state != "pinned" || upload.kind != Some(BlobKind::Document)
++        if upload.project != project_id
++            || upload.state != "pinned"
++            || upload.kind != Some(BlobKind::Document)
+             || upload.length != expected.byte_length.value()
+             || upload.digest.as_deref() != Some(expected.digest.as_str())
+-        { return Ok(false); }
++        {
++            return Ok(false);
++        }
+         let rows = sql(self.database().query("SELECT CASE WHEN length(CAST(b.byte_length AS BLOB))<=20 THEN b.byte_length ELSE NULL END FROM blobs b WHERE b.digest=? AND b.state='ready' AND EXISTS(SELECT 1 FROM blob_pins p WHERE p.digest=b.digest AND p.kind='upload' AND p.upload_id=? AND p.owner_epoch=? AND p.snapshot_id=?)", &[&expected.digest, upload_id, &upload.owner, &upload.snapshot]))?;
+         if rows.len() != 1 || cell(&rows[0], 0)? != expected.byte_length.as_str() {
+             return Ok(false);
+Diff in /workspace/Muyon-document-candidate/crates/muyon-core/src/blobs.rs:460:
+         }
+-        verify_file(&self.object_path(&expected.digest)?, upload.length, &expected.digest)?;
++        verify_file(
++            &self.object_path(&expected.digest)?,
++            upload.length,
++            &expected.digest,
++        )?;
+         Ok(true)
+     }
+     /// Trusted picker owner only; never expose to model-generated commands.
+Diff in /workspace/Muyon-document-candidate/crates/muyon-core/src/blobs.rs:886:
+     }
+     fn can_delete_blob(&self, digest: &str) -> Result<bool> {
+         let blocked=sql(self.database().query("SELECT 1 WHERE EXISTS(SELECT 1 FROM blob_references WHERE digest=?) OR EXISTS(SELECT 1 FROM blob_pins WHERE digest=?) OR EXISTS(SELECT 1 FROM blob_uploads WHERE state NOT IN('committed','aborted') AND digest=?) OR EXISTS(SELECT 1 FROM intents WHERE status IN('pending','unknown'))",&[digest,digest,digest]))?;
+-        if !blocked.is_empty() { return Ok(false); }
++        if !blocked.is_empty() {
++            return Ok(false);
++        }
+         let mut cursor = String::new();
+         loop {
+             let unresolved = sql(self.database().query("SELECT CASE WHEN length(CAST(upload_id AS BLOB))<=128 THEN upload_id ELSE NULL END FROM blob_uploads WHERE state NOT IN('committed','aborted') AND digest IS NULL AND (?='' OR upload_id>?) ORDER BY upload_id LIMIT 128", &[&cursor, &cursor]))?;
+Diff in /workspace/Muyon-document-candidate/crates/muyon-core/src/blobs.rs:893:
+-            if unresolved.is_empty() { return Ok(true); }
++            if unresolved.is_empty() {
++                return Ok(true);
++            }
+             for row in &unresolved {
+                 let upload = cell(row, 0)?;
+                 match self.document_candidate_reserves_digest(upload, digest)? {
+Diff in /workspace/Muyon-document-candidate/crates/muyon-core/src/blobs.rs:897:
+-                    Some(false) => {},
++                    Some(false) => {}
+                     // Legacy unresolved uploads keep their original conservative
+                     // behavior; journal-backed candidates reserve exact digests.
+                     Some(true) | None => return Ok(false),
+Diff in /workspace/Muyon-document-candidate/crates/muyon-core/src/blobs.rs:901:
+                 }
+                 cursor = upload.into();
+             }
+-            if unresolved.len() < 128 { return Ok(true); }
++            if unresolved.len() < 128 {
++                return Ok(true);
++            }
+         }
+     }
+     /// Explicit, serialized maintenance. Marking deleting commits before unlink;
+Diff in /workspace/Muyon-document-candidate/crates/muyon-core/src/documents/candidate.rs:1:
+ //! Durable private preparation only. No real validator exists: publication is disabled.
+ use super::{identity::valid_id, DocumentAccess, DocumentMetadata, DocumentOperation, DocumentRef};
+-use crate::{blobs::{BlobKind, MAX_CHUNK, MAX_DOCUMENT_BYTES}, business::BusinessStore, contract::*, sqlite::Transaction};
++use crate::{
++    blobs::{BlobKind, MAX_CHUNK, MAX_DOCUMENT_BYTES},
++    business::BusinessStore,
++    contract::*,
++    sqlite::Transaction,
++};
+ use serde::{Deserialize, Serialize};
+ use sha2::{Digest, Sha256};
+ type Result<T> = std::result::Result<T, ContractError>;
+Diff in /workspace/Muyon-document-candidate/crates/muyon-core/src/documents/candidate.rs:7:
+ const DDL: &str = "CREATE TABLE document_candidates_v1(candidate_id TEXT PRIMARY KEY,workspace TEXT NOT NULL,project_id TEXT NOT NULL REFERENCES projects(id),upload_id TEXT NOT NULL UNIQUE REFERENCES blob_uploads(upload_id),expected_length TEXT NOT NULL,payload TEXT NOT NULL,state TEXT NOT NULL CHECK(state IN('preparing','sealed_unvalidated','preparation_unknown')))";
+-const PERMISSIONS: &[DocumentOperation] = &[DocumentOperation::ReadText, DocumentOperation::StructuredEdit];
++const PERMISSIONS: &[DocumentOperation] = &[
++    DocumentOperation::ReadText,
++    DocumentOperation::StructuredEdit,
++];
+ 
+ #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
+ #[serde(rename_all = "snake_case")]
+Diff in /workspace/Muyon-document-candidate/crates/muyon-core/src/documents/candidate.rs:12:
+-pub enum CandidateState { Preparing, SealedUnvalidated, PreparationUnknown }
++pub enum CandidateState {
++    Preparing,
++    SealedUnvalidated,
++    PreparationUnknown,
++}
+ #[derive(Clone, Debug, PartialEq, Eq, Serialize)]
+ pub struct CandidateStatus {
+     pub candidate_id: String,
+Diff in /workspace/Muyon-document-candidate/crates/muyon-core/src/documents/candidate.rs:29:
+     expected_blob: BlobRef,
+     upload_id: String,
+ }
+-fn sql<T>(result: crate::sqlite::Result<T>) -> Result<T> { result.map_err(|_| ContractError::Storage) }
+-fn cell(row: &[Option<String>], n: usize) -> Result<&str> { row.get(n).and_then(Option::as_deref).ok_or(ContractError::StorageCorrupt) }
+-fn encode<T: Serialize>(value: &T) -> Result<String> { serde_json::to_string(value).map_err(|_| ContractError::InvalidPayload) }
+-fn identifier(value: &str) -> Result<()> { if valid_id(value) { Ok(()) } else { Err(ContractError::InvalidIdentity) } }
++fn sql<T>(result: crate::sqlite::Result<T>) -> Result<T> {
++    result.map_err(|_| ContractError::Storage)
++}
++fn cell(row: &[Option<String>], n: usize) -> Result<&str> {
++    row.get(n)
++        .and_then(Option::as_deref)
++        .ok_or(ContractError::StorageCorrupt)
++}
++fn encode<T: Serialize>(value: &T) -> Result<String> {
++    serde_json::to_string(value).map_err(|_| ContractError::InvalidPayload)
++}
++fn identifier(value: &str) -> Result<()> {
++    if valid_id(value) {
++        Ok(())
++    } else {
++        Err(ContractError::InvalidIdentity)
++    }
++}
+ impl BusinessStore {
+     pub fn initialize_document_candidates_trusted(&self) -> Result<()> {
+         let tx = sql(self.database().transaction())?;
+Diff in /workspace/Muyon-document-candidate/crates/muyon-core/src/documents/candidate.rs:39:
+         // Requires the original canonical document store to be initialized.
+         self.document_schema()?;
+-        let rows = sql(self.database().query("SELECT name FROM sqlite_master WHERE type='table' AND name='document_candidates_v1'", &[]))?;
+-        if rows.is_empty() { sql(self.database().exec(DDL, &[]))?; }
++        let rows = sql(self.database().query(
++            "SELECT name FROM sqlite_master WHERE type='table' AND name='document_candidates_v1'",
++            &[],
++        ))?;
++        if rows.is_empty() {
++            sql(self.database().exec(DDL, &[]))?;
++        }
+         self.candidate_schema()?;
+         sql(tx.commit())
+     }
+Diff in /workspace/Muyon-document-candidate/crates/muyon-core/src/documents/candidate.rs:46:
+     fn candidate_schema(&self) -> Result<()> {
+         let rows = sql(self.database().query("SELECT CASE WHEN length(CAST(sql AS BLOB))<=2048 THEN sql ELSE NULL END FROM sqlite_master WHERE type='table' AND name='document_candidates_v1'", &[]))?;
+-        if rows.len() != 1 || cell(&rows[0], 0)? != DDL { return Err(ContractError::InvalidVersion); }
++        if rows.len() != 1 || cell(&rows[0], 0)? != DDL {
++            return Err(ContractError::InvalidVersion);
++        }
+         Ok(())
+     }
+     fn candidate_row(&self, candidate_id: &str) -> Result<(Row, CandidateState)> {
+Diff in /workspace/Muyon-document-candidate/crates/muyon-core/src/documents/candidate.rs:53:
+         self.candidate_schema()?;
+         let rows = sql(self.database().query("SELECT CASE WHEN length(CAST(workspace AS BLOB))<=128 THEN workspace ELSE NULL END,CASE WHEN length(CAST(project_id AS BLOB))<=128 THEN project_id ELSE NULL END,CASE WHEN length(CAST(upload_id AS BLOB))<=128 THEN upload_id ELSE NULL END,CASE WHEN length(CAST(expected_length AS BLOB))<=8 THEN expected_length ELSE NULL END,CASE WHEN length(CAST(payload AS BLOB))<=8192 THEN payload ELSE NULL END,CASE WHEN length(CAST(state AS BLOB))<=32 THEN state ELSE NULL END FROM document_candidates_v1 WHERE candidate_id=?", &[candidate_id]))?;
+         let raw = rows.first().ok_or(ContractError::NotFound)?;
+-        let row: Row = serde_json::from_str(cell(raw, 4)?).map_err(|_| ContractError::StorageCorrupt)?;
+-        identifier(&row.operation_id)?; identifier(&row.upload_id)?;
+-        row.source_blob.validate()?; row.expected_blob.validate()?;
+-        if row.candidate_id != candidate_id || cell(raw, 0)? != self.workspace_id()
++        let row: Row =
++            serde_json::from_str(cell(raw, 4)?).map_err(|_| ContractError::StorageCorrupt)?;
++        identifier(&row.operation_id)?;
++        identifier(&row.upload_id)?;
++        row.source_blob.validate()?;
++        row.expected_blob.validate()?;
++        if row.candidate_id != candidate_id
++            || cell(raw, 0)? != self.workspace_id()
+             || row.base.scope().workspace_id != self.workspace_id()
+             || row.base.scope().project_id.as_deref() != Some(cell(raw, 1)?)
+-            || row.upload_id != cell(raw, 2)? || row.expected_blob.byte_length.as_str() != cell(raw, 3)?
+-            || row.expected_blob.byte_length.value() == 0 || row.expected_blob.byte_length.value() > MAX_DOCUMENT_BYTES
+-        { return Err(ContractError::StorageCorrupt); }
++            || row.upload_id != cell(raw, 2)?
++            || row.expected_blob.byte_length.as_str() != cell(raw, 3)?
++            || row.expected_blob.byte_length.value() == 0
++            || row.expected_blob.byte_length.value() > MAX_DOCUMENT_BYTES
++        {
++            return Err(ContractError::StorageCorrupt);
++        }
+         let state = match cell(raw, 5)? {
+             "preparing" => CandidateState::Preparing,
+             "sealed_unvalidated" => CandidateState::SealedUnvalidated,
+Diff in /workspace/Muyon-document-candidate/crates/muyon-core/src/documents/candidate.rs:73:
+     fn candidate_status(&self, row: &Row, recorded: CandidateState) -> CandidateStatus {
+         // Any uncertain/interrupted preparation remains query-only, even if an
+         // object happens to exist. A missing/mismatched sealed pin is unknown.
+-        let ready = self.candidate_upload_is_pinned(&row.upload_id, row.base.scope().project_id.as_deref().unwrap_or(""), &row.expected_blob).unwrap_or(false);
+-        let state = if recorded == CandidateState::SealedUnvalidated && ready { recorded } else { CandidateState::PreparationUnknown };
+-        CandidateStatus { candidate_id: row.candidate_id.clone(), operation_id: row.operation_id.clone(), base: row.base.clone(), expected_blob: row.expected_blob.clone(), state }
++        let ready = self
++            .candidate_upload_is_pinned(
++                &row.upload_id,
++                row.base.scope().project_id.as_deref().unwrap_or(""),
++                &row.expected_blob,
++            )
++            .unwrap_or(false);
++        let state = if recorded == CandidateState::SealedUnvalidated && ready {
++            recorded
++        } else {
++            CandidateState::PreparationUnknown
++        };
++        CandidateStatus {
++            candidate_id: row.candidate_id.clone(),
++            operation_id: row.operation_id.clone(),
++            base: row.base.clone(),
++            expected_blob: row.expected_blob.clone(),
++            state,
++        }
+     }
+     fn mark_candidate_unknown(&self, candidate_id: &str) {
+         // Best effort factual status only; it never changes sealed output into
+Diff in /workspace/Muyon-document-candidate/crates/muyon-core/src/documents/candidate.rs:92:
+         tx.commit().map_err(|_| ContractError::Unknown)?;
+         Ok(metadata)
+     }
+-    pub fn prepare_document_candidate_trusted(&self, access: &DocumentAccess, candidate_id: &str, operation_id: &str, bytes: &[u8]) -> Result<CandidateStatus> {
+-        identifier(candidate_id)?; identifier(operation_id)?;
+-        if bytes.is_empty() || bytes.len() as u64 > MAX_DOCUMENT_BYTES { return Err(ContractError::TextLimit); }
+-        let expected = BlobRef { digest: Sha256::digest(bytes).iter().map(|b| format!("{b:02x}")).collect(), byte_length: Revision::new(bytes.len() as u64) };
++    pub fn prepare_document_candidate_trusted(
++        &self,
++        access: &DocumentAccess,
++        candidate_id: &str,
++        operation_id: &str,
++        bytes: &[u8],
++    ) -> Result<CandidateStatus> {
++        identifier(candidate_id)?;
++        identifier(operation_id)?;
++        if bytes.is_empty() || bytes.len() as u64 > MAX_DOCUMENT_BYTES {
++            return Err(ContractError::TextLimit);
++        }
++        let expected = BlobRef {
++            digest: Sha256::digest(bytes)
++                .iter()
++                .map(|b| format!("{b:02x}"))
++                .collect(),
++            byte_length: Revision::new(bytes.len() as u64),
++        };
+         let tx = sql(self.database().transaction())?;
+         let source = self.document_access_in_transaction(&tx, access, PERMISSIONS)?;
+         self.candidate_schema()?;
+Diff in /workspace/Muyon-document-candidate/crates/muyon-core/src/documents/candidate.rs:102:
+         match self.candidate_row(candidate_id) {
+             Ok((row, state)) => {
+-                if row.base != access.document || row.authority != access.authority || row.expected_blob != expected || row.operation_id != operation_id || row.source_blob != source.blob {
++                if row.base != access.document
++                    || row.authority != access.authority
++                    || row.expected_blob != expected
++                    || row.operation_id != operation_id
++                    || row.source_blob != source.blob
++                {
+                     return Err(ContractError::IntentConflict);
+                 }
+                 let status = self.candidate_status(&row, state);
+Diff in /workspace/Muyon-document-candidate/crates/muyon-core/src/documents/candidate.rs:112:
+             Err(ContractError::NotFound) => {}
+             Err(error) => return Err(error),
+         }
+-        let project = access.document.scope().project_id.as_deref().ok_or(ContractError::ScopeMismatch)?;
++        let project = access
++            .document
++            .scope()
++            .project_id
++            .as_deref()
++            .ok_or(ContractError::ScopeMismatch)?;
+         let budget = sql(self.database().query("SELECT COUNT(*),COALESCE(SUM(CAST(expected_length AS INTEGER)),0),COALESCE(SUM(CASE WHEN expected_length='' OR expected_length GLOB '*[^0-9]*' OR length(expected_length)>8 OR CAST(expected_length AS INTEGER) NOT BETWEEN 1 AND 31457280 THEN 1 ELSE 0 END),0) FROM document_candidates_v1 WHERE workspace=? AND project_id=?", &[self.workspace_id(), project]))?;
+-        let count: u64 = cell(&budget[0], 0)?.parse().map_err(|_| ContractError::StorageCorrupt)?;
+-        let used: u64 = cell(&budget[0], 1)?.parse().map_err(|_| ContractError::StorageCorrupt)?;
+-        if cell(&budget[0], 2)? != "0" { return Err(ContractError::StorageCorrupt); }
+-        if count >= 32 || used.checked_add(bytes.len() as u64).ok_or(ContractError::TextLimit)? > 128 * 1024 * 1024 { return Err(ContractError::TextLimit); }
++        let count: u64 = cell(&budget[0], 0)?
++            .parse()
++            .map_err(|_| ContractError::StorageCorrupt)?;
++        let used: u64 = cell(&budget[0], 1)?
++            .parse()
++            .map_err(|_| ContractError::StorageCorrupt)?;
++        if cell(&budget[0], 2)? != "0" {
++            return Err(ContractError::StorageCorrupt);
++        }
++        if count >= 32
++            || used
++                .checked_add(bytes.len() as u64)
++                .ok_or(ContractError::TextLimit)?
++                > 128 * 1024 * 1024
++        {
++            return Err(ContractError::TextLimit);
++        }
+         let upload = self.reserve_candidate_upload_in_transaction(&tx, project)?;
+-        let row = Row { candidate_id: candidate_id.into(), operation_id: operation_id.into(), base: access.document.clone(), source_blob: source.blob, authority: access.authority.clone(), expected_blob: expected, upload_id: upload.upload_id };
++        let row = Row {
++            candidate_id: candidate_id.into(),
++            operation_id: operation_id.into(),
++            base: access.document.clone(),
++            source_blob: source.blob,
++            authority: access.authority.clone(),
++            expected_blob: expected,
++            upload_id: upload.upload_id,
++        };
+         let payload = encode(&row)?;
+-        if payload.len() > 8192 { return Err(ContractError::TextLimit); }
+-        sql(self.database().exec("INSERT INTO document_candidates_v1 VALUES(?,?,?,?,?,?,'preparing')", &[candidate_id, self.workspace_id(), project, &row.upload_id, row.expected_blob.byte_length.as_str(), &payload]))?;
++        if payload.len() > 8192 {
++            return Err(ContractError::TextLimit);
++        }
++        sql(self.database().exec(
++            "INSERT INTO document_candidates_v1 VALUES(?,?,?,?,?,?,'preparing')",
++            &[
++                candidate_id,
++                self.workspace_id(),
++                project,
++                &row.upload_id,
++                row.expected_blob.byte_length.as_str(),
++                &payload,
++            ],
++        ))?;
+         self.document_grant_in_transaction(&tx, access, PERMISSIONS)?;
+         tx.commit().map_err(|_| ContractError::Unknown)?;
+         // From here failures may leave real durable filesystem bytes. Never
+Diff in /workspace/Muyon-document-candidate/crates/muyon-core/src/documents/candidate.rs:136:
+             }
+             self.candidate_preflight(access)?;
+             let finished = self.finish_blob(&row.upload_id, BlobKind::Document)?;
+-            if finished.blob != row.expected_blob { return Err(ContractError::BindingMismatch); }
++            if finished.blob != row.expected_blob {
++                return Err(ContractError::BindingMismatch);
++            }
+             let seal = sql(self.database().transaction())?;
+             self.document_access_in_transaction(&seal, access, PERMISSIONS)?;
+             let (actual, state) = self.candidate_row(candidate_id)?;
+Diff in /workspace/Muyon-document-candidate/crates/muyon-core/src/documents/candidate.rs:143:
+-            if actual != row || state != CandidateState::Preparing || !self.candidate_upload_is_pinned(&row.upload_id, project, &row.expected_blob)? { return Err(ContractError::BindingMismatch); }
++            if actual != row
++                || state != CandidateState::Preparing
++                || !self.candidate_upload_is_pinned(&row.upload_id, project, &row.expected_blob)?
++            {
++                return Err(ContractError::BindingMismatch);
++            }
+             let changed = sql(self.database().exec("UPDATE document_candidates_v1 SET state='sealed_unvalidated' WHERE candidate_id=? AND workspace=? AND state='preparing'", &[candidate_id, self.workspace_id()]))?;
+-            if changed != 1 { return Err(ContractError::IntentConflict); }
++            if changed != 1 {
++                return Err(ContractError::IntentConflict);
++            }
+             self.document_grant_in_transaction(&seal, access, PERMISSIONS)?;
+             seal.commit().map_err(|_| ContractError::Unknown)?;
+             Ok(())
+Diff in /workspace/Muyon-document-candidate/crates/muyon-core/src/documents/candidate.rs:149:
+         })();
+-        if work.is_err() { self.mark_candidate_unknown(candidate_id); return Err(ContractError::Unknown); }
+-        self.lookup_document_candidate(access, candidate_id).map_err(|_| ContractError::Unknown)
++        if work.is_err() {
++            self.mark_candidate_unknown(candidate_id);
++            return Err(ContractError::Unknown);
++        }
++        self.lookup_document_candidate(access, candidate_id)
++            .map_err(|_| ContractError::Unknown)
+     }
+-    pub fn lookup_document_candidate(&self, access: &DocumentAccess, candidate_id: &str) -> Result<CandidateStatus> {
++    pub fn lookup_document_candidate(
++        &self,
++        access: &DocumentAccess,
++        candidate_id: &str,
++    ) -> Result<CandidateStatus> {
+         let tx = sql(self.database().transaction())?;
+         let source = self.document_access_in_transaction(&tx, access, PERMISSIONS)?;
+         let (row, state) = self.candidate_row(candidate_id)?;
+Diff in /workspace/Muyon-document-candidate/crates/muyon-core/src/documents/candidate.rs:157:
+-        if row.base != access.document || row.source_blob != source.blob { return Err(ContractError::BindingMismatch); }
++        if row.base != access.document || row.source_blob != source.blob {
++            return Err(ContractError::BindingMismatch);
++        }
+         let status = self.candidate_status(&row, state);
+         self.document_grant_in_transaction(&tx, access, PERMISSIONS)?;
+         tx.commit().map_err(|_| ContractError::Unknown)?;
+Diff in /workspace/Muyon-document-candidate/crates/muyon-core/src/documents/candidate.rs:161:
+         Ok(status)
+     }
+-    pub(crate) fn document_publish_candidate_in_transaction(&self, tx: &Transaction<'_>, access: &DocumentAccess, candidate_id: &str) -> Result<DocumentMetadata> {
+-        if !tx.belongs_to(self.database()) { return Err(ContractError::InvalidAuthority); }
++    pub(crate) fn document_publish_candidate_in_transaction(
++        &self,
++        tx: &Transaction<'_>,
++        access: &DocumentAccess,
++        candidate_id: &str,
++    ) -> Result<DocumentMetadata> {
++        if !tx.belongs_to(self.database()) {
++            return Err(ContractError::InvalidAuthority);
++        }
+         let source = self.document_access_in_transaction(tx, access, PERMISSIONS)?;
+         let (row, _) = self.candidate_row(candidate_id)?;
+-        if row.base != access.document || row.source_blob != source.blob { return Err(ContractError::BindingMismatch); }
++        if row.base != access.document || row.source_blob != source.blob {
++            return Err(ContractError::BindingMismatch);
++        }
+         // No real validator is integrated. There is deliberately no caller bool,
+         // forged validation token, test-only success gate, CAS or reference write.
+         Err(ContractError::UnsupportedOperation)
+Diff in /workspace/Muyon-document-candidate/crates/muyon-core/src/documents/candidate.rs:171:
+     }
+     pub(crate) fn document_candidate_upload_retained(&self, upload_id: &str) -> Result<bool> {
+-        let exists = sql(self.database().query("SELECT name FROM sqlite_master WHERE type='table' AND name='document_candidates_v1'", &[]))?;
+-        if exists.is_empty() { return Ok(false); }
++        let exists = sql(self.database().query(
++            "SELECT name FROM sqlite_master WHERE type='table' AND name='document_candidates_v1'",
++            &[],
++        ))?;
++        if exists.is_empty() {
++            return Ok(false);
++        }
+         self.candidate_schema()?;
+-        let rows = sql(self.database().query("SELECT 1 FROM document_candidates_v1 WHERE workspace=? AND upload_id=? LIMIT 1", &[self.workspace_id(), upload_id]))?;
++        let rows = sql(self.database().query(
++            "SELECT 1 FROM document_candidates_v1 WHERE workspace=? AND upload_id=? LIMIT 1",
++            &[self.workspace_id(), upload_id],
++        ))?;
+         Ok(!rows.is_empty())
+     }
+     /// GC needs the exact expected digest for a journal-backed incomplete upload,
+Diff in /workspace/Muyon-document-candidate/crates/muyon-core/src/documents/candidate.rs:180:
+     /// not a global "any object might belong to it" reservation.
+-    pub(crate) fn document_candidate_reserves_digest(&self, upload_id: &str, digest: &str) -> Result<Option<bool>> {
+-        let exists = sql(self.database().query("SELECT name FROM sqlite_master WHERE type='table' AND name='document_candidates_v1'", &[]))?;
+-        if exists.is_empty() { return Ok(None); }
++    pub(crate) fn document_candidate_reserves_digest(
++        &self,
++        upload_id: &str,
++        digest: &str,
++    ) -> Result<Option<bool>> {
++        let exists = sql(self.database().query(
++            "SELECT name FROM sqlite_master WHERE type='table' AND name='document_candidates_v1'",
++            &[],
++        ))?;
++        if exists.is_empty() {
++            return Ok(None);
++        }
+         self.candidate_schema()?;
+         let rows = sql(self.database().query("SELECT CASE WHEN length(CAST(candidate_id AS BLOB))<=128 THEN candidate_id ELSE NULL END FROM document_candidates_v1 WHERE workspace=? AND upload_id=?", &[self.workspace_id(), upload_id]))?;
+-        let Some(raw) = rows.first() else { return Ok(None); };
++        let Some(raw) = rows.first() else {
++            return Ok(None);
++        };
+         let (row, _) = self.candidate_row(cell(raw, 0)?)?;
+-        if row.upload_id != upload_id { return Err(ContractError::StorageCorrupt); }
++        if row.upload_id != upload_id {
++            return Err(ContractError::StorageCorrupt);
++        }
+         Ok(Some(row.expected_blob.digest == digest))
+     }
+ }
+Diff in /workspace/Muyon-document-candidate/crates/muyon-core/src/documents/candidate_tests.rs:2:
+ use super::{storage_tests::Fixture, *};
+ use crate::{business::BusinessStore, contract::*, sqlite::Db};
+ use sha2::{Digest, Sha256};
+-use std::{fs, time::{SystemTime, UNIX_EPOCH}};
+-const NEW_BYTES: &[u8] = b"%PDF-1.4\nNEW ORIGINAL SYNTHETIC CANDIDATE; not engine-validated\n%%EOF\n";
+-fn expiry() -> u64 { SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_millis() as u64 + 20_000 }
++use std::{
++    fs,
++    time::{SystemTime, UNIX_EPOCH},
++};
++const NEW_BYTES: &[u8] =
++    b"%PDF-1.4\nNEW ORIGINAL SYNTHETIC CANDIDATE; not engine-validated\n%%EOF\n";
++fn expiry() -> u64 {
++    SystemTime::now()
++        .duration_since(UNIX_EPOCH)
++        .unwrap()
++        .as_millis() as u64
++        + 20_000
++}
+ fn setup() -> (Fixture, BusinessStore, DocumentAccess) {
+-    let f = Fixture::new(); let (store, mut access) = f.setup();
++    let f = Fixture::new();
++    let (store, mut access) = f.setup();
+     access.authority.generation = access.authority.generation.next().unwrap();
+-    store.issue_document_grant_trusted(&access.document, &access.authority, &[DocumentOperation::Inspect, DocumentOperation::ReadText, DocumentOperation::StructuredEdit], expiry()).unwrap();
++    store
++        .issue_document_grant_trusted(
++            &access.document,
++            &access.authority,
++            &[
++                DocumentOperation::Inspect,
++                DocumentOperation::ReadText,
++                DocumentOperation::StructuredEdit,
++            ],
++            expiry(),
++        )
++        .unwrap();
+     store.initialize_document_candidates_trusted().unwrap();
+     (f, store, access)
+ }
+Diff in /workspace/Muyon-document-candidate/crates/muyon-core/src/documents/candidate_tests.rs:15:
+ #[test]
+ fn new_bytes_are_private_sealed_unvalidated_and_never_publish() {
+-    let (_f, store, access) = setup(); let original = store.read_document(&access).unwrap();
+-    let status = store.prepare_document_candidate_trusted(&access, "candidate", "operation", NEW_BYTES).unwrap();
++    let (_f, store, access) = setup();
++    let original = store.read_document(&access).unwrap();
++    let status = store
++        .prepare_document_candidate_trusted(&access, "candidate", "operation", NEW_BYTES)
++        .unwrap();
+     assert_eq!(status.state, CandidateState::SealedUnvalidated);
+     assert_ne!(status.expected_blob.digest, original.blob.digest);
+-    assert_eq!(fs::read(store.root_dir().join("objects").join(&status.expected_blob.digest)).unwrap(), NEW_BYTES);
++    assert_eq!(
++        fs::read(
++            store
++                .root_dir()
++                .join("objects")
++                .join(&status.expected_blob.digest)
++        )
++        .unwrap(),
++        NEW_BYTES
++    );
+     assert_eq!(store.read_document(&access).unwrap(), original);
+     let tx = store.database().transaction().unwrap();
+-    assert_eq!(store.document_publish_candidate_in_transaction(&tx, &access, "candidate"), Err(ContractError::UnsupportedOperation));
++    assert_eq!(
++        store.document_publish_candidate_in_transaction(&tx, &access, "candidate"),
++        Err(ContractError::UnsupportedOperation)
++    );
+     drop(tx);
+-    assert_eq!(store.database().query("SELECT * FROM document_revisions", &[]).unwrap().len(), 1);
+-    assert_eq!(store.database().query("SELECT * FROM blob_references", &[]).unwrap().len(), 1);
++    assert_eq!(
++        store
++            .database()
++            .query("SELECT * FROM document_revisions", &[])
++            .unwrap()
++            .len(),
++        1
++    );
++    assert_eq!(
++        store
++            .database()
++            .query("SELECT * FROM blob_references", &[])
++            .unwrap()
++            .len(),
++        1
++    );
+ }
+ #[test]
+ fn duplicate_preparation_is_query_only_and_conflicting_binding_is_rejected() {
+Diff in /workspace/Muyon-document-candidate/crates/muyon-core/src/documents/candidate_tests.rs:31:
+     let (_f, store, access) = setup();
+-    let one = store.prepare_document_candidate_trusted(&access, "candidate", "operation", NEW_BYTES).unwrap();
+-    let uploads = store.database().query("SELECT * FROM blob_uploads ORDER BY upload_id", &[]).unwrap();
+-    assert_eq!(store.prepare_document_candidate_trusted(&access, "candidate", "operation", NEW_BYTES).unwrap(), one);
+-    assert_eq!(store.database().query("SELECT * FROM blob_uploads ORDER BY upload_id", &[]).unwrap(), uploads);
+-    assert_eq!(store.prepare_document_candidate_trusted(&access, "candidate", "different", NEW_BYTES), Err(ContractError::IntentConflict));
+-    assert_eq!(store.prepare_document_candidate_trusted(&access, "candidate", "operation", b"different bytes"), Err(ContractError::IntentConflict));
+-    store.database().exec("UPDATE document_candidates_v1 SET state='preparation_unknown'", &[]).unwrap();
+-    assert_eq!(store.prepare_document_candidate_trusted(&access, "candidate", "operation", NEW_BYTES).unwrap().state, CandidateState::PreparationUnknown);
+-    assert_eq!(store.database().query("SELECT * FROM blob_uploads ORDER BY upload_id", &[]).unwrap(), uploads);
++    let one = store
++        .prepare_document_candidate_trusted(&access, "candidate", "operation", NEW_BYTES)
++        .unwrap();
++    let uploads = store
++        .database()
++        .query("SELECT * FROM blob_uploads ORDER BY upload_id", &[])
++        .unwrap();
++    assert_eq!(
++        store
++            .prepare_document_candidate_trusted(&access, "candidate", "operation", NEW_BYTES)
++            .unwrap(),
++        one
++    );
++    assert_eq!(
++        store
++            .database()
++            .query("SELECT * FROM blob_uploads ORDER BY upload_id", &[])
++            .unwrap(),
++        uploads
++    );
++    assert_eq!(
++        store.prepare_document_candidate_trusted(&access, "candidate", "different", NEW_BYTES),
++        Err(ContractError::IntentConflict)
++    );
++    assert_eq!(
++        store.prepare_document_candidate_trusted(
++            &access,
++            "candidate",
++            "operation",
++            b"different bytes"
++        ),
++        Err(ContractError::IntentConflict)
++    );
++    store
++        .database()
++        .exec(
++            "UPDATE document_candidates_v1 SET state='preparation_unknown'",
++            &[],
++        )
++        .unwrap();
++    assert_eq!(
++        store
++            .prepare_document_candidate_trusted(&access, "candidate", "operation", NEW_BYTES)
++            .unwrap()
++            .state,
++        CandidateState::PreparationUnknown
++    );
++    assert_eq!(
++        store
++            .database()
++            .query("SELECT * FROM blob_uploads ORDER BY upload_id", &[])
++            .unwrap(),
++        uploads
++    );
+ }
+ #[test]
+ fn reservation_failure_has_no_upload_or_output_effect() {
+Diff in /workspace/Muyon-document-candidate/crates/muyon-core/src/documents/candidate_tests.rs:44:
+     let (_f, store, access) = setup();
+     store.database().exec("CREATE TRIGGER fail_candidate_reservation BEFORE INSERT ON document_candidates_v1 BEGIN SELECT RAISE(ABORT,'synthetic reservation failure'); END", &[]).unwrap();
+-    assert!(store.prepare_document_candidate_trusted(&access, "candidate", "operation", NEW_BYTES).is_err());
+-    assert!(store.database().query("SELECT * FROM document_candidates_v1", &[]).unwrap().is_empty());
+-    assert_eq!(store.database().query("SELECT * FROM blob_uploads", &[]).unwrap().len(), 1);
+-    assert_eq!(fs::read_dir(store.root_dir().join("objects")).unwrap().count(), 1);
++    assert!(store
++        .prepare_document_candidate_trusted(&access, "candidate", "operation", NEW_BYTES)
++        .is_err());
++    assert!(store
++        .database()
++        .query("SELECT * FROM document_candidates_v1", &[])
++        .unwrap()
++        .is_empty());
++    assert_eq!(
++        store
++            .database()
++            .query("SELECT * FROM blob_uploads", &[])
++            .unwrap()
++            .len(),
++        1
++    );
++    assert_eq!(
++        fs::read_dir(store.root_dir().join("objects"))
++            .unwrap()
++            .count(),
++        1
++    );
+ }
+ #[test]
+ fn late_seal_failure_leaves_unpublished_object_and_query_only_unknown() {
+Diff in /workspace/Muyon-document-candidate/crates/muyon-core/src/documents/candidate_tests.rs:53:
+     let (_f, store, access) = setup();
+     store.database().exec("CREATE TRIGGER fail_candidate_seal BEFORE UPDATE OF state ON document_candidates_v1 WHEN NEW.state='sealed_unvalidated' BEGIN SELECT RAISE(ABORT,'synthetic seal failure'); END", &[]).unwrap();
+-    assert_eq!(store.prepare_document_candidate_trusted(&access, "candidate", "operation", NEW_BYTES), Err(ContractError::Unknown));
+-    let status = store.lookup_document_candidate(&access, "candidate").unwrap();
++    assert_eq!(
++        store.prepare_document_candidate_trusted(&access, "candidate", "operation", NEW_BYTES),
++        Err(ContractError::Unknown)
++    );
++    let status = store
++        .lookup_document_candidate(&access, "candidate")
++        .unwrap();
+     assert_eq!(status.state, CandidateState::PreparationUnknown);
+-    assert_eq!(fs::read(store.root_dir().join("objects").join(&status.expected_blob.digest)).unwrap(), NEW_BYTES);
+-    assert_eq!(store.database().query("SELECT * FROM document_revisions", &[]).unwrap().len(), 1);
+-    assert_eq!(store.database().query("SELECT * FROM blob_pins WHERE kind='upload'", &[]).unwrap().len(), 1);
+-    assert_eq!(store.prepare_document_candidate_trusted(&access, "candidate", "operation", NEW_BYTES).unwrap().state, CandidateState::PreparationUnknown);
++    assert_eq!(
++        fs::read(
++            store
++                .root_dir()
++                .join("objects")
++                .join(&status.expected_blob.digest)
++        )
++        .unwrap(),
++        NEW_BYTES
++    );
++    assert_eq!(
++        store
++            .database()
++            .query("SELECT * FROM document_revisions", &[])
++            .unwrap()
++            .len(),
++        1
++    );
++    assert_eq!(
++        store
++            .database()
++            .query("SELECT * FROM blob_pins WHERE kind='upload'", &[])
++            .unwrap()
++            .len(),
++        1
++    );
++    assert_eq!(
++        store
++            .prepare_document_candidate_trusted(&access, "candidate", "operation", NEW_BYTES)
++            .unwrap()
++            .state,
++        CandidateState::PreparationUnknown
++    );
+ }
+ #[test]
+ fn restart_retains_prepared_pin_but_never_adopts_original_execution_authority() {
+Diff in /workspace/Muyon-document-candidate/crates/muyon-core/src/documents/candidate_tests.rs:65:
+     let (f, store, access) = setup();
+-    store.prepare_document_candidate_trusted(&access, "candidate", "operation", NEW_BYTES).unwrap();
++    store
++        .prepare_document_candidate_trusted(&access, "candidate", "operation", NEW_BYTES)
++        .unwrap();
+     drop(store);
+     let store = BusinessStore::open_existing(&f.path(), "workspace", "new-epoch").unwrap();
+     let recovery = store.reconcile_blobs_after_restart().unwrap();
+Diff in /workspace/Muyon-document-candidate/crates/muyon-core/src/documents/candidate_tests.rs:70:
+     assert_eq!(recovery.aborted_uploads, 0);
+-    assert_eq!(store.database().query("SELECT * FROM blob_pins WHERE kind='upload'", &[]).unwrap().len(), 1);
+-    assert!(store.lookup_document_candidate(&access, "candidate").is_err());
+-    let fresh = DocumentAccess { document: access.document, authority: AuthorityBinding { generation: access.authority.generation.next().unwrap(), owner_epoch: "new-epoch".into(), ..access.authority } };
+-    store.issue_document_grant_trusted(&fresh.document, &fresh.authority, &[DocumentOperation::ReadText, DocumentOperation::StructuredEdit], expiry()).unwrap();
+-    assert_eq!(store.lookup_document_candidate(&fresh, "candidate").unwrap().state, CandidateState::SealedUnvalidated);
+-    assert_eq!(store.prepare_document_candidate_trusted(&fresh, "candidate", "operation", NEW_BYTES), Err(ContractError::IntentConflict));
++    assert_eq!(
++        store
++            .database()
++            .query("SELECT * FROM blob_pins WHERE kind='upload'", &[])
++            .unwrap()
++            .len(),
++        1
++    );
++    assert!(store
++        .lookup_document_candidate(&access, "candidate")
++        .is_err());
++    let fresh = DocumentAccess {
++        document: access.document,
++        authority: AuthorityBinding {
++            generation: access.authority.generation.next().unwrap(),
++            owner_epoch: "new-epoch".into(),
++            ..access.authority
++        },
++    };
++    store
++        .issue_document_grant_trusted(
++            &fresh.document,
++            &fresh.authority,
++            &[
++                DocumentOperation::ReadText,
++                DocumentOperation::StructuredEdit,
++            ],
++            expiry(),
++        )
++        .unwrap();
++    assert_eq!(
++        store
++            .lookup_document_candidate(&fresh, "candidate")
++            .unwrap()
++            .state,
++        CandidateState::SealedUnvalidated
++    );
++    assert_eq!(
++        store.prepare_document_candidate_trusted(&fresh, "candidate", "operation", NEW_BYTES),
++        Err(ContractError::IntentConflict)
++    );
+ }
+ #[test]
+ fn revocation_conflict_invalid_input_and_foreign_publication_fail_closed() {
+Diff in /workspace/Muyon-document-candidate/crates/muyon-core/src/documents/candidate_tests.rs:80:
+     let (_f, store, access) = setup();
+-    assert!(store.prepare_document_candidate_trusted(&access, "/tmp/model-path", "operation", NEW_BYTES).is_err());
+-    assert!(store.prepare_document_candidate_trusted(&access, "empty", "operation", &[]).is_err());
+-    assert!(store.prepare_document_candidate_trusted(&access, "huge", "operation", &vec![1; 30 * 1024 * 1024 + 1]).is_err());
+-    store.prepare_document_candidate_trusted(&access, "candidate", "operation", NEW_BYTES).unwrap();
+-    let foreign = Db::open(":memory:", false, true).unwrap(); let tx = foreign.transaction().unwrap();
+-    assert_eq!(store.document_publish_candidate_in_transaction(&tx, &access, "candidate"), Err(ContractError::InvalidAuthority)); drop(tx);
+-    store.revoke_document_grant_trusted(&access.authority).unwrap();
+-    assert!(store.lookup_document_candidate(&access, "candidate").is_err());
+-    assert!(store.prepare_document_candidate_trusted(&access, "later", "operation", NEW_BYTES).is_err());
++    assert!(store
++        .prepare_document_candidate_trusted(&access, "/tmp/model-path", "operation", NEW_BYTES)
++        .is_err());
++    assert!(store
++        .prepare_document_candidate_trusted(&access, "empty", "operation", &[])
++        .is_err());
++    assert!(store
++        .prepare_document_candidate_trusted(
++            &access,
++            "huge",
++            "operation",
++            &vec![1; 30 * 1024 * 1024 + 1]
++        )
++        .is_err());
++    store
++        .prepare_document_candidate_trusted(&access, "candidate", "operation", NEW_BYTES)
++        .unwrap();
++    let foreign = Db::open(":memory:", false, true).unwrap();
++    let tx = foreign.transaction().unwrap();
++    assert_eq!(
++        store.document_publish_candidate_in_transaction(&tx, &access, "candidate"),
++        Err(ContractError::InvalidAuthority)
++    );
++    drop(tx);
++    store
++        .revoke_document_grant_trusted(&access.authority)
++        .unwrap();
++    assert!(store
++        .lookup_document_candidate(&access, "candidate")
++        .is_err());
++    assert!(store
++        .prepare_document_candidate_trusted(&access, "later", "operation", NEW_BYTES)
++        .is_err());
+ }
+ 
+ // Test-only construction of a genuinely reserved pre-file-write crash window.
+Diff in /workspace/Muyon-document-candidate/crates/muyon-core/src/documents/candidate_tests.rs:93:
+ // It never creates a production validation credential or a publication permit.
+-fn reserve_fixture(store: &BusinessStore, access: &DocumentAccess, id: &str, expected: &BlobRef) -> crate::blobs::UploadHandle {
++fn reserve_fixture(
++    store: &BusinessStore,
++    access: &DocumentAccess,
++    id: &str,
++    expected: &BlobRef,
++) -> crate::blobs::UploadHandle {
+     let source = store.read_document(access).unwrap();
+     let project = access.document.scope().project_id.as_deref().unwrap();
+     let tx = store.database().transaction().unwrap();
+Diff in /workspace/Muyon-document-candidate/crates/muyon-core/src/documents/candidate_tests.rs:98:
+-    let upload = store.reserve_candidate_upload_in_transaction(&tx, project).unwrap();
++    let upload = store
++        .reserve_candidate_upload_in_transaction(&tx, project)
++        .unwrap();
+     let payload = serde_json::json!({"candidate_id": id, "operation_id": "operation", "base": access.document,
+         "source_blob": source.blob, "authority": access.authority, "expected_blob": expected, "upload_id": upload.upload_id});
+-    store.database().exec("INSERT INTO document_candidates_v1 VALUES(?,'workspace',?,?,?,?,'preparing')", &[id, project, &upload.upload_id, expected.byte_length.as_str(), &payload.to_string()]).unwrap();
++    store
++        .database()
++        .exec(
++            "INSERT INTO document_candidates_v1 VALUES(?,'workspace',?,?,?,?,'preparing')",
++            &[
++                id,
++                project,
++                &upload.upload_id,
++                expected.byte_length.as_str(),
++                &payload.to_string(),
++            ],
++        )
++        .unwrap();
+     tx.commit().unwrap();
+     upload
+ }
+Diff in /workspace/Muyon-document-candidate/crates/muyon-core/src/documents/candidate_tests.rs:105:
+ 
+ fn add_project_fixture(store: &BusinessStore, project: &str) -> DocumentAccess {
+-    store.database().exec("INSERT INTO projects VALUES(?,'workspace','Synthetic','1',0)", &[project]).unwrap();
++    store
++        .database()
++        .exec(
++            "INSERT INTO projects VALUES(?,'workspace','Synthetic','1',0)",
++            &[project],
++        )
++        .unwrap();
+     let upload = store.begin_upload(project).unwrap();
+-    store.append_chunk(&upload.upload_id, b"original synthetic multi-project source").unwrap();
+-    let finished = store.finish_blob(&upload.upload_id, crate::blobs::BlobKind::Document).unwrap();
+-    let metadata = store.register_document_trusted(project, &format!("document-{project}"), "Synthetic", DocumentFormat::Text, &finished).unwrap();
+-    let authority = AuthorityBinding { grant_id: format!("grant-{project}"), generation: Revision::new(1), owner_epoch: "epoch".into() };
+-    store.issue_document_grant_trusted(&metadata.document, &authority, &[DocumentOperation::Inspect, DocumentOperation::ReadText, DocumentOperation::StructuredEdit], expiry()).unwrap();
+-    DocumentAccess { document: metadata.document, authority }
++    store
++        .append_chunk(
++            &upload.upload_id,
++            b"original synthetic multi-project source",
++        )
++        .unwrap();
++    let finished = store
++        .finish_blob(&upload.upload_id, crate::blobs::BlobKind::Document)
++        .unwrap();
++    let metadata = store
++        .register_document_trusted(
++            project,
++            &format!("document-{project}"),
++            "Synthetic",
++            DocumentFormat::Text,
++            &finished,
++        )
++        .unwrap();
++    let authority = AuthorityBinding {
++        grant_id: format!("grant-{project}"),
++        generation: Revision::new(1),
++        owner_epoch: "epoch".into(),
++    };
++    store
++        .issue_document_grant_trusted(
++            &metadata.document,
++            &authority,
++            &[
++                DocumentOperation::Inspect,
++                DocumentOperation::ReadText,
++                DocumentOperation::StructuredEdit,
++            ],
++            expiry(),
++        )
++        .unwrap();
++    DocumentAccess {
++        document: metadata.document,
++        authority,
++    }
+ }
+ 
+ #[test]
+Diff in /workspace/Muyon-document-candidate/crates/muyon-core/src/documents/candidate_tests.rs:118:
+ fn candidate_gc_crosses_page_boundary_preserving_exact_objects_and_project_quotas() {
+     let (f, store, access) = setup();
+     let mut projects = vec![access];
+-    for n in 1..5 { projects.push(add_project_fixture(&store, &format!("project-{n}"))); }
++    for n in 1..5 {
++        projects.push(add_project_fixture(&store, &format!("project-{n}")));
++    }
+     let mut reserved = Vec::new();
+     for (project_n, access) in projects.iter().enumerate() {
+         // A real committed reservation is the crash point before CREATE_NEW.
+Diff in /workspace/Muyon-document-candidate/crates/muyon-core/src/documents/candidate_tests.rs:126:
+         for n in 0..32 {
+             let bytes = format!("original synthetic candidate {project_n}/{n}").into_bytes();
+             let blob = expected(&bytes);
+-            let upload = reserve_fixture(&store, access, &format!("candidate-{project_n}-{n}"), &blob);
++            let upload =
++                reserve_fixture(&store, access, &format!("candidate-{project_n}-{n}"), &blob);
+             reserved.push((upload.upload_id, blob, bytes));
+         }
+-        assert_eq!(store.prepare_document_candidate_trusted(access, &format!("over-quota-{project_n}"), "operation", NEW_BYTES), Err(ContractError::TextLimit));
++        assert_eq!(
++            store.prepare_document_candidate_trusted(
++                access,
++                &format!("over-quota-{project_n}"),
++                "operation",
++                NEW_BYTES
++            ),
++            Err(ContractError::TextLimit)
++        );
+     }
+     reserved.sort_by(|a, b| a.0.cmp(&b.0));
+     assert_eq!(reserved.len(), 160);
+Diff in /workspace/Muyon-document-candidate/crates/muyon-core/src/documents/candidate_tests.rs:144:
+     }
+     // The final unresolved upload also has actual partial durable staging.
+     let final_upload = &reserved[159].0;
+-    store.materialize_candidate_upload_trusted(final_upload).unwrap();
++    store
++        .materialize_candidate_upload_trusted(final_upload)
++        .unwrap();
+     store.append_chunk(final_upload, b"partial").unwrap();
+     let partial = store.root_dir().join("staging").join(final_upload);
+     let unrelated = b"unrelated synthetic object absent from every reservation";
+Diff in /workspace/Muyon-document-candidate/crates/muyon-core/src/documents/candidate_tests.rs:151:
+-    let orphan_path = store.root_dir().join("objects").join(expected(unrelated).digest);
++    let orphan_path = store
++        .root_dir()
++        .join("objects")
++        .join(expected(unrelated).digest);
+     fs::write(&orphan_path, unrelated).unwrap();
+     // Per-project quota must not become a global admission cap.
+     let sixth = add_project_fixture(&store, "project-5");
+Diff in /workspace/Muyon-document-candidate/crates/muyon-core/src/documents/candidate_tests.rs:155:
+-    assert_eq!(store.prepare_document_candidate_trusted(&sixth, "sixth-candidate", "operation", NEW_BYTES).unwrap().state, CandidateState::SealedUnvalidated);
+-    assert!(store.lookup_document_candidate(&sixth, "candidate-0-0").is_err());
+-    let uploads = store.database().query("SELECT * FROM blob_uploads ORDER BY upload_id", &[]).unwrap();
+-    let journals = store.database().query("SELECT * FROM document_candidates_v1 ORDER BY candidate_id", &[]).unwrap();
++    assert_eq!(
++        store
++            .prepare_document_candidate_trusted(&sixth, "sixth-candidate", "operation", NEW_BYTES)
++            .unwrap()
++            .state,
++        CandidateState::SealedUnvalidated
++    );
++    assert!(store
++        .lookup_document_candidate(&sixth, "candidate-0-0")
++        .is_err());
++    let uploads = store
++        .database()
++        .query("SELECT * FROM blob_uploads ORDER BY upload_id", &[])
++        .unwrap();
++    let journals = store
++        .database()
++        .query(
++            "SELECT * FROM document_candidates_v1 ORDER BY candidate_id",
++            &[],
++        )
++        .unwrap();
+     assert_eq!(journals.len(), 161);
+     drop(store);
+     let store = BusinessStore::open_existing(&f.path(), "workspace", "new-epoch").unwrap();
+Diff in /workspace/Muyon-document-candidate/crates/muyon-core/src/documents/candidate_tests.rs:162:
+-    assert_eq!(store.reconcile_blobs_after_restart().unwrap().aborted_uploads, 0);
++    assert_eq!(
++        store
++            .reconcile_blobs_after_restart()
++            .unwrap()
++            .aborted_uploads,
++        0
++    );
+     assert_eq!(fs::read(&partial).unwrap(), b"partial");
+     assert_eq!(store.collect_blobs().unwrap(), 1);
+     assert!(!orphan_path.exists());
+Diff in /workspace/Muyon-document-candidate/crates/muyon-core/src/documents/candidate_tests.rs:166:
+-    for (path, bytes) in &protected { assert_eq!(fs::read(path).unwrap(), *bytes); }
+-    assert_eq!(store.database().query("SELECT * FROM blob_uploads ORDER BY upload_id", &[]).unwrap(), uploads);
+-    assert_eq!(store.database().query("SELECT * FROM document_candidates_v1 ORDER BY candidate_id", &[]).unwrap(), journals);
++    for (path, bytes) in &protected {
++        assert_eq!(fs::read(path).unwrap(), *bytes);
++    }
++    assert_eq!(
++        store
++            .database()
++            .query("SELECT * FROM blob_uploads ORDER BY upload_id", &[])
++            .unwrap(),
++        uploads
++    );
++    assert_eq!(
++        store
++            .database()
++            .query(
++                "SELECT * FROM document_candidates_v1 ORDER BY candidate_id",
++                &[]
++            )
++            .unwrap(),
++        journals
++    );
+     // A second sweep cannot repeat deletion or alter an uncertain reservation.
+     assert_eq!(store.collect_blobs().unwrap(), 0);
+     assert_eq!(fs::read(&partial).unwrap(), b"partial");
+Diff in /workspace/Muyon-document-candidate/crates/muyon-core/src/documents/candidate_tests.rs:172:
+-    assert_eq!(store.database().query("SELECT * FROM document_candidates_v1 ORDER BY candidate_id", &[]).unwrap(), journals);
++    assert_eq!(
++        store
++            .database()
++            .query(
++                "SELECT * FROM document_candidates_v1 ORDER BY candidate_id",
++                &[]
++            )
++            .unwrap(),
++        journals
++    );
+ }
+ fn expected(bytes: &[u8]) -> BlobRef {
+-    BlobRef { digest: Sha256::digest(bytes).iter().map(|b| format!("{b:02x}")).collect(), byte_length: Revision::new(bytes.len() as u64) }
++    BlobRef {
++        digest: Sha256::digest(bytes)
++            .iter()
++            .map(|b| format!("{b:02x}"))
++            .collect(),
++        byte_length: Revision::new(bytes.len() as u64),
++    }
+ }
+ #[test]
+ fn partial_staging_restart_preserves_candidate_without_blocking_unrelated_gc() {
+Diff in /workspace/Muyon-document-candidate/crates/muyon-core/src/documents/candidate_tests.rs:180:
+     let (f, store, access) = setup();
+     let candidate = expected(NEW_BYTES);
+     let upload = reserve_fixture(&store, &access, "partial", &candidate);
+-    store.materialize_candidate_upload_trusted(&upload.upload_id).unwrap();
+-    store.append_chunk(&upload.upload_id, &NEW_BYTES[..7]).unwrap();
++    store
++        .materialize_candidate_upload_trusted(&upload.upload_id)
++        .unwrap();
++    store
++        .append_chunk(&upload.upload_id, &NEW_BYTES[..7])
++        .unwrap();
+     let staging = store.root_dir().join("staging").join(&upload.upload_id);
+     // Real file write after the ledger's last commit: SQLite cannot undo it.
+     let mut file = fs::OpenOptions::new().append(true).open(&staging).unwrap();
+Diff in /workspace/Muyon-document-candidate/crates/muyon-core/src/documents/candidate_tests.rs:188:
+-    file.write_all(b"unsql-committed-tail").unwrap(); file.sync_all().unwrap(); drop(file);
++    file.write_all(b"unsql-committed-tail").unwrap();
++    file.sync_all().unwrap();
++    drop(file);
+     let before = fs::read(&staging).unwrap();
+     let orphan = store.begin_upload("project").unwrap();
+-    store.append_chunk(&orphan.upload_id, b"unrelated original synthetic orphan").unwrap();
+-    let orphan = store.finish_blob(&orphan.upload_id, crate::blobs::BlobKind::Document).unwrap();
++    store
++        .append_chunk(&orphan.upload_id, b"unrelated original synthetic orphan")
++        .unwrap();
++    let orphan = store
++        .finish_blob(&orphan.upload_id, crate::blobs::BlobKind::Document)
++        .unwrap();
+     store.abort_upload(&orphan.upload_id).unwrap();
+     // Simulate the durable expected object existing before its ledger commit.
+     let expected_object = store.root_dir().join("objects").join(&candidate.digest);
+Diff in /workspace/Muyon-document-candidate/crates/muyon-core/src/documents/candidate_tests.rs:196:
+     fs::write(&expected_object, NEW_BYTES).unwrap();
+     drop(store);
+     let store = BusinessStore::open_existing(&f.path(), "workspace", "new-epoch").unwrap();
+-    assert_eq!(store.reconcile_blobs_after_restart().unwrap().aborted_uploads, 0);
++    assert_eq!(
++        store
++            .reconcile_blobs_after_restart()
++            .unwrap()
++            .aborted_uploads,
++        0
++    );
+     assert_eq!(fs::read(&staging).unwrap(), before);
+     assert_eq!(store.collect_blobs().unwrap(), 1);
+-    assert!(!store.root_dir().join("objects").join(&orphan.blob.digest).exists());
++    assert!(!store
++        .root_dir()
++        .join("objects")
++        .join(&orphan.blob.digest)
++        .exists());
+     assert_eq!(fs::read(&expected_object).unwrap(), NEW_BYTES);
+     assert_eq!(fs::read(&staging).unwrap(), before);
+-    assert_eq!(store.lookup_upload(&upload.upload_id).unwrap().state, "copying");
++    assert_eq!(
++        store.lookup_upload(&upload.upload_id).unwrap().state,
++        "copying"
++    );
+ }
+ #[test]
+ fn oversize_nonpayload_fields_fail_before_status_decode() {
+Diff in /workspace/Muyon-document-candidate/crates/muyon-core/src/documents/candidate_tests.rs:209:
+     let (_f, store, access) = setup();
+-    store.prepare_document_candidate_trusted(&access, "candidate", "operation", NEW_BYTES).unwrap();
+-    for mutation in ["UPDATE document_candidates_v1 SET workspace=hex(zeroblob(100000))", "UPDATE document_candidates_v1 SET expected_length=hex(zeroblob(100000))"] {
+-        let tx = store.database().transaction().unwrap(); store.database().exec(mutation, &[]).unwrap();
++    store
++        .prepare_document_candidate_trusted(&access, "candidate", "operation", NEW_BYTES)
++        .unwrap();
++    for mutation in [
++        "UPDATE document_candidates_v1 SET workspace=hex(zeroblob(100000))",
++        "UPDATE document_candidates_v1 SET expected_length=hex(zeroblob(100000))",
++    ] {
++        let tx = store.database().transaction().unwrap();
++        store.database().exec(mutation, &[]).unwrap();
+         // No nested lookup transaction: inspect the same mutation via direct
+         // source publication gate, which must reject before producing authority.
+-        assert_eq!(store.document_publish_candidate_in_transaction(&tx, &access, "candidate"), Err(ContractError::StorageCorrupt));
++        assert_eq!(
++            store.document_publish_candidate_in_transaction(&tx, &access, "candidate"),
++            Err(ContractError::StorageCorrupt)
++        );
+         drop(tx);
+     }
+ }
+Diff in /workspace/Muyon-document-candidate/crates/muyon-core/src/documents/candidate_tests.rs:220:
+ fn candidate_count_and_expected_byte_admission_limits_precede_file_writes() {
+     let (_f, store, access) = setup();
+     let one = expected(b"one");
+-    for n in 0..32 { reserve_fixture(&store, &access, &format!("reserved-{n}"), &one); }
+-    assert_eq!(store.prepare_document_candidate_trusted(&access, "blocked", "operation", NEW_BYTES), Err(ContractError::TextLimit));
+-    assert_eq!(store.database().query("SELECT * FROM blob_uploads", &[]).unwrap().len(), 33);
++    for n in 0..32 {
++        reserve_fixture(&store, &access, &format!("reserved-{n}"), &one);
++    }
++    assert_eq!(
++        store.prepare_document_candidate_trusted(&access, "blocked", "operation", NEW_BYTES),
++        Err(ContractError::TextLimit)
++    );
++    assert_eq!(
++        store
++            .database()
++            .query("SELECT * FROM blob_uploads", &[])
++            .unwrap()
++            .len(),
++        33
++    );
+     let (_f2, store, access) = setup();
+-    let bytes = vec![1; 24 * 1024 * 1024]; let planned = expected(&bytes);
+-    for n in 0..5 { reserve_fixture(&store, &access, &format!("reserved-{n}"), &planned); }
+-    assert_eq!(store.prepare_document_candidate_trusted(&access, "blocked", "operation", &vec![2; 9 * 1024 * 1024]), Err(ContractError::TextLimit));
+-    assert_eq!(store.database().query("SELECT * FROM blob_uploads", &[]).unwrap().len(), 6);
++    let bytes = vec![1; 24 * 1024 * 1024];
++    let planned = expected(&bytes);
++    for n in 0..5 {
++        reserve_fixture(&store, &access, &format!("reserved-{n}"), &planned);
++    }
++    assert_eq!(
++        store.prepare_document_candidate_trusted(
++            &access,
++            "blocked",
++            "operation",
++            &vec![2; 9 * 1024 * 1024]
++        ),
++        Err(ContractError::TextLimit)
++    );
++    assert_eq!(
++        store
++            .database()
++            .query("SELECT * FROM blob_uploads", &[])
++            .unwrap()
++            .len(),
++        6
++    );
+ }
+ #[test]
+ fn expiry_after_durable_pin_is_unknown_and_never_source_success() {
+Diff in /workspace/Muyon-document-candidate/crates/muyon-core/src/documents/candidate_tests.rs:234:
+     let (_f, store, access) = setup();
+     store.database().exec("CREATE TRIGGER expire_after_candidate_pin AFTER UPDATE ON blob_uploads WHEN NEW.state='pinned' BEGIN UPDATE document_grants SET expires_at_ms='0'; END", &[]).unwrap();
+-    assert_eq!(store.prepare_document_candidate_trusted(&access, "candidate", "operation", NEW_BYTES), Err(ContractError::Unknown));
+-    assert_eq!(store.database().query("SELECT * FROM document_revisions", &[]).unwrap().len(), 1);
+-    assert_eq!(store.database().query("SELECT * FROM blob_pins WHERE kind='upload'", &[]).unwrap().len(), 1);
+-    assert!(store.lookup_document_candidate(&access, "candidate").is_err());
++    assert_eq!(
++        store.prepare_document_candidate_trusted(&access, "candidate", "operation", NEW_BYTES),
++        Err(ContractError::Unknown)
++    );
++    assert_eq!(
++        store
++            .database()
++            .query("SELECT * FROM document_revisions", &[])
++            .unwrap()
++            .len(),
++        1
++    );
++    assert_eq!(
++        store
++            .database()
++            .query("SELECT * FROM blob_pins WHERE kind='upload'", &[])
++            .unwrap()
++            .len(),
++        1
++    );
++    assert!(store
++        .lookup_document_candidate(&access, "candidate")
++        .is_err());
+ }
+ #[test]
+ fn missing_pin_or_corrupt_object_is_query_only_unknown() {
+Diff in /workspace/Muyon-document-candidate/crates/muyon-core/src/documents/candidate_tests.rs:243:
+     let (_f, store, access) = setup();
+-    let status = store.prepare_document_candidate_trusted(&access, "candidate", "operation", NEW_BYTES).unwrap();
+-    let object = store.root_dir().join("objects").join(&status.expected_blob.digest);
++    let status = store
++        .prepare_document_candidate_trusted(&access, "candidate", "operation", NEW_BYTES)
++        .unwrap();
++    let object = store
++        .root_dir()
++        .join("objects")
++        .join(&status.expected_blob.digest);
+     // Preserve length so this exercises the hash check, not just byte count.
+     let mut corrupt = NEW_BYTES.to_vec();
+     corrupt[0] ^= 1;
+Diff in /workspace/Muyon-document-candidate/crates/muyon-core/src/documents/candidate_tests.rs:249:
+     fs::write(&object, &corrupt).unwrap();
+-    assert_eq!(store.lookup_document_candidate(&access, "candidate").unwrap().state, CandidateState::PreparationUnknown);
++    assert_eq!(
++        store
++            .lookup_document_candidate(&access, "candidate")
++            .unwrap()
++            .state,
++        CandidateState::PreparationUnknown
++    );
+     fs::write(&object, NEW_BYTES).unwrap();
+-    assert_eq!(store.lookup_document_candidate(&access, "candidate").unwrap().state, CandidateState::SealedUnvalidated);
++    assert_eq!(
++        store
++            .lookup_document_candidate(&access, "candidate")
++            .unwrap()
++            .state,
++        CandidateState::SealedUnvalidated
++    );
+     fs::remove_file(&object).unwrap();
+-    assert_eq!(store.lookup_document_candidate(&access, "candidate").unwrap().state, CandidateState::PreparationUnknown);
++    assert_eq!(
++        store
++            .lookup_document_candidate(&access, "candidate")
++            .unwrap()
++            .state,
++        CandidateState::PreparationUnknown
++    );
+     fs::write(&object, NEW_BYTES).unwrap();
+-    store.database().exec("DELETE FROM blob_pins WHERE kind='upload'", &[]).unwrap();
+-    assert_eq!(store.lookup_document_candidate(&access, "candidate").unwrap().state, CandidateState::PreparationUnknown);
+-    assert_eq!(store.database().query("SELECT * FROM document_revisions", &[]).unwrap().len(), 1);
++    store
++        .database()
++        .exec("DELETE FROM blob_pins WHERE kind='upload'", &[])
++        .unwrap();
++    assert_eq!(
++        store
++            .lookup_document_candidate(&access, "candidate")
++            .unwrap()
++            .state,
++        CandidateState::PreparationUnknown
++    );
++    assert_eq!(
++        store
++            .database()
++            .query("SELECT * FROM document_revisions", &[])
++            .unwrap()
++            .len(),
++        1
++    );
+ }
+ #[test]
+ fn source_head_advance_rejects_old_candidate_without_latest_substitution() {
+Diff in /workspace/Muyon-document-candidate/crates/muyon-core/src/documents/candidate_tests.rs:262:
+     let (_f, store, access) = setup();
+     let original = store.read_document(&access).unwrap();
+-    store.prepare_document_candidate_trusted(&access, "candidate", "operation", NEW_BYTES).unwrap();
++    store
++        .prepare_document_candidate_trusted(&access, "candidate", "operation", NEW_BYTES)
++        .unwrap();
+     let tx = store.database().transaction().unwrap();
+-    store.document_access_in_transaction(&tx, &access, &[DocumentOperation::StructuredEdit]).unwrap();
+-    store.document_clone_in_transaction(&tx, &access.document, "Source advanced", &original.blob).unwrap();
++    store
++        .document_access_in_transaction(&tx, &access, &[DocumentOperation::StructuredEdit])
++        .unwrap();
++    store
++        .document_clone_in_transaction(&tx, &access.document, "Source advanced", &original.blob)
++        .unwrap();
+     tx.commit().unwrap();
+-    assert_eq!(store.lookup_document_candidate(&access, "candidate"), Err(ContractError::RevisionConflict));
+-    assert_eq!(store.database().query("SELECT state FROM document_candidates_v1", &[]).unwrap()[0][0].as_deref(), Some("sealed_unvalidated"));
+-    assert_eq!(store.database().query("SELECT * FROM document_revisions", &[]).unwrap().len(), 2);
++    assert_eq!(
++        store.lookup_document_candidate(&access, "candidate"),
++        Err(ContractError::RevisionConflict)
++    );
++    assert_eq!(
++        store
++            .database()
++            .query("SELECT state FROM document_candidates_v1", &[])
++            .unwrap()[0][0]
++            .as_deref(),
++        Some("sealed_unvalidated")
++    );
++    assert_eq!(
++        store
++            .database()
++            .query("SELECT * FROM document_revisions", &[])
++            .unwrap()
++            .len(),
++        2
++    );
+ }
+ 
+Diff in /workspace/Muyon-document-candidate/crates/muyon-core/src/documents/history_tests.rs:4:
+ use std::time::{SystemTime, UNIX_EPOCH};
+ 
+ fn expiry() -> u64 {
+-    SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_millis() as u64 + 20_000
++    SystemTime::now()
++        .duration_since(UNIX_EPOCH)
++        .unwrap()
++        .as_millis() as u64
++        + 20_000
+ }
+ fn advance(store: &BusinessStore, old: &DocumentAccess) -> (DocumentAccess, DocumentMetadata) {
+     let metadata = store.read_document(old).unwrap();
+Diff in /workspace/Muyon-document-candidate/crates/muyon-core/src/documents/history_tests.rs:11:
+     let tx = store.database().transaction().unwrap();
+-    let next = store.document_clone_in_transaction(&tx, &old.document, "COPY-only new head", &metadata.blob).unwrap();
++    let next = store
++        .document_clone_in_transaction(&tx, &old.document, "COPY-only new head", &metadata.blob)
++        .unwrap();
+     tx.commit().unwrap();
+-    let current = DocumentAccess { document: next.document, authority: AuthorityBinding { generation: old.authority.generation.next().unwrap(), ..old.authority.clone() } };
+-    store.issue_document_grant_trusted(&current.document, &current.authority, &[DocumentOperation::Inspect, DocumentOperation::ReadText], expiry()).unwrap();
++    let current = DocumentAccess {
++        document: next.document,
++        authority: AuthorityBinding {
++            generation: old.authority.generation.next().unwrap(),
++            ..old.authority.clone()
++        },
++    };
++    store
++        .issue_document_grant_trusted(
++            &current.document,
++            &current.authority,
++            &[DocumentOperation::Inspect, DocumentOperation::ReadText],
++            expiry(),
++        )
++        .unwrap();
+     (current, metadata)
+ }
+ #[test]
+Diff in /workspace/Muyon-document-candidate/crates/muyon-core/src/documents/history_tests.rs:19:
+ fn history_denies_without_explicit_target_policy_and_then_reads_exact_snapshot() {
+-    let f = Fixture::new(); let (store, old) = f.setup(); let (current, snapshot) = advance(&store, &old);
++    let f = Fixture::new();
++    let (store, old) = f.setup();
++    let (current, snapshot) = advance(&store, &old);
+     let tx = store.database().transaction().unwrap();
+-    assert!(store.document_history_access_in_transaction(&tx, &current, &old.document, &[DocumentOperation::ReadText]).is_err());
++    assert!(store
++        .document_history_access_in_transaction(
++            &tx,
++            &current,
++            &old.document,
++            &[DocumentOperation::ReadText]
++        )
++        .is_err());
+     drop(tx);
+     store.initialize_document_history_trusted().unwrap();
+     let tx = store.database().transaction().unwrap();
+Diff in /workspace/Muyon-document-candidate/crates/muyon-core/src/documents/history_tests.rs:26:
+-    assert!(store.document_history_access_in_transaction(&tx, &current, &old.document, &[DocumentOperation::ReadText]).is_err());
+-    assert_eq!(store.document_history_access_in_transaction(&tx, &current, &current.document, &[DocumentOperation::ReadText]).unwrap().document, current.document);
++    assert!(store
++        .document_history_access_in_transaction(
++            &tx,
++            &current,
++            &old.document,
++            &[DocumentOperation::ReadText]
++        )
++        .is_err());
++    assert_eq!(
++        store
++            .document_history_access_in_transaction(
++                &tx,
++                &current,
++                &current.document,
++                &[DocumentOperation::ReadText]
++            )
++            .unwrap()
++            .document,
++        current.document
++    );
+     drop(tx);
+-    store.issue_document_history_grant_trusted(&current, &old.document, &[DocumentOperation::ReadText], expiry()).unwrap();
++    store
++        .issue_document_history_grant_trusted(
++            &current,
++            &old.document,
++            &[DocumentOperation::ReadText],
++            expiry(),
++        )
++        .unwrap();
+     let tx = store.database().transaction().unwrap();
+-    assert_eq!(store.document_history_access_in_transaction(&tx, &current, &old.document, &[DocumentOperation::ReadText]).unwrap(), snapshot);
+-    assert!(store.document_history_access_in_transaction(&tx, &current, &old.document, &[DocumentOperation::Inspect]).is_err());
++    assert_eq!(
++        store
++            .document_history_access_in_transaction(
++                &tx,
++                &current,
++                &old.document,
++                &[DocumentOperation::ReadText]
++            )
++            .unwrap(),
++        snapshot
++    );
++    assert!(store
++        .document_history_access_in_transaction(
++            &tx,
++            &current,
++            &old.document,
++            &[DocumentOperation::Inspect]
++        )
++        .is_err());
+     drop(tx);
+ }
+ #[test]
+Diff in /workspace/Muyon-document-candidate/crates/muyon-core/src/documents/history_tests.rs:36:
+ fn historical_and_parent_revocation_expiry_generation_and_project_are_current() {
+-    let f = Fixture::new(); let (store, old) = f.setup(); let (current, _) = advance(&store, &old);
++    let f = Fixture::new();
++    let (store, old) = f.setup();
++    let (current, _) = advance(&store, &old);
+     store.initialize_document_history_trusted().unwrap();
+-    store.issue_document_history_grant_trusted(&current, &old.document, &[DocumentOperation::ReadText], expiry()).unwrap();
++    store
++        .issue_document_history_grant_trusted(
++            &current,
++            &old.document,
++            &[DocumentOperation::ReadText],
++            expiry(),
++        )
++        .unwrap();
+     for mutation in [
+         "UPDATE document_history_grants_v1 SET active=0",
+         "UPDATE document_history_grants_v1 SET expires_at_ms='0'",
+Diff in /workspace/Muyon-document-candidate/crates/muyon-core/src/documents/history_tests.rs:48:
+     ] {
+         let tx = store.database().transaction().unwrap();
+         store.database().exec(mutation, &[]).unwrap();
+-        assert!(store.document_history_access_in_transaction(&tx, &current, &old.document, &[DocumentOperation::ReadText]).is_err(), "{mutation}");
++        assert!(
++            store
++                .document_history_access_in_transaction(
++                    &tx,
++                    &current,
++                    &old.document,
++                    &[DocumentOperation::ReadText]
++                )
++                .is_err(),
++            "{mutation}"
++        );
+         drop(tx);
+     }
+-    store.revoke_document_history_grant_trusted(&current, &old.document).unwrap();
++    store
++        .revoke_document_history_grant_trusted(&current, &old.document)
++        .unwrap();
+     let tx = store.database().transaction().unwrap();
+-    assert!(store.document_history_access_in_transaction(&tx, &current, &old.document, &[DocumentOperation::ReadText]).is_err());
++    assert!(store
++        .document_history_access_in_transaction(
++            &tx,
++            &current,
++            &old.document,
++            &[DocumentOperation::ReadText]
++        )
++        .is_err());
+     drop(tx);
+ }
+ #[test]
+Diff in /workspace/Muyon-document-candidate/crates/muyon-core/src/documents/history_tests.rs:60:
+ fn old_policy_is_not_inherited_by_a_new_parent_grant_generation() {
+-    let f = Fixture::new(); let (store, old) = f.setup(); let (current, _) = advance(&store, &old);
++    let f = Fixture::new();
++    let (store, old) = f.setup();
++    let (current, _) = advance(&store, &old);
+     store.initialize_document_history_trusted().unwrap();
+-    store.issue_document_history_grant_trusted(&current, &old.document, &[DocumentOperation::ReadText], expiry()).unwrap();
+-    let next = DocumentAccess { authority: AuthorityBinding { generation: current.authority.generation.next().unwrap(), ..current.authority.clone() }, document: current.document.clone() };
+-    store.issue_document_grant_trusted(&next.document, &next.authority, &[DocumentOperation::ReadText], expiry()).unwrap();
++    store
++        .issue_document_history_grant_trusted(
++            &current,
++            &old.document,
++            &[DocumentOperation::ReadText],
++            expiry(),
++        )
++        .unwrap();
++    let next = DocumentAccess {
++        authority: AuthorityBinding {
++            generation: current.authority.generation.next().unwrap(),
++            ..current.authority.clone()
++        },
++        document: current.document.clone(),
++    };
++    store
++        .issue_document_grant_trusted(
++            &next.document,
++            &next.authority,
++            &[DocumentOperation::ReadText],
++            expiry(),
++        )
++        .unwrap();
+     let tx = store.database().transaction().unwrap();
+-    assert!(store.document_history_access_in_transaction(&tx, &current, &old.document, &[DocumentOperation::ReadText]).is_err());
+-    assert!(store.document_history_access_in_transaction(&tx, &next, &old.document, &[DocumentOperation::ReadText]).is_err());
++    assert!(store
++        .document_history_access_in_transaction(
++            &tx,
++            &current,
++            &old.document,
++            &[DocumentOperation::ReadText]
++        )
++        .is_err());
++    assert!(store
++        .document_history_access_in_transaction(
++            &tx,
++            &next,
++            &old.document,
++            &[DocumentOperation::ReadText]
++        )
++        .is_err());
+     drop(tx);
+ }
+ #[test]
+Diff in /workspace/Muyon-document-candidate/crates/muyon-core/src/documents/history_tests.rs:72:
+ fn historical_identity_scope_schema_and_read_only_policy_fail_closed() {
+-    let f = Fixture::new(); let (store, old) = f.setup(); let (current, _) = advance(&store, &old);
++    let f = Fixture::new();
++    let (store, old) = f.setup();
++    let (current, _) = advance(&store, &old);
+     store.initialize_document_history_trusted().unwrap();
+-    assert!(store.issue_document_history_grant_trusted(&current, &old.document, &[DocumentOperation::StructuredEdit], expiry()).is_err());
+-    store.issue_document_history_grant_trusted(&current, &old.document, &[DocumentOperation::ReadText], expiry()).unwrap();
++    assert!(store
++        .issue_document_history_grant_trusted(
++            &current,
++            &old.document,
++            &[DocumentOperation::StructuredEdit],
++            expiry()
++        )
++        .is_err());
++    store
++        .issue_document_history_grant_trusted(
++            &current,
++            &old.document,
++            &[DocumentOperation::ReadText],
++            expiry(),
++        )
++        .unwrap();
+     let tx = store.database().transaction().unwrap();
+     for historical in [
+-        DocumentRef::new(Scope { workspace_id: "workspace".into(), project_id: Some("other".into()) }, "document", Revision::new(1), DocumentFormat::Pdf).unwrap(),
+-        DocumentRef::new(current.document.scope().clone(), "other", Revision::new(1), DocumentFormat::Pdf).unwrap(),
+-        DocumentRef::new(current.document.scope().clone(), "document", Revision::new(3), DocumentFormat::Pdf).unwrap(),
+-    ] { assert!(store.document_history_access_in_transaction(&tx, &current, &historical, &[DocumentOperation::ReadText]).is_err()); }
+-    assert!(store.document_history_access_in_transaction(&tx, &current, &old.document, &[DocumentOperation::StructuredEdit]).is_err());
++        DocumentRef::new(
++            Scope {
++                workspace_id: "workspace".into(),
++                project_id: Some("other".into()),
++            },
++            "document",
++            Revision::new(1),
++            DocumentFormat::Pdf,
++        )
++        .unwrap(),
++        DocumentRef::new(
++            current.document.scope().clone(),
++            "other",
++            Revision::new(1),
++            DocumentFormat::Pdf,
++        )
++        .unwrap(),
++        DocumentRef::new(
++            current.document.scope().clone(),
++            "document",
++            Revision::new(3),
++            DocumentFormat::Pdf,
++        )
++        .unwrap(),
++    ] {
++        assert!(store
++            .document_history_access_in_transaction(
++                &tx,
++                &current,
++                &historical,
++                &[DocumentOperation::ReadText]
++            )
++            .is_err());
++    }
++    assert!(store
++        .document_history_access_in_transaction(
++            &tx,
++            &current,
++            &old.document,
++            &[DocumentOperation::StructuredEdit]
++        )
++        .is_err());
+     drop(tx);
+-    let foreign = Db::open(":memory:", false, true).unwrap(); let tx = foreign.transaction().unwrap();
+-    assert_eq!(store.document_history_access_in_transaction(&tx, &current, &old.document, &[DocumentOperation::ReadText]), Err(ContractError::InvalidAuthority));
++    let foreign = Db::open(":memory:", false, true).unwrap();
++    let tx = foreign.transaction().unwrap();
++    assert_eq!(
++        store.document_history_access_in_transaction(
++            &tx,
++            &current,
++            &old.document,
++            &[DocumentOperation::ReadText]
++        ),
++        Err(ContractError::InvalidAuthority)
++    );
+ }
+ #[test]
+ fn canonical_history_corruption_and_missing_revision_are_not_substituted() {
+Diff in /workspace/Muyon-document-candidate/crates/muyon-core/src/documents/history_tests.rs:90:
+-    let f = Fixture::new(); let (store, old) = f.setup(); let (current, _) = advance(&store, &old);
++    let f = Fixture::new();
++    let (store, old) = f.setup();
++    let (current, _) = advance(&store, &old);
+     store.initialize_document_history_trusted().unwrap();
+-    store.issue_document_history_grant_trusted(&current, &old.document, &[DocumentOperation::ReadText], expiry()).unwrap();
++    store
++        .issue_document_history_grant_trusted(
++            &current,
++            &old.document,
++            &[DocumentOperation::ReadText],
++            expiry(),
++        )
++        .unwrap();
+     let current_payload = serde_json::to_string(&store.read_document(&current).unwrap()).unwrap();
+     let tx = store.database().transaction().unwrap();
+-    store.database().exec("UPDATE document_revisions SET payload=? WHERE revision='1'", &[&current_payload]).unwrap();
+-    assert_eq!(store.document_history_access_in_transaction(&tx, &current, &old.document, &[DocumentOperation::ReadText]), Err(ContractError::StorageCorrupt));
++    store
++        .database()
++        .exec(
++            "UPDATE document_revisions SET payload=? WHERE revision='1'",
++            &[&current_payload],
++        )
++        .unwrap();
++    assert_eq!(
++        store.document_history_access_in_transaction(
++            &tx,
++            &current,
++            &old.document,
++            &[DocumentOperation::ReadText]
++        ),
++        Err(ContractError::StorageCorrupt)
++    );
+     drop(tx);
+     let tx = store.database().transaction().unwrap();
+-    store.database().exec("DELETE FROM document_revisions WHERE revision='1'", &[]).unwrap();
+-    assert_eq!(store.document_history_access_in_transaction(&tx, &current, &old.document, &[DocumentOperation::ReadText]), Err(ContractError::NotFound));
++    store
++        .database()
++        .exec("DELETE FROM document_revisions WHERE revision='1'", &[])
++        .unwrap();
++    assert_eq!(
++        store.document_history_access_in_transaction(
++            &tx,
++            &current,
++            &old.document,
++            &[DocumentOperation::ReadText]
++        ),
++        Err(ContractError::NotFound)
++    );
+     drop(tx);
+ }
+ #[test]
+Diff in /workspace/Muyon-document-candidate/crates/muyon-core/src/documents/history_tests.rs:104:
+ fn text_label_roundtrips_without_default_utf8_or_reader_capability() {
+-    let document = DocumentRef::new(Scope { workspace_id: "workspace".into(), project_id: Some("project".into()) }, "text-source", Revision::new(1), DocumentFormat::Text).unwrap();
++    let document = DocumentRef::new(
++        Scope {
++            workspace_id: "workspace".into(),
++            project_id: Some("project".into()),
++        },
++        "text-source",
++        Revision::new(1),
++        DocumentFormat::Text,
++    )
++    .unwrap();
+     let json = serde_json::to_string(&document).unwrap();
+     assert!(json.contains("\"format\":\"text\""));
+-    assert_eq!(serde_json::from_str::<DocumentRef>(&json).unwrap(), document);
+-    assert_eq!(CapabilityMatrix::default().status(DocumentFormat::Text, DocumentOperation::ReadText), CapabilityStatus::Unknown);
++    assert_eq!(
++        serde_json::from_str::<DocumentRef>(&json).unwrap(),
++        document
++    );
++    assert_eq!(
++        CapabilityMatrix::default().status(DocumentFormat::Text, DocumentOperation::ReadText),
++        CapabilityStatus::Unknown
++    );
+ }
+ #[test]
+ fn advancing_parent_head_does_not_reuse_old_history_policy() {
+Diff in /workspace/Muyon-document-candidate/crates/muyon-core/src/documents/history_tests.rs:113:
+-    let f = Fixture::new(); let (store, old) = f.setup(); let (current, metadata) = advance(&store, &old);
++    let f = Fixture::new();
++    let (store, old) = f.setup();
++    let (current, metadata) = advance(&store, &old);
+     store.initialize_document_history_trusted().unwrap();
+-    store.issue_document_history_grant_trusted(&current, &old.document, &[DocumentOperation::ReadText], expiry()).unwrap();
++    store
++        .issue_document_history_grant_trusted(
++            &current,
++            &old.document,
++            &[DocumentOperation::ReadText],
++            expiry(),
++        )
++        .unwrap();
+     let tx = store.database().transaction().unwrap();
+-    store.document_clone_in_transaction(&tx, &current.document, "Next COPY", &metadata.blob).unwrap();
++    store
++        .document_clone_in_transaction(&tx, &current.document, "Next COPY", &metadata.blob)
++        .unwrap();
+     tx.commit().unwrap();
+     let tx = store.database().transaction().unwrap();
+-    assert_eq!(store.document_history_access_in_transaction(&tx, &current, &old.document, &[DocumentOperation::ReadText]), Err(ContractError::RevisionConflict));
++    assert_eq!(
++        store.document_history_access_in_transaction(
++            &tx,
++            &current,
++            &old.document,
++            &[DocumentOperation::ReadText]
++        ),
++        Err(ContractError::RevisionConflict)
++    );
+     drop(tx);
+ }
+ #[test]
+Diff in /workspace/Muyon-document-candidate/crates/muyon-core/src/documents/history_tests.rs:124:
+ fn wrong_history_schema_is_rejected_without_changing_document_store() {
+-    let f = Fixture::new(); let (store, old) = f.setup(); let (current, _) = advance(&store, &old);
+-    store.database().exec("CREATE TABLE document_history_grants_v1(untrusted TEXT)", &[]).unwrap();
+-    assert_eq!(store.initialize_document_history_trusted(), Err(ContractError::InvalidVersion));
++    let f = Fixture::new();
++    let (store, old) = f.setup();
++    let (current, _) = advance(&store, &old);
++    store
++        .database()
++        .exec(
++            "CREATE TABLE document_history_grants_v1(untrusted TEXT)",
++            &[],
++        )
++        .unwrap();
++    assert_eq!(
++        store.initialize_document_history_trusted(),
++        Err(ContractError::InvalidVersion)
++    );
+     store.initialize_documents_trusted().unwrap();
+-    assert_eq!(store.read_document(&current).unwrap().document, current.document);
++    assert_eq!(
++        store.read_document(&current).unwrap().document,
++        current.document
++    );
+ }
+ 
+Diff in /workspace/Muyon-document-candidate/crates/muyon-core/src/documents/candidate.rs:1:
+ //! Durable private preparation only. No real validator exists: publication is disabled.
+ use super::{identity::valid_id, DocumentAccess, DocumentMetadata, DocumentOperation, DocumentRef};
+-use crate::{blobs::{BlobKind, MAX_CHUNK, MAX_DOCUMENT_BYTES}, business::BusinessStore, contract::*, sqlite::Transaction};
++use crate::{
++    blobs::{BlobKind, MAX_CHUNK, MAX_DOCUMENT_BYTES},
++    business::BusinessStore,
++    contract::*,
++    sqlite::Transaction,
++};
+ use serde::{Deserialize, Serialize};
+ use sha2::{Digest, Sha256};
+ type Result<T> = std::result::Result<T, ContractError>;
+Diff in /workspace/Muyon-document-candidate/crates/muyon-core/src/documents/candidate.rs:7:
+ const DDL: &str = "CREATE TABLE document_candidates_v1(candidate_id TEXT PRIMARY KEY,workspace TEXT NOT NULL,project_id TEXT NOT NULL REFERENCES projects(id),upload_id TEXT NOT NULL UNIQUE REFERENCES blob_uploads(upload_id),expected_length TEXT NOT NULL,payload TEXT NOT NULL,state TEXT NOT NULL CHECK(state IN('preparing','sealed_unvalidated','preparation_unknown')))";
+-const PERMISSIONS: &[DocumentOperation] = &[DocumentOperation::ReadText, DocumentOperation::StructuredEdit];
++const PERMISSIONS: &[DocumentOperation] = &[
++    DocumentOperation::ReadText,
++    DocumentOperation::StructuredEdit,
++];
+ 
+ #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
+ #[serde(rename_all = "snake_case")]
+Diff in /workspace/Muyon-document-candidate/crates/muyon-core/src/documents/candidate.rs:12:
+-pub enum CandidateState { Preparing, SealedUnvalidated, PreparationUnknown }
++pub enum CandidateState {
++    Preparing,
++    SealedUnvalidated,
++    PreparationUnknown,
++}
+ #[derive(Clone, Debug, PartialEq, Eq, Serialize)]
+ pub struct CandidateStatus {
+     pub candidate_id: String,
+Diff in /workspace/Muyon-document-candidate/crates/muyon-core/src/documents/candidate.rs:29:
+     expected_blob: BlobRef,
+     upload_id: String,
+ }
+-fn sql<T>(result: crate::sqlite::Result<T>) -> Result<T> { result.map_err(|_| ContractError::Storage) }
+-fn cell(row: &[Option<String>], n: usize) -> Result<&str> { row.get(n).and_then(Option::as_deref).ok_or(ContractError::StorageCorrupt) }
+-fn encode<T: Serialize>(value: &T) -> Result<String> { serde_json::to_string(value).map_err(|_| ContractError::InvalidPayload) }
+-fn identifier(value: &str) -> Result<()> { if valid_id(value) { Ok(()) } else { Err(ContractError::InvalidIdentity) } }
++fn sql<T>(result: crate::sqlite::Result<T>) -> Result<T> {
++    result.map_err(|_| ContractError::Storage)
++}
++fn cell(row: &[Option<String>], n: usize) -> Result<&str> {
++    row.get(n)
++        .and_then(Option::as_deref)
++        .ok_or(ContractError::StorageCorrupt)
++}
++fn encode<T: Serialize>(value: &T) -> Result<String> {
++    serde_json::to_string(value).map_err(|_| ContractError::InvalidPayload)
++}
++fn identifier(value: &str) -> Result<()> {
++    if valid_id(value) {
++        Ok(())
++    } else {
++        Err(ContractError::InvalidIdentity)
++    }
++}
+ impl BusinessStore {
+     pub fn initialize_document_candidates_trusted(&self) -> Result<()> {
+         let tx = sql(self.database().transaction())?;
+Diff in /workspace/Muyon-document-candidate/crates/muyon-core/src/documents/candidate.rs:39:
+         // Requires the original canonical document store to be initialized.
+         self.document_schema()?;
+-        let rows = sql(self.database().query("SELECT name FROM sqlite_master WHERE type='table' AND name='document_candidates_v1'", &[]))?;
+-        if rows.is_empty() { sql(self.database().exec(DDL, &[]))?; }
++        let rows = sql(self.database().query(
++            "SELECT name FROM sqlite_master WHERE type='table' AND name='document_candidates_v1'",
++            &[],
++        ))?;
++        if rows.is_empty() {
++            sql(self.database().exec(DDL, &[]))?;
++        }
+         self.candidate_schema()?;
+         sql(tx.commit())
+     }
+Diff in /workspace/Muyon-document-candidate/crates/muyon-core/src/documents/candidate.rs:46:
+     fn candidate_schema(&self) -> Result<()> {
+         let rows = sql(self.database().query("SELECT CASE WHEN length(CAST(sql AS BLOB))<=2048 THEN sql ELSE NULL END FROM sqlite_master WHERE type='table' AND name='document_candidates_v1'", &[]))?;
+-        if rows.len() != 1 || cell(&rows[0], 0)? != DDL { return Err(ContractError::InvalidVersion); }
++        if rows.len() != 1 || cell(&rows[0], 0)? != DDL {
++            return Err(ContractError::InvalidVersion);
++        }
+         Ok(())
+     }
+     fn candidate_row(&self, candidate_id: &str) -> Result<(Row, CandidateState)> {
+Diff in /workspace/Muyon-document-candidate/crates/muyon-core/src/documents/candidate.rs:53:
+         self.candidate_schema()?;
+         let rows = sql(self.database().query("SELECT CASE WHEN length(CAST(workspace AS BLOB))<=128 THEN workspace ELSE NULL END,CASE WHEN length(CAST(project_id AS BLOB))<=128 THEN project_id ELSE NULL END,CASE WHEN length(CAST(upload_id AS BLOB))<=128 THEN upload_id ELSE NULL END,CASE WHEN length(CAST(expected_length AS BLOB))<=8 THEN expected_length ELSE NULL END,CASE WHEN length(CAST(payload AS BLOB))<=8192 THEN payload ELSE NULL END,CASE WHEN length(CAST(state AS BLOB))<=32 THEN state ELSE NULL END FROM document_candidates_v1 WHERE candidate_id=?", &[candidate_id]))?;
+         let raw = rows.first().ok_or(ContractError::NotFound)?;
+-        let row: Row = serde_json::from_str(cell(raw, 4)?).map_err(|_| ContractError::StorageCorrupt)?;
+-        identifier(&row.operation_id)?; identifier(&row.upload_id)?;
+-        row.source_blob.validate()?; row.expected_blob.validate()?;
+-        if row.candidate_id != candidate_id || cell(raw, 0)? != self.workspace_id()
++        let row: Row =
++            serde_json::from_str(cell(raw, 4)?).map_err(|_| ContractError::StorageCorrupt)?;
++        identifier(&row.operation_id)?;
++        identifier(&row.upload_id)?;
++        row.source_blob.validate()?;
++        row.expected_blob.validate()?;
++        if row.candidate_id != candidate_id
++            || cell(raw, 0)? != self.workspace_id()
+             || row.base.scope().workspace_id != self.workspace_id()
+             || row.base.scope().project_id.as_deref() != Some(cell(raw, 1)?)
+-            || row.upload_id != cell(raw, 2)? || row.expected_blob.byte_length.as_str() != cell(raw, 3)?
+-            || row.expected_blob.byte_length.value() == 0 || row.expected_blob.byte_length.value() > MAX_DOCUMENT_BYTES
+-        { return Err(ContractError::StorageCorrupt); }
++            || row.upload_id != cell(raw, 2)?
++            || row.expected_blob.byte_length.as_str() != cell(raw, 3)?
++            || row.expected_blob.byte_length.value() == 0
++            || row.expected_blob.byte_length.value() > MAX_DOCUMENT_BYTES
++        {
++            return Err(ContractError::StorageCorrupt);
++        }
+         let state = match cell(raw, 5)? {
+             "preparing" => CandidateState::Preparing,
+             "sealed_unvalidated" => CandidateState::SealedUnvalidated,
+Diff in /workspace/Muyon-document-candidate/crates/muyon-core/src/documents/candidate.rs:73:
+     fn candidate_status(&self, row: &Row, recorded: CandidateState) -> CandidateStatus {
+         // Any uncertain/interrupted preparation remains query-only, even if an
+         // object happens to exist. A missing/mismatched sealed pin is unknown.
+-        let ready = self.candidate_upload_is_pinned(&row.upload_id, row.base.scope().project_id.as_deref().unwrap_or(""), &row.expected_blob).unwrap_or(false);
+-        let state = if recorded == CandidateState::SealedUnvalidated && ready { recorded } else { CandidateState::PreparationUnknown };
+-        CandidateStatus { candidate_id: row.candidate_id.clone(), operation_id: row.operation_id.clone(), base: row.base.clone(), expected_blob: row.expected_blob.clone(), state }
++        let ready = self
++            .candidate_upload_is_pinned(
++                &row.upload_id,
++                row.base.scope().project_id.as_deref().unwrap_or(""),
++                &row.expected_blob,
++            )
++            .unwrap_or(false);
++        let state = if recorded == CandidateState::SealedUnvalidated && ready {
++            recorded
++        } else {
++            CandidateState::PreparationUnknown
++        };
++        CandidateStatus {
++            candidate_id: row.candidate_id.clone(),
++            operation_id: row.operation_id.clone(),
++            base: row.base.clone(),
++            expected_blob: row.expected_blob.clone(),
++            state,
++        }
+     }
+     fn mark_candidate_unknown(&self, candidate_id: &str) {
+         // Best effort factual status only; it never changes sealed output into
+Diff in /workspace/Muyon-document-candidate/crates/muyon-core/src/documents/candidate.rs:92:
+         tx.commit().map_err(|_| ContractError::Unknown)?;
+         Ok(metadata)
+     }
+-    pub fn prepare_document_candidate_trusted(&self, access: &DocumentAccess, candidate_id: &str, operation_id: &str, bytes: &[u8]) -> Result<CandidateStatus> {
+-        identifier(candidate_id)?; identifier(operation_id)?;
+-        if bytes.is_empty() || bytes.len() as u64 > MAX_DOCUMENT_BYTES { return Err(ContractError::TextLimit); }
+-        let expected = BlobRef { digest: Sha256::digest(bytes).iter().map(|b| format!("{b:02x}")).collect(), byte_length: Revision::new(bytes.len() as u64) };
++    pub fn prepare_document_candidate_trusted(
++        &self,
++        access: &DocumentAccess,
++        candidate_id: &str,
++        operation_id: &str,
++        bytes: &[u8],
++    ) -> Result<CandidateStatus> {
++        identifier(candidate_id)?;
++        identifier(operation_id)?;
++        if bytes.is_empty() || bytes.len() as u64 > MAX_DOCUMENT_BYTES {
++            return Err(ContractError::TextLimit);
++        }
++        let expected = BlobRef {
++            digest: Sha256::digest(bytes)
++                .iter()
++                .map(|b| format!("{b:02x}"))
++                .collect(),
++            byte_length: Revision::new(bytes.len() as u64),
++        };
+         let tx = sql(self.database().transaction())?;
+         let source = self.document_access_in_transaction(&tx, access, PERMISSIONS)?;
+         self.candidate_schema()?;
+Diff in /workspace/Muyon-document-candidate/crates/muyon-core/src/documents/candidate.rs:102:
+         match self.candidate_row(candidate_id) {
+             Ok((row, state)) => {
+-                if row.base != access.document || row.authority != access.authority || row.expected_blob != expected || row.operation_id != operation_id || row.source_blob != source.blob {
++                if row.base != access.document
++                    || row.authority != access.authority
++                    || row.expected_blob != expected
++                    || row.operation_id != operation_id
++                    || row.source_blob != source.blob
++                {
+                     return Err(ContractError::IntentConflict);
+                 }
+                 let status = self.candidate_status(&row, state);
+Diff in /workspace/Muyon-document-candidate/crates/muyon-core/src/documents/candidate.rs:112:
+             Err(ContractError::NotFound) => {}
+             Err(error) => return Err(error),
+         }
+-        let project = access.document.scope().project_id.as_deref().ok_or(ContractError::ScopeMismatch)?;
++        let project = access
++            .document
++            .scope()
++            .project_id
++            .as_deref()
++            .ok_or(ContractError::ScopeMismatch)?;
+         let budget = sql(self.database().query("SELECT COUNT(*),COALESCE(SUM(CAST(expected_length AS INTEGER)),0),COALESCE(SUM(CASE WHEN expected_length='' OR expected_length GLOB '*[^0-9]*' OR length(expected_length)>8 OR CAST(expected_length AS INTEGER) NOT BETWEEN 1 AND 31457280 THEN 1 ELSE 0 END),0) FROM document_candidates_v1 WHERE workspace=? AND project_id=?", &[self.workspace_id(), project]))?;
+-        let count: u64 = cell(&budget[0], 0)?.parse().map_err(|_| ContractError::StorageCorrupt)?;
+-        let used: u64 = cell(&budget[0], 1)?.parse().map_err(|_| ContractError::StorageCorrupt)?;
+-        if cell(&budget[0], 2)? != "0" { return Err(ContractError::StorageCorrupt); }
+-        if count >= 32 || used.checked_add(bytes.len() as u64).ok_or(ContractError::TextLimit)? > 128 * 1024 * 1024 { return Err(ContractError::TextLimit); }
++        let count: u64 = cell(&budget[0], 0)?
++            .parse()
++            .map_err(|_| ContractError::StorageCorrupt)?;
++        let used: u64 = cell(&budget[0], 1)?
++            .parse()
++            .map_err(|_| ContractError::StorageCorrupt)?;
++        if cell(&budget[0], 2)? != "0" {
++            return Err(ContractError::StorageCorrupt);
++        }
++        if count >= 32
++            || used
++                .checked_add(bytes.len() as u64)
++                .ok_or(ContractError::TextLimit)?
++                > 128 * 1024 * 1024
++        {
++            return Err(ContractError::TextLimit);
++        }
+         let upload = self.reserve_candidate_upload_in_transaction(&tx, project)?;
+-        let row = Row { candidate_id: candidate_id.into(), operation_id: operation_id.into(), base: access.document.clone(), source_blob: source.blob, authority: access.authority.clone(), expected_blob: expected, upload_id: upload.upload_id };
++        let row = Row {
++            candidate_id: candidate_id.into(),
++            operation_id: operation_id.into(),
++            base: access.document.clone(),
++            source_blob: source.blob,
++            authority: access.authority.clone(),
++            expected_blob: expected,
++            upload_id: upload.upload_id,
++        };
+         let payload = encode(&row)?;
+-        if payload.len() > 8192 { return Err(ContractError::TextLimit); }
+-        sql(self.database().exec("INSERT INTO document_candidates_v1 VALUES(?,?,?,?,?,?,'preparing')", &[candidate_id, self.workspace_id(), project, &row.upload_id, row.expected_blob.byte_length.as_str(), &payload]))?;
++        if payload.len() > 8192 {
++            return Err(ContractError::TextLimit);
++        }
++        sql(self.database().exec(
++            "INSERT INTO document_candidates_v1 VALUES(?,?,?,?,?,?,'preparing')",
++            &[
++                candidate_id,
++                self.workspace_id(),
++                project,
++                &row.upload_id,
++                row.expected_blob.byte_length.as_str(),
++                &payload,
++            ],
++        ))?;
+         self.document_grant_in_transaction(&tx, access, PERMISSIONS)?;
+         tx.commit().map_err(|_| ContractError::Unknown)?;
+         // From here failures may leave real durable filesystem bytes. Never
+Diff in /workspace/Muyon-document-candidate/crates/muyon-core/src/documents/candidate.rs:136:
+             }
+             self.candidate_preflight(access)?;
+             let finished = self.finish_blob(&row.upload_id, BlobKind::Document)?;
+-            if finished.blob != row.expected_blob { return Err(ContractError::BindingMismatch); }
++            if finished.blob != row.expected_blob {
++                return Err(ContractError::BindingMismatch);
++            }
+             let seal = sql(self.database().transaction())?;
+             self.document_access_in_transaction(&seal, access, PERMISSIONS)?;
+             let (actual, state) = self.candidate_row(candidate_id)?;
+Diff in /workspace/Muyon-document-candidate/crates/muyon-core/src/documents/candidate.rs:143:
+-            if actual != row || state != CandidateState::Preparing || !self.candidate_upload_is_pinned(&row.upload_id, project, &row.expected_blob)? { return Err(ContractError::BindingMismatch); }
++            if actual != row
++                || state != CandidateState::Preparing
++                || !self.candidate_upload_is_pinned(&row.upload_id, project, &row.expected_blob)?
++            {
++                return Err(ContractError::BindingMismatch);
++            }
+             let changed = sql(self.database().exec("UPDATE document_candidates_v1 SET state='sealed_unvalidated' WHERE candidate_id=? AND workspace=? AND state='preparing'", &[candidate_id, self.workspace_id()]))?;
+-            if changed != 1 { return Err(ContractError::IntentConflict); }
++            if changed != 1 {
++                return Err(ContractError::IntentConflict);
++            }
+             self.document_grant_in_transaction(&seal, access, PERMISSIONS)?;
+             seal.commit().map_err(|_| ContractError::Unknown)?;
+             Ok(())
+Diff in /workspace/Muyon-document-candidate/crates/muyon-core/src/documents/candidate.rs:149:
+         })();
+-        if work.is_err() { self.mark_candidate_unknown(candidate_id); return Err(ContractError::Unknown); }
+-        self.lookup_document_candidate(access, candidate_id).map_err(|_| ContractError::Unknown)
++        if work.is_err() {
++            self.mark_candidate_unknown(candidate_id);
++            return Err(ContractError::Unknown);
++        }
++        self.lookup_document_candidate(access, candidate_id)
++            .map_err(|_| ContractError::Unknown)
+     }
+-    pub fn lookup_document_candidate(&self, access: &DocumentAccess, candidate_id: &str) -> Result<CandidateStatus> {
++    pub fn lookup_document_candidate(
++        &self,
++        access: &DocumentAccess,
++        candidate_id: &str,
++    ) -> Result<CandidateStatus> {
+         let tx = sql(self.database().transaction())?;
+         let source = self.document_access_in_transaction(&tx, access, PERMISSIONS)?;
+         let (row, state) = self.candidate_row(candidate_id)?;
+Diff in /workspace/Muyon-document-candidate/crates/muyon-core/src/documents/candidate.rs:157:
+-        if row.base != access.document || row.source_blob != source.blob { return Err(ContractError::BindingMismatch); }
++        if row.base != access.document || row.source_blob != source.blob {
++            return Err(ContractError::BindingMismatch);
++        }
+         let status = self.candidate_status(&row, state);
+         self.document_grant_in_transaction(&tx, access, PERMISSIONS)?;
+         tx.commit().map_err(|_| ContractError::Unknown)?;
+Diff in /workspace/Muyon-document-candidate/crates/muyon-core/src/documents/candidate.rs:161:
+         Ok(status)
+     }
+-    pub(crate) fn document_publish_candidate_in_transaction(&self, tx: &Transaction<'_>, access: &DocumentAccess, candidate_id: &str) -> Result<DocumentMetadata> {
+-        if !tx.belongs_to(self.database()) { return Err(ContractError::InvalidAuthority); }
++    pub(crate) fn document_publish_candidate_in_transaction(
++        &self,
++        tx: &Transaction<'_>,
++        access: &DocumentAccess,
++        candidate_id: &str,
++    ) -> Result<DocumentMetadata> {
++        if !tx.belongs_to(self.database()) {
++            return Err(ContractError::InvalidAuthority);
++        }
+         let source = self.document_access_in_transaction(tx, access, PERMISSIONS)?;
+         let (row, _) = self.candidate_row(candidate_id)?;
+-        if row.base != access.document || row.source_blob != source.blob { return Err(ContractError::BindingMismatch); }
++        if row.base != access.document || row.source_blob != source.blob {
++            return Err(ContractError::BindingMismatch);
++        }
+         // No real validator is integrated. There is deliberately no caller bool,
+         // forged validation token, test-only success gate, CAS or reference write.
+         Err(ContractError::UnsupportedOperation)
+Diff in /workspace/Muyon-document-candidate/crates/muyon-core/src/documents/candidate.rs:171:
+     }
+     pub(crate) fn document_candidate_upload_retained(&self, upload_id: &str) -> Result<bool> {
+-        let exists = sql(self.database().query("SELECT name FROM sqlite_master WHERE type='table' AND name='document_candidates_v1'", &[]))?;
+-        if exists.is_empty() { return Ok(false); }
++        let exists = sql(self.database().query(
++            "SELECT name FROM sqlite_master WHERE type='table' AND name='document_candidates_v1'",
++            &[],
++        ))?;
++        if exists.is_empty() {
++            return Ok(false);
++        }
+         self.candidate_schema()?;
+-        let rows = sql(self.database().query("SELECT 1 FROM document_candidates_v1 WHERE workspace=? AND upload_id=? LIMIT 1", &[self.workspace_id(), upload_id]))?;
++        let rows = sql(self.database().query(
++            "SELECT 1 FROM document_candidates_v1 WHERE workspace=? AND upload_id=? LIMIT 1",
++            &[self.workspace_id(), upload_id],
++        ))?;
+         Ok(!rows.is_empty())
+     }
+     /// GC needs the exact expected digest for a journal-backed incomplete upload,
+Diff in /workspace/Muyon-document-candidate/crates/muyon-core/src/documents/candidate.rs:180:
+     /// not a global "any object might belong to it" reservation.
+-    pub(crate) fn document_candidate_reserves_digest(&self, upload_id: &str, digest: &str) -> Result<Option<bool>> {
+-        let exists = sql(self.database().query("SELECT name FROM sqlite_master WHERE type='table' AND name='document_candidates_v1'", &[]))?;
+-        if exists.is_empty() { return Ok(None); }
++    pub(crate) fn document_candidate_reserves_digest(
++        &self,
++        upload_id: &str,
++        digest: &str,
++    ) -> Result<Option<bool>> {
++        let exists = sql(self.database().query(
++            "SELECT name FROM sqlite_master WHERE type='table' AND name='document_candidates_v1'",
++            &[],
++        ))?;
++        if exists.is_empty() {
++            return Ok(None);
++        }
+         self.candidate_schema()?;
+         let rows = sql(self.database().query("SELECT CASE WHEN length(CAST(candidate_id AS BLOB))<=128 THEN candidate_id ELSE NULL END FROM document_candidates_v1 WHERE workspace=? AND upload_id=?", &[self.workspace_id(), upload_id]))?;
+-        let Some(raw) = rows.first() else { return Ok(None); };
++        let Some(raw) = rows.first() else {
++            return Ok(None);
++        };
+         let (row, _) = self.candidate_row(cell(raw, 0)?)?;
+-        if row.upload_id != upload_id { return Err(ContractError::StorageCorrupt); }
++        if row.upload_id != upload_id {
++            return Err(ContractError::StorageCorrupt);
++        }
+         Ok(Some(row.expected_blob.digest == digest))
+     }
+ }
+Diff in /workspace/Muyon-document-candidate/crates/muyon-core/src/documents/candidate_tests.rs:2:
+ use super::{storage_tests::Fixture, *};
+ use crate::{business::BusinessStore, contract::*, sqlite::Db};
+ use sha2::{Digest, Sha256};
+-use std::{fs, time::{SystemTime, UNIX_EPOCH}};
+-const NEW_BYTES: &[u8] = b"%PDF-1.4\nNEW ORIGINAL SYNTHETIC CANDIDATE; not engine-validated\n%%EOF\n";
+-fn expiry() -> u64 { SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_millis() as u64 + 20_000 }
++use std::{
++    fs,
++    time::{SystemTime, UNIX_EPOCH},
++};
++const NEW_BYTES: &[u8] =
++    b"%PDF-1.4\nNEW ORIGINAL SYNTHETIC CANDIDATE; not engine-validated\n%%EOF\n";
++fn expiry() -> u64 {
++    SystemTime::now()
++        .duration_since(UNIX_EPOCH)
++        .unwrap()
++        .as_millis() as u64
++        + 20_000
++}
+ fn setup() -> (Fixture, BusinessStore, DocumentAccess) {
+-    let f = Fixture::new(); let (store, mut access) = f.setup();
++    let f = Fixture::new();
++    let (store, mut access) = f.setup();
+     access.authority.generation = access.authority.generation.next().unwrap();
+-    store.issue_document_grant_trusted(&access.document, &access.authority, &[DocumentOperation::Inspect, DocumentOperation::ReadText, DocumentOperation::StructuredEdit], expiry()).unwrap();
++    store
++        .issue_document_grant_trusted(
++            &access.document,
++            &access.authority,
++            &[
++                DocumentOperation::Inspect,
++                DocumentOperation::ReadText,
++                DocumentOperation::StructuredEdit,
++            ],
++            expiry(),
++        )
++        .unwrap();
+     store.initialize_document_candidates_trusted().unwrap();
+     (f, store, access)
+ }
+Diff in /workspace/Muyon-document-candidate/crates/muyon-core/src/documents/candidate_tests.rs:15:
+ #[test]
+ fn new_bytes_are_private_sealed_unvalidated_and_never_publish() {
+-    let (_f, store, access) = setup(); let original = store.read_document(&access).unwrap();
+-    let status = store.prepare_document_candidate_trusted(&access, "candidate", "operation", NEW_BYTES).unwrap();
++    let (_f, store, access) = setup();
++    let original = store.read_document(&access).unwrap();
++    let status = store
++        .prepare_document_candidate_trusted(&access, "candidate", "operation", NEW_BYTES)
++        .unwrap();
+     assert_eq!(status.state, CandidateState::SealedUnvalidated);
+     assert_ne!(status.expected_blob.digest, original.blob.digest);
+-    assert_eq!(fs::read(store.root_dir().join("objects").join(&status.expected_blob.digest)).unwrap(), NEW_BYTES);
++    assert_eq!(
++        fs::read(
++            store
++                .root_dir()
++                .join("objects")
++                .join(&status.expected_blob.digest)
++        )
++        .unwrap(),
++        NEW_BYTES
++    );
+     assert_eq!(store.read_document(&access).unwrap(), original);
+     let tx = store.database().transaction().unwrap();
+-    assert_eq!(store.document_publish_candidate_in_transaction(&tx, &access, "candidate"), Err(ContractError::UnsupportedOperation));
++    assert_eq!(
++        store.document_publish_candidate_in_transaction(&tx, &access, "candidate"),
++        Err(ContractError::UnsupportedOperation)
++    );
+     drop(tx);
+-    assert_eq!(store.database().query("SELECT * FROM document_revisions", &[]).unwrap().len(), 1);
+-    assert_eq!(store.database().query("SELECT * FROM blob_references", &[]).unwrap().len(), 1);
++    assert_eq!(
++        store
++            .database()
++            .query("SELECT * FROM document_revisions", &[])
++            .unwrap()
++            .len(),
++        1
++    );
++    assert_eq!(
++        store
++            .database()
++            .query("SELECT * FROM blob_references", &[])
++            .unwrap()
++            .len(),
++        1
++    );
+ }
+ #[test]
+ fn duplicate_preparation_is_query_only_and_conflicting_binding_is_rejected() {
+Diff in /workspace/Muyon-document-candidate/crates/muyon-core/src/documents/candidate_tests.rs:31:
+     let (_f, store, access) = setup();
+-    let one = store.prepare_document_candidate_trusted(&access, "candidate", "operation", NEW_BYTES).unwrap();
+-    let uploads = store.database().query("SELECT * FROM blob_uploads ORDER BY upload_id", &[]).unwrap();
+-    assert_eq!(store.prepare_document_candidate_trusted(&access, "candidate", "operation", NEW_BYTES).unwrap(), one);
+-    assert_eq!(store.database().query("SELECT * FROM blob_uploads ORDER BY upload_id", &[]).unwrap(), uploads);
+-    assert_eq!(store.prepare_document_candidate_trusted(&access, "candidate", "different", NEW_BYTES), Err(ContractError::IntentConflict));
+-    assert_eq!(store.prepare_document_candidate_trusted(&access, "candidate", "operation", b"different bytes"), Err(ContractError::IntentConflict));
+-    store.database().exec("UPDATE document_candidates_v1 SET state='preparation_unknown'", &[]).unwrap();
+-    assert_eq!(store.prepare_document_candidate_trusted(&access, "candidate", "operation", NEW_BYTES).unwrap().state, CandidateState::PreparationUnknown);
+-    assert_eq!(store.database().query("SELECT * FROM blob_uploads ORDER BY upload_id", &[]).unwrap(), uploads);
++    let one = store
++        .prepare_document_candidate_trusted(&access, "candidate", "operation", NEW_BYTES)
++        .unwrap();
++    let uploads = store
++        .database()
++        .query("SELECT * FROM blob_uploads ORDER BY upload_id", &[])
++        .unwrap();
++    assert_eq!(
++        store
++            .prepare_document_candidate_trusted(&access, "candidate", "operation", NEW_BYTES)
++            .unwrap(),
++        one
++    );
++    assert_eq!(
++        store
++            .database()
++            .query("SELECT * FROM blob_uploads ORDER BY upload_id", &[])
++            .unwrap(),
++        uploads
++    );
++    assert_eq!(
++        store.prepare_document_candidate_trusted(&access, "candidate", "different", NEW_BYTES),
++        Err(ContractError::IntentConflict)
++    );
++    assert_eq!(
++        store.prepare_document_candidate_trusted(
++            &access,
++            "candidate",
++            "operation",
++            b"different bytes"
++        ),
++        Err(ContractError::IntentConflict)
++    );
++    store
++        .database()
++        .exec(
++            "UPDATE document_candidates_v1 SET state='preparation_unknown'",
++            &[],
++        )
++        .unwrap();
++    assert_eq!(
++        store
++            .prepare_document_candidate_trusted(&access, "candidate", "operation", NEW_BYTES)
++            .unwrap()
++            .state,
++        CandidateState::PreparationUnknown
++    );
++    assert_eq!(
++        store
++            .database()
++            .query("SELECT * FROM blob_uploads ORDER BY upload_id", &[])
++            .unwrap(),
++        uploads
++    );
+ }
+ #[test]
+ fn reservation_failure_has_no_upload_or_output_effect() {
+Diff in /workspace/Muyon-document-candidate/crates/muyon-core/src/documents/candidate_tests.rs:44:
+     let (_f, store, access) = setup();
+     store.database().exec("CREATE TRIGGER fail_candidate_reservation BEFORE INSERT ON document_candidates_v1 BEGIN SELECT RAISE(ABORT,'synthetic reservation failure'); END", &[]).unwrap();
+-    assert!(store.prepare_document_candidate_trusted(&access, "candidate", "operation", NEW_BYTES).is_err());
+-    assert!(store.database().query("SELECT * FROM document_candidates_v1", &[]).unwrap().is_empty());
+-    assert_eq!(store.database().query("SELECT * FROM blob_uploads", &[]).unwrap().len(), 1);
+-    assert_eq!(fs::read_dir(store.root_dir().join("objects")).unwrap().count(), 1);
++    assert!(store
++        .prepare_document_candidate_trusted(&access, "candidate", "operation", NEW_BYTES)
++        .is_err());
++    assert!(store
++        .database()
++        .query("SELECT * FROM document_candidates_v1", &[])
++        .unwrap()
++        .is_empty());
++    assert_eq!(
++        store
++            .database()
++            .query("SELECT * FROM blob_uploads", &[])
++            .unwrap()
++            .len(),
++        1
++    );
++    assert_eq!(
++        fs::read_dir(store.root_dir().join("objects"))
++            .unwrap()
++            .count(),
++        1
++    );
+ }
+ #[test]
+ fn late_seal_failure_leaves_unpublished_object_and_query_only_unknown() {
+Diff in /workspace/Muyon-document-candidate/crates/muyon-core/src/documents/candidate_tests.rs:53:
+     let (_f, store, access) = setup();
+     store.database().exec("CREATE TRIGGER fail_candidate_seal BEFORE UPDATE OF state ON document_candidates_v1 WHEN NEW.state='sealed_unvalidated' BEGIN SELECT RAISE(ABORT,'synthetic seal failure'); END", &[]).unwrap();
+-    assert_eq!(store.prepare_document_candidate_trusted(&access, "candidate", "operation", NEW_BYTES), Err(ContractError::Unknown));
+-    let status = store.lookup_document_candidate(&access, "candidate").unwrap();
++    assert_eq!(
++        store.prepare_document_candidate_trusted(&access, "candidate", "operation", NEW_BYTES),
++        Err(ContractError::Unknown)
++    );
++    let status = store
++        .lookup_document_candidate(&access, "candidate")
++        .unwrap();
+     assert_eq!(status.state, CandidateState::PreparationUnknown);
+-    assert_eq!(fs::read(store.root_dir().join("objects").join(&status.expected_blob.digest)).unwrap(), NEW_BYTES);
+-    assert_eq!(store.database().query("SELECT * FROM document_revisions", &[]).unwrap().len(), 1);
+-    assert_eq!(store.database().query("SELECT * FROM blob_pins WHERE kind='upload'", &[]).unwrap().len(), 1);
+-    assert_eq!(store.prepare_document_candidate_trusted(&access, "candidate", "operation", NEW_BYTES).unwrap().state, CandidateState::PreparationUnknown);
++    assert_eq!(
++        fs::read(
++            store
++                .root_dir()
++                .join("objects")
++                .join(&status.expected_blob.digest)
++        )
++        .unwrap(),
++        NEW_BYTES
++    );
++    assert_eq!(
++        store
++            .database()
++            .query("SELECT * FROM document_revisions", &[])
++            .unwrap()
++            .len(),
++        1
++    );
++    assert_eq!(
++        store
++            .database()
++            .query("SELECT * FROM blob_pins WHERE kind='upload'", &[])
++            .unwrap()
++            .len(),
++        1
++    );
++    assert_eq!(
++        store
++            .prepare_document_candidate_trusted(&access, "candidate", "operation", NEW_BYTES)
++            .unwrap()
++            .state,
++        CandidateState::PreparationUnknown
++    );
+ }
+ #[test]
+ fn restart_retains_prepared_pin_but_never_adopts_original_execution_authority() {
+Diff in /workspace/Muyon-document-candidate/crates/muyon-core/src/documents/candidate_tests.rs:65:
+     let (f, store, access) = setup();
+-    store.prepare_document_candidate_trusted(&access, "candidate", "operation", NEW_BYTES).unwrap();
++    store
++        .prepare_document_candidate_trusted(&access, "candidate", "operation", NEW_BYTES)
++        .unwrap();
+     drop(store);
+     let store = BusinessStore::open_existing(&f.path(), "workspace", "new-epoch").unwrap();
+     let recovery = store.reconcile_blobs_after_restart().unwrap();
+Diff in /workspace/Muyon-document-candidate/crates/muyon-core/src/documents/candidate_tests.rs:70:
+     assert_eq!(recovery.aborted_uploads, 0);
+-    assert_eq!(store.database().query("SELECT * FROM blob_pins WHERE kind='upload'", &[]).unwrap().len(), 1);
+-    assert!(store.lookup_document_candidate(&access, "candidate").is_err());
+-    let fresh = DocumentAccess { document: access.document, authority: AuthorityBinding { generation: access.authority.generation.next().unwrap(), owner_epoch: "new-epoch".into(), ..access.authority } };
+-    store.issue_document_grant_trusted(&fresh.document, &fresh.authority, &[DocumentOperation::ReadText, DocumentOperation::StructuredEdit], expiry()).unwrap();
+-    assert_eq!(store.lookup_document_candidate(&fresh, "candidate").unwrap().state, CandidateState::SealedUnvalidated);
+-    assert_eq!(store.prepare_document_candidate_trusted(&fresh, "candidate", "operation", NEW_BYTES), Err(ContractError::IntentConflict));
++    assert_eq!(
++        store
++            .database()
++            .query("SELECT * FROM blob_pins WHERE kind='upload'", &[])
++            .unwrap()
++            .len(),
++        1
++    );
++    assert!(store
++        .lookup_document_candidate(&access, "candidate")
++        .is_err());
++    let fresh = DocumentAccess {
++        document: access.document,
++        authority: AuthorityBinding {
++            generation: access.authority.generation.next().unwrap(),
++            owner_epoch: "new-epoch".into(),
++            ..access.authority
++        },
++    };
++    store
++        .issue_document_grant_trusted(
++            &fresh.document,
++            &fresh.authority,
++            &[
++                DocumentOperation::ReadText,
++                DocumentOperation::StructuredEdit,
++            ],
++            expiry(),
++        )
++        .unwrap();
++    assert_eq!(
++        store
++            .lookup_document_candidate(&fresh, "candidate")
++            .unwrap()
++            .state,
++        CandidateState::SealedUnvalidated
++    );
++    assert_eq!(
++        store.prepare_document_candidate_trusted(&fresh, "candidate", "operation", NEW_BYTES),
++        Err(ContractError::IntentConflict)
++    );
+ }
+ #[test]
+ fn revocation_conflict_invalid_input_and_foreign_publication_fail_closed() {
+Diff in /workspace/Muyon-document-candidate/crates/muyon-core/src/documents/candidate_tests.rs:80:
+     let (_f, store, access) = setup();
+-    assert!(store.prepare_document_candidate_trusted(&access, "/tmp/model-path", "operation", NEW_BYTES).is_err());
+-    assert!(store.prepare_document_candidate_trusted(&access, "empty", "operation", &[]).is_err());
+-    assert!(store.prepare_document_candidate_trusted(&access, "huge", "operation", &vec![1; 30 * 1024 * 1024 + 1]).is_err());
+-    store.prepare_document_candidate_trusted(&access, "candidate", "operation", NEW_BYTES).unwrap();
+-    let foreign = Db::open(":memory:", false, true).unwrap(); let tx = foreign.transaction().unwrap();
+-    assert_eq!(store.document_publish_candidate_in_transaction(&tx, &access, "candidate"), Err(ContractError::InvalidAuthority)); drop(tx);
+-    store.revoke_document_grant_trusted(&access.authority).unwrap();
+-    assert!(store.lookup_document_candidate(&access, "candidate").is_err());
+-    assert!(store.prepare_document_candidate_trusted(&access, "later", "operation", NEW_BYTES).is_err());
++    assert!(store
++        .prepare_document_candidate_trusted(&access, "/tmp/model-path", "operation", NEW_BYTES)
++        .is_err());
++    assert!(store
++        .prepare_document_candidate_trusted(&access, "empty", "operation", &[])
++        .is_err());
++    assert!(store
++        .prepare_document_candidate_trusted(
++            &access,
++            "huge",
++            "operation",
++            &vec![1; 30 * 1024 * 1024 + 1]
++        )
++        .is_err());
++    store
++        .prepare_document_candidate_trusted(&access, "candidate", "operation", NEW_BYTES)
++        .unwrap();
++    let foreign = Db::open(":memory:", false, true).unwrap();
++    let tx = foreign.transaction().unwrap();
++    assert_eq!(
++        store.document_publish_candidate_in_transaction(&tx, &access, "candidate"),
++        Err(ContractError::InvalidAuthority)
++    );
++    drop(tx);
++    store
++        .revoke_document_grant_trusted(&access.authority)
++        .unwrap();
++    assert!(store
++        .lookup_document_candidate(&access, "candidate")
++        .is_err());
++    assert!(store
++        .prepare_document_candidate_trusted(&access, "later", "operation", NEW_BYTES)
++        .is_err());
+ }
+ 
+ // Test-only construction of a genuinely reserved pre-file-write crash window.
+Diff in /workspace/Muyon-document-candidate/crates/muyon-core/src/documents/candidate_tests.rs:93:
+ // It never creates a production validation credential or a publication permit.
+-fn reserve_fixture(store: &BusinessStore, access: &DocumentAccess, id: &str, expected: &BlobRef) -> crate::blobs::UploadHandle {
++fn reserve_fixture(
++    store: &BusinessStore,
++    access: &DocumentAccess,
++    id: &str,
++    expected: &BlobRef,
++) -> crate::blobs::UploadHandle {
+     let source = store.read_document(access).unwrap();
+     let project = access.document.scope().project_id.as_deref().unwrap();
+     let tx = store.database().transaction().unwrap();
+Diff in /workspace/Muyon-document-candidate/crates/muyon-core/src/documents/candidate_tests.rs:98:
+-    let upload = store.reserve_candidate_upload_in_transaction(&tx, project).unwrap();
++    let upload = store
++        .reserve_candidate_upload_in_transaction(&tx, project)
++        .unwrap();
+     let payload = serde_json::json!({"candidate_id": id, "operation_id": "operation", "base": access.document,
+         "source_blob": source.blob, "authority": access.authority, "expected_blob": expected, "upload_id": upload.upload_id});
+-    store.database().exec("INSERT INTO document_candidates_v1 VALUES(?,'workspace',?,?,?,?,'preparing')", &[id, project, &upload.upload_id, expected.byte_length.as_str(), &payload.to_string()]).unwrap();
++    store
++        .database()
++        .exec(
++            "INSERT INTO document_candidates_v1 VALUES(?,'workspace',?,?,?,?,'preparing')",
++            &[
++                id,
++                project,
++                &upload.upload_id,
++                expected.byte_length.as_str(),
++                &payload.to_string(),
++            ],
++        )
++        .unwrap();
+     tx.commit().unwrap();
+     upload
+ }
+Diff in /workspace/Muyon-document-candidate/crates/muyon-core/src/documents/candidate_tests.rs:105:
+ 
+ fn add_project_fixture(store: &BusinessStore, project: &str) -> DocumentAccess {
+-    store.database().exec("INSERT INTO projects VALUES(?,'workspace','Synthetic','1',0)", &[project]).unwrap();
++    store
++        .database()
++        .exec(
++            "INSERT INTO projects VALUES(?,'workspace','Synthetic','1',0)",
++            &[project],
++        )
++        .unwrap();
+     let upload = store.begin_upload(project).unwrap();
+-    store.append_chunk(&upload.upload_id, b"original synthetic multi-project source").unwrap();
+-    let finished = store.finish_blob(&upload.upload_id, crate::blobs::BlobKind::Document).unwrap();
+-    let metadata = store.register_document_trusted(project, &format!("document-{project}"), "Synthetic", DocumentFormat::Text, &finished).unwrap();
+-    let authority = AuthorityBinding { grant_id: format!("grant-{project}"), generation: Revision::new(1), owner_epoch: "epoch".into() };
+-    store.issue_document_grant_trusted(&metadata.document, &authority, &[DocumentOperation::Inspect, DocumentOperation::ReadText, DocumentOperation::StructuredEdit], expiry()).unwrap();
+-    DocumentAccess { document: metadata.document, authority }
++    store
++        .append_chunk(
++            &upload.upload_id,
++            b"original synthetic multi-project source",
++        )
++        .unwrap();
++    let finished = store
++        .finish_blob(&upload.upload_id, crate::blobs::BlobKind::Document)
++        .unwrap();
++    let metadata = store
++        .register_document_trusted(
++            project,
++            &format!("document-{project}"),
++            "Synthetic",
++            DocumentFormat::Text,
++            &finished,
++        )
++        .unwrap();
++    let authority = AuthorityBinding {
++        grant_id: format!("grant-{project}"),
++        generation: Revision::new(1),
++        owner_epoch: "epoch".into(),
++    };
++    store
++        .issue_document_grant_trusted(
++            &metadata.document,
++            &authority,
++            &[
++                DocumentOperation::Inspect,
++                DocumentOperation::ReadText,
++                DocumentOperation::StructuredEdit,
++            ],
++            expiry(),
++        )
++        .unwrap();
++    DocumentAccess {
++        document: metadata.document,
++        authority,
++    }
+ }
+ 
+ #[test]
+Diff in /workspace/Muyon-document-candidate/crates/muyon-core/src/documents/candidate_tests.rs:118:
+ fn candidate_gc_crosses_page_boundary_preserving_exact_objects_and_project_quotas() {
+     let (f, store, access) = setup();
+     let mut projects = vec![access];
+-    for n in 1..5 { projects.push(add_project_fixture(&store, &format!("project-{n}"))); }
++    for n in 1..5 {
++        projects.push(add_project_fixture(&store, &format!("project-{n}")));
++    }
+     let mut reserved = Vec::new();
+     for (project_n, access) in projects.iter().enumerate() {
+         // A real committed reservation is the crash point before CREATE_NEW.
+Diff in /workspace/Muyon-document-candidate/crates/muyon-core/src/documents/candidate_tests.rs:126:
+         for n in 0..32 {
+             let bytes = format!("original synthetic candidate {project_n}/{n}").into_bytes();
+             let blob = expected(&bytes);
+-            let upload = reserve_fixture(&store, access, &format!("candidate-{project_n}-{n}"), &blob);
++            let upload =
++                reserve_fixture(&store, access, &format!("candidate-{project_n}-{n}"), &blob);
+             reserved.push((upload.upload_id, blob, bytes));
+         }
+-        assert_eq!(store.prepare_document_candidate_trusted(access, &format!("over-quota-{project_n}"), "operation", NEW_BYTES), Err(ContractError::TextLimit));
++        assert_eq!(
++            store.prepare_document_candidate_trusted(
++                access,
++                &format!("over-quota-{project_n}"),
++                "operation",
++                NEW_BYTES
++            ),
++            Err(ContractError::TextLimit)
++        );
+     }
+     reserved.sort_by(|a, b| a.0.cmp(&b.0));
+     assert_eq!(reserved.len(), 160);
+Diff in /workspace/Muyon-document-candidate/crates/muyon-core/src/documents/candidate_tests.rs:144:
+     }
+     // The final unresolved upload also has actual partial durable staging.
+     let final_upload = &reserved[159].0;
+-    store.materialize_candidate_upload_trusted(final_upload).unwrap();
++    store
++        .materialize_candidate_upload_trusted(final_upload)
++        .unwrap();
+     store.append_chunk(final_upload, b"partial").unwrap();
+     let partial = store.root_dir().join("staging").join(final_upload);
+     let unrelated = b"unrelated synthetic object absent from every reservation";
+Diff in /workspace/Muyon-document-candidate/crates/muyon-core/src/documents/candidate_tests.rs:151:
+-    let orphan_path = store.root_dir().join("objects").join(expected(unrelated).digest);
++    let orphan_path = store
++        .root_dir()
++        .join("objects")
++        .join(expected(unrelated).digest);
+     fs::write(&orphan_path, unrelated).unwrap();
+     // Per-project quota must not become a global admission cap.
+     let sixth = add_project_fixture(&store, "project-5");
+Diff in /workspace/Muyon-document-candidate/crates/muyon-core/src/documents/candidate_tests.rs:155:
+-    assert_eq!(store.prepare_document_candidate_trusted(&sixth, "sixth-candidate", "operation", NEW_BYTES).unwrap().state, CandidateState::SealedUnvalidated);
+-    assert!(store.lookup_document_candidate(&sixth, "candidate-0-0").is_err());
+-    let uploads = store.database().query("SELECT * FROM blob_uploads ORDER BY upload_id", &[]).unwrap();
+-    let journals = store.database().query("SELECT * FROM document_candidates_v1 ORDER BY candidate_id", &[]).unwrap();
++    assert_eq!(
++        store
++            .prepare_document_candidate_trusted(&sixth, "sixth-candidate", "operation", NEW_BYTES)
++            .unwrap()
++            .state,
++        CandidateState::SealedUnvalidated
++    );
++    assert!(store
++        .lookup_document_candidate(&sixth, "candidate-0-0")
++        .is_err());
++    let uploads = store
++        .database()
++        .query("SELECT * FROM blob_uploads ORDER BY upload_id", &[])
++        .unwrap();
++    let journals = store
++        .database()
++        .query(
++            "SELECT * FROM document_candidates_v1 ORDER BY candidate_id",
++            &[],
++        )
++        .unwrap();
+     assert_eq!(journals.len(), 161);
+     drop(store);
+     let store = BusinessStore::open_existing(&f.path(), "workspace", "new-epoch").unwrap();
+Diff in /workspace/Muyon-document-candidate/crates/muyon-core/src/documents/candidate_tests.rs:162:
+-    assert_eq!(store.reconcile_blobs_after_restart().unwrap().aborted_uploads, 0);
++    assert_eq!(
++        store
++            .reconcile_blobs_after_restart()
++            .unwrap()
++            .aborted_uploads,
++        0
++    );
+     assert_eq!(fs::read(&partial).unwrap(), b"partial");
+     assert_eq!(store.collect_blobs().unwrap(), 1);
+     assert!(!orphan_path.exists());
+Diff in /workspace/Muyon-document-candidate/crates/muyon-core/src/documents/candidate_tests.rs:166:
+-    for (path, bytes) in &protected { assert_eq!(fs::read(path).unwrap(), *bytes); }
+-    assert_eq!(store.database().query("SELECT * FROM blob_uploads ORDER BY upload_id", &[]).unwrap(), uploads);
+-    assert_eq!(store.database().query("SELECT * FROM document_candidates_v1 ORDER BY candidate_id", &[]).unwrap(), journals);
++    for (path, bytes) in &protected {
++        assert_eq!(fs::read(path).unwrap(), *bytes);
++    }
++    assert_eq!(
++        store
++            .database()
++            .query("SELECT * FROM blob_uploads ORDER BY upload_id", &[])
++            .unwrap(),
++        uploads
++    );
++    assert_eq!(
++        store
++            .database()
++            .query(
++                "SELECT * FROM document_candidates_v1 ORDER BY candidate_id",
++                &[]
++            )
++            .unwrap(),
++        journals
++    );
+     // A second sweep cannot repeat deletion or alter an uncertain reservation.
+     assert_eq!(store.collect_blobs().unwrap(), 0);
+     assert_eq!(fs::read(&partial).unwrap(), b"partial");
+Diff in /workspace/Muyon-document-candidate/crates/muyon-core/src/documents/candidate_tests.rs:172:
+-    assert_eq!(store.database().query("SELECT * FROM document_candidates_v1 ORDER BY candidate_id", &[]).unwrap(), journals);
++    assert_eq!(
++        store
++            .database()
++            .query(
++                "SELECT * FROM document_candidates_v1 ORDER BY candidate_id",
++                &[]
++            )
++            .unwrap(),
++        journals
++    );
+ }
+ fn expected(bytes: &[u8]) -> BlobRef {
+-    BlobRef { digest: Sha256::digest(bytes).iter().map(|b| format!("{b:02x}")).collect(), byte_length: Revision::new(bytes.len() as u64) }
++    BlobRef {
++        digest: Sha256::digest(bytes)
++            .iter()
++            .map(|b| format!("{b:02x}"))
++            .collect(),
++        byte_length: Revision::new(bytes.len() as u64),
++    }
+ }
+ #[test]
+ fn partial_staging_restart_preserves_candidate_without_blocking_unrelated_gc() {
+Diff in /workspace/Muyon-document-candidate/crates/muyon-core/src/documents/candidate_tests.rs:180:
+     let (f, store, access) = setup();
+     let candidate = expected(NEW_BYTES);
+     let upload = reserve_fixture(&store, &access, "partial", &candidate);
+-    store.materialize_candidate_upload_trusted(&upload.upload_id).unwrap();
+-    store.append_chunk(&upload.upload_id, &NEW_BYTES[..7]).unwrap();
++    store
++        .materialize_candidate_upload_trusted(&upload.upload_id)
++        .unwrap();
++    store
++        .append_chunk(&upload.upload_id, &NEW_BYTES[..7])
++        .unwrap();
+     let staging = store.root_dir().join("staging").join(&upload.upload_id);
+     // Real file write after the ledger's last commit: SQLite cannot undo it.
+     let mut file = fs::OpenOptions::new().append(true).open(&staging).unwrap();
+Diff in /workspace/Muyon-document-candidate/crates/muyon-core/src/documents/candidate_tests.rs:188:
+-    file.write_all(b"unsql-committed-tail").unwrap(); file.sync_all().unwrap(); drop(file);
++    file.write_all(b"unsql-committed-tail").unwrap();
++    file.sync_all().unwrap();
++    drop(file);
+     let before = fs::read(&staging).unwrap();
+     let orphan = store.begin_upload("project").unwrap();
+-    store.append_chunk(&orphan.upload_id, b"unrelated original synthetic orphan").unwrap();
+-    let orphan = store.finish_blob(&orphan.upload_id, crate::blobs::BlobKind::Document).unwrap();
++    store
++        .append_chunk(&orphan.upload_id, b"unrelated original synthetic orphan")
++        .unwrap();
++    let orphan = store
++        .finish_blob(&orphan.upload_id, crate::blobs::BlobKind::Document)
++        .unwrap();
+     store.abort_upload(&orphan.upload_id).unwrap();
+     // Simulate the durable expected object existing before its ledger commit.
+     let expected_object = store.root_dir().join("objects").join(&candidate.digest);
+Diff in /workspace/Muyon-document-candidate/crates/muyon-core/src/documents/candidate_tests.rs:196:
+     fs::write(&expected_object, NEW_BYTES).unwrap();
+     drop(store);
+     let store = BusinessStore::open_existing(&f.path(), "workspace", "new-epoch").unwrap();
+-    assert_eq!(store.reconcile_blobs_after_restart().unwrap().aborted_uploads, 0);
++    assert_eq!(
++        store
++            .reconcile_blobs_after_restart()
++            .unwrap()
++            .aborted_uploads,
++        0
++    );
+     assert_eq!(fs::read(&staging).unwrap(), before);
+     assert_eq!(store.collect_blobs().unwrap(), 1);
+-    assert!(!store.root_dir().join("objects").join(&orphan.blob.digest).exists());
++    assert!(!store
++        .root_dir()
++        .join("objects")
++        .join(&orphan.blob.digest)
++        .exists());
+     assert_eq!(fs::read(&expected_object).unwrap(), NEW_BYTES);
+     assert_eq!(fs::read(&staging).unwrap(), before);
+-    assert_eq!(store.lookup_upload(&upload.upload_id).unwrap().state, "copying");
++    assert_eq!(
++        store.lookup_upload(&upload.upload_id).unwrap().state,
++        "copying"
++    );
+ }
+ #[test]
+ fn oversize_nonpayload_fields_fail_before_status_decode() {
+Diff in /workspace/Muyon-document-candidate/crates/muyon-core/src/documents/candidate_tests.rs:209:
+     let (_f, store, access) = setup();
+-    store.prepare_document_candidate_trusted(&access, "candidate", "operation", NEW_BYTES).unwrap();
+-    for mutation in ["UPDATE document_candidates_v1 SET workspace=hex(zeroblob(100000))", "UPDATE document_candidates_v1 SET expected_length=hex(zeroblob(100000))"] {
+-        let tx = store.database().transaction().unwrap(); store.database().exec(mutation, &[]).unwrap();
++    store
++        .prepare_document_candidate_trusted(&access, "candidate", "operation", NEW_BYTES)
++        .unwrap();
++    for mutation in [
++        "UPDATE document_candidates_v1 SET workspace=hex(zeroblob(100000))",
++        "UPDATE document_candidates_v1 SET expected_length=hex(zeroblob(100000))",
++    ] {
++        let tx = store.database().transaction().unwrap();
++        store.database().exec(mutation, &[]).unwrap();
+         // No nested lookup transaction: inspect the same mutation via direct
+         // source publication gate, which must reject before producing authority.
+-        assert_eq!(store.document_publish_candidate_in_transaction(&tx, &access, "candidate"), Err(ContractError::StorageCorrupt));
++        assert_eq!(
++            store.document_publish_candidate_in_transaction(&tx, &access, "candidate"),
++            Err(ContractError::StorageCorrupt)
++        );
+         drop(tx);
+     }
+ }
+Diff in /workspace/Muyon-document-candidate/crates/muyon-core/src/documents/candidate_tests.rs:220:
+ fn candidate_count_and_expected_byte_admission_limits_precede_file_writes() {
+     let (_f, store, access) = setup();
+     let one = expected(b"one");
+-    for n in 0..32 { reserve_fixture(&store, &access, &format!("reserved-{n}"), &one); }
+-    assert_eq!(store.prepare_document_candidate_trusted(&access, "blocked", "operation", NEW_BYTES), Err(ContractError::TextLimit));
+-    assert_eq!(store.database().query("SELECT * FROM blob_uploads", &[]).unwrap().len(), 33);
++    for n in 0..32 {
++        reserve_fixture(&store, &access, &format!("reserved-{n}"), &one);
++    }
++    assert_eq!(
++        store.prepare_document_candidate_trusted(&access, "blocked", "operation", NEW_BYTES),
++        Err(ContractError::TextLimit)
++    );
++    assert_eq!(
++        store
++            .database()
++            .query("SELECT * FROM blob_uploads", &[])
++            .unwrap()
++            .len(),
++        33
++    );
+     let (_f2, store, access) = setup();
+-    let bytes = vec![1; 24 * 1024 * 1024]; let planned = expected(&bytes);
+-    for n in 0..5 { reserve_fixture(&store, &access, &format!("reserved-{n}"), &planned); }
+-    assert_eq!(store.prepare_document_candidate_trusted(&access, "blocked", "operation", &vec![2; 9 * 1024 * 1024]), Err(ContractError::TextLimit));
+-    assert_eq!(store.database().query("SELECT * FROM blob_uploads", &[]).unwrap().len(), 6);
++    let bytes = vec![1; 24 * 1024 * 1024];
++    let planned = expected(&bytes);
++    for n in 0..5 {
++        reserve_fixture(&store, &access, &format!("reserved-{n}"), &planned);
++    }
++    assert_eq!(
++        store.prepare_document_candidate_trusted(
++            &access,
++            "blocked",
++            "operation",
++            &vec![2; 9 * 1024 * 1024]
++        ),
++        Err(ContractError::TextLimit)
++    );
++    assert_eq!(
++        store
++            .database()
++            .query("SELECT * FROM blob_uploads", &[])
++            .unwrap()
++            .len(),
++        6
++    );
+ }
+ #[test]
+ fn expiry_after_durable_pin_is_unknown_and_never_source_success() {
+Diff in /workspace/Muyon-document-candidate/crates/muyon-core/src/documents/candidate_tests.rs:234:
+     let (_f, store, access) = setup();
+     store.database().exec("CREATE TRIGGER expire_after_candidate_pin AFTER UPDATE ON blob_uploads WHEN NEW.state='pinned' BEGIN UPDATE document_grants SET expires_at_ms='0'; END", &[]).unwrap();
+-    assert_eq!(store.prepare_document_candidate_trusted(&access, "candidate", "operation", NEW_BYTES), Err(ContractError::Unknown));
+-    assert_eq!(store.database().query("SELECT * FROM document_revisions", &[]).unwrap().len(), 1);
+-    assert_eq!(store.database().query("SELECT * FROM blob_pins WHERE kind='upload'", &[]).unwrap().len(), 1);
+-    assert!(store.lookup_document_candidate(&access, "candidate").is_err());
++    assert_eq!(
++        store.prepare_document_candidate_trusted(&access, "candidate", "operation", NEW_BYTES),
++        Err(ContractError::Unknown)
++    );
++    assert_eq!(
++        store
++            .database()
++            .query("SELECT * FROM document_revisions", &[])
++            .unwrap()
++            .len(),
++        1
++    );
++    assert_eq!(
++        store
++            .database()
++            .query("SELECT * FROM blob_pins WHERE kind='upload'", &[])
++            .unwrap()
++            .len(),
++        1
++    );
++    assert!(store
++        .lookup_document_candidate(&access, "candidate")
++        .is_err());
+ }
+ #[test]
+ fn missing_pin_or_corrupt_object_is_query_only_unknown() {
+Diff in /workspace/Muyon-document-candidate/crates/muyon-core/src/documents/candidate_tests.rs:243:
+     let (_f, store, access) = setup();
+-    let status = store.prepare_document_candidate_trusted(&access, "candidate", "operation", NEW_BYTES).unwrap();
+-    let object = store.root_dir().join("objects").join(&status.expected_blob.digest);
++    let status = store
++        .prepare_document_candidate_trusted(&access, "candidate", "operation", NEW_BYTES)
++        .unwrap();
++    let object = store
++        .root_dir()
++        .join("objects")
++        .join(&status.expected_blob.digest);
+     // Preserve length so this exercises the hash check, not just byte count.
+     let mut corrupt = NEW_BYTES.to_vec();
+     corrupt[0] ^= 1;
+Diff in /workspace/Muyon-document-candidate/crates/muyon-core/src/documents/candidate_tests.rs:249:
+     fs::write(&object, &corrupt).unwrap();
+-    assert_eq!(store.lookup_document_candidate(&access, "candidate").unwrap().state, CandidateState::PreparationUnknown);
++    assert_eq!(
++        store
++            .lookup_document_candidate(&access, "candidate")
++            .unwrap()
++            .state,
++        CandidateState::PreparationUnknown
++    );
+     fs::write(&object, NEW_BYTES).unwrap();
+-    assert_eq!(store.lookup_document_candidate(&access, "candidate").unwrap().state, CandidateState::SealedUnvalidated);
++    assert_eq!(
++        store
++            .lookup_document_candidate(&access, "candidate")
++            .unwrap()
++            .state,
++        CandidateState::SealedUnvalidated
++    );
+     fs::remove_file(&object).unwrap();
+-    assert_eq!(store.lookup_document_candidate(&access, "candidate").unwrap().state, CandidateState::PreparationUnknown);
++    assert_eq!(
++        store
++            .lookup_document_candidate(&access, "candidate")
++            .unwrap()
++            .state,
++        CandidateState::PreparationUnknown
++    );
+     fs::write(&object, NEW_BYTES).unwrap();
+-    store.database().exec("DELETE FROM blob_pins WHERE kind='upload'", &[]).unwrap();
+-    assert_eq!(store.lookup_document_candidate(&access, "candidate").unwrap().state, CandidateState::PreparationUnknown);
+-    assert_eq!(store.database().query("SELECT * FROM document_revisions", &[]).unwrap().len(), 1);
++    store
++        .database()
++        .exec("DELETE FROM blob_pins WHERE kind='upload'", &[])
++        .unwrap();
++    assert_eq!(
++        store
++            .lookup_document_candidate(&access, "candidate")
++            .unwrap()
++            .state,
++        CandidateState::PreparationUnknown
++    );
++    assert_eq!(
++        store
++            .database()
++            .query("SELECT * FROM document_revisions", &[])
++            .unwrap()
++            .len(),
++        1
++    );
+ }
+ #[test]
+ fn source_head_advance_rejects_old_candidate_without_latest_substitution() {
+Diff in /workspace/Muyon-document-candidate/crates/muyon-core/src/documents/candidate_tests.rs:262:
+     let (_f, store, access) = setup();
+     let original = store.read_document(&access).unwrap();
+-    store.prepare_document_candidate_trusted(&access, "candidate", "operation", NEW_BYTES).unwrap();
++    store
++        .prepare_document_candidate_trusted(&access, "candidate", "operation", NEW_BYTES)
++        .unwrap();
+     let tx = store.database().transaction().unwrap();
+-    store.document_access_in_transaction(&tx, &access, &[DocumentOperation::StructuredEdit]).unwrap();
+-    store.document_clone_in_transaction(&tx, &access.document, "Source advanced", &original.blob).unwrap();
++    store
++        .document_access_in_transaction(&tx, &access, &[DocumentOperation::StructuredEdit])
++        .unwrap();
++    store
++        .document_clone_in_transaction(&tx, &access.document, "Source advanced", &original.blob)
++        .unwrap();
+     tx.commit().unwrap();
+-    assert_eq!(store.lookup_document_candidate(&access, "candidate"), Err(ContractError::RevisionConflict));
+-    assert_eq!(store.database().query("SELECT state FROM document_candidates_v1", &[]).unwrap()[0][0].as_deref(), Some("sealed_unvalidated"));
+-    assert_eq!(store.database().query("SELECT * FROM document_revisions", &[]).unwrap().len(), 2);
++    assert_eq!(
++        store.lookup_document_candidate(&access, "candidate"),
++        Err(ContractError::RevisionConflict)
++    );
++    assert_eq!(
++        store
++            .database()
++            .query("SELECT state FROM document_candidates_v1", &[])
++            .unwrap()[0][0]
++            .as_deref(),
++        Some("sealed_unvalidated")
++    );
++    assert_eq!(
++        store
++            .database()
++            .query("SELECT * FROM document_revisions", &[])
++            .unwrap()
++            .len(),
++        2
++    );
+ }
+ 
+Diff in /workspace/Muyon-document-candidate/crates/muyon-core/src/documents/history_tests.rs:4:
+ use std::time::{SystemTime, UNIX_EPOCH};
+ 
+ fn expiry() -> u64 {
+-    SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_millis() as u64 + 20_000
++    SystemTime::now()
++        .duration_since(UNIX_EPOCH)
++        .unwrap()
++        .as_millis() as u64
++        + 20_000
+ }
+ fn advance(store: &BusinessStore, old: &DocumentAccess) -> (DocumentAccess, DocumentMetadata) {
+     let metadata = store.read_document(old).unwrap();
+Diff in /workspace/Muyon-document-candidate/crates/muyon-core/src/documents/history_tests.rs:11:
+     let tx = store.database().transaction().unwrap();
+-    let next = store.document_clone_in_transaction(&tx, &old.document, "COPY-only new head", &metadata.blob).unwrap();
++    let next = store
++        .document_clone_in_transaction(&tx, &old.document, "COPY-only new head", &metadata.blob)
++        .unwrap();
+     tx.commit().unwrap();
+-    let current = DocumentAccess { document: next.document, authority: AuthorityBinding { generation: old.authority.generation.next().unwrap(), ..old.authority.clone() } };
+-    store.issue_document_grant_trusted(&current.document, &current.authority, &[DocumentOperation::Inspect, DocumentOperation::ReadText], expiry()).unwrap();
++    let current = DocumentAccess {
++        document: next.document,
++        authority: AuthorityBinding {
++            generation: old.authority.generation.next().unwrap(),
++            ..old.authority.clone()
++        },
++    };
++    store
++        .issue_document_grant_trusted(
++            &current.document,
++            &current.authority,
++            &[DocumentOperation::Inspect, DocumentOperation::ReadText],
++            expiry(),
++        )
++        .unwrap();
+     (current, metadata)
+ }
+ #[test]
+Diff in /workspace/Muyon-document-candidate/crates/muyon-core/src/documents/history_tests.rs:19:
+ fn history_denies_without_explicit_target_policy_and_then_reads_exact_snapshot() {
+-    let f = Fixture::new(); let (store, old) = f.setup(); let (current, snapshot) = advance(&store, &old);
++    let f = Fixture::new();
++    let (store, old) = f.setup();
++    let (current, snapshot) = advance(&store, &old);
+     let tx = store.database().transaction().unwrap();
+-    assert!(store.document_history_access_in_transaction(&tx, &current, &old.document, &[DocumentOperation::ReadText]).is_err());
++    assert!(store
++        .document_history_access_in_transaction(
++            &tx,
++            &current,
++            &old.document,
++            &[DocumentOperation::ReadText]
++        )
++        .is_err());
+     drop(tx);
+     store.initialize_document_history_trusted().unwrap();
+     let tx = store.database().transaction().unwrap();
+Diff in /workspace/Muyon-document-candidate/crates/muyon-core/src/documents/history_tests.rs:26:
+-    assert!(store.document_history_access_in_transaction(&tx, &current, &old.document, &[DocumentOperation::ReadText]).is_err());
+-    assert_eq!(store.document_history_access_in_transaction(&tx, &current, &current.document, &[DocumentOperation::ReadText]).unwrap().document, current.document);
++    assert!(store
++        .document_history_access_in_transaction(
++            &tx,
++            &current,
++            &old.document,
++            &[DocumentOperation::ReadText]
++        )
++        .is_err());
++    assert_eq!(
++        store
++            .document_history_access_in_transaction(
++                &tx,
++                &current,
++                &current.document,
++                &[DocumentOperation::ReadText]
++            )
++            .unwrap()
++            .document,
++        current.document
++    );
+     drop(tx);
+-    store.issue_document_history_grant_trusted(&current, &old.document, &[DocumentOperation::ReadText], expiry()).unwrap();
++    store
++        .issue_document_history_grant_trusted(
++            &current,
++            &old.document,
++            &[DocumentOperation::ReadText],
++            expiry(),
++        )
++        .unwrap();
+     let tx = store.database().transaction().unwrap();
+-    assert_eq!(store.document_history_access_in_transaction(&tx, &current, &old.document, &[DocumentOperation::ReadText]).unwrap(), snapshot);
+-    assert!(store.document_history_access_in_transaction(&tx, &current, &old.document, &[DocumentOperation::Inspect]).is_err());
++    assert_eq!(
++        store
++            .document_history_access_in_transaction(
++                &tx,
++                &current,
++                &old.document,
++                &[DocumentOperation::ReadText]
++            )
++            .unwrap(),
++        snapshot
++    );
++    assert!(store
++        .document_history_access_in_transaction(
++            &tx,
++            &current,
++            &old.document,
++            &[DocumentOperation::Inspect]
++        )
++        .is_err());
+     drop(tx);
+ }
+ #[test]
+Diff in /workspace/Muyon-document-candidate/crates/muyon-core/src/documents/history_tests.rs:36:
+ fn historical_and_parent_revocation_expiry_generation_and_project_are_current() {
+-    let f = Fixture::new(); let (store, old) = f.setup(); let (current, _) = advance(&store, &old);
++    let f = Fixture::new();
++    let (store, old) = f.setup();
++    let (current, _) = advance(&store, &old);
+     store.initialize_document_history_trusted().unwrap();
+-    store.issue_document_history_grant_trusted(&current, &old.document, &[DocumentOperation::ReadText], expiry()).unwrap();
++    store
++        .issue_document_history_grant_trusted(
++            &current,
++            &old.document,
++            &[DocumentOperation::ReadText],
++            expiry(),
++        )
++        .unwrap();
+     for mutation in [
+         "UPDATE document_history_grants_v1 SET active=0",
+         "UPDATE document_history_grants_v1 SET expires_at_ms='0'",
+Diff in /workspace/Muyon-document-candidate/crates/muyon-core/src/documents/history_tests.rs:48:
+     ] {
+         let tx = store.database().transaction().unwrap();
+         store.database().exec(mutation, &[]).unwrap();
+-        assert!(store.document_history_access_in_transaction(&tx, &current, &old.document, &[DocumentOperation::ReadText]).is_err(), "{mutation}");
++        assert!(
++            store
++                .document_history_access_in_transaction(
++                    &tx,
++                    &current,
++                    &old.document,
++                    &[DocumentOperation::ReadText]
++                )
++                .is_err(),
++            "{mutation}"
++        );
+         drop(tx);
+     }
+-    store.revoke_document_history_grant_trusted(&current, &old.document).unwrap();
++    store
++        .revoke_document_history_grant_trusted(&current, &old.document)
++        .unwrap();
+     let tx = store.database().transaction().unwrap();
+-    assert!(store.document_history_access_in_transaction(&tx, &current, &old.document, &[DocumentOperation::ReadText]).is_err());
++    assert!(store
++        .document_history_access_in_transaction(
++            &tx,
++            &current,
++            &old.document,
++            &[DocumentOperation::ReadText]
++        )
++        .is_err());
+     drop(tx);
+ }
+ #[test]
+Diff in /workspace/Muyon-document-candidate/crates/muyon-core/src/documents/history_tests.rs:60:
+ fn old_policy_is_not_inherited_by_a_new_parent_grant_generation() {
+-    let f = Fixture::new(); let (store, old) = f.setup(); let (current, _) = advance(&store, &old);
++    let f = Fixture::new();
++    let (store, old) = f.setup();
++    let (current, _) = advance(&store, &old);
+     store.initialize_document_history_trusted().unwrap();
+-    store.issue_document_history_grant_trusted(&current, &old.document, &[DocumentOperation::ReadText], expiry()).unwrap();
+-    let next = DocumentAccess { authority: AuthorityBinding { generation: current.authority.generation.next().unwrap(), ..current.authority.clone() }, document: current.document.clone() };
+-    store.issue_document_grant_trusted(&next.document, &next.authority, &[DocumentOperation::ReadText], expiry()).unwrap();
++    store
++        .issue_document_history_grant_trusted(
++            &current,
++            &old.document,
++            &[DocumentOperation::ReadText],
++            expiry(),
++        )
++        .unwrap();
++    let next = DocumentAccess {
++        authority: AuthorityBinding {
++            generation: current.authority.generation.next().unwrap(),
++            ..current.authority.clone()
++        },
++        document: current.document.clone(),
++    };
++    store
++        .issue_document_grant_trusted(
++            &next.document,
++            &next.authority,
++            &[DocumentOperation::ReadText],
++            expiry(),
++        )
++        .unwrap();
+     let tx = store.database().transaction().unwrap();
+-    assert!(store.document_history_access_in_transaction(&tx, &current, &old.document, &[DocumentOperation::ReadText]).is_err());
+-    assert!(store.document_history_access_in_transaction(&tx, &next, &old.document, &[DocumentOperation::ReadText]).is_err());
++    assert!(store
++        .document_history_access_in_transaction(
++            &tx,
++            &current,
++            &old.document,
++            &[DocumentOperation::ReadText]
++        )
++        .is_err());
++    assert!(store
++        .document_history_access_in_transaction(
++            &tx,
++            &next,
++            &old.document,
++            &[DocumentOperation::ReadText]
++        )
++        .is_err());
+     drop(tx);
+ }
+ #[test]
+Diff in /workspace/Muyon-document-candidate/crates/muyon-core/src/documents/history_tests.rs:72:
+ fn historical_identity_scope_schema_and_read_only_policy_fail_closed() {
+-    let f = Fixture::new(); let (store, old) = f.setup(); let (current, _) = advance(&store, &old);
++    let f = Fixture::new();
++    let (store, old) = f.setup();
++    let (current, _) = advance(&store, &old);
+     store.initialize_document_history_trusted().unwrap();
+-    assert!(store.issue_document_history_grant_trusted(&current, &old.document, &[DocumentOperation::StructuredEdit], expiry()).is_err());
+-    store.issue_document_history_grant_trusted(&current, &old.document, &[DocumentOperation::ReadText], expiry()).unwrap();
++    assert!(store
++        .issue_document_history_grant_trusted(
++            &current,
++            &old.document,
++            &[DocumentOperation::StructuredEdit],
++            expiry()
++        )
++        .is_err());
++    store
++        .issue_document_history_grant_trusted(
++            &current,
++            &old.document,
++            &[DocumentOperation::ReadText],
++            expiry(),
++        )
++        .unwrap();
+     let tx = store.database().transaction().unwrap();
+     for historical in [
+-        DocumentRef::new(Scope { workspace_id: "workspace".into(), project_id: Some("other".into()) }, "document", Revision::new(1), DocumentFormat::Pdf).unwrap(),
+-        DocumentRef::new(current.document.scope().clone(), "other", Revision::new(1), DocumentFormat::Pdf).unwrap(),
+-        DocumentRef::new(current.document.scope().clone(), "document", Revision::new(3), DocumentFormat::Pdf).unwrap(),
+-    ] { assert!(store.document_history_access_in_transaction(&tx, &current, &historical, &[DocumentOperation::ReadText]).is_err()); }
+-    assert!(store.document_history_access_in_transaction(&tx, &current, &old.document, &[DocumentOperation::StructuredEdit]).is_err());
++        DocumentRef::new(
++            Scope {
++                workspace_id: "workspace".into(),
++                project_id: Some("other".into()),
++            },
++            "document",
++            Revision::new(1),
++            DocumentFormat::Pdf,
++        )
++        .unwrap(),
++        DocumentRef::new(
++            current.document.scope().clone(),
++            "other",
++            Revision::new(1),
++            DocumentFormat::Pdf,
++        )
++        .unwrap(),
++        DocumentRef::new(
++            current.document.scope().clone(),
++            "document",
++            Revision::new(3),
++            DocumentFormat::Pdf,
++        )
++        .unwrap(),
++    ] {
++        assert!(store
++            .document_history_access_in_transaction(
++                &tx,
++                &current,
++                &historical,
++                &[DocumentOperation::ReadText]
++            )
++            .is_err());
++    }
++    assert!(store
++        .document_history_access_in_transaction(
++            &tx,
++            &current,
++            &old.document,
++            &[DocumentOperation::StructuredEdit]
++        )
++        .is_err());
+     drop(tx);
+-    let foreign = Db::open(":memory:", false, true).unwrap(); let tx = foreign.transaction().unwrap();
+-    assert_eq!(store.document_history_access_in_transaction(&tx, &current, &old.document, &[DocumentOperation::ReadText]), Err(ContractError::InvalidAuthority));
++    let foreign = Db::open(":memory:", false, true).unwrap();
++    let tx = foreign.transaction().unwrap();
++    assert_eq!(
++        store.document_history_access_in_transaction(
++            &tx,
++            &current,
++            &old.document,
++            &[DocumentOperation::ReadText]
++        ),
++        Err(ContractError::InvalidAuthority)
++    );
+ }
+ #[test]
+ fn canonical_history_corruption_and_missing_revision_are_not_substituted() {
+Diff in /workspace/Muyon-document-candidate/crates/muyon-core/src/documents/history_tests.rs:90:
+-    let f = Fixture::new(); let (store, old) = f.setup(); let (current, _) = advance(&store, &old);
++    let f = Fixture::new();
++    let (store, old) = f.setup();
++    let (current, _) = advance(&store, &old);
+     store.initialize_document_history_trusted().unwrap();
+-    store.issue_document_history_grant_trusted(&current, &old.document, &[DocumentOperation::ReadText], expiry()).unwrap();
++    store
++        .issue_document_history_grant_trusted(
++            &current,
++            &old.document,
++            &[DocumentOperation::ReadText],
++            expiry(),
++        )
++        .unwrap();
+     let current_payload = serde_json::to_string(&store.read_document(&current).unwrap()).unwrap();
+     let tx = store.database().transaction().unwrap();
+-    store.database().exec("UPDATE document_revisions SET payload=? WHERE revision='1'", &[&current_payload]).unwrap();
+-    assert_eq!(store.document_history_access_in_transaction(&tx, &current, &old.document, &[DocumentOperation::ReadText]), Err(ContractError::StorageCorrupt));
++    store
++        .database()
++        .exec(
++            "UPDATE document_revisions SET payload=? WHERE revision='1'",
++            &[&current_payload],
++        )
++        .unwrap();
++    assert_eq!(
++        store.document_history_access_in_transaction(
++            &tx,
++            &current,
++            &old.document,
++            &[DocumentOperation::ReadText]
++        ),
++        Err(ContractError::StorageCorrupt)
++    );
+     drop(tx);
+     let tx = store.database().transaction().unwrap();
+-    store.database().exec("DELETE FROM document_revisions WHERE revision='1'", &[]).unwrap();
+-    assert_eq!(store.document_history_access_in_transaction(&tx, &current, &old.document, &[DocumentOperation::ReadText]), Err(ContractError::NotFound));
++    store
++        .database()
++        .exec("DELETE FROM document_revisions WHERE revision='1'", &[])
++        .unwrap();
++    assert_eq!(
++        store.document_history_access_in_transaction(
++            &tx,
++            &current,
++            &old.document,
++            &[DocumentOperation::ReadText]
++        ),
++        Err(ContractError::NotFound)
++    );
+     drop(tx);
+ }
+ #[test]
+Diff in /workspace/Muyon-document-candidate/crates/muyon-core/src/documents/history_tests.rs:104:
+ fn text_label_roundtrips_without_default_utf8_or_reader_capability() {
+-    let document = DocumentRef::new(Scope { workspace_id: "workspace".into(), project_id: Some("project".into()) }, "text-source", Revision::new(1), DocumentFormat::Text).unwrap();
++    let document = DocumentRef::new(
++        Scope {
++            workspace_id: "workspace".into(),
++            project_id: Some("project".into()),
++        },
++        "text-source",
++        Revision::new(1),
++        DocumentFormat::Text,
++    )
++    .unwrap();
+     let json = serde_json::to_string(&document).unwrap();
+     assert!(json.contains("\"format\":\"text\""));
+-    assert_eq!(serde_json::from_str::<DocumentRef>(&json).unwrap(), document);
+-    assert_eq!(CapabilityMatrix::default().status(DocumentFormat::Text, DocumentOperation::ReadText), CapabilityStatus::Unknown);
++    assert_eq!(
++        serde_json::from_str::<DocumentRef>(&json).unwrap(),
++        document
++    );
++    assert_eq!(
++        CapabilityMatrix::default().status(DocumentFormat::Text, DocumentOperation::ReadText),
++        CapabilityStatus::Unknown
++    );
+ }
+ #[test]
+ fn advancing_parent_head_does_not_reuse_old_history_policy() {
+Diff in /workspace/Muyon-document-candidate/crates/muyon-core/src/documents/history_tests.rs:113:
+-    let f = Fixture::new(); let (store, old) = f.setup(); let (current, metadata) = advance(&store, &old);
++    let f = Fixture::new();
++    let (store, old) = f.setup();
++    let (current, metadata) = advance(&store, &old);
+     store.initialize_document_history_trusted().unwrap();
+-    store.issue_document_history_grant_trusted(&current, &old.document, &[DocumentOperation::ReadText], expiry()).unwrap();
++    store
++        .issue_document_history_grant_trusted(
++            &current,
++            &old.document,
++            &[DocumentOperation::ReadText],
++            expiry(),
++        )
++        .unwrap();
+     let tx = store.database().transaction().unwrap();
+-    store.document_clone_in_transaction(&tx, &current.document, "Next COPY", &metadata.blob).unwrap();
++    store
++        .document_clone_in_transaction(&tx, &current.document, "Next COPY", &metadata.blob)
++        .unwrap();
+     tx.commit().unwrap();
+     let tx = store.database().transaction().unwrap();
+-    assert_eq!(store.document_history_access_in_transaction(&tx, &current, &old.document, &[DocumentOperation::ReadText]), Err(ContractError::RevisionConflict));
++    assert_eq!(
++        store.document_history_access_in_transaction(
++            &tx,
++            &current,
++            &old.document,
++            &[DocumentOperation::ReadText]
++        ),
++        Err(ContractError::RevisionConflict)
++    );
+     drop(tx);
+ }
+ #[test]
+Diff in /workspace/Muyon-document-candidate/crates/muyon-core/src/documents/history_tests.rs:124:
+ fn wrong_history_schema_is_rejected_without_changing_document_store() {
+-    let f = Fixture::new(); let (store, old) = f.setup(); let (current, _) = advance(&store, &old);
+-    store.database().exec("CREATE TABLE document_history_grants_v1(untrusted TEXT)", &[]).unwrap();
+-    assert_eq!(store.initialize_document_history_trusted(), Err(ContractError::InvalidVersion));
++    let f = Fixture::new();
++    let (store, old) = f.setup();
++    let (current, _) = advance(&store, &old);
++    store
++        .database()
++        .exec(
++            "CREATE TABLE document_history_grants_v1(untrusted TEXT)",
++            &[],
++        )
++        .unwrap();
++    assert_eq!(
++        store.initialize_document_history_trusted(),
++        Err(ContractError::InvalidVersion)
++    );
+     store.initialize_documents_trusted().unwrap();
+-    assert_eq!(store.read_document(&current).unwrap().document, current.document);
++    assert_eq!(
++        store.read_document(&current).unwrap().document,
++        current.document
++    );
+ }
+ 
+Diff in /workspace/Muyon-document-candidate/crates/muyon-core/src/documents/mod.rs:5:
+ //! reading, rendering, target resolution, editing or native format fidelity.
+ pub mod anchor;
+ pub mod annotation;
+-pub mod capability;
+ pub mod candidate;
++pub mod capability;
++#[cfg(test)]
++mod history_tests;
+ pub mod identity;
+ pub mod storage;
+ #[cfg(test)]
+Diff in /workspace/Muyon-document-candidate/crates/muyon-core/src/documents/mod.rs:13:
+ mod storage_tests;
+-#[cfg(test)]
+-mod history_tests;
+ use crate::contract::{AuthorityBinding, FileSource};
+ pub use anchor::*;
+ pub use annotation::*;
+Diff in /workspace/Muyon-document-candidate/crates/muyon-core/src/documents/mod.rs:19:
+-pub use capability::*;
+ pub use candidate::{CandidateState, CandidateStatus};
++pub use capability::*;
+ #[cfg(test)]
+ mod candidate_tests;
+ pub use identity::DocumentRef;
+Diff in /workspace/Muyon-document-candidate/crates/muyon-core/src/documents/storage.rs:79:
+     Ok(())
+ }
+ fn historical_target(current: &DocumentRef, historical: &DocumentRef) -> Result<()> {
+-    if current.scope() != historical.scope() { return Err(ContractError::ScopeMismatch); }
+-    if current.document_id() != historical.document_id() { return Err(ContractError::BindingMismatch); }
+-    if historical.revision() >= current.revision() { return Err(ContractError::RevisionConflict); }
++    if current.scope() != historical.scope() {
++        return Err(ContractError::ScopeMismatch);
++    }
++    if current.document_id() != historical.document_id() {
++        return Err(ContractError::BindingMismatch);
++    }
++    if historical.revision() >= current.revision() {
++        return Err(ContractError::RevisionConflict);
++    }
+     Ok(())
+ }
+ 
+Diff in /workspace/Muyon-document-candidate/crates/muyon-core/src/documents/storage.rs:92:
+         let tx = sql(self.database().transaction())?;
+         self.document_schema()?;
+         let rows = sql(self.database().query("SELECT name FROM sqlite_master WHERE type='table' AND name='document_history_grants_v1'", &[]))?;
+-        if rows.is_empty() { sql(self.database().exec(HISTORY_SCHEMA, &[]))?; }
++        if rows.is_empty() {
++            sql(self.database().exec(HISTORY_SCHEMA, &[]))?;
++        }
+         self.document_history_schema()?;
+         sql(tx.commit())
+     }
+Diff in /workspace/Muyon-document-candidate/crates/muyon-core/src/documents/storage.rs:99:
+     fn document_history_schema(&self) -> Result<()> {
+         let rows = sql(self.database().query("SELECT CASE WHEN length(CAST(sql AS BLOB))<=2048 THEN sql ELSE NULL END FROM sqlite_master WHERE type='table' AND name='document_history_grants_v1'", &[]))?;
+-        if rows.is_empty() { return Err(ContractError::InvalidAuthority); }
+-        if rows.len() != 1 || cell(&rows[0], 0)? != HISTORY_SCHEMA { return Err(ContractError::InvalidVersion); }
++        if rows.is_empty() {
++            return Err(ContractError::InvalidAuthority);
++        }
++        if rows.len() != 1 || cell(&rows[0], 0)? != HISTORY_SCHEMA {
++            return Err(ContractError::InvalidVersion);
++        }
+         Ok(())
+     }
+-    fn historical_metadata(&self, current: &DocumentRef, historical: &DocumentRef) -> Result<DocumentMetadata> {
++    fn historical_metadata(
++        &self,
++        current: &DocumentRef,
++        historical: &DocumentRef,
++    ) -> Result<DocumentMetadata> {
+         historical_target(current, historical)?;
+         let project = self.document_project(current)?;
+         let rows = sql(self.database().query("SELECT CASE WHEN length(CAST(revision AS BLOB))<=20 THEN revision ELSE NULL END,CASE WHEN length(CAST(payload AS BLOB))<=8192 THEN payload ELSE NULL END FROM document_revisions WHERE project_id=? AND document_id=? AND revision=?", &[project, historical.document_id(), historical.revision().as_str()]))?;
+Diff in /workspace/Muyon-document-candidate/crates/muyon-core/src/documents/storage.rs:109:
+         let row = rows.first().ok_or(ContractError::NotFound)?;
+         let metadata: DocumentMetadata = decode(cell(row, 1)?)?;
+-        if metadata.document != *historical || metadata.document.revision().as_str() != cell(row, 0)? {
++        if metadata.document != *historical
++            || metadata.document.revision().as_str() != cell(row, 0)?
++        {
+             return Err(ContractError::StorageCorrupt);
+         }
+-        metadata.blob.validate().map_err(|_| ContractError::StorageCorrupt)?;
++        metadata
++            .blob
++            .validate()
++            .map_err(|_| ContractError::StorageCorrupt)?;
+         Ok(metadata)
+     }
+-    fn historical_grant(&self, current: &DocumentAccess, historical: &DocumentRef, required: &[DocumentOperation]) -> Result<()> {
++    fn historical_grant(
++        &self,
++        current: &DocumentAccess,
++        historical: &DocumentRef,
++        required: &[DocumentOperation],
++    ) -> Result<()> {
+         historical_operations(required)?;
+         historical_target(&current.document, historical)?;
+         self.document_history_schema()?;
+Diff in /workspace/Muyon-document-candidate/crates/muyon-core/src/documents/storage.rs:122:
+         let row = rows.first().ok_or(ContractError::InvalidAuthority)?;
+         let bound: DocumentRef = decode(cell(row, 0)?)?;
+         let permissions: Vec<DocumentOperation> = decode(cell(row, 1)?)?;
+-        let expires = cell(row, 2)?.parse::<u64>().map_err(|_| ContractError::StorageCorrupt)?;
+-        if bound != current.document || expires <= now_ms()? || required.iter().any(|op| !permissions.contains(op)) {
++        let expires = cell(row, 2)?
++            .parse::<u64>()
++            .map_err(|_| ContractError::StorageCorrupt)?;
++        if bound != current.document
++            || expires <= now_ms()?
++            || required.iter().any(|op| !permissions.contains(op))
++        {
+             return Err(ContractError::InvalidAuthority);
+         }
+         Ok(())
+Diff in /workspace/Muyon-document-candidate/crates/muyon-core/src/documents/storage.rs:131:
+     /// HOST ONLY: invoke only after a real explicit historical-target policy
+     /// decision. Current-read permission or a model request is not that decision.
+     /// No model/JSON dispatcher is provided. Membership/provenance stays host-owned.
+-    pub fn issue_document_history_grant_trusted(&self, current: &DocumentAccess, historical: &DocumentRef, operations: &[DocumentOperation], expires_at_ms: u64) -> Result<()> {
++    pub fn issue_document_history_grant_trusted(
++        &self,
++        current: &DocumentAccess,
++        historical: &DocumentRef,
++        operations: &[DocumentOperation],
++        expires_at_ms: u64,
++    ) -> Result<()> {
+         historical_operations(operations)?;
+         let tx = sql(self.database().transaction())?;
+         self.document_access(current, operations)?;
+Diff in /workspace/Muyon-document-candidate/crates/muyon-core/src/documents/storage.rs:138:
+         self.document_history_schema()?;
+         self.historical_metadata(&current.document, historical)?;
+         let now = now_ms()?;
+-        if expires_at_ms <= now || expires_at_ms > now.checked_add(30_000).ok_or(ContractError::InvalidAuthority)? {
++        if expires_at_ms <= now
++            || expires_at_ms
++                > now
++                    .checked_add(30_000)
++                    .ok_or(ContractError::InvalidAuthority)?
++        {
+             return Err(ContractError::InvalidAuthority);
+         }
+         sql(self.database().exec("INSERT INTO document_history_grants_v1 VALUES(?,?,?,?,?,?,?,1) ON CONFLICT(grant_id,generation,historical_document_json) DO UPDATE SET owner_epoch=excluded.owner_epoch,current_document_json=excluded.current_document_json,permissions=excluded.permissions,expires_at_ms=excluded.expires_at_ms,active=1", &[&current.authority.grant_id, current.authority.generation.as_str(), &current.authority.owner_epoch, &encode(&current.document)?, &encode(historical)?, &encode(&operations)?, &expires_at_ms.to_string()]))?;
+Diff in /workspace/Muyon-document-candidate/crates/muyon-core/src/documents/storage.rs:145:
+         self.document_grant(current, operations)?;
+         sql(tx.commit())
+     }
+-    pub fn revoke_document_history_grant_trusted(&self, current: &DocumentAccess, historical: &DocumentRef) -> Result<()> {
++    pub fn revoke_document_history_grant_trusted(
++        &self,
++        current: &DocumentAccess,
++        historical: &DocumentRef,
++    ) -> Result<()> {
+         let tx = sql(self.database().transaction())?;
+         self.document_schema()?;
+         self.document_history_schema()?;
+Diff in /workspace/Muyon-document-candidate/crates/muyon-core/src/documents/storage.rs:152:
+         binding_shape(&current.authority)?;
+-        if current.authority.owner_epoch != self.owner_epoch() { return Err(ContractError::InvalidAuthority); }
++        if current.authority.owner_epoch != self.owner_epoch() {
++            return Err(ContractError::InvalidAuthority);
++        }
+         historical_target(&current.document, historical)?;
+         self.document_project(&current.document)?;
+         let changed = sql(self.database().exec("UPDATE document_history_grants_v1 SET active=0 WHERE grant_id=? AND generation=? AND owner_epoch=? AND current_document_json=? AND historical_document_json=?", &[&current.authority.grant_id, current.authority.generation.as_str(), &current.authority.owner_epoch, &encode(&current.document)?, &encode(historical)?]))?;
+Diff in /workspace/Muyon-document-candidate/crates/muyon-core/src/documents/storage.rs:157:
+-        if changed != 1 { return Err(ContractError::InvalidAuthority); }
++        if changed != 1 {
++            return Err(ContractError::InvalidAuthority);
++        }
+         sql(tx.commit())
+     }
+     /// Exact historical metadata authority, not a reader lease or write permit.
+Diff in /workspace/Muyon-document-candidate/crates/muyon-core/src/documents/storage.rs:161:
+     /// Caller must recheck at byte/result delivery if it does further work.
+-    pub(crate) fn document_history_access_in_transaction(&self, tx: &Transaction<'_>, current: &DocumentAccess, historical: &DocumentRef, required: &[DocumentOperation]) -> Result<DocumentMetadata> {
+-        if !tx.belongs_to(self.database()) { return Err(ContractError::InvalidAuthority); }
++    pub(crate) fn document_history_access_in_transaction(
++        &self,
++        tx: &Transaction<'_>,
++        current: &DocumentAccess,
++        historical: &DocumentRef,
++        required: &[DocumentOperation],
++    ) -> Result<DocumentMetadata> {
++        if !tx.belongs_to(self.database()) {
++            return Err(ContractError::InvalidAuthority);
++        }
+         historical_operations(required)?;
+         let latest = self.document_access(current, required)?;
+         if historical == &current.document {
+Diff in /workspace/Muyon-document-candidate/crates/muyon-core/src/documents/storage.rs:79:
+     Ok(())
+ }
+ fn historical_target(current: &DocumentRef, historical: &DocumentRef) -> Result<()> {
+-    if current.scope() != historical.scope() { return Err(ContractError::ScopeMismatch); }
+-    if current.document_id() != historical.document_id() { return Err(ContractError::BindingMismatch); }
+-    if historical.revision() >= current.revision() { return Err(ContractError::RevisionConflict); }
++    if current.scope() != historical.scope() {
++        return Err(ContractError::ScopeMismatch);
++    }
++    if current.document_id() != historical.document_id() {
++        return Err(ContractError::BindingMismatch);
++    }
++    if historical.revision() >= current.revision() {
++        return Err(ContractError::RevisionConflict);
++    }
+     Ok(())
+ }
+ 
+Diff in /workspace/Muyon-document-candidate/crates/muyon-core/src/documents/storage.rs:92:
+         let tx = sql(self.database().transaction())?;
+         self.document_schema()?;
+         let rows = sql(self.database().query("SELECT name FROM sqlite_master WHERE type='table' AND name='document_history_grants_v1'", &[]))?;
+-        if rows.is_empty() { sql(self.database().exec(HISTORY_SCHEMA, &[]))?; }
++        if rows.is_empty() {
++            sql(self.database().exec(HISTORY_SCHEMA, &[]))?;
++        }
+         self.document_history_schema()?;
+         sql(tx.commit())
+     }
+Diff in /workspace/Muyon-document-candidate/crates/muyon-core/src/documents/storage.rs:99:
+     fn document_history_schema(&self) -> Result<()> {
+         let rows = sql(self.database().query("SELECT CASE WHEN length(CAST(sql AS BLOB))<=2048 THEN sql ELSE NULL END FROM sqlite_master WHERE type='table' AND name='document_history_grants_v1'", &[]))?;
+-        if rows.is_empty() { return Err(ContractError::InvalidAuthority); }
+-        if rows.len() != 1 || cell(&rows[0], 0)? != HISTORY_SCHEMA { return Err(ContractError::InvalidVersion); }
++        if rows.is_empty() {
++            return Err(ContractError::InvalidAuthority);
++        }
++        if rows.len() != 1 || cell(&rows[0], 0)? != HISTORY_SCHEMA {
++            return Err(ContractError::InvalidVersion);
++        }
+         Ok(())
+     }
+-    fn historical_metadata(&self, current: &DocumentRef, historical: &DocumentRef) -> Result<DocumentMetadata> {
++    fn historical_metadata(
++        &self,
++        current: &DocumentRef,
++        historical: &DocumentRef,
++    ) -> Result<DocumentMetadata> {
+         historical_target(current, historical)?;
+         let project = self.document_project(current)?;
+         let rows = sql(self.database().query("SELECT CASE WHEN length(CAST(revision AS BLOB))<=20 THEN revision ELSE NULL END,CASE WHEN length(CAST(payload AS BLOB))<=8192 THEN payload ELSE NULL END FROM document_revisions WHERE project_id=? AND document_id=? AND revision=?", &[project, historical.document_id(), historical.revision().as_str()]))?;
+Diff in /workspace/Muyon-document-candidate/crates/muyon-core/src/documents/storage.rs:109:
+         let row = rows.first().ok_or(ContractError::NotFound)?;
+         let metadata: DocumentMetadata = decode(cell(row, 1)?)?;
+-        if metadata.document != *historical || metadata.document.revision().as_str() != cell(row, 0)? {
++        if metadata.document != *historical
++            || metadata.document.revision().as_str() != cell(row, 0)?
++        {
+             return Err(ContractError::StorageCorrupt);
+         }
+-        metadata.blob.validate().map_err(|_| ContractError::StorageCorrupt)?;
++        metadata
++            .blob
++            .validate()
++            .map_err(|_| ContractError::StorageCorrupt)?;
+         Ok(metadata)
+     }
+-    fn historical_grant(&self, current: &DocumentAccess, historical: &DocumentRef, required: &[DocumentOperation]) -> Result<()> {
++    fn historical_grant(
++        &self,
++        current: &DocumentAccess,
++        historical: &DocumentRef,
++        required: &[DocumentOperation],
++    ) -> Result<()> {
+         historical_operations(required)?;
+         historical_target(&current.document, historical)?;
+         self.document_history_schema()?;
+Diff in /workspace/Muyon-document-candidate/crates/muyon-core/src/documents/storage.rs:122:
+         let row = rows.first().ok_or(ContractError::InvalidAuthority)?;
+         let bound: DocumentRef = decode(cell(row, 0)?)?;
+         let permissions: Vec<DocumentOperation> = decode(cell(row, 1)?)?;
+-        let expires = cell(row, 2)?.parse::<u64>().map_err(|_| ContractError::StorageCorrupt)?;
+-        if bound != current.document || expires <= now_ms()? || required.iter().any(|op| !permissions.contains(op)) {
++        let expires = cell(row, 2)?
++            .parse::<u64>()
++            .map_err(|_| ContractError::StorageCorrupt)?;
++        if bound != current.document
++            || expires <= now_ms()?
++            || required.iter().any(|op| !permissions.contains(op))
++        {
+             return Err(ContractError::InvalidAuthority);
+         }
+         Ok(())
+Diff in /workspace/Muyon-document-candidate/crates/muyon-core/src/documents/storage.rs:131:
+     /// HOST ONLY: invoke only after a real explicit historical-target policy
+     /// decision. Current-read permission or a model request is not that decision.
+     /// No model/JSON dispatcher is provided. Membership/provenance stays host-owned.
+-    pub fn issue_document_history_grant_trusted(&self, current: &DocumentAccess, historical: &DocumentRef, operations: &[DocumentOperation], expires_at_ms: u64) -> Result<()> {
++    pub fn issue_document_history_grant_trusted(
++        &self,
++        current: &DocumentAccess,
++        historical: &DocumentRef,
++        operations: &[DocumentOperation],
++        expires_at_ms: u64,
++    ) -> Result<()> {
+         historical_operations(operations)?;
+         let tx = sql(self.database().transaction())?;
+         self.document_access(current, operations)?;
+Diff in /workspace/Muyon-document-candidate/crates/muyon-core/src/documents/storage.rs:138:
+         self.document_history_schema()?;
+         self.historical_metadata(&current.document, historical)?;
+         let now = now_ms()?;
+-        if expires_at_ms <= now || expires_at_ms > now.checked_add(30_000).ok_or(ContractError::InvalidAuthority)? {
++        if expires_at_ms <= now
++            || expires_at_ms
++                > now
++                    .checked_add(30_000)
++                    .ok_or(ContractError::InvalidAuthority)?
++        {
+             return Err(ContractError::InvalidAuthority);
+         }
+         sql(self.database().exec("INSERT INTO document_history_grants_v1 VALUES(?,?,?,?,?,?,?,1) ON CONFLICT(grant_id,generation,historical_document_json) DO UPDATE SET owner_epoch=excluded.owner_epoch,current_document_json=excluded.current_document_json,permissions=excluded.permissions,expires_at_ms=excluded.expires_at_ms,active=1", &[&current.authority.grant_id, current.authority.generation.as_str(), &current.authority.owner_epoch, &encode(&current.document)?, &encode(historical)?, &encode(&operations)?, &expires_at_ms.to_string()]))?;
+Diff in /workspace/Muyon-document-candidate/crates/muyon-core/src/documents/storage.rs:145:
+         self.document_grant(current, operations)?;
+         sql(tx.commit())
+     }
+-    pub fn revoke_document_history_grant_trusted(&self, current: &DocumentAccess, historical: &DocumentRef) -> Result<()> {
++    pub fn revoke_document_history_grant_trusted(
++        &self,
++        current: &DocumentAccess,
++        historical: &DocumentRef,
++    ) -> Result<()> {
+         let tx = sql(self.database().transaction())?;
+         self.document_schema()?;
+         self.document_history_schema()?;
+Diff in /workspace/Muyon-document-candidate/crates/muyon-core/src/documents/storage.rs:152:
+         binding_shape(&current.authority)?;
+-        if current.authority.owner_epoch != self.owner_epoch() { return Err(ContractError::InvalidAuthority); }
++        if current.authority.owner_epoch != self.owner_epoch() {
++            return Err(ContractError::InvalidAuthority);
++        }
+         historical_target(&current.document, historical)?;
+         self.document_project(&current.document)?;
+         let changed = sql(self.database().exec("UPDATE document_history_grants_v1 SET active=0 WHERE grant_id=? AND generation=? AND owner_epoch=? AND current_document_json=? AND historical_document_json=?", &[&current.authority.grant_id, current.authority.generation.as_str(), &current.authority.owner_epoch, &encode(&current.document)?, &encode(historical)?]))?;
+Diff in /workspace/Muyon-document-candidate/crates/muyon-core/src/documents/storage.rs:157:
+-        if changed != 1 { return Err(ContractError::InvalidAuthority); }
++        if changed != 1 {
++            return Err(ContractError::InvalidAuthority);
++        }
+         sql(tx.commit())
+     }
+     /// Exact historical metadata authority, not a reader lease or write permit.
+Diff in /workspace/Muyon-document-candidate/crates/muyon-core/src/documents/storage.rs:161:
+     /// Caller must recheck at byte/result delivery if it does further work.
+-    pub(crate) fn document_history_access_in_transaction(&self, tx: &Transaction<'_>, current: &DocumentAccess, historical: &DocumentRef, required: &[DocumentOperation]) -> Result<DocumentMetadata> {
+-        if !tx.belongs_to(self.database()) { return Err(ContractError::InvalidAuthority); }
++    pub(crate) fn document_history_access_in_transaction(
++        &self,
++        tx: &Transaction<'_>,
++        current: &DocumentAccess,
++        historical: &DocumentRef,
++        required: &[DocumentOperation],
++    ) -> Result<DocumentMetadata> {
++        if !tx.belongs_to(self.database()) {
++            return Err(ContractError::InvalidAuthority);
++        }
+         historical_operations(required)?;
+         let latest = self.document_access(current, required)?;
+         if historical == &current.document {
