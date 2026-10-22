@@ -1,0 +1,38 @@
+    Checking muyon-core-agent-lab v0.1.0 (/workspace/Muyon-artifact-group-combination-20261022/experiments/redesign/core-agent-lab/core)
+    Checking muyon-plugin-contract-lab v0.1.0 (/workspace/Muyon-artifact-group-combination-20261022/experiments/redesign/plugin-contract-lab/core)
+    Checking muyon-rust-agent-host-lab v0.1.0 (/workspace/Muyon-artifact-group-combination-20261022/experiments/redesign/rust-agent-host-lab/core)
+    Checking muyon-web-search-lab v0.1.0 (/workspace/Muyon-artifact-group-combination-20261022/experiments/redesign/web-search-lab/core)
+    Checking muyon-core v0.1.0 (/workspace/Muyon-artifact-group-combination-20261022/crates/muyon-core)
+error: this function has too many arguments (8/7)
+   --> muyon-core/src/group_runtime/store.rs:460:5
+    |
+460 | /     fn group_consume_and_verify_tail(
+461 | |         &self,
+462 | |         tx: &crate::sqlite::Transaction<'_>,
+463 | |         c: &GroupCommand,
+...   |
+468 | |         configured_runs: &Option<Vec<Vec<Option<String>>>>,
+469 | |     ) -> Result<()> {
+    | |___________________^
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.93.0/index.html#too_many_arguments
+    = note: `-D clippy::too-many-arguments` implied by `-D warnings`
+    = help: to override `-D warnings` add `#[allow(clippy::too_many_arguments)]`
+
+error: this function has too many arguments (8/7)
+   --> muyon-core/src/group_runtime/bridge.rs:431:5
+    |
+431 | /     fn group_ui_workflow(
+432 | |         &self,
+433 | |         s: &GroupUiScope,
+434 | |         scope: &GroupScope,
+...   |
+439 | |         owner: Option<&AgentOwner>,
+440 | |     ) -> Result<Value> {
+    | |______________________^
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.93.0/index.html#too_many_arguments
+
+error: could not compile `muyon-core` (lib) due to 2 previous errors
+warning: build failed, waiting for other jobs to finish...
+error: could not compile `muyon-core` (lib test) due to 2 previous errors

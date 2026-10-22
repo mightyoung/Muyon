@@ -1,0 +1,6 @@
+{
+  "artifacts_all_owned_exact": true,
+  "group_production_exact": true,
+  "group_tests_only_actual_documents_import": true,
+  "single_exports": true
+}
