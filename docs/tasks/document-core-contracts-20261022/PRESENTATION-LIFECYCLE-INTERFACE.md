@@ -48,8 +48,16 @@ Status includes valid_for_ms and check_after_ms<=1000, bounded by original idle,
 absolute and persisted grant deadlines. Host checks before rendering and again
 before an async result is shown, schedules the next check/expiry timer, and clears
 old images/PFD/private cache on any denial, terminal event, scope change or close.
+Anchor the returned lifetime to the Host request-start monotonic timestamp, not
+response receipt, so queue/FFI latency cannot extend it. Ignore stale response
+generations; never replace a stale callback's ticket with the current one.
 Core cannot retract bytes/PFDs already handed to Android; this is a cooperative
 trusted-host lease, not an OS revocation sandbox or an instantaneous push service.
+
+Legacy read_chunk, is_current and close reject presentation sessions. Explicit
+ticket methods enforce generation; internal expiry/selection maintenance uses a
+private cleanup method. close_all remains trusted administrative logout/owner
+cleanup, never an arbitrary async page callback endpoint.
 
 FFI must add explicit mode: existing document_bridge.rs EOF mapping deletion and
 session_active=!eof apply only to legacy transport. Display EOF keeps native

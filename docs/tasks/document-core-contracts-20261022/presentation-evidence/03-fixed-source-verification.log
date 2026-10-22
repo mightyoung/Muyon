@@ -1,0 +1,18 @@
+2026-10-22 07:30:41.816924+00:00
+Linux-6.18.55-x86_64-with-glibc2.41
+Source ee184fc1dd90faf2c3cdd48d735f47274de6d418, new presentation lifecycle distinct from old snapshot validated source.
+
+$ cargo test --offline --locked --manifest-path crates/Cargo.toml -p muyon-core --lib documents::presentation_tests
+[Errno 2] No such file or directory: 'cargo'
+exit=127 NOT_RUN (tools absent, not compiler/test failure or pass)
+
+$ cargo test --offline --locked --manifest-path crates/Cargo.toml -p muyon-core
+[Errno 2] No such file or directory: 'cargo'
+exit=127 NOT_RUN (tools absent, not compiler/test failure or pass)
+
+$ rustfmt --check --edition 2021 --config skip_children=true crates/muyon-core/src/documents/reader.rs crates/muyon-core/src/documents/presentation_tests.rs crates/muyon-core/src/documents/storage.rs crates/muyon-core/src/documents/mod.rs crates/muyon-core/src/documents/reader_tests.rs
+[Errno 2] No such file or directory: 'rustfmt'
+exit=127 NOT_RUN (tools absent, not compiler/test failure or pass)
+
+$ git diff --check
+exit=0
