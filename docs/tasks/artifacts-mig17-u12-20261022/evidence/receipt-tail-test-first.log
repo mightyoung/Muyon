@@ -1,0 +1,2 @@
+/bin/bash: line 65: cargo: command not found
+RECEIPT_TAIL_TEST_FIRST_EXIT=127; NOT_RUN if cargo absent, no RED claim

@@ -1,0 +1,24 @@
+    Checking muyon-core v0.1.0 (/workspace/Muyon-combination-20261022/crates/muyon-core)
+error: manual implementation of `.is_multiple_of()`
+  --> muyon-core/src/document_edit/gateway.rs:91:12
+   |
+91 |         || s.len() % 2 != 0
+   |            ^^^^^^^^^^^^^^^^ help: replace with: `!s.len().is_multiple_of(2)`
+   |
+   = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.93.0/index.html#manual_is_multiple_of
+   = note: `-D clippy::manual-is-multiple-of` implied by `-D warnings`
+   = help: to override `-D warnings` add `#[allow(clippy::manual_is_multiple_of)]`
+
+error: useless conversion to the same type: `[u8; 32]`
+   --> muyon-core/src/document_edit/gateway.rs:357:27
+    |
+357 |             patch_digest: digest.into(),
+    |                           ^^^^^^^^^^^^^ help: consider removing `.into()`: `digest`
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.93.0/index.html#useless_conversion
+    = note: `-D clippy::useless-conversion` implied by `-D warnings`
+    = help: to override `-D warnings` add `#[allow(clippy::useless_conversion)]`
+
+error: could not compile `muyon-core` (lib) due to 2 previous errors
+warning: build failed, waiting for other jobs to finish...
+error: could not compile `muyon-core` (lib test) due to 2 previous errors

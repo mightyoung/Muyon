@@ -1,0 +1,16 @@
+{
+  "source_sha": "fbde72aa0420c522a94417f383ec17a8d0718677",
+  "run_id": 39144821029,
+  "terminal": "FAILURE",
+  "successful_jobs": 3,
+  "failed_jobs": 1,
+  "package_build_lint": "PASS",
+  "device_step": "FAIL",
+  "instrumentation_started": "UNKNOWN",
+  "individual_test_outcomes": "UNKNOWN",
+  "ordinary_chat_e2e": "NOT_VERIFIED",
+  "raw_failure_log": "DENIED_HTTP403_ONE_ATTEMPT_NO_RETRY",
+  "real_model_call": "NOT_RUN",
+  "old_I04_path": "NOT_RUN",
+  "HOLD": "UNCHANGED"
+}

@@ -1,0 +1,14 @@
+[package]
+name = "muyon-rust-agent-host-lab"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+[dependencies]
+muyon-core-agent-lab = { path = "../../core-agent-lab/core" }
+muyon-plugin-contract-lab = { path = "../../plugin-contract-lab/core" }
+
+# Android has no public NDK sqlite3 ABI. Compile the pinned SQLite amalgamation
+# into the private native Service; never depend on hidden platform libsqlite.so.
+[target.'cfg(target_os = "android")'.dependencies]
+libsqlite3-sys = { version = "=0.35.0", features = ["bundled"] }

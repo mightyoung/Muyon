@@ -1,0 +1,12 @@
+Command: python3 docs/tasks/muyon-android-refactor/i04/verify_existing_evidence.py
+Working directory: /private/tmp/muyon-android-refactor-20261020
+Exit code: 0
+PASS sealed artifact: HANDOFF.md sha256=774e7a4ba683ded11ff02ac4bb40200fca75acc5043b604e46b2277b85e3b3a7
+PASS sealed artifact: evidence/I04-BLOCKED.json sha256=5c6ee3cd85a0df5fd6f5fcdc0333ff580d7ff2e055133c2f567c776a079a4868
+PASS index seal; I04=DENIED_BEFORE_EXECUTION/BLOCKED
+HISTORICAL DENIAL: Agent errored: This content was flagged for possible cybersecurity risk.
+HISTORICAL TARGET: /workspace/batch4/i04, lab/leaderb-batch4-i04-proof-20261018, product 3f1be180bb009a91e659c113ba5b1916e5360332
+AUDIT BASE: cebc6876c31651d5037dc54a10dfd1c72129dca0
+REFERENCED CANDIDATE OBJECT: commit
+REQUESTED HANDOFF EXISTS: False
+RC01 behavioral execution: NOT_RUN; evidence audit only

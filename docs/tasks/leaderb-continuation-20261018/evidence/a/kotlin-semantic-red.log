@@ -1,0 +1,3 @@
+Exception in thread "main" java.lang.IllegalStateException: PRODUCTION_RECEIPT_RED: explicit reconciliation must apply the original native receipt
+	at com.mightyoung.muyon.agent.ReceiptObserverChecksKt.main(ReceiptObserverChecks.kt:30)
+	at com.mightyoung.muyon.agent.ReceiptObserverChecksKt.main(ReceiptObserverChecks.kt)

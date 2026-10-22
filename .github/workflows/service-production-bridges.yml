@@ -1,0 +1,67 @@
+name: Service production bridges scoped
+on:
+  push:
+    branches: ['task/service-production-bridges-20261018']
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: service-production-bridges-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  scoped:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with: {persist-credentials: false}
+      - name: Exact scoped Rust tests (no HTTP or legacy reopen modules)
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/bridge-evidence"
+          git rev-parse HEAD > "$RUNNER_TEMP/bridge-evidence/source-sha.txt"
+          rustup toolchain install 1.99.0 --profile minimal
+          rustup default 1.99.0
+          export CARGO_TARGET_DIR="$RUNNER_TEMP/bridge-target"
+          result=0
+          for target in supplier_scope_bridge service_provider service_host_controller supplier_store supplier_lab_source supplier_business_controller; do
+            cargo test --locked --manifest-path experiments/redesign/rust-agent-host-lab/core/Cargo.toml --test "$target" -- --nocapture 2>&1 | tee "$RUNNER_TEMP/bridge-evidence/$target.log" || result=1
+          done
+          cargo test --locked --manifest-path experiments/redesign/rust-agent-host-lab/core/Cargo.toml --lib supplier_business::terminal_regressions -- --nocapture 2>&1 | tee "$RUNNER_TEMP/bridge-evidence/terminal-regressions.log" || result=1
+          test "$result" = 0
+          git diff --exit-code
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: service-production-bridges-scoped
+          path: ${{ runner.temp }}/bridge-evidence
+  android-owner-bridge:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with: {persist-credentials: false}
+      - name: Typed Service owner bridge and generated Kotlin
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/android-owner-evidence"
+          git rev-parse HEAD > "$RUNNER_TEMP/android-owner-evidence/source-sha.txt"
+          rustup toolchain install 1.99.0 --profile minimal
+          rustup default 1.99.0
+          export CARGO_TARGET_DIR="$RUNNER_TEMP/android-owner-target"
+          export MUYON_BRIDGE_BUILD_ID="$(git rev-parse HEAD)"
+          cargo test --locked --manifest-path experiments/redesign/android-rust-bridge-lab/core/Cargo.toml --test service_host_bridge -- --nocapture 2>&1 | tee "$RUNNER_TEMP/android-owner-evidence/test.log"
+          cargo build --locked --manifest-path experiments/redesign/android-rust-bridge-lab/core/Cargo.toml --features bindings
+          (
+            cd experiments/redesign/android-rust-bridge-lab/core
+            "$CARGO_TARGET_DIR/debug/uniffi-bindgen" generate --library "$CARGO_TARGET_DIR/debug/libmuyon_android_contract_bridge.so" --language kotlin --config uniffi.android.toml --out-dir "$RUNNER_TEMP/android-owner-evidence/generated" --no-format
+          )
+          cmp "$RUNNER_TEMP/android-owner-evidence/generated/com/mightyoung/muyon/androidbridge/muyon_android_contract_bridge.kt" experiments/redesign/android-compose-lab/app/src/main/kotlin/com/mightyoung/muyon/androidbridge/muyon_android_contract_bridge.kt
+          git diff --exit-code
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: android-service-owner-bridge
+          path: ${{ runner.temp }}/android-owner-evidence

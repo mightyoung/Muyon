@@ -1,0 +1,12 @@
+
+running 7 tests
+test apply_query_recovery_does_not_reauthorize_validate ... ok
+test cancelled_apply_preserves_copy_but_no_work_resumes ... ok
+test commit_query_recovery_does_not_reauthorize_export ... ok
+test candidate_binding_all_dimensions_rejected ... ok
+test recover_phases_cannot_be_swapped ... ok
+test revoked_cancel_and_cross_binding_cancel ... ok
+test validation_report_binding_cannot_be_reused ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

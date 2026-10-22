@@ -1,0 +1,211 @@
+INSTRUMENTATION_STATUS: numtests=13
+INSTRUMENTATION_STATUS: stream=
+com.mightyoung.muyon.product.ContractCodecProductTest:
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=actualKotlinToRustCodecPreservesPairsAndUsesTheSameNfcRule
+INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.product.ContractCodecProductTest
+INSTRUMENTATION_STATUS: current=1
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: numtests=13
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=actualKotlinToRustCodecPreservesPairsAndUsesTheSameNfcRule
+INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.product.ContractCodecProductTest
+INSTRUMENTATION_STATUS: current=1
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: numtests=13
+INSTRUMENTATION_STATUS: stream=
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=malformedUtf16AndRawLimitCannotTurnIntoAValidReviewedPlan
+INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.product.ContractCodecProductTest
+INSTRUMENTATION_STATUS: current=2
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: numtests=13
+INSTRUMENTATION_STATUS: stream=
+Error in malformedUtf16AndRawLimitCannotTurnIntoAValidReviewedPlan(com.mightyoung.muyon.product.ContractCodecProductTest):
+org.junit.ComparisonFailure: {"status":"unknown","error":"InvalidAuthority","recovery_action":"query_original","request_id":"2080d161-4616-4e1d-973e-6b8de3c0ba07"} expected:<[ok]> but was:<[unknown]>
+	at org.junit.Assert.assertEquals(Assert.java:117)
+	at com.mightyoung.muyon.product.ContractCodecProductTest.connect(ContractCodecProductTest.kt:22)
+
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=malformedUtf16AndRawLimitCannotTurnIntoAValidReviewedPlan
+INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.product.ContractCodecProductTest
+INSTRUMENTATION_STATUS: stack=org.junit.ComparisonFailure: {"status":"unknown","error":"InvalidAuthority","recovery_action":"query_original","request_id":"2080d161-4616-4e1d-973e-6b8de3c0ba07"} expected:<[ok]> but was:<[unknown]>
+	at org.junit.Assert.assertEquals(Assert.java:117)
+	at com.mightyoung.muyon.product.ContractCodecProductTest.connect(ContractCodecProductTest.kt:22)
+
+INSTRUMENTATION_STATUS: current=2
+INSTRUMENTATION_STATUS_CODE: -2
+INSTRUMENTATION_STATUS: numtests=13
+INSTRUMENTATION_STATUS: stream=
+com.mightyoung.muyon.product.ProductRecoveryTest:
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=actualServiceDeathChangesEpochAndOnlyOriginalReceiptRecovers
+INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.product.ProductRecoveryTest
+INSTRUMENTATION_STATUS: current=3
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: numtests=13
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=actualServiceDeathChangesEpochAndOnlyOriginalReceiptRecovers
+INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.product.ProductRecoveryTest
+INSTRUMENTATION_STATUS: current=3
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: numtests=13
+INSTRUMENTATION_STATUS: stream=
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=closingWithAllRequestSlotsBusyStillRevokesTheLiveBinderLease
+INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.product.ProductRecoveryTest
+INSTRUMENTATION_STATUS: current=4
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: numtests=13
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=closingWithAllRequestSlotsBusyStillRevokesTheLiveBinderLease
+INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.product.ProductRecoveryTest
+INSTRUMENTATION_STATUS: current=4
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: numtests=13
+INSTRUMENTATION_STATUS: stream=
+com.mightyoung.muyon.product.ProductLifecycleTest:
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=closingLeaseBeforePrepareReplyCannotReportStaleSuccessOrPublishSupplier
+INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.product.ProductLifecycleTest
+INSTRUMENTATION_STATUS: current=5
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: numtests=13
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=closingLeaseBeforePrepareReplyCannotReportStaleSuccessOrPublishSupplier
+INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.product.ProductLifecycleTest
+INSTRUMENTATION_STATUS: current=5
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: numtests=13
+INSTRUMENTATION_STATUS: stream=
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=backFromReviewThenRealRotationDiscardsUnconfirmedDraftWithoutWriting
+INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.product.ProductLifecycleTest
+INSTRUMENTATION_STATUS: current=6
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: numtests=13
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=backFromReviewThenRealRotationDiscardsUnconfirmedDraftWithoutWriting
+INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.product.ProductLifecycleTest
+INSTRUMENTATION_STATUS: current=6
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: numtests=13
+INSTRUMENTATION_STATUS: stream=
+com.mightyoung.muyon.product.ProductChatBoundaryTest:
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=explicitConfigurationCannotTurnMissingPriceProofIntoOutboundAuthority
+INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.product.ProductChatBoundaryTest
+INSTRUMENTATION_STATUS: current=7
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: numtests=13
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=explicitConfigurationCannotTurnMissingPriceProofIntoOutboundAuthority
+INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.product.ProductChatBoundaryTest
+INSTRUMENTATION_STATUS: current=7
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: numtests=13
+INSTRUMENTATION_STATUS: stream=
+com.mightyoung.muyon.product.supplier.SupplierProductTest:
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=dismissingReviewKeepsDraftAndDoesNotWrite
+INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.product.supplier.SupplierProductTest
+INSTRUMENTATION_STATUS: current=8
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: numtests=13
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=dismissingReviewKeepsDraftAndDoesNotWrite
+INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.product.supplier.SupplierProductTest
+INSTRUMENTATION_STATUS: current=8
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: numtests=13
+INSTRUMENTATION_STATUS: stream=
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=visibleReviewCrudUsesActualReceipts
+INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.product.supplier.SupplierProductTest
+INSTRUMENTATION_STATUS: current=9
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: numtests=13
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=visibleReviewCrudUsesActualReceipts
+INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.product.supplier.SupplierProductTest
+INSTRUMENTATION_STATUS: current=9
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: numtests=13
+INSTRUMENTATION_STATUS: stream=
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=elevenRealSuppliersAreReachableThroughNextPage
+INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.product.supplier.SupplierProductTest
+INSTRUMENTATION_STATUS: current=10
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: numtests=13
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=elevenRealSuppliersAreReachableThroughNextPage
+INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.product.supplier.SupplierProductTest
+INSTRUMENTATION_STATUS: current=10
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: numtests=13
+INSTRUMENTATION_STATUS: stream=
+com.mightyoung.muyon.product.research.ResearchProductTest:
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=corruptStoredMemberCannotPublishSnapshotOrPaper
+INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.product.research.ResearchProductTest
+INSTRUMENTATION_STATUS: current=11
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: numtests=13
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=corruptStoredMemberCannotPublishSnapshotOrPaper
+INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.product.research.ResearchProductTest
+INSTRUMENTATION_STATUS: current=11
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: numtests=13
+INSTRUMENTATION_STATUS: stream=
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=projectVisibleReviewThenActualPdfHostAndDetail
+INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.product.research.ResearchProductTest
+INSTRUMENTATION_STATUS: current=12
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: numtests=13
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=projectVisibleReviewThenActualPdfHostAndDetail
+INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.product.research.ResearchProductTest
+INSTRUMENTATION_STATUS: current=12
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: numtests=13
+INSTRUMENTATION_STATUS: stream=
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=deflatedZipUsesFrozenArchiveAndSealsActualImport
+INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.product.research.ResearchProductTest
+INSTRUMENTATION_STATUS: current=13
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: numtests=13
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=deflatedZipUsesFrozenArchiveAndSealsActualImport
+INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.product.research.ResearchProductTest
+INSTRUMENTATION_STATUS: current=13
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_RESULT: stream=
+
+Time: 17.63
+There was 1 failure:
+1) malformedUtf16AndRawLimitCannotTurnIntoAValidReviewedPlan(com.mightyoung.muyon.product.ContractCodecProductTest)
+org.junit.ComparisonFailure: {"status":"unknown","error":"InvalidAuthority","recovery_action":"query_original","request_id":"2080d161-4616-4e1d-973e-6b8de3c0ba07"} expected:<[ok]> but was:<[unknown]>
+	at org.junit.Assert.assertEquals(Assert.java:117)
+	at com.mightyoung.muyon.product.ContractCodecProductTest.connect(ContractCodecProductTest.kt:22)
+
+FAILURES!!!
+Tests run: 13,  Failures: 1
+
+
+INSTRUMENTATION_CODE: -1

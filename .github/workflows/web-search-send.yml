@@ -1,0 +1,88 @@
+name: WebSearch ordinary Send offline
+on:
+  push:
+    branches: ['feat/web-search-send']
+    paths:
+      - 'experiments/redesign/android-compose-lab/**'
+      - 'experiments/redesign/android-rust-bridge-lab/**'
+      - 'experiments/redesign/rust-agent-host-lab/**'
+      - 'experiments/redesign/web-search-lab/**'
+      - '.github/workflows/web-search-send.yml'
+permissions:
+  contents: read
+concurrency:
+  group: web-search-send-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  scoped:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with: {persist-credentials: false}
+      - uses: actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00
+        with: {distribution: temurin, java-version: '17'}
+      - name: Exact search targets and genuine binding reproduction
+        shell: bash
+        run: |
+          set -euo pipefail
+          export CARGO_TARGET_DIR="$RUNNER_TEMP/search-target"
+          export MUYON_BRIDGE_BUILD_ID="$(git rev-parse HEAD)"
+          rustup toolchain install 1.99.0 --profile minimal
+          rustup default 1.99.0
+          mkdir -p "$RUNNER_TEMP/search-scoped"
+          cargo build --locked --manifest-path experiments/redesign/plugin-contract-lab/core/Cargo.toml --bin muyon-plugin-contract-lab
+          export MUYON_PLUGIN_CONTRACT_BIN="$CARGO_TARGET_DIR/debug/muyon-plugin-contract-lab"
+          cargo test --locked --manifest-path experiments/redesign/web-search-lab/core/Cargo.toml --test contract --test agent_search --test service_send -- --test-threads=1
+          cargo build --locked --manifest-path experiments/redesign/android-rust-bridge-lab/core/Cargo.toml --features bindings
+          (cd experiments/redesign/android-rust-bridge-lab/core && "$CARGO_TARGET_DIR/debug/uniffi-bindgen" generate --library "$CARGO_TARGET_DIR/debug/libmuyon_android_contract_bridge.so" --language kotlin --config uniffi.android.toml --out-dir "$RUNNER_TEMP/search-generated" --no-format)
+          generated="$RUNNER_TEMP/search-generated/com/mightyoung/muyon/androidbridge/muyon_android_contract_bridge.kt"
+          cmp "$generated" experiments/redesign/android-compose-lab/app/src/main/kotlin/com/mightyoung/muyon/androidbridge/muyon_android_contract_bridge.kt
+          cp "$generated" "$RUNNER_TEMP/search-scoped/generated-binding.kt"
+          # Only targeted new pure Kotlin checks. No inherited aggregate runner.
+          curl --fail --location https://github.com/JetBrains/kotlin/releases/download/v2.2.20/kotlin-compiler-2.2.20.zip -o "$RUNNER_TEMP/search-kotlin.zip"
+          echo '81f0264c9073b5cbbdb3ff8418cf2c5dac076879fc156fa1a6462f5a5acc4420  '"$RUNNER_TEMP/search-kotlin.zip" | sha256sum --check
+          unzip -q "$RUNNER_TEMP/search-kotlin.zip" -d "$RUNNER_TEMP/search-kotlin"
+          MUYON_UI_KOTLINC="$RUNNER_TEMP/search-kotlin/kotlinc/bin/kotlinc" bash experiments/redesign/android-compose-lab/run-search-checks.sh
+          git diff --exit-code
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with: {name: search-scoped, path: '${{ runner.temp }}/search-scoped'}
+  native:
+    strategy:
+      fail-fast: false
+      matrix: {abi: [arm64-v8a, x86_64]}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with: {persist-credentials: false}
+      - name: Build-only exact-source API26 ABI producer
+        run: |
+          set -euo pipefail
+          rustup toolchain install 1.99.0 --profile minimal --target aarch64-linux-android,x86_64-linux-android
+          rustup default 1.99.0
+          python3 experiments/redesign/android-rust-bridge-lab/checks/android_gate.py --abi '${{ matrix.abi }}' --evidence-dir "$RUNNER_TEMP/search-native" --work-dir "$RUNNER_TEMP/search-native-work"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with: {name: 'search-${{ matrix.abi }}', path: '${{ runner.temp }}/search-native'}
+  package-device:
+    needs: [scoped, native]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with: {persist-credentials: false}
+      - uses: actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00
+        with: {distribution: temurin, java-version: '17'}
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with: {name: search-scoped, path: '${{ runner.temp }}/search-producers/scoped'}
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with: {name: search-arm64-v8a, path: '${{ runner.temp }}/search-producers/arm64-v8a'}
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with: {name: search-x86_64, path: '${{ runner.temp }}/search-producers/x86_64'}
+      - name: Exact-source offline Search settings and Send APK/lint
+        run: python3 experiments/redesign/android-rust-bridge-lab/checks/lifecycle_package.py --search-fixture --artifacts "$RUNNER_TEMP/search-producers" --evidence "$RUNNER_TEMP/search-package" --work "$RUNNER_TEMP/search-package-work"
+      - name: API26 real Settings to ordinary Send to Service registered Agent
+        run: bash experiments/redesign/android-rust-bridge-lab/checks/search_send_device.sh
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with: {name: search-package-device, path: '${{ runner.temp }}/search-package', retention-days: 7}

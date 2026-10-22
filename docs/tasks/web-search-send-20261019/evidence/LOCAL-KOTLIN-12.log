@@ -1,0 +1,13 @@
+PASS default disabled and no installed connection
+PASS enabled unconfigured remains unready
+PASS configured without host remains unready
+PASS synthetic configuration does not claim remote availability
+PASS corruption never becomes disabled
+PASS loss clears every derived disclosure but preserves original identities
+PASS saving settings cannot submit a chat or search
+PASS existing ordinary Send remains the only frontend dispatch
+PASS unknown cannot auto resend
+PASS tainted result cannot promote instruction authority
+PASS credential-bearing source URL rejected
+PASS empty success matches actual empty sources
+SEARCH_CHECKS_PASS 12

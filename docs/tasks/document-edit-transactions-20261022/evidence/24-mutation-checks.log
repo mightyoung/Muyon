@@ -1,0 +1,290 @@
+
+MUTATION: candidate binding removed compile exit: 0
+
+running 27 tests
+test apply_requires_an_immutable_copy_with_a_distinct_identity ... ok
+test candidate_mismatch_and_missing_validation_do_not_advance ... ok
+test cancel_before_late_commit_receipt_or_unknown_keeps_recovery_open ... ok
+test commit_needs_durable_matching_receipt_and_cannot_repeat ... ok
+test cancellation_preserves_unknown_and_committed_outcomes ... ok
+test cross_scope_is_rejected_even_for_read ... ok
+test double_click_does_not_reapply ... ok
+test every_boundary_requires_facts_and_live_authority ... ok
+test export_requires_committed_revision_and_matching_copy ... ok
+test each_validation_dimension_and_formula_unknown_fails_closed ... ok
+test identity_requires_all_binding_fields ... ok
+test host_observations_reject_paths_in_opaque_candidate_and_authority_ids ... ok
+test original_intent_query_with_new_read_authority_does_not_replay_old_confirmation ... ok
+test preview_never_confirms_or_supplies_missing_authority ... ok
+test readonly_capability_is_never_edit_permission ... ok
+test reissued_authority_does_not_reuse_confirmation ... ok
+test prior_candidate_cannot_be_attached_to_a_different_patch_or_intent ... FAILED
+test rollback_is_a_new_bound_transaction_not_a_cancel_side_effect ... ok
+test revocation_cannot_hide_an_uncertain_original_outcome ... ok
+test revocation_does_not_prevent_local_cancel_request ... ok
+test stale_confirmation_is_rejected ... ok
+test stale_source_and_failed_cas_preserve_candidate_as_conflict ... ok
+test unknown_apply_recovers_original_candidate_without_replay ... ok
+test unknown_capability_or_missing_operation_permission_never_advances ... ok
+test unknown_queries_original_intent_and_never_replays ... ok
+test unvalidated_commit_is_refused ... ok
+test validation_failure_is_terminal_and_cannot_commit ... ok
+
+failures:
+
+---- prior_candidate_cannot_be_attached_to_a_different_patch_or_intent stdout ----
+
+thread 'prior_candidate_cannot_be_attached_to_a_different_patch_or_intent' panicked at /tmp/muyon-doc-edit-mutations-p211jtlq/tests/document_edit_transactions.rs:448:9:
+assertion `left == right` failed
+  left: Ok(())
+ right: Err(Binding)
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    prior_candidate_cannot_be_attached_to_a_different_patch_or_intent
+
+test result: FAILED. 26 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+MUTATION: confirmation binding removed compile exit: 0
+
+running 27 tests
+test apply_requires_an_immutable_copy_with_a_distinct_identity ... ok
+test cancel_before_late_commit_receipt_or_unknown_keeps_recovery_open ... ok
+test cancellation_preserves_unknown_and_committed_outcomes ... ok
+test candidate_mismatch_and_missing_validation_do_not_advance ... ok
+test double_click_does_not_reapply ... ok
+test commit_needs_durable_matching_receipt_and_cannot_repeat ... ok
+test cross_scope_is_rejected_even_for_read ... ok
+test each_validation_dimension_and_formula_unknown_fails_closed ... ok
+test every_boundary_requires_facts_and_live_authority ... ok
+test host_observations_reject_paths_in_opaque_candidate_and_authority_ids ... ok
+test export_requires_committed_revision_and_matching_copy ... ok
+test identity_requires_all_binding_fields ... ok
+test preview_never_confirms_or_supplies_missing_authority ... ok
+test prior_candidate_cannot_be_attached_to_a_different_patch_or_intent ... ok
+test readonly_capability_is_never_edit_permission ... ok
+test original_intent_query_with_new_read_authority_does_not_replay_old_confirmation ... ok
+test reissued_authority_does_not_reuse_confirmation ... ok
+test revocation_cannot_hide_an_uncertain_original_outcome ... ok
+test revocation_does_not_prevent_local_cancel_request ... ok
+test rollback_is_a_new_bound_transaction_not_a_cancel_side_effect ... ok
+test unknown_capability_or_missing_operation_permission_never_advances ... ok
+test stale_source_and_failed_cas_preserve_candidate_as_conflict ... ok
+test stale_confirmation_is_rejected ... FAILED
+test unknown_apply_recovers_original_candidate_without_replay ... ok
+test unknown_queries_original_intent_and_never_replays ... ok
+test unvalidated_commit_is_refused ... ok
+test validation_failure_is_terminal_and_cannot_commit ... ok
+
+failures:
+
+---- stale_confirmation_is_rejected stdout ----
+
+thread 'stale_confirmation_is_rejected' panicked at /tmp/muyon-doc-edit-mutations-p211jtlq/tests/document_edit_transactions.rs:160:5:
+assertion `left == right` failed
+  left: Ok(())
+ right: Err(Binding)
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    stale_confirmation_is_rejected
+
+test result: FAILED. 26 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+MUTATION: revocation removed compile exit: 0
+
+running 27 tests
+test apply_requires_an_immutable_copy_with_a_distinct_identity ... ok
+test candidate_mismatch_and_missing_validation_do_not_advance ... ok
+test commit_needs_durable_matching_receipt_and_cannot_repeat ... ok
+test cancellation_preserves_unknown_and_committed_outcomes ... ok
+test cancel_before_late_commit_receipt_or_unknown_keeps_recovery_open ... ok
+test cross_scope_is_rejected_even_for_read ... ok
+test double_click_does_not_reapply ... ok
+test every_boundary_requires_facts_and_live_authority ... FAILED
+test each_validation_dimension_and_formula_unknown_fails_closed ... ok
+test export_requires_committed_revision_and_matching_copy ... ok
+test host_observations_reject_paths_in_opaque_candidate_and_authority_ids ... ok
+test identity_requires_all_binding_fields ... ok
+test preview_never_confirms_or_supplies_missing_authority ... ok
+test original_intent_query_with_new_read_authority_does_not_replay_old_confirmation ... ok
+test prior_candidate_cannot_be_attached_to_a_different_patch_or_intent ... ok
+test reissued_authority_does_not_reuse_confirmation ... ok
+test revocation_cannot_hide_an_uncertain_original_outcome ... ok
+test readonly_capability_is_never_edit_permission ... ok
+test revocation_does_not_prevent_local_cancel_request ... ok
+test stale_confirmation_is_rejected ... ok
+test rollback_is_a_new_bound_transaction_not_a_cancel_side_effect ... ok
+test stale_source_and_failed_cas_preserve_candidate_as_conflict ... ok
+test unknown_apply_recovers_original_candidate_without_replay ... ok
+test unknown_capability_or_missing_operation_permission_never_advances ... ok
+test unknown_queries_original_intent_and_never_replays ... ok
+test unvalidated_commit_is_refused ... ok
+test validation_failure_is_terminal_and_cannot_commit ... ok
+
+failures:
+
+---- every_boundary_requires_facts_and_live_authority stdout ----
+
+thread 'every_boundary_requires_facts_and_live_authority' panicked at /tmp/muyon-doc-edit-mutations-p211jtlq/tests/document_edit_transactions.rs:189:5:
+assertion `left == right` failed
+  left: Ok(())
+ right: Err(Authority)
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    every_boundary_requires_facts_and_live_authority
+
+test result: FAILED. 26 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+MUTATION: reopen validation removed compile exit: 0
+
+running 27 tests
+test apply_requires_an_immutable_copy_with_a_distinct_identity ... ok
+test cancel_before_late_commit_receipt_or_unknown_keeps_recovery_open ... ok
+test candidate_mismatch_and_missing_validation_do_not_advance ... ok
+test commit_needs_durable_matching_receipt_and_cannot_repeat ... ok
+test cross_scope_is_rejected_even_for_read ... ok
+test double_click_does_not_reapply ... ok
+test cancellation_preserves_unknown_and_committed_outcomes ... ok
+test each_validation_dimension_and_formula_unknown_fails_closed ... FAILED
+test every_boundary_requires_facts_and_live_authority ... ok
+test host_observations_reject_paths_in_opaque_candidate_and_authority_ids ... ok
+test identity_requires_all_binding_fields ... ok
+test original_intent_query_with_new_read_authority_does_not_replay_old_confirmation ... ok
+test preview_never_confirms_or_supplies_missing_authority ... ok
+test export_requires_committed_revision_and_matching_copy ... ok
+test prior_candidate_cannot_be_attached_to_a_different_patch_or_intent ... ok
+test readonly_capability_is_never_edit_permission ... ok
+test reissued_authority_does_not_reuse_confirmation ... ok
+test revocation_cannot_hide_an_uncertain_original_outcome ... ok
+test revocation_does_not_prevent_local_cancel_request ... ok
+test stale_confirmation_is_rejected ... ok
+test rollback_is_a_new_bound_transaction_not_a_cancel_side_effect ... ok
+test unknown_capability_or_missing_operation_permission_never_advances ... ok
+test unknown_apply_recovers_original_candidate_without_replay ... ok
+test stale_source_and_failed_cas_preserve_candidate_as_conflict ... ok
+test unknown_queries_original_intent_and_never_replays ... ok
+test unvalidated_commit_is_refused ... ok
+test validation_failure_is_terminal_and_cannot_commit ... ok
+
+failures:
+
+---- each_validation_dimension_and_formula_unknown_fails_closed stdout ----
+
+thread 'each_validation_dimension_and_formula_unknown_fails_closed' panicked at /tmp/muyon-doc-edit-mutations-p211jtlq/tests/document_edit_transactions.rs:527:9:
+assertion `left == right` failed
+  left: Ok(())
+ right: Err(Validation)
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    each_validation_dimension_and_formula_unknown_fails_closed
+
+test result: FAILED. 26 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+MUTATION: operation permission removed compile exit: 0
+
+running 27 tests
+test apply_requires_an_immutable_copy_with_a_distinct_identity ... ok
+test candidate_mismatch_and_missing_validation_do_not_advance ... ok
+test cancellation_preserves_unknown_and_committed_outcomes ... ok
+test cancel_before_late_commit_receipt_or_unknown_keeps_recovery_open ... ok
+test cross_scope_is_rejected_even_for_read ... ok
+test commit_needs_durable_matching_receipt_and_cannot_repeat ... ok
+test double_click_does_not_reapply ... ok
+test every_boundary_requires_facts_and_live_authority ... ok
+test each_validation_dimension_and_formula_unknown_fails_closed ... ok
+test original_intent_query_with_new_read_authority_does_not_replay_old_confirmation ... ok
+test export_requires_committed_revision_and_matching_copy ... ok
+test host_observations_reject_paths_in_opaque_candidate_and_authority_ids ... ok
+test identity_requires_all_binding_fields ... ok
+test preview_never_confirms_or_supplies_missing_authority ... ok
+test readonly_capability_is_never_edit_permission ... ok
+test revocation_cannot_hide_an_uncertain_original_outcome ... ok
+test reissued_authority_does_not_reuse_confirmation ... ok
+test prior_candidate_cannot_be_attached_to_a_different_patch_or_intent ... ok
+test revocation_does_not_prevent_local_cancel_request ... ok
+test stale_confirmation_is_rejected ... ok
+test unknown_apply_recovers_original_candidate_without_replay ... ok
+test rollback_is_a_new_bound_transaction_not_a_cancel_side_effect ... ok
+test stale_source_and_failed_cas_preserve_candidate_as_conflict ... ok
+test unknown_capability_or_missing_operation_permission_never_advances ... FAILED
+test unvalidated_commit_is_refused ... ok
+test unknown_queries_original_intent_and_never_replays ... ok
+test validation_failure_is_terminal_and_cannot_commit ... ok
+
+failures:
+
+---- unknown_capability_or_missing_operation_permission_never_advances stdout ----
+
+thread 'unknown_capability_or_missing_operation_permission_never_advances' panicked at /tmp/muyon-doc-edit-mutations-p211jtlq/tests/document_edit_transactions.rs:626:5:
+assertion `left == right` failed
+  left: Ok(())
+ right: Err(Permission)
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    unknown_capability_or_missing_operation_permission_never_advances
+
+test result: FAILED. 26 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+MUTATION: CAS failure ignored compile exit: 0
+
+running 27 tests
+test apply_requires_an_immutable_copy_with_a_distinct_identity ... ok
+test cancellation_preserves_unknown_and_committed_outcomes ... ok
+test candidate_mismatch_and_missing_validation_do_not_advance ... ok
+test cancel_before_late_commit_receipt_or_unknown_keeps_recovery_open ... ok
+test commit_needs_durable_matching_receipt_and_cannot_repeat ... ok
+test cross_scope_is_rejected_even_for_read ... ok
+test double_click_does_not_reapply ... ok
+test every_boundary_requires_facts_and_live_authority ... ok
+test export_requires_committed_revision_and_matching_copy ... ok
+test host_observations_reject_paths_in_opaque_candidate_and_authority_ids ... ok
+test identity_requires_all_binding_fields ... ok
+test original_intent_query_with_new_read_authority_does_not_replay_old_confirmation ... ok
+test prior_candidate_cannot_be_attached_to_a_different_patch_or_intent ... ok
+test readonly_capability_is_never_edit_permission ... ok
+test reissued_authority_does_not_reuse_confirmation ... ok
+test revocation_cannot_hide_an_uncertain_original_outcome ... ok
+test revocation_does_not_prevent_local_cancel_request ... ok
+test rollback_is_a_new_bound_transaction_not_a_cancel_side_effect ... ok
+test stale_confirmation_is_rejected ... ok
+test stale_source_and_failed_cas_preserve_candidate_as_conflict ... FAILED
+test unknown_apply_recovers_original_candidate_without_replay ... ok
+test preview_never_confirms_or_supplies_missing_authority ... ok
+test unknown_capability_or_missing_operation_permission_never_advances ... ok
+test each_validation_dimension_and_formula_unknown_fails_closed ... ok
+test unknown_queries_original_intent_and_never_replays ... ok
+test unvalidated_commit_is_refused ... ok
+test validation_failure_is_terminal_and_cannot_commit ... ok
+
+failures:
+
+---- stale_source_and_failed_cas_preserve_candidate_as_conflict stdout ----
+
+thread 'stale_source_and_failed_cas_preserve_candidate_as_conflict' panicked at /tmp/muyon-doc-edit-mutations-p211jtlq/tests/document_edit_transactions.rs:309:5:
+assertion `left == right` failed
+  left: Ok(())
+ right: Err(Conflict)
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    stale_source_and_failed_cas_preserve_candidate_as_conflict
+
+test result: FAILED. 26 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+6/6 behavior mutations caught; no production files edited.

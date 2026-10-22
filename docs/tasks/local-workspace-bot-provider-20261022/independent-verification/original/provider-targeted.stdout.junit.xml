@@ -1,0 +1,65 @@
+<?xml version='1.0' encoding='utf-8'?>
+<testsuite name="provider-targeted" tests="15" failures="14" errors="0" skipped="0">
+  <properties>
+    <property name="origin" value="derived from raw libtest stdout; failures retained; invocations overlap" />
+    <property name="raw_sha256" value="4f2287cabe07afadd1e3b057f10ed6921a037b19f7a87c78fafec820cdb437e5" />
+  </properties>
+  <testcase classname="provider-targeted" name="draft_capacity_preserves_existing_records_and_receipts">
+    <failure message="actual Rust test failure">thread 'draft_capacity_preserves_existing_records_and_receipts' (13063) panicked at muyon-core/tests/bot_drafts.rs:137:72:
+called `Result::unwrap()` on an `Err` value: "local_draft_corrupt"
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace</failure>
+  </testcase>
+  <testcase classname="provider-targeted" name="exclusive_owner_and_competing_editors_do_not_lose_updates">
+    <failure message="actual Rust test failure">thread 'exclusive_owner_and_competing_editors_do_not_lose_updates' (13064) panicked at muyon-core/tests/bot_drafts.rs:126:39:
+called `Result::unwrap()` on an `Err` value: "local_draft_corrupt"</failure>
+  </testcase>
+  <testcase classname="provider-targeted" name="canonical_envelope_tamper_limit_revision_and_trailing_data_refuse">
+    <failure message="actual Rust test failure">thread 'canonical_envelope_tamper_limit_revision_and_trailing_data_refuse' (13062) panicked at muyon-core/tests/bot_drafts.rs:66:77:
+called `Result::unwrap()` on an `Err` value: "local_draft_corrupt"</failure>
+  </testcase>
+  <testcase classname="provider-targeted" name="altered_schema_workspace_and_signed_long_overflow_refuse">
+    <failure message="actual Rust test failure">thread 'altered_schema_workspace_and_signed_long_overflow_refuse' (13061) panicked at muyon-core/tests/bot_drafts.rs:154:77:
+called `Result::unwrap()` on an `Err` value: "local_draft_corrupt"</failure>
+  </testcase>
+  <testcase classname="provider-targeted" name="failed_receipt_insert_rolls_back_archive_revision_and_attempt">
+    <failure message="actual Rust test failure">thread 'failed_receipt_insert_rolls_back_archive_revision_and_attempt' (13065) panicked at muyon-core/tests/bot_drafts.rs:76:77:
+called `Result::unwrap()` on an `Err` value: "local_draft_corrupt"</failure>
+  </testcase>
+  <testcase classname="provider-targeted" name="live_project_revocation_is_checked_even_for_original_receipts">
+    <failure message="actual Rust test failure">thread 'live_project_revocation_is_checked_even_for_original_receipts' (13066) panicked at muyon-core/tests/bot_drafts.rs:105:35:
+called `Result::unwrap()` on an `Err` value: "local_draft_corrupt"</failure>
+  </testcase>
+  <testcase classname="provider-targeted" name="original_receipt_is_atomic_idempotent_and_survives_callback_loss">
+    <failure message="actual Rust test failure">thread 'original_receipt_is_atomic_idempotent_and_survives_callback_loss' (13067) panicked at muyon-core/tests/bot_drafts.rs:41:68:
+called `Result::unwrap()` on an `Err` value: "local_draft_corrupt"</failure>
+  </testcase>
+  <testcase classname="provider-targeted" name="original_unknown_and_reserved_ledgers_are_untouched">
+    <failure message="actual Rust test failure">thread 'original_unknown_and_reserved_ledgers_are_untouched' (13068) panicked at muyon-core/tests/bot_drafts.rs:119:39:
+called `Result::unwrap()` on an `Err` value: "local_draft_corrupt"</failure>
+  </testcase>
+  <testcase classname="provider-targeted" name="restart_and_null_project_are_real_registry_facts">
+    <failure message="actual Rust test failure">thread 'restart_and_null_project_are_real_registry_facts' (13072) panicked at muyon-core/tests/bot_drafts.rs:33:68:
+called `Result::unwrap()` on an `Err` value: "local_draft_corrupt"</failure>
+  </testcase>
+  <testcase classname="provider-targeted" name="receipt_capacity_does_not_evict_originals">
+    <failure message="actual Rust test failure">thread 'receipt_capacity_does_not_evict_originals' (13071) panicked at muyon-core/tests/bot_drafts.rs:145:77:
+called `Result::unwrap()` on an `Err` value: "local_draft_corrupt"</failure>
+  </testcase>
+  <testcase classname="provider-targeted" name="partial_schema_never_resets_or_imports" />
+  <testcase classname="provider-targeted" name="project_query_storage_fault_is_unknown_not_scope_denial">
+    <failure message="actual Rust test failure">thread 'project_query_storage_fault_is_unknown_not_scope_denial' (13070) panicked at muyon-core/tests/bot_drafts.rs:169:62:
+called `Result::unwrap()` on an `Err` value: "local_draft_corrupt"</failure>
+  </testcase>
+  <testcase classname="provider-targeted" name="stored_archive_and_receipt_tamper_refuse">
+    <failure message="actual Rust test failure">thread 'stored_archive_and_receipt_tamper_refuse' (13073) panicked at muyon-core/tests/bot_drafts.rs:91:77:
+called `Result::unwrap()` on an `Err` value: "local_draft_corrupt"</failure>
+  </testcase>
+  <testcase classname="provider-targeted" name="structurally_invalid_rehashed_archive_cannot_add_fields">
+    <failure message="actual Rust test failure">thread 'structurally_invalid_rehashed_archive_cannot_add_fields' (13074) panicked at muyon-core/tests/bot_drafts.rs:163:77:
+called `Result::unwrap()` on an `Err` value: "local_draft_corrupt"</failure>
+  </testcase>
+  <testcase classname="provider-targeted" name="wrong_scope_binding_generation_lifecycle_and_missing_attempt_refuse">
+    <failure message="actual Rust test failure">thread 'wrong_scope_binding_generation_lifecycle_and_missing_attempt_refuse' (13075) panicked at muyon-core/tests/bot_drafts.rs:56:68:
+called `Result::unwrap()` on an `Err` value: "local_draft_corrupt"</failure>
+  </testcase>
+</testsuite>

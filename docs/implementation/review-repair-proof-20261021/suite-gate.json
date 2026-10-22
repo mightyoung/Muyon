@@ -1,0 +1,38 @@
+{
+  "gate": "PASS",
+  "build_id": "9c1fb4a9e8aa0b85f1c896938278085ee8cdc0ad:707dff5340d754c9f5e4d0c71f856a16957eb4d08d1ae63da4accbe4bdff6079",
+  "required_methods": 63,
+  "runs": [
+    {
+      "log": "/private/tmp/muyon-android-refactor-20261020/docs/implementation/review-repair-proof-20261021/nonpicker.log",
+      "passed": 58,
+      "gate": "PASS"
+    },
+    {
+      "log": "/private/tmp/muyon-android-refactor-20261020/docs/implementation/review-repair-proof-20261021/GENERATE.log",
+      "passed": 1,
+      "gate": "PASS"
+    },
+    {
+      "log": "/private/tmp/muyon-android-refactor-20261020/docs/implementation/review-repair-proof-20261021/PDF.log",
+      "passed": 1,
+      "gate": "PASS"
+    },
+    {
+      "log": "/private/tmp/muyon-android-refactor-20261020/docs/implementation/review-repair-proof-20261021/ZIP.log",
+      "passed": 1,
+      "gate": "PASS"
+    },
+    {
+      "log": "/private/tmp/muyon-android-refactor-20261020/docs/implementation/review-repair-proof-20261021/DIRECTORY.log",
+      "passed": 1,
+      "gate": "PASS"
+    },
+    {
+      "log": "/private/tmp/muyon-android-refactor-20261020/docs/implementation/review-repair-proof-20261021/PRIVATE.log",
+      "passed": 1,
+      "gate": "PASS"
+    }
+  ],
+  "boundary": "product instrumentation only; I04, production pricing proof and real provider/tool-loop remain separate gates"
+}

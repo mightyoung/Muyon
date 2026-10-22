@@ -1,0 +1,31 @@
+warning: unused import: `contract::Revision`
+ --> muyon-core/src/document_edit/engine_protocol.rs:5:5
+  |
+5 |     contract::Revision,
+  |     ^^^^^^^^^^^^^^^^^^
+  |
+  = note: `#[warn(unused_imports)]` on by default
+
+warning: `muyon-core` (lib) generated 1 warning (run `cargo fix --lib -p muyon-core` to apply 1 suggestion)
+   Compiling muyon-core v0.1.0 (/workspace/document-edit-durable-combination/crates/muyon-core)
+    Finished `test` profile [unoptimized] target(s) in 0.26s
+     Running tests/document_edit_gateway.rs (/workspace/document-edit-combination/crates/target/debug/deps/document_edit_gateway-9524898dbf45656f)
+
+running 1 test
+test corrupt_oversize_persisted_metadata_is_rejected_before_payload_decode ... FAILED
+
+failures:
+
+---- corrupt_oversize_persisted_metadata_is_rejected_before_payload_decode stdout ----
+
+thread 'corrupt_oversize_persisted_metadata_is_rejected_before_payload_decode' panicked at muyon-core/tests/document_edit_gateway.rs:536:35:
+called `Result::unwrap_err()` on an `Ok` value: DurableIntent { binding: Binding { document: DocumentRef { scope: Scope { workspace_id: "workspace", project_id: Some("project") }, document_id: "document", revision: Revision("1"), format: Unknown }, patch_digest: [242, 158, 135, 196, 15, 2, 242, 42, 246, 27, 201, 236, 182, 71, 54, 163, 211, 94, 145, 151, 186, 18, 160, 6, 20, 246, 25, 182, 101, 178, 94, 88], intent_id: "oversize", rollback_target: None }, state: Prepared, cancel_requested: false, candidate: None, receipt: None, upload: None }
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    corrupt_oversize_persisted_metadata_is_rejected_before_payload_decode
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 12 filtered out; finished in 0.01s
+
+error: test failed, to rerun pass `-p muyon-core --test document_edit_gateway`

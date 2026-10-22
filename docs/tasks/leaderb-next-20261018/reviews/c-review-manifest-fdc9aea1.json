@@ -1,0 +1,38 @@
+{
+  "source_sha": "fdc9aea120925229aa592c3551efab9b3f67a825",
+  "worktree_status": "",
+  "target_dir": "/workspace/toolchains/review-store-target",
+  "checks": {
+    "supplier_store": {
+      "exit": 0,
+      "passed": 12
+    },
+    "service_runtime": {
+      "exit": 0,
+      "passed": 2
+    },
+    "android_cargo_check": {
+      "exit": 0,
+      "target": "aarch64-linux-android",
+      "scope": "--lib"
+    },
+    "diff_check": {
+      "exit": 0
+    }
+  },
+  "source_files": {
+    "docs/tasks/leaderb-store-readonly-20261018/CONTRACT.md": "f84ee42c540ce9a6b11347caa7def97d61f0b796992d708a9ac71d5b64768c4d",
+    "docs/tasks/leaderb-store-readonly-20261018/README.md": "cd41f982542002f0474e54fc7ab0bc39236df06b641fc50dac2e8655b03b0fdd",
+    "experiments/redesign/rust-agent-host-lab/core/src/lib.rs": "0ca5ac315bc2e40758088ecd7370160bea3ee49fbdaf3fd014c357832e77a10a",
+    "experiments/redesign/rust-agent-host-lab/core/src/supplier_name_contract.json": "22d6fff9610c4a613f9c9099c487af37d9d35d977030948bfa78d652c1510d59",
+    "experiments/redesign/rust-agent-host-lab/core/src/supplier_sqlite.rs": "3e748e36905aef34d9622c6e523d69da4bd80d10b2c866081207f80e6e9a9473",
+    "experiments/redesign/rust-agent-host-lab/core/src/supplier_store.rs": "cd4e503a43405e260a3ae9d346848f3bcba915b43d607bdcda40aa88148168fd",
+    "experiments/redesign/rust-agent-host-lab/core/tests/supplier_store.rs": "a88f7dc65d2677eaf47dbda38e767e6ef15da3ddd8e80e4b6fdd9342da67bfd5",
+    ".github/workflows/leaderb-store-readonly.yml": "c7207edcc18cbdfa9431a12fcbc733597816bdc62bd117b701a94acbb291b419"
+  },
+  "logs": {
+    "c-tests-fdc9aea1.log": "7dde3cd9f41a609c8aa2668641d5114db0493a373e41d2eb0bac34e795d379e7",
+    "c-android-check-fdc9aea1.log": "9675226676ac20f60bd0df5716fae63913f6a187c60a9d2a68ff0fee87d3b7de"
+  },
+  "rust_toolchain": "1.99.0"
+}

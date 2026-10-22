@@ -1,0 +1,33 @@
+package com.mightyoung.muyon.androidlab
+
+fun runAgentServiceWireChecks() {
+    val build="a".repeat(40);val epoch="b".repeat(32);val meta=UiAgentMeta(1u,build,epoch,4)
+    val intent=UiAgentIntent("original_1",UiAgentVariant.EQUIPMENT,build)
+    val identity=UiAgentRunIdentity("c".repeat(32),epoch,UiAgentTask("t-4231-1792012800000000000","a-4231-1792012800000000000"))
+    val receipt=UiAgentReceipt("receipt-1",UiAgentReceiptOutcome.RECORDED_SUCCESS)
+    val terminal=UiAgentRun.Terminal(UiAgentSummary(intent,identity,UiAgentTerminal.CANCELLED,UiAgentReason.CANCELLED,receipt))
+    fun roundtrip(reply:UiAgentWireReply) {val bytes=AgentServiceWire.encode(reply,build) ?: error("closed reply encode refused");check(bytes.size<=AgentServiceWire.MAX_PAYLOAD_BYTES);check(AgentServiceWire.decode(bytes,build)==reply)}
+    val cases=linkedMapOf<String,()->Unit>()
+    cases["local initialization remains distinct from native metadata"]={UiAgentLocalStatus.entries.forEach{roundtrip(UiAgentWireReply.Local(it))}}
+    cases["connected lease and actual native phase survive codec"]={roundtrip(UiAgentWireReply.Connected(meta,UiAgentClientRef(epoch,"d".repeat(32)),UiAgentServicePhase.RECOVERY_REQUIRED))}
+    cases["all six snapshot shapes retain original identity and receipt"]={for(run in listOf(UiAgentRun.Queued(intent),UiAgentRun.Admitted(intent,identity),UiAgentRun.Running(intent,identity),terminal,UiAgentRun.SettledNoAdmission(intent,UiAgentNoAdmissionReason.QUOTA_EXCEEDED),UiAgentRun.Unresolved(intent,null,UiAgentReceipt(null,UiAgentReceiptOutcome.UNKNOWN)),null))roundtrip(UiAgentWireReply.Snapshot(UiAgentSnapshot(meta,UiAgentServicePhase.READY,run)))}
+    cases["queued admission differs from original existing result"]={roundtrip(UiAgentWireReply.Started(meta,UiAgentRun.Queued(intent),false));roundtrip(UiAgentWireReply.Started(meta,terminal,true))}
+    cases["control rejection busy and unknown use closed units"]={UiAgentAck.entries.forEach{roundtrip(UiAgentWireReply.Ack(meta,it))};UiAgentError.entries.forEach{roundtrip(UiAgentWireReply.Rejected(meta,it))};roundtrip(UiAgentWireReply.Unresolved(meta));roundtrip(UiAgentWireReply.Busy(meta))}
+    cases["truncated trailing and wrong version bytes cannot become a result"]={val bytes=AgentServiceWire.encode(UiAgentWireReply.Snapshot(UiAgentSnapshot(meta,UiAgentServicePhase.CLOSING,terminal)),build)!!;check(AgentServiceWire.decode(bytes.copyOf(bytes.size-1),build)==null);check(AgentServiceWire.decode(bytes+byteArrayOf(0),build)==null);check(AgentServiceWire.decode(bytes,build)==UiAgentWireReply.Snapshot(UiAgentSnapshot(meta,UiAgentServicePhase.CLOSING,terminal)));val badMagic=bytes.clone();badMagic[0]=0;check(AgentServiceWire.decode(badMagic,build)==null);val badVersion=bytes.clone();badVersion[4]=2;check(AgentServiceWire.decode(badVersion,build)==null);val badTag=bytes.clone();badTag[5]=127;check(AgentServiceWire.decode(badTag,build)==null);val queued=UiAgentWireReply.Started(meta,UiAgentRun.Queued(intent),false);val flagBytes=AgentServiceWire.encode(queued,build)!!;check(AgentServiceWire.decode(flagBytes,build)==queued);val flagOffset=6+4+2+build.length+2+epoch.length+8;flagBytes[flagOffset]=2;check(AgentServiceWire.decode(flagBytes,build)==null)}
+    cases["oversize bytes and unstructured input are rejected"]={check(AgentServiceWire.decode(ByteArray(AgentServiceWire.MAX_PAYLOAD_BYTES+1),build)==null);check(AgentServiceWire.decode("not a native result".toByteArray(),build)==null)}
+    cases["invalid native identity protocol and build cannot be encoded"]={for(m in listOf(meta.copy(protocol=2u),meta.copy(revision=-1),meta.copy(serviceEpoch="bad"),meta.copy(buildIdentity="f".repeat(40))))check(AgentServiceWire.encode(UiAgentWireReply.Busy(m),build)==null);check(AgentServiceWire.encode(UiAgentWireReply.Connected(meta,UiAgentClientRef(epoch,"invalid"),UiAgentServicePhase.READY),build)==null)}
+    cases["invalid completed result is not repaired into success"]={val invalid=terminal.copy(summary=terminal.summary.copy(terminal=UiAgentTerminal.COMPLETED,reason=UiAgentReason.NONE,identity=identity.copy(actualTask=null)));check(AgentServiceWire.encode(UiAgentWireReply.Snapshot(UiAgentSnapshot(meta,UiAgentServicePhase.READY,invalid)),build)==null);check(AgentServiceWire.encode(UiAgentWireReply.Started(meta,terminal,false),build)==null)}
+    fun pending():Pair<AgentServiceClientState,UiAgentObservationTicket> {
+        val c=AgentServiceClientState(build);check(c.connected(c.beginBinding(),meta.copy(revision=1),"d".repeat(32),UiAgentServicePhase.READY)==UiAgentApply.APPLIED)
+        val v=c.activityVisibility("activity",true)!!;c.visibilityAcknowledged(v.client,v.generation,true)
+        check(c.apply(c.capture()!!,UiAgentSnapshot(meta.copy(revision=2),UiAgentServicePhase.READY,terminal))==UiAgentApply.APPLIED)
+        check(c.userStart("new_request",UiAgentVariant.EQUIPMENT) is UiAgentStartDecision.Submit)
+        return c to c.capture(UiAgentObservationKind.STATUS)!!
+    }
+    cases["actual typed start refusal requires reconciliation without fabricating terminal"]={val(c,t)=pending();check(c.rejectedStart(t,UiAgentWireReply.Busy(meta)));check(c.snapshot?.run==terminal);check(c.userStart("another",UiAgentVariant.RESEARCH)==UiAgentStartDecision.ReconcileFirst);check(c.apply(c.capture()!!,UiAgentSnapshot(meta.copy(revision=5),UiAgentServicePhase.READY,terminal))==UiAgentApply.APPLIED);check(c.userStart("another",UiAgentVariant.RESEARCH) is UiAgentStartDecision.Submit)}
+    cases["uncertain transport and unrelated control cannot clear pending start"]={val(c,t)=pending();for(reply in listOf(UiAgentWireReply.Local(UiAgentLocalStatus.UNAVAILABLE),UiAgentWireReply.Ack(meta,UiAgentAck.REQUESTED),UiAgentWireReply.Busy(meta.copy(buildIdentity="f".repeat(40)))))check(!c.rejectedStart(t,reply));check(c.userStart("another",UiAgentVariant.RESEARCH)==UiAgentStartDecision.Busy);check(c.rejectedStart(t,UiAgentWireReply.Rejected(meta,UiAgentError.REQUEST_CONFLICT)))}
+    cases["stale start refusal cannot clear a replacement connection pending request"]={val(c,t)=pending();val newEpoch="f".repeat(32);check(c.connected(c.beginBinding(),meta.copy(serviceEpoch=newEpoch),"e".repeat(32),UiAgentServicePhase.READY)==UiAgentApply.APPLIED);check(!c.rejectedStart(t,UiAgentWireReply.Rejected(meta,UiAgentError.BUSY)));check(c.selectedIntent?.requestId=="new_request")}
+    var failed=0;cases.forEach{(name,test)->try{test();println("PASS B IPC $name")}catch(e:Throwable){failed++;println("FAIL B IPC $name: ${e.message}")}}
+    check(failed==0){"$failed/${cases.size} B IPC codec checks failed"}
+    println("${cases.size}/${cases.size} B IPC codec checks passed; Android Parcel/Binder runtime NOT_RUN")
+}

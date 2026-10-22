@@ -1,0 +1,24 @@
+Exact core8802bf555bfce1265296318d83a2f8a1fb2b787e
+Exact source archive /tmp/muyon-document-durable-check.4MrIWpNe
+Library-only49 passed; direct8 passed; full Cargo exit101 business_worker upstream errors
+99d23874159e2a05aecbf41d8c76190c81b8be59277a64629efdd603e0d5fbb0 crates/muyon-core/src/document_edit/edited_candidates/core_bridge.rs
+2c70960141da4ecd4b757dd8410aa7197172a8256e0ba04b2b8251028e65a9e0 crates/muyon-core/src/document_edit/edited_candidates.rs
+a6a8d43186ecdf26756a8fb4e81657aeabe5d5cd055c0a63f231eb5b4d19b49a crates/muyon-core/src/document_edit/engine_protocol.rs
+337ae2c1b5d2ddb1e86d0d51f9e4572a3d75daaa26c8fe12465aaf7b3acdee62 crates/muyon-core/src/document_edit/fingerprint.rs
+01314810cbccd477960891b2efea28c021c1d7da9ca83e8bb632148967636891 crates/muyon-core/src/document_edit/gateway.rs
+8ca638b74b79259b251e6a23ca696f9d08f6b1645df711b3dd07f49731aee158 crates/muyon-core/src/document_edit/mod.rs
+04ba412d87355f56bb08eab3fe1cc1219dbdbca9c1017d5c3286272291566c83 crates/muyon-core/src/document_edit/text_protocol.rs
+00575798cd6ad89b75a40434c0d4322d238d073880991c78a73453fa414dc408 crates/muyon-core/tests/document_edit_core_bridge.rs
+$ git rev-parse HEAD
+8b80fad0ebb43a184754bc376dbb3a328bdf8dbf
+exit=0
+$ /workspace/document-edit-tools/toolchain/bin/rustc --version
+rustc 1.90.0 (1159e78c4 2025-09-14)
+exit=0
+$ git ls-remote origin refs/heads/main refs/heads/develop refs/heads/task/document-core-contracts-20261022 refs/heads/task/document-edit-transactions-20261022 refs/heads/task/document-edit-clippy-20261022
+0ab2c4f667681b9aacb017f8cd2eea6f576cf78e	refs/heads/develop
+cc7c8d14d30e3d3c4c7c6cb2bf2059a99e46e003	refs/heads/main
+8802bf555bfce1265296318d83a2f8a1fb2b787e	refs/heads/task/document-core-contracts-20261022
+69988f01278b9506e04d24090387022306afa720	refs/heads/task/document-edit-clippy-20261022
+8b80fad0ebb43a184754bc376dbb3a328bdf8dbf	refs/heads/task/document-edit-transactions-20261022
+exit=0

@@ -1,0 +1,25 @@
+error[E0599]: no variant or associated item named `AwaitApply` found for enum `document_edit::Command` in the current scope
+   --> crates/muyon-core/tests/document_edit_transactions.rs:185:28
+    |
+185 |         t.execute(Command::AwaitApply(Confirmation{binding:t.binding().clone(),authority:f.authority.clone().unwrap()}),Some(&f)).unwrap();
+    |                            ^^^^^^^^^^ variant or associated item not found in `document_edit::Command`
+    |
+   ::: crates/muyon-core/tests/../src/document_edit/mod.rs:89:1
+    |
+ 89 | pub enum Command {
+    | ---------------- variant or associated item `AwaitApply` not found for this enum
+
+error[E0599]: no variant or associated item named `RecoverApply` found for enum `document_edit::Command` in the current scope
+   --> crates/muyon-core/tests/document_edit_transactions.rs:191:28
+    |
+191 |         t.execute(Command::RecoverApply(Some(candidate())),Some(&fresh)).unwrap();
+    |                            ^^^^^^^^^^^^ variant or associated item not found in `document_edit::Command`
+    |
+   ::: crates/muyon-core/tests/../src/document_edit/mod.rs:89:1
+    |
+ 89 | pub enum Command {
+    | ---------------- variant or associated item `RecoverApply` not found for this enum
+
+error: aborting due to 2 previous errors
+
+For more information about this error, try `rustc --explain E0599`.

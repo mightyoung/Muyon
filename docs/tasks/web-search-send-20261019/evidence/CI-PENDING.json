@@ -1,0 +1,41 @@
+{
+  "conclusion": "",
+  "headSha": "590fbc026b2fc5d200236d1877482b03752d0d8f",
+  "jobs": [
+    {
+      "completedAt": "0001-01-01T00:00:00Z",
+      "conclusion": "",
+      "databaseId": 118151518829,
+      "name": "scoped",
+      "startedAt": "2026-10-19T15:39:53Z",
+      "status": "queued",
+      "steps": [],
+      "url": "https://github.com/mightyoung/Muyon/actions/runs/39279706227/job/118151518829"
+    },
+    {
+      "completedAt": "0001-01-01T00:00:00Z",
+      "conclusion": "",
+      "databaseId": 118151519184,
+      "name": "native (x86_64)",
+      "startedAt": "2026-10-19T15:39:53Z",
+      "status": "queued",
+      "steps": [],
+      "url": "https://github.com/mightyoung/Muyon/actions/runs/39279706227/job/118151519184"
+    },
+    {
+      "completedAt": "0001-01-01T00:00:00Z",
+      "conclusion": "",
+      "databaseId": 118151519304,
+      "name": "native (arm64-v8a)",
+      "startedAt": "2026-10-19T15:39:53Z",
+      "status": "queued",
+      "steps": [],
+      "url": "https://github.com/mightyoung/Muyon/actions/runs/39279706227/job/118151519304"
+    }
+  ],
+  "status": "queued",
+  "runId": 39279706227,
+  "runAttempt": 1,
+  "capturedAt": "2026-10-19T15:46:47.359242+00:00",
+  "captureNote": "Read-only native run/job metadata; queued is pending, no terminal/device success claimed."
+}

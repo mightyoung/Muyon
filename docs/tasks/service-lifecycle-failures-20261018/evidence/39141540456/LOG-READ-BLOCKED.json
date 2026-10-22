@@ -1,0 +1,12 @@
+{
+  "action": "GET repos/mightyoung/Muyon/actions/jobs/117717160270/logs",
+  "target_run": 39141540456,
+  "target_job": 117717160270,
+  "job_name": "package-device (failInflight)",
+  "outcome": "DENIED",
+  "reason": "GitHub job-log redirect storage returned Forbidden (HTTP 403).",
+  "already_completed": "Source/reviews archived; run/jobs metadata remains readable; this job had completed success before the log read.",
+  "retry_or_alternate_route": "NOT_ATTEMPTED; no retry, run-log archive, artifact download, alternate job-log route or environment switch.",
+  "remaining_limit": "Raw job log and fixture JSON not archived; do not infer an opaque PID/receipt not visible in permitted metadata.",
+  "signed_redirect_url": "REDACTED; never persisted"
+}

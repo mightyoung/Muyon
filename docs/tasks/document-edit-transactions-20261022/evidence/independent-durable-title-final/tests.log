@@ -1,0 +1,51 @@
+    Finished `test` profile [unoptimized] target(s) in 0.03s
+     Running tests/document_edit_engine_protocol.rs (/workspace/document-edit-combination/crates/target/debug/deps/document_edit_engine_protocol-e52837b697f52b2d)
+
+running 6 tests
+test real_metadata_maps_exact_identity_and_preserves_numeric_literals ... ok
+test numeric_cell_bounds_and_metadata_format_are_strict ... ok
+test apparently_real_status_requires_source_hash_and_simulated_diagnostics_are_hard_rejected ... ok
+test identity_and_hash_errors_are_distinct_from_environment_hold ... ok
+test six_response_fixtures_can_never_mint_an_engine_commit_permit ... ok
+test unknown_keys_versions_duplicate_keys_and_oversize_receipts_fail_closed ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/document_edit_gateway.rs (/workspace/document-edit-combination/crates/target/debug/deps/document_edit_gateway-9524898dbf45656f)
+
+running 19 tests
+test a_copy_claim_that_cannot_store_its_candidate_is_query_only_after_restart ... ok
+test candidate_and_original_receipt_survive_restart_without_replay ... ok
+test a_different_hash_candidate_cannot_borrow_the_copy_only_publication_route ... ok
+test cancellation_is_not_rollback_and_cannot_erase_a_committed_receipt ... ok
+test copy_publication_uses_new_metadata_reference_without_new_upload_or_staging_files ... ok
+test corrupt_oversize_persisted_metadata_is_rejected_before_payload_decode ... ok
+test candidate_reopens_but_new_effect_requires_an_explicit_fresh_confirmation ... ok
+test confirmation_is_exact_and_revocation_stops_publication ... ok
+test corrupt_candidate_never_validates_or_publishes ... ok
+test duplicate_intent_binds_original_and_never_creates_second_upload ... ok
+test frozen_source_title_cannot_change_without_changing_the_reviewed_copy_plan ... ok
+test persisted_receipt_title_must_match_frozen_reviewed_source ... FAILED
+test live_engine_envelope_cannot_be_confused_with_a_validated_copy_intent ... ok
+test prepare_is_durable_without_confirmation_or_engine_success ... ok
+test late_copy_duplicate_is_only_an_authorized_original_result_query ... ok
+test receipt_tail_failure_rolls_back_cas_and_restart_unknown_never_replays ... ok
+test reading_a_newer_different_blob_does_not_authorize_old_candidate_bytes ... ok
+test two_original_intents_cannot_publish_the_same_source_revision ... ok
+test grant_revoked_or_expired_by_last_receipt_write_rolls_back_the_entire_publish ... ok
+
+failures:
+
+---- persisted_receipt_title_must_match_frozen_reviewed_source stdout ----
+
+thread 'persisted_receipt_title_must_match_frozen_reviewed_source' panicked at muyon-core/tests/document_edit_gateway.rs:796:48:
+called `Result::unwrap_err()` on an `Ok` value: DurableIntent { binding: Binding { document: DocumentRef { scope: Scope { workspace_id: "workspace", project_id: Some("project") }, document_id: "document", revision: Revision("1"), format: Unknown }, patch_digest: [144, 198, 226, 240, 66, 214, 192, 122, 68, 47, 37, 159, 9, 231, 156, 60, 20, 148, 145, 3, 47, 188, 106, 174, 65, 72, 90, 188, 28, 126, 11, 114], intent_id: "receipt-title", rollback_target: None }, state: Committed, cancel_requested: false, candidate: Some(BlobRef { digest: "0fa7c5f34eddec1d4c9bc45edf02b85baeb9a2bc18ceab5d131d52de97d7c1b1", byte_length: Revision("58") }), receipt: Some(CopyReceipt { operation: ByteIdenticalCopy, intent_id: "receipt-title", binding_digest: "d95ce2948687ac85e09f13341459925b20303219e4f64481930c23aaf86b80d5", result: DocumentMetadata { document: DocumentRef { scope: Scope { workspace_id: "workspace", project_id: Some("project") }, document_id: "document", revision: Revision("2"), format: Unknown }, title: "unreviewed-forged-title", blob: BlobRef { digest: "0fa7c5f34eddec1d4c9bc45edf02b85baeb9a2bc18ceab5d131d52de97d7c1b1", byte_length: Revision("58") } } }) }
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    persisted_receipt_title_must_match_frozen_reviewed_source
+
+test result: FAILED. 18 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.13s
+
+error: test failed, to rerun pass `-p muyon-core --test document_edit_gateway`

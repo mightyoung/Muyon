@@ -1,0 +1,12 @@
+../muyon-product-ci-before.yml:67:32: context "runner" is not allowed here. available contexts are "github", "inputs", "matrix", "needs", "secrets", "strategy", "vars". see https://docs.github.com/en/actions/learn-github-actions/contexts#context-availability for more details [expression]
+   |
+67 |       MUYON_NATIVE_OUTPUT: ${{ runner.temp }}/product-native
+   |                                ^~~~~~~~~~~
+../muyon-product-ci-before.yml:68:28: context "runner" is not allowed here. available contexts are "github", "inputs", "matrix", "needs", "secrets", "strategy", "vars". see https://docs.github.com/en/actions/learn-github-actions/contexts#context-availability for more details [expression]
+   |
+68 |       MUYON_ML_OUTPUT: ${{ runner.temp }}/product-ml
+   |                            ^~~~~~~~~~~
+../muyon-product-ci-before.yml:70:29: context "runner" is not allowed here. available contexts are "github", "inputs", "matrix", "needs", "secrets", "strategy", "vars". see https://docs.github.com/en/actions/learn-github-actions/contexts#context-availability for more details [expression]
+   |
+70 |       GRADLE_USER_HOME: ${{ runner.temp }}/product-gradle
+   |                             ^~~~~~~~~~~

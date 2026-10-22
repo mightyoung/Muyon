@@ -1,0 +1,192 @@
+    Updating crates.io index
+ Downloading crates ...
+  Downloaded autocfg v1.5.1
+  Downloaded anyhow v1.0.104
+  Downloaded bytes v1.12.1
+  Downloaded askama_macros v0.16.1
+  Downloaded anstyle v1.0.14
+  Downloaded basic-toml v0.1.10
+  Downloaded askama v0.16.1
+  Downloaded askama_derive v0.16.1
+  Downloaded clap_builder v4.6.7
+  Downloaded clap_derive v4.6.7
+  Downloaded askama_parser v0.16.1
+  Downloaded camino v1.2.6
+  Downloaded cfg-if v1.0.5
+  Downloaded clap v4.6.7
+  Downloaded errno v0.3.14
+  Downloaded cargo-platform v0.3.2
+  Downloaded clap_lex v1.1.1
+  Downloaded cargo_metadata v0.23.1
+  Downloaded fastrand v2.5.0
+  Downloaded equivalent v1.0.3
+  Downloaded fs-err v3.3.2
+  Downloaded glob v0.3.4
+  Downloaded bitflags v2.13.2
+  Downloaded getrandom v0.4.3
+  Downloaded hashbrown v0.17.1
+  Downloaded heck v0.5.0
+  Downloaded goblin v0.8.2
+  Downloaded minimal-lexical v0.2.1
+  Downloaded indexmap v2.14.2
+  Downloaded itoa v1.0.18
+  Downloaded log v0.4.34
+  Downloaded once_cell v1.21.4
+  Downloaded nom v7.1.3
+  Downloaded memchr v2.8.3
+  Downloaded percent-encoding v2.3.2
+  Downloaded plain v0.2.3
+  Downloaded proc-macro2 v1.0.107
+  Downloaded quote v1.0.47
+  Downloaded rustc-hash v2.1.3
+  Downloaded scroll_derive v0.12.1
+  Downloaded semver v1.0.28
+  Downloaded serde_core v1.0.229
+  Downloaded scroll v0.12.0
+  Downloaded serde v1.0.229
+  Downloaded libc v0.2.190
+  Downloaded serde_derive v1.0.229
+  Downloaded rustix v1.1.5
+  Downloaded serde_json v1.0.154
+  Downloaded serde_spanned v1.1.2
+  Downloaded siphasher v1.0.4
+  Downloaded strsim v0.11.1
+  Downloaded smawk v0.3.3
+  Downloaded static_assertions v1.1.0
+  Downloaded thiserror v2.0.21
+  Downloaded syn v2.0.119
+  Downloaded tempfile v3.27.0
+  Downloaded textwrap v0.16.4
+  Downloaded toml_datetime v1.1.2+spec-1.1.0
+  Downloaded toml v1.1.8+spec-1.1.0
+  Downloaded syn v3.0.9
+  Downloaded thiserror-impl v2.0.21
+  Downloaded unicode-ident v1.0.27
+  Downloaded linux-raw-sys v0.12.1
+  Downloaded toml_parser v1.1.5+spec-1.1.0
+  Downloaded toml_writer v1.1.3+spec-1.1.0
+  Downloaded unicode-width v0.2.2
+  Downloaded uniffi v0.32.2
+  Downloaded uniffi_bindgen v0.32.2
+  Downloaded uniffi_pipeline v0.32.2
+  Downloaded uniffi_udl v0.32.2
+  Downloaded uniffi_core v0.32.2
+  Downloaded uniffi_internal_macros v0.32.2
+  Downloaded uniffi_macros v0.32.2
+  Downloaded weedle2 v5.0.0
+  Downloaded winnow v1.0.4
+  Downloaded uniffi_meta v0.32.2
+  Downloaded zmij v1.0.23
+   Compiling proc-macro2 v1.0.107
+   Compiling unicode-ident v1.0.27
+   Compiling quote v1.0.47
+   Compiling serde_core v1.0.229
+   Compiling anyhow v1.0.104
+   Compiling libc v0.2.190
+   Compiling serde v1.0.229
+   Compiling syn v3.0.9
+   Compiling syn v2.0.119
+   Compiling rustix v1.1.5
+   Compiling hashbrown v0.17.1
+   Compiling equivalent v1.0.3
+   Compiling getrandom v0.4.3
+   Compiling bitflags v2.13.2
+   Compiling cfg-if v1.0.5
+   Compiling once_cell v1.21.4
+   Compiling linux-raw-sys v0.12.1
+   Compiling heck v0.5.0
+   Compiling memchr v2.8.3
+   Compiling serde_derive v1.0.229
+   Compiling winnow v1.0.4
+   Compiling indexmap v2.14.2
+   Compiling fastrand v2.5.0
+   Compiling uniffi_internal_macros v0.32.2
+   Compiling tempfile v3.27.0
+   Compiling zmij v1.0.23
+   Compiling rustc-hash v2.1.3
+   Compiling autocfg v1.5.1
+   Compiling siphasher v1.0.4
+   Compiling fs-err v3.3.2
+   Compiling camino v1.2.6
+   Compiling minimal-lexical v0.2.1
+   Compiling toml_writer v1.1.3+spec-1.1.0
+   Compiling thiserror v2.0.21
+   Compiling glob v0.3.4
+   Compiling itoa v1.0.18
+   Compiling serde_json v1.0.154
+   Compiling uniffi_pipeline v0.32.2
+   Compiling nom v7.1.3
+   Compiling scroll_derive v0.12.1
+   Compiling basic-toml v0.1.10
+   Compiling askama_parser v0.16.1
+   Compiling thiserror-impl v2.0.21
+   Compiling smawk v0.3.3
+   Compiling toml_parser v1.1.5+spec-1.1.0
+   Compiling weedle2 v5.0.0
+   Compiling textwrap v0.16.4
+   Compiling scroll v0.12.0
+   Compiling uniffi_meta v0.32.2
+   Compiling askama_derive v0.16.1
+   Compiling toml_datetime v1.1.2+spec-1.1.0
+   Compiling cargo-platform v0.3.2
+   Compiling semver v1.0.28
+   Compiling serde_spanned v1.1.2
+   Compiling plain v0.2.3
+   Compiling log v0.4.34
+   Compiling strsim v0.11.1
+   Compiling clap_lex v1.1.1
+   Compiling anstyle v1.0.14
+   Compiling goblin v0.8.2
+   Compiling toml v1.1.8+spec-1.1.0
+   Compiling clap_builder v4.6.7
+   Compiling cargo_metadata v0.23.1
+   Compiling askama_macros v0.16.1
+   Compiling askama v0.16.1
+   Compiling uniffi_udl v0.32.2
+   Compiling clap_derive v4.6.7
+   Compiling bytes v1.12.1
+   Compiling static_assertions v1.1.0
+   Compiling muyon-core-agent-lab v0.1.0 (/workspace/Muyon/experiments/redesign/core-agent-lab/core)
+   Compiling uniffi_macros v0.32.2
+   Compiling uniffi_core v0.32.2
+warning: suspicious definition of the runtime `read` symbol used by the standard library
+   --> /workspace/Muyon/experiments/redesign/core-agent-lab/core/src/host_session.rs:132:124
+    |
+132 | ...ount: usize, timeout: i32) -> i32; fn read(fd: i32, buffer: *mut u8, count: usize) -> isize; fn write(fd: i32, buffer: *const u8...
+    |                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = note: expected `unsafe extern "C" fn(i32, *mut c_void, usize) -> isize` (for the current target)
+            found    `unsafe extern "C" fn(i32, *mut u8, usize) -> isize`
+    = help: either fix the signature or remove any attributes like `#[unsafe(no_mangle)]`, `#[unsafe(export_name = "read")]`, or `#[link_name = "read"]`
+    = help: allow this lint if the signature is compatible
+    = note: `#[warn(suspicious_runtime_symbol_definitions)]` on by default
+
+warning: suspicious definition of the runtime `write` symbol used by the standard library
+   --> /workspace/Muyon/experiments/redesign/core-agent-lab/core/src/host_session.rs:132:182
+    |
+132 | ... *mut u8, count: usize) -> isize; fn write(fd: i32, buffer: *const u8, count: usize) -> isize; }
+    |                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = note: expected `unsafe extern "C" fn(i32, *const c_void, usize) -> isize` (for the current target)
+            found    `unsafe extern "C" fn(i32, *const u8, usize) -> isize`
+    = help: either fix the signature or remove any attributes like `#[unsafe(no_mangle)]`, `#[unsafe(export_name = "write")]`, or `#[link_name = "write"]`
+    = help: allow this lint if the signature is compatible
+
+   Compiling uniffi_bindgen v0.32.2
+   Compiling clap v4.6.7
+   Compiling muyon-plugin-contract-lab v0.1.0 (/workspace/Muyon/experiments/redesign/plugin-contract-lab/core)
+warning: `muyon-core-agent-lab` (lib) generated 2 warnings
+   Compiling muyon-android-contract-bridge-lab v0.1.0 (/workspace/Muyon/experiments/redesign/android-rust-bridge-lab/core)
+error: failed to run custom build command for `muyon-android-contract-bridge-lab v0.1.0 (/workspace/Muyon/experiments/redesign/android-rust-bridge-lab/core)`
+
+Caused by:
+  process didn't exit successfully: `/tmp/muyon-chat-target/debug/build/muyon-android-contract-bridge-lab-40ad94434c785ced/build-script-build` (exit status: 101)
+  --- stdout
+  cargo:rerun-if-env-changed=MUYON_BRIDGE_BUILD_ID
+
+  --- stderr
+
+  thread 'main' (8220) panicked at build.rs:4:10:
+  MUYON_BRIDGE_BUILD_ID must identify the fixed build source: NotPresent
+  note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+warning: build failed, waiting for other jobs to finish...

@@ -1,0 +1,15 @@
+   Compiling muyon-core v0.1.0 (/tmp/muyon-document-durable-check.HuqkpAc8/crates/muyon-core)
+error[E0599]: no method named `prepare_text_request` found for struct `DocumentEditGateway` in the current scope
+   --> muyon-core/tests/document_edit_candidates.rs:521:81
+    |
+521 |  let gateway=DocumentEditGateway::initialize_trusted(&s).unwrap();let p=gateway.prepare_text_request(&a,"docx-held",op.clone()).unwrap();
+    |                                                                                 ^^^^^^^^^^^^^^^^^^^^ method not found in `DocumentEditGateway<'_>`
+
+error[E0599]: no method named `prepare_text_request` found for struct `DocumentEditGateway` in the current scope
+   --> muyon-core/tests/document_edit_candidates.rs:526:73
+    |
+526 | ...thority).unwrap();assert!(gateway.prepare_text_request(&a,"blocked",op).is_err());assert!(journal.candidate_bytes(&b,&a).is_err());
+    |                                      ^^^^^^^^^^^^^^^^^^^^ method not found in `DocumentEditGateway<'_>`
+
+For more information about this error, try `rustc --explain E0599`.
+error: could not compile `muyon-core` (test "document_edit_candidates") due to 2 previous errors

@@ -1,0 +1,36 @@
+{
+  "source_sha": "e49be079eb6f3367df9b5c6d5eb1f29b74c989ae",
+  "base_sha": "7965f46beba6f52924e73e99fde6d69c18d985ff",
+  "branch": "task/leaderb-min26-20261018",
+  "changed": {
+    ".github/workflows/android-min26.yml": "ef4f61f189bf597c3be4e39b99e40d46f9b7693f0813270f3abb4930c8a5a142",
+    ".github/workflows/android-rust-bridge.yml": "6b45ff764754a752130d10529c17ffeefce3286e740d2133bc9e5affd2bc6e74",
+    "apps/muyon/android/agent-observation/README.md": "90e2a45fdbc0fd41396b4876887c00579c7a774362ba084b00a5d43b5525b269",
+    "apps/muyon/android/app/build.gradle.kts": "2b768d5d283d01102ceaebc49fb0372ec4d20b1a6b0b9b67fe5c36f87bce21ed",
+    "docs/design/ANDROID-RUST-BRIDGE-INPUTS-V2.md": "a4ed54352868cefd84b3b5ac165d9ede3f960bd85b4e2feac97eed57ca71fa9a",
+    "docs/design/ANDROID-RUST-BRIDGE-INPUTS-V2.schema.json": "6a9c5168816de5188fa7ef15b8e9f00fc2b745278ef02206fac3806ab30f93c2",
+    "experiments/redesign/android-compose-lab/RUST-DIAGNOSTICS.md": "9ce112664c16c6863cc2c8ed9e1bd303dbfa84645b48be2327081c33b8c120ad",
+    "experiments/redesign/android-compose-lab/app/build.gradle.kts": "32ca9139054e83848e7dcced8c3332a058b991c7f4a2ceb56f6f015ffb8a45a6",
+    "experiments/redesign/android-rust-bridge-lab/checks/android_gate.py": "195cd0a7d5341f9bd5ed1389fa25864d58877ade2107fb873e8b9ef1ecafad37",
+    "experiments/redesign/android-rust-bridge-lab/checks/elf_check.py": "aadd2c6939c644c730bbdbb2ff1cc7f5cf14747e7dd89837a6d9aeafb73c7c2a",
+    "experiments/redesign/android-rust-bridge-lab/checks/linux_gate.py": "8fe3dc4ed7d3e01a9450d1830d089ed686e0b8885de680971379f2bd04342cd4",
+    "experiments/redesign/android-rust-bridge-lab/checks/package_gate.py": "be70ea43641b7c57c14bd2cbce856e61707861eaf0bfa12f3adaeef1488c5427",
+    "experiments/redesign/android-rust-bridge-lab/checks/test_android_evidence.py": "f314475c96cf44bd0db56ec706f4333ca12f8dbebe360aa6c2447468e2a16896",
+    "experiments/redesign/android-rust-bridge-lab/checks/test_verify_inputs.py": "8f0c9d26e1a7f0fb59cdccad715ba5686ca963e65a19b4362d075387a1307efc",
+    "experiments/redesign/android-rust-bridge-lab/checks/verify_inputs.py": "999636ac8a7ef399b5028f315978784d1c662bc4e2459db27a23bc91266b4ac6"
+  },
+  "historical_v1_schema_unchanged": true,
+  "tests": {
+    "command": "python3 -B -m unittest discover -s experiments/redesign/android-rust-bridge-lab/checks -p 'test_*.py'",
+    "exit": 0,
+    "log": "python-fixed-e49be079.log"
+  },
+  "boundaries": {
+    "I04": "NOT_RUN/BLOCKED",
+    "Android runtime": "NOT_RUN",
+    "OCR module": "UNCHANGED",
+    "Compose pages/resources": "UNCHANGED",
+    "targetSDK declarations": "UNCHANGED",
+    "permissions/credentials": "UNCHANGED"
+  }
+}

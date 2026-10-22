@@ -1,0 +1,58 @@
+INSTRUMENTATION_STATUS: numtests=2
+INSTRUMENTATION_STATUS: stream=
+com.mightyoung.muyon.androidlab.SearchSendServiceLoopTest:
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=enabledButUnconfiguredOrdinarySendNeverInventsAvailableHostOrSearchResult
+INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.androidlab.SearchSendServiceLoopTest
+INSTRUMENTATION_STATUS: current=1
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: numtests=2
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=enabledButUnconfiguredOrdinarySendNeverInventsAvailableHostOrSearchResult
+INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.androidlab.SearchSendServiceLoopTest
+INSTRUMENTATION_STATUS: current=1
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: numtests=2
+INSTRUMENTATION_STATUS: stream=
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=settingsSaveThenOrdinarySendShowsSourceEmptyAndControlledError
+INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.androidlab.SearchSendServiceLoopTest
+INSTRUMENTATION_STATUS: current=2
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: numtests=2
+INSTRUMENTATION_STATUS: stream=
+Error in settingsSaveThenOrdinarySendShowsSourceEmptyAndControlledError(com.mightyoung.muyon.androidlab.SearchSendServiceLoopTest):
+androidx.compose.ui.test.ComposeTimeoutException: Condition still not satisfied after 60000 ms
+	at androidx.compose.ui.test.AndroidComposeUiTestEnvironment$AndroidComposeUiTestImpl.waitUntil(ComposeUiTest.android.kt:755)
+	at androidx.compose.ui.test.junit4.AndroidComposeTestRule.waitUntil(AndroidComposeTestRule.android.kt:362)
+	at com.mightyoung.muyon.androidlab.SearchSendServiceLoopTest.send(SearchSendServiceLoopTest.kt:33)
+	at com.mightyoung.muyon.androidlab.SearchSendServiceLoopTest.settingsSaveThenOrdinarySendShowsSourceEmptyAndControlledError(SearchSendServiceLoopTest.kt:45)
+
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=settingsSaveThenOrdinarySendShowsSourceEmptyAndControlledError
+INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.androidlab.SearchSendServiceLoopTest
+INSTRUMENTATION_STATUS: stack=androidx.compose.ui.test.ComposeTimeoutException: Condition still not satisfied after 60000 ms
+	at androidx.compose.ui.test.AndroidComposeUiTestEnvironment$AndroidComposeUiTestImpl.waitUntil(ComposeUiTest.android.kt:755)
+	at androidx.compose.ui.test.junit4.AndroidComposeTestRule.waitUntil(AndroidComposeTestRule.android.kt:362)
+	at com.mightyoung.muyon.androidlab.SearchSendServiceLoopTest.send(SearchSendServiceLoopTest.kt:33)
+	at com.mightyoung.muyon.androidlab.SearchSendServiceLoopTest.settingsSaveThenOrdinarySendShowsSourceEmptyAndControlledError(SearchSendServiceLoopTest.kt:45)
+
+INSTRUMENTATION_STATUS: current=2
+INSTRUMENTATION_STATUS_CODE: -2
+INSTRUMENTATION_RESULT: stream=
+
+Time: 67.7
+There was 1 failure:
+1) settingsSaveThenOrdinarySendShowsSourceEmptyAndControlledError(com.mightyoung.muyon.androidlab.SearchSendServiceLoopTest)
+androidx.compose.ui.test.ComposeTimeoutException: Condition still not satisfied after 60000 ms
+	at androidx.compose.ui.test.AndroidComposeUiTestEnvironment$AndroidComposeUiTestImpl.waitUntil(ComposeUiTest.android.kt:755)
+	at androidx.compose.ui.test.junit4.AndroidComposeTestRule.waitUntil(AndroidComposeTestRule.android.kt:362)
+	at com.mightyoung.muyon.androidlab.SearchSendServiceLoopTest.send(SearchSendServiceLoopTest.kt:33)
+	at com.mightyoung.muyon.androidlab.SearchSendServiceLoopTest.settingsSaveThenOrdinarySendShowsSourceEmptyAndControlledError(SearchSendServiceLoopTest.kt:45)
+
+FAILURES!!!
+Tests run: 2,  Failures: 1
+
+
+INSTRUMENTATION_CODE: -1

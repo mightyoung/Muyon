@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:muyon:android:result:1",
+  "type": "object", "additionalProperties": false,
+  "required": ["status", "receipt", "error", "recovery_action"],
+  "properties": {
+    "status": {"enum": ["pending", "unknown", "committed", "rejected", "cancelled"]},
+    "recovery_action": {"enum": ["query_original", "inspect_dependency", "none"]},
+    "error": {"type": ["string", "null"], "enum": [null, "invalid_json", "invalid_version", "invalid_identity", "invalid_revision", "invalid_payload", "invalid_xml", "raw_limit", "required", "text_limit", "unsupported_operation", "scope_mismatch", "invalid_digest", "invalid_authority", "binding_mismatch", "intent_conflict", "revision_conflict", "not_found", "cancelled", "unknown", "storage", "storage_busy", "storage_constraint", "storage_corrupt", "storage_io", "unsupported"]},
+    "receipt": {"anyOf": [{"type": "null"}, {"$ref": "#/$defs/receipt"}]}
+  },
+  "$defs": {
+    "receipt": {
+      "type": "object", "additionalProperties": false,
+      "required": ["protocol_version", "intent_id", "binding_digest", "scope", "authority", "admission_id", "target_id", "revision", "status", "result"],
+      "properties": {
+        "protocol_version": {"const": 1}, "intent_id": {"$ref": "command-v1.schema.json#/$defs/id"},
+        "binding_digest": {"$ref": "command-v1.schema.json#/$defs/digest"},
+        "scope": {"$ref": "command-v1.schema.json#/$defs/scope"},
+        "authority": {"$ref": "command-v1.schema.json#/$defs/authority"},
+        "admission_id": {"anyOf": [{"type": "null"}, {"$ref": "command-v1.schema.json#/$defs/id"}]},
+        "target_id": {"$ref": "command-v1.schema.json#/$defs/id"},
+        "revision": {"$ref": "command-v1.schema.json#/$defs/revision"},
+        "status": {"const": "committed"}, "result": {}
+      }
+    }
+  },
+  "$comment": "Rust ExecutionResult::validate and Receipt::validate_for enforce state, command binding and revision invariants; JSON Schema alone is insufficient."
+}

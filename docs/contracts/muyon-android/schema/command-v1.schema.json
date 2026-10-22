@@ -1,0 +1,95 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:muyon:android:command:1",
+  "title": "Android business command v1 (Rust validates additional semantics)",
+  "type": "object", "additionalProperties": false,
+  "required": ["protocol_version", "business_version", "intent_id", "scope", "expected_revision", "authority", "plan_id", "plan_digest", "command"],
+  "properties": {
+    "protocol_version": {"const": 1}, "business_version": {"const": 1},
+    "intent_id": {"$ref": "#/$defs/id"}, "plan_id": {"$ref": "#/$defs/id"},
+    "plan_digest": {"$ref": "#/$defs/digest"},
+    "scope": {"$ref": "#/$defs/scope"},
+    "authority": {"$ref": "#/$defs/authority"},
+    "expected_revision": {"$ref": "#/$defs/revision"},
+    "command": {"oneOf": [
+      {"$ref": "#/$defs/supplierWrite"}, {"$ref": "#/$defs/supplierState"},
+      {"$ref": "#/$defs/projectCreate"}, {"$ref": "#/$defs/paperCreate"},
+      {"$ref": "#/$defs/researchImport"}, {"$ref": "#/$defs/blobOperation"}
+    ]}
+  },
+  "$defs": {
+    "id": {"type": "string", "minLength": 1, "maxLength": 128, "pattern": "^[A-Za-z0-9_.:-]+$"},
+    "digest": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "revision": {"type": "string", "pattern": "^(0|[1-9][0-9]{0,19})$", "$comment": "Rust additionally checks u64 range and operation-specific constraints."},
+    "nullableText": {"type": ["string", "null"]},
+    "scope": {
+      "type": "object", "additionalProperties": false, "required": ["workspace_id"],
+      "properties": {"workspace_id": {"$ref": "#/$defs/id"}, "project_id": {"anyOf": [{"$ref": "#/$defs/id"}, {"type": "null"}]}}
+    },
+    "authority": {
+      "type": "object", "additionalProperties": false, "required": ["grant_id", "generation", "owner_epoch"],
+      "properties": {"grant_id": {"$ref": "#/$defs/id"}, "generation": {"$ref": "#/$defs/revision"}, "owner_epoch": {"$ref": "#/$defs/id"}}
+    },
+    "supplier": {
+      "type": "object", "additionalProperties": false, "required": ["name", "aliases", "categories"],
+      "properties": {
+        "name": {"type": "string"}, "aliases": {"type": "array", "maxItems": 20, "items": {"type": "string"}},
+        "address": {"$ref": "#/$defs/nullableText"},
+        "categories": {"type": "array", "maxItems": 20, "items": {"type": "string"}},
+        "notes": {"$ref": "#/$defs/nullableText"}, "merged_into": {"type": "null"},
+        "rating": {"enum": [null, "preferred", "caution", "disabled"]}, "rating_note": {"$ref": "#/$defs/nullableText"}
+      }
+    },
+    "supplierWrite": {
+      "type": "object", "additionalProperties": false, "required": ["operation", "supplier_id", "payload"],
+      "properties": {"operation": {"enum": ["supplier_create", "supplier_update"]}, "supplier_id": {"$ref": "#/$defs/id"}, "payload": {"$ref": "#/$defs/supplier"}}
+    },
+    "supplierState": {
+      "type": "object", "additionalProperties": false, "required": ["operation", "supplier_id"],
+      "properties": {"operation": {"enum": ["supplier_delete", "supplier_restore"]}, "supplier_id": {"$ref": "#/$defs/id"}}
+    },
+    "projectCreate": {
+      "type": "object", "additionalProperties": false, "required": ["operation", "project_id", "name"],
+      "properties": {"operation": {"const": "project_create"}, "project_id": {"$ref": "#/$defs/id"}, "name": {"type": "string"}}
+    },
+    "blob": {
+      "type": "object", "additionalProperties": false, "required": ["digest", "byte_length"],
+      "properties": {"digest": {"$ref": "#/$defs/digest"}, "byte_length": {"$ref": "#/$defs/revision"}}
+    },
+    "paper": {
+      "type": "object", "additionalProperties": false, "required": ["title", "attachment"],
+      "properties": {
+        "title": {"type": "string"}, "authors": {"type": "array", "maxItems": 100, "items": {"type": "string"}},
+        "year": {"type": ["integer", "null"], "minimum": 1, "maximum": 9999},
+        "doi": {"$ref": "#/$defs/nullableText"}, "url": {"$ref": "#/$defs/nullableText"}, "notes": {"$ref": "#/$defs/nullableText"},
+        "attachment": {"$ref": "#/$defs/blob"},
+        "attachment_upload_id": {"anyOf": [{"$ref": "#/$defs/id"}, {"type": "null"}]}
+      }
+    },
+    "paperCreate": {
+      "type": "object", "additionalProperties": false, "required": ["operation", "paper_id", "payload"],
+      "properties": {"operation": {"const": "paper_create"}, "paper_id": {"$ref": "#/$defs/id"}, "payload": {"$ref": "#/$defs/paper"}}
+    },
+    "importedPaper": {
+      "type": "object", "additionalProperties": false, "required": ["source_id", "source_revision", "record", "raw_json", "attachments"],
+      "properties": {
+        "source_id": {"$ref": "#/$defs/id"}, "source_revision": {"$ref": "#/$defs/revision"},
+        "record": {"type": "object"}, "raw_json": {"type": "string"},
+        "attachments": {"type": "array", "maxItems": 100, "items": {"$ref": "#/$defs/blob"}},
+        "attachment_upload_ids": {"type": "object", "propertyNames": {"$ref": "#/$defs/digest"}, "additionalProperties": {"$ref": "#/$defs/id"}}
+      }
+    },
+    "researchImport": {
+      "type": "object", "additionalProperties": false, "required": ["operation", "source_id", "source_revision", "snapshot"],
+      "properties": {
+        "operation": {"const": "research_import"}, "source_id": {"$ref": "#/$defs/id"}, "source_revision": {"$ref": "#/$defs/revision"},
+        "snapshot": {"$ref": "#/$defs/blob"}, "snapshot_upload_id": {"anyOf": [{"$ref": "#/$defs/id"}, {"type": "null"}]},
+        "records": {"type": "array", "maxItems": 10000, "items": {"$ref": "#/$defs/importedPaper"}}
+      }
+    },
+    "blobOperation": {
+      "type": "object", "additionalProperties": false, "required": ["operation", "blob"],
+      "properties": {"operation": {"enum": ["blob_pin", "blob_release"]}, "blob": {"$ref": "#/$defs/blob"}}
+    }
+  }
+}

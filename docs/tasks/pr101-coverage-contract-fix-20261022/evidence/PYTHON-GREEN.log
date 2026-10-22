@@ -1,0 +1,20 @@
+test_decrease_fails (test_check.CoverageContract.test_decrease_fails) ... ok
+test_equal_passes (test_check.CoverageContract.test_equal_passes) ... ok
+test_line_identity_drift_even_at_equal_count_fails (test_check.CoverageContract.test_line_identity_drift_even_at_equal_count_fails) ... ok
+test_measurement_version_change_fails (test_check.CoverageContract.test_measurement_version_change_fails) ... ok
+test_merge_duplicate_hits_and_keep_unloaded_unknown (test_check.CoverageContract.test_merge_duplicate_hits_and_keep_unloaded_unknown) ... ok
+test_missing_report_cli_fails (test_check.CoverageContract.test_missing_report_cli_fails) ... ok
+test_missing_report_fails (test_check.CoverageContract.test_missing_report_fails) ... ok
+test_per_file_decrease_cannot_hide_behind_scope_improvement (test_check.CoverageContract.test_per_file_decrease_cannot_hide_behind_scope_improvement) ... ok
+test_unloaded_source_added_fails (test_check.CoverageContract.test_unloaded_source_added_fails) ... ok
+test_all_loaded_sources_have_identity_and_da_sets (test_da_details.DaDetails.test_all_loaded_sources_have_identity_and_da_sets) ... ok
+test_exact_zero_da_and_union_hit (test_da_details.DaDetails.test_exact_zero_da_and_union_hit) ... ok
+test_invalid_da_fails (test_da_details.DaDetails.test_invalid_da_fails) ... ok
+test_missing_suite_evidence_is_explicit (test_da_details.DaDetails.test_missing_suite_evidence_is_explicit) ... ok
+test_regressed_metadata_files_have_bounded_explicit_diagnostics (test_da_details.DaDetails.test_regressed_metadata_files_have_bounded_explicit_diagnostics) ... ok
+test_unreported_source_is_unknown_not_zero (test_da_details.DaDetails.test_unreported_source_is_unknown_not_zero) ... ok
+
+----------------------------------------------------------------------
+Ran 15 tests in 0.206s
+
+OK

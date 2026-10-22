@@ -1,0 +1,4 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" xmlns:tools="http://schemas.android.com/tools">
+    <!-- This fixture contains no INTERNET permission and can never call a provider. -->
+    <application android:name=".agentipc.OrdinaryChatLiveFixtureApplication" tools:replace="android:name" />
+</manifest>

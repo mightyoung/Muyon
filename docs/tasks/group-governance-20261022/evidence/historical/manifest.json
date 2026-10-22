@@ -1,0 +1,132 @@
+{
+  "archive_created_utc": "2026-10-22T03:55:31.983607+00:00",
+  "source_commit": "2cc5df1c900cd2977e8bdf4ca623e82f673a50b7",
+  "notes": [
+    "Filesystem mtime is not asserted to be execution start/end time.",
+    "green is original final 21-test stdout; cargo-final contains original final 168-test combined stdout/stderr.",
+    "Six mutation outputs use the earlier 20-test/pre-unknown-child-fix source. Exact retained sources are preserved as text plus individual patches.",
+    "Initial 17-test RED raw output survives, but its stub source, native JUnit, and original environment manifest do not.",
+    "Original standalone/mutation compile output and the unknown-child targeted RED output were not saved to files; no reconstruction is represented as an original raw log.",
+    "Historical exit statuses are from prior tool responses/recorded orchestration, not log text; the RED shell ended with cat and its test failure was recorded by libtest summary.",
+    "Mutation orchestration asserted nonzero runner status but did not print the numeric status. The historical RED shell returned cat status0; neither is presented as a separately captured exit101."
+  ],
+  "artifacts": [
+    {
+      "archive_path": "historical/green.log",
+      "original_path": "/tmp/muyon-group-green.log",
+      "sha256": "dd69e81b3a90afce76b99210ed156a7b2b373b2b41f8da719a47ef78aec58db8",
+      "size_bytes": 1562,
+      "original_mtime_utc": "2026-10-22T03:46:43.036391+00:00",
+      "execution_start_utc": null,
+      "execution_end_utc": null,
+      "kind": "existing original output",
+      "exit_status_from_prior_tool_result": 0
+    },
+    {
+      "archive_path": "historical/cargo-final.log",
+      "original_path": "/tmp/muyon-group-cargo-final.log",
+      "sha256": "94705058cbdfff351e12b35940e091a78a6f63b9523f0115afd1846ee76a394b",
+      "size_bytes": 18818,
+      "original_mtime_utc": "2026-10-22T03:48:06.465452+00:00",
+      "execution_start_utc": null,
+      "execution_end_utc": null,
+      "kind": "existing original output",
+      "exit_status_from_prior_tool_result": 0
+    },
+    {
+      "archive_path": "historical/cargo.log",
+      "original_path": "/tmp/muyon-group-cargo.log",
+      "sha256": "7f9951e4d6201f63c6bc59d91b7d313aaa3f6ef7eb57b4fc2c5331da36e9c862",
+      "size_bytes": 19861,
+      "original_mtime_utc": "2026-10-22T03:47:04.184660+00:00",
+      "execution_start_utc": null,
+      "execution_end_utc": null,
+      "kind": "existing original output",
+      "exit_status_from_prior_tool_result": 0
+    },
+    {
+      "archive_path": "historical/red.log",
+      "original_path": "/tmp/muyon-group-red.log",
+      "sha256": "bdced993067fcf657d7a210067aca3290e9481a1f785534e78c3496df82e658d",
+      "size_bytes": 6466,
+      "original_mtime_utc": "2026-10-22T03:44:13.926486+00:00",
+      "execution_start_utc": null,
+      "execution_end_utc": null,
+      "kind": "existing original output",
+      "exit_status_from_prior_tool_result": null,
+      "original_outcome": "libtest reported failure; exact process status not separately retained"
+    },
+    {
+      "archive_path": "historical/mutations/lifetime_cap.log",
+      "original_path": "/tmp/muyon-group-mutations/lifetime_cap/result.log",
+      "sha256": "1f60abd7a8031465b42cf3973cb6b2d87f132756e11917d6db97670eb824cff1",
+      "size_bytes": 2433,
+      "original_mtime_utc": "2026-10-22T03:46:19.997882+00:00",
+      "execution_start_utc": null,
+      "execution_end_utc": null,
+      "kind": "existing original combined test output",
+      "exit_status_from_prior_tool_result": null,
+      "original_outcome": "libtest reported failure; exact process status not separately retained"
+    },
+    {
+      "archive_path": "historical/mutations/active_cap.log",
+      "original_path": "/tmp/muyon-group-mutations/active_cap/result.log",
+      "sha256": "c8f7490a9cadade7ef70b1df78de1c967378e6ee66e0546a2487b8f1f98ac282",
+      "size_bytes": 1986,
+      "original_mtime_utc": "2026-10-22T03:46:20.361636+00:00",
+      "execution_start_utc": null,
+      "execution_end_utc": null,
+      "kind": "existing original combined test output",
+      "exit_status_from_prior_tool_result": null,
+      "original_outcome": "libtest reported failure; exact process status not separately retained"
+    },
+    {
+      "archive_path": "historical/mutations/epoch_fence.log",
+      "original_path": "/tmp/muyon-group-mutations/epoch_fence/result.log",
+      "sha256": "901321681a0d71125ac427388c0fe8e9dd5934adfae6953111a15715a7873f98",
+      "size_bytes": 1998,
+      "original_mtime_utc": "2026-10-22T03:46:20.813720+00:00",
+      "execution_start_utc": null,
+      "execution_end_utc": null,
+      "kind": "existing original combined test output",
+      "exit_status_from_prior_tool_result": null,
+      "original_outcome": "libtest reported failure; exact process status not separately retained"
+    },
+    {
+      "archive_path": "historical/mutations/unknown_budget.log",
+      "original_path": "/tmp/muyon-group-mutations/unknown_budget/result.log",
+      "sha256": "91b52a4f6dd860a9617f62872a7f67d18bdda7438feaccac7e4a1e47d748611b",
+      "size_bytes": 1975,
+      "original_mtime_utc": "2026-10-22T03:46:21.286526+00:00",
+      "execution_start_utc": null,
+      "execution_end_utc": null,
+      "kind": "existing original combined test output",
+      "exit_status_from_prior_tool_result": null,
+      "original_outcome": "libtest reported failure; exact process status not separately retained"
+    },
+    {
+      "archive_path": "historical/mutations/authority_intersection.log",
+      "original_path": "/tmp/muyon-group-mutations/authority_intersection/result.log",
+      "sha256": "ce328748e0a08ccd3ee7295e0d253d5ed6d44ac49134985c1b09309aa69780a3",
+      "size_bytes": 2007,
+      "original_mtime_utc": "2026-10-22T03:46:21.810704+00:00",
+      "execution_start_utc": null,
+      "execution_end_utc": null,
+      "kind": "existing original combined test output",
+      "exit_status_from_prior_tool_result": null,
+      "original_outcome": "libtest reported failure; exact process status not separately retained"
+    },
+    {
+      "archive_path": "historical/mutations/dag_cycle.log",
+      "original_path": "/tmp/muyon-group-mutations/dag_cycle/result.log",
+      "sha256": "f5f38f7b3883d7f7a99a6fac9336d68c88796fb103bdc14dfd859ea992455d41",
+      "size_bytes": 1978,
+      "original_mtime_utc": "2026-10-22T03:46:22.297214+00:00",
+      "execution_start_utc": null,
+      "execution_end_utc": null,
+      "kind": "existing original combined test output",
+      "exit_status_from_prior_tool_result": null,
+      "original_outcome": "libtest reported failure; exact process status not separately retained"
+    }
+  ]
+}

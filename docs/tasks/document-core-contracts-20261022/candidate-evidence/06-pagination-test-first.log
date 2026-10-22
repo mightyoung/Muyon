@@ -1,0 +1,5 @@
+2026-10-22T05:56:30.901506+00:00
+Base b49ed859c331b4bd8004d8d3be5b8e12e7c7ff3e plus pagination regression; production code unchanged.
+$ cargo test -p muyon-core --offline documents::candidate_tests::candidate_gc_crosses_page_boundary_preserving_exact_objects_and_project_quotas
+[Errno 2] No such file or directory: 'cargo'
+exit=127 NOT_RUN, tool absent; not red/green test execution.

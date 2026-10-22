@@ -1,0 +1,529 @@
+﻿2026-10-18T07:02:30.1473530Z Current runner version: '2.337.0'
+2026-10-18T07:02:30.1492949Z ##[group]Runner Image Provisioner
+2026-10-18T07:02:30.1493567Z Hosted Compute Agent
+2026-10-18T07:02:30.1494001Z Version: 20261012.601
+2026-10-18T07:02:30.1494383Z Commit: f3dc54e1fb89da6852db922499a0233137369e1d
+2026-10-18T07:02:30.1494850Z Build Date: 2026-10-12T17:48:21Z
+2026-10-18T07:02:30.1495325Z Worker ID: {e0dcd41c-256a-4060-9c87-2ecbca36571d}
+2026-10-18T07:02:30.1495744Z Region: centralus
+2026-10-18T07:02:30.1496123Z Cloud: Azure
+2026-10-18T07:02:30.1496464Z ##[endgroup]
+2026-10-18T07:02:30.1497353Z ##[group]Operating System
+2026-10-18T07:02:30.1497838Z Ubuntu
+2026-10-18T07:02:30.1498162Z 24.04.5
+2026-10-18T07:02:30.1498523Z LTS
+2026-10-18T07:02:30.1498845Z ##[endgroup]
+2026-10-18T07:02:30.1499172Z ##[group]Runner Image
+2026-10-18T07:02:30.1499605Z Image: ubuntu-24.04
+2026-10-18T07:02:30.1499951Z Version: 20261012.334.1
+2026-10-18T07:02:30.1501073Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20261012.334/images/ubuntu/Ubuntu2404-Readme.md
+2026-10-18T07:02:30.1502141Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20261012.334
+2026-10-18T07:02:30.1502784Z ##[endgroup]
+2026-10-18T07:02:30.1503487Z ##[group]GITHUB_TOKEN Permissions
+2026-10-18T07:02:30.1505004Z Contents: read
+2026-10-18T07:02:30.1505356Z Metadata: read
+2026-10-18T07:02:30.1505732Z ##[endgroup]
+2026-10-18T07:02:30.1507257Z Secret source: Actions
+2026-10-18T07:02:30.1507855Z Cache mode: write
+2026-10-18T07:02:30.1508302Z Prepare workflow directory
+2026-10-18T07:02:30.2260140Z Prepare all required actions
+2026-10-18T07:02:30.2305953Z Getting action download info
+2026-10-18T07:02:30.4528907Z Download action repository 'actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683' (SHA:11bd71901bbe5b1630ceea73d27597364c9af683)
+2026-10-18T07:02:30.5661203Z Download action repository 'actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00' (SHA:c5195efecf7bdfc987ee8bae7a71cb8b11521c00)
+2026-10-18T07:02:31.1498937Z Download action repository 'actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02' (SHA:ea165f8d65b6e75b540449e92b4886f43607fa02)
+2026-10-18T07:02:31.4595925Z Complete job name: scoped
+2026-10-18T07:02:31.6007800Z ##[group]Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+2026-10-18T07:02:31.6008552Z with:
+2026-10-18T07:02:31.6008847Z   persist-credentials: false
+2026-10-18T07:02:31.6009217Z   repository: mightyoung/Muyon
+2026-10-18T07:02:31.6014047Z   token: ***
+2026-10-18T07:02:31.6014333Z   ssh-strict: true
+2026-10-18T07:02:31.6014612Z   ssh-user: git
+2026-10-18T07:02:31.6014880Z   clean: true
+2026-10-18T07:02:31.6015173Z   sparse-checkout-cone-mode: true
+2026-10-18T07:02:31.6015543Z   fetch-depth: 1
+2026-10-18T07:02:31.6015821Z   fetch-tags: false
+2026-10-18T07:02:31.6016108Z   show-progress: true
+2026-10-18T07:02:31.6016412Z   lfs: false
+2026-10-18T07:02:31.6016683Z   submodules: false
+2026-10-18T07:02:31.6016978Z   set-safe-directory: true
+2026-10-18T07:02:31.6017501Z ##[endgroup]
+2026-10-18T07:02:31.6711401Z Syncing repository: mightyoung/Muyon
+2026-10-18T07:02:31.6713564Z ##[group]Getting Git version info
+2026-10-18T07:02:31.6714467Z Working directory is '/home/runner/work/Muyon/Muyon'
+2026-10-18T07:02:31.6715720Z [command]/usr/bin/git version
+2026-10-18T07:02:31.6751789Z git version 2.55.0
+2026-10-18T07:02:31.6768126Z ##[endgroup]
+2026-10-18T07:02:31.6781130Z Temporarily overriding HOME='/home/runner/work/_temp/9ae66176-b30d-4c71-bd52-c47fce1b7101' before making global git config changes
+2026-10-18T07:02:31.6783363Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-18T07:02:31.6785172Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/Muyon/Muyon
+2026-10-18T07:02:31.6838653Z Deleting the contents of '/home/runner/work/Muyon/Muyon'
+2026-10-18T07:02:31.6841850Z ##[group]Initializing the repository
+2026-10-18T07:02:31.6845244Z [command]/usr/bin/git init /home/runner/work/Muyon/Muyon
+2026-10-18T07:02:31.6936352Z hint: Using 'master' as the name for the initial branch. This default branch name
+2026-10-18T07:02:31.6938374Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+2026-10-18T07:02:31.6939752Z hint: to use in all of your new repositories, which will suppress this warning,
+2026-10-18T07:02:31.6940757Z hint: call:
+2026-10-18T07:02:31.6941197Z hint:
+2026-10-18T07:02:31.6942019Z hint: 	git config --global init.defaultBranch <name>
+2026-10-18T07:02:31.6942781Z hint:
+2026-10-18T07:02:31.6943511Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+2026-10-18T07:02:31.6944832Z hint: 'development'. The just-created branch can be renamed via this command:
+2026-10-18T07:02:31.6945806Z hint:
+2026-10-18T07:02:31.6946236Z hint: 	git branch -m <name>
+2026-10-18T07:02:31.6946745Z hint:
+2026-10-18T07:02:31.6947528Z hint: Disable this message with "git config set advice.defaultBranchName false"
+2026-10-18T07:02:31.6954591Z Initialized empty Git repository in /home/runner/work/Muyon/Muyon/.git/
+2026-10-18T07:02:31.6967963Z [command]/usr/bin/git remote add origin https://github.com/mightyoung/Muyon
+2026-10-18T07:02:31.7020075Z ##[endgroup]
+2026-10-18T07:02:31.7023067Z ##[group]Disabling automatic garbage collection
+2026-10-18T07:02:31.7024016Z [command]/usr/bin/git config --local gc.auto 0
+2026-10-18T07:02:31.7067872Z ##[endgroup]
+2026-10-18T07:02:31.7069240Z ##[group]Setting up auth
+2026-10-18T07:02:31.7074355Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-18T07:02:31.7112672Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-18T07:02:31.7436920Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-18T07:02:31.7469878Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-18T07:02:31.7664122Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+2026-10-18T07:02:31.7702696Z ##[endgroup]
+2026-10-18T07:02:31.7703533Z ##[group]Fetching the repository
+2026-10-18T07:02:31.7711823Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +73a582d3c948d70450a45da4205435a715eeb6b4:refs/remotes/origin/lab/android-compose-frontend-loop-20261018
+2026-10-18T07:02:34.4147963Z From https://github.com/mightyoung/Muyon
+2026-10-18T07:02:34.4149695Z  * [new ref]         73a582d3c948d70450a45da4205435a715eeb6b4 -> origin/lab/android-compose-frontend-loop-20261018
+2026-10-18T07:02:34.4154115Z ##[endgroup]
+2026-10-18T07:02:34.4154506Z ##[group]Determining the checkout info
+2026-10-18T07:02:34.4154977Z ##[endgroup]
+2026-10-18T07:02:34.4158752Z [command]/usr/bin/git sparse-checkout disable
+2026-10-18T07:02:34.4208860Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+2026-10-18T07:02:34.4237908Z ##[group]Checking out the ref
+2026-10-18T07:02:34.4241674Z [command]/usr/bin/git checkout --progress --force -B lab/android-compose-frontend-loop-20261018 refs/remotes/origin/lab/android-compose-frontend-loop-20261018
+2026-10-18T07:02:34.7965829Z Switched to a new branch 'lab/android-compose-frontend-loop-20261018'
+2026-10-18T07:02:34.7968263Z branch 'lab/android-compose-frontend-loop-20261018' set up to track 'origin/lab/android-compose-frontend-loop-20261018'.
+2026-10-18T07:02:34.7990798Z ##[endgroup]
+2026-10-18T07:02:34.8034181Z [command]/usr/bin/git log -1 --format=%H
+2026-10-18T07:02:34.8060519Z 73a582d3c948d70450a45da4205435a715eeb6b4
+2026-10-18T07:02:34.8083131Z ##[group]Removing auth
+2026-10-18T07:02:34.8083629Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-18T07:02:34.8105353Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-18T07:02:34.8287814Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-18T07:02:34.8314583Z http.https://github.com/.extraheader
+2026-10-18T07:02:34.8320004Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+2026-10-18T07:02:34.8349202Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-18T07:02:34.8525102Z ##[endgroup]
+2026-10-18T07:02:34.9902697Z ##[group]Run actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00
+2026-10-18T07:02:34.9902984Z with:
+2026-10-18T07:02:34.9903114Z   distribution: temurin
+2026-10-18T07:02:34.9903252Z   java-version: 17
+2026-10-18T07:02:34.9903383Z   java-package: jdk
+2026-10-18T07:02:34.9903517Z   check-latest: false
+2026-10-18T07:02:34.9903638Z   server-id: github
+2026-10-18T07:02:34.9903799Z   server-username: GITHUB_ACTOR
+2026-10-18T07:02:34.9903992Z   server-password: GITHUB_TOKEN
+2026-10-18T07:02:34.9904135Z   overwrite-settings: true
+2026-10-18T07:02:34.9904270Z   job-status: success
+2026-10-18T07:02:34.9905852Z   token: ***
+2026-10-18T07:02:34.9905974Z ##[endgroup]
+2026-10-18T07:02:35.1036145Z ##[group]Installed distributions
+2026-10-18T07:02:35.1076975Z Resolved Java 17.0.20+1 from tool-cache
+2026-10-18T07:02:35.1077260Z Setting Java 17.0.20+1 as the default
+2026-10-18T07:02:35.1085411Z (node:2104) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-18T07:02:35.1086044Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-18T07:02:35.1087799Z Creating toolchains.xml for JDK version 17 from temurin
+2026-10-18T07:02:35.1146689Z Writing to /home/runner/.m2/toolchains.xml
+2026-10-18T07:02:35.1147182Z 
+2026-10-18T07:02:35.1147284Z Java configuration:
+2026-10-18T07:02:35.1147567Z   Distribution: temurin
+2026-10-18T07:02:35.1152014Z   Version: 17.0.20+1
+2026-10-18T07:02:35.1152335Z   Path: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.20-1/x64
+2026-10-18T07:02:35.1152614Z 
+2026-10-18T07:02:35.1153145Z ##[endgroup]
+2026-10-18T07:02:35.1171333Z Creating settings.xml with server-id: github
+2026-10-18T07:02:35.1171794Z Writing to /home/runner/.m2/settings.xml
+2026-10-18T07:02:35.1581482Z ##[group]Run set -euo pipefail
+2026-10-18T07:02:35.1581961Z [36;1mset -euo pipefail[0m
+2026-10-18T07:02:35.1582137Z [36;1mmkdir -p "$RUNNER_TEMP/loop-scoped"[0m
+2026-10-18T07:02:35.1582367Z [36;1mexport CARGO_TARGET_DIR="$RUNNER_TEMP/loop-rust-target"[0m
+2026-10-18T07:02:35.1582606Z [36;1mexport MUYON_BRIDGE_BUILD_ID="$(git rev-parse HEAD)"[0m
+2026-10-18T07:02:35.1582825Z [36;1mrustup toolchain install 1.99.0 --profile minimal[0m
+2026-10-18T07:02:35.1583011Z [36;1mrustup default 1.99.0[0m
+2026-10-18T07:02:35.1583360Z [36;1mpython3 -B -m unittest discover -s experiments/redesign/frontend-service-loop-lab -v 2>&1 | tee "$RUNNER_TEMP/loop-scoped/oracle.log"[0m
+2026-10-18T07:02:35.1584045Z [36;1mcargo test --locked --manifest-path experiments/redesign/rust-agent-host-lab/core/Cargo.toml --test supplier_store --test supplier_lab_source --test supplier_business_controller -- --nocapture 2>&1 | tee "$RUNNER_TEMP/loop-scoped/rust.log"[0m
+2026-10-18T07:02:35.1584680Z [36;1m# Exact module filter: never execute the unrelated HTTP/reopen unit module.[0m
+2026-10-18T07:02:35.1585203Z [36;1mcargo test --locked --manifest-path experiments/redesign/rust-agent-host-lab/core/Cargo.toml --lib supplier_business::terminal_regressions -- --nocapture 2>&1 | tee "$RUNNER_TEMP/loop-scoped/recovery.log"[0m
+2026-10-18T07:02:35.1585700Z [36;1mgrep -F "3 passed; 0 failed" "$RUNNER_TEMP/loop-scoped/recovery.log"[0m
+2026-10-18T07:02:35.1586142Z [36;1mcargo build --locked --manifest-path experiments/redesign/android-rust-bridge-lab/core/Cargo.toml --features bindings 2>&1 | tee "$RUNNER_TEMP/loop-scoped/bridge.log"[0m
+2026-10-18T07:02:35.1586703Z [36;1m([0m
+2026-10-18T07:02:35.1586857Z [36;1m  cd experiments/redesign/android-rust-bridge-lab/core[0m
+2026-10-18T07:02:35.1587371Z [36;1m  "$CARGO_TARGET_DIR/debug/uniffi-bindgen" generate --library "$CARGO_TARGET_DIR/debug/libmuyon_android_contract_bridge.so" --language kotlin --config uniffi.android.toml --out-dir "$RUNNER_TEMP/loop-generated" --no-format[0m
+2026-10-18T07:02:35.1587833Z [36;1m)[0m
+2026-10-18T07:02:35.1588086Z [36;1mgenerated="$RUNNER_TEMP/loop-generated/com/mightyoung/muyon/androidbridge/muyon_android_contract_bridge.kt"[0m
+2026-10-18T07:02:35.1588582Z [36;1mcmp "$generated" experiments/redesign/android-compose-lab/app/src/main/kotlin/com/mightyoung/muyon/androidbridge/muyon_android_contract_bridge.kt[0m
+2026-10-18T07:02:35.1588988Z [36;1mcp "$generated" "$RUNNER_TEMP/loop-scoped/generated-binding.kt"[0m
+2026-10-18T07:02:35.1589238Z [36;1mgit rev-parse HEAD > "$RUNNER_TEMP/loop-scoped/source-sha.txt"[0m
+2026-10-18T07:02:35.1589446Z [36;1mgit diff --exit-code[0m
+2026-10-18T07:02:35.1892861Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2026-10-18T07:02:35.1893115Z env:
+2026-10-18T07:02:35.1893307Z   JAVA_HOME: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.20-1/x64
+2026-10-18T07:02:35.1893582Z   JAVA_HOME_17_X64: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.20-1/x64
+2026-10-18T07:02:35.1893816Z ##[endgroup]
+2026-10-18T07:02:35.2422771Z info: syncing channel updates for 1.99.0-x86_64-unknown-linux-gnu
+2026-10-18T07:02:35.4968749Z info: latest update on 2026-10-01 for version 1.99.0 (b940084d7 2026-09-28)
+2026-10-18T07:02:35.4969245Z info: downloading 3 components
+2026-10-18T07:02:42.1059671Z 
+2026-10-18T07:02:42.1116739Z   1.99.0-x86_64-unknown-linux-gnu installed - rustc 1.99.0 (b940084d7 2026-09-28)
+2026-10-18T07:02:42.1116999Z 
+2026-10-18T07:02:42.1198743Z info: using existing install for 1.99.0-x86_64-unknown-linux-gnu
+2026-10-18T07:02:42.1205293Z info: default toolchain set to 1.99.0-x86_64-unknown-linux-gnu
+2026-10-18T07:02:42.1205440Z 
+2026-10-18T07:02:42.1256505Z   1.99.0-x86_64-unknown-linux-gnu unchanged - rustc 1.99.0 (b940084d7 2026-09-28)
+2026-10-18T07:02:42.1256785Z 
+2026-10-18T07:02:42.1611374Z test_answer_delta_byte_limit_is_1024 (test_contract.EventTests.test_answer_delta_byte_limit_is_1024) ... ok
+2026-10-18T07:02:42.1613346Z test_binder_loss_and_unknown_only_reconcile_never_resubmit (test_contract.EventTests.test_binder_loss_and_unknown_only_reconcile_never_resubmit) ... ok
+2026-10-18T07:02:42.1613903Z test_binder_loss_clears_answer_and_still_accepts_receipt_metadata (test_contract.EventTests.test_binder_loss_clears_answer_and_still_accepts_receipt_metadata) ... ok
+2026-10-18T07:02:42.1614418Z test_cancel_is_request_not_fabricated_terminal (test_contract.EventTests.test_cancel_is_request_not_fabricated_terminal) ... ok
+2026-10-18T07:02:42.1616072Z test_completion_requires_durable_success_receipt (test_contract.EventTests.test_completion_requires_durable_success_receipt) ... ok
+2026-10-18T07:02:42.1617138Z test_display_invalidation_clears_and_blocks_business_until_host_reauthorization (test_contract.EventTests.test_display_invalidation_clears_and_blocks_business_until_host_reauthorization) ... ok
+2026-10-18T07:02:42.1618101Z test_malformed_or_unbounded_events_atomic_rejection (test_contract.EventTests.test_malformed_or_unbounded_events_atomic_rejection) ... ok
+2026-10-18T07:02:42.1618906Z test_object_schema_version_required (test_contract.EventTests.test_object_schema_version_required) ... ok
+2026-10-18T07:02:42.1619895Z test_opaque_receipt_is_utf8_not_identifier (test_contract.EventTests.test_opaque_receipt_is_utf8_not_identifier) ... ok
+2026-10-18T07:02:42.1620566Z test_order_and_replay_are_deterministic (test_contract.EventTests.test_order_and_replay_are_deterministic) ... ok
+2026-10-18T07:02:42.1621248Z test_original_receipt_and_current_projection_separate (test_contract.EventTests.test_original_receipt_and_current_projection_separate) ... ok
+2026-10-18T07:02:42.1622136Z test_projection_requires_matching_object_revision_and_original_receipt (test_contract.EventTests.test_projection_requires_matching_object_revision_and_original_receipt) ... ok
+2026-10-18T07:02:42.1622726Z test_reconnect_lookup_uses_new_lease_without_rewriting_admitted_epoch (test_contract.EventTests.test_reconnect_lookup_uses_new_lease_without_rewriting_admitted_epoch) ... ok
+2026-10-18T07:02:42.1623257Z test_wrong_identity_stale_lease_and_run_cannot_mutate (test_contract.EventTests.test_wrong_identity_stale_lease_and_run_cannot_mutate) ... ok
+2026-10-18T07:02:42.1623734Z test_authority_and_transport_fields_never_accepted (test_contract.SubmissionTests.test_authority_and_transport_fields_never_accepted) ... ok
+2026-10-18T07:02:42.1624198Z test_missing_wrong_type_and_overflow_rejected (test_contract.SubmissionTests.test_missing_wrong_type_and_overflow_rejected) ... ok
+2026-10-18T07:02:42.1624689Z test_selected_supplier_only_and_no_path_like_identifiers (test_contract.SubmissionTests.test_selected_supplier_only_and_no_path_like_identifiers) ... ok
+2026-10-18T07:02:42.1625134Z test_typed_bounded_submission (test_contract.SubmissionTests.test_typed_bounded_submission) ... ok
+2026-10-18T07:02:42.1632109Z 
+2026-10-18T07:02:42.1632250Z ----------------------------------------------------------------------
+2026-10-18T07:02:42.1632555Z Ran 18 tests in 0.001s
+2026-10-18T07:02:42.1632735Z 
+2026-10-18T07:02:42.1632807Z OK
+2026-10-18T07:02:42.1910104Z     Updating crates.io index
+2026-10-18T07:02:42.3446085Z    Compiling muyon-core-agent-lab v0.1.0 (/home/runner/work/Muyon/Muyon/experiments/redesign/core-agent-lab/core)
+2026-10-18T07:02:42.5995934Z warning: suspicious definition of the runtime `read` symbol used by the standard library
+2026-10-18T07:02:42.5996557Z    --> /home/runner/work/Muyon/Muyon/experiments/redesign/core-agent-lab/core/src/host_session.rs:132:124
+2026-10-18T07:02:42.5996942Z     |
+2026-10-18T07:02:42.5997374Z 132 | ...ount: usize, timeout: i32) -> i32; fn read(fd: i32, buffer: *mut u8, count: usize) -> isize; fn write(fd: i32, buffer: *const u8...
+2026-10-18T07:02:42.5997896Z     |                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-10-18T07:02:42.5998172Z     |
+2026-10-18T07:02:42.5998468Z     = note: expected `unsafe extern "C" fn(i32, *mut c_void, usize) -> isize` (for the current target)
+2026-10-18T07:02:42.5999118Z             found    `unsafe extern "C" fn(i32, *mut u8, usize) -> isize`
+2026-10-18T07:02:42.5999687Z     = help: either fix the signature or remove any attributes like `#[unsafe(no_mangle)]`, `#[unsafe(export_name = "read")]`, or `#[link_name = "read"]`
+2026-10-18T07:02:42.6000228Z     = help: allow this lint if the signature is compatible
+2026-10-18T07:02:42.6000709Z     = note: `#[warn(suspicious_runtime_symbol_definitions)]` on by default
+2026-10-18T07:02:42.6000944Z 
+2026-10-18T07:02:42.6001153Z warning: suspicious definition of the runtime `write` symbol used by the standard library
+2026-10-18T07:02:42.6001907Z    --> /home/runner/work/Muyon/Muyon/experiments/redesign/core-agent-lab/core/src/host_session.rs:132:182
+2026-10-18T07:02:42.6002308Z     |
+2026-10-18T07:02:42.6002598Z 132 | ... *mut u8, count: usize) -> isize; fn write(fd: i32, buffer: *const u8, count: usize) -> isize; }
+2026-10-18T07:02:42.6003003Z     |                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-10-18T07:02:42.6003266Z     |
+2026-10-18T07:02:42.6003575Z     = note: expected `unsafe extern "C" fn(i32, *const c_void, usize) -> isize` (for the current target)
+2026-10-18T07:02:42.6004012Z             found    `unsafe extern "C" fn(i32, *const u8, usize) -> isize`
+2026-10-18T07:02:42.6004573Z     = help: either fix the signature or remove any attributes like `#[unsafe(no_mangle)]`, `#[unsafe(export_name = "write")]`, or `#[link_name = "write"]`
+2026-10-18T07:02:42.6005101Z     = help: allow this lint if the signature is compatible
+2026-10-18T07:02:42.6005292Z 
+2026-10-18T07:02:42.7134425Z    Compiling muyon-plugin-contract-lab v0.1.0 (/home/runner/work/Muyon/Muyon/experiments/redesign/plugin-contract-lab/core)
+2026-10-18T07:02:42.8994730Z    Compiling muyon-rust-agent-host-lab v0.1.0 (/home/runner/work/Muyon/Muyon/experiments/redesign/rust-agent-host-lab/core)
+2026-10-18T07:02:43.3306767Z warning: `muyon-core-agent-lab` (lib) generated 2 warnings
+2026-10-18T07:02:43.9275978Z     Finished `test` profile [unoptimized + debuginfo] target(s) in 1.75s
+2026-10-18T07:02:43.9289056Z      Running tests/supplier_business_controller.rs (/home/runner/work/_temp/loop-rust-target/debug/deps/supplier_business_controller-5348d60a828b97c1)
+2026-10-18T07:02:43.9301493Z 
+2026-10-18T07:02:43.9301791Z running 1 test
+2026-10-18T07:02:44.5000212Z test business_read_is_real_durable_and_reconnect_never_executes_again ... ok
+2026-10-18T07:02:44.5000522Z 
+2026-10-18T07:02:44.5000745Z test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.57s
+2026-10-18T07:02:44.5001054Z 
+2026-10-18T07:02:44.5003194Z      Running tests/supplier_lab_source.rs (/home/runner/work/_temp/loop-rust-target/debug/deps/supplier_lab_source-3593509b51bbca4b)
+2026-10-18T07:02:44.5015303Z 
+2026-10-18T07:02:44.5015386Z running 5 tests
+2026-10-18T07:02:44.5019140Z test cancellation_cannot_publish_or_create_receipt ... ok
+2026-10-18T07:02:44.5030929Z test symlink_synthetic_source_is_refused ... ok
+2026-10-18T07:02:44.5031371Z test ui_request_cannot_install_other_scope_or_source ... ok
+2026-10-18T07:02:44.8617726Z SYNTHETIC_REGISTERED_SUPPLIER_READ projection={"name":"合成供应商甲","supplier":{"key":"11111111-1111-4111-8111-111111111111","module_id":"inquiry","revision":"7","schema_version":1,"type":"supplier"}} receipt={"binding_id":"host-supplier-name-read","identity":"6d2de4b63afc5a2943e4d761f89b59fa","invocation_id":"i-2cb0a61619e78da29eb2136b5c51610a","owner":"ToolRegistry"}
+2026-10-18T07:02:44.8809044Z test synthetic_schema12_read_uses_same_run_original_durable_receipt ... ok
+2026-10-18T07:02:44.9302169Z test replay_revalidates_source_and_exact_projection_without_creating_new_receipt ... ok
+2026-10-18T07:02:44.9302797Z 
+2026-10-18T07:02:44.9303358Z test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.43s
+2026-10-18T07:02:44.9303793Z 
+2026-10-18T07:02:44.9308999Z      Running tests/supplier_store.rs (/home/runner/work/_temp/loop-rust-target/debug/deps/supplier_store-57d15bb408c5c647)
+2026-10-18T07:02:44.9319786Z 
+2026-10-18T07:02:44.9320114Z running 12 tests
+2026-10-18T07:02:46.1329308Z test authority_unavailable_during_registered_dispatch_revokes_publication ... ok
+2026-10-18T07:02:46.1330003Z test current_reads_reject_pinned_revision_drift_and_pending_or_revoked_authority ... ok
+2026-10-18T07:02:46.1341685Z test fixture_domain_contract_is_tied_to_actual_dart_schema_source ... ok
+2026-10-18T07:02:47.1354332Z test identity_and_request_shape_are_not_sql_or_path_authority ... ok
+2026-10-18T07:02:47.3843941Z test mode_change_and_symlink_ancestor_are_denied ... ok
+2026-10-18T07:02:47.4544372Z test current_projection_rereads_name_while_historical_receipt_identity_stays_original ... ok
+2026-10-18T07:02:48.4619963Z test replaced_file_symlinks_owner_mode_and_no_create_fail_closed ... ok
+2026-10-18T07:02:49.0183752Z BUSINESS_READ_EVIDENCE {"projection":{"name":"合成供应商甲","supplier":{"key":"11111111-1111-4111-8111-111111111111","module_id":"inquiry","revision":"7","schema_version":1,"type":"supplier"}},"receipt_ref":{"binding_id":"host-supplier-name-read","identity":"e0a17107bebab4f01b0fc69ec0475f1d","invocation_id":"i-4007ae856132cd3f6e8bc9ef8d5e41d4","owner":"ToolRegistry"}}
+2026-10-18T07:02:49.1032967Z test registered_read_yields_business_name_and_original_durable_receipt_without_business_write ... ok
+2026-10-18T07:02:50.1633319Z test same_revision_tamper_without_host_source_stamp_change_is_denied ... ok
+2026-10-18T07:02:50.2299134Z test meta_shape_and_storage_types_are_checked ... ok
+2026-10-18T07:02:50.3953285Z test actual_source_mutation_in_each_final_host_sample_denies_publication ... ok
+2026-10-18T07:02:50.4752470Z test unknown_schema_missing_deleted_malformed_and_oversized_sources_fail_closed ... ok
+2026-10-18T07:02:50.4752800Z 
+2026-10-18T07:02:50.4753016Z test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 5.54s
+2026-10-18T07:02:50.4753289Z 
+2026-10-18T07:02:50.4929782Z warning: suspicious definition of the runtime `read` symbol used by the standard library
+2026-10-18T07:02:50.4930242Z    --> /home/runner/work/Muyon/Muyon/experiments/redesign/core-agent-lab/core/src/host_session.rs:132:124
+2026-10-18T07:02:50.4930501Z     |
+2026-10-18T07:02:50.4930845Z 132 | ...ount: usize, timeout: i32) -> i32; fn read(fd: i32, buffer: *mut u8, count: usize) -> isize; fn write(fd: i32, buffer: *const u8...
+2026-10-18T07:02:50.4931190Z     |                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-10-18T07:02:50.4931409Z     |
+2026-10-18T07:02:50.4931873Z     = note: expected `unsafe extern "C" fn(i32, *mut c_void, usize) -> isize` (for the current target)
+2026-10-18T07:02:50.4932319Z             found    `unsafe extern "C" fn(i32, *mut u8, usize) -> isize`
+2026-10-18T07:02:50.4932854Z     = help: either fix the signature or remove any attributes like `#[unsafe(no_mangle)]`, `#[unsafe(export_name = "read")]`, or `#[link_name = "read"]`
+2026-10-18T07:02:50.4933208Z     = help: allow this lint if the signature is compatible
+2026-10-18T07:02:50.4933440Z     = note: `#[warn(suspicious_runtime_symbol_definitions)]` on by default
+2026-10-18T07:02:50.4933589Z 
+2026-10-18T07:02:50.4933724Z warning: suspicious definition of the runtime `write` symbol used by the standard library
+2026-10-18T07:02:50.4934060Z    --> /home/runner/work/Muyon/Muyon/experiments/redesign/core-agent-lab/core/src/host_session.rs:132:182
+2026-10-18T07:02:50.4934307Z     |
+2026-10-18T07:02:50.4934499Z 132 | ... *mut u8, count: usize) -> isize; fn write(fd: i32, buffer: *const u8, count: usize) -> isize; }
+2026-10-18T07:02:50.4934758Z     |                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-10-18T07:02:50.4934931Z     |
+2026-10-18T07:02:50.4935125Z     = note: expected `unsafe extern "C" fn(i32, *const c_void, usize) -> isize` (for the current target)
+2026-10-18T07:02:50.4935395Z             found    `unsafe extern "C" fn(i32, *const u8, usize) -> isize`
+2026-10-18T07:02:50.4935990Z     = help: either fix the signature or remove any attributes like `#[unsafe(no_mangle)]`, `#[unsafe(export_name = "write")]`, or `#[link_name = "write"]`
+2026-10-18T07:02:50.4936328Z     = help: allow this lint if the signature is compatible
+2026-10-18T07:02:50.4936450Z 
+2026-10-18T07:02:50.4936536Z warning: `muyon-core-agent-lab` (lib) generated 2 warnings
+2026-10-18T07:02:50.4936863Z    Compiling muyon-rust-agent-host-lab v0.1.0 (/home/runner/work/Muyon/Muyon/experiments/redesign/rust-agent-host-lab/core)
+2026-10-18T07:02:51.1763563Z     Finished `test` profile [unoptimized + debuginfo] target(s) in 0.69s
+2026-10-18T07:02:51.1765270Z      Running unittests src/lib.rs (/home/runner/work/_temp/loop-rust-target/debug/deps/muyon_rust_agent_host_lab-1052fe828ffb81af)
+2026-10-18T07:02:51.1777025Z 
+2026-10-18T07:02:51.1777102Z running 3 tests
+2026-10-18T07:02:51.1906841Z test supplier_business::terminal_regressions::task_identity_is_durable_before_dispatch_creates_a_receipt ... ok
+2026-10-18T07:02:51.1908056Z test supplier_business::terminal_regressions::failed_final_ledger_is_unknown_terminal_not_pending_or_completed ... ok
+2026-10-18T07:02:51.1919186Z test supplier_business::terminal_regressions::interrupted_receipt_survives_restart_without_projection_or_new_receipt ... ok
+2026-10-18T07:02:51.1919579Z 
+2026-10-18T07:02:51.1919779Z test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 7 filtered out; finished in 0.01s
+2026-10-18T07:02:51.1919961Z 
+2026-10-18T07:02:51.1947690Z test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 7 filtered out; finished in 0.01s
+2026-10-18T07:02:51.2067437Z     Updating crates.io index
+2026-10-18T07:02:51.5021720Z  Downloading crates ...
+2026-10-18T07:02:51.6563978Z   Downloaded askama_macros v0.16.1
+2026-10-18T07:02:51.6600246Z   Downloaded anstyle v1.0.14
+2026-10-18T07:02:51.6638740Z   Downloaded anyhow v1.0.104
+2026-10-18T07:02:51.6759645Z   Downloaded askama v0.16.1
+2026-10-18T07:02:51.6822527Z   Downloaded equivalent v1.0.3
+2026-10-18T07:02:51.6835915Z   Downloaded scroll_derive v0.12.1
+2026-10-18T07:02:51.6888809Z   Downloaded errno v0.3.14
+2026-10-18T07:02:51.6933243Z   Downloaded strsim v0.11.1
+2026-10-18T07:02:51.6962053Z   Downloaded serde_spanned v1.1.2
+2026-10-18T07:02:51.7062635Z   Downloaded percent-encoding v2.3.2
+2026-10-18T07:02:51.7068754Z   Downloaded uniffi_internal_macros v0.32.2
+2026-10-18T07:02:51.7105555Z   Downloaded siphasher v1.0.4
+2026-10-18T07:02:51.7117763Z   Downloaded cfg-if v1.0.5
+2026-10-18T07:02:51.7127326Z   Downloaded itoa v1.0.18
+2026-10-18T07:02:51.7168492Z   Downloaded heck v0.5.0
+2026-10-18T07:02:51.7179413Z   Downloaded cargo-platform v0.3.2
+2026-10-18T07:02:51.7188273Z   Downloaded clap_lex v1.1.1
+2026-10-18T07:02:51.7287435Z   Downloaded plain v0.2.3
+2026-10-18T07:02:51.7296047Z   Downloaded rustc-hash v2.1.3
+2026-10-18T07:02:51.7326000Z   Downloaded uniffi_pipeline v0.32.2
+2026-10-18T07:02:51.7333293Z   Downloaded toml_writer v1.1.3+spec-1.1.0
+2026-10-18T07:02:51.7343816Z   Downloaded scroll v0.12.0
+2026-10-18T07:02:51.7354330Z   Downloaded smawk v0.3.3
+2026-10-18T07:02:51.7366381Z   Downloaded static_assertions v1.1.0
+2026-10-18T07:02:51.7377488Z   Downloaded autocfg v1.5.1
+2026-10-18T07:02:51.7391486Z   Downloaded thiserror-impl v2.0.21
+2026-10-18T07:02:51.7401875Z   Downloaded zmij v1.0.23
+2026-10-18T07:02:51.7415276Z   Downloaded fastrand v2.5.0
+2026-10-18T07:02:51.7425305Z   Downloaded fs-err v3.3.2
+2026-10-18T07:02:51.7444568Z   Downloaded toml_datetime v1.1.2+spec-1.1.0
+2026-10-18T07:02:51.7454035Z   Downloaded uniffi_meta v0.32.2
+2026-10-18T07:02:51.7462313Z   Downloaded weedle2 v5.0.0
+2026-10-18T07:02:51.7474041Z   Downloaded thiserror v2.0.21
+2026-10-18T07:02:51.7527964Z   Downloaded askama_derive v0.16.1
+2026-10-18T07:02:51.7558884Z   Downloaded clap_derive v4.6.7
+2026-10-18T07:02:51.7575839Z   Downloaded cargo_metadata v0.23.1
+2026-10-18T07:02:51.7589273Z   Downloaded uniffi v0.32.2
+2026-10-18T07:02:51.7602335Z   Downloaded once_cell v1.21.4
+2026-10-18T07:02:51.7623028Z   Downloaded quote v1.0.47
+2026-10-18T07:02:51.7643531Z   Downloaded tempfile v3.27.0
+2026-10-18T07:02:51.7662565Z   Downloaded uniffi_udl v0.32.2
+2026-10-18T07:02:51.7673579Z   Downloaded camino v1.2.6
+2026-10-18T07:02:51.7685181Z   Downloaded semver v1.0.28
+2026-10-18T07:02:51.7702158Z   Downloaded toml_parser v1.1.5+spec-1.1.0
+2026-10-18T07:02:51.7718944Z   Downloaded unicode-ident v1.0.27
+2026-10-18T07:02:51.7739809Z   Downloaded glob v0.3.4
+2026-10-18T07:02:51.7752412Z   Downloaded basic-toml v0.1.10
+2026-10-18T07:02:51.7836670Z   Downloaded uniffi_core v0.32.2
+2026-10-18T07:02:51.7856423Z   Downloaded bitflags v2.13.2
+2026-10-18T07:02:51.7890690Z   Downloaded getrandom v0.4.3
+2026-10-18T07:02:51.7919425Z   Downloaded log v0.4.34
+2026-10-18T07:02:51.7937586Z   Downloaded serde_core v1.0.229
+2026-10-18T07:02:51.7958775Z   Downloaded serde_derive v1.0.229
+2026-10-18T07:02:51.7980783Z   Downloaded textwrap v0.16.4
+2026-10-18T07:02:51.7999395Z   Downloaded toml v1.1.8+spec-1.1.0
+2026-10-18T07:02:51.8029719Z   Downloaded proc-macro2 v1.0.107
+2026-10-18T07:02:51.8051185Z   Downloaded uniffi_macros v0.32.2
+2026-10-18T07:02:51.8068024Z   Downloaded askama_parser v0.16.1
+2026-10-18T07:02:51.8099740Z   Downloaded bytes v1.12.1
+2026-10-18T07:02:51.8125595Z   Downloaded clap v4.6.7
+2026-10-18T07:02:51.8198017Z   Downloaded serde v1.0.229
+2026-10-18T07:02:51.8223465Z   Downloaded memchr v2.8.3
+2026-10-18T07:02:51.8265807Z   Downloaded minimal-lexical v0.2.1
+2026-10-18T07:02:51.8299142Z   Downloaded indexmap v2.14.2
+2026-10-18T07:02:51.8330150Z   Downloaded clap_builder v4.6.7
+2026-10-18T07:02:51.8377154Z   Downloaded nom v7.1.3
+2026-10-18T07:02:51.8414504Z   Downloaded hashbrown v0.17.1
+2026-10-18T07:02:51.8454647Z   Downloaded serde_json v1.0.154
+2026-10-18T07:02:51.8508958Z   Downloaded winnow v1.0.4
+2026-10-18T07:02:51.8581195Z   Downloaded goblin v0.8.2
+2026-10-18T07:02:51.8623458Z   Downloaded uniffi_bindgen v0.32.2
+2026-10-18T07:02:51.8762240Z   Downloaded unicode-width v0.2.2
+2026-10-18T07:02:51.8803098Z   Downloaded syn v2.0.119
+2026-10-18T07:02:51.8880920Z   Downloaded syn v3.0.9
+2026-10-18T07:02:51.8959320Z   Downloaded rustix v1.1.5
+2026-10-18T07:02:51.9161969Z   Downloaded libc v0.2.190
+2026-10-18T07:02:51.9527478Z   Downloaded linux-raw-sys v0.12.1
+2026-10-18T07:02:52.0231178Z    Compiling proc-macro2 v1.0.107
+2026-10-18T07:02:52.0231868Z    Compiling unicode-ident v1.0.27
+2026-10-18T07:02:52.0232262Z    Compiling quote v1.0.47
+2026-10-18T07:02:52.0232601Z    Compiling serde_core v1.0.229
+2026-10-18T07:02:52.1263074Z    Compiling libc v0.2.190
+2026-10-18T07:02:52.3132802Z    Compiling anyhow v1.0.104
+2026-10-18T07:02:52.4213659Z    Compiling serde v1.0.229
+2026-10-18T07:02:52.6374242Z    Compiling syn v3.0.9
+2026-10-18T07:02:52.6479419Z    Compiling syn v2.0.119
+2026-10-18T07:02:53.5443137Z    Compiling rustix v1.1.5
+2026-10-18T07:02:53.5940711Z    Compiling hashbrown v0.17.1
+2026-10-18T07:02:53.6772799Z    Compiling equivalent v1.0.3
+2026-10-18T07:02:53.7083172Z    Compiling getrandom v0.4.3
+2026-10-18T07:02:54.1603559Z    Compiling cfg-if v1.0.5
+2026-10-18T07:02:54.1805994Z    Compiling once_cell v1.21.4
+2026-10-18T07:02:54.2698302Z    Compiling linux-raw-sys v0.12.1
+2026-10-18T07:02:54.4739666Z    Compiling heck v0.5.0
+2026-10-18T07:02:54.4862960Z    Compiling memchr v2.8.3
+2026-10-18T07:02:54.5613463Z    Compiling bitflags v2.13.2
+2026-10-18T07:02:54.8602692Z    Compiling winnow v1.0.4
+2026-10-18T07:02:55.0193022Z    Compiling serde_derive v1.0.229
+2026-10-18T07:02:55.6672665Z    Compiling indexmap v2.14.2
+2026-10-18T07:02:55.6893396Z    Compiling fastrand v2.5.0
+2026-10-18T07:02:55.8073423Z    Compiling tempfile v3.27.0
+2026-10-18T07:02:56.0032874Z    Compiling rustc-hash v2.1.3
+2026-10-18T07:02:56.0413709Z    Compiling autocfg v1.5.1
+2026-10-18T07:02:56.0540194Z    Compiling uniffi_internal_macros v0.32.2
+2026-10-18T07:02:56.1872799Z    Compiling siphasher v1.0.4
+2026-10-18T07:02:56.2135813Z    Compiling zmij v1.0.23
+2026-10-18T07:02:56.2696557Z    Compiling fs-err v3.3.2
+2026-10-18T07:02:56.3249959Z    Compiling thiserror v2.0.21
+2026-10-18T07:02:56.4613968Z    Compiling glob v0.3.4
+2026-10-18T07:02:56.5743527Z    Compiling itoa v1.0.18
+2026-10-18T07:02:56.6482757Z    Compiling serde_json v1.0.154
+2026-10-18T07:02:56.6633349Z    Compiling camino v1.2.6
+2026-10-18T07:02:56.7063827Z    Compiling minimal-lexical v0.2.1
+2026-10-18T07:02:56.7682763Z    Compiling toml_writer v1.1.3+spec-1.1.0
+2026-10-18T07:02:56.7923009Z    Compiling uniffi_pipeline v0.32.2
+2026-10-18T07:02:56.8252856Z    Compiling nom v7.1.3
+2026-10-18T07:02:56.9434251Z    Compiling scroll_derive v0.12.1
+2026-10-18T07:02:57.0742840Z    Compiling thiserror-impl v2.0.21
+2026-10-18T07:02:57.2508536Z    Compiling basic-toml v0.1.10
+2026-10-18T07:02:57.2563045Z    Compiling askama_parser v0.16.1
+2026-10-18T07:02:57.8152605Z    Compiling smawk v0.3.3
+2026-10-18T07:02:57.8952936Z    Compiling textwrap v0.16.4
+2026-10-18T07:02:57.9052957Z    Compiling weedle2 v5.0.0
+2026-10-18T07:02:58.0782499Z    Compiling toml_parser v1.1.5+spec-1.1.0
+2026-10-18T07:02:58.1572864Z    Compiling scroll v0.12.0
+2026-10-18T07:02:58.9828687Z    Compiling uniffi_meta v0.32.2
+2026-10-18T07:02:59.2004618Z    Compiling askama_derive v0.16.1
+2026-10-18T07:02:59.4912791Z    Compiling serde_spanned v1.1.2
+2026-10-18T07:02:59.5476213Z    Compiling toml_datetime v1.1.2+spec-1.1.0
+2026-10-18T07:02:59.7352903Z    Compiling cargo-platform v0.3.2
+2026-10-18T07:02:59.7832582Z    Compiling semver v1.0.28
+2026-10-18T07:02:59.9374280Z    Compiling plain v0.2.3
+2026-10-18T07:02:59.9694500Z    Compiling log v0.4.34
+2026-10-18T07:02:59.9802985Z    Compiling strsim v0.11.1
+2026-10-18T07:03:00.0052769Z    Compiling clap_lex v1.1.1
+2026-10-18T07:03:00.0443469Z    Compiling anstyle v1.0.14
+2026-10-18T07:03:00.0860703Z    Compiling goblin v0.8.2
+2026-10-18T07:03:00.1420688Z    Compiling clap_builder v4.6.7
+2026-10-18T07:03:00.1493316Z    Compiling toml v1.1.8+spec-1.1.0
+2026-10-18T07:03:00.9382800Z    Compiling cargo_metadata v0.23.1
+2026-10-18T07:03:01.4893442Z    Compiling askama_macros v0.16.1
+2026-10-18T07:03:01.6362569Z    Compiling askama v0.16.1
+2026-10-18T07:03:02.0722988Z    Compiling uniffi_udl v0.32.2
+2026-10-18T07:03:02.5482831Z    Compiling clap_derive v4.6.7
+2026-10-18T07:03:02.5973000Z    Compiling static_assertions v1.1.0
+2026-10-18T07:03:02.6175470Z    Compiling muyon-core-agent-lab v0.1.0 (/home/runner/work/Muyon/Muyon/experiments/redesign/core-agent-lab/core)
+2026-10-18T07:03:02.6251439Z    Compiling bytes v1.12.1
+2026-10-18T07:03:02.6772977Z    Compiling uniffi_macros v0.32.2
+2026-10-18T07:03:02.9953518Z    Compiling uniffi_core v0.32.2
+2026-10-18T07:03:03.0266541Z warning: suspicious definition of the runtime `read` symbol used by the standard library
+2026-10-18T07:03:03.0292724Z    --> /home/runner/work/Muyon/Muyon/experiments/redesign/core-agent-lab/core/src/host_session.rs:132:124
+2026-10-18T07:03:03.0322207Z     |
+2026-10-18T07:03:03.0343076Z 132 | ...ount: usize, timeout: i32) -> i32; fn read(fd: i32, buffer: *mut u8, count: usize) -> isize; fn write(fd: i32, buffer: *const u8...
+2026-10-18T07:03:03.0352223Z     |                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-10-18T07:03:03.0382118Z     |
+2026-10-18T07:03:03.0412453Z     = note: expected `unsafe extern "C" fn(i32, *mut c_void, usize) -> isize` (for the current target)
+2026-10-18T07:03:03.0413147Z             found    `unsafe extern "C" fn(i32, *mut u8, usize) -> isize`
+2026-10-18T07:03:03.0442488Z     = help: either fix the signature or remove any attributes like `#[unsafe(no_mangle)]`, `#[unsafe(export_name = "read")]`, or `#[link_name = "read"]`
+2026-10-18T07:03:03.0472202Z     = help: allow this lint if the signature is compatible
+2026-10-18T07:03:03.0502177Z     = note: `#[warn(suspicious_runtime_symbol_definitions)]` on by default
+2026-10-18T07:03:03.0502725Z 
+2026-10-18T07:03:03.0532467Z warning: suspicious definition of the runtime `write` symbol used by the standard library
+2026-10-18T07:03:03.0562514Z    --> /home/runner/work/Muyon/Muyon/experiments/redesign/core-agent-lab/core/src/host_session.rs:132:182
+2026-10-18T07:03:03.0564114Z     |
+2026-10-18T07:03:03.0592857Z 132 | ... *mut u8, count: usize) -> isize; fn write(fd: i32, buffer: *const u8, count: usize) -> isize; }
+2026-10-18T07:03:03.0622127Z     |                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-10-18T07:03:03.0652014Z     |
+2026-10-18T07:03:03.0652585Z     = note: expected `unsafe extern "C" fn(i32, *const c_void, usize) -> isize` (for the current target)
+2026-10-18T07:03:03.0682167Z             found    `unsafe extern "C" fn(i32, *const u8, usize) -> isize`
+2026-10-18T07:03:03.0712324Z     = help: either fix the signature or remove any attributes like `#[unsafe(no_mangle)]`, `#[unsafe(export_name = "write")]`, or `#[link_name = "write"]`
+2026-10-18T07:03:03.0732083Z     = help: allow this lint if the signature is compatible
+2026-10-18T07:03:03.0741945Z 
+2026-10-18T07:03:03.2009116Z    Compiling muyon-plugin-contract-lab v0.1.0 (/home/runner/work/Muyon/Muyon/experiments/redesign/plugin-contract-lab/core)
+2026-10-18T07:03:03.5493493Z    Compiling clap v4.6.7
+2026-10-18T07:03:03.5770343Z    Compiling uniffi_bindgen v0.32.2
+2026-10-18T07:03:03.6103130Z    Compiling muyon-android-contract-bridge-lab v0.1.0 (/home/runner/work/Muyon/Muyon/experiments/redesign/android-rust-bridge-lab/core)
+2026-10-18T07:03:03.6807904Z    Compiling muyon-rust-agent-host-lab v0.1.0 (/home/runner/work/Muyon/Muyon/experiments/redesign/rust-agent-host-lab/core)
+2026-10-18T07:03:03.7529669Z warning: `muyon-core-agent-lab` (lib) generated 2 warnings
+2026-10-18T07:03:13.8258129Z    Compiling uniffi v0.32.2
+2026-10-18T07:03:16.3901717Z     Finished `dev` profile [unoptimized] target(s) in 25.18s
+2026-10-18T07:03:16.9854829Z ##[group]Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+2026-10-18T07:03:16.9855056Z with:
+2026-10-18T07:03:16.9855172Z   name: loop-scoped
+2026-10-18T07:03:16.9855304Z   path: /home/runner/work/_temp/loop-scoped
+2026-10-18T07:03:16.9855463Z   if-no-files-found: warn
+2026-10-18T07:03:16.9855598Z   compression-level: 6
+2026-10-18T07:03:16.9855718Z   overwrite: false
+2026-10-18T07:03:16.9855842Z   include-hidden-files: false
+2026-10-18T07:03:16.9855971Z env:
+2026-10-18T07:03:16.9856132Z   JAVA_HOME: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.20-1/x64
+2026-10-18T07:03:16.9856389Z   JAVA_HOME_17_X64: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.20-1/x64
+2026-10-18T07:03:16.9856588Z ##[endgroup]
+2026-10-18T07:03:17.0971389Z (node:3768) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-18T07:03:17.0972956Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-18T07:03:17.1028590Z With the provided path, there will be 6 files uploaded
+2026-10-18T07:03:17.1029042Z Artifact name is valid!
+2026-10-18T07:03:17.1029256Z Root directory input is valid!
+2026-10-18T07:03:17.3751395Z Beginning upload of artifact content to blob storage
+2026-10-18T07:03:17.3948050Z (node:3768) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+2026-10-18T07:03:17.5567529Z Uploaded bytes 25570
+2026-10-18T07:03:17.5985604Z Finished uploading artifact content to blob storage!
+2026-10-18T07:03:17.5985964Z SHA256 digest of uploaded artifact zip is 0ce6c50dbe5c7feb397121635a6ac02cb2235368c766b503b4423a4014a1bce1
+2026-10-18T07:03:17.5986501Z Finalizing artifact upload
+2026-10-18T07:03:17.8182433Z Artifact loop-scoped.zip successfully finalized. Artifact ID 12128512817
+2026-10-18T07:03:17.8183155Z Artifact loop-scoped has been successfully uploaded! Final size is 25570 bytes. Artifact ID is 12128512817
+2026-10-18T07:03:17.8188345Z Artifact download URL: https://github.com/mightyoung/Muyon/actions/runs/39106124839/artifacts/12128512817
+2026-10-18T07:03:17.8492108Z Post job cleanup.
+2026-10-18T07:03:17.9356158Z (node:3781) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-18T07:03:17.9356623Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-18T07:03:17.9714435Z Post job cleanup.
+2026-10-18T07:03:18.0297623Z [command]/usr/bin/git version
+2026-10-18T07:03:18.0331473Z git version 2.55.0
+2026-10-18T07:03:18.0356137Z Temporarily overriding HOME='/home/runner/work/_temp/9da15008-732a-4b51-9d0b-7d05d2c5d5e9' before making global git config changes
+2026-10-18T07:03:18.0356825Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-18T07:03:18.0360338Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/Muyon/Muyon
+2026-10-18T07:03:18.0393429Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-18T07:03:18.0449165Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-18T07:03:18.0656533Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-18T07:03:18.0694488Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-18T07:03:18.1010289Z Cleaning up orphan processes
+2026-10-18T07:03:18.1217432Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683, actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00, actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+

@@ -1,0 +1,15 @@
+{
+  "sdk": "26",
+  "abi": "x86_64",
+  "boot": "1",
+  "app": {
+    "path": "/data/app/com.mightyoung.muyon.product-BhUJJrckG_VrKRbH1qhyAw==/base.apk",
+    "installed_apk_sha256": "8901f7c67f548d056d0a897845a2e2cfe6a28f2f2a661be7bd92695ad7b50d28"
+  },
+  "test": {
+    "path": "/data/app/com.mightyoung.muyon.product.test-NivxmTu0jFJfTGEqpIyN3w==/base.apk",
+    "installed_apk_sha256": "7285891c4b2160de15af85d505fac3d3cafada62876201ecccd2c659fd4d4726"
+  },
+  "identity_records": 4,
+  "boundary": "read-only independent getprop/pm path/sha256sum/logcat through reviewed raw standard platform transport; no installation/test/business mutation"
+}

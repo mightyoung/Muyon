@@ -1,0 +1,491 @@
+{
+  "results": [
+    [
+      "relocated_prolog_pi",
+      {
+        "status": "pass",
+        "reasons": [],
+        "source_manifest": [
+          {
+            "name": "[Content_Types].xml",
+            "size": 1079,
+            "sha256": "e34a80dd379deff3fbd1abb9a461aa5af352f92274c4041513607fe2433e430a"
+          },
+          {
+            "name": "_rels/.rels",
+            "size": 240,
+            "sha256": "fc5715a86467973c771fed6cf49203ed48734dcbd0f24088be6bbb6e290cd7b5"
+          },
+          {
+            "name": "custom/original.bin",
+            "size": 33,
+            "sha256": "d6fdff43e49c2841433bca98eadba1beeb7cb768144cec4446eb30cf6659fbac"
+          },
+          {
+            "name": "xl/_rels/workbook.xml.rels",
+            "size": 509,
+            "sha256": "30b8d159cb4a0dcd6356b1da2d21ba7858ba27926ee0f025f8455055b8295f26"
+          },
+          {
+            "name": "xl/comments/comment1.xml",
+            "size": 242,
+            "sha256": "226eeb71fa3aeb78772787ecdc7d8f6de231f1b98a86ded1cde97dab95025a72"
+          },
+          {
+            "name": "xl/drawings/comments.vml",
+            "size": 731,
+            "sha256": "b31793b08fcdf3a8586bedbee0a2b963c8f1b5e604a441138ef36c0f0258dc4c"
+          },
+          {
+            "name": "xl/styles.xml",
+            "size": 674,
+            "sha256": "2560f56e733e073607171974d686a41c1771db7b512414aa797f4aef2f6a00ad"
+          },
+          {
+            "name": "xl/workbook.xml",
+            "size": 465,
+            "sha256": "9d5ca20524d1bc6b299da8150786a99514dfc883370865bdbd5ba5ceae1a3edb"
+          },
+          {
+            "name": "xl/worksheets/_rels/sheet1.xml.rels",
+            "size": 388,
+            "sha256": "377165d0a28ffe7b123cddab89236076be63d69cfafe7c5ebfc46a1eec19af7f"
+          },
+          {
+            "name": "xl/worksheets/sheet1.xml",
+            "size": 679,
+            "sha256": "9622f64eb9ba748aea63e8d6ef6a7dfb64ff1a359296e4a94285860afaeb021c"
+          },
+          {
+            "name": "xl/worksheets/sheet2.xml",
+            "size": 194,
+            "sha256": "19683e1289f459571b6f371f0e5897e4451fa2fa10850b91815d0af0dc219868"
+          }
+        ],
+        "candidate_sha256": "e6f4691d33d4ea829ab984d63c54617eb4cc7d9e0bf47edf955089c61063720a",
+        "candidate_manifest": [
+          {
+            "name": "[Content_Types].xml",
+            "size": 1079,
+            "sha256": "e34a80dd379deff3fbd1abb9a461aa5af352f92274c4041513607fe2433e430a"
+          },
+          {
+            "name": "_rels/.rels",
+            "size": 240,
+            "sha256": "fc5715a86467973c771fed6cf49203ed48734dcbd0f24088be6bbb6e290cd7b5"
+          },
+          {
+            "name": "custom/original.bin",
+            "size": 33,
+            "sha256": "d6fdff43e49c2841433bca98eadba1beeb7cb768144cec4446eb30cf6659fbac"
+          },
+          {
+            "name": "xl/_rels/workbook.xml.rels",
+            "size": 509,
+            "sha256": "30b8d159cb4a0dcd6356b1da2d21ba7858ba27926ee0f025f8455055b8295f26"
+          },
+          {
+            "name": "xl/comments/comment1.xml",
+            "size": 242,
+            "sha256": "226eeb71fa3aeb78772787ecdc7d8f6de231f1b98a86ded1cde97dab95025a72"
+          },
+          {
+            "name": "xl/drawings/comments.vml",
+            "size": 731,
+            "sha256": "b31793b08fcdf3a8586bedbee0a2b963c8f1b5e604a441138ef36c0f0258dc4c"
+          },
+          {
+            "name": "xl/styles.xml",
+            "size": 674,
+            "sha256": "2560f56e733e073607171974d686a41c1771db7b512414aa797f4aef2f6a00ad"
+          },
+          {
+            "name": "xl/workbook.xml",
+            "size": 465,
+            "sha256": "9d5ca20524d1bc6b299da8150786a99514dfc883370865bdbd5ba5ceae1a3edb"
+          },
+          {
+            "name": "xl/worksheets/_rels/sheet1.xml.rels",
+            "size": 388,
+            "sha256": "377165d0a28ffe7b123cddab89236076be63d69cfafe7c5ebfc46a1eec19af7f"
+          },
+          {
+            "name": "xl/worksheets/sheet1.xml",
+            "size": 679,
+            "sha256": "6f56bc6195307a45ca173206449da53b35065f63ab715416bc09e1270611627c"
+          },
+          {
+            "name": "xl/worksheets/sheet2.xml",
+            "size": 194,
+            "sha256": "19683e1289f459571b6f371f0e5897e4451fa2fa10850b91815d0af0dc219868"
+          }
+        ]
+      }
+    ],
+    [
+      "protected",
+      "ValueError:protected_or_unsupported_worksheet"
+    ],
+    [
+      "unknown_namespace",
+      "ValueError:unknown_worksheet_namespace_unsupported"
+    ],
+    [
+      "namespace_attribute",
+      "ValueError:namespace_attribute_unsupported"
+    ],
+    [
+      "hidden_row",
+      "ACCEPTED"
+    ],
+    [
+      "hidden_column",
+      "ACCEPTED"
+    ],
+    [
+      "corrupt",
+      {
+        "status": "fail",
+        "reasons": [
+          "candidate_preflight_rejected"
+        ],
+        "source_manifest": [
+          {
+            "name": "[Content_Types].xml",
+            "size": 1079,
+            "sha256": "e34a80dd379deff3fbd1abb9a461aa5af352f92274c4041513607fe2433e430a"
+          },
+          {
+            "name": "_rels/.rels",
+            "size": 240,
+            "sha256": "fc5715a86467973c771fed6cf49203ed48734dcbd0f24088be6bbb6e290cd7b5"
+          },
+          {
+            "name": "custom/original.bin",
+            "size": 33,
+            "sha256": "d6fdff43e49c2841433bca98eadba1beeb7cb768144cec4446eb30cf6659fbac"
+          },
+          {
+            "name": "xl/_rels/workbook.xml.rels",
+            "size": 509,
+            "sha256": "30b8d159cb4a0dcd6356b1da2d21ba7858ba27926ee0f025f8455055b8295f26"
+          },
+          {
+            "name": "xl/comments/comment1.xml",
+            "size": 242,
+            "sha256": "226eeb71fa3aeb78772787ecdc7d8f6de231f1b98a86ded1cde97dab95025a72"
+          },
+          {
+            "name": "xl/drawings/comments.vml",
+            "size": 731,
+            "sha256": "b31793b08fcdf3a8586bedbee0a2b963c8f1b5e604a441138ef36c0f0258dc4c"
+          },
+          {
+            "name": "xl/styles.xml",
+            "size": 674,
+            "sha256": "2560f56e733e073607171974d686a41c1771db7b512414aa797f4aef2f6a00ad"
+          },
+          {
+            "name": "xl/workbook.xml",
+            "size": 465,
+            "sha256": "9d5ca20524d1bc6b299da8150786a99514dfc883370865bdbd5ba5ceae1a3edb"
+          },
+          {
+            "name": "xl/worksheets/_rels/sheet1.xml.rels",
+            "size": 388,
+            "sha256": "377165d0a28ffe7b123cddab89236076be63d69cfafe7c5ebfc46a1eec19af7f"
+          },
+          {
+            "name": "xl/worksheets/sheet1.xml",
+            "size": 628,
+            "sha256": "82328aa68bebf1e2bd45f3d7010a1b4486a682b7f8c2438aec52f6b96f820bc3"
+          },
+          {
+            "name": "xl/worksheets/sheet2.xml",
+            "size": 194,
+            "sha256": "19683e1289f459571b6f371f0e5897e4451fa2fa10850b91815d0af0dc219868"
+          }
+        ],
+        "candidate_sha256": "8e0e99226f1dfa2bf0ae46eaa52debd680586e35f56af211213fae04399c61b4",
+        "candidate_manifest": []
+      }
+    ],
+    [
+      "malformed_target",
+      {
+        "status": "fail",
+        "reasons": [
+          "candidate_preflight_rejected"
+        ],
+        "source_manifest": [
+          {
+            "name": "[Content_Types].xml",
+            "size": 1079,
+            "sha256": "e34a80dd379deff3fbd1abb9a461aa5af352f92274c4041513607fe2433e430a"
+          },
+          {
+            "name": "_rels/.rels",
+            "size": 240,
+            "sha256": "fc5715a86467973c771fed6cf49203ed48734dcbd0f24088be6bbb6e290cd7b5"
+          },
+          {
+            "name": "custom/original.bin",
+            "size": 33,
+            "sha256": "d6fdff43e49c2841433bca98eadba1beeb7cb768144cec4446eb30cf6659fbac"
+          },
+          {
+            "name": "xl/_rels/workbook.xml.rels",
+            "size": 509,
+            "sha256": "30b8d159cb4a0dcd6356b1da2d21ba7858ba27926ee0f025f8455055b8295f26"
+          },
+          {
+            "name": "xl/comments/comment1.xml",
+            "size": 242,
+            "sha256": "226eeb71fa3aeb78772787ecdc7d8f6de231f1b98a86ded1cde97dab95025a72"
+          },
+          {
+            "name": "xl/drawings/comments.vml",
+            "size": 731,
+            "sha256": "b31793b08fcdf3a8586bedbee0a2b963c8f1b5e604a441138ef36c0f0258dc4c"
+          },
+          {
+            "name": "xl/styles.xml",
+            "size": 674,
+            "sha256": "2560f56e733e073607171974d686a41c1771db7b512414aa797f4aef2f6a00ad"
+          },
+          {
+            "name": "xl/workbook.xml",
+            "size": 465,
+            "sha256": "9d5ca20524d1bc6b299da8150786a99514dfc883370865bdbd5ba5ceae1a3edb"
+          },
+          {
+            "name": "xl/worksheets/_rels/sheet1.xml.rels",
+            "size": 388,
+            "sha256": "377165d0a28ffe7b123cddab89236076be63d69cfafe7c5ebfc46a1eec19af7f"
+          },
+          {
+            "name": "xl/worksheets/sheet1.xml",
+            "size": 628,
+            "sha256": "82328aa68bebf1e2bd45f3d7010a1b4486a682b7f8c2438aec52f6b96f820bc3"
+          },
+          {
+            "name": "xl/worksheets/sheet2.xml",
+            "size": 194,
+            "sha256": "19683e1289f459571b6f371f0e5897e4451fa2fa10850b91815d0af0dc219868"
+          }
+        ],
+        "candidate_sha256": "cc7c38a1c3c76ccdc2643d2467f1734c2f353cc740a5445bb97ecbc8b8efe2b4",
+        "candidate_manifest": [
+          {
+            "name": "[Content_Types].xml",
+            "size": 1079,
+            "sha256": "e34a80dd379deff3fbd1abb9a461aa5af352f92274c4041513607fe2433e430a"
+          },
+          {
+            "name": "_rels/.rels",
+            "size": 240,
+            "sha256": "fc5715a86467973c771fed6cf49203ed48734dcbd0f24088be6bbb6e290cd7b5"
+          },
+          {
+            "name": "custom/original.bin",
+            "size": 33,
+            "sha256": "d6fdff43e49c2841433bca98eadba1beeb7cb768144cec4446eb30cf6659fbac"
+          },
+          {
+            "name": "xl/_rels/workbook.xml.rels",
+            "size": 509,
+            "sha256": "30b8d159cb4a0dcd6356b1da2d21ba7858ba27926ee0f025f8455055b8295f26"
+          },
+          {
+            "name": "xl/comments/comment1.xml",
+            "size": 242,
+            "sha256": "226eeb71fa3aeb78772787ecdc7d8f6de231f1b98a86ded1cde97dab95025a72"
+          },
+          {
+            "name": "xl/drawings/comments.vml",
+            "size": 731,
+            "sha256": "b31793b08fcdf3a8586bedbee0a2b963c8f1b5e604a441138ef36c0f0258dc4c"
+          },
+          {
+            "name": "xl/styles.xml",
+            "size": 674,
+            "sha256": "2560f56e733e073607171974d686a41c1771db7b512414aa797f4aef2f6a00ad"
+          },
+          {
+            "name": "xl/workbook.xml",
+            "size": 465,
+            "sha256": "9d5ca20524d1bc6b299da8150786a99514dfc883370865bdbd5ba5ceae1a3edb"
+          },
+          {
+            "name": "xl/worksheets/_rels/sheet1.xml.rels",
+            "size": 388,
+            "sha256": "377165d0a28ffe7b123cddab89236076be63d69cfafe7c5ebfc46a1eec19af7f"
+          },
+          {
+            "name": "xl/worksheets/sheet1.xml",
+            "size": 4,
+            "sha256": "2f2b51747bb803479f6b11158b610a1591d1b10fa6e84dcd69bc2de0e5a3392a"
+          },
+          {
+            "name": "xl/worksheets/sheet2.xml",
+            "size": 194,
+            "sha256": "19683e1289f459571b6f371f0e5897e4451fa2fa10850b91815d0af0dc219868"
+          }
+        ]
+      }
+    ],
+    [
+      "oversized",
+      {
+        "status": "fail",
+        "reasons": [
+          "invalid_candidate"
+        ],
+        "source_manifest": [
+          {
+            "name": "[Content_Types].xml",
+            "size": 1079,
+            "sha256": "e34a80dd379deff3fbd1abb9a461aa5af352f92274c4041513607fe2433e430a"
+          },
+          {
+            "name": "_rels/.rels",
+            "size": 240,
+            "sha256": "fc5715a86467973c771fed6cf49203ed48734dcbd0f24088be6bbb6e290cd7b5"
+          },
+          {
+            "name": "custom/original.bin",
+            "size": 33,
+            "sha256": "d6fdff43e49c2841433bca98eadba1beeb7cb768144cec4446eb30cf6659fbac"
+          },
+          {
+            "name": "xl/_rels/workbook.xml.rels",
+            "size": 509,
+            "sha256": "30b8d159cb4a0dcd6356b1da2d21ba7858ba27926ee0f025f8455055b8295f26"
+          },
+          {
+            "name": "xl/comments/comment1.xml",
+            "size": 242,
+            "sha256": "226eeb71fa3aeb78772787ecdc7d8f6de231f1b98a86ded1cde97dab95025a72"
+          },
+          {
+            "name": "xl/drawings/comments.vml",
+            "size": 731,
+            "sha256": "b31793b08fcdf3a8586bedbee0a2b963c8f1b5e604a441138ef36c0f0258dc4c"
+          },
+          {
+            "name": "xl/styles.xml",
+            "size": 674,
+            "sha256": "2560f56e733e073607171974d686a41c1771db7b512414aa797f4aef2f6a00ad"
+          },
+          {
+            "name": "xl/workbook.xml",
+            "size": 465,
+            "sha256": "9d5ca20524d1bc6b299da8150786a99514dfc883370865bdbd5ba5ceae1a3edb"
+          },
+          {
+            "name": "xl/worksheets/_rels/sheet1.xml.rels",
+            "size": 388,
+            "sha256": "377165d0a28ffe7b123cddab89236076be63d69cfafe7c5ebfc46a1eec19af7f"
+          },
+          {
+            "name": "xl/worksheets/sheet1.xml",
+            "size": 628,
+            "sha256": "82328aa68bebf1e2bd45f3d7010a1b4486a682b7f8c2438aec52f6b96f820bc3"
+          },
+          {
+            "name": "xl/worksheets/sheet2.xml",
+            "size": 194,
+            "sha256": "19683e1289f459571b6f371f0e5897e4451fa2fa10850b91815d0af0dc219868"
+          }
+        ],
+        "candidate_sha256": "991bc82a1f5bdf203ad43efb5c253856b49b5c09580d8ed24bcdd2f431f7707c",
+        "candidate_manifest": []
+      }
+    ],
+    [
+      "admission_True",
+      "RAISED AttributeError:'bool' object has no attribute 'get'"
+    ],
+    [
+      "admission_1",
+      "RAISED AttributeError:'int' object has no attribute 'get'"
+    ],
+    [
+      "admission_'pass'",
+      "RAISED AttributeError:'str' object has no attribute 'get'"
+    ],
+    [
+      "admission_['pass']",
+      "RAISED AttributeError:'list' object has no attribute 'get'"
+    ],
+    [
+      "admission_{}",
+      {
+        "schema_version": 1,
+        "status": "held",
+        "reasons": [
+          "environment_hold",
+          "real_executor_not_implemented",
+          "admission_missing"
+        ],
+        "engine_execution": "not_run",
+        "real_roundtrip": "not_run",
+        "fake_executor_used": false,
+        "fidelity": "unknown",
+        "safety": "unknown",
+        "dimensions": {
+          "render": "not_run",
+          "recalc": "not_run",
+          "visual": "not_run",
+          "annotation": "not_run"
+        },
+        "identity": {
+          "scope_id": "scope1",
+          "file_id": "file1",
+          "base_revision": "rev1",
+          "operation_id": "op1",
+          "idempotency_key": "key1"
+        }
+      }
+    ]
+  ],
+  "fixtures": [
+    {
+      "path": "tools/document_fidelity/fixtures/minimal.docx",
+      "sha256": "3490b0855765c574079fcd1274aa1c8e0b7782f69ada87dab206c68b9069ee87",
+      "manifest_match": true,
+      "base_bytes_unchanged": true
+    },
+    {
+      "path": "tools/document_fidelity/fixtures/minimal.pdf",
+      "sha256": "affae7b5719e0a7a284e173bc6d430f9bb1be3b7092d9c8a947ee2b5ee87f00f",
+      "manifest_match": true,
+      "base_bytes_unchanged": true
+    },
+    {
+      "path": "tools/document_fidelity/fixtures/minimal.pptx",
+      "sha256": "37b1b3d41242ca3359371ae636635e43bdb8fb46d9ac77119cf2bdce7c5ad733",
+      "manifest_match": true,
+      "base_bytes_unchanged": true
+    },
+    {
+      "path": "tools/document_fidelity/fixtures/minimal.xlsx",
+      "sha256": "546c5390f410064f74ac7f6c206f838d267261b79e7f34d6421d1660c8336363",
+      "manifest_match": true,
+      "base_bytes_unchanged": true
+    },
+    {
+      "path": "tools/document_fidelity/fixtures_complex/complex.docx",
+      "sha256": "ce3bc59163545067a56307714b9422851c5fa8a9288f0e08e088fbe225d958fc",
+      "manifest_match": true,
+      "base_bytes_unchanged": true
+    },
+    {
+      "path": "tools/document_fidelity/fixtures_complex/complex.xlsx",
+      "sha256": "e1bbea112782f0350fbe348a2a021d8d0926ed8c2c768be528ef2fc9317ba78d",
+      "manifest_match": true,
+      "base_bytes_unchanged": true
+    }
+  ],
+  "engine_imported": false
+}

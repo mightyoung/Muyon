@@ -1,0 +1,11 @@
+PASS actual DDL + initial NULL archive + registry fact
+PASS all extracted production SQL parses and parameter counts
+PASS unique structured scope
+PASS injected receipt failure rolls back archive/revision/attempt
+PASS save commit + stale editor CAS refuses
+PASS restart stable registry and exact original receipt after callback loss
+PASS original receipt is not replaced with latest head
+PASS SQL CAS also checks editing_only lifecycle
+PASS bounded archive and receipt SQL projections
+PASS two original unknowns and reservation untouched
+NOT_RUN Rust behavior, FFI compilation/bindings, canonical Kotlin roundtrip, Android: absent toolchain/export integration

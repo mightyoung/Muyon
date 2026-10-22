@@ -1,0 +1,49 @@
+{
+  "source": "f043c6b9b8d850acb590a9a3e567d1f2634a95cd",
+  "evidence_commit": "0035845b5e9fedf8bf3cddd24da050b231500858",
+  "raw_fmt_diff_sha256": "372feac43fe3617ec162355790582ae7ccf0317e78a7ef6cef3a57ab443b20e5",
+  "files": [
+    {
+      "path": "crates/muyon-core/src/documents/annotation.rs",
+      "unique_hunks": 4,
+      "before_sha256": "1e724911ee8d0e0978c07ac3962423973cef2f0b4d1bbe9796cf775def804af6",
+      "after_sha256": "2e42ababc5ab32c69a08fa04926d437ea06d994f90558b61f24355ce950dc6b2"
+    },
+    {
+      "path": "crates/muyon-core/src/documents/capability.rs",
+      "unique_hunks": 1,
+      "before_sha256": "76f301d0f9cfb27cc107b593224fd3950040b14cdeb999508a4efb3b1cb64e8f",
+      "after_sha256": "f03ee25e66dde42318b14cf88871184ead5780d56c47407cb4577358d22d614d"
+    },
+    {
+      "path": "crates/muyon-core/src/documents/identity.rs",
+      "unique_hunks": 1,
+      "before_sha256": "b97b270198416b104cf09847b3f0efff11a2b97a69e6f8e57132205c1bd31820",
+      "after_sha256": "14ff7b35128b41faf132db9dd59fdd3216757ce7efe67b577f630befa753f7cf"
+    },
+    {
+      "path": "crates/muyon-core/src/documents/mod.rs",
+      "unique_hunks": 2,
+      "before_sha256": "80261abfb33c2640ffe1ad9b3d1df7ee6685cf1f05688e62cbbd2ae2c80c63b8",
+      "after_sha256": "ad3ad8a94cf24310d53c24e66a0074bbf0ebb3864afaf0e9afe7dbebec9ce830"
+    },
+    {
+      "path": "crates/muyon-core/src/documents/storage.rs",
+      "unique_hunks": 29,
+      "before_sha256": "54c458b99b561c37b56392a0cb1019e032fae353839153f46227f5cc46a0ce10",
+      "after_sha256": "9a079fd28d8dad07359ea627b642e18673b8aba48f253f3b8b4f750793530b5c"
+    },
+    {
+      "path": "crates/muyon-core/src/documents/storage_tests.rs",
+      "unique_hunks": 9,
+      "before_sha256": "58eec35b0ba14779945f71157d4d3c8c5fc45ebb58a5c16b17e23e0bc64c802c",
+      "after_sha256": "9b8c01dc5c14f92fe76125b57fcd1f6973b5dd5dcf5e3b7253225c72630dee49"
+    },
+    {
+      "path": "crates/muyon-core/tests/document_storage.rs",
+      "unique_hunks": 26,
+      "before_sha256": "814ebbe66c9d0ecd30bc8e38b239f2f286209410950a1bab8025d74f2e15fdd5",
+      "after_sha256": "c21f25ab0f1b49013b3f4883f02800992dd8fe4070f51139f2488415ea024513"
+    }
+  ]
+}

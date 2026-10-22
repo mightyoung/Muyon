@@ -1,0 +1,45 @@
+{
+  "tested_source": "3aaced7281ab7215416841e46edcf8646ad8dfa3",
+  "run": 39195875864,
+  "attempt": 1,
+  "status": "completed",
+  "conclusion": "success",
+  "jobs": [
+    {
+      "name": "native (arm64-v8a)",
+      "databaseId": 117878425820,
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "name": "native (x86_64)",
+      "databaseId": 117878426094,
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "name": "scoped",
+      "databaseId": 117878426095,
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "name": "package-device",
+      "databaseId": 117878835350,
+      "status": "completed",
+      "conclusion": "success"
+    }
+  ],
+  "device_result_gate": "success; exact source script requires two named tests and OK (2 tests)",
+  "raw_instrumentation_output_independently_read": false,
+  "final_device_log_action": "GET repos/mightyoung/Muyon/actions/jobs/117878835350/logs",
+  "final_device_log_outcome": "storage HTTP403, one attempt, no retry or alternate route",
+  "local_checks": "Kotlin pure probe PASS; Rust ordinary_chat_controller 6/6 PASS at2fc9ecab, source inputs unchanged thereafter",
+  "historical_failed_runs": [
+    39194418472,
+    39194629849
+  ],
+  "historical_device_causes": "unknown; raw own-job log reads returned403",
+  "no_model_context_history": true,
+  "I04_and_PR86_dependency_HOLD": "unchanged"
+}

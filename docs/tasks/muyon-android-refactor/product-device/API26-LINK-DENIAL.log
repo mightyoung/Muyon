@@ -1,0 +1,4 @@
+10-20 23:06:33.272  3441  3441 W MuyonProductCor: type=1400 audit(0.0:36): avc: denied { link } for name="up_5bcfe76278315dd8bcba46d89f13697a" dev="vdc" ino=115176 scontext=u:r:untrusted_app:s0:c512,c768 tcontext=u:object_r:app_data_file:s0:c512,c768 tclass=file permissive=0
+10-20 23:06:34.432  3441  3441 W MuyonProductCor: type=1400 audit(0.0:37): avc: denied { link } for name="up_3c0710d4996163a764cf01d96b629fae" dev="vdc" ino=115177 scontext=u:r:untrusted_app:s0:c512,c768 tcontext=u:object_r:app_data_file:s0:c512,c768 tclass=file permissive=0
+10-20 23:06:34.732  3441  3441 W MuyonProductCor: type=1400 audit(0.0:38): avc: denied { link } for name="up_d3f60e15e39aff21c2551eb7d6f6629d" dev="vdc" ino=115178 scontext=u:r:untrusted_app:s0:c512,c768 tcontext=u:object_r:app_data_file:s0:c512,c768 tclass=file permissive=0
+

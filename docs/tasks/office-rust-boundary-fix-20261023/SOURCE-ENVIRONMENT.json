@@ -1,0 +1,36 @@
+{
+  "android_compilation": "NOT_RUN: Gradle Java client Network is unreachable at plugin-resolution; compile exit1, diagnostic cancelled130; no routing/TLS/security workaround",
+  "android_tools": {
+    "build_tools": "35.0.0",
+    "commandline_tools": "23.0; sdkmanager reports AndroidCLI1.0.16625370",
+    "gradle": "8.13",
+    "jdk": "Temurin17.0.21+9",
+    "platform": "android-36 revision2",
+    "sdk_license": "explicit user acceptance supplied by parent; official installer wrote acceptance marker"
+  },
+  "base_sha": "796cdfe7cb3d79d630056239724af78128094fee",
+  "branch": "task/office-rust-boundary-fix-20261023",
+  "device": "NOT_RUN",
+  "fixtures_sha256": {
+    "tools/document_fidelity/fixtures/manifest.json": "3afbdd662e85f940f026f5a77d3c485b7776d5f733a7318251eeabe8cf53474c",
+    "tools/document_fidelity/fixtures/minimal.docx": "3490b0855765c574079fcd1274aa1c8e0b7782f69ada87dab206c68b9069ee87",
+    "tools/document_fidelity/fixtures/minimal.pdf": "affae7b5719e0a7a284e173bc6d430f9bb1be3b7092d9c8a947ee2b5ee87f00f",
+    "tools/document_fidelity/fixtures/minimal.pptx": "37b1b3d41242ca3359371ae636635e43bdb8fb46d9ac77119cf2bdce7c5ad733",
+    "tools/document_fidelity/fixtures/minimal.xlsx": "546c5390f410064f74ac7f6c206f838d267261b79e7f34d6421d1660c8336363",
+    "tools/document_fidelity/fixtures_complex/complex.docx": "ce3bc59163545067a56307714b9422851c5fa8a9288f0e08e088fbe225d958fc",
+    "tools/document_fidelity/fixtures_complex/complex.xlsx": "e1bbea112782f0350fbe348a2a021d8d0926ed8c2c768be528ef2fc9317ba78d",
+    "tools/document_fidelity/fixtures_complex/manifest.json": "a6b05c715d3c939e3980dae574702ed371a2d6fceabbdd63c9cf7064fa08f694",
+    "tools/document_fidelity/fixtures_subsets/manifest.json": "2e04f06172baf1be093166995ac8151a9af72c62be13b314281f31659928b478",
+    "tools/document_fidelity/fixtures_subsets/simple-run.docx": "7843ec72722b4866ebc36f1e30a96378449efad7b9febb632bc03b15b6ebc43b",
+    "tools/document_fidelity/fixtures_subsets/simple-shape.pptx": "e0f217f2ddcc8f0c429b07caacdf9ad365b96ea090e1a887055154a44275732e"
+  },
+  "independent_review": "PASS scoped fixed four-file snapshot; independent 601 tests, strict Clippy",
+  "platform": "Linux-6.18.55-x86_64-with-glibc2.41",
+  "source_commit": "acfb9dc391a80983c1c8e4631db78a201a51dfb3",
+  "source_sha256": {
+    "crates/muyon-office/src/edit.rs": "6a0a3ff02e87ed2e9df92ec2b56f33f6ded4134e091ced72c3a54192e915f1ef",
+    "crates/muyon-office/src/package.rs": "994c59e94dbcf41071dc35b68173b69c90e6728c9c4f63fd3d2f549c249cc377",
+    "crates/muyon-office/src/text.rs": "12fc4940bd8200b4dfb6ed8735afff5e3d2a87f106d57ffd17ab84bbb5e6419c",
+    "crates/muyon-office/tests/boundaries.rs": "c714b67f7874f7b941a61690cdee5858894488fab936fb29da79cba7c01112d2"
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "captured_utc": "2026-10-22T03:55:02.058490+00:00",
+  "provenance": "Byte copies of existing /tmp RED compiler logs and mutation driver; original GREEN/independent/mutation stdout-stderr were not persisted. File mtimes are preserved metadata, not independent trusted timestamps. Original RED exit codes were not captured in these files; diagnostics are preserved without fabricating historical status. Driver source is not execution output.",
+  "files": [
+    {
+      "file": "bot-setup-choices-red.log",
+      "sha256": "ee33f890560ca3e3af7183cbc0dedd2382fab249a836fa402888681178c2bd7b",
+      "size_bytes": 1025,
+      "preserved_filesystem_mtime_utc": "2026-10-22T03:43:31.274766+00:00"
+    },
+    {
+      "file": "bot-setup-r1-red.log",
+      "sha256": "c7b239a9eea04709ec0a09f5271fceb4e0560fc83d9f6c25dfd81f33f95a2080",
+      "size_bytes": 4777,
+      "preserved_filesystem_mtime_utc": "2026-10-22T03:45:28.504847+00:00"
+    },
+    {
+      "file": "bot-setup-red.log",
+      "sha256": "43e11c4dc8a6205c8e8a874a4d00200b809fb1b2c91de8f86b6b47c17b6efa01",
+      "size_bytes": 26926,
+      "preserved_filesystem_mtime_utc": "2026-10-22T03:42:05.453264+00:00"
+    },
+    {
+      "file": "original-mutation-driver.py",
+      "sha256": "29c0290009ea267fb2f3f81b33a4f681e9370ed7fba3e6ef32e55093defd6ba4",
+      "size_bytes": 1594,
+      "preserved_filesystem_mtime_utc": "2026-10-22T03:46:05.914375+00:00"
+    }
+  ]
+}

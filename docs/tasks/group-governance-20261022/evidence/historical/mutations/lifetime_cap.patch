@@ -1,0 +1,11 @@
+--- baseline-module.rs
++++ lifetime_cap-module.rs
+@@ -311,7 +311,7 @@
+         .children
+         .len()
+         .checked_add(plan.len())
+-        .is_none_or(|n| n > 8)
++        .is_none_or(|n| n > 9)
+     {
+         return Err(Error::ChildLimit);
+     }

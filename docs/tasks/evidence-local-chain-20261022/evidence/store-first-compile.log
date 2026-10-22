@@ -1,0 +1,81 @@
+Actual source checkout: 741274f6ef628501cc8c75c61f156b9f003c81d7
+Generated module-only harness: /tmp/muyon-evidence-store-harness-e617jvxi
+All harness dependencies match repository lock versions/sources/checksums
+   Compiling muyon-core v0.1.0 (/tmp/muyon-evidence-store-harness-e617jvxi)
+    Finished `test` profile [unoptimized] target(s) in 2.79s
+     Running unittests lib.rs (crates/target/debug/deps/muyon_core-b4ac5d1e8b153320)
+
+running 9 tests
+test evidence::store::tests::malformed_saved_text_is_failed_processing_not_saved_or_index_success ... FAILED
+test evidence::store::tests::corrupt_controlled_blob_never_uses_previous_cache_as_success ... FAILED
+test evidence::store::tests::changed_current_revision_never_rebinds_old_evidence ... FAILED
+test evidence::store::tests::original_unknown_intents_are_not_looked_up_retried_or_changed ... FAILED
+test evidence::store::tests::inspect_is_not_readtext_and_failure_opens_no_reader ... FAILED
+test evidence::store::tests::owner_delivery_transaction_excludes_other_sqlite_writer ... FAILED
+test evidence::store::tests::persisted_revocation_expiry_generation_epoch_and_project_deletion_deny_cached_results ... FAILED
+test evidence::store::tests::real_saved_text_readtext_grant_produces_processing_receipt_and_exact_quote ... FAILED
+test evidence::store::tests::reader_lease_and_grant_mutation_in_same_transaction_block_delivery ... FAILED
+
+failures:
+
+---- evidence::store::tests::malformed_saved_text_is_failed_processing_not_saved_or_index_success stdout ----
+
+thread 'evidence::store::tests::malformed_saved_text_is_failed_processing_not_saved_or_index_success' (7058) panicked at /workspace/Muyon/crates/muyon-core/src/evidence/store_tests.rs:18:58:
+fixed core Text commit required: Error("unknown variant `text`, expected one of `docx`, `pptx`, `xlsx`, `pdf`, `doc`, `ppt`, `xls`, `unknown`", line: 1, column: 6)
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+---- evidence::store::tests::corrupt_controlled_blob_never_uses_previous_cache_as_success stdout ----
+
+thread 'evidence::store::tests::corrupt_controlled_blob_never_uses_previous_cache_as_success' (7056) panicked at /workspace/Muyon/crates/muyon-core/src/evidence/store_tests.rs:18:58:
+fixed core Text commit required: Error("unknown variant `text`, expected one of `docx`, `pptx`, `xlsx`, `pdf`, `doc`, `ppt`, `xls`, `unknown`", line: 1, column: 6)
+
+---- evidence::store::tests::changed_current_revision_never_rebinds_old_evidence stdout ----
+
+thread 'evidence::store::tests::changed_current_revision_never_rebinds_old_evidence' (7055) panicked at /workspace/Muyon/crates/muyon-core/src/evidence/store_tests.rs:18:58:
+fixed core Text commit required: Error("unknown variant `text`, expected one of `docx`, `pptx`, `xlsx`, `pdf`, `doc`, `ppt`, `xls`, `unknown`", line: 1, column: 6)
+
+---- evidence::store::tests::original_unknown_intents_are_not_looked_up_retried_or_changed stdout ----
+
+thread 'evidence::store::tests::original_unknown_intents_are_not_looked_up_retried_or_changed' (7059) panicked at /workspace/Muyon/crates/muyon-core/src/evidence/store_tests.rs:18:58:
+fixed core Text commit required: Error("unknown variant `text`, expected one of `docx`, `pptx`, `xlsx`, `pdf`, `doc`, `ppt`, `xls`, `unknown`", line: 1, column: 6)
+
+---- evidence::store::tests::inspect_is_not_readtext_and_failure_opens_no_reader stdout ----
+
+thread 'evidence::store::tests::inspect_is_not_readtext_and_failure_opens_no_reader' (7057) panicked at /workspace/Muyon/crates/muyon-core/src/evidence/store_tests.rs:18:58:
+fixed core Text commit required: Error("unknown variant `text`, expected one of `docx`, `pptx`, `xlsx`, `pdf`, `doc`, `ppt`, `xls`, `unknown`", line: 1, column: 6)
+
+---- evidence::store::tests::owner_delivery_transaction_excludes_other_sqlite_writer stdout ----
+
+thread 'evidence::store::tests::owner_delivery_transaction_excludes_other_sqlite_writer' (7060) panicked at /workspace/Muyon/crates/muyon-core/src/evidence/store_tests.rs:18:58:
+fixed core Text commit required: Error("unknown variant `text`, expected one of `docx`, `pptx`, `xlsx`, `pdf`, `doc`, `ppt`, `xls`, `unknown`", line: 1, column: 6)
+
+---- evidence::store::tests::persisted_revocation_expiry_generation_epoch_and_project_deletion_deny_cached_results stdout ----
+
+thread 'evidence::store::tests::persisted_revocation_expiry_generation_epoch_and_project_deletion_deny_cached_results' (7061) panicked at /workspace/Muyon/crates/muyon-core/src/evidence/store_tests.rs:18:58:
+fixed core Text commit required: Error("unknown variant `text`, expected one of `docx`, `pptx`, `xlsx`, `pdf`, `doc`, `ppt`, `xls`, `unknown`", line: 1, column: 6)
+
+---- evidence::store::tests::real_saved_text_readtext_grant_produces_processing_receipt_and_exact_quote stdout ----
+
+thread 'evidence::store::tests::real_saved_text_readtext_grant_produces_processing_receipt_and_exact_quote' (7063) panicked at /workspace/Muyon/crates/muyon-core/src/evidence/store_tests.rs:18:58:
+fixed core Text commit required: Error("unknown variant `text`, expected one of `docx`, `pptx`, `xlsx`, `pdf`, `doc`, `ppt`, `xls`, `unknown`", line: 1, column: 6)
+
+---- evidence::store::tests::reader_lease_and_grant_mutation_in_same_transaction_block_delivery stdout ----
+
+thread 'evidence::store::tests::reader_lease_and_grant_mutation_in_same_transaction_block_delivery' (7062) panicked at /workspace/Muyon/crates/muyon-core/src/evidence/store_tests.rs:18:58:
+fixed core Text commit required: Error("unknown variant `text`, expected one of `docx`, `pptx`, `xlsx`, `pdf`, `doc`, `ppt`, `xls`, `unknown`", line: 1, column: 6)
+
+
+failures:
+    evidence::store::tests::changed_current_revision_never_rebinds_old_evidence
+    evidence::store::tests::corrupt_controlled_blob_never_uses_previous_cache_as_success
+    evidence::store::tests::inspect_is_not_readtext_and_failure_opens_no_reader
+    evidence::store::tests::malformed_saved_text_is_failed_processing_not_saved_or_index_success
+    evidence::store::tests::original_unknown_intents_are_not_looked_up_retried_or_changed
+    evidence::store::tests::owner_delivery_transaction_excludes_other_sqlite_writer
+    evidence::store::tests::persisted_revocation_expiry_generation_epoch_and_project_deletion_deny_cached_results
+    evidence::store::tests::reader_lease_and_grant_mutation_in_same_transaction_block_delivery
+    evidence::store::tests::real_saved_text_readtext_grant_produces_processing_receipt_and_exact_quote
+
+test result: FAILED. 0 passed; 9 failed; 0 ignored; 0 measured; 21 filtered out; finished in 0.02s
+
+error: test failed, to rerun pass `--lib`

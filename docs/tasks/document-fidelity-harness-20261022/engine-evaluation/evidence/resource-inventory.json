@@ -1,0 +1,46 @@
+{
+  "cgroup": {
+    "cpu.max": "400000 100000",
+    "memory.max": "17179869184",
+    "pids.max": "max"
+  },
+  "engine_execution": "not_run",
+  "limits": {
+    "RLIMIT_AS": [
+      -1,
+      -1
+    ],
+    "RLIMIT_CORE": [
+      0,
+      -1
+    ],
+    "RLIMIT_CPU": [
+      -1,
+      -1
+    ],
+    "RLIMIT_FSIZE": [
+      -1,
+      -1
+    ],
+    "RLIMIT_NOFILE": [
+      16384,
+      16384
+    ],
+    "RLIMIT_NPROC": [
+      71955,
+      71955
+    ]
+  },
+  "new_isolation_proven": false,
+  "note": "Observed host process/cgroup limits only, not proof of engine filesystem/network confinement; no namespace retry or engine executed.",
+  "proc_status": {
+    "CapAmb": "0000000000000000",
+    "CapBnd": "0000000000000000",
+    "CapEff": "0000000000000000",
+    "CapInh": "0000000000000000",
+    "CapPrm": "0000000000000000",
+    "NoNewPrivs": "1",
+    "Seccomp": "2"
+  },
+  "read_only": true
+}

@@ -1,0 +1,11 @@
+   Compiling muyon-core v0.1.0 (/private/tmp/muyon-android-refactor-20261020/crates/muyon-core)
+    Finished `test` profile [unoptimized] target(s) in 4.57s
+     Running unittests src/lib.rs (/private/tmp/muyon-review-fixes-target/debug/deps/muyon_core-48d1ff86322ef0c2)
+
+running 3 tests
+test review_lifecycle::tests::uncommitted_ddl_reopens_and_initializes_the_original_database ... ok
+test review_lifecycle::tests::empty_file_from_interrupted_creation_initializes_without_replacement ... ok
+test review_lifecycle::tests::committed_claims_are_preserved_and_partial_committed_schema_is_refused ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 15 filtered out; finished in 0.05s
+

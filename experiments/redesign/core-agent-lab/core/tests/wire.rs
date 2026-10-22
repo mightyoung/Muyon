@@ -61,11 +61,15 @@ static NEXT:AtomicU64=AtomicU64::new(0);
 const HELPER:&str=r#"import argparse,json,pathlib,sys,os,signal
 p=argparse.ArgumentParser();p.add_argument('--fixture-dir');p.add_argument('--turn');p.add_argument('--capture-dir');a=p.parse_args()
 f=pathlib.Path(a.fixture_dir);c=pathlib.Path(a.capture_dir);c.mkdir(exist_ok=True)
+if (f/'delay-start').exists():
+ import time
+ time.sleep(0.15)
 (c/('pid-'+a.turn)).write_text(str(os.getpid()))
 if (f/'no-read').exists():
  while True: signal.pause()
 raw=sys.stdin.buffer.read();(c/('request-'+a.turn+'.json')).write_bytes(raw)
 if (f/'silent').exists():
+ (c/'hold-ready').write_text('silent')
  while True: signal.pause()
 response=f/('turn-'+a.turn+'.sse')
 if response.exists(): data=response.read_bytes()
@@ -79,6 +83,7 @@ sys.stdout.buffer.write(data);sys.stdout.buffer.flush()
 if (f/'exit-fail').exists(): sys.exit(3)
 if (f/'eof-hang').exists():
  os.close(1)
+ (c/'hold-ready').write_text('eof-hang')
  while True: signal.pause()
 "#;
 fn fixture(stream:&str,extra:&[&str])->PathBuf{
@@ -107,7 +112,69 @@ fn wire_budget_stops_before_request_and_does_not_reset(){
 }
 #[test]
 fn silent_and_eof_hanging_children_are_killed_and_reaped(){
-    for mode in ["silent","eof-hang"]{let dir=fixture(TOOL,&["--wire-idle-ms","100","--wire-total-ms","500"]);fs::write(dir.parent().unwrap().join(mode),"").unwrap();let result=command(&dir,"run",&[]);assert_eq!(field(&result,"effects"),"0");assert!(field(&result,"reason").ends_with("timeout"));let pid=fs::read_to_string(dir.join("wire-capture/pid-1")).unwrap();assert!(!Path::new(&format!("/proc/{pid}")).exists(),"child must be reaped");}
+    use std::{io::Write,os::unix::process::CommandExt,process::{Child,Stdio},thread,time::{Duration,Instant}};
+    // EOF releases the checkpoint on assertion failure, letting Rust kill/reap
+    // its own helper before we reap Rust.
+    struct OwnedRun(Child);
+    impl Drop for OwnedRun {
+        fn drop(&mut self){
+            drop(self.0.stdin.take());
+            let start=Instant::now();
+            while matches!(self.0.try_wait(),Ok(None)) && start.elapsed()<Duration::from_secs(2) {
+                thread::sleep(Duration::from_millis(2));
+            }
+            // Only this run and its helper belong to this new process group.
+            // Kill any residual descendants even if Rust has already exited.
+            unsafe extern "C" {fn kill(pid:i32,signal:i32)->i32;}
+            unsafe {kill(-(self.0.id() as i32),9);}
+            let _=self.0.wait();
+        }
+    }
+    for (mode,delayed,drop_at_checkpoint) in [
+        ("silent",false,false),("eof-hang",false,false),
+        ("silent",true,false),("eof-hang",true,false),("silent",false,true)
+    ] {
+        let dir=fixture(TOOL,&["--wire-idle-ms","100","--wire-total-ms","500"]);
+        fs::write(dir.parent().unwrap().join(mode),"").unwrap();
+        if delayed {fs::write(dir.parent().unwrap().join("delay-start"),"").unwrap();}
+        eprintln!("idle-helper mode={mode} delayed_start={delayed} drop_at_checkpoint={drop_at_checkpoint}");
+        let output=dir.parent().unwrap().join("timeout-run.stdout");
+        let mut run=OwnedRun(Command::new(env!("CARGO_BIN_EXE_muyon-core-agent-lab"))
+            .args(["run","--dir"]).arg(&dir).args(["--checkpoint","wire-open"])
+            .stdin(Stdio::piped()).stdout(fs::File::create(&output).unwrap()).process_group(0).spawn().unwrap());
+        // The deadline still starts before spawn. Hold only at the existing
+        // test checkpoint so even a helper scheduled after 100ms has an
+        // observed PID and has actually reached the requested hold mode.
+        let ready=dir.join("wire-capture/hold-ready");
+        let start=Instant::now();
+        while !ready.exists() || !fs::read_to_string(&output).unwrap().contains("checkpoint=wire-open") {
+            assert!(start.elapsed()<Duration::from_secs(5),"helper/checkpoint readiness");
+            assert!(run.0.try_wait().unwrap().is_none(),"Rust exited before readiness");
+            thread::sleep(Duration::from_millis(2));
+        }
+        assert_eq!(fs::read_to_string(ready).unwrap(),mode);
+        let pid=fs::read_to_string(dir.join("wire-capture/pid-1")).unwrap();
+        assert!(Path::new(&format!("/proc/{pid}")).exists(),"helper must be live before release");
+        if drop_at_checkpoint {
+            let rust_pid=run.0.id();
+            drop(run);
+            assert!(!Path::new(&format!("/proc/{rust_pid}")).exists(),"owned Rust run must be reaped");
+            assert!(!Path::new(&format!("/proc/{pid}")).exists(),"checkpoint failure must clean helper");
+            continue;
+        }
+        run.0.stdin.take().unwrap().write_all(b"continue\n").unwrap();
+        let released=Instant::now();
+        let status=loop {
+            if let Some(status)=run.0.try_wait().unwrap(){break status;}
+            assert!(released.elapsed()<Duration::from_secs(5),"Rust timeout/cleanup did not finish");
+            thread::sleep(Duration::from_millis(2));
+        };
+        assert!(status.success());
+        let result=fs::read_to_string(output).unwrap();
+        assert_eq!(field(&result,"effects"),"0");
+        assert!(field(&result,"reason").ends_with("timeout"));
+        assert!(!Path::new(&format!("/proc/{pid}")).exists(),"child must be reaped");
+    }
 }
 #[test]
 fn reopened_inflight_is_terminal_and_never_resends(){

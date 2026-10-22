@@ -1,0 +1,62 @@
+PASS exact111e 04e326766840fb1341c8b68661e69aaab5f50270536dee3c00cd4c2d58532668 crates/muyon-core/src/bot_drafts.rs
+PASS exact111e 99c0ebe9c9d39a7aa5452d08469cc51d6ddfa98b52d603ecb8fb168cbd857302 crates/muyon-core/tests/bot_drafts.rs
+PASS FFI normalized equality to preformat typed-record source; fixtures/assertions retained
+PASS core export/dependency/lock bytes unchanged
+Imported verification checksum exit=0
+custody.json: OK
+derive_junit.py: OK
+format/format-commit.patch: OK
+format/format-proof.json: OK
+format/formatter.stderr.log: OK
+format/formatter.stdout.log: OK
+format-diff-paths.json: OK
+formatted/binary-overlap.json: OK
+formatted/core-full.stderr.log: OK
+formatted/core-full.stdout.junit.xml: OK
+formatted/core-full.stdout.log: OK
+formatted/ffi-targeted.stderr.log: OK
+formatted/ffi-targeted.stdout.log: OK
+formatted/manifest.json: OK
+formatted/provider-targeted.stderr.log: OK
+formatted/provider-targeted.stdout.junit.xml: OK
+formatted/provider-targeted.stdout.log: OK
+formatted/race/artifact-build.stderr.log: OK
+formatted/race/artifact-build.stdout.log: OK
+formatted/race/manifest.json: OK
+formatted/race/probe-compile.stderr.log: OK
+formatted/race/probe-compile.stdout.log: OK
+formatted/race/probe-source.rs.txt: OK
+formatted/race/probe-tests.stderr.log: OK
+formatted/race/probe-tests.stdout.junit.xml: OK
+formatted/race/probe-tests.stdout.log: OK
+formatted/scoped-fmt.stderr.log: OK
+formatted/scoped-fmt.stdout.log: OK
+original/binary-overlap.json: OK
+original/core-full.stderr.log: OK
+original/core-full.stdout.junit.xml: OK
+original/core-full.stdout.log: OK
+original/ffi-targeted.stderr.log: OK
+original/ffi-targeted.stdout.log: OK
+original/manifest.json: OK
+original/provider-targeted.stderr.log: OK
+original/provider-targeted.stdout.junit.xml: OK
+original/provider-targeted.stdout.log: OK
+original/race/artifact-build.stderr.log: OK
+original/race/artifact-build.stdout.log: OK
+original/race/manifest.json: OK
+original/race/probe-compile.stderr.log: OK
+original/race/probe-compile.stdout.log: OK
+original/race/probe-source.rs.txt: OK
+original/race/probe-tests.stderr.log: OK
+original/race/probe-tests.stdout.junit.xml: OK
+original/race/probe-tests.stdout.log: OK
+original/scoped-fmt.stderr.log: OK
+original/scoped-fmt.stdout.log: OK
+test-summary.json: OK
+whitespace-check.json: OK
+
+
+Authored unstaged diff-check exit=0
+
+
+NOT_RUN current typed-record FFI Rust/Clippy/fmt/generation/Host/Android; independently actual26/core209/probe3 belongs to specified098d/111e sources

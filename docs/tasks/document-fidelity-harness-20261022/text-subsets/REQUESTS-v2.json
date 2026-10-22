@@ -1,0 +1,40 @@
+{
+  "docx": {
+    "base_revision": "rev1",
+    "file_id": "file1",
+    "idempotency_key": "key1",
+    "operation": {
+      "expected": "target",
+      "kind": "replace_docx_run_text",
+      "paragraph_index": 0,
+      "part": "word/document.xml",
+      "replacement": "edited",
+      "run_index": 1,
+      "target_sha256": "b7164fe75612c4d7ce56eadcca953d82ea193c4f955948bf3fbf014aeb95dae2"
+    },
+    "operation_id": "op1",
+    "schema_version": 2,
+    "scope_id": "scope1",
+    "source_sha256": "7843ec72722b4866ebc36f1e30a96378449efad7b9febb632bc03b15b6ebc43b"
+  },
+  "pptx": {
+    "base_revision": "rev1",
+    "file_id": "file1",
+    "idempotency_key": "key1",
+    "operation": {
+      "expected": "target",
+      "kind": "replace_pptx_shape_text",
+      "paragraph_index": 0,
+      "part": "ppt/slides/slide1.xml",
+      "replacement": "edited",
+      "run_index": 0,
+      "shape_id": 2,
+      "slide_id": 256,
+      "target_sha256": "245e81b60868c922eacaf8154039de3b02b1d8df56d1c6fe5451d3a36be1ffa9"
+    },
+    "operation_id": "op1",
+    "schema_version": 2,
+    "scope_id": "scope1",
+    "source_sha256": "e0f217f2ddcc8f0c429b07caacdf9ad365b96ea090e1a887055154a44275732e"
+  }
+}

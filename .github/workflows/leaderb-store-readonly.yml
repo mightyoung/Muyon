@@ -1,0 +1,96 @@
+name: leaderb-store-readonly
+
+on:
+  push:
+    branches: ['task/leaderb-store-readonly-20261018']
+  workflow_dispatch:
+    inputs:
+      source_sha:
+        description: Exact 40-character source commit to verify
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  readonly-supplier:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      EXPECTED_SHA: ${{ github.event.inputs.source_sha || github.sha }}
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: ${{ env.EXPECTED_SHA }}
+          persist-credentials: false
+      - name: Assert exact checkout and preserve source hashes
+        run: |
+          echo "CARGO_TARGET_DIR=$RUNNER_TEMP/leaderb-store-target" >> "$GITHUB_ENV"
+          mkdir store-read-evidence
+          python3 - <<'PY'
+          import hashlib, json, os, re, subprocess
+          from pathlib import Path
+          expected = os.environ['EXPECTED_SHA']
+          actual = subprocess.check_output(['git', 'rev-parse', 'HEAD'], text=True).strip()
+          assert re.fullmatch('[0-9a-f]{40}', expected) and actual == expected, (expected, actual)
+          files = subprocess.check_output(['git', 'ls-files', '-z']).split(b'\0')
+          hashes = {os.fsdecode(p): hashlib.sha256(Path(os.fsdecode(p)).read_bytes()).hexdigest() for p in files if p}
+          Path('store-read-evidence/source-before.json').write_text(json.dumps({'sha': actual, 'files': hashes}, indent=2) + '\n')
+          print('EXACT_SOURCE_SHA=' + actual)
+          PY
+      - name: Install pinned tested Rust
+        run: |
+          set -o pipefail
+          rustup toolchain install 1.99.0 --profile minimal --target aarch64-linux-android 2>&1 | tee store-read-evidence/toolchain.log
+          rustc +1.99.0 --version | tee -a store-read-evidence/toolchain.log
+          python3 --version | tee -a store-read-evidence/toolchain.log
+          python3 - <<'PYENV' | tee -a store-read-evidence/toolchain.log
+          import ctypes, platform
+          sqlite = ctypes.CDLL('libsqlite3.so.0')
+          sqlite.sqlite3_libversion.restype = ctypes.c_char_p
+          print('native_sqlite=' + sqlite.sqlite3_libversion().decode())
+          print('platform=' + platform.platform())
+          PYENV
+      - name: Scoped registered business read and Android compile checks
+        run: |
+          python3 - <<'PY'
+          import json, os, subprocess, sys
+          from pathlib import Path
+          manifest = 'experiments/redesign/rust-agent-host-lab/core/Cargo.toml'
+          # Explicit targets only: no legacy script/HTTP/reopen suite selection.
+          commands = [
+              ('supplier-store', ['cargo', '+1.99.0', 'test', '--manifest-path', manifest, '--locked', '--offline', '--test', 'supplier_store', '--', '--nocapture']),
+              ('offline-service-runtime', ['cargo', '+1.99.0', 'test', '--manifest-path', manifest, '--locked', '--offline', '--test', 'service_runtime', '--', '--nocapture']),
+              ('android-lib-check', ['cargo', '+1.99.0', 'check', '--manifest-path', manifest, '--locked', '--offline', '--target', 'aarch64-linux-android', '--lib']),
+          ]
+          results = []
+          for name, command in commands:
+              result = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+              Path('store-read-evidence', name + '.log').write_bytes(result.stdout)
+              print(result.stdout.decode('utf-8', errors='replace'), flush=True)
+              results.append({'name': name, 'command': command, 'exit': result.returncode, 'source_sha': os.environ['EXPECTED_SHA']})
+          Path('store-read-evidence/results.json').write_text(json.dumps(results, indent=2) + '\n')
+          sys.exit(1 if any(r['exit'] != 0 for r in results) else 0)
+          PY
+      - name: Verify source integrity after checks
+        if: always()
+        run: |
+          python3 - <<'PY'
+          import hashlib, json, subprocess
+          from pathlib import Path
+          before = json.loads(Path('store-read-evidence/source-before.json').read_text())
+          after = {p: hashlib.sha256(Path(p).read_bytes()).hexdigest() for p in before['files']}
+          sha = subprocess.check_output(['git', 'rev-parse', 'HEAD'], text=True).strip()
+          status = subprocess.check_output(['git', 'diff', '--name-only'], text=True)
+          passed = sha == before['sha'] and after == before['files'] and not status
+          Path('store-read-evidence/source-after.json').write_text(json.dumps({'sha': sha, 'files': after, 'unchanged': passed}, indent=2) + '\n')
+          assert passed, 'source changed during verification'
+          PY
+      - name: Upload raw evidence even on failure
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: leaderb-store-readonly-${{ env.EXPECTED_SHA }}
+          path: store-read-evidence/
+          if-no-files-found: error

@@ -1,0 +1,10 @@
+scoped	Exact lifecycle tests and genuine binding reproduction	2026-10-18T13:18:18.0305656Z test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+scoped	Exact lifecycle tests and genuine binding reproduction	2026-10-18T13:18:18.0344395Z test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+scoped	Exact lifecycle tests and genuine binding reproduction	2026-10-18T13:18:27.3740125Z test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+scoped	Exact lifecycle tests and genuine binding reproduction	2026-10-18T13:18:27.3820774Z test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+package-device	Stage producer names and build actual combined APK	2026-10-18T13:23:48.3112291Z LIFECYCLE_NATIVE_COMPOSE_PACKAGE_PASS source=a971b4f6742eed9aaf93f7ddb9e956278dd7f75c
+package-device	API26 actual private Service metadata lifecycle	2026-10-18T13:23:48.3282743Z grep -F 'OK (1 test)' "$evidence/instrumentation.log"
+package-device	API26 actual private Service metadata lifecycle	2026-10-18T13:25:40.5145430Z OK (1 test)
+package-device	API26 actual private Service metadata lifecycle	2026-10-18T13:25:40.5708562Z 10-18 13:25:39.451  4573  4590 I System.out: API26_SERVICE_LIFECYCLE_PASS agent_pid=4592 bootstrap_count=2 admissions=1 consumed=1 held=0 expired=1 admission_identity=aa6b36ed-2133-47bb-abee-8a825858ff88 normal_rebind=true model_api_called=false
+package-device	API26 actual private Service metadata lifecycle	2026-10-18T13:25:40.5712072Z 10-18 13:25:39.702  4573  4590 I System.out: API26_SERVICE_PROCESS_RECREATION_PASS old_agent_pid=4592 new_agent_pid=4653 schedule_phase=3 probe_attempts=0 admission_identity=aa6b36ed-2133-47bb-abee-8a825858ff88 synthetic=true model_api_called=false
+package-device	API26 actual private Service metadata lifecycle	2026-10-18T13:25:40.6157545Z OK (1 test)

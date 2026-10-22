@@ -1,0 +1,207 @@
+{
+  "module_id": "equipment_loan",
+  "protocol_version": 1,
+  "data": [
+    {
+      "name": "equipment",
+      "schema_version": 1,
+      "schema": {
+        "type": "object",
+        "properties": {
+          "equipment_key": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "equipment_key",
+          "label"
+        ],
+        "additionalProperties": false
+      },
+      "classification": {
+        "label": "unreviewed"
+      }
+    },
+    {
+      "name": "loan",
+      "schema_version": 1,
+      "schema": {
+        "type": "object",
+        "properties": {
+          "loan_key": {
+            "type": "string"
+          },
+          "equipment": {
+            "type": "object",
+            "properties": {
+              "module_id": {
+                "type": "string"
+              },
+              "type": {
+                "type": "string"
+              },
+              "key": {
+                "type": "string"
+              },
+              "revision": {
+                "type": "string"
+              },
+              "schema_version": {
+                "type": "integer"
+              }
+            },
+            "required": [
+              "module_id",
+              "type",
+              "key",
+              "revision",
+              "schema_version"
+            ],
+            "additionalProperties": false,
+            "data_ref": "equipment_loan/equipment@1"
+          },
+          "borrower": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "loan_key",
+          "equipment",
+          "borrower"
+        ],
+        "additionalProperties": false
+      },
+      "classification": {
+        "borrower": "personal"
+      }
+    }
+  ],
+  "relations": [
+    {
+      "name": "loan_equipment",
+      "schema_version": 1,
+      "from": "equipment_loan/loan@1",
+      "field": "equipment",
+      "to": "equipment_loan/equipment@1",
+      "many": false
+    }
+  ],
+  "operations": [
+    {
+      "name": "inspect_equipment",
+      "schema_version": 1,
+      "effect": "read",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "equipment_key": {
+            "type": "string"
+          },
+          "include_loans": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "equipment_key"
+        ],
+        "additionalProperties": false
+      },
+      "projection_schema": {
+        "type": "object",
+        "properties": {
+          "equipment": {
+            "type": "object",
+            "properties": {
+              "module_id": {
+                "type": "string"
+              },
+              "type": {
+                "type": "string"
+              },
+              "key": {
+                "type": "string"
+              },
+              "revision": {
+                "type": "string"
+              },
+              "schema_version": {
+                "type": "integer"
+              }
+            },
+            "required": [
+              "module_id",
+              "type",
+              "key",
+              "revision",
+              "schema_version"
+            ],
+            "additionalProperties": false,
+            "data_ref": "equipment_loan/equipment@1"
+          },
+          "label": {
+            "type": "string"
+          },
+          "loans": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "module_id": {
+                  "type": "string"
+                },
+                "type": {
+                  "type": "string"
+                },
+                "key": {
+                  "type": "string"
+                },
+                "revision": {
+                  "type": "string"
+                },
+                "schema_version": {
+                  "type": "integer"
+                }
+              },
+              "required": [
+                "module_id",
+                "type",
+                "key",
+                "revision",
+                "schema_version"
+              ],
+              "additionalProperties": false,
+              "data_ref": "equipment_loan/loan@1"
+            },
+            "maxItems": 128
+          }
+        },
+        "required": [
+          "equipment",
+          "label",
+          "loans"
+        ],
+        "additionalProperties": false
+      },
+      "data_refs": [
+        "equipment_loan/equipment@1",
+        "equipment_loan/loan@1"
+      ],
+      "binding_id": "host-equipment-read"
+    }
+  ],
+  "views": [
+    {
+      "name": "equipment_details",
+      "data_refs": [
+        "equipment_loan/equipment@1",
+        "equipment_loan/loan@1"
+      ],
+      "operation_refs": [
+        "equipment_loan/inspect_equipment@1"
+      ]
+    }
+  ]
+}

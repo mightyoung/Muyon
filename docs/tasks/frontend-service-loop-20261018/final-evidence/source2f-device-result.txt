@@ -1,0 +1,1 @@
+API26 UI/Binder/native/synthetic schema12 read PASS; model API NOT_RUN

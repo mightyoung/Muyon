@@ -11,11 +11,13 @@ pub struct Decoder {
     line:Vec<u8>,data:Vec<u8>,data_present:bool,bytes:usize,text:String,
     call_seen:bool,call_ref:String,name:String,args:String,reason:Option<String>,
     done:bool,observed:bool,usage:Usage,failure:Option<String>,
+    tools:Option<Vec<crate::model::ToolDefinition>>,
 }
 fn nullable_text(value:Option<&Json>)->Result<Option<&str>>{match value{None|Some(Json::Null)=>Ok(None),Some(v)=>Ok(Some(v.string()?))}}
 fn freeze(target:&mut String,value:Option<&Json>)->Result<()>{if let Some(s)=nullable_text(value)?{if !s.is_empty(){if !target.is_empty()&&target!=s{return Err("wire_metadata_conflict".into());}if s.len()>64{return Err("wire_metadata_size".into());}*target=s.into();}}Ok(())}
 impl Decoder {
     pub fn new()->Self{Self::default()}
+    pub fn with_tools(tools:&[crate::model::ToolDefinition])->Result<Self>{crate::model::validate_tools(tools)?;Ok(Self{tools:Some(tools.to_vec()),..Self::default()})}
     pub fn cancel(&mut self){self.failure=Some("wire_cancelled".into());}
     pub fn feed(&mut self,byte:u8)->Result<Option<ArgumentObservation>>{
         if let Some(e)=&self.failure{return Err(e.clone());}
@@ -46,20 +48,26 @@ impl Decoder {
         if let Some(calls)=delta.get("tool_calls"){if !matches!(calls,Json::Null){let calls=calls.array()?;if calls.len()>1{return Err("wire_multiple_calls".into());}if let Some(call)=calls.first(){let call=call.object()?;if call.get("index").ok_or("wire_call_index")?.integer()?!=0{return Err("wire_call_index".into());}self.call_seen=true;freeze(&mut self.call_ref,call.get("id"))?;if let Some(kind)=nullable_text(call.get("type"))?{if kind!="function"{return Err("wire_call_type".into());}}
             if let Some(function)=call.get("function"){if !matches!(function,Json::Null){let function=function.object()?;freeze(&mut self.name,function.get("name"))?;if let Some(args)=nullable_text(function.get("arguments"))?{if self.args.len().checked_add(args.len()).ok_or("wire_arguments_limit")?>8192{return Err("wire_arguments_limit".into());}self.args.push_str(args);}}}
         }}}
-        if !self.name.is_empty()&&self.name!="fixture__record"{return Err("wire_unknown_tool".into());}
+        if !self.name.is_empty() && match &self.tools{Some(tools)=>!tools.iter().any(|t|t.wire_name==self.name),None=>self.name!="fixture__record"}{return Err("wire_unknown_tool".into());}
         if self.call_seen&&!self.text.is_empty(){return Err("wire_mixed_turn".into());}
         if let Some(reason)=nullable_text(choice.get("finish_reason"))?{if !matches!(reason,"stop"|"tool_calls"){return Err("wire_finish_reason".into());}self.reason=Some(reason.into());}
         if !self.observed&&self.reason.is_none()&&self.call_seen {if let Ok(call)=self.complete_call(){self.observed=true;return Ok(Some(call));}}
         Ok(None)
     }
     fn complete_call(&self)->Result<ArgumentObservation>{
+        if let Some(tools)=&self.tools{
+            if !identifier(&self.call_ref){return Err("wire_call_metadata".into());}
+            let tool=tools.iter().find(|t|t.wire_name==self.name).ok_or("wire_unknown_tool")?;
+            let args=wire_json::parse(self.args.as_bytes())?;args.object()?;
+            return Ok(ArgumentObservation{call_ref:self.call_ref.clone(),name:tool.name.clone(),value:args.encode()});
+        }
         if !identifier(&self.call_ref)||self.name!="fixture__record"{return Err("wire_call_metadata".into());}
         let args=wire_json::parse(self.args.as_bytes())?;let args=args.object()?;if args.len()!=1{return Err("wire_arguments_schema".into());}let value=args.get("value").ok_or("wire_arguments_schema")?.string()?;
         Ok(ArgumentObservation{call_ref:self.call_ref.clone(),name:"fixture.record".into(),value:value.into()})
     }
     pub fn finish(self)->Result<DecodedTurn>{
         if let Some(e)=&self.failure{return Err(e.clone());}if !self.line.is_empty()||self.data_present||!self.done{return Err("wire_stream_truncated".into());}
-        let event=if self.call_seen{if self.reason.as_deref()!=Some("tool_calls"){return Err("wire_tool_finish".into());}let call=self.complete_call()?;ModelEvent::Tool{call_ref:call.call_ref,name:call.name,value:call.value}}
+        let event=if self.call_seen{if self.reason.as_deref()!=Some("tool_calls"){return Err("wire_tool_finish".into());}let call=self.complete_call()?;if self.tools.is_some(){ModelEvent::HostTool{call_ref:call.call_ref,name:call.name,arguments:wire_json::parse(call.value.as_bytes())?}}else{ModelEvent::Tool{call_ref:call.call_ref,name:call.name,value:call.value}}}
         else{if self.reason.as_deref()!=Some("stop"){return Err("wire_answer_finish".into());}ModelEvent::Answer(self.text.clone())};
         Ok(DecodedTurn{event,usage:self.usage})
     }

@@ -1,0 +1,82 @@
+   Compiling typenum v1.20.1
+   Compiling crc32fast v1.5.3
+   Compiling cfg-if v1.0.5
+   Compiling const-oid v0.10.2
+   Compiling equivalent v1.0.3
+   Compiling zlib-rs v0.6.8
+   Compiling hashbrown v0.17.1
+   Compiling memchr v2.8.3
+   Compiling indexmap v2.14.2
+   Compiling hybrid-array v0.4.15
+   Compiling cpufeatures v0.3.1
+   Compiling typed-path v0.12.4
+   Compiling crypto-common v0.2.2
+   Compiling block-buffer v0.12.1
+   Compiling digest v0.11.3
+   Compiling sha2 v0.11.1
+   Compiling flate2 v1.1.10
+   Compiling zip v9.0.5
+   Compiling muyon-office v0.1.0 (/workspace/office-rust-boundary-fix/crates/muyon-office)
+    Finished `test` profile [unoptimized] target(s) in 4.60s
+     Running tests/boundaries.rs (/workspace/office-rust-boundary-fix-tools/target/debug/deps/boundaries-26ea6d622049de21)
+
+running 6 tests
+test direct_rewrite_obeys_part_and_expanded_limits_and_keeps_source ... FAILED
+test docx_input_and_total_text_boundaries_are_not_delayed_until_readback ... FAILED
+test docx_part_limit_accounts_for_escaped_bytes_before_splice ... FAILED
+test docx_expanded_limit_counts_unchanged_parts ... FAILED
+test inline_and_shared_rich_text_ignore_only_spreadsheet_phonetics_per_cell ... FAILED
+test highly_compressible_replacement_cannot_hide_expanded_or_part_overflow ... FAILED
+
+failures:
+
+---- direct_rewrite_obeys_part_and_expanded_limits_and_keeps_source stdout ----
+
+thread 'direct_rewrite_obeys_part_and_expanded_limits_and_keeps_source' (4268) panicked at muyon-office/tests/boundaries.rs:112:9:
+assertion failed: matches!(package.rewrite_part("word/document.xml", larger.as_bytes(), (0, 0)),
+    Err(OfficeError::LimitExceeded(_)))
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+---- docx_input_and_total_text_boundaries_are_not_delayed_until_readback stdout ----
+
+thread 'docx_input_and_total_text_boundaries_are_not_delayed_until_readback' (4270) panicked at muyon-office/tests/boundaries.rs:30:5:
+assertion failed: matches!(package.replace_docx_run_text(expected, replacement),
+    Err(OfficeError::LimitExceeded(_)))
+
+---- docx_part_limit_accounts_for_escaped_bytes_before_splice stdout ----
+
+thread 'docx_part_limit_accounts_for_escaped_bytes_before_splice' (4271) panicked at muyon-office/tests/boundaries.rs:30:5:
+assertion failed: matches!(package.replace_docx_run_text(expected, replacement),
+    Err(OfficeError::LimitExceeded(_)))
+
+---- docx_expanded_limit_counts_unchanged_parts stdout ----
+
+thread 'docx_expanded_limit_counts_unchanged_parts' (4269) panicked at muyon-office/tests/boundaries.rs:30:5:
+assertion failed: matches!(package.replace_docx_run_text(expected, replacement),
+    Err(OfficeError::LimitExceeded(_)))
+
+---- inline_and_shared_rich_text_ignore_only_spreadsheet_phonetics_per_cell stdout ----
+
+thread 'inline_and_shared_rich_text_ignore_only_spreadsheet_phonetics_per_cell' (4273) panicked at muyon-office/tests/boundaries.rs:54:9:
+assertion `left == right` failed
+  left: "A1: 漢かん字\nB1: 共有\nC1: nextkept\nD1: 7\n"
+ right: "A1: 漢字\nB1: 共有\nC1: nextkept\nD1: 7\n"
+
+---- highly_compressible_replacement_cannot_hide_expanded_or_part_overflow stdout ----
+
+thread 'highly_compressible_replacement_cannot_hide_expanded_or_part_overflow' (4272) panicked at muyon-office/tests/boundaries.rs:30:5:
+assertion failed: matches!(package.replace_docx_run_text(expected, replacement),
+    Err(OfficeError::LimitExceeded(_)))
+
+
+failures:
+    direct_rewrite_obeys_part_and_expanded_limits_and_keeps_source
+    docx_expanded_limit_counts_unchanged_parts
+    docx_input_and_total_text_boundaries_are_not_delayed_until_readback
+    docx_part_limit_accounts_for_escaped_bytes_before_splice
+    highly_compressible_replacement_cannot_hide_expanded_or_part_overflow
+    inline_and_shared_rich_text_ignore_only_spreadsheet_phonetics_per_cell
+
+test result: FAILED. 0 passed; 6 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+error: test failed, to rerun pass `-p muyon-office --test boundaries`

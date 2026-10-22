@@ -1,0 +1,34 @@
+# Independent ordinary chat source review
+
+Reviewed immutable source `802844fc` against handoff `2e3ecb8d231998ba9e097b9c65ac81e32060880d`. Read-only source inspection; no test, build, generation, network, emulator, credential operation or historical database reopen was performed. Generated binding refresh is a known outstanding prerequisite, excluded from the findings below. No AGENTS.md was found in the workspace. Fixed design references: v1.3.2 payload classification patch, USER-TEXT-v1, and the reviewed local CONTRACT.md.
+
+## Result: changes required
+
+### 1. Rejected credential input is persisted by the UI identity journal
+
+`AgentChatReadSession.kt:26–29,34–43` writes `value.text` verbatim to `ordinary-chat-identities-v2` before the first Binder submission. Only generic length/content bounds run first. An input such as `Bearer synthetic-canary` is consequently saved even when the native USER-TEXT-v1 check rejects it before any business ledger or fake handoff. The subsequent failed-state update saves the same text again. Initialization also restores that raw text using only generic text bounds.
+
+The fixed payload-classification patch example 2 requires credential-hit evidence to contain input references and rule reasons without saving the token or revealing fragments. The new native guard satisfies its own ledger boundary, but the UI journal bypasses that boundary. Preserve durable request/run identity without persisting unchecked input. For this existing UI path a local deterministic check may reject before persistence, while native checks remain authoritative; restoration should reject or scrub unsupported/credential-bearing entries as well. Do not merely clear it after rejection, because that leaves an initial durable exposure and crash window. This is a source finding, not a claim that user secrets were read or used during review.
+
+### 2. Completed recovery/disclosure accepts incomplete or contradictory frozen evidence
+
+`ordinary_chat.rs:124–147` checks the send record version/state, matching context/answer/admission/event task, single message content/model, and nonzero usage/generation. It does not validate the full provider/context/usage schemas or replay the supported bounds. For example, deleting `provider.endpoint`, `profile_revision`, `credential_identity` or `usage.counting_rule`, or setting positive output usage above the frozen wire `max_tokens`, does not affect the predicates. `restore()` can still return Completed; disclosure uses the same partial receipt check. The current-authority comparison protects current grant/input lineage but does not repair incomplete original response evidence.
+
+The record also lacks the exact call budget needed to recheck total reported usage against the admitted reservation. `restore()` checks actual task/attempt and conversation, but not `input_ref == run_id:request_id` or the required input version. A pair of mutually equal context copies is insufficient evidence of the required versioned run/input binding.
+
+Persist the supported call bound alongside provider/handle evidence; validate closed supported schemas, required identities/versions, the exact one-message wire shape, positive output cap, output usage <= cap, and checked total usage <= the frozen bound before restoring or disclosing Completed. Verify input_ref against the actual durable run and request when that run is available. Missing/malformed evidence must remain unavailable/unknown, without replay. This finding concerns corruption/incomplete-evidence handling; real transport remains unavailable and this review asserts no paid exposure.
+
+## Positive source observations
+
+- Compose Send now calls `submitOrdinaryChat` through the existing session, bounded private AIDL Service, generated controller wrapper and original Rust Service controller/worker. The default Application installs an unconfigured owned lease and cannot silently execute the synthetic supplier path.
+- Ordinary intent has conversation/text and no supplier key/read grant. The branch creates the actual core State task/attempt and calls the same `Agent::run_with_runtime_ports`; its ports advertise no tools and reject dispatch. Supplier reads retain their existing owner checks.
+- Native input and output use the bounded versioned scanner; current trusted owner facts include personal/commercial and inherited restriction decisions. Auto/FullAllow are accepted as settled modes without new endpoint/taint/reviewer questions. Non-synthetic authority denies production execution.
+- Frozen bytes are prepared and finally admitted through the existing provider bridge. Generationless existence sentinels cannot prepare ordinary chat. Final admission compares the handle including generation. Provider profile, authority and scope/credential snapshots are checked by the same Kotlin durable owner at reservation, commit and exchange.
+- Kotlin exchange holds the authority guard through validation and fake handoff, commits a unique `chat_attempts` marker before the call, checks exact committed payload/current binding/capability, and never refunds consumed admission. The fixture uses the same durable owner, a distinct schema/file and an in-memory response lambda; no network or key-value API is added.
+- Native post-admission errors become outcome_unknown. Ordinary recovery contains no Agent::open, resend or transport retry. Answer events carry provider receipts rather than fabricated supplier projections; decoder accepts these without requiring a supplier projection. The private Service remains `exported=false` in the separate `:agent` process, and the manifest has no INTERNET permission.
+
+## Evidence limits
+
+The three explicit native tests cover success/duplicate, input credential rejection, reservation-time generation rotation, disclosure revocation and lost reply. The named Android test covers Compose Send, same conversation/run after Activity recreation, separate Service PID and durable one-call exhaustion. Source inspection supports those intended paths; it does not establish execution success. Output credential rejection, absent configuration, mode/grant/profile/payload drift, post-commit generation rotation, storage failure and corrupted frozen evidence do not have explicit coverage in the reviewed targets. Retain these as NOT_RUN/unverified unless separately exercised in the allowed fresh-root offline graph; do not infer them from the happy path or run an aggregate suite.
+
+The generated bindings in this SHA are known stale, so this SHA cannot establish Android buildability. No real DeepSeek/model success, real price/currency proof, physical-device completion, foreign constructor/destructor exception coverage or production readiness is claimed. I04 and any implicit suite remain prohibited; old 403 downloads were not retried, PR90/Dart8 and HOLDs were untouched. Reviewer writer stopped after this report.

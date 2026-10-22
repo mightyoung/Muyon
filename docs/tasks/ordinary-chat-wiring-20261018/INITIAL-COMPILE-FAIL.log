@@ -1,0 +1,190 @@
+    Updating crates.io index
+   Compiling muyon-core-agent-lab v0.1.0 (/workspace/Muyon/experiments/redesign/core-agent-lab/core)
+warning: suspicious definition of the runtime `read` symbol used by the standard library
+   --> /workspace/Muyon/experiments/redesign/core-agent-lab/core/src/host_session.rs:132:124
+    |
+132 | ...ount: usize, timeout: i32) -> i32; fn read(fd: i32, buffer: *mut u8, count: usize) -> isize; fn write(fd: i32, buffer: *const u8...
+    |                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = note: expected `unsafe extern "C" fn(i32, *mut c_void, usize) -> isize` (for the current target)
+            found    `unsafe extern "C" fn(i32, *mut u8, usize) -> isize`
+    = help: either fix the signature or remove any attributes like `#[unsafe(no_mangle)]`, `#[unsafe(export_name = "read")]`, or `#[link_name = "read"]`
+    = help: allow this lint if the signature is compatible
+    = note: `#[warn(suspicious_runtime_symbol_definitions)]` on by default
+
+warning: suspicious definition of the runtime `write` symbol used by the standard library
+   --> /workspace/Muyon/experiments/redesign/core-agent-lab/core/src/host_session.rs:132:182
+    |
+132 | ... *mut u8, count: usize) -> isize; fn write(fd: i32, buffer: *const u8, count: usize) -> isize; }
+    |                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = note: expected `unsafe extern "C" fn(i32, *const c_void, usize) -> isize` (for the current target)
+            found    `unsafe extern "C" fn(i32, *const u8, usize) -> isize`
+    = help: either fix the signature or remove any attributes like `#[unsafe(no_mangle)]`, `#[unsafe(export_name = "write")]`, or `#[link_name = "write"]`
+    = help: allow this lint if the signature is compatible
+
+   Compiling muyon-plugin-contract-lab v0.1.0 (/workspace/Muyon/experiments/redesign/plugin-contract-lab/core)
+   Compiling muyon-rust-agent-host-lab v0.1.0 (/workspace/Muyon/experiments/redesign/rust-agent-host-lab/core)
+error[E0616]: field `events` of struct `BusinessRead` is private
+  --> src/ordinary_chat.rs:45:60
+   |
+45 | pub(crate) fn disclose(b:&BusinessRead)->Result<()> { if b.events.iter().any(|e|field(e,"kind").ok()==Some(&string("answer_delta")))...
+   |                                                            ^^^^^^ private field
+
+error[E0616]: field `host` of struct `BusinessRead` is private
+  --> src/ordinary_chat.rs:45:154
+   |
+45 | ...()==Some(&string("answer_delta"))) {validate_binding(b.host.as_ref().ok_or("chat_owner_unavailable")?,&b.payload,b.source_binding...
+   |                                                           ^^^^ private field
+
+error[E0616]: field `source_binding` of struct `BusinessRead` is private
+  --> src/ordinary_chat.rs:45:214
+   |
+45 | ...f().ok_or("chat_owner_unavailable")?,&b.payload,b.source_binding.as_ref().ok_or("chat_binding_unavailable")?)?;receipt(b.dir.as_r...
+   |                                                      ^^^^^^^^^^^^^^ private field
+
+error[E0616]: field `dir` of struct `BusinessRead` is private
+  --> src/ordinary_chat.rs:45:285
+   |
+45 | ...as_ref().ok_or("chat_binding_unavailable")?)?;receipt(b.dir.as_ref().ok_or("chat_run_unavailable")?,b)?;}Ok(()) }
+   |                                                            ^^^ private field
+
+error[E0616]: field `dir` of struct `BusinessRead` is private
+  --> src/ordinary_chat.rs:88:7
+   |
+88 |     b.dir=Some(dir.into());let shared=Rc::new(RefCell::new(Shared{record:None,admitted:false}));
+   |       ^^^ private field
+
+error[E0616]: field `host` of struct `BusinessRead` is private
+  --> src/ordinary_chat.rs:91:20
+   |
+91 | ...   let host=b.host.clone().ok_or("chat_owner_unconfigured")?;let authority=current(&host,&b.payload)?;check_text(field(&b.payload...
+   |                  ^^^^ private field
+
+error[E0616]: field `source_binding` of struct `BusinessRead` is private
+  --> src/ordinary_chat.rs:96:11
+   |
+96 |         b.source_binding=Some(context.clone());b.save(dir)?;
+   |           ^^^^^^^^^^^^^^ private field
+
+error[E0624]: method `save` is private
+  --> src/ordinary_chat.rs:96:50
+   |
+96 |         b.source_binding=Some(context.clone());b.save(dir)?;
+   |                                                  ^^^^ private method
+   |
+  ::: src/supplier_business.rs:64:5
+   |
+64 |     fn save(&self, dir: &Path) -> Result<()> {
+   |     ---------------------------------------- private method defined here
+
+error[E0624]: method `push` is private
+   --> src/ordinary_chat.rs:102:11
+    |
+102 |         b.push("answer_delta",object([("text",string(agent.state.answer))]));
+    |           ^^^^ private method
+    |
+   ::: src/supplier_business.rs:85:5
+    |
+ 85 |     fn push(&mut self, kind: &str, payload: Json) {
+    |     --------------------------------------------- private method defined here
+
+error[E0624]: method `push` is private
+   --> src/ordinary_chat.rs:103:11
+    |
+103 | ...   b.push("provider_receipt",object([("owner",string("ServiceProviderOwner")),("identity",string(&record)),("task",string(&agent...
+    |         ^^^^ private method
+    |
+   ::: src/supplier_business.rs:85:5
+    |
+ 85 |     fn push(&mut self, kind: &str, payload: Json) {
+    |     --------------------------------------------- private method defined here
+
+error[E0616]: field `events` of struct `BusinessRead` is private
+   --> src/ordinary_chat.rs:106:45
+    |
+106 |     let reason=if let Err(reason)=result {b.events.clear();if shared.borrow().admitted{summary.terminal=AgentTerminal::OutcomeUnkno...
+    |                                             ^^^^^^ private field
+
+error[E0624]: method `push` is private
+   --> src/ordinary_chat.rs:107:178
+    |
+107 | ...nal::OutcomeUnknown=>"outcome_unknown",_=>"failed"};b.push("terminal",object([("state",string(state)),("reason",string(reason))]));
+    |                                                          ^^^^ private method
+    |
+   ::: src/supplier_business.rs:85:5
+    |
+ 85 |     fn push(&mut self, kind: &str, payload: Json) {
+    |     --------------------------------------------- private method defined here
+
+error[E0616]: field `source_binding` of struct `BusinessRead` is private
+   --> src/ordinary_chat.rs:109:10
+    |
+109 |     if b.source_binding.is_some() && b.save(dir).is_err(){root.poison();b.events.clear();b.push("terminal",object([("state",string(...
+    |          ^^^^^^^^^^^^^^ private field
+
+error[E0624]: method `save` is private
+   --> src/ordinary_chat.rs:109:40
+    |
+109 |     if b.source_binding.is_some() && b.save(dir).is_err(){root.poison();b.events.clear();b.push("terminal",object([("state",string(...
+    |                                        ^^^^ private method
+    |
+   ::: src/supplier_business.rs:64:5
+    |
+ 64 |     fn save(&self, dir: &Path) -> Result<()> {
+    |     ---------------------------------------- private method defined here
+
+error[E0616]: field `events` of struct `BusinessRead` is private
+   --> src/ordinary_chat.rs:109:75
+    |
+109 |     if b.source_binding.is_some() && b.save(dir).is_err(){root.poison();b.events.clear();b.push("terminal",object([("state",string(...
+    |                                                                           ^^^^^^ private field
+
+error[E0624]: method `push` is private
+   --> src/ordinary_chat.rs:109:92
+    |
+109 |     if b.source_binding.is_some() && b.save(dir).is_err(){root.poison();b.events.clear();b.push("terminal",object([("state",string(...
+    |                                                                                            ^^^^ private method
+    |
+   ::: src/supplier_business.rs:85:5
+    |
+ 85 |     fn push(&mut self, kind: &str, payload: Json) {
+    |     --------------------------------------------- private method defined here
+
+error[E0616]: field `source_binding` of struct `BusinessRead` is private
+   --> src/ordinary_chat.rs:116:107
+    |
+116 | ... || field(&j,"state")?!=&string("completed") || b.source_binding.as_ref()!=Some(field(&j,"context")?) {return Err("chat_receipt_...
+    |                                                      ^^^^^^^^^^^^^^ private field
+
+error[E0616]: field `events` of struct `BusinessRead` is private
+   --> src/ordinary_chat.rs:118:13
+    |
+118 |     let e=b.events.iter().find(|e|field(e,"kind").ok()==Some(&string("answer_delta"))).ok_or("chat_answer_missing")?;
+    |             ^^^^^^ private field
+
+error[E0616]: field `events` of struct `BusinessRead` is private
+   --> src/ordinary_chat.rs:124:21
+    |
+124 |     let completed=b.events.last().and_then(|e|field(e,"payload").ok()).and_then(|p|field(p,"state").ok())==Some(&string("completed"));
+    |                     ^^^^^^ private field
+
+error[E0616]: field `source_binding` of struct `BusinessRead` is private
+   --> src/ordinary_chat.rs:126:46
+    |
+126 |     let record=receipt(dir,b)?;let context=b.source_binding.as_ref().ok_or("chat_binding_missing")?;let task=run.identity.actual_ta...
+    |                                              ^^^^^^^^^^^^^^ private field
+
+warning: unused import: `service_provider`
+ --> src/ordinary_chat.rs:3:71
+  |
+3 | use crate::{field, service_host::{ServiceHostMode, ServiceHostPorts}, service_provider::*, service_root::ServiceRoot, service_runtime...
+  |                                                                       ^^^^^^^^^^^^^^^^
+  |
+  = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+warning: `muyon-core-agent-lab` (lib) generated 2 warnings
+Some errors have detailed explanations: E0616, E0624.
+For more information about an error, try `rustc --explain E0616`.
+warning: `muyon-rust-agent-host-lab` (lib) generated 1 warning
+error: could not compile `muyon-rust-agent-host-lab` (lib) due to 20 previous errors; 1 warning emitted

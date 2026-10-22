@@ -1,0 +1,9 @@
+{
+  "base_combination": "cf26a7bf",
+  "artifact_fixed": "fdc8f28e2cbfaf8fd22c3370b156fb7d0a5bf734",
+  "artifact_test_first": "c5ee7041e3ab22dc7b00e8e9708f3b9a5b4c8f5c",
+  "overlay": "git diff --binary <artifact_fixed> <artifact_test_first> -- crates/muyon-core/src/artifacts",
+  "overlay_sha256": "5122ccf5486f9072f96c5379dce13f6b0dc4a1137a053e6b30673e23e1b265c8",
+  "result": "compiled; one exact test executed and FAILED101, Committed vs Unknown after output grant revocation; not a compile-only RED",
+  "worktree": "/workspace/Muyon-combination-artifact-red"
+}

@@ -1,0 +1,5 @@
+PASS real host/controller: one reducer, exact CAS, stale/double action rejection, template token/manual buffer, lost outcome original read, cancel/resume, same-CAS immutability, closed-view callback isolation, re-entry original-ID read and expired-session retention; no native/transport
+PASS real host candidate: original request/config identity, exact scope, finite read-only kind, binding/actions absent, unknown charge remains unknown, mismatched duplicate observation rejects; no transport
+Exception in thread "main" java.lang.IllegalStateException: same attempt cannot remain pending and terminal
+	at com.mightyoung.muyon.product.ui.shell.HostPersistenceProjectionChecksKt.main(HostPersistenceProjectionChecks.kt:93)
+	at com.mightyoung.muyon.product.ui.shell.HostPersistenceProjectionChecksKt.main(HostPersistenceProjectionChecks.kt)

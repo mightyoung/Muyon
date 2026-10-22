@@ -1,0 +1,67 @@
+{
+  "gate": "PASS",
+  "model_files": 6,
+  "libraries": [
+    {
+      "name": "lib/arm64-v8a/libandroidx.graphics.path.so",
+      "sha256": "41e9a793c43a0f4fddb19e33f346bace464f30f888ba7b9eaf96294ea115bfb6",
+      "alignment": 16384
+    },
+    {
+      "name": "lib/arm64-v8a/libjnidispatch.so",
+      "sha256": "abc26e994517bcaa3309acdb0a27373864086c7569c89d3087b8626fada9ef06",
+      "alignment": 16384
+    },
+    {
+      "name": "lib/arm64-v8a/libmuyon_local_embedding.so",
+      "sha256": "a783371402342ce6220f5b2d5d53fc2f0d79be2f8d02c7f2dd1230502a17f9cc",
+      "alignment": 16384
+    },
+    {
+      "name": "lib/arm64-v8a/libonnxruntime.so",
+      "sha256": "cd1285f8955f3abcb0127d1ffaf1e5da7893d2547872a831b4717c0bfe388328",
+      "alignment": 16384
+    },
+    {
+      "name": "lib/arm64-v8a/libonnxruntime4j_jni.so",
+      "sha256": "b475dec0daca8df567c8bed806b99a4caa984aef274a9aa7089d8c3b539dfa30",
+      "alignment": 16384
+    },
+    {
+      "name": "lib/x86_64/libandroidx.graphics.path.so",
+      "sha256": "4e56c996f13670e70082658de7880c4020eabf4f25e43387f88ed78a713fc9f0",
+      "alignment": 16384
+    },
+    {
+      "name": "lib/x86_64/libjnidispatch.so",
+      "sha256": "3809247e9b804a05ed8377b87d545cf5b5e97f960f75e725bc8497b40260e417",
+      "alignment": 16384
+    },
+    {
+      "name": "lib/x86_64/libmuyon_local_embedding.so",
+      "sha256": "5b4f0eaf6701b5d2c0ef1ecdb8a4a2ef12a69567007a76ead58d5fa4c639b2d2",
+      "alignment": 16384
+    },
+    {
+      "name": "lib/x86_64/libonnxruntime.so",
+      "sha256": "63950eb2495baec6c561309c833f81ba5b6d90222491772941780c210c054fac",
+      "alignment": 16384
+    },
+    {
+      "name": "lib/x86_64/libonnxruntime4j_jni.so",
+      "sha256": "708c0695867fe1dd4c4bd0fbd3210210a5412e9842a3a9c2d1fbcabba38dc50a",
+      "alignment": 16384
+    },
+    {
+      "name": "lib/arm64-v8a/libmuyon_android_product.so",
+      "sha256": "3a5c78814894703c1d55f08d8eee0ef021425e06a480704f0fa14e58cb7ab243",
+      "alignment": 16384
+    },
+    {
+      "name": "lib/x86_64/libmuyon_android_product.so",
+      "sha256": "e914a08e4824c6e49508714f29f84b50662b81dc8b6992dc6ba39fb066a383ee",
+      "alignment": 16384
+    }
+  ],
+  "boundary": "Static APK bytes/alignment only; API26 inference and 16KiB-kernel execution are separate evidence."
+}

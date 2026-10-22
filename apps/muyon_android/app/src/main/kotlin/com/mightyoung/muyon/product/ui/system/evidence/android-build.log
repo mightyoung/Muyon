@@ -1,0 +1,4 @@
+$ bash apps/muyon_android/gradlew -p apps/muyon_android :app:testDebugUnitTest :app:compileDebugKotlin :app:compileDebugAndroidTestKotlin :app:lintDebug
+NOT_RUN: set MUYON_UI_GRADLE to the existing Gradle 8.13 executable.
+
+exit_code=2

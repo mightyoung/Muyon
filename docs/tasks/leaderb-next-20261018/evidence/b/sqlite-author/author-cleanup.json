@@ -1,0 +1,17 @@
+{
+  "observed_author_child_roots": [
+    {
+      "path": "/tmp/le06-flutter-project-DGSZUB/",
+      "exists": false
+    },
+    {
+      "path": "/tmp/le06-flutter-project-NTAARD/",
+      "exists": false
+    },
+    {
+      "path": "/tmp/le06-flutter-project-JEZUYW/",
+      "exists": false
+    }
+  ],
+  "active_owned_builders": []
+}

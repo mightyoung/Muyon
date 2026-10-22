@@ -1,0 +1,101 @@
+{
+  "version": 1,
+  "source_commit": "6e0f1c5752515c2bb8318897832912c57b8d1090",
+  "targets": {
+    "native_read": {
+      "path": "experiments/redesign/rust-agent-host-lab/core/tests/native_read.rs",
+      "blob_sha": "d768e6bb8bc12b7d00304e582ea3849cb59406b8",
+      "sha256": "04aed51dd17ab035f6a4210fcf7d4c30c2c9458f64dd44642c974dc22c59e188",
+      "names": [
+        "native_host_executes_registered_read",
+        "unauthorized_read_executes_zero",
+        "wrong_projection_preserves_raw_receipt",
+        "handler_failure_keeps_source_facts",
+        "receipt_time_revoke_exports_no_projection",
+        "actual_value_review_denies_sensitive_projection",
+        "cancel_closes_owned_child_and_executes_zero",
+        "restart_retains_raw_evidence_without_live_export_authority",
+        "two_turn_model_bytes_contain_only_validated_projection",
+        "historical_projection_revoke_blocks_actual_second_send",
+        "ledger_failure_sends_zero_bytes",
+        "malformed_oversize_eof_child_frames_invalidate_session",
+        "silent_child_deadline_is_bounded_and_reaped",
+        "duplicate_model_call_never_reexecutes_handler",
+        "wrong_reference_version_retains_only_original_receipt",
+        "final_payload_policy_revoke_blocks_second_endpoint_admission",
+        "catalog_known_but_unadvertised_call_executes_zero",
+        "all_native_mappings_use_physical_store_and_same_two_turn_runtime",
+        "physical_handler_rejects_same_id_wrong_business_type",
+        "invalid_host_enrollment_publishes_nothing_and_active_catalog_is_sealed",
+        "missing_selected_refs_execute_zero_before_physical_read",
+        "revoke_after_preinvoke_snapshot_executes_zero",
+        "native_store_restore_rejects_forged_receipts_and_facts",
+        "native_store_persist_budget_never_writes_unreadable_snapshot",
+        "cancel_during_handler_retains_raw_receipt_without_projection"
+      ]
+    },
+    "contract_transport": {
+      "path": "experiments/redesign/rust-agent-host-lab/core/tests/contract_transport.rs",
+      "blob_sha": "a969344b5607e714b37c6c411cc823a6d89c03fb",
+      "sha256": "2fab93189b6615b623185db505f2b61e4bc53d0a4853670a94193d81d13907b3",
+      "names": [
+        "persistent_catalog_keeps_generation_and_one_shot_ticket",
+        "tickets_cannot_cross_catalog_instances",
+        "recoverable_schema_rejection_preserves_catalog",
+        "fatal_envelope_replies_latch_transport_closed",
+        "raw_frames_enforce_utf8_duplicates_depth_and_limits",
+        "explicit_transport_close_rejects_future_inspection",
+        "wire_close_retains_child_command_inspection_semantics",
+        "embedded_line_feed_is_fatal_but_crlf_sibling_is_valid"
+      ]
+    },
+    "service_runtime": {
+      "path": "experiments/redesign/rust-agent-host-lab/core/tests/service_runtime.rs",
+      "blob_sha": "0bfa69ee46f7fab974ec6015e63bdeeffcf55475",
+      "sha256": "165b2e903aac273d5cb4f31deb9974b1c4fe20561735662923644fdafbfa4b8b",
+      "names": [
+        "all_builtins_read_physical_file_and_journal_two_actual_payloads",
+        "pre_cancelled_worker_never_bootstraps_or_reads"
+      ]
+    },
+    "service_root": {
+      "path": "experiments/redesign/rust-agent-host-lab/core/tests/service_root.rs",
+      "blob_sha": "7cbf6fa4829e7dae8c3a5e813cea41be8a44fb71",
+      "sha256": "e02398223d07ded359e8f64fbb9b1f3f9356a90a0ed1056117e0fbe08c34de68",
+      "names": [
+        "root_lease_serializes_durable_admission_and_preserves_identity",
+        "root_inventory_refuses_unowned_entries_and_peak_overflow"
+      ]
+    },
+    "service_controller": {
+      "path": "experiments/redesign/rust-agent-host-lab/core/tests/service_controller.rs",
+      "blob_sha": "9ac56d3009b6aea0ddd889ba1ae610d3837391bc",
+      "sha256": "6653361134043202b9bf71b4f5fe3e07fb9e019d25b7e48fb50f3ee2cc5ed694",
+      "names": [
+        "service_controller_executes_registered_read",
+        "controller_is_send_sync_without_moving_native_session",
+        "build_identity_is_explicit_without_host_build_environment",
+        "zero_client_initialization_retirement_requires_real_settlement"
+      ]
+    },
+    "service_oracle": {
+      "path": "experiments/redesign/rust-agent-host-lab/core/tests/service_oracle.rs",
+      "blob_sha": "2945c872730bd38bed1ca0cf034bb8b091e9a643",
+      "sha256": "f792140578cc8dbdf130dde0298eda21aca8bcf70afbc52dfa83f3f00e9b5d36",
+      "names": [
+        "service_controller_observer_correlates_all_builtin_payloads"
+      ]
+    },
+    "service_lifecycle": {
+      "path": "experiments/redesign/rust-agent-host-lab/core/tests/service_lifecycle.rs",
+      "blob_sha": "5aa612cde26ab55dd2db38eee962568303e103dc",
+      "sha256": "36146445d5db8b8552cac3d3fccc36d7d90b9ef0d1691f6c83b4602c599f6123",
+      "names": [
+        "client_epochs_generations_and_visibility_are_fail_closed",
+        "same_request_is_existing_without_a_second_worker",
+        "close_and_reconnect_preserve_original_durable_outcome",
+        "incomplete_temp_evidence_blocks_ready_without_cleanup"
+      ]
+    }
+  }
+}

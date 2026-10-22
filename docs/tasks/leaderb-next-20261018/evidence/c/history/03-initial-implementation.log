@@ -1,0 +1,53 @@
+warning: suspicious definition of the runtime `read` symbol used by the standard library
+   --> /workspace/leaderb-store/experiments/redesign/core-agent-lab/core/src/host_session.rs:132:124
+    |
+132 | ...ount: usize, timeout: i32) -> i32; fn read(fd: i32, buffer: *mut u8, count: usize) -> isize; fn write(fd: i32, buffer: *const u8...
+    |                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = note: expected `unsafe extern "C" fn(i32, *mut c_void, usize) -> isize` (for the current target)
+            found    `unsafe extern "C" fn(i32, *mut u8, usize) -> isize`
+    = help: either fix the signature or remove any attributes like `#[unsafe(no_mangle)]`, `#[unsafe(export_name = "read")]`, or `#[link_name = "read"]`
+    = help: allow this lint if the signature is compatible
+    = note: `#[warn(suspicious_runtime_symbol_definitions)]` on by default
+
+warning: suspicious definition of the runtime `write` symbol used by the standard library
+   --> /workspace/leaderb-store/experiments/redesign/core-agent-lab/core/src/host_session.rs:132:182
+    |
+132 | ... *mut u8, count: usize) -> isize; fn write(fd: i32, buffer: *const u8, count: usize) -> isize; }
+    |                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = note: expected `unsafe extern "C" fn(i32, *const c_void, usize) -> isize` (for the current target)
+            found    `unsafe extern "C" fn(i32, *const u8, usize) -> isize`
+    = help: either fix the signature or remove any attributes like `#[unsafe(no_mangle)]`, `#[unsafe(export_name = "write")]`, or `#[link_name = "write"]`
+    = help: allow this lint if the signature is compatible
+
+warning: `muyon-core-agent-lab` (lib) generated 2 warnings
+   Compiling muyon-rust-agent-host-lab v0.1.0 (/workspace/leaderb-store/experiments/redesign/rust-agent-host-lab/core)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.72s
+     Running tests/supplier_store.rs (experiments/redesign/rust-agent-host-lab/core/target/debug/deps/supplier_store-68a20eabb995f1af)
+
+running 7 tests
+
+thread 'current_projection_rereads_name_while_historical_receipt_identity_stays_original' (5412) panicked at tests/supplier_store.rs:89:37:
+called `Result::unwrap()` on an `Err` value: "No such file or directory (os error 2)"
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test current_projection_rereads_name_while_historical_receipt_identity_stays_original ... FAILED
+test identity_and_request_shape_are_not_sql_or_path_authority ... ok
+
+thread 'registered_read_yields_business_name_and_original_durable_receipt_without_business_write' (5415) panicked at tests/supplier_store.rs:51:40:
+called `Result::unwrap()` on an `Err` value: "No such file or directory (os error 2)"
+test registered_read_yields_business_name_and_original_durable_receipt_without_business_write ... FAILED
+test replaced_file_symlinks_owner_mode_and_no_create_fail_closed ... ok
+test source_change_during_registered_dispatch_revokes_publication ... ok
+test current_reads_reject_pinned_revision_drift_and_pending_or_revoked_authority ... ok
+test unknown_schema_missing_deleted_malformed_and_oversized_sources_fail_closed ... ok
+
+failures:
+
+failures:
+    current_projection_rereads_name_while_historical_receipt_identity_stays_original
+    registered_read_yields_business_name_and_original_durable_receipt_without_business_write
+
+test result: FAILED. 5 passed; 2 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.26s
+
+error: test failed, to rerun pass `--test supplier_store`

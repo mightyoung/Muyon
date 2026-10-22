@@ -1,0 +1,115 @@
+   Compiling muyon-core-agent-lab v0.1.0 (/workspace/document-edit-durable-combination/experiments/redesign/core-agent-lab/core)
+   Compiling muyon-plugin-contract-lab v0.1.0 (/workspace/document-edit-durable-combination/experiments/redesign/plugin-contract-lab/core)
+   Compiling muyon-rust-agent-host-lab v0.1.0 (/workspace/document-edit-durable-combination/experiments/redesign/rust-agent-host-lab/core)
+   Compiling muyon-web-search-lab v0.1.0 (/workspace/document-edit-durable-combination/experiments/redesign/web-search-lab/core)
+   Compiling muyon-core v0.1.0 (/workspace/document-edit-durable-combination/crates/muyon-core)
+    Finished `test` profile [unoptimized] target(s) in 7.19s
+     Running tests/document_edit_engine_protocol.rs (/workspace/document-edit-combination/crates/target/debug/deps/document_edit_engine_protocol-e52837b697f52b2d)
+
+running 5 tests
+test numeric_cell_bounds_and_metadata_format_are_strict ... ok
+test identity_and_hash_errors_are_distinct_from_environment_hold ... ok
+test real_metadata_maps_exact_identity_and_preserves_numeric_literals ... ok
+test six_response_fixtures_can_never_mint_an_engine_commit_permit ... ok
+test unknown_keys_versions_duplicate_keys_and_oversize_receipts_fail_closed ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/document_edit_gateway.rs (/workspace/document-edit-combination/crates/target/debug/deps/document_edit_gateway-9524898dbf45656f)
+
+running 13 tests
+test a_copy_claim_that_cannot_store_its_candidate_is_query_only_after_restart ... ok
+test candidate_reopens_but_new_effect_requires_an_explicit_fresh_confirmation ... ok
+test candidate_and_original_receipt_survive_restart_without_replay ... ok
+test confirmation_is_exact_and_revocation_stops_publication ... ok
+test cancellation_is_not_rollback_and_cannot_erase_a_committed_receipt ... ok
+test corrupt_candidate_never_validates_or_publishes ... ok
+test corrupt_oversize_persisted_metadata_is_rejected_before_payload_decode ... ok
+test duplicate_intent_binds_original_and_never_creates_second_upload ... ok
+test late_copy_duplicate_is_only_an_authorized_original_result_query ... ok
+test prepare_is_durable_without_confirmation_or_engine_success ... ok
+test receipt_tail_failure_rolls_back_cas_and_restart_unknown_never_replays ... ok
+test two_original_intents_cannot_publish_the_same_source_revision ... ok
+test grant_revoked_or_expired_by_last_receipt_write_rolls_back_the_entire_publish ... ok
+
+test result: ok. 13 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.08s
+
+     Running tests/document_edit_transactions.rs (/workspace/document-edit-combination/crates/target/debug/deps/document_edit_transactions-f75bf9d06fb90499)
+
+running 28 tests
+test candidate_mismatch_and_missing_validation_do_not_advance ... ok
+test cancel_before_late_commit_receipt_or_unknown_keeps_recovery_open ... ok
+test apply_requires_an_immutable_copy_with_a_distinct_identity ... ok
+test cancellation_preserves_unknown_and_committed_outcomes ... ok
+test commit_needs_durable_matching_receipt_and_cannot_repeat ... ok
+test cross_scope_is_rejected_even_for_read ... ok
+test double_click_does_not_reapply ... ok
+test each_validation_dimension_and_formula_unknown_fails_closed ... ok
+test export_requires_committed_revision_and_matching_copy ... ok
+test every_boundary_requires_facts_and_live_authority ... ok
+test commit_and_original_intent_recovery_require_exact_next_revision_without_overflow ... ok
+test identity_requires_all_binding_fields ... ok
+test host_observations_reject_paths_in_opaque_candidate_and_authority_ids ... ok
+test preview_never_confirms_or_supplies_missing_authority ... ok
+test original_intent_query_with_new_read_authority_does_not_replay_old_confirmation ... ok
+test prior_candidate_cannot_be_attached_to_a_different_patch_or_intent ... ok
+test readonly_capability_is_never_edit_permission ... ok
+test reissued_authority_does_not_reuse_confirmation ... ok
+test revocation_cannot_hide_an_uncertain_original_outcome ... ok
+test revocation_does_not_prevent_local_cancel_request ... ok
+test rollback_is_a_new_bound_transaction_not_a_cancel_side_effect ... ok
+test stale_confirmation_is_rejected ... ok
+test stale_source_and_failed_cas_preserve_candidate_as_conflict ... ok
+test unknown_apply_recovers_original_candidate_without_replay ... ok
+test unknown_queries_original_intent_and_never_replays ... ok
+test unknown_capability_or_missing_operation_permission_never_advances ... ok
+test unvalidated_commit_is_refused ... ok
+test validation_failure_is_terminal_and_cannot_commit ... ok
+
+test result: ok. 28 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/document_storage.rs (/workspace/document-edit-combination/crates/target/debug/deps/document_storage-0a5b8b0b2e2a0923)
+
+running 15 tests
+test expires_deleted_project_and_missing_permissions_fail_closed ... ok
+test delete_expiry_at_publication_tail_preserves_previous_annotation ... ok
+test annotation_cas_tombstones_and_ai_provenance_are_durable ... ok
+test foreign_upload_and_bad_schema_are_rejected_without_partial_metadata ... ok
+test corrupted_revision_keys_or_missing_snapshot_fail_closed ... ok
+test grant_scope_revision_epoch_generation_and_revoke_are_current ... ok
+test export_is_deterministic_sidecar_data_with_origin_and_tombstones ... ok
+test invalid_or_cross_revision_anchors_do_not_leave_rows ... ok
+test immutable_document_revisions_invalidate_access_and_preserve_old_anchors ... ok
+test late_metadata_failure_rolls_back_blob_publication_and_head ... ok
+test late_annotation_failure_rolls_back_history ... ok
+test oversized_persistent_payloads_are_rejected_before_decode ... ok
+test save_expiry_at_publication_tail_rolls_back_sidecar_and_history ... ok
+test synthetic_metadata_blob_and_annotation_survive_reopen ... ok
+test writes_cannot_strand_existing_annotations_above_read_budget ... ok
+
+test result: ok. 15 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.65s
+
+     Running tests/documents.rs (/workspace/document-edit-combination/crates/target/debug/deps/documents-16400c438fe53c74)
+
+running 18 tests
+test cached_metadata_never_bypasses_revocation_or_unknown_authority ... ok
+test anchors_are_bound_to_identity_revision_and_format ... ok
+test capability_for_other_operation_or_format_grants_nothing ... ok
+test declared_format_never_enables_a_reader ... ok
+test current_host_and_operation_capability_must_both_allow_read ... ok
+test each_missing_pdf_geometry_field_remains_unresolved ... ok
+test nonfinite_empty_overflowing_and_invalid_normalized_rectangles_fail ... ok
+test host_errors_and_invalid_or_stale_lease_fail_closed ... ok
+test invalid_document_metadata_is_rejected_and_revision_is_preserved ... ok
+test normalized_regions_preserve_explicit_rotation_and_reject_invalid_crop ... ok
+test old_revision_or_other_document_is_rejected ... ok
+test pdf_geometry_keeps_unknowns_without_guessing ... ok
+test read_contract_cannot_admit_edit_even_when_both_lists_allow_it ... ok
+test structured_anchors_validate_ids_ranges_and_package_parts ... ok
+test stale_grant_epoch_generation_and_id_are_rejected ... ok
+test visible_pdf_selection_must_fit_the_declared_crop ... ok
+test unsupported_and_gated_capabilities_deny ... ok
+test workspace_and_project_are_exact_not_wildcards ... ok
+
+test result: ok. 18 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

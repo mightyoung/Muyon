@@ -1,0 +1,17 @@
+docs/tasks/mig20-group-runtime-20261022/evidence/01-missing-module.log:8: new blank line at EOF.
+docs/tasks/mig20-group-runtime-20261022/evidence/03-behavior-red.log:102: new blank line at EOF.
+docs/tasks/mig20-group-runtime-20261022/evidence/05-first-green.log:18: new blank line at EOF.
+docs/tasks/mig20-group-runtime-20261022/evidence/08-projection-scaffold-compile.log:20: new blank line at EOF.
+docs/tasks/mig20-group-runtime-20261022/evidence/09-projection-red.log:18: new blank line at EOF.
+docs/tasks/mig20-group-runtime-20261022/evidence/12-projection-red.log:51: new blank line at EOF.
+docs/tasks/mig20-group-runtime-20261022/evidence/14-green.log:23: new blank line at EOF.
+docs/tasks/mig20-group-runtime-20261022/evidence/15-cargo.log:58: trailing whitespace.
++          
+docs/tasks/mig20-group-runtime-20261022/evidence/16-review-regression-red.log:18: new blank line at EOF.
+docs/tasks/mig20-group-runtime-20261022/evidence/18-review-fixed-green.log:24: new blank line at EOF.
+docs/tasks/mig20-group-runtime-20261022/evidence/19-cargo-green.log:347: new blank line at EOF.
+docs/tasks/mig20-group-runtime-20261022/evidence/20-budget-boundary-green.log:25: new blank line at EOF.
+docs/tasks/mig20-group-runtime-20261022/evidence/final-cargo.stdout.log:278: new blank line at EOF.
+docs/tasks/mig20-group-runtime-20261022/evidence/final-governance.stdout.log:26: new blank line at EOF.
+docs/tasks/mig20-group-runtime-20261022/evidence/final-runtime.stdout.log:25: new blank line at EOF.
+docs/tasks/mig20-group-runtime-20261022/evidence/independent-ir01-red.log:18: new blank line at EOF.

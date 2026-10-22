@@ -1,0 +1,7 @@
+scoped	Exact lifecycle tests and genuine binding reproduction	2026-10-18T13:08:30.8221987Z test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+scoped	Exact lifecycle tests and genuine binding reproduction	2026-10-18T13:08:30.8262591Z test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+scoped	Exact lifecycle tests and genuine binding reproduction	2026-10-18T13:08:39.6876952Z test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+scoped	Exact lifecycle tests and genuine binding reproduction	2026-10-18T13:08:39.6961816Z test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+package-device	Stage producer names and build actual combined APK	2026-10-18T13:12:30.6582617Z combined-build.log: exit=1 timeout=False forced_cleanup=False
+package-device	Stage producer names and build actual combined APK	2026-10-18T13:12:30.6609271Z Caused by: org.jetbrains.kotlin.gradle.tasks.CompilationErrorException: Compilation error. See log for more details
+package-device	Stage producer names and build actual combined APK	2026-10-18T13:12:30.6642381Z BUILD FAILED in 2m 1s

@@ -1,0 +1,6 @@
+{
+  "adb_exit": 0,
+  "samples": 147,
+  "max_sampled_app_rss_kib": 645608,
+  "scope": "API26 arm64 emulator main app process, sampled every >=250ms; not a guaranteed instantaneous peak or device-class benchmark"
+}

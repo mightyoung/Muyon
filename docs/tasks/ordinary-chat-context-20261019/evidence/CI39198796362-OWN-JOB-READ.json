@@ -1,0 +1,8 @@
+{
+  "job": 117888967417,
+  "run": 39198796362,
+  "attempted_once": true,
+  "exit_code": 1,
+  "stderr": "Get \"[redacted redirect URL] Forbidden\n",
+  "no_retry_or_alternate": true
+}

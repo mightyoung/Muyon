@@ -1,0 +1,30 @@
+{
+  "checked_at_utc": "2026-10-22T03:57:52.311342+00:00",
+  "results": [
+    {
+      "argv": [
+        "git",
+        "diff",
+        "--cached",
+        "--check"
+      ],
+      "exit_status": 2,
+      "stdout": "docs/tasks/group-governance-20261022/evidence/fresh/tests.stdout.log:26: new blank line at EOF.\ndocs/tasks/group-governance-20261022/evidence/historical/cargo-final.log:296: new blank line at EOF.\ndocs/tasks/group-governance-20261022/evidence/historical/cargo.log:321: new blank line at EOF.\ndocs/tasks/group-governance-20261022/evidence/historical/green.log:26: new blank line at EOF.\ndocs/tasks/group-governance-20261022/evidence/historical/mutations/active_cap.log:39: new blank line at EOF.\ndocs/tasks/group-governance-20261022/evidence/historical/mutations/authority_intersection.log:39: new blank line at EOF.\ndocs/tasks/group-governance-20261022/evidence/historical/mutations/dag_cycle.log:39: new blank line at EOF.\ndocs/tasks/group-governance-20261022/evidence/historical/mutations/epoch_fence.log:39: new blank line at EOF.\ndocs/tasks/group-governance-20261022/evidence/historical/mutations/lifetime_cap.log:47: new blank line at EOF.\ndocs/tasks/group-governance-20261022/evidence/historical/mutations/unknown_budget.log:39: new blank line at EOF.\ndocs/tasks/group-governance-20261022/evidence/historical/red.log:139: new blank line at EOF.\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "git",
+        "diff",
+        "--cached",
+        "--check",
+        "--",
+        ".",
+        ":(exclude)docs/tasks/group-governance-20261022/evidence/**/*.log"
+      ],
+      "exit_status": 0,
+      "stdout": "",
+      "stderr": ""
+    }
+  ]
+}

@@ -1,0 +1,22 @@
+[
+  {
+    "name": "Assert exact checkout and preserve source hashes",
+    "exit": 0,
+    "source_sha": "fdc9aea120925229aa592c3551efab9b3f67a825"
+  },
+  {
+    "name": "Install pinned tested Rust",
+    "exit": 0,
+    "source_sha": "fdc9aea120925229aa592c3551efab9b3f67a825"
+  },
+  {
+    "name": "Scoped registered business read and Android compile checks",
+    "exit": 0,
+    "source_sha": "fdc9aea120925229aa592c3551efab9b3f67a825"
+  },
+  {
+    "name": "Verify source integrity after checks",
+    "exit": 0,
+    "source_sha": "fdc9aea120925229aa592c3551efab9b3f67a825"
+  }
+]

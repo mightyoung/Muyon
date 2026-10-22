@@ -15,7 +15,7 @@ pub struct State {
     pub correlations:BTreeMap<String,Binding>,pub behavior:String,
     pub resume_status:String,pub resume_reason:String,pub result_pending:bool,
     pub receipt_binding:Option<Binding>,pub evidence_hold:bool,
-    pub wire:Option<WireConfig>,pub wire_counters:WireCounters,pub native:Vec<NativeMessage>,pub pending_call_ref:String,
+    pub(crate) host_metered:bool,pub wire:Option<WireConfig>,pub wire_counters:WireCounters,pub native:Vec<NativeMessage>,pub pending_call_ref:String,
 }
 fn mode_name(mode:Mode)->&'static str {match mode{Mode::ReadOnly=>"read-only",Mode::AskEveryTime=>"ask-every-time",Mode::Auto=>"auto",Mode::FullAllow=>"full-allow"}}
 pub fn parse_mode(s:&str)->Result<Mode>{match s{"read-only"=>Ok(Mode::ReadOnly),"ask-every-time"=>Ok(Mode::AskEveryTime),"auto"=>Ok(Mode::Auto),"full-allow"=>Ok(Mode::FullAllow),_=>Err("invalid_mode".into())}}
@@ -27,9 +27,17 @@ impl State {
         if input.len() as u64>limits.context{return Err("input_context_limit".into());}
         let nonce=SystemTime::now().duration_since(UNIX_EPOCH).map_err(|_|"clock")?.as_nanos();
         let task=format!("t-{}-{nonce}",std::process::id());
-        Ok(Self{attempt:format!("a-{}-{nonce}",std::process::id()),task,status:"ready".into(),reason:String::new(),script,scope,facts,limits,counters:Counters::default(),context:vec![Message{role:Role::User,text:input}],position:0,binding:None,unresolved:false,receipt:String::new(),answer:String::new(),cancelled:false,correlations:BTreeMap::new(),behavior,resume_status:String::new(),resume_reason:String::new(),result_pending:false,receipt_binding:None,evidence_hold:false,wire:None,wire_counters:WireCounters::default(),native:Vec::new(),pending_call_ref:String::new()})
+        Ok(Self{attempt:format!("a-{}-{nonce}",std::process::id()),task,status:"ready".into(),reason:String::new(),script,scope,facts,limits,counters:Counters::default(),context:vec![Message{role:Role::User,text:input}],position:0,binding:None,unresolved:false,receipt:String::new(),answer:String::new(),cancelled:false,correlations:BTreeMap::new(),behavior,resume_status:String::new(),resume_reason:String::new(),result_pending:false,receipt_binding:None,evidence_hold:false,host_metered:false,wire:None,wire_counters:WireCounters::default(),native:Vec::new(),pending_call_ref:String::new()})
     }
-    pub fn with_wire(mut self,config:WireConfig)->Result<Self>{config.validate()?;self.native=self.context.iter().map(|m|NativeMessage::User(m.text.clone())).collect();self.script.clear();self.wire=Some(config);Ok(self)}
+    /// Native host owns persistence and authority; this does not create fixture effects.
+    pub fn runtime(input:String,scope:String,limits:Limits)->Result<Self>{
+        limits.validate()?;
+        if input.len()>65536 || input.len() as u64>limits.context || scope.is_empty() || scope.len()>1024{return Err("invalid_start".into());}
+        let nonce=SystemTime::now().duration_since(UNIX_EPOCH).map_err(|_|"clock")?.as_nanos();
+        let task=format!("t-{}-{nonce}",std::process::id());
+        Ok(Self{attempt:format!("a-{}-{nonce}",std::process::id()),task,status:"ready".into(),reason:String::new(),script:String::new(),scope,facts:HostFacts{mode:Mode::ReadOnly,high:true,hard_ok:false,revoked:true,scope_ok:false,classification_ok:false,confirmed:false,tainted:true,new_destination:true},limits,counters:Counters::default(),context:vec![Message{role:Role::User,text:input}],position:0,binding:None,unresolved:false,receipt:String::new(),answer:String::new(),cancelled:false,correlations:BTreeMap::new(),behavior:"normal".into(),resume_status:String::new(),resume_reason:String::new(),result_pending:false,receipt_binding:None,evidence_hold:false,host_metered:true,wire:None,wire_counters:WireCounters::default(),native:Vec::new(),pending_call_ref:String::new()})
+    }
+    pub fn with_wire(mut self,config:WireConfig)->Result<Self>{config.validate()?;self.host_metered=false;self.native=self.context.iter().map(|m|NativeMessage::User(m.text.clone())).collect();self.script.clear();self.wire=Some(config);Ok(self)}
     pub fn encode(&self)->String{
         let mut m=BTreeMap::new();
         macro_rules! put {($k:expr,$v:expr)=>{m.insert($k.to_string(),$v.to_string());};}
@@ -42,7 +50,7 @@ impl State {
         put!("pending_hex",hex(&self.binding.as_ref().map(|b|b.encode()).unwrap_or_default()));put!("unresolved",self.unresolved);put!("receipt",self.receipt);put!("answer_hex",hex(&self.answer));put!("cancelled",self.cancelled);put!("correlations_hex",hex(&self.correlations.iter().map(|(k,b)|format!("{}\t{}\n",k,hex(&b.encode()))).collect::<String>()));put!("behavior",self.behavior);
         put!("receipt_binding_hex",hex(&self.receipt_binding.as_ref().map(|b|b.encode()).unwrap_or_default()));put!("evidence_hold",self.evidence_hold);
         put!("resume_status",self.resume_status);put!("resume_reason",self.resume_reason);put!("result_pending",self.result_pending);
-        put!("provider",if self.wire.is_some(){"chat-sse"}else{"script"});
+        put!("provider",if self.host_metered{"native-host"}else if self.wire.is_some(){"chat-sse"}else{"script"});
         put!("wire_config_hex",hex(&self.wire.as_ref().map(WireConfig::encode).unwrap_or_default()));put!("native_history_hex",hex(&encode_history(&self.native)));put!("pending_call_ref",self.pending_call_ref);
         put!("wire_sent_bytes",self.wire_counters.sent);put!("wire_received_bytes",self.wire_counters.received);put!("wire_total_bytes",self.wire_counters.total());put!("provider_inflight",self.wire_counters.inflight);
         put!("usage_prompt",self.wire_counters.usage.prompt.map(|n|n.to_string()).unwrap_or_else(||"unknown".into()));put!("usage_completion",self.wire_counters.usage.completion.map(|n|n.to_string()).unwrap_or_else(||"unknown".into()));
@@ -72,13 +80,19 @@ impl State {
         let evidence_hold=flag(&mut m,"evidence_hold")?;
         let resume_status=take(&mut m,"resume_status")?;let resume_reason=take(&mut m,"resume_reason")?;let result_pending=flag(&mut m,"result_pending")?;
         let provider=take(&mut m,"provider")?;let wire_raw=unhex(&take(&mut m,"wire_config_hex")?)?;
-        let wire=match provider.as_str(){"script" if wire_raw.is_empty()=>None,"chat-sse" if script.is_empty()=>Some(WireConfig::decode(&wire_raw)?),_=>return Err("invalid_provider".into())};
+        let host_metered=provider=="native-host";
+        let wire=match provider.as_str(){"native-host" if script.is_empty()&&wire_raw.is_empty()=>None,"script" if wire_raw.is_empty()=>None,"chat-sse" if script.is_empty()=>Some(WireConfig::decode(&wire_raw)?),_=>return Err("invalid_provider".into())};
         let native=decode_history(&unhex(&take(&mut m,"native_history_hex")?)?)?;let pending_call_ref=take(&mut m,"pending_call_ref")?;
         let sent=number(&mut m,"wire_sent_bytes")?;let received=number(&mut m,"wire_received_bytes")?;let total=number(&mut m,"wire_total_bytes")?;let inflight=flag(&mut m,"provider_inflight")?;
         let usage_value=|v:String|->Result<Option<u64>>{if v=="unknown"{Ok(None)}else{Ok(Some(v.parse().map_err(|_|"invalid_usage")?))}};
         let usage=crate::wire_sse::Usage{prompt:usage_value(take(&mut m,"usage_prompt")?)?,completion:usage_value(take(&mut m,"usage_completion")?)?};
         let wire_counters=WireCounters{sent,received,inflight,usage};
-        if sent.checked_add(received)!=Some(total)||total>wire.as_ref().map(|c|c.max_total).unwrap_or(0)||(!pending_call_ref.is_empty()&&!identifier(&pending_call_ref))||wire.is_none()&&(!native.is_empty()||inflight){return Err("invalid_wire_state".into());}
+        // Host HTTP meters against the existing task budget. Its closed provider
+        // discriminator grants no authority and cannot carry fixture wire state.
+        let wire_limit=if host_metered{limits.total}else{wire.as_ref().map(|c|c.max_total).unwrap_or(0)};
+        if sent.checked_add(received)!=Some(total)||total>wire_limit||(!pending_call_ref.is_empty()&&!identifier(&pending_call_ref))
+            ||host_metered&&(!native.is_empty()||!pending_call_ref.is_empty()||total>counters.total)
+            ||!host_metered&&wire.is_none()&&(!native.is_empty()||inflight){return Err("invalid_wire_state".into());}
         if !m.is_empty() || !identifier(&task)||!identifier(&attempt)||!matches!(status.as_str(),"ready"|"waiting"|"completed"|"denied"|"failed"|"cancelled"|"outcome_unknown"|"budget_exhausted") || !matches!(behavior.as_str(),"normal"|"fail"|"lose-response") || scope.is_empty()||scope.len()>1024 || position>128 || counters.steps>1_000_000||counters.calls>1_000_000||counters.output>2_000_000||counters.total>4_000_000 || correlations.len()>128 || (!receipt.is_empty()&&!identifier(&receipt)) {return Err("invalid_task_state".into());}
         if (unresolved||status=="waiting")&&binding.is_none(){return Err("missing_binding".into());}
         if let Some(b)=&binding{if b.task!=task||b.attempt!=attempt||b.scope!=scope||b.turn>counters.steps{return Err("task_binding_mismatch".into());}}
@@ -87,8 +101,8 @@ impl State {
         if let Some(b)=&receipt_binding{if receipt!=format!("r-{}",b.invocation)||!correlations.values().any(|original|original==b){return Err("receipt_binding_identity".into());}}
         for b in correlations.values(){if b.task!=task||b.attempt!=attempt||b.scope!=scope||b.turn>counters.steps{return Err("correlation_binding_mismatch".into());}}
         if let Some(b)=&binding{if !correlations.values().any(|original|original==b){return Err("missing_correlation_binding".into());}}
-        if wire.is_none(){ScriptedProvider::parse(&script)?;}
-        Ok(Self{task,attempt,status,reason,script,scope,facts,limits,counters,context,position,binding,unresolved,receipt,answer,cancelled,correlations,behavior,resume_status,resume_reason,result_pending,receipt_binding,evidence_hold,wire,wire_counters,native,pending_call_ref})
+        if wire.is_none()&&!host_metered{ScriptedProvider::parse(&script)?;}
+        Ok(Self{task,attempt,status,reason,script,scope,facts,limits,counters,context,position,binding,unresolved,receipt,answer,cancelled,correlations,behavior,resume_status,resume_reason,result_pending,receipt_binding,evidence_hold,host_metered,wire,wire_counters,native,pending_call_ref})
     }
     pub fn save(&self,dir:&Path)->Result<()>{store::atomic(dir,"task.db",&self.encode())}
     fn stop(&mut self,status:&str,reason:&str){self.status=status.into();self.reason=reason.into();}
@@ -104,7 +118,7 @@ impl Agent {
     pub fn start(dir:&Path,state:State)->Result<Self>{store::create_dir(dir)?;let _lock=store::lock(dir)?;store::atomic(dir,"effects.db",&EffectStore::empty().encode())?;state.save(dir)?;Ok(Self{dir:dir.to_path_buf(),state})}
     pub fn open(dir:&Path)->Result<Self>{
         let mut state=State::load(dir)?;
-        if state.wire_counters.inflight{state.stop("failed","wire_interrupted");}
+        if state.wire_counters.inflight{state.stop(if state.host_metered{"outcome_unknown"}else{"failed"},"wire_interrupted");}
         // Historical receipt evidence owns a binding distinct from the next pending call.
         if !state.evidence_hold {
             if let Some(binding)=state.receipt_binding.clone() {
@@ -192,34 +206,58 @@ impl Agent {
         if let Some(config)=self.state.wire.clone(){let mut provider=WireProvider::new(config,&self.dir);self.run_with_provider(&mut provider,h)}else{let mut provider=ScriptedProvider::parse(&self.state.script)?;self.run_with_provider(&mut provider,h)}
     }
     pub fn run_with_provider(&mut self,provider:&mut dyn Provider,h:&Hooks)->Result<()> {
-        if self.state.wire_counters.inflight{self.state.stop("failed","wire_interrupted");return self.state.save(&self.dir);}
+        self.drive(provider,None,h)
+    }
+    /// Product host ports share this exact model/admission/control loop with fixtures.
+    pub fn run_with_ports(&mut self,provider:&mut dyn Provider,ports:&mut crate::host_session::HostPorts,h:&Hooks)->Result<()> {
+        self.drive(provider,Some(ports),h)
+    }
+    pub fn run_with_runtime_ports(&mut self,provider:&mut dyn Provider,ports:&mut dyn crate::agent_ports::AgentPorts,h:&Hooks)->Result<()> {
+        self.drive(provider,Some(ports),h)
+    }
+    fn save_drive(&self,ports:Option<&dyn crate::agent_ports::AgentPorts>)->Result<()> {
+        if let Some(ports)=ports{ports.persist(self)}else{self.state.save(&self.dir)}
+    }
+    fn drive(&mut self,provider:&mut dyn Provider,mut ports:Option<&mut dyn crate::agent_ports::AgentPorts>,h:&Hooks)->Result<()> {
+        if self.state.wire_counters.inflight{self.state.stop(if self.state.host_metered{"outcome_unknown"}else{"failed"},"wire_interrupted");return self.save_drive(ports.as_deref());}
         if self.state.evidence_hold || self.state.unresolved{return Ok(());}
-        if self.cancelled()?{self.state.stop("cancelled","cancel_requested");return self.state.save(&self.dir);}
-        if self.state.status=="waiting"{self.dispatch(h)?;}
+        // Durable host uncertainty cannot be rewritten by a later cancellation.
+        if self.state.host_metered&&self.state.status=="outcome_unknown"{return self.save_drive(ports.as_deref());}
+        if self.cancelled()?{self.state.stop("cancelled","cancel_requested");return self.save_drive(ports.as_deref());}
+        if self.state.status=="waiting"{if ports.is_some(){self.state.stop("failed","host_protocol");return self.save_drive(ports.as_deref());}self.dispatch(h)?;}
         while self.state.status=="ready" {
+            if let Some(host)=ports.as_deref_mut(){if let Err(reason)=host.check_control(){host.failure(&mut self.state,&reason);break;}}
             if self.cancelled()?{self.state.stop("cancelled","cancel_requested");break;}
             let size=model::context_bytes(&self.state.context);
             if self.state.counters.steps>=self.state.limits.steps||self.state.counters.calls>=self.state.limits.calls||size>self.state.limits.context||self.state.counters.total.saturating_add(size)>self.state.limits.total||self.state.counters.output>=self.state.limits.output {self.state.stop("budget_exhausted","admission");break;}
             self.state.counters.steps+=1;self.state.counters.calls+=1;self.state.counters.total+=size;
-            self.state.wire_counters.inflight=self.state.wire.is_some();
-            if self.state.wire.is_some(){self.state.wire_counters.usage=crate::wire_sse::Usage::default();}
-            self.state.stop("failed","provider_interrupted");self.state.save(&self.dir)?;
-            let request=ModelRequest{task:self.state.task.clone(),attempt:self.state.attempt.clone(),turn:self.state.counters.steps,messages:self.state.context.clone(),tools:vec!["fixture.record".into()]};
+            self.state.wire_counters.inflight=self.state.wire.is_some()||ports.is_some();
+            if self.state.wire_counters.inflight{self.state.wire_counters.usage=crate::wire_sse::Usage::default();}
+            self.state.stop("failed","provider_interrupted");self.save_drive(ports.as_deref())?;
+            let tools=if let Some(host)=ports.as_deref_mut(){match host.advertised_tools(&self.state){Ok(tools)=>tools,Err(reason)=>{host.failure(&mut self.state,&reason);break;}}}else{vec!["fixture.record".into()]};
+            let request=ModelRequest{task:self.state.task.clone(),attempt:self.state.attempt.clone(),turn:self.state.counters.steps,messages:self.state.context.clone(),tools};
             let position=self.state.position;let history=self.state.native.clone();
-            let response=provider.respond_controlled(&request,position,&history,&mut AgentControl{agent:self,h});
+            let response=provider.respond_controlled(&request,position,&history,&mut AgentControl{agent:self,h,ports:ports.as_mut().map(|p|&mut **p as &mut dyn crate::agent_ports::AgentPorts)});
             self.state.wire_counters.inflight=false;
-            let event=match response{Ok(e)=>e,Err(reason)=>{if self.state.wire.is_some(){if reason=="wire_cancelled"{self.state.stop("cancelled",&reason);}else if reason.ends_with("_limit"){self.state.stop("budget_exhausted",&reason);}else{self.state.stop("failed",&reason);}}else{self.state.stop("failed","provider_error");}break;}};
+            let event=match response{Ok(e)=>e,Err(reason)=>{if let Some(host)=ports.as_deref_mut(){host.failure(&mut self.state,&reason);}else if self.state.wire.is_some(){if reason=="wire_cancelled"{self.state.stop("cancelled",&reason);}else if reason.ends_with("_limit"){self.state.stop("budget_exhausted",&reason);}else{self.state.stop("failed",&reason);}}else{self.state.stop("failed","provider_error");}break;}};
             let (prompt,completion)=provider.reported_usage();self.state.wire_counters.usage=crate::wire_sse::Usage{prompt,completion};
             if self.cancelled()?{self.state.stop("cancelled","cancel_requested");break;}
+            if let Some(host)=ports.as_deref_mut(){if let Err(reason)=host.check_control(){host.failure(&mut self.state,&reason);break;}}
             self.state.position+=1;let bytes=model::event_bytes(&event);self.state.counters.output+=bytes;self.state.counters.total+=bytes;
             if self.state.counters.output>self.state.limits.output||self.state.counters.total>self.state.limits.total {self.state.stop("budget_exhausted","response");break;}
             self.state.stop("ready","");
             match event {
+                ModelEvent::HostTool{call_ref,name,arguments}=>{
+                    if let Some(host)=ports.as_deref_mut(){if let Err(reason)=host.dispatch(self,call_ref,name,arguments){host.failure(&mut self.state,&reason);}}
+                    else{self.state.stop("failed","unknown_tool");}
+                },
                 ModelEvent::Fail(reason)=>self.state.stop("failed",&reason),
                 ModelEvent::Answer(text)=>{
+                    if let Some(host)=ports.as_deref_mut(){if let Err(reason)=host.admit_answer(&self.state,&text){host.failure(&mut self.state,&reason);break;}}
                     if size.saturating_add(text.len() as u64)>self.state.limits.context{self.state.stop("budget_exhausted","context");}else{if self.state.wire.is_some(){self.state.native.push(NativeMessage::Assistant(text.clone()));}self.state.answer=text.clone();self.state.context.push(Message{role:Role::Assistant,text});self.state.stop("completed","");}
                 },
                 ModelEvent::Tool{call_ref,name,value}=>{
+                    if ports.is_some(){self.state.stop("failed","host_protocol");break;}
                     if name!="fixture.record"{self.state.stop("failed","unknown_tool");break;}
                     let original=self.state.correlations.get(&call_ref).cloned();
                     if let Some(b)=&original{if b.value!=value||b.scope!=self.state.scope{self.state.stop("failed","binding_conflict");break;}}
@@ -243,9 +281,10 @@ impl Agent {
                     }
                 },
             }
-            self.state.save(&self.dir)?;
+            self.save_drive(ports.as_deref())?;
         }
-        self.state.save(&self.dir)
+        if ports.is_some() && self.state.status=="budget_exhausted"{self.state.reason="host_budget".into();}
+        self.save_drive(ports.as_deref())
     }
     pub fn observe(&self)->String {
         let effect=EffectStore::load(&self.dir);let (count,value)=match effect{Ok(s)=>(s.receipts.len().to_string(),hex(&s.value)),Err(_)=>("unknown".into(),String::new())};
@@ -254,10 +293,22 @@ impl Agent {
     }
 }
 
-struct AgentControl<'a>{agent:&'a mut Agent,h:&'a Hooks}
-impl ProviderControl for AgentControl<'_>{
-    fn poll(&mut self)->Result<()>{if self.agent.cancelled()?{Err("wire_cancelled".into())}else{Ok(())}}
-    fn remaining(&self)->u64{self.agent.state.wire.as_ref().map(|c|c.max_total.saturating_sub(self.agent.state.wire_counters.total())).unwrap_or(u64::MAX)}
-    fn charge(&mut self,sent:bool,bytes:usize)->Result<()>{if bytes as u64>self.remaining(){return Err("wire_total_limit".into());}let counters=&mut self.agent.state.wire_counters;let target=if sent{&mut counters.sent}else{&mut counters.received};*target=target.checked_add(bytes as u64).ok_or("wire_total_limit")?;self.agent.state.save(&self.agent.dir).map_err(|_|"wire_journal".into())}
-    fn checkpoint(&mut self,name:&str)->Result<()>{self.agent.state.save(&self.agent.dir).map_err(|_|"wire_journal".to_string())?;self.h.checkpoint(name)}
+struct AgentControl<'a,'p>{agent:&'a mut Agent,h:&'a Hooks,ports:Option<&'p mut dyn crate::agent_ports::AgentPorts>}
+impl ProviderControl for AgentControl<'_,'_>{
+    fn poll(&mut self)->Result<()>{if let Some(p)=self.ports.as_deref_mut(){p.check_control()?;}if self.agent.cancelled()?{Err("wire_cancelled".into())}else{Ok(())}}
+    fn remaining(&self)->u64{
+        let wire=self.agent.state.wire.as_ref().map(|c|c.max_total.saturating_sub(self.agent.state.wire_counters.total())).unwrap_or(u64::MAX);
+        if self.ports.is_some(){wire.min(self.agent.state.limits.total.saturating_sub(self.agent.state.counters.total))}else{wire}
+    }
+    fn charge(&mut self,sent:bool,bytes:usize)->Result<()>{
+        let bytes=u64::try_from(bytes).map_err(|_|"wire_total_limit")?;
+        if bytes>self.remaining(){return Err("wire_total_limit".into());}
+        let counters=&mut self.agent.state.wire_counters;let target=if sent{&mut counters.sent}else{&mut counters.received};
+        *target=target.checked_add(bytes).ok_or("wire_total_limit")?;
+        // Host HTTP bytes use the existing task total budget; wire counters are
+        // its durable sent/received detail, not a second host budget.
+        if self.ports.is_some(){self.agent.state.counters.total=self.agent.state.counters.total.checked_add(bytes).ok_or("wire_total_limit")?;}
+        self.agent.save_drive(self.ports.as_deref()).map_err(|_|"wire_journal".into())
+    }
+    fn checkpoint(&mut self,name:&str)->Result<()>{self.agent.save_drive(self.ports.as_deref()).map_err(|_|"wire_journal".to_string())?;self.h.checkpoint(name)}
 }

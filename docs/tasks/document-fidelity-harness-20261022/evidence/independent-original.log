@@ -1,0 +1,13 @@
+empty-unused-content-type {"decision": "inspect_only", "structure": "pass", "findings": []}
+missing-relationship-Type {"decision": "inspect_only", "structure": "pass", "findings": []}
+wrong-rels-content-type {"decision": "inspect_only", "structure": "pass", "findings": []}
+additional-unsupported-main-type {"decision": "inspect_only", "structure": "pass", "findings": []}
+local-encrypted inspect_only []
+bad-deflate-cli 1 stdout= '' last-stderr= zlib.error: Error -3 while decompressing data: invalid block type
+forged-count bytes= 222148 max_members= 2048 allocated-entries= [2054] decision= reject findings= [{'code': 'archive_limits', 'part': '', 'detail': ''}]
+fifo-cli TIMEOUT after 1 second; process killed; regular-file rejection never reached
+fixture minimal.docx generator-byte-identical= True manifest-inspect-identical= True sha256= 3490b0855765c574079fcd1274aa1c8e0b7782f69ada87dab206c68b9069ee87
+fixture minimal.xlsx generator-byte-identical= True manifest-inspect-identical= True sha256= 546c5390f410064f74ac7f6c206f838d267261b79e7f34d6421d1660c8336363
+fixture minimal.pptx generator-byte-identical= True manifest-inspect-identical= True sha256= 37b1b3d41242ca3359371ae636635e43bdb8fb46d9ac77119cf2bdce7c5ad733
+fixture minimal.pdf generator-byte-identical= True manifest-inspect-identical= True sha256= affae7b5719e0a7a284e173bc6d430f9bb1be3b7092d9c8a947ee2b5ee87f00f
+missing-file-cli 2 [{'code': 'input_error', 'detail': 'FileNotFoundError', 'part': ''}] stderr= ''

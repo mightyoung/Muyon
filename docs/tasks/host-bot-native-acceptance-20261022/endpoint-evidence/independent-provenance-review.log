@@ -1,0 +1,30 @@
+READ-ONLY HISTORICAL ENDPOINT PROVENANCE REVIEW
+No device/network commands, restart/retest, code changes or other-process enumeration performed.
+
+Original artifacts personally read:
+/workspace/host-bot-native-tools/avd/host-bot-api26.avd/emu-launch-params.txt
+  size302;mtime2026-10-22T19:56:16.289902966Z
+  SHA2562b876ba1f214269928b7ffca59447dc28bd057c9bf096a86d20aa86f1d28abe6
+  Original emulator argv records -avd host-bot-api26 -accel off -gpu swiftshader_indirect -port5580; task-local official emulator path; no-window/no-audio/no-snapshot/no-metrics.
+/workspace/host-bot-native-tools/avd/host-bot-api26.avd/config.ini
+  size473;mtime2026-10-22T19:50:17.510871345Z
+  SHA25657b4e20993335b6c6a8c10c9a7448c3a5465cb9ecbf57db278b63a9e7e119dee
+  Fixed AVD name, API26/default/x86_64 image path,2cores/2048MB,1080x1920/420dpi,SwiftShader,cold boot.
+/workspace/host-bot-native-tools/avd/host-bot-api26.ini
+  size102;mtime2026-10-22T19:48:55.090882526Z
+  SHA256626a58bb73acd421c92ccf21947562ef0a9964ea4f2e80e5c026f5168b796f6c
+  Points to exact task AVD directory,target android-26.
+/workspace/host-bot-native-tools/evidence/emulator-boot-second.log
+  size4693;mtime2026-10-22T19:57:59.847013925Z
+  SHA2562a54ea802581a992b1b94cd9551d8e171e466b2f51243b679c6a36b4cf7c8d6e
+  Actual API26 image path,AVD host-bot-api26, qemu.avd_name=host-bot-api26, emulator37.2.12, crash-monitor process17275, software-emulation warnings and boot-completed103524ms. Console home-token error preserved.
+/workspace/host-bot-native-tools/evidence/emulator-stop.json
+  size119;mtime2026-10-22T20:19:17.538134592Z
+  SHA256377d4e6c367a12149a81754a3e45c4a9e17b199853cbce9ce24cb975b3613d98
+  Recorded stop PID17275,own AVD host-bot-api26,SIGTERM,after terminal result.
+
+Evidence strength:
+Original launch/config/boot/stop artifacts consistently support the named task AVD,software API26 x86_64 runtime and PID17275 lifecycle. Launch -port5580 is consistent with the standard emulator paired ADB endpoint5581; reviewed client hardcodes127.0.0.1:5581. Prior CNXN banner/API/fingerprint/display/native/APK observations corroborate runtime facts.
+However, no contemporary ss/lsof or equivalent PID17275-to-listening5581 mapping was retained. Launch argv plus matching configuration/logs is CORROBORATIVE/INFERRED endpoint attribution, not a direct captured socket-ownership proof. Timestamps are filesystem metadata observed now, not an earlier cryptographic timestamp. Newly archived hashes preserve current original files and must not be presented as a contemporaneous pre-execution seal.
+The emulator is stopped, so current inspection cannot retroactively recreate the missing historical mapping. Do not silently restart/retest or invent this evidence. Preserve the explicit gap alongside these additive original artifacts. Do not claim endpoint ownership is fully/directly proven.
+Conclusion: artifact archiving with the above qualification is appropriate; no new Important beyond the explicitly retained historical endpoint-attribution limitation. Three recorded Bot test results and package/native identity evidence are not relabeled or broadened by this addition. Reviewer changed no sources.

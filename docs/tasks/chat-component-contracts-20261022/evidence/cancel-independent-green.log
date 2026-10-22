@@ -1,0 +1,22 @@
+PASS strict schema and finite kinds
+PASS unknown and disguised actions fail closed
+PASS ordinary selection and compose never grant business authority
+PASS scope binds conversation project agent workspace and mounted generation
+PASS old component and state revisions cannot overwrite draft
+PASS double click returns original identity; pending is not committed
+PASS unknown and cancel request keep identity held cost and lookup only
+PASS only exact original authoritative receipt can commit
+PASS confirmed cancellation and rejection are not success and preserve draft
+PASS redo uses a fresh attempt and retains old receipts
+PASS snapshot restore retains unresolved identity without resubmission
+PASS source references are typed, versioned, and never executable URLs
+PASS submission decisions distinguish new, duplicate, unknown and historical outcomes
+PASS damaged restored pending identity and values cannot become authority
+PASS simultaneous double click records one identity and one state transition
+PASS malformed Unicode cannot alias a different value digest
+late-cancel probe: original=intent-1 current=intent-B before=PENDING after=PENDING
+PASS late cancellation from attempt A must not mutate pending attempt B
+PASS normal and repeated cancellation require exact pending identity and current CAS
+PASS cancellation rejects stale revision and every altered identity field without mutation
+PASS unknown cancellation preserves original identity costs and lookup-only recovery
+PASS 20 offline contract groups; no network/provider/IPC code invoked

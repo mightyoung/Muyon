@@ -1,0 +1,289 @@
+{
+  "complex.docx": {
+    "operation_contract": {
+      "allowed_changed_parts": [
+        "word/document.xml"
+      ],
+      "annotation": "not_run",
+      "byte_invariant_parts": [
+        "[Content_Types].xml",
+        "_rels/.rels",
+        "custom/original.bin",
+        "word/_rels/document.xml.rels",
+        "word/comments.xml",
+        "word/header1.xml"
+      ],
+      "execution_allowed": false,
+      "forbidden": [
+        "source overwrite",
+        "network",
+        "macros",
+        "external refresh",
+        "embedded payload execution",
+        "unreviewed engine",
+        "unknown-part loss or rewrite",
+        "unapproved changed part or semantic node"
+      ],
+      "independent_reopen": "not_run",
+      "operation": {
+        "expected": "target",
+        "kind": "replace_single_run_text",
+        "replacement": "edited",
+        "target": "bookmark SyntheticTarget / bold run text"
+      },
+      "original_name": "complex.docx",
+      "reason": "Isolation probe failed; licensing/origin gates incomplete",
+      "recalc": "not_run",
+      "render": "not_run",
+      "round_trip": "not_run",
+      "schema_version": 1,
+      "semantic_comparison": "not_run",
+      "semantic_invariants": [
+        "Exactly one w:t changes target -> edited; all attributes/rPr, adjacent runs, bookmarks, comment references, header and all other nodes unchanged"
+      ],
+      "source_sha256": "ce3bc59163545067a56307714b9422851c5fa8a9288f0e08e088fbe225d958fc",
+      "visual": "not_run"
+    },
+    "source": {
+      "decision": "inspect_only",
+      "dimensions": {
+        "annotation": {
+          "reason": "No engine installed or invoked",
+          "status": "not_run"
+        },
+        "formula": {
+          "reason": "No engine installed or invoked",
+          "status": "not_run"
+        },
+        "recalc": {
+          "reason": "No engine installed or invoked",
+          "status": "not_run"
+        },
+        "render": {
+          "reason": "No engine installed or invoked",
+          "status": "not_run"
+        },
+        "structure": {
+          "reason": "Bounded container/XML/main-part/relationship checks only; no OOXML schema or semantic validation",
+          "status": "pass"
+        },
+        "visual": {
+          "reason": "No engine installed or invoked",
+          "status": "not_run"
+        }
+      },
+      "fidelity": "unknown",
+      "findings": [],
+      "format": "docx",
+      "limitations": [
+        "No complete OOXML schema validation or malware detection",
+        "Unknown parts inventoried; no editing/rendering/semantic preservation proven"
+      ],
+      "limits": {
+        "max_file": 16777216,
+        "max_member": 8388608,
+        "max_members": 2048,
+        "max_ratio": 100,
+        "max_total": 33554432,
+        "max_xml_depth": 128
+      },
+      "parts": [
+        {
+          "name": "[Content_Types].xml",
+          "sha256": "8eff7737a59e8cfa5e4e87971bee6fbbd99f55bf53249c7dfd62b70859b354ea",
+          "size": 698
+        },
+        {
+          "name": "_rels/.rels",
+          "sha256": "22c01d12e912dc45bdf191c382dd5b80cdeca1a9e95af86a477798a9f7e541e9",
+          "size": 242
+        },
+        {
+          "name": "custom/original.bin",
+          "sha256": "d6fdff43e49c2841433bca98eadba1beeb7cb768144cec4446eb30cf6659fbac",
+          "size": 33
+        },
+        {
+          "name": "word/_rels/document.xml.rels",
+          "sha256": "75828e3ad4ed30ead7b1c157b68ff271a745fbae74eb7dd6874d56c24d60f92a",
+          "size": 359
+        },
+        {
+          "name": "word/comments.xml",
+          "sha256": "9c13fea4cf9d7e9212e82e8be3dd154e99b90504a63f762f6e0a212eaebd4ac9",
+          "size": 253
+        },
+        {
+          "name": "word/document.xml",
+          "sha256": "b65506647ddbe4a6a2e3b3a705743b6af04a969dc4ecf4e598e2f0ad2038ab86",
+          "size": 708
+        },
+        {
+          "name": "word/header1.xml",
+          "sha256": "ebff5bf442acfc2f487850b03b2e589f55f428728f8668fa52612288cf7506f5",
+          "size": 116
+        }
+      ],
+      "safety": "unknown",
+      "schema_version": 1,
+      "sha256": "ce3bc59163545067a56307714b9422851c5fa8a9288f0e08e088fbe225d958fc",
+      "size": 1950
+    }
+  },
+  "complex.xlsx": {
+    "operation_contract": {
+      "allowed_changed_parts": [
+        "xl/worksheets/sheet1.xml"
+      ],
+      "annotation": "not_run",
+      "byte_invariant_parts": [
+        "[Content_Types].xml",
+        "_rels/.rels",
+        "custom/original.bin",
+        "xl/_rels/workbook.xml.rels",
+        "xl/comments/comment1.xml",
+        "xl/drawings/comments.vml",
+        "xl/styles.xml",
+        "xl/workbook.xml",
+        "xl/worksheets/_rels/sheet1.xml.rels",
+        "xl/worksheets/sheet2.xml"
+      ],
+      "execution_allowed": false,
+      "forbidden": [
+        "source overwrite",
+        "network",
+        "macros",
+        "external refresh",
+        "embedded payload execution",
+        "unreviewed engine",
+        "unknown-part loss or rewrite",
+        "unapproved changed part or semantic node"
+      ],
+      "independent_reopen": "not_run",
+      "operation": {
+        "expected": "2",
+        "kind": "set_single_cell_value",
+        "replacement": "5",
+        "target": "Original!A1"
+      },
+      "original_name": "complex.xlsx",
+      "reason": "Isolation probe failed; licensing/origin gates incomplete",
+      "recalc": "not_run",
+      "render": "not_run",
+      "round_trip": "not_run",
+      "schema_version": 1,
+      "semantic_comparison": "not_run",
+      "semantic_invariants": [
+        "Exactly A1/v changes 2 -> 5; all other nodes/attributes unchanged",
+        "B1 formula A1+1 and deliberately stale authored cache999 remain unchanged; recalculation NOT_RUN"
+      ],
+      "source_sha256": "e1bbea112782f0350fbe348a2a021d8d0926ed8c2c768be528ef2fc9317ba78d",
+      "visual": "not_run"
+    },
+    "source": {
+      "decision": "inspect_only",
+      "dimensions": {
+        "annotation": {
+          "reason": "No engine installed or invoked",
+          "status": "not_run"
+        },
+        "formula": {
+          "reason": "No engine installed or invoked",
+          "status": "not_run"
+        },
+        "recalc": {
+          "reason": "No engine installed or invoked",
+          "status": "not_run"
+        },
+        "render": {
+          "reason": "No engine installed or invoked",
+          "status": "not_run"
+        },
+        "structure": {
+          "reason": "Bounded container/XML/main-part/relationship checks only; no OOXML schema or semantic validation",
+          "status": "pass"
+        },
+        "visual": {
+          "reason": "No engine installed or invoked",
+          "status": "not_run"
+        }
+      },
+      "fidelity": "unknown",
+      "findings": [],
+      "format": "xlsx",
+      "limitations": [
+        "No complete OOXML schema validation or malware detection",
+        "Unknown parts inventoried; no editing/rendering/semantic preservation proven"
+      ],
+      "limits": {
+        "max_file": 16777216,
+        "max_member": 8388608,
+        "max_members": 2048,
+        "max_ratio": 100,
+        "max_total": 33554432,
+        "max_xml_depth": 128
+      },
+      "parts": [
+        {
+          "name": "[Content_Types].xml",
+          "sha256": "e34a80dd379deff3fbd1abb9a461aa5af352f92274c4041513607fe2433e430a",
+          "size": 1079
+        },
+        {
+          "name": "_rels/.rels",
+          "sha256": "fc5715a86467973c771fed6cf49203ed48734dcbd0f24088be6bbb6e290cd7b5",
+          "size": 240
+        },
+        {
+          "name": "custom/original.bin",
+          "sha256": "d6fdff43e49c2841433bca98eadba1beeb7cb768144cec4446eb30cf6659fbac",
+          "size": 33
+        },
+        {
+          "name": "xl/_rels/workbook.xml.rels",
+          "sha256": "30b8d159cb4a0dcd6356b1da2d21ba7858ba27926ee0f025f8455055b8295f26",
+          "size": 509
+        },
+        {
+          "name": "xl/comments/comment1.xml",
+          "sha256": "226eeb71fa3aeb78772787ecdc7d8f6de231f1b98a86ded1cde97dab95025a72",
+          "size": 242
+        },
+        {
+          "name": "xl/drawings/comments.vml",
+          "sha256": "b31793b08fcdf3a8586bedbee0a2b963c8f1b5e604a441138ef36c0f0258dc4c",
+          "size": 731
+        },
+        {
+          "name": "xl/styles.xml",
+          "sha256": "2560f56e733e073607171974d686a41c1771db7b512414aa797f4aef2f6a00ad",
+          "size": 674
+        },
+        {
+          "name": "xl/workbook.xml",
+          "sha256": "9d5ca20524d1bc6b299da8150786a99514dfc883370865bdbd5ba5ceae1a3edb",
+          "size": 465
+        },
+        {
+          "name": "xl/worksheets/_rels/sheet1.xml.rels",
+          "sha256": "377165d0a28ffe7b123cddab89236076be63d69cfafe7c5ebfc46a1eec19af7f",
+          "size": 388
+        },
+        {
+          "name": "xl/worksheets/sheet1.xml",
+          "sha256": "82328aa68bebf1e2bd45f3d7010a1b4486a682b7f8c2438aec52f6b96f820bc3",
+          "size": 628
+        },
+        {
+          "name": "xl/worksheets/sheet2.xml",
+          "sha256": "19683e1289f459571b6f371f0e5897e4451fa2fa10850b91815d0af0dc219868",
+          "size": 194
+        }
+      ],
+      "safety": "unknown",
+      "schema_version": 1,
+      "sha256": "e1bbea112782f0350fbe348a2a021d8d0926ed8c2c768be528ef2fc9317ba78d",
+      "size": 3649
+    }
+  }
+}

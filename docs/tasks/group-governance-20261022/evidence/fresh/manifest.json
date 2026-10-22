@@ -1,0 +1,96 @@
+{
+  "created_utc": "2026-10-22T03:55:32.333521+00:00",
+  "git_head": "2cc5df1c900cd2977e8bdf4ca623e82f673a50b7",
+  "git_branch": "task/group-governance-20261022",
+  "environment": {
+    "PATH": "/tmp/muyon-rust/bin:/home/agent/.local/bin:/opt/codex/runtimes/codex-primary-runtime/dependencies/bin/override:/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin:/opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin:/opt/codex/runtimes/codex-primary-runtime/dependencies/bin:/opt/codex/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/home/agent/.local/bin:/opt/codex/runtimes/codex-primary-runtime/dependencies/bin/fallback",
+    "CARGO_HOME": "/tmp/muyon-cargo",
+    "CARGO_TARGET_DIR": "/tmp/muyon-cargo-target",
+    "RUSTFLAGS": "-L native=/tmp/muyon-native-libs"
+  },
+  "platform": "Linux-6.18.55-x86_64-with-glibc2.41",
+  "machine": "x86_64",
+  "tools": {
+    "rustc": {
+      "version": "rustc 1.99.1 (58cf8f9c3 2026-10-13)",
+      "binary_sha256": "b53b780f77f952062f8ca8a3b70aef2390b1e45ad91939be94afdc9543026853"
+    },
+    "cargo": {
+      "version": "cargo 1.99.1 (5f94df478 2026-08-27)",
+      "binary_sha256": "a670e02cfa39ac2e53f77a2d911ca1fc9e2c479b0603ec956625be1daf24e3af"
+    },
+    "rustfmt": {
+      "version": "rustfmt 1.10.0-stable (58cf8f9c35 2026-10-13)",
+      "binary_sha256": "68cb47a2a38daa8ff2ec6d623a2374b0a165d77ec74f1f654216665018c04598"
+    }
+  },
+  "sqlite_linker_alias": {
+    "path": "/tmp/muyon-native-libs/libsqlite3.so",
+    "resolved_target": "/usr/lib/x86_64-linux-gnu/libsqlite3.so.0.8.6",
+    "sha256": "14c4418a06c5c2e30f5fb57bc8add93762236ae17898c6708984cf15e680ca71"
+  },
+  "source_sha256": {
+    "crates/muyon-core/src/group_governance/mod.rs": "0cea48fe4e01a95c0980e0d77d4ece899f6aa86adc58c4c43a8d2b068a2b0099",
+    "crates/muyon-core/tests/group_governance.rs": "1487f996311cd8d9a65970d6f02cc135f36ee5cd35b39fe790e57d119a477076",
+    "crates/muyon-core/src/lib.rs": "222f36db7e5f67979690af95624119718e2dd094591c14c304f7ebfb1d98890f",
+    "crates/Cargo.lock": "3a87fdce6228dff89d292547057627f999e7286ccf0a774c1683c4ba5f95f367",
+    "crates/Cargo.toml": "f26104ba02b1428992464a393d902dad2b9d328a9ffd364a9ddd7d7f1cc091e3"
+  },
+  "commands": [
+    {
+      "label": "rustc",
+      "argv": [
+        "/tmp/muyon-rust/bin/rustc",
+        "--edition=2021",
+        "-D",
+        "warnings",
+        "--test",
+        "crates/muyon-core/tests/group_governance.rs",
+        "-o",
+        "/tmp/muyon-group-evidence-tests"
+      ],
+      "cwd": "/workspace/Muyon-group",
+      "start_utc": "2026-10-22T03:55:31.983791+00:00",
+      "end_utc": "2026-10-22T03:55:32.245292+00:00",
+      "exit_status": 0
+    },
+    {
+      "label": "tests",
+      "argv": [
+        "/tmp/muyon-group-evidence-tests"
+      ],
+      "cwd": "/workspace/Muyon-group",
+      "start_utc": "2026-10-22T03:55:32.245311+00:00",
+      "end_utc": "2026-10-22T03:55:32.247658+00:00",
+      "exit_status": 0
+    },
+    {
+      "label": "fmt",
+      "argv": [
+        "/tmp/muyon-rust/bin/rustfmt",
+        "--edition",
+        "2021",
+        "--check",
+        "crates/muyon-core/src/group_governance/mod.rs",
+        "crates/muyon-core/tests/group_governance.rs"
+      ],
+      "cwd": "/workspace/Muyon-group",
+      "start_utc": "2026-10-22T03:55:32.247668+00:00",
+      "end_utc": "2026-10-22T03:55:32.269481+00:00",
+      "exit_status": 0
+    },
+    {
+      "label": "diff",
+      "argv": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "cwd": "/workspace/Muyon-group",
+      "start_utc": "2026-10-22T03:55:32.269497+00:00",
+      "end_utc": "2026-10-22T03:55:32.274934+00:00",
+      "exit_status": 0
+    }
+  ],
+  "production_execution_enabled": false
+}

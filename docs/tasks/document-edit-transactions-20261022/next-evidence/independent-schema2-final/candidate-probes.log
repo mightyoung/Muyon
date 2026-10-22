@@ -1,0 +1,9 @@
+
+running 4 tests
+test expiry_column_is_real_and_tail_rolls_back_stage_to_unknown ... ok
+test staging_only_writes_journal_and_cannot_borrow_copy_route ... ok
+test unpublished_delivery_requires_reconfirmation_deadline_and_no_cancel ... ok
+test frozen_request_or_source_title_corruption_never_delivers_or_stages ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+

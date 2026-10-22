@@ -1,0 +1,2 @@
+# Preserve actual UniFFI --no-format output for deterministic byte comparison.
+app/src/main/kotlin/com/mightyoung/muyon/androidbridge/muyon_android_contract_bridge.kt -whitespace

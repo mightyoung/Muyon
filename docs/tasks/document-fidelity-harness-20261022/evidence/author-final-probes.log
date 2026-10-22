@@ -1,0 +1,10 @@
+empty-unused-content-type {"decision": "reject", "structure": "fail", "findings": [{"code": "invalid_content_types", "part": "", "detail": "Missing or malformed MIME type"}]}
+missing-relationship-Type {"decision": "reject", "structure": "fail", "findings": [{"code": "invalid_relationships", "part": "word/_rels/document.xml.rels", "detail": ""}]}
+wrong-rels-content-type {"decision": "reject", "structure": "fail", "findings": [{"code": "invalid_relationship_content_type", "part": "_rels/.rels", "detail": ""}]}
+additional-unsupported-main-type {"decision": "reject", "structure": "fail", "findings": [{"code": "unsupported_main_type", "part": "", "detail": "Expected one supported non-macro OOXML main type"}]}
+local-encrypted reject [{'code': 'encrypted', 'part': '[Content_Types].xml', 'detail': 'Local header encryption flag'}, {'code': 'invalid_zip', 'part': '[Content_Types].xml', 'detail': 'Local/central flags or method disagree'}]
+Traceback (most recent call last):
+  File "/workspace/document-fidelity/docs/tasks/document-fidelity-harness-20261022/evidence/independent-review-probes.py", line 50, in <module>
+    print('bad-deflate-cli', run.returncode, 'stdout=', repr(run.stdout), 'last-stderr=', run.stderr.splitlines()[-1])
+                                                                                          ~~~~~~~~~~~~~~~~~~~~~~~^^^^
+IndexError: list index out of range

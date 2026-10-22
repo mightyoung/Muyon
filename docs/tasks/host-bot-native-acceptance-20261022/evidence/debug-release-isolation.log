@@ -1,0 +1,4 @@
+PASS actual merged debug manifest: exactly one non-exported :bot_native_acceptance fixture.
+PASS actual merged release manifest: zero fixture entries.
+PASS actual compiled debug fixture class exists; compiled release fixture class absent.
+No device/native execution inferred.

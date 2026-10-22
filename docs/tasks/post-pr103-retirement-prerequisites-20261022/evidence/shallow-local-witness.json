@@ -1,0 +1,13 @@
+{
+  "argv": [
+    "python3",
+    "/workspace/Muyon-post-pr103-retirement-evidence/shallow-local-witness.py"
+  ],
+  "cwd": "/workspace/Muyon-post-pr103-retirement-20261022",
+  "source_sha": "50ce62bf7033f63e4632e362ecd95fa7524c3ee0",
+  "dirty_source": false,
+  "start_utc": "2026-10-22T20:35:53.820235+00:00",
+  "exit_code": 0,
+  "duration_seconds": 23.271,
+  "end_utc": "2026-10-22T20:36:17.029564+00:00"
+}

@@ -1,0 +1,34 @@
+   Compiling muyon-core-agent-lab v0.1.0 (/private/tmp/muyon-review-red-source/experiments/redesign/core-agent-lab/core)
+   Compiling muyon-plugin-contract-lab v0.1.0 (/private/tmp/muyon-review-red-source/experiments/redesign/plugin-contract-lab/core)
+   Compiling muyon-rust-agent-host-lab v0.1.0 (/private/tmp/muyon-review-red-source/experiments/redesign/rust-agent-host-lab/core)
+   Compiling muyon-web-search-lab v0.1.0 (/private/tmp/muyon-review-red-source/experiments/redesign/web-search-lab/core)
+   Compiling muyon-core v0.1.0 (/private/tmp/muyon-review-red-source/crates/muyon-core)
+    Finished `test` profile [unoptimized] target(s) in 5.76s
+     Running tests/agent_child_tools.rs (/private/tmp/muyon-review-target/debug/deps/agent_child_tools-8da5bffe730e0a20)
+
+running 3 tests
+test preprepared_plan_cannot_bypass_a_later_unknown_request ... FAILED
+test confirmation_preview_contains_the_exact_prior_history_and_wire_fields ... FAILED
+test child_tool_subset_is_priced_and_enforced_on_the_actual_model_response ... ok
+
+failures:
+
+---- preprepared_plan_cannot_bypass_a_later_unknown_request stdout ----
+
+thread 'preprepared_plan_cannot_bypass_a_later_unknown_request' (12161298) panicked at muyon-core/tests/agent_child_tools.rs:33:84:
+called `Result::unwrap_err()` on an `Ok` value: Observation { request_id: "dd63c55c2df67ca6932400f937686f04", status: "reserved", reserved_micro_cny: Revision("33792"), charged_micro_cny: Revision("0"), cancelled: false, answer: None, recovery_action: "none", attempted: false, failure_stage: None, http_status: None, blocked_reason: None }
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+---- confirmation_preview_contains_the_exact_prior_history_and_wire_fields stdout ----
+
+thread 'confirmation_preview_contains_the_exact_prior_history_and_wire_fields' (12161297) panicked at muyon-core/tests/agent_child_tools.rs:50:48:
+exact outgoing body must be reviewed
+
+
+failures:
+    confirmation_preview_contains_the_exact_prior_history_and_wire_fields
+    preprepared_plan_cannot_bypass_a_later_unknown_request
+
+test result: FAILED. 1 passed; 2 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+error: test failed, to rerun pass `-p muyon-core --test agent_child_tools`

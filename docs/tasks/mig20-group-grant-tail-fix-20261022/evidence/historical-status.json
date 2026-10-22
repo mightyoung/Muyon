@@ -1,0 +1,26 @@
+{
+  "01-tail-red.log": {
+    "exit_code": 101,
+    "meaning": "42 passed /16 failed; vulnerable original local tail and rejection behavior"
+  },
+  "02-first-green.log": {
+    "exit_code": 0,
+    "meaning": "58 passed; first tail/terminal persistence repair"
+  },
+  "03-request-read-red.log": {
+    "exit_code": 101,
+    "meaning": "0 passed /2 failed; inconclusive chain-read classification"
+  },
+  "04-focused-green.log": {
+    "exit_code": 0,
+    "meaning": "62 passed; chain-read repair"
+  },
+  "05-independent-identity-red.log": {
+    "exit_code": 101,
+    "meaning": "0 passed /1 failed; original identity storage failure incorrectly classified as NotFound/Rejected"
+  },
+  "06-identity-and-commit-green.log": {
+    "exit_code": 0,
+    "meaning": "65 passed after final identity-read repair, includes actual deferred-FK COMMIT failures"
+  }
+}

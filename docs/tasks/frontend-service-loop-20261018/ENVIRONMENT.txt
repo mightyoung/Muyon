@@ -1,0 +1,16 @@
+Inventory base: 10773ba4d7849ee745c2859063ac8a45194687a3
+UI inspected: d3572ea5e74996f468952f16b095775f59ea37b3
+Ownership: B06 remains sole integrator; no production ownership handoff received.
+Workspace: /workspace/Muyon-frontend-loop
+Branch: docs/frontend-service-loop-20261018
+Python: Python 3.12.14
+rustc: ABSENT_FROM_PATH
+cargo: ABSENT_FROM_PATH
+kotlinc: ABSENT_FROM_PATH
+adb: ABSENT_FROM_PATH
+flutter: ABSENT_FROM_PATH
+java: /usr/bin/java
+/AGENTS.md: absent
+/workspace/AGENTS.md: absent
+/workspace/Muyon/AGENTS.md: absent
+Fixed base AGENTS.md / .agents/skills / SKILL.md: []

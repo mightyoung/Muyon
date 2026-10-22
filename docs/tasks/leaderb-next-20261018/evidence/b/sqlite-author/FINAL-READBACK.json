@@ -1,0 +1,45 @@
+{
+  "at_utc": "2026-10-18T06:11:27.949634+00:00",
+  "source_sha": "190477fe0e5008d473508e45d2d835ddd5e0c09c",
+  "worktree_porcelain": "",
+  "remote_ref": "190477fe0e5008d473508e45d2d835ddd5e0c09c\trefs/heads/task/leaderb-sqlite-investigation-20261018",
+  "source_hashes_match": true,
+  "new_ci": {
+    "conclusion": "success",
+    "created_at": "2026-10-18T05:51:49Z",
+    "head_sha": "190477fe0e5008d473508e45d2d835ddd5e0c09c",
+    "html_url": "https://github.com/mightyoung/Muyon/actions/runs/39102012787",
+    "run_attempt": 1,
+    "status": "completed",
+    "updated_at": "2026-10-18T06:09:49Z"
+  },
+  "original_b": {
+    "conclusion": "failure",
+    "headSha": "379b1a6d8d5a5830fb3a74924fd5c41cfb234e1c",
+    "status": "completed",
+    "url": "https://github.com/mightyoung/Muyon/actions/runs/39099707674"
+  },
+  "original_a": {
+    "conclusion": "success",
+    "headSha": "7965f46beba6f52924e73e99fde6d69c18d985ff",
+    "status": "completed",
+    "url": "https://github.com/mightyoung/Muyon/actions/runs/39099985492"
+  },
+  "cleanup": {
+    "observed_author_child_roots": [
+      {
+        "path": "/tmp/le06-flutter-project-DGSZUB/",
+        "exists": false
+      },
+      {
+        "path": "/tmp/le06-flutter-project-NTAARD/",
+        "exists": false
+      },
+      {
+        "path": "/tmp/le06-flutter-project-JEZUYW/",
+        "exists": false
+      }
+    ],
+    "active_owned_builders": []
+  }
+}

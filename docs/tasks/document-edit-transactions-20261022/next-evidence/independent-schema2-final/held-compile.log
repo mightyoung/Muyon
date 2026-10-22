@@ -1,0 +1,10 @@
+warning: unused import: `local_fingerprint`
+ --> /tmp/document-edit-independent-review/schema2-final/held-probes.rs:1:59
+  |
+1 | use muyon_core::document_edit::fingerprint::{ExpandedNode,local_fingerprint};
+  |                                                           ^^^^^^^^^^^^^^^^^
+  |
+  = note: `#[warn(unused_imports)]` on by default
+
+warning: 1 warning emitted
+

@@ -1,0 +1,50 @@
+[
+  {
+    "baseRefName": "develop",
+    "headRefName": "lab/leaderb-batch4-combined-20261018",
+    "headRefOid": "3f1be180bb009a91e659c113ba5b1916e5360332",
+    "isDraft": true,
+    "number": 86,
+    "state": "OPEN"
+  },
+  {
+    "baseRefName": "docs/leaderb-next-20261018",
+    "headRefName": "research/memory-failure-validation-20261018",
+    "headRefOid": "38b59db43f2487700ff15971ee008f0024673a13",
+    "isDraft": true,
+    "number": 87,
+    "state": "OPEN"
+  },
+  {
+    "baseRefName": "docs/leaderb-next-20261018",
+    "headRefName": "lab/android-compose-frontend-loop-20261018",
+    "headRefOid": "2f8f4da674e871708880dcc792a1c9dafb3a17f3",
+    "isDraft": true,
+    "number": 88,
+    "state": "OPEN"
+  },
+  {
+    "baseRefName": "docs/frontend-service-loop-final-evidence-20261018",
+    "headRefName": "task/service-production-bridges-20261018",
+    "headRefOid": "fc8ffd7e061736fdf9f4897d7c1c7914d429400a",
+    "isDraft": true,
+    "number": 89,
+    "state": "OPEN"
+  },
+  {
+    "baseRefName": "research/memory-fixed-develop-20261018",
+    "headRefName": "research/memory-isolated-candidate-20261018",
+    "headRefOid": "060e46f1359915e267f849f3807ec1999b29dd8d",
+    "isDraft": true,
+    "number": 90,
+    "state": "OPEN"
+  },
+  {
+    "baseRefName": "task/service-production-bridges-20261018",
+    "headRefName": "lab/service-admission-bindings-20261018",
+    "headRefOid": "4b609602f76996ec69e9f51da8bc4261d6a2d94a",
+    "isDraft": true,
+    "number": 91,
+    "state": "OPEN"
+  }
+]

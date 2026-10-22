@@ -1,0 +1,15 @@
+apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupDraft.kt:93:16: error: unresolved reference 'SetupDraftArchive'.
+        return SetupDraftArchive.encode(ArchivedSetupEdits(storedRevision,
+               ^^^^^^^^^^^^^^^^^
+apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupDraft.kt:93:41: error: unresolved reference 'ArchivedSetupEdits'.
+        return SetupDraftArchive.encode(ArchivedSetupEdits(storedRevision,
+                                        ^^^^^^^^^^^^^^^^^^
+apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupDraft.kt:100:65: error: unresolved reference 'RestoredBotSetupDraft'.
+            newDraftId: String = UUID.randomUUID().toString()): RestoredBotSetupDraft {
+                                                                ^^^^^^^^^^^^^^^^^^^^^
+apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupDraft.kt:101:25: error: unresolved reference 'SetupDraftArchive'.
+            val edits = SetupDraftArchive.decode(bytes)
+                        ^^^^^^^^^^^^^^^^^
+apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupDraft.kt:108:20: error: unresolved reference 'RestoredBotSetupDraft'.
+            return RestoredBotSetupDraft(restored, edits.storedRevision)
+                   ^^^^^^^^^^^^^^^^^^^^^
