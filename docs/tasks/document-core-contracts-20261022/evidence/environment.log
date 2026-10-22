@@ -1,0 +1,14 @@
+Thu Oct 22 04:22:50 UTC 2026
+Linux de42e6310890 6.18.55 #1 SMP Wed Oct 14 19:45:18 UTC 2026 x86_64 GNU/Linux
+85daa64449c494eb005589ca71b164a48c470951
+## task/document-core-contracts-20261022
+ M crates/muyon-core/src/lib.rs
+?? crates/muyon-core/src/documents/
+?? crates/muyon-core/tests/documents.rs
+?? docs/tasks/document-core-contracts-20261022/evidence/
+f4781e16ddf4e542b983fbd77f266a0071148255	refs/heads/codex/muyon-android-refactor
+0ab2c4f667681b9aacb017f8cd2eea6f576cf78e	refs/heads/develop
+cc7c8d14d30e3d3c4c7c6cb2bf2059a99e46e003	refs/heads/main
+b6fcc030410d1718d00fbad15627423d4f809e2f	refs/heads/task/ui-shell-20261022
+toolchain_lookup_exit=1
+tracked_agents_lookup_exit=1
