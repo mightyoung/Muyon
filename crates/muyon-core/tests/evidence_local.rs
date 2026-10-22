@@ -1,9 +1,11 @@
-use muyon_core::{contract, documents};
-#[path = "../src/evidence/mod.rs"]
-mod evidence;
 use contract::*;
 use documents::*;
 use evidence::*;
+use muyon_core::{contract, documents};
+// Compile the real pure processor without requiring the core-owned export patch.
+// The store adapter is tested separately in the same-crate owner harness.
+#[path = "../src/evidence/local.rs"]
+mod evidence;
 use sha2::{Digest, Sha256};
 use std::cell::RefCell;
 
@@ -21,7 +23,7 @@ fn setup(bytes: &[u8]) -> (Host, ReadRequest) {
         },
         "doc",
         Revision::new(1),
-        DocumentFormat::Unknown,
+        DocumentFormat::Text,
     )
     .unwrap();
     let authority = AuthorityBinding {
@@ -89,7 +91,16 @@ fn synthetic_text_has_real_receipt_and_bound_utf8_anchor() {
 fn pdf_and_ocr_never_manufacture_content() {
     for kind in [InputKind::Pdf, InputKind::Ocr] {
         let bytes = b"%PDF synthetic";
-        let (host, request) = setup(bytes);
+        let (host, mut request) = setup(bytes);
+        let pdf = DocumentRef::new(
+            request.document.scope().clone(),
+            "doc",
+            Revision::new(1),
+            DocumentFormat::Pdf,
+        )
+        .unwrap();
+        request.document = pdf.clone();
+        host.0.borrow_mut().document = pdf;
         let outcome = process_local(&host, &request, kind, bytes).unwrap();
         assert_eq!(outcome.receipt().extraction, ProcessingState::Unsupported);
         assert_eq!(
@@ -133,7 +144,7 @@ fn cache_access_rechecks_revision_scope_and_revocation() {
             },
             "doc",
             Revision::new(revision),
-            DocumentFormat::Unknown,
+            DocumentFormat::Text,
         )
         .unwrap();
         assert!(outcome.open(&host, &request, &hit).is_err());
@@ -329,7 +340,7 @@ fn source_identity_separates_same_bytes_across_scope_document_and_revision() {
             },
             document_id,
             Revision::new(revision),
-            DocumentFormat::Unknown,
+            DocumentFormat::Text,
         )
         .unwrap();
         host.0.borrow_mut().document = document.clone();
@@ -368,5 +379,22 @@ fn limits_reject_overlarge_queries_invalid_limits_and_oversized_sources() {
     assert_eq!(
         process_local(&host, &request, InputKind::Utf8Text, &bytes).unwrap_err(),
         EvidenceError::LimitExceeded
+    );
+}
+#[test]
+fn unknown_format_never_becomes_utf8_by_caller_assertion() {
+    let (host, mut request) = setup(b"synthetic");
+    let unknown = DocumentRef::new(
+        request.document.scope().clone(),
+        "doc",
+        Revision::new(1),
+        DocumentFormat::Unknown,
+    )
+    .unwrap();
+    host.0.borrow_mut().document = unknown.clone();
+    request.document = unknown;
+    assert_eq!(
+        process_local(&host, &request, InputKind::Utf8Text, b"synthetic").unwrap_err(),
+        EvidenceError::InvalidRequest
     );
 }
