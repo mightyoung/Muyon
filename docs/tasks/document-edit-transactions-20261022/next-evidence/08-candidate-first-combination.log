@@ -1,0 +1,63 @@
+   Compiling muyon-core v0.1.0 (/tmp/muyon-document-durable-check.HuqkpAc8/crates/muyon-core)
+    Finished `test` profile [unoptimized] target(s) in 5.16s
+     Running tests/document_edit_candidates.rs (/workspace/document-edit-combination/crates/target/debug/deps/document_edit_candidates-ef54b164ac608172)
+
+running 6 tests
+test exact_confirm_same_intent_scope_and_copy_routes_are_separate ... ok
+test candidate_corruption_and_equal_source_bytes_are_not_edited_success ... ok
+test cancellation_and_source_change_prevent_new_staging_without_rollback ... ok
+test unknown_ingestion_queries_original_intent_and_never_replays_after_restart ... ok
+test prepared_candidate_restart_never_implies_confirmation_validation_or_document_success ... ok
+test candidate_write_tail_revocation_rolls_back_bytes_and_reopen_preserves_unknown ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.06s
+
+     Running tests/document_edit_engine_protocol.rs (/workspace/document-edit-combination/crates/target/debug/deps/document_edit_engine_protocol-50ee234a2ce5c46d)
+
+running 6 tests
+test numeric_cell_bounds_and_metadata_format_are_strict ... ok
+test real_metadata_maps_exact_identity_and_preserves_numeric_literals ... ok
+test identity_and_hash_errors_are_distinct_from_environment_hold ... ok
+test apparently_real_status_requires_source_hash_and_simulated_diagnostics_are_hard_rejected ... ok
+test six_response_fixtures_can_never_mint_an_engine_commit_permit ... ok
+test unknown_keys_versions_duplicate_keys_and_oversize_receipts_fail_closed ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/document_edit_gateway.rs (/workspace/document-edit-combination/crates/target/debug/deps/document_edit_gateway-e6517e2bdedba46d)
+
+running 19 tests
+test a_copy_claim_that_cannot_store_its_candidate_is_query_only_after_restart ... ok
+test a_different_hash_candidate_cannot_borrow_the_copy_only_publication_route ... ok
+test candidate_and_original_receipt_survive_restart_without_replay ... ok
+test cancellation_is_not_rollback_and_cannot_erase_a_committed_receipt ... ok
+test confirmation_is_exact_and_revocation_stops_publication ... ok
+test corrupt_oversize_persisted_metadata_is_rejected_before_payload_decode ... ok
+test copy_publication_uses_new_metadata_reference_without_new_upload_or_staging_files ... ok
+test candidate_reopens_but_new_effect_requires_an_explicit_fresh_confirmation ... ok
+test corrupt_candidate_never_validates_or_publishes ... ok
+test frozen_source_title_cannot_change_without_changing_the_reviewed_copy_plan ... ok
+test duplicate_intent_binds_original_and_never_creates_second_upload ... ok
+test live_engine_envelope_cannot_be_confused_with_a_validated_copy_intent ... ok
+test prepare_is_durable_without_confirmation_or_engine_success ... ok
+test late_copy_duplicate_is_only_an_authorized_original_result_query ... ok
+test persisted_receipt_title_must_match_frozen_reviewed_source ... ok
+test reading_a_newer_different_blob_does_not_authorize_old_candidate_bytes ... ok
+test two_original_intents_cannot_publish_the_same_source_revision ... ok
+test receipt_tail_failure_rolls_back_cas_and_restart_unknown_never_replays ... ok
+test grant_revoked_or_expired_by_last_receipt_write_rolls_back_the_entire_publish ... ok
+
+test result: ok. 19 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.10s
+
+     Running tests/document_edit_schema2.rs (/workspace/document-edit-combination/crates/target/debug/deps/document_edit_schema2-9eaa099629d29e40)
+
+running 6 tests
+test expanded_tree_matches_python_ascii_json_bytes_and_hashes ... ok
+test matching_schema2_response_is_held_and_simulation_or_version_never_admitted ... ok
+test schema2_refuses_wrong_format_locator_run_text_and_xml_space_change ... ok
+test schema2_maps_true_format_exact_locator_and_local_run_hash ... ok
+test schema2_digest_binds_locator_tree_format_source_operation_and_intent ... ok
+test duplicate_attributes_limits_and_tree_identity_fail_closed ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

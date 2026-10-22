@@ -1,0 +1,122 @@
+[
+  {
+    "name": "null-empty",
+    "form": [
+      "{urn:test}r",
+      [],
+      null,
+      "",
+      []
+    ],
+    "canonical": "[\"{urn:test}r\",[],null,\"\",[]]",
+    "sha256": "ec1129944cc6d828f107c1509b7d3d81dfdd699da6c2197c71599cd829f1cbbe"
+  },
+  {
+    "name": "unicode-attributes",
+    "form": [
+      "{urn:\u6587}r",
+      [
+        [
+          "{urn:z}\u5b57",
+          "\u6587\ud83d\ude00"
+        ],
+        [
+          "a",
+          "\u00e9"
+        ],
+        [
+          "Z",
+          "line\n\t\r\b\f\u0000\u001f\u007f\"\\/"
+        ]
+      ],
+      "\u4e2d\u00e9\ud83d\ude00\ud834\udd1e",
+      null,
+      []
+    ],
+    "canonical": "[\"{urn:\\u6587}r\",[[\"Z\",\"line\\n\\t\\r\\b\\f\\u0000\\u001f\\u007f\\\"\\\\/\"],[\"a\",\"\\u00e9\"],[\"{urn:z}\\u5b57\",\"\\u6587\\ud83d\\ude00\"]],\"\\u4e2d\\u00e9\\ud83d\\ude00\\ud834\\udd1e\",null,[]]",
+    "sha256": "a2bdf99fea68ef2724a0d538d8c88221eabcd06109b67fbf0590b1c0668d491e"
+  },
+  {
+    "name": "special-nodes",
+    "form": [
+      "{urn:test}r",
+      [
+        [
+          "z",
+          "last"
+        ],
+        [
+          "a",
+          "first"
+        ]
+      ],
+      null,
+      null,
+      [
+        [
+          "#comment",
+          [],
+          "unchanged comment",
+          null,
+          []
+        ],
+        [
+          "#pi",
+          [],
+          "target instruction",
+          "\u5c3e",
+          []
+        ],
+        [
+          "{urn:test}t",
+          [],
+          "",
+          null,
+          []
+        ]
+      ]
+    ],
+    "canonical": "[\"{urn:test}r\",[[\"a\",\"first\"],[\"z\",\"last\"]],null,null,[[\"#comment\",[],\"unchanged comment\",null,[]],[\"#pi\",[],\"target instruction\",\"\\u5c3e\",[]],[\"{urn:test}t\",[],\"\",null,[]]]]",
+    "sha256": "8e11636f7e214c0c41fa65058a52ef766e4baa0e707e3f42111176ea01e6f591"
+  },
+  {
+    "name": "docx-run",
+    "form": [
+      "{http://schemas.openxmlformats.org/wordprocessingml/2006/main}r",
+      [],
+      null,
+      null,
+      [
+        [
+          "{http://schemas.openxmlformats.org/wordprocessingml/2006/main}t",
+          [],
+          "target",
+          null,
+          []
+        ]
+      ]
+    ],
+    "canonical": "[\"{http://schemas.openxmlformats.org/wordprocessingml/2006/main}r\",[],null,null,[[\"{http://schemas.openxmlformats.org/wordprocessingml/2006/main}t\",[],\"target\",null,[]]]]",
+    "sha256": "506b05a9810e2b05b1c8be9f79fe471f95e1ab4e9151872ee5d9e8fab46d477a"
+  },
+  {
+    "name": "pptx-run",
+    "form": [
+      "{http://schemas.openxmlformats.org/drawingml/2006/main}r",
+      [],
+      null,
+      null,
+      [
+        [
+          "{http://schemas.openxmlformats.org/drawingml/2006/main}t",
+          [],
+          "target",
+          null,
+          []
+        ]
+      ]
+    ],
+    "canonical": "[\"{http://schemas.openxmlformats.org/drawingml/2006/main}r\",[],null,null,[[\"{http://schemas.openxmlformats.org/drawingml/2006/main}t\",[],\"target\",null,[]]]]",
+    "sha256": "d3816c7daabaa9e15cd3ee8cd22135f6bafed129175fceb2fec0ec0ce7b770f9"
+  }
+]

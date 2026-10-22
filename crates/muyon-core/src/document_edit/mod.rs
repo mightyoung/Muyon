@@ -7,8 +7,11 @@
 //! through the existing core store. `engine_protocol` maps held requests only;
 //! no real Office editing engine or edited-candidate publication is enabled.
 
+pub mod edited_candidates;
 pub mod engine_protocol;
+pub mod fingerprint;
 pub mod gateway;
+pub mod text_protocol;
 
 pub use crate::contract::AuthorityBinding as Authority;
 use crate::contract::Revision;

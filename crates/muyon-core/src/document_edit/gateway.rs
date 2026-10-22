@@ -104,7 +104,7 @@ fn unhex(s: &str) -> Result<Vec<u8>> {
 fn format_name(f: DocumentFormat) -> String {
     format!("{f:?}")
 }
-fn document_json(m: &DocumentMetadata) -> Result<String> {
+pub(super) fn document_json(m: &DocumentMetadata) -> Result<String> {
     encode(&StoredDocument {
         scope: m.document.scope().clone(),
         id: m.document.document_id().into(),
@@ -114,7 +114,7 @@ fn document_json(m: &DocumentMetadata) -> Result<String> {
         blob: m.blob.clone(),
     })
 }
-fn document_decode(s: &str) -> Result<DocumentMetadata> {
+pub(super) fn document_decode(s: &str) -> Result<DocumentMetadata> {
     let m: StoredDocument = decode(s)?;
     m.blob.validate()?;
     let f = match m.format.as_str() {
@@ -135,7 +135,7 @@ fn document_decode(s: &str) -> Result<DocumentMetadata> {
         blob: m.blob,
     })
 }
-fn binding_json(b: &Binding) -> Result<String> {
+pub(super) fn binding_json(b: &Binding) -> Result<String> {
     b.check().map_err(|_| ContractError::InvalidPayload)?;
     encode(&(
         b.document.scope(),
@@ -157,6 +157,31 @@ fn cell(row: &[Option<String>], n: usize) -> Result<&str> {
     row.get(n)
         .and_then(Option::as_deref)
         .ok_or(ContractError::StorageCorrupt)
+}
+/// Both journals share one bounded candidate-byte budget. Missing edited table
+/// is valid on stores that only initialized the historical COPY gateway.
+pub(super) fn journal_candidate_bytes(store: &BusinessStore) -> Result<usize> {
+    let db = store.database();
+    let mut total = 0usize;
+    for table in ["edit_journal_intents", "edit_candidate_intents"] {
+        if sql(db.query(
+            "SELECT name FROM sqlite_master WHERE type='table' AND name=?",
+            &[table],
+        ))?
+        .is_empty()
+        {
+            continue;
+        }
+        let rows = sql(db.query(
+            &format!("SELECT COALESCE(SUM(length(candidate_hex)/2),0) FROM {table}"),
+            &[],
+        ))?;
+        let n: usize = cell(&rows[0], 0)?
+            .parse()
+            .map_err(|_| ContractError::StorageCorrupt)?;
+        total = total.checked_add(n).ok_or(ContractError::RawLimit)?;
+    }
+    Ok(total)
 }
 struct Record {
     source: DocumentMetadata,
@@ -351,6 +376,20 @@ impl<'a> DocumentEditGateway<'a> {
         let source =
             self.store
                 .document_access_in_transaction(&tx, a, &[DocumentOperation::ReadText])?;
+        // Both operation families share the original-intent namespace and lock.
+        let edited = sql(db.query(
+            "SELECT name FROM sqlite_master WHERE type='table' AND name='edit_candidate_intents'",
+            &[],
+        ))?;
+        if !edited.is_empty()
+            && !sql(db.query(
+                "SELECT intent_id FROM edit_candidate_intents WHERE intent_id=?",
+                &[intent],
+            ))?
+            .is_empty()
+        {
+            return Err(ContractError::IntentConflict);
+        }
         let digest = copy_plan_digest(&source, intent)?;
         let b = Binding {
             document: source.document.clone(),
@@ -467,6 +506,25 @@ impl<'a> DocumentEditGateway<'a> {
         sql(tx.commit())?;
         Ok(request)
     }
+    /// Trusted read-side observation mapping only; the subtree/locator must come
+    /// from a host reader, never model JSON. No package eligibility is attested.
+    pub fn prepare_text_request(
+        &self,
+        a: &DocumentAccess,
+        intent: &str,
+        edit: super::text_protocol::TextEdit,
+    ) -> Result<super::engine_protocol::PreparedEngineRequest> {
+        let tx = sql(self.store.database().transaction())?;
+        let source =
+            self.store
+                .document_access_in_transaction(&tx, a, &[DocumentOperation::ReadText])?;
+        let request = super::text_protocol::prepare_text_request_trusted(&source, intent, edit)
+            .map_err(|_| ContractError::InvalidPayload)?;
+        self.store
+            .document_access_in_transaction(&tx, a, &[DocumentOperation::ReadText])?;
+        sql(tx.commit())?;
+        Ok(request)
+    }
     pub fn apply_engine_patch(&self, _b: &Binding, _a: &DocumentAccess) -> Result<DurableIntent> {
         Err(ContractError::UnsupportedOperation)
     }
@@ -564,13 +622,7 @@ impl<'a> DocumentEditGateway<'a> {
                 return Err(ContractError::IntentConflict);
             }
             // Hard global bound as well as per-document bound. No unbounded hidden staging.
-            let total = sql(db.query(
-                "SELECT COALESCE(SUM(length(candidate_hex)/2),0) FROM edit_journal_intents",
-                &[],
-            ))?;
-            let total: usize = cell(&total[0], 0)?
-                .parse()
-                .map_err(|_| ContractError::StorageCorrupt)?;
+            let total = journal_candidate_bytes(self.store)?;
             if total
                 .checked_add(bytes.len())
                 .ok_or(ContractError::RawLimit)?

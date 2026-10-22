@@ -1,4 +1,4 @@
-//! Host-derived schema1 envelope mapping only. Every engine response remains HOLD.
+//! Host-derived schema1/2 envelope mapping only. Every engine response remains HOLD.
 //! No launcher, file path, grant decoder, simulated receipt or commit permit exists.
 use super::Binding;
 use crate::documents::{DocumentFormat, DocumentMetadata};
@@ -31,6 +31,7 @@ pub struct PreparedEngineRequest {
     identity: Identity,
     source_hash: String,
     expires_at_ms: u64,
+    schema_version: u32,
 }
 impl PreparedEngineRequest {
     pub fn binding(&self) -> &Binding {
@@ -38,6 +39,12 @@ impl PreparedEngineRequest {
     }
     pub fn request_json(&self) -> &str {
         &self.json
+    }
+    pub(super) fn fresh_deadline(&self) -> Result<u64, ProtocolError> {
+        if now()? >= self.expires_at_ms {
+            return Err(ProtocolError::Expired);
+        }
+        Ok(self.expires_at_ms)
     }
 }
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
@@ -55,7 +62,7 @@ fn hash(bytes: &[u8]) -> [u8; 32] {
 fn hex(bytes: &[u8]) -> String {
     bytes.iter().map(|b| format!("{b:02x}")).collect()
 }
-fn now() -> Result<u64, ProtocolError> {
+pub(super) fn now() -> Result<u64, ProtocolError> {
     u64::try_from(
         SystemTime::now()
             .duration_since(UNIX_EPOCH)
@@ -141,6 +148,37 @@ pub fn prepare_request_trusted(
     {
         return Err(ProtocolError::InvalidOperation);
     }
+    let operation = serde_json::json!({"kind":"set_numeric_cell","sheet":operation.sheet,"cell":operation.cell,"expected":operation.expected,"replacement":operation.replacement});
+    prepare_envelope(source, intent, 1, operation)
+}
+/// Digest epoch invalidates legacy XLSX previews after hidden/protected/merged
+/// eligibility tightening. This identifier is host-side, never a worker wire key.
+pub const ELIGIBILITY_POLICY: &str = "office-subsets-20261022-hidden-protected-merged-v2";
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+struct StoredRequest {
+    schema_version: u32,
+    scope_id: String,
+    file_id: String,
+    base_revision: String,
+    operation_id: String,
+    idempotency_key: String,
+    source_sha256: String,
+    operation: serde_json::Value,
+}
+pub(super) fn prepare_envelope(
+    source: &DocumentMetadata,
+    intent: &str,
+    schema: u32,
+    operation: serde_json::Value,
+) -> Result<PreparedEngineRequest, ProtocolError> {
+    if !matches!(schema, 1 | 2)
+        || source.blob.validate().is_err()
+        || !identifier(intent)
+        || !identifier(source.document.document_id())
+    {
+        return Err(ProtocolError::InvalidOperation);
+    }
     let scope =
         serde_json::to_vec(source.document.scope()).map_err(|_| ProtocolError::InvalidOperation)?;
     let mut identity = Identity {
@@ -150,13 +188,21 @@ pub fn prepare_request_trusted(
         operation_id: intent.into(),
         idempotency_key: String::new(),
     };
-    let operation = serde_json::json!({"kind":"set_numeric_cell","sheet":operation.sheet,"cell":operation.cell,"expected":operation.expected,"replacement":operation.replacement});
     let digest = hash(
-        &serde_json::to_vec(&(1, &identity, &source.blob.digest, &operation))
-            .map_err(|_| ProtocolError::InvalidOperation)?,
+        &serde_json::to_vec(&(
+            ELIGIBILITY_POLICY,
+            schema,
+            format!("{:?}", source.document.format()),
+            &source.title,
+            &source.blob.byte_length,
+            &identity,
+            &source.blob.digest,
+            &operation,
+        ))
+        .map_err(|_| ProtocolError::InvalidOperation)?,
     );
     identity.idempotency_key = format!("op:{}", hex(&digest));
-    let request = serde_json::json!({"schema_version":1,"scope_id":identity.scope_id,"file_id":identity.file_id,"base_revision":identity.base_revision,"operation_id":identity.operation_id,"idempotency_key":identity.idempotency_key,"source_sha256":source.blob.digest,"operation":operation});
+    let request = serde_json::json!({"schema_version":schema,"scope_id":identity.scope_id,"file_id":identity.file_id,"base_revision":identity.base_revision,"operation_id":identity.operation_id,"idempotency_key":identity.idempotency_key,"source_sha256":source.blob.digest,"operation":operation});
     Ok(PreparedEngineRequest {
         binding: Binding {
             document: source.document.clone(),
@@ -168,8 +214,38 @@ pub fn prepare_request_trusted(
         identity,
         source_hash: source.blob.digest.clone(),
         expires_at_ms: now()?.checked_add(30_000).ok_or(ProtocolError::Expired)?,
+        schema_version: schema,
     })
 }
+/// Storage consistency check only. A restored request remains data, never engine
+/// validation or a runnable preview. Live grant/source checks belong to the store.
+pub(super) fn verify_stored_request(
+    source: &DocumentMetadata,
+    json: &str,
+    binding: &Binding,
+) -> Result<(), ProtocolError> {
+    let raw: StoredRequest =
+        serde_json::from_str(json).map_err(|_| ProtocolError::InvalidResponse)?;
+    let expected = prepare_envelope(
+        source,
+        &binding.intent_id,
+        raw.schema_version,
+        raw.operation,
+    )?;
+    if expected.binding != *binding
+        || expected.json != json
+        || raw.scope_id != expected.identity.scope_id
+        || raw.file_id != expected.identity.file_id
+        || raw.base_revision != expected.identity.base_revision
+        || raw.operation_id != expected.identity.operation_id
+        || raw.idempotency_key != expected.identity.idempotency_key
+        || raw.source_sha256 != source.blob.digest
+    {
+        return Err(ProtocolError::BindingMismatch);
+    }
+    Ok(())
+}
+
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
 struct Response {
@@ -223,7 +299,7 @@ fn check_at(
         return Err(ProtocolError::InvalidResponse);
     }
     let r: Response = serde_json::from_slice(bytes).map_err(|_| ProtocolError::InvalidResponse)?;
-    if r.schema_version != 1 {
+    if r.schema_version != prepared.schema_version {
         return Err(ProtocolError::InvalidResponse);
     }
     if r.identity != prepared.identity
