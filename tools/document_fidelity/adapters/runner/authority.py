@@ -10,6 +10,8 @@ from . import model
 from ..protocol import parse_request,IDENTITY_FIELDS
 
 _SEAL=object()
+# Fail closed at capacity; never evict replay history to silently reopen an attempt.
+MAX_ATTEMPTS=1024
 
 
 class Capability:
@@ -19,6 +21,10 @@ class Capability:
         return super().__new__(cls)
     def __init__(self,seal=None,issuer=None):self._issuer=issuer
     def __reduce__(self):raise TypeError('capability_not_serializable')
+
+
+def valid_proof_id(value):
+    return isinstance(value,str) and re.fullmatch(r'[A-Za-z0-9_.:-]{1,128}',value) is not None
 
 
 def bind(raw,attempt):
@@ -48,13 +54,13 @@ class Authority:
         with self._lock:
             request=parse_request(raw)
             if source_sha256!=request['source_sha256'] or not isinstance(attempt,str) or not re.fullmatch(r'[A-Za-z0-9_-]{1,128}',attempt):return None
-            if not isinstance(now,(int,float)) or isinstance(now,bool) or not math.isfinite(now):return None
-            if attempt in self._attempts:return None
+            if not isinstance(now,(int,float)) or isinstance(now,bool) or not math.isfinite(now) or now<0:return None
+            if attempt in self._attempts or len(self._attempts)>=MAX_ATTEMPTS:return None
             if self.assurance=='simulation':
                 if getattr(executor,'assurance',None)!='simulation':return None
                 expiry=now+self.policy.timeout_ms+3*self.policy.grace_ms+1000
             else:
-                if not isinstance(executor,model.HostOSBackend) or not self.session.verify_executor(executor):return None
+                if not isinstance(executor,model.HostOSBackend) or self.session.verify_executor(executor) is not True:return None
                 context=bind(request,attempt)
                 evidence=self.session.verify_admission(context,self.engine,self.policy,now)
                 if type(evidence) is not model.HostEvidence or evidence.binding!=context or evidence.engine!=self.engine or evidence.policy_digest!=self.policy.digest():return None
@@ -71,7 +77,7 @@ class Authority:
     def check_lease(self,cap,raw,executor,now):
         with self._lock:
             record=self._record(cap)
-            try:return bool(record and record['kind']=='lease' and record['executor'] is executor and record['binding']==bind(raw,record['binding'].attempt_id) and type(now) in (int,float) and math.isfinite(now) and now<record['expiry'])
+            try:return bool(record and record['kind']=='lease' and not record.get('closed') and record['executor'] is executor and record['binding']==bind(raw,record['binding'].attempt_id) and type(now) in (int,float) and math.isfinite(now) and 0<=now<record['expiry'])
             except (ValueError,TypeError,KeyError):return False
     def claim(self,cap,raw,executor,now):
         with self._lock:
@@ -83,12 +89,12 @@ class Authority:
     def approve_ready(self,cap,ready,executor):
         with self._lock:
             record=self._record(cap)
-            if not record or not record['claimed'] or record['executor'] is not executor or record['ready'] is not None or type(ready) is not model.SandboxReady:return False
+            if not record or record.get('closed') or not record['claimed'] or record['executor'] is not executor or record['ready'] is not None or type(ready) is not model.SandboxReady:return False
             if ready.binding!=record['binding'] or ready.engine!=self.engine or ready.policy_digest!=self.policy.digest() or not ready.guards_hold():return False
             digest=ready_digest(ready)
             if self.assurance=='host_verified':
                 evidence=self.session.verify_ready(record['binding'],ready,executor)
-                if type(evidence) is not model.HostReadyEvidence or evidence.binding!=record['binding'] or evidence.ready_digest!=digest or not evidence.proof_id:return False
+                if type(evidence) is not model.HostReadyEvidence or evidence.binding!=record['binding'] or evidence.ready_digest!=digest or not valid_proof_id(evidence.proof_id):return False
             record['ready']=digest;return True
     def issue_worker_permit(self,lease,raw,executor,now,format):
         """Trusted broker integration only; simulation can never issue this cap.
@@ -114,7 +120,7 @@ class Authority:
             if self.assurance!='host_verified' or not record or record['kind']!='worker' or record['used']:return None
             try:
                 if (record['binding']!=bind(raw,record['binding'].attempt_id) or record['source']!=source or record['candidate']!=candidate
-                        or record['engine'].engine_id!=engine_id or type(now) not in (int,float) or not math.isfinite(now) or now>=record['expiry']):return None
+                        or record['engine'].engine_id!=engine_id or type(now) not in (int,float) or not math.isfinite(now) or now<0 or now>=record['expiry']):return None
             except (TypeError,ValueError):return None
             record['used']=True
             return record['engine'],record['policy'],record['binding']
@@ -125,16 +131,32 @@ class Authority:
             if not record['ready'] or record.get('credential_issued') or receipt.get('assurance')!='host_verified' or receipt.get('status')!='candidate_validated':return None
             digest=model.digest(receipt)
             evidence=self.session.verify_terminal(record['binding'],record['ready'],receipt,candidate_sha,terminal_proof,executor)
-            if type(evidence) is not model.HostTerminalEvidence or evidence.binding!=record['binding'] or evidence.ready_digest!=record['ready'] or evidence.receipt_digest!=digest or evidence.candidate_sha256!=candidate_sha or not evidence.proof_id:return None
+            if type(evidence) is not model.HostTerminalEvidence or evidence.binding!=record['binding'] or evidence.ready_digest!=record['ready'] or evidence.receipt_digest!=digest or evidence.candidate_sha256!=candidate_sha or not valid_proof_id(evidence.proof_id):return None
             record['credential_issued']=True
             credential=Capability(_SEAL,self)
-            self._records[credential]=dict(kind='validator',binding=record['binding'],candidate=candidate_sha,receipt=digest,used=False)
+            self._records[credential]=dict(kind='validator',binding=record['binding'],candidate=candidate_sha,receipt=digest,expiry=record['expiry'],used=False)
             return credential
-    def consume_credential(self,cap,raw,candidate_sha,receipt_digest=None):
+    def consume_credential(self,cap,raw,candidate_sha,receipt_digest=None,*,now=None):
         with self._lock:
             record=self._record(cap)
             if self.assurance!='host_verified' or not record or record['kind']!='validator' or record['used']:return False
             try:
-                if record['binding']!=bind(raw,record['binding'].attempt_id) or record['candidate']!=candidate_sha or record['receipt']!=receipt_digest:return False
+                if (record['binding']!=bind(raw,record['binding'].attempt_id) or record['candidate']!=candidate_sha or record['receipt']!=receipt_digest
+                        or type(now) not in (int,float) or not math.isfinite(now) or now<0 or now>=record['expiry']):return False
             except (ValueError,TypeError):return False
             record['used']=True;return True
+
+    def finish(self,lease,keep_credential=None):
+        """Close admission and revoke all child capabilities except accepted result.
+
+        A closed lease can never authorize another ready/spawn/worker/validator.
+        The one retained validator still has its original short expiry and must
+        be consumed against current host monotonic time plus core CAS checks.
+        """
+        with self._lock:
+            record=self._record(lease)
+            if not record or record['kind']!='lease':return
+            record['closed']=True
+            for cap,child in self._records.items():
+                if child['binding']==record['binding'] and child['kind'] in ('worker','validator') and cap is not keep_credential:
+                    child['used']=True

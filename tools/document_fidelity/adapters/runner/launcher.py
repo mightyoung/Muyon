@@ -109,7 +109,9 @@ def _run(source,raw,executor,authority,cancel):
         if not authority.approve_ready(lease,ready,executor):raise Stop('failed','sandbox_ready_not_verified')
         record('sandbox_ready_verified')
         if cancelled():raise Stop('cancelled','cancelled_before_spawn')
-        if not authority.check_lease(lease,request,executor,clock()):raise Stop('held','lease_expired_before_spawn')
+        now=clock()
+        if now>=start+policy.timeout_ms:raise Stop('timed_out','deadline_before_spawn')
+        if not authority.check_lease(lease,request,executor,now):raise Stop('held','lease_expired_before_spawn')
         spawn_attempted=True
         process=executor.spawn(workspace,spec,lease)
         if process is None:raise Stop('outcome_unknown','spawn_handle_missing')
@@ -190,6 +192,7 @@ def _run(source,raw,executor,authority,cancel):
     if candidate is not None:
         try:
             if cancelled():raise Stop('cancelled','cancelled_before_release')
+            if clock()>=deadline:raise Stop('timed_out','deadline_before_release')
         except Stop as error:
             receipt['status']=error.status;receipt['reasons'].append(error.reason);candidate=None
         except Exception:
@@ -200,8 +203,17 @@ def _run(source,raw,executor,authority,cancel):
         except Exception:credential=None
         if credential is None:
             receipt['status']='failed';receipt['reasons'].append('host_validator_credential_not_issued');candidate=None
-        else:receipt=prospective
+        else:
+            try:
+                if cancelled():raise Stop('cancelled','cancelled_during_terminal_proof')
+                if clock()>=deadline:raise Stop('timed_out','deadline_during_terminal_proof')
+            except Stop as error:
+                receipt['status']=error.status;receipt['reasons'].append(error.reason);candidate=credential=None
+            except Exception:
+                receipt['status']='failed';receipt['reasons'].append('terminal_release_check_failed');candidate=credential=None
+            else:receipt=prospective
     if receipt['status'] not in ('candidate_validated','simulated_validated'):candidate=None
+    if lease is not None:authority.finish(lease,keep_credential=credential)
     return model.Result(receipt,credential,candidate)
 
 

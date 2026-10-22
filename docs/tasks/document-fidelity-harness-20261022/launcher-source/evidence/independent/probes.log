@@ -1,0 +1,6 @@
+{"probe": "deadline_elapsed_before_spawn", "status": "timed_out", "reasons": ["deadline_exceeded"], "calls": ["reserve", "ready", "spawn", "terminate", "reap", "cleanup"], "clock": 51}
+{"probe": "cancel_during_final_host_validation", "synthetic_host_only": true, "status": "candidate_validated", "txn_eligible": true, "cancelled": true, "candidate_returned": true, "credential_returned": true}
+{"probe": "deadline_elapsed_during_cleanup", "synthetic_host_only": true, "status": "candidate_validated", "clock": 51, "timeout_ms": 50, "txn_eligible": true, "candidate_returned": true}
+{"probe": "worker_permit_after_cancel_cleanup", "synthetic_host_only": true, "status": "cancelled", "cleaned": true, "permit_issued": true, "permit_consumed": true}
+{"probe": "validator_consumption_no_ttl", "synthetic_host_only": true, "clock": 1000000, "admission_expires_ms": 1000, "accepted": true}
+{"third_party_modules_imported": []}

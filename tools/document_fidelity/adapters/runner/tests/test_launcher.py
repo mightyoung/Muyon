@@ -59,6 +59,27 @@ class FakeOS:
     def cleanup(self,workspace):self.calls.append('cleanup')
     def quarantine(self,attempt,workspace=None):self.calls.append('quarantine')
 
+class FakeHostOS(FakeOS,model.HostOSBackend):
+    """Test double for trusted API contract; NEVER real host/sandbox evidence."""
+    assurance='host_verified'
+    def spawn(self,workspace,spec,lease):
+        self.lease=lease
+        return super().spawn(workspace,spec,lease)
+    def terminal_proof(self,process,workspace):return 'FAKE_NOT_PRODUCTION'
+
+class FakeHostSession(model.TrustedHostSession):
+    """Explicit test bootstrap only; credentials in these tests are synthetic."""
+    cancelled=False
+    cancel_in_verify=False
+    def verify_executor(self,executor):return isinstance(executor,FakeHostOS)
+    def verify_admission(self,binding,engine,policy,now_ms):
+        return model.HostEvidence(binding,engine,policy.digest(),now_ms+1000,*(['FAKE_NOT_PRODUCTION']*4))
+    def verify_ready(self,binding,ready,executor):
+        return model.HostReadyEvidence(binding,authority.ready_digest(ready),'FAKE_NOT_PRODUCTION')
+    def verify_terminal(self,binding,ready_digest,receipt,candidate_sha256,proof,executor):
+        if self.cancel_in_verify:self.cancelled=True
+        return model.HostTerminalEvidence(binding,ready_digest,model.digest(receipt),candidate_sha256,'FAKE_NOT_PRODUCTION')
+
 class LauncherTests(unittest.TestCase):
     def setUp(self):
         self.source=build_complex_samples()['complex.xlsx'];self.req=request(self.source)
@@ -139,6 +160,88 @@ class LauncherTests(unittest.TestCase):
             with self.assertRaises(ValueError):model.Policy(**values)
         with self.assertRaises(TypeError):authority.Authority.host(self.engine,self.policy,{'verified':True})
         with self.assertRaises(TypeError):authority.Capability()
+    def host_contract_fake(self,os=None,session=None,cancel=None):
+        os=os or FakeHostOS();session=session or FakeHostSession()
+        a=authority.Authority.host(self.engine,self.policy,session)
+        r=launcher.run_production(self.source,self.req,launcher.TrustedRuntimeBinding(a,os),cancel=cancel)
+        return r,os,a
+    def test_deadline_before_spawn_and_after_cleanup_prevents_release(self):
+        class LateReady(FakeOS):
+            def ready(os,*args):
+                result=super().ready(*args);os.clock=51;return result
+        os=LateReady();a=authority.Authority.simulation(self.engine,self.policy)
+        r=launcher.run_simulation(self.source,self.req,os,a)
+        self.assertEqual('timed_out',r.public['status']);self.assertNotIn('spawn',os.calls)
+        class LateCleanup(FakeHostOS):
+            def cleanup(os,workspace):super().cleanup(workspace);os.clock=51
+        r,os,a=self.host_contract_fake(LateCleanup())
+        self.assertEqual('timed_out',r.public['status']);self.assertIsNone(r.credential);self.assertIsNone(r.candidate)
+    def test_terminal_host_callback_cancellation_revokes_synthetic_capability(self):
+        session=FakeHostSession();session.cancel_in_verify=True
+        r,os,a=self.host_contract_fake(session=session,cancel=lambda:session.cancelled)
+        self.assertEqual('cancelled',r.public['status']);self.assertIsNone(r.candidate);self.assertIsNone(r.credential)
+        self.assertFalse(r.public['txn_eligible'])
+    def test_terminal_lease_cannot_mint_worker_permit_and_credential_has_expiry(self):
+        os=FakeHostOS('cancel')
+        r,os,a=self.host_contract_fake(os,cancel=lambda:os.poll_count>=1)
+        self.assertEqual('cancelled',r.public['status'])
+        self.assertIsNone(a.issue_worker_permit(os.lease,self.req,os,os.clock,'xlsx'))
+        self.assertFalse(a.check_lease(os.lease,self.req,os,os.clock))
+        r,os,a=self.host_contract_fake()
+        self.assertIsNotNone(r.credential) # synthetic object from explicit fake trusted API only
+        self.assertFalse(a.consume_credential(r.credential,self.req,r.public['candidate_sha256'],model.digest(r.public),now=1001))
+        self.assertFalse(a.consume_credential(r.credential,self.req,r.public['candidate_sha256'],model.digest(r.public)))
+        self.assertFalse(a.consume_credential(r.credential,self.req,r.public['candidate_sha256'],model.digest(r.public),now=-1))
+        self.assertTrue(a.consume_credential(r.credential,self.req,r.public['candidate_sha256'],model.digest(r.public),now=os.clock))
+        self.assertFalse(a.consume_credential(r.credential,self.req,r.public['candidate_sha256'],model.digest(r.public),now=os.clock))
+    def test_docx_and_pptx_fake_os_pipeline_remains_inert(self):
+        from tools.document_fidelity.tests.test_text_subsets import subset_samples,text_request,rewrite
+        class TextOS(FakeOS):
+            def snapshot(os,workspace,policy):
+                os.calls.append('snapshot')
+                fmt=os.spec['format'];part='word/document.xml' if fmt=='docx' else 'ppt/slides/slide1.xml'
+                data=rewrite(os.source,part,lambda payload:payload.replace(b'>target<',b'>edited<'))
+                return model.Snapshot(data,os.source,os.job,True,1,False)
+        for fmt,name,engine,version in [('docx','simple-run.docx','python-docx','1.2.0'),('pptx','simple-shape.pptx','python-pptx','1.0.2')]:
+            with self.subTest(format=fmt):
+                source=subset_samples()[name];req=text_request(source,fmt);os=TextOS()
+                a=authority.Authority.simulation(model.EngineIdentity(engine,version,'1'*64,'2'*64,'3'*64),self.policy)
+                r=launcher.run_simulation(source,req,os,a)
+                self.assertEqual('simulated_validated',r.public['status'],r.public)
+                self.assertIsNone(r.credential);self.assertFalse(r.public['txn_eligible'])
+                self.assertEqual('not_run',r.public['engine_execution'])
+                self.assertLess(os.calls.index('reap'),os.calls.index('snapshot'))
+        self.assertFalse(any(name in sys.modules for name in ('openpyxl','docx','pptx')))
+    def test_fake_trusted_interface_requires_strict_executor_and_proof_shapes(self):
+        class TruthyExecutorSession(FakeHostSession):
+            def verify_executor(self,executor):return 'true'
+        r,os,a=self.host_contract_fake(session=TruthyExecutorSession())
+        self.assertEqual('held',r.public['status']);self.assertNotIn('reserve',os.calls)
+        class TruthyProofSession(FakeHostSession):
+            def verify_ready(self,binding,ready,executor):
+                return model.HostReadyEvidence(binding,authority.ready_digest(ready),True)
+        r,os,a=self.host_contract_fake(session=TruthyProofSession())
+        self.assertEqual('failed',r.public['status']);self.assertNotIn('spawn',os.calls)
+    def test_admission_registry_is_bounded_without_eviction_or_replay(self):
+        a=authority.Authority.simulation(self.engine,self.policy);os=FakeOS()
+        for i in range(1024):self.assertIsNotNone(a.admit(self.req,model.sha(self.source),os,'attempt_'+str(i),0))
+        self.assertIsNone(a.admit(self.req,model.sha(self.source),os,'overflow',0))
+        self.assertIsNone(a.admit(self.req,model.sha(self.source),os,'attempt_0',0))
+    def test_terminal_close_revokes_preissued_worker_and_slow_verifier(self):
+        a=None
+        class IssuedWorkerOS(FakeHostOS):
+            def spawn(os,workspace,spec,lease):
+                os.permit=a.issue_worker_permit(lease,self.req,os,os.clock,'xlsx')
+                return super().spawn(workspace,spec,lease)
+        os=IssuedWorkerOS('cancel');session=FakeHostSession();a=authority.Authority.host(self.engine,self.policy,session)
+        r=launcher.run_production(self.source,self.req,launcher.TrustedRuntimeBinding(a,os),cancel=lambda:os.poll_count>=1)
+        self.assertIsNotNone(os.permit)
+        self.assertIsNone(a.consume_worker_permit(os.permit,self.req,'/input/source.xlsx','/output/candidate.xlsx','openpyxl',os.clock))
+        class SlowVerifier(FakeHostSession):
+            def verify_terminal(session,*args):
+                result=super().verify_terminal(*args);args[-1].clock=51;return result
+        r,os,a=self.host_contract_fake(session=SlowVerifier())
+        self.assertEqual('timed_out',r.public['status']);self.assertIsNone(r.credential);self.assertFalse(r.public['txn_eligible'])
     def test_scope_expiry_and_replay_and_simulated_worker_permits(self):
         a=authority.Authority.simulation(self.engine,self.policy);os=FakeOS()
         lease=a.admit(self.req,hashlib.sha256(self.source).hexdigest(),os,'attempt1',0)
