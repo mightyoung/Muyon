@@ -24,3 +24,14 @@ pureJVM real sourceconsumers; strictClippy/tests finalfixed review. No inferred
 Android/device acceptance (existingSDK/Gradle absent, no denied-install workaround).
 No oldI04 or historical403 retries, real userfile/provider/model/search/paid/key,
 main/develop merge/deploy/forcepush/delete. Synthetic tempstores only.
+
+## Applied and actual conflicts
+
+Applied owned deltas core/bridge/provider/Host/Botdefinitions without source conflicts.
+Shellf04f4ef237a386b250deb903b9373229febd62ce then added only own UI/controller/
+projectiontest/runner/docs (not older Host1b source). Runner codec-list conflict
+resolved using exact offered Shell runner. Harness compile E0599 fixed by actual
+pathmoddocuments (adds repeated tests, not replacement methods). Shell synthetic
+prepare override signature adapted to Hostf707 PreparedLocalSave, body stillforbidden.
+Single actual5method generated bindingf604; Service patch remains withHostowner.
+See applied-deltas.json, RESULTS.md and FIVE-METHOD-HOST-HANDOFF.md.

@@ -1,0 +1,71 @@
+warning: method `document_publish_candidate_in_transaction` is never used
+   --> muyon-core/src/documents/candidate.rs:297:19
+    |
+ 62 | impl BusinessStore {
+    | ------------------ method in this implementation
+...
+297 |     pub(crate) fn document_publish_candidate_in_transaction(
+    |                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: `muyon-core` (lib) generated 1 warning
+   Compiling muyon-core v0.1.0 (/workspace/Muyon-combination-next-20261022/crates/muyon-core)
+warning: unused imports: `CandidateState` and `CandidateStatus`
+  --> muyon-core/src/bin/../documents/mod.rs:19:21
+   |
+19 | pub use candidate::{CandidateState, CandidateStatus};
+   |                     ^^^^^^^^^^^^^^  ^^^^^^^^^^^^^^^
+   |
+   = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused import: `CandidateStatus`
+  --> muyon-core/src/bin/../documents/mod.rs:19:37
+   |
+19 | pub use candidate::{CandidateState, CandidateStatus};
+   |                                     ^^^^^^^^^^^^^^^
+   |
+   = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+warning: `muyon-core` (bin "business_worker" test) generated 1 warning (run `cargo fix --bin "business_worker" -p muyon-core --tests` to apply 1 suggestion)
+warning: unused import: `CandidateStatus`
+  --> muyon-core/tests/../src/documents/mod.rs:19:37
+   |
+19 | pub use candidate::{CandidateState, CandidateStatus};
+   |                                     ^^^^^^^^^^^^^^^
+   |
+   = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+warning: `muyon-core` (bin "business_worker") generated 1 warning (run `cargo fix --bin "business_worker" -p muyon-core` to apply 1 suggestion)
+warning: `muyon-core` (test "group_runtime_store") generated 1 warning (run `cargo fix --test "group_runtime_store" -p muyon-core` to apply 1 suggestion)
+    Finished `test` profile [unoptimized] target(s) in 5.26s
+  Executable unittests src/lib.rs (/tmp/muyon-combination-target/debug/deps/muyon_android_product-96d8de0a08b40f87)
+  Executable unittests src/lib.rs (/tmp/muyon-combination-target/debug/deps/muyon_core-ce704dc0bd54c2ee)
+  Executable unittests src/bin/business_worker.rs (/tmp/muyon-combination-target/debug/deps/business_worker-dc8baf3b434a1418)
+  Executable tests/agent_child_tools.rs (/tmp/muyon-combination-target/debug/deps/agent_child_tools-0da17d8121db6362)
+  Executable tests/agent_owner.rs (/tmp/muyon-combination-target/debug/deps/agent_owner-82ebe533276033af)
+  Executable tests/agent_product.rs (/tmp/muyon-combination-target/debug/deps/agent_product-d9aaf363eb3e9271)
+  Executable tests/agent_tools.rs (/tmp/muyon-combination-target/debug/deps/agent_tools-4c0e458de1b3cc89)
+  Executable tests/agent_workflow.rs (/tmp/muyon-combination-target/debug/deps/agent_workflow-6f6325b777f5427d)
+  Executable tests/archive.rs (/tmp/muyon-combination-target/debug/deps/archive-f1935913539aad2b)
+  Executable tests/blobs.rs (/tmp/muyon-combination-target/debug/deps/blobs-0307892164eb3646)
+  Executable tests/bot_drafts.rs (/tmp/muyon-combination-target/debug/deps/bot_drafts-462c04f1ed958972)
+  Executable tests/business.rs (/tmp/muyon-combination-target/debug/deps/business-4415d273d772dd6b)
+  Executable tests/contract.rs (/tmp/muyon-combination-target/debug/deps/contract-c50d3a993467df7c)
+  Executable tests/contract_vectors_additional.rs (/tmp/muyon-combination-target/debug/deps/contract_vectors_additional-916919c9dd03af6e)
+  Executable tests/document_edit_candidates.rs (/tmp/muyon-combination-target/debug/deps/document_edit_candidates-08190453af903c2d)
+  Executable tests/document_edit_core_bridge.rs (/tmp/muyon-combination-target/debug/deps/document_edit_core_bridge-5156125507bbd05d)
+  Executable tests/document_edit_engine_protocol.rs (/tmp/muyon-combination-target/debug/deps/document_edit_engine_protocol-f25f2542d42cbd01)
+  Executable tests/document_edit_gateway.rs (/tmp/muyon-combination-target/debug/deps/document_edit_gateway-3c5d3d2a8c27b036)
+  Executable tests/document_edit_policy_epoch.rs (/tmp/muyon-combination-target/debug/deps/document_edit_policy_epoch-c30a4e030d0d2aff)
+  Executable tests/document_edit_schema2.rs (/tmp/muyon-combination-target/debug/deps/document_edit_schema2-d95b88be07c32ac3)
+  Executable tests/document_edit_transactions.rs (/tmp/muyon-combination-target/debug/deps/document_edit_transactions-520cf6229bafb585)
+  Executable tests/document_storage.rs (/tmp/muyon-combination-target/debug/deps/document_storage-c5136ca680f13dc7)
+  Executable tests/documents.rs (/tmp/muyon-combination-target/debug/deps/documents-a2e25c993996d700)
+  Executable tests/evidence_local.rs (/tmp/muyon-combination-target/debug/deps/evidence_local-d66a9e125d392cfb)
+  Executable tests/group_governance.rs (/tmp/muyon-combination-target/debug/deps/group_governance-518bbb1b70447bd9)
+  Executable tests/group_runtime.rs (/tmp/muyon-combination-target/debug/deps/group_runtime-9e2e0199e245db9e)
+  Executable tests/group_runtime_store.rs (/tmp/muyon-combination-target/debug/deps/group_runtime_store-6e1a0a1b85291bb6)
+  Executable tests/research.rs (/tmp/muyon-combination-target/debug/deps/research-26fa55096256815e)
+  Executable tests/resource_boundaries_additional.rs (/tmp/muyon-combination-target/debug/deps/resource_boundaries_additional-3c00c0d50eadc72b)
+  Executable tests/store_admission_additional.rs (/tmp/muyon-combination-target/debug/deps/store_admission_additional-75109991ab4122c2)
