@@ -2,10 +2,8 @@ use contract::{Revision, Scope};
 use documents::{
     CapabilityMatrix, CapabilityStatus, DocumentFormat, DocumentOperation, DocumentRef,
 };
+use muyon_core::document_edit::*;
 use muyon_core::{contract, documents};
-#[path = "../src/document_edit/mod.rs"]
-mod document_edit;
-use document_edit::*;
 
 fn document(project: &str, revision: u64) -> DocumentRef {
     DocumentRef::new(

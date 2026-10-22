@@ -1,10 +1,14 @@
-//! DOC-06/08: pure, in-memory validation of host-observed transaction facts.
+//! DOC-06/08 transaction contracts and trusted host integration.
 //!
-//! This module performs NO document edits, I/O, authorization issuance or CAS.
-//! A trusted future host adapter must resolve current permissions, claim a durable
-//! intent once, execute isolated engine work and atomically publish/query receipts.
-//! These public fact structs are NOT wire grants. Never populate them from model
-//! output, document content or untrusted JSON. No serde decoder is provided.
+//! The fact/state types below remain pure in-memory validation: no I/O, permission
+//! issuance or real CAS. They are NOT wire grants or engine execution receipts.
+//! Never populate them from model output, document content or untrusted JSON.
+//! `gateway` separately implements durable, live-authorized byte-identical COPY
+//! through the existing core store. `engine_protocol` maps held requests only;
+//! no real Office editing engine or edited-candidate publication is enabled.
+
+pub mod engine_protocol;
+pub mod gateway;
 
 pub use crate::contract::AuthorityBinding as Authority;
 use crate::contract::Revision;
