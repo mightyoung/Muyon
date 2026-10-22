@@ -1,0 +1,45 @@
+
+running 8 tests
+test counters_accept_exact_u64_without_i64_or_jvm_long_narrowing ... ok
+test identifiers_are_bounded_ascii_without_paths_or_nul ... ok
+test exact_originals_do_not_cross_kind_scope_or_attempt ... ok
+test old_callback_cannot_upgrade_or_mutate_newer_frame ... ok
+test malformed_callback_cannot_be_equal_by_normalization ... FAILED
+test counters_refuse_noncanonical_aliases_and_overflow ... FAILED
+test zero_and_noncanonical_frame_generations_are_not_current ... FAILED
+test selection_aba_and_scope_changes_are_independent_fences ... ok
+
+failures:
+
+---- malformed_callback_cannot_be_equal_by_normalization stdout ----
+
+thread 'malformed_callback_cannot_be_equal_by_normalization' (3100) panicked at docs/tasks/reader-ffi-recovery-20261022/adapter/wire_contract_tests.rs:75:5:
+assertion `left == right` failed
+  left: Err(Frame)
+ right: Err(Counter)
+
+---- counters_refuse_noncanonical_aliases_and_overflow stdout ----
+
+thread 'counters_refuse_noncanonical_aliases_and_overflow' (3097) panicked at docs/tasks/reader-ffi-recovery-20261022/adapter/wire_contract_tests.rs:22:9:
+assertion `left == right` failed: "01"
+  left: Ok(1)
+ right: Err(Counter)
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+---- zero_and_noncanonical_frame_generations_are_not_current stdout ----
+
+thread 'zero_and_noncanonical_frame_generations_are_not_current' (3103) panicked at docs/tasks/reader-ffi-recovery-20261022/adapter/wire_contract_tests.rs:51:9:
+assertion `left == right` failed
+  left: Ok(())
+ right: Err(Counter)
+
+
+failures:
+    counters_refuse_noncanonical_aliases_and_overflow
+    malformed_callback_cannot_be_equal_by_normalization
+    zero_and_noncanonical_frame_generations_are_not_current
+
+test result: FAILED. 5 passed; 3 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+exit=101

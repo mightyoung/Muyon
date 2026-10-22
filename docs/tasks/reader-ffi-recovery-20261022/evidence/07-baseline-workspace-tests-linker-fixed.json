@@ -1,0 +1,18 @@
+{
+  "argv": [
+    "cargo",
+    "test",
+    "--offline",
+    "--locked",
+    "--workspace",
+    "--all-targets",
+    "--manifest-path",
+    "crates/Cargo.toml"
+  ],
+  "source": "c130008bbc40d78e85d10058030da9da4aca38f0",
+  "start_utc": "2026-10-22T19:11:08.286058+00:00",
+  "elapsed_s": 74.92218594099995,
+  "exit": 0,
+  "RUSTFLAGS": "-L native=/workspace/task-tools/reader-ffi-recovery/native-libs",
+  "scope": "unchanged baseline production source; staged helper not in workspace"
+}

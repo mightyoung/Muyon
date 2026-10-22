@@ -1,0 +1,4 @@
+PASS: original1c64worktree unchanged/clean; no residual Group gate source
+PASS: actual production paths unchanged fromc130
+PASS: FFI/lib,Core/lib,Cargo.lock byte-identical to baseline
+PASS: no ABI export/Host/Office/Bot/core policy mutation

@@ -1,0 +1,21 @@
+import pathlib,subprocess,os,json,time,datetime,hashlib
+root=pathlib.Path('/workspace/Muyon-reader-ffi-recovery');os.chdir(root)
+tool=pathlib.Path('/workspace/task-tools/reader-ffi-recovery/toolchain/bin')
+artifact=pathlib.Path('/workspace/task-tools/reader-ffi-recovery');out=root/'docs/tasks/reader-ffi-recovery-20261022/evidence';src=root/'docs/tasks/reader-ffi-recovery-20261022/adapter'
+env=os.environ.copy();env.update(PATH=str(tool)+':/usr/local/bin:/usr/bin:/bin',CARGO_HOME=str(artifact/'cargo-home'),CARGO_TARGET_DIR=str(artifact/'cargo-target'))
+runs=[]
+def run(name,cmd):
+ started=datetime.datetime.now(datetime.timezone.utc).isoformat();begin=time.monotonic();print('running '+name,flush=True)
+ with (out/(name+'.log')).open('w') as log:
+  log.write('$ '+' '.join(cmd)+'\n');log.flush();p=subprocess.run(cmd,env=env,stdout=log,stderr=subprocess.STDOUT,text=True);log.write('\nexit='+str(p.returncode)+'\n')
+ runs.append({'name':name,'argv':cmd,'cwd':str(root),'start_utc':started,'elapsed_s':time.monotonic()-begin,'exit':p.returncode})
+ (out/'runs.json').write_text(json.dumps(runs,indent=2)+'\n');print(name+' exit='+str(p.returncode),flush=True)
+ return p.returncode
+assert run('02-green-compile',[str(tool/'rustc'),'--edition=2021','--test',str(src/'wire_contract_tests.rs'),'-o',str(artifact/'wire-tests-green')])==0
+assert run('02-green-tests',[str(artifact/'wire-tests-green')])==0
+assert run('03-owned-fmt',[str(tool/'rustfmt'),'--edition','2021','--check',str(src/'reader_policy_bindings.rs'),str(src/'wire_contract_tests.rs')])==0
+assert run('03-owned-clippy',[str(tool/'clippy-driver'),'--edition=2021','--crate-type','lib',str(src/'reader_policy_bindings.rs'),'--out-dir',str(artifact),'-D','warnings'])==0
+run('04-locked-cache',['cargo','fetch','--offline','--locked','--manifest-path','crates/Cargo.toml'])
+run('05-baseline-workspace-tests',['cargo','test','--offline','--locked','--workspace','--all-targets','--manifest-path','crates/Cargo.toml'])
+run('06-baseline-workspace-clippy',['cargo','clippy','--offline','--locked','--workspace','--all-targets','--manifest-path','crates/Cargo.toml','--','-D','warnings'])
+(out/'final-source-sha256.json').write_text(json.dumps({str(p.relative_to(root)):hashlib.sha256(p.read_bytes()).hexdigest() for p in src.glob('*.rs')},indent=2)+'\n')

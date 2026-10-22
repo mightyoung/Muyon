@@ -1,0 +1,3 @@
+$ cargo fetch --offline --locked --manifest-path crates/Cargo.toml
+
+exit=0

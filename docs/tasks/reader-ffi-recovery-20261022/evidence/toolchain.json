@@ -1,0 +1,20 @@
+{
+  "rustc": {
+    "exit": 0,
+    "output": "rustc 1.93.1 (01f6ddf75 2026-02-11)\n"
+  },
+  "cargo": {
+    "exit": 0,
+    "output": "cargo 1.93.1 (083ac5135 2025-12-15)\n"
+  },
+  "rustfmt": {
+    "exit": 0,
+    "output": "rustfmt 1.8.0-stable (01f6ddf758 2026-02-11)\n"
+  },
+  "cargo-clippy": {
+    "exit": 0,
+    "output": "clippy 0.1.93 (01f6ddf758 2026-02-11)\n"
+  },
+  "official_archive_sha256": "518872275a3648f735471d7add854d39171c5a6b17f423c4d7f931f52120c2af",
+  "pin": ".github/workflows/muyon-product.yml:43 atc130008bbc40d78e85d10058030da9da4aca38f0"
+}

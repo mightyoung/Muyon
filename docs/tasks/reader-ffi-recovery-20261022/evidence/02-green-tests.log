@@ -1,0 +1,16 @@
+$ /workspace/task-tools/reader-ffi-recovery/wire-tests-green
+
+running 8 tests
+test counters_accept_exact_u64_without_i64_or_jvm_long_narrowing ... ok
+test identifiers_are_bounded_ascii_without_paths_or_nul ... ok
+test counters_refuse_noncanonical_aliases_and_overflow ... ok
+test exact_originals_do_not_cross_kind_scope_or_attempt ... ok
+test malformed_callback_cannot_be_equal_by_normalization ... ok
+test zero_and_noncanonical_frame_generations_are_not_current ... ok
+test selection_aba_and_scope_changes_are_independent_fences ... ok
+test old_callback_cannot_upgrade_or_mutate_newer_frame ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+exit=0

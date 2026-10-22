@@ -1,0 +1,6 @@
+PASS: baseline576 execution summary matches actual raw test output
+PASS: strict baseline Clippy exit0; standalone8/ownedfmt/clippy exit0
+PASS: tested adapter hashes unchanged
+PASS: only task-directory staged changes, no production diff fromc130
+HOLD: new Reader policy depends on stopped Core task; no replacement implementation
+FAIL retained: raw staged whitespace check exit2 due exact failed linker log and independent transcript; authored source/docs scoped check exit0

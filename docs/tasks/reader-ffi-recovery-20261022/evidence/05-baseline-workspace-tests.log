@@ -1,0 +1,85 @@
+$ cargo test --offline --locked --workspace --all-targets --manifest-path crates/Cargo.toml
+   Compiling proc-macro2 v1.0.107
+   Compiling unicode-ident v1.0.27
+   Compiling quote v1.0.47
+   Compiling serde_core v1.0.229
+   Compiling cfg-if v1.0.5
+   Compiling serde v1.0.229
+   Compiling typenum v1.20.1
+   Compiling zmij v1.0.23
+   Compiling serde_json v1.0.154
+   Compiling muyon-core-agent-lab v0.1.0 (/workspace/Muyon-reader-ffi-recovery/experiments/redesign/core-agent-lab/core)
+   Compiling syn v3.0.9
+   Compiling hybrid-array v0.4.15
+   Compiling itoa v1.0.18
+   Compiling memchr v2.8.3
+   Compiling muyon-plugin-contract-lab v0.1.0 (/workspace/Muyon-reader-ffi-recovery/experiments/redesign/plugin-contract-lab/core)
+   Compiling crypto-common v0.2.2
+   Compiling block-buffer v0.12.1
+   Compiling const-oid v0.10.2
+   Compiling serde_derive v1.0.229
+   Compiling muyon-rust-agent-host-lab v0.1.0 (/workspace/Muyon-reader-ffi-recovery/experiments/redesign/rust-agent-host-lab/core)
+   Compiling digest v0.11.3
+   Compiling cpufeatures v0.3.1
+   Compiling tinyvec v1.13.3
+   Compiling sha2 v0.11.1
+   Compiling unicode-normalization v0.1.25
+   Compiling libc v0.2.191
+   Compiling anyhow v1.0.104
+   Compiling rustix v1.1.5
+   Compiling getrandom v0.4.3
+   Compiling muyon-web-search-lab v0.1.0 (/workspace/Muyon-reader-ffi-recovery/experiments/redesign/web-search-lab/core)
+   Compiling hashbrown v0.17.1
+   Compiling once_cell v1.21.4
+   Compiling equivalent v1.0.3
+   Compiling muyon-core v0.1.0 (/workspace/Muyon-reader-ffi-recovery/crates/muyon-core)
+   Compiling linux-raw-sys v0.12.1
+   Compiling bitflags v2.13.2
+   Compiling indexmap v2.14.2
+   Compiling syn v2.0.119
+   Compiling autocfg v1.5.1
+   Compiling fastrand v2.5.0
+   Compiling fs-err v3.3.2
+   Compiling camino v1.2.6
+   Compiling winnow v1.0.4
+   Compiling tempfile v3.27.0
+   Compiling thiserror v2.0.21
+   Compiling heck v0.5.0
+   Compiling toml_parser v1.1.5+spec-1.1.0
+   Compiling serde_spanned v1.1.2
+   Compiling toml_datetime v1.1.2+spec-1.1.0
+   Compiling thiserror-impl v2.0.21
+   Compiling toml_writer v1.1.3+spec-1.1.0
+   Compiling siphasher v1.0.4
+   Compiling toml v1.1.8+spec-1.1.0
+   Compiling cargo-platform v0.3.3
+   Compiling semver v1.0.28
+   Compiling static_assertions v1.1.0
+   Compiling bytes v1.12.1
+   Compiling cargo_metadata v0.23.1
+   Compiling uniffi_internal_macros v0.32.2
+   Compiling uniffi_core v0.32.2
+   Compiling uniffi_pipeline v0.32.2
+   Compiling uniffi_meta v0.32.2
+   Compiling uniffi_macros v0.32.2
+error: linking with `cc` failed: exit status: 1
+  |
+  = note:  "cc" "-m64" "/tmp/rustcK39u0M/symbols.o" "<3 object files omitted>" "-Wl,--as-needed" "-Wl,-Bstatic" "<sysroot>/lib/rustlib/x86_64-unknown-linux-gnu/lib/{libtest-*,libgetopts-*,librustc_std_workspace_std-*}.rlib" "/workspace/task-tools/reader-ffi-recovery/cargo-target/debug/deps/{libmuyon_core-02511357cd1ff8fb,libunicode_normalization-adab91d3f9211b76,libtinyvec-a1d88367f6601197,libsha2-f073bc9f860d3169,libcpufeatures-6207f2d504f6f04d,libcfg_if-3617b139bac9bb19,libdigest-2c9c0eaaf3bdd99f,libconst_oid-c5d205fcdbb651d4,libcrypto_common-94a42264dff2555b,libblock_buffer-d6857580bc259c75,libhybrid_array-ff63871ad72c35cc,libtypenum-0c259017b8a014ec,libserde_json-03303693a02c484b,libmemchr-b737c48f1ea44f54,libitoa-e91213b5c5f7da48,libzmij-d00f536091887d68,libserde-5433c4800baace0b,libserde_core-8be3cdc3a362f0f7,libmuyon_web_search_lab-c84b70cccc8b34ea,libmuyon_rust_agent_host_lab-d8b5c97bc2fca30f,libmuyon_plugin_contract_lab-ec350b0957b93503,libmuyon_core_agent_lab-ef07e44f3fc1863b}.rlib" "<sysroot>/lib/rustlib/x86_64-unknown-linux-gnu/lib/{libstd-*,libpanic_unwind-*,libobject-*,libmemchr-*,libaddr2line-*,libgimli-*,libcfg_if-*,librustc_demangle-*,libstd_detect-*,libhashbrown-*,librustc_std_workspace_alloc-*,libminiz_oxide-*,libadler2-*,libunwind-*,liblibc-*,librustc_std_workspace_core-*,liballoc-*,libcore-*,libcompiler_builtins-*}.rlib" "-Wl,-Bdynamic" "-lsqlite3" "-l:libsqlite3.so.0" "-lgcc_s" "-lutil" "-lrt" "-lpthread" "-lm" "-ldl" "-lc" "-L" "/tmp/rustcK39u0M/raw-dylibs" "-B<sysroot>/lib/rustlib/x86_64-unknown-linux-gnu/bin/gcc-ld" "-fuse-ld=lld" "-Wl,--eh-frame-hdr" "-Wl,-z,noexecstack" "-L" "<sysroot>/lib/rustlib/x86_64-unknown-linux-gnu/lib" "-o" "/workspace/task-tools/reader-ffi-recovery/cargo-target/debug/deps/document_edit_transactions-9cddc8edd1527f2d" "-Wl,--gc-sections" "-pie" "-Wl,-z,relro,-z,now" "-Wl,--strip-debug" "-nodefaultlibs"
+  = note: some arguments are omitted. use `--verbose` to show all linker arguments
+  = note: rust-lld: error: unable to find library -lsqlite3
+          collect2: error: ld returned 1 exit status
+          
+
+error: could not compile `muyon-core` (test "document_edit_transactions") due to 1 previous error
+warning: build failed, waiting for other jobs to finish...
+error: linking with `cc` failed: exit status: 1
+  |
+  = note:  "cc" "-m64" "/tmp/rustc9PvHeR/symbols.o" "<17 object files omitted>" "-Wl,--as-needed" "-Wl,-Bdynamic" "-lsqlite3" "-Wl,-Bstatic" "<sysroot>/lib/rustlib/x86_64-unknown-linux-gnu/lib/{libtest-*,libgetopts-*,librustc_std_workspace_std-*}.rlib" "/workspace/task-tools/reader-ffi-recovery/cargo-target/debug/deps/{libunicode_normalization-adab91d3f9211b76,libtinyvec-a1d88367f6601197,libsha2-f073bc9f860d3169,libcpufeatures-6207f2d504f6f04d,libcfg_if-3617b139bac9bb19,libdigest-2c9c0eaaf3bdd99f,libconst_oid-c5d205fcdbb651d4,libcrypto_common-94a42264dff2555b,libblock_buffer-d6857580bc259c75,libhybrid_array-ff63871ad72c35cc,libtypenum-0c259017b8a014ec,libserde_json-03303693a02c484b,libmemchr-b737c48f1ea44f54,libitoa-e91213b5c5f7da48,libzmij-d00f536091887d68,libserde-5433c4800baace0b,libserde_core-8be3cdc3a362f0f7,libmuyon_web_search_lab-c84b70cccc8b34ea,libmuyon_rust_agent_host_lab-d8b5c97bc2fca30f,libmuyon_plugin_contract_lab-ec350b0957b93503,libmuyon_core_agent_lab-ef07e44f3fc1863b}.rlib" "<sysroot>/lib/rustlib/x86_64-unknown-linux-gnu/lib/{libstd-*,libpanic_unwind-*,libobject-*,libmemchr-*,libaddr2line-*,libgimli-*,libcfg_if-*,librustc_demangle-*,libstd_detect-*,libhashbrown-*,librustc_std_workspace_alloc-*,libminiz_oxide-*,libadler2-*,libunwind-*,liblibc-*,librustc_std_workspace_core-*,liballoc-*,libcore-*,libcompiler_builtins-*}.rlib" "-Wl,-Bdynamic" "-l:libsqlite3.so.0" "-lgcc_s" "-lutil" "-lrt" "-lpthread" "-lm" "-ldl" "-lc" "-L" "/tmp/rustc9PvHeR/raw-dylibs" "-B<sysroot>/lib/rustlib/x86_64-unknown-linux-gnu/bin/gcc-ld" "-fuse-ld=lld" "-Wl,--eh-frame-hdr" "-Wl,-z,noexecstack" "-L" "<sysroot>/lib/rustlib/x86_64-unknown-linux-gnu/lib" "-o" "/workspace/task-tools/reader-ffi-recovery/cargo-target/debug/deps/muyon_core-71599a985e96f3d1" "-Wl,--gc-sections" "-pie" "-Wl,-z,relro,-z,now" "-Wl,--strip-debug" "-nodefaultlibs"
+  = note: some arguments are omitted. use `--verbose` to show all linker arguments
+  = note: rust-lld: error: unable to find library -lsqlite3
+          collect2: error: ld returned 1 exit status
+          
+
+error: could not compile `muyon-core` (lib test) due to 1 previous error
+
+exit=101

@@ -1,0 +1,112 @@
+[
+  {
+    "name": "02-green-compile",
+    "argv": [
+      "/workspace/task-tools/reader-ffi-recovery/toolchain/bin/rustc",
+      "--edition=2021",
+      "--test",
+      "/workspace/Muyon-reader-ffi-recovery/docs/tasks/reader-ffi-recovery-20261022/adapter/wire_contract_tests.rs",
+      "-o",
+      "/workspace/task-tools/reader-ffi-recovery/wire-tests-green"
+    ],
+    "cwd": "/workspace/Muyon-reader-ffi-recovery",
+    "start_utc": "2026-10-22T19:07:58.238550+00:00",
+    "elapsed_s": 0.11429462600000306,
+    "exit": 0
+  },
+  {
+    "name": "02-green-tests",
+    "argv": [
+      "/workspace/task-tools/reader-ffi-recovery/wire-tests-green"
+    ],
+    "cwd": "/workspace/Muyon-reader-ffi-recovery",
+    "start_utc": "2026-10-22T19:07:58.353141+00:00",
+    "elapsed_s": 0.002298020000012002,
+    "exit": 0
+  },
+  {
+    "name": "03-owned-fmt",
+    "argv": [
+      "/workspace/task-tools/reader-ffi-recovery/toolchain/bin/rustfmt",
+      "--edition",
+      "2021",
+      "--check",
+      "/workspace/Muyon-reader-ffi-recovery/docs/tasks/reader-ffi-recovery-20261022/adapter/reader_policy_bindings.rs",
+      "/workspace/Muyon-reader-ffi-recovery/docs/tasks/reader-ffi-recovery-20261022/adapter/wire_contract_tests.rs"
+    ],
+    "cwd": "/workspace/Muyon-reader-ffi-recovery",
+    "start_utc": "2026-10-22T19:07:58.355678+00:00",
+    "elapsed_s": 0.012949599999956263,
+    "exit": 0
+  },
+  {
+    "name": "03-owned-clippy",
+    "argv": [
+      "/workspace/task-tools/reader-ffi-recovery/toolchain/bin/clippy-driver",
+      "--edition=2021",
+      "--crate-type",
+      "lib",
+      "/workspace/Muyon-reader-ffi-recovery/docs/tasks/reader-ffi-recovery-20261022/adapter/reader_policy_bindings.rs",
+      "--out-dir",
+      "/workspace/task-tools/reader-ffi-recovery",
+      "-D",
+      "warnings"
+    ],
+    "cwd": "/workspace/Muyon-reader-ffi-recovery",
+    "start_utc": "2026-10-22T19:07:58.368966+00:00",
+    "elapsed_s": 0.055242519000046286,
+    "exit": 0
+  },
+  {
+    "name": "04-locked-cache",
+    "argv": [
+      "cargo",
+      "fetch",
+      "--offline",
+      "--locked",
+      "--manifest-path",
+      "crates/Cargo.toml"
+    ],
+    "cwd": "/workspace/Muyon-reader-ffi-recovery",
+    "start_utc": "2026-10-22T19:07:58.424499+00:00",
+    "elapsed_s": 0.06677899999999681,
+    "exit": 0
+  },
+  {
+    "name": "05-baseline-workspace-tests",
+    "argv": [
+      "cargo",
+      "test",
+      "--offline",
+      "--locked",
+      "--workspace",
+      "--all-targets",
+      "--manifest-path",
+      "crates/Cargo.toml"
+    ],
+    "cwd": "/workspace/Muyon-reader-ffi-recovery",
+    "start_utc": "2026-10-22T19:07:58.491591+00:00",
+    "elapsed_s": 15.476065077000044,
+    "exit": 101
+  },
+  {
+    "name": "06-baseline-workspace-clippy",
+    "argv": [
+      "cargo",
+      "clippy",
+      "--offline",
+      "--locked",
+      "--workspace",
+      "--all-targets",
+      "--manifest-path",
+      "crates/Cargo.toml",
+      "--",
+      "-D",
+      "warnings"
+    ],
+    "cwd": "/workspace/Muyon-reader-ffi-recovery",
+    "start_utc": "2026-10-22T19:08:13.967986+00:00",
+    "elapsed_s": 11.872455187999947,
+    "exit": 0
+  }
+]

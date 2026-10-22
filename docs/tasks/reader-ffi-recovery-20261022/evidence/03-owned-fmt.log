@@ -1,0 +1,3 @@
+$ /workspace/task-tools/reader-ffi-recovery/toolchain/bin/rustfmt --edition 2021 --check /workspace/Muyon-reader-ffi-recovery/docs/tasks/reader-ffi-recovery-20261022/adapter/reader_policy_bindings.rs /workspace/Muyon-reader-ffi-recovery/docs/tasks/reader-ffi-recovery-20261022/adapter/wire_contract_tests.rs
+
+exit=0

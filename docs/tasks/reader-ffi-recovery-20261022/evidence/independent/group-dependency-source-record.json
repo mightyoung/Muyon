@@ -1,0 +1,15 @@
+{
+  "review_kind": "Read-only dependency/source inspection; no Rust tests rerun",
+  "fixed_group_commit": "5f2644cfbcc580a0cc9a567c5272d58c35b47ac3",
+  "fixed_group_source_sha256": {
+    "crates/muyon-core/src/group_runtime/gate.rs": "bdfb7bb344573f9a5fc7e816b1f43c335a74cda292856a3dea450fa461a9d3eb",
+    "crates/muyon-core/src/group_runtime/store.rs": "0e0d0e214dc4994836692c8dded1c8d8178c391a7ec8792a35f52c9e338528de",
+    "crates/muyon-core/src/group_runtime/binding.rs": "da5814f087ff30a185e7aeffc784ed32177b86782711e102bb0f418000f7298e"
+  },
+  "current_source_sha256": {
+    "crates/muyon-core/src/lib.rs": "b579a028dfef7b10124947c2e166915d1893316b1e7606a876e18821c616cde0",
+    "crates/muyon-core/src/agent/workflow.rs": "58ffaf35c845772f12634e6169861bb378e6e686ca0d53660b27ebcf72e699a7",
+    "docs/tasks/reader-ffi-recovery-20261022/ADAPTATION.md": "82ef537ee0f60fd487cf2ff7ff99bfff39b592bbb8f1f1c92ed5ae2744a2d7af"
+  },
+  "baseline_tests_and_clippy": "Parent-reported separately; not rerun or independently certified by this source review."
+}

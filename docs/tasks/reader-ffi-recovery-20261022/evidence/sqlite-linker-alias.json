@@ -1,0 +1,7 @@
+{
+  "existing_library": "/usr/lib/x86_64-linux-gnu/libsqlite3.so.0.8.6",
+  "sha256": "14c4418a06c5c2e30f5fb57bc8add93762236ae17898c6708984cf15e680ca71",
+  "alias": "/workspace/task-tools/reader-ffi-recovery/native-libs/libsqlite3.so",
+  "scope": "task-local link name only; no package install/system write/security change",
+  "original_failure": "05-baseline-workspace-tests.log:101 unable to find -lsqlite3"
+}

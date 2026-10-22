@@ -1,0 +1,3 @@
+$ /workspace/task-tools/reader-ffi-recovery/toolchain/bin/rustc --edition=2021 --test /workspace/Muyon-reader-ffi-recovery/docs/tasks/reader-ffi-recovery-20261022/adapter/wire_contract_tests.rs -o /workspace/task-tools/reader-ffi-recovery/wire-tests-green
+
+exit=0

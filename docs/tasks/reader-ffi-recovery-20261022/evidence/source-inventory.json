@@ -1,0 +1,19 @@
+{
+  "fixed_develop": "c130008bbc40d78e85d10058030da9da4aca38f0",
+  "original_branch": "task/reader-evidence-ffi-20261022",
+  "original_head": "1c64ab50021c6183f281ee32f751f2a2876a4e45",
+  "original_dirty": "",
+  "tracked_source_delta": "",
+  "dependencies": {
+    "historical_ffi": "5488ec69d59ae2ed368ca2fd53d5989c51cf2719",
+    "policy_request_and_approval": "1c64ab50021c6183f281ee32f751f2a2876a4e45",
+    "host_seven_endpoints": "660f03da29d26d6cdcf28c594c959cc6c43098e4",
+    "group": "5f2644cfbcc580a0cc9a567c5272d58c35b47ac3",
+    "core_complete_verified": "PENDING, no fabricated SHA"
+  },
+  "untouched_files": {
+    "crates/muyon-android-ffi/src/lib.rs": "7b0fc2c4556250f00b618b979d6b69ed744ce75dfe0182d6cb91571e3c95a3bd",
+    "crates/muyon-core/src/lib.rs": "b579a028dfef7b10124947c2e166915d1893316b1e7606a876e18821c616cde0",
+    "crates/Cargo.lock": "3a87fdce6228dff89d292547057627f999e7286ccf0a774c1683c4ba5f95f367"
+  }
+}

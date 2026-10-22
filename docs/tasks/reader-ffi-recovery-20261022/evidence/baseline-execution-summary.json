@@ -1,0 +1,188 @@
+{
+  "source": "c130008bbc40d78e85d10058030da9da4aca38f0",
+  "binary_summaries": [
+    {
+      "binary": "Running unittests src/lib.rs (/workspace/task-tools/reader-ffi-recovery/cargo-target/debug/deps/muyon_android_product-47aa2925470e73e5)",
+      "status": "ok",
+      "passed": 15,
+      "failed": 0
+    },
+    {
+      "binary": "Running unittests src/lib.rs (/workspace/task-tools/reader-ffi-recovery/cargo-target/debug/deps/muyon_core-c13570f637d0bfde)",
+      "status": "ok",
+      "passed": 111,
+      "failed": 0
+    },
+    {
+      "binary": "Running unittests src/bin/business_worker.rs (/workspace/task-tools/reader-ffi-recovery/cargo-target/debug/deps/business_worker-79789042efa5c20a)",
+      "status": "ok",
+      "passed": 48,
+      "failed": 0
+    },
+    {
+      "binary": "Running tests/agent_child_tools.rs (/workspace/task-tools/reader-ffi-recovery/cargo-target/debug/deps/agent_child_tools-814b6d6051258fb6)",
+      "status": "ok",
+      "passed": 3,
+      "failed": 0
+    },
+    {
+      "binary": "Running tests/agent_owner.rs (/workspace/task-tools/reader-ffi-recovery/cargo-target/debug/deps/agent_owner-57a83444788fcc04)",
+      "status": "ok",
+      "passed": 11,
+      "failed": 0
+    },
+    {
+      "binary": "Running tests/agent_product.rs (/workspace/task-tools/reader-ffi-recovery/cargo-target/debug/deps/agent_product-87b27c3e199eeebf)",
+      "status": "ok",
+      "passed": 6,
+      "failed": 0
+    },
+    {
+      "binary": "Running tests/agent_tools.rs (/workspace/task-tools/reader-ffi-recovery/cargo-target/debug/deps/agent_tools-f344a0a45e6a8448)",
+      "status": "ok",
+      "passed": 7,
+      "failed": 0
+    },
+    {
+      "binary": "Running tests/agent_workflow.rs (/workspace/task-tools/reader-ffi-recovery/cargo-target/debug/deps/agent_workflow-02677e7c5d7d0d5c)",
+      "status": "ok",
+      "passed": 16,
+      "failed": 0
+    },
+    {
+      "binary": "Running tests/archive.rs (/workspace/task-tools/reader-ffi-recovery/cargo-target/debug/deps/archive-e095b2b12daa91ac)",
+      "status": "ok",
+      "passed": 13,
+      "failed": 0
+    },
+    {
+      "binary": "Running tests/blobs.rs (/workspace/task-tools/reader-ffi-recovery/cargo-target/debug/deps/blobs-9f5b7f7981688a35)",
+      "status": "ok",
+      "passed": 8,
+      "failed": 0
+    },
+    {
+      "binary": "Running tests/bot_drafts.rs (/workspace/task-tools/reader-ffi-recovery/cargo-target/debug/deps/bot_drafts-5b243d348ec77be9)",
+      "status": "ok",
+      "passed": 26,
+      "failed": 0
+    },
+    {
+      "binary": "Running tests/business.rs (/workspace/task-tools/reader-ffi-recovery/cargo-target/debug/deps/business-1eea3f80c625f5f9)",
+      "status": "ok",
+      "passed": 14,
+      "failed": 0
+    },
+    {
+      "binary": "Running tests/contract.rs (/workspace/task-tools/reader-ffi-recovery/cargo-target/debug/deps/contract-04a02a9f5ae08ea6)",
+      "status": "ok",
+      "passed": 10,
+      "failed": 0
+    },
+    {
+      "binary": "Running tests/contract_vectors_additional.rs (/workspace/task-tools/reader-ffi-recovery/cargo-target/debug/deps/contract_vectors_additional-94dd30ee5fb21a8d)",
+      "status": "ok",
+      "passed": 1,
+      "failed": 0
+    },
+    {
+      "binary": "Running tests/document_edit_candidates.rs (/workspace/task-tools/reader-ffi-recovery/cargo-target/debug/deps/document_edit_candidates-0903c2bf809aeda3)",
+      "status": "ok",
+      "passed": 12,
+      "failed": 0
+    },
+    {
+      "binary": "Running tests/document_edit_core_bridge.rs (/workspace/task-tools/reader-ffi-recovery/cargo-target/debug/deps/document_edit_core_bridge-ba28546396d0d2be)",
+      "status": "ok",
+      "passed": 8,
+      "failed": 0
+    },
+    {
+      "binary": "Running tests/document_edit_engine_protocol.rs (/workspace/task-tools/reader-ffi-recovery/cargo-target/debug/deps/document_edit_engine_protocol-dbb2c8134575ec2e)",
+      "status": "ok",
+      "passed": 6,
+      "failed": 0
+    },
+    {
+      "binary": "Running tests/document_edit_gateway.rs (/workspace/task-tools/reader-ffi-recovery/cargo-target/debug/deps/document_edit_gateway-f456bab4b618f07a)",
+      "status": "ok",
+      "passed": 19,
+      "failed": 0
+    },
+    {
+      "binary": "Running tests/document_edit_policy_epoch.rs (/workspace/task-tools/reader-ffi-recovery/cargo-target/debug/deps/document_edit_policy_epoch-167b60b708e64404)",
+      "status": "ok",
+      "passed": 1,
+      "failed": 0
+    },
+    {
+      "binary": "Running tests/document_edit_schema2.rs (/workspace/task-tools/reader-ffi-recovery/cargo-target/debug/deps/document_edit_schema2-0fe1459c8778e48b)",
+      "status": "ok",
+      "passed": 6,
+      "failed": 0
+    },
+    {
+      "binary": "Running tests/document_edit_transactions.rs (/workspace/task-tools/reader-ffi-recovery/cargo-target/debug/deps/document_edit_transactions-3a0960a1657f422b)",
+      "status": "ok",
+      "passed": 28,
+      "failed": 0
+    },
+    {
+      "binary": "Running tests/document_storage.rs (/workspace/task-tools/reader-ffi-recovery/cargo-target/debug/deps/document_storage-d2d7979c8b286596)",
+      "status": "ok",
+      "passed": 15,
+      "failed": 0
+    },
+    {
+      "binary": "Running tests/documents.rs (/workspace/task-tools/reader-ffi-recovery/cargo-target/debug/deps/documents-5203b8b4a40715f4)",
+      "status": "ok",
+      "passed": 18,
+      "failed": 0
+    },
+    {
+      "binary": "Running tests/evidence_local.rs (/workspace/task-tools/reader-ffi-recovery/cargo-target/debug/deps/evidence_local-16d6abc77ca5c594)",
+      "status": "ok",
+      "passed": 16,
+      "failed": 0
+    },
+    {
+      "binary": "Running tests/group_governance.rs (/workspace/task-tools/reader-ffi-recovery/cargo-target/debug/deps/group_governance-1beed173eb92fa03)",
+      "status": "ok",
+      "passed": 21,
+      "failed": 0
+    },
+    {
+      "binary": "Running tests/group_runtime.rs (/workspace/task-tools/reader-ffi-recovery/cargo-target/debug/deps/group_runtime-c6ff6ca511f2a561)",
+      "status": "ok",
+      "passed": 20,
+      "failed": 0
+    },
+    {
+      "binary": "Running tests/group_runtime_store.rs (/workspace/task-tools/reader-ffi-recovery/cargo-target/debug/deps/group_runtime_store-a83dc07f04c07a4e)",
+      "status": "ok",
+      "passed": 95,
+      "failed": 0
+    },
+    {
+      "binary": "Running tests/research.rs (/workspace/task-tools/reader-ffi-recovery/cargo-target/debug/deps/research-98e16c1376a56bda)",
+      "status": "ok",
+      "passed": 16,
+      "failed": 0
+    },
+    {
+      "binary": "Running tests/resource_boundaries_additional.rs (/workspace/task-tools/reader-ffi-recovery/cargo-target/debug/deps/resource_boundaries_additional-953fa3c438238317)",
+      "status": "ok",
+      "passed": 3,
+      "failed": 0
+    },
+    {
+      "binary": "Running tests/store_admission_additional.rs (/workspace/task-tools/reader-ffi-recovery/cargo-target/debug/deps/store_admission_additional-3272bd3422ab5106)",
+      "status": "ok",
+      "passed": 3,
+      "failed": 0
+    }
+  ],
+  "test_executions_passed": 576,
+  "test_executions_failed": 0,
+  "scope": "baseline only; library/worker repeated modules; no new policy/Reader/G gate coverage; standalone8 not added"
+}

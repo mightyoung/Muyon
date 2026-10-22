@@ -1,0 +1,24 @@
+{
+  "kind": "independent standalone helper execution result record",
+  "cwd": "/workspace/Muyon-reader-ffi-recovery",
+  "command": "/workspace/task-tools/reader-ffi-recovery/toolchain/bin/rustc --version && /workspace/task-tools/reader-ffi-recovery/toolchain/bin/rustc --edition=2021 --test docs/tasks/reader-ffi-recovery-20261022/adapter/wire_contract_tests.rs -o /tmp/independent-provider-review-wire-tests && /tmp/independent-provider-review-wire-tests",
+  "observed_shell_exit_code": 0,
+  "component_exit_status": "All three commands succeeded, implied by && chain and observed shell exit0; component statuses were not separately logged.",
+  "tool_capture": {
+    "chunk_id": "c5626c",
+    "reported_wall_time_seconds": 0.023974627,
+    "stream": "Tool returned combined output; stdout/stderr were not captured separately.",
+    "raw_log_availability": "No original stdout/stderr files were created. result-record.txt transcribes returned tool text; it is not a byte-for-byte copied raw stream log. No empty stderr log was manufactured.",
+    "per_command_timestamps": "Not recorded; no exact start/end times reconstructed."
+  },
+  "source_sha256": {
+    "docs/tasks/reader-ffi-recovery-20261022/adapter/reader_policy_bindings.rs": "c8989ee1d703875ffb81702746b0a8402d801bbfdeb4aa799137095133cf413f",
+    "docs/tasks/reader-ffi-recovery-20261022/adapter/wire_contract_tests.rs": "95a98ef6cc12e91d27391e5a5b9cb2d133103f6c817b165db09525c478e9ea4f"
+  },
+  "outcome": {
+    "passed": 8,
+    "failed": 0,
+    "ignored": 0
+  },
+  "execution_scope": "Dependency-free rustc --test only; independent of parent cargo workspace run. No tests rerun while saving this evidence."
+}
