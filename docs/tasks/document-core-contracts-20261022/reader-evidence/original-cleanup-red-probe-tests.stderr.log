@@ -1,0 +1,7 @@
+
+thread 'independent_eof_cleanup_expiry_must_withhold_returned_chunk' (19969) panicked at /tmp/muyon-reader-probes-original.rs:810:5:
+EOF must withhold chunk when cleanup expired live grant after initial transaction commit
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+thread 'independent_one_shot_cleanup_expiry_must_withhold_returned_bytes' (19970) panicked at /tmp/muyon-reader-probes-original.rs:800:5:
+Reader must withhold delivery when real cleanup invalidated grant before COMMIT/result
