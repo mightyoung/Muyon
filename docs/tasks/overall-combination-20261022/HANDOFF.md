@@ -1,3 +1,5 @@
+> Latest4b98072e: storage repeat_n fixed and15PASS. Core strict per-target audit24commands:23PASS, only transactions.rs387 needless_update fails; full strict also FFIlib181 too_many_arguments. Method-local documented ABI exception authorized, source pending. See CLIPPY-TARGET-AUDIT.md. Earlier records below retain fixed-version history.
+
 # Leader B current combination handoff — incomplete product, no develop merge
 
 Remote branch: lab/overall-combination-20261022.

@@ -1,3 +1,5 @@
+> Latest4b98072e: storage repeat_n fixed and15PASS. Core strict per-target audit24commands:23PASS, only transactions.rs387 needless_update fails; full strict also FFIlib181 too_many_arguments. Method-local documented ABI exception authorized, source pending. See CLIPPY-TARGET-AUDIT.md. Earlier records below retain fixed-version history.
+
 > Latest67fd14c4: workspace435 PASS and final fixed-source independent composition review complete. Strict Clippy FAIL101: FFIlib.rs181 too_many_arguments + document_storage.rs685 manual_repeat_n. Prior55 diagnostics cleared. See STRICT-GATE-REMAINING.md; next candidate/provider batch not started. Earlier records below are historical.
 
 > Latest a21fdbd3: fresh workspace435 executions PASS/0FAIL. Original50 lint diagnostics cleared; strict Clippy still FAIL101 on5 newly reached gateway-test drop_non_drop diagnostics. See GATEWAY-CLIPPY-FOLLOWUP.md for exact owner locations. Earlier fixed-version records below retain historical status.
