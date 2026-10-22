@@ -1,5 +1,13 @@
 {
-  "android_compilation": "NOT_RUN: offline AGP cache missing; SDK license not accepted",
+  "android_compilation": "NOT_RUN: Gradle Java client Network is unreachable at plugin-resolution; compile exit1, diagnostic cancelled130; no routing/TLS/security workaround",
+  "android_tools": {
+    "build_tools": "35.0.0",
+    "commandline_tools": "23.0; sdkmanager reports AndroidCLI1.0.16625370",
+    "gradle": "8.13",
+    "jdk": "Temurin17.0.21+9",
+    "platform": "android-36 revision2",
+    "sdk_license": "explicit user acceptance supplied by parent; official installer wrote acceptance marker"
+  },
   "base_sha": "796cdfe7cb3d79d630056239724af78128094fee",
   "branch": "task/office-rust-boundary-fix-20261023",
   "device": "NOT_RUN",
@@ -18,6 +26,7 @@
   },
   "independent_review": "PASS scoped fixed four-file snapshot; independent 601 tests, strict Clippy",
   "platform": "Linux-6.18.55-x86_64-with-glibc2.41",
+  "source_commit": "acfb9dc391a80983c1c8e4631db78a201a51dfb3",
   "source_sha256": {
     "crates/muyon-office/src/edit.rs": "6a0a3ff02e87ed2e9df92ec2b56f33f6ded4134e091ced72c3a54192e915f1ef",
     "crates/muyon-office/src/package.rs": "994c59e94dbcf41071dc35b68173b69c90e6728c9c4f63fd3d2f549c249cc377",
