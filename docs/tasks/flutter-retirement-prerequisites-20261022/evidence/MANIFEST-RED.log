@@ -1,0 +1,20 @@
+test_exact_historical_source_bytes_are_preserved (__main__.FrozenSchema.test_exact_historical_source_bytes_are_preserved) ... ok
+test_historical_reference_manifest_matches_fixed_git_objects (__main__.FrozenSchema.test_historical_reference_manifest_matches_fixed_git_objects) ... FAIL
+test_reference_checker_rejects_corruption_and_missing_file (__main__.FrozenSchema.test_reference_checker_rejects_corruption_and_missing_file) ... ok
+test_rust_test_consumes_frozen_reference_without_removing_assertions (__main__.FrozenSchema.test_rust_test_consumes_frozen_reference_without_removing_assertions) ... ok
+test_any_failed_child_fails_the_gate (__main__.IndependentLaya.test_any_failed_child_fails_the_gate) ... ok
+test_both_workflows_have_unconditional_independent_job (__main__.IndependentLaya.test_both_workflows_have_unconditional_independent_job) ... ok
+test_runner_executes_all_four_from_correct_directory_without_flutter (__main__.IndependentLaya.test_runner_executes_all_four_from_correct_directory_without_flutter) ... ok
+
+======================================================================
+FAIL: test_historical_reference_manifest_matches_fixed_git_objects (__main__.FrozenSchema.test_historical_reference_manifest_matches_fixed_git_objects)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/Muyon-retirement-prerequisites-20261022/scripts/test_retirement_prerequisites.py", line 89, in test_historical_reference_manifest_matches_fixed_git_objects
+    self.assertTrue(path.is_file(), 'historical source references are not fixed yet')
+AssertionError: False is not true : historical source references are not fixed yet
+
+----------------------------------------------------------------------
+Ran 7 tests in 1.393s
+
+FAILED (failures=1)

@@ -1,0 +1,199 @@
+{
+  "schema_version": 1,
+  "legacy_source_sha": "214b4031deb38ca7dfd35ee86396089eb48157d5",
+  "legacy_tree_oid": "8e9e82deb7bc6d0a7b1279a42bcfa4152bbdc83b",
+  "root_paths": [
+    "packages/",
+    "apps/muyon/",
+    "apps/muyon_ui_preview/",
+    "scripts/",
+    "pubspec.yaml",
+    "pubspec.lock",
+    ".github/workflows/"
+  ],
+  "boundary": "Immutable Git references and schema test fixtures only; not an executable archive",
+  "legacy_ci": {
+    "run": 39822618984,
+    "checkout_sha": "3c947f0070c67321e97f1625550ba6a53317c494",
+    "status": "FAILED",
+    "reason": "coverage:report; 2395 < 2401"
+  },
+  "references": [
+    {
+      "source_sha": "214b4031deb38ca7dfd35ee86396089eb48157d5",
+      "source_path": ".github/workflows/ci.yml",
+      "git_blob": "003143d6487bf65cc7683ace788bacc2324599d2",
+      "sha256": "7bce99cece4de729a8bab3bf658d011ac2fdb0b21266cb0ee55c05c19f6d1602",
+      "bytes": 2972
+    },
+    {
+      "source_sha": "214b4031deb38ca7dfd35ee86396089eb48157d5",
+      "source_path": ".github/workflows/verify.yml",
+      "git_blob": "84d01dd1528372c4922d0b4996c262f6a4aa5d35",
+      "sha256": "69321f17ff65d3637d855d4ced3e081ae004a18f4082e94b49f6430db99c6bc9",
+      "bytes": 1167
+    },
+    {
+      "source_sha": "214b4031deb38ca7dfd35ee86396089eb48157d5",
+      "source_path": ".github/workflows/ui-preview.yml",
+      "git_blob": "9fd20acf3b9e6fc10217f78aa50b0706eafbb97c",
+      "sha256": "f473d44dd55d5649c85b2a7ddbca20f04dd2ab09b5f71e855185ce673ad8f7df",
+      "bytes": 1675
+    },
+    {
+      "source_sha": "214b4031deb38ca7dfd35ee86396089eb48157d5",
+      "source_path": ".github/workflows/reg4c-verification.yml",
+      "git_blob": "d2f1be32e6efacef4ef5d0dc9acde9319a119b22",
+      "sha256": "77eb4c720d8928742ad52618c7ce81de2273a1b47afce1da687a94b34618e3c9",
+      "bytes": 1010
+    },
+    {
+      "source_sha": "214b4031deb38ca7dfd35ee86396089eb48157d5",
+      "source_path": ".github/workflows/android-min26.yml",
+      "git_blob": "494b2218a86ab3aee57dd088fe73a06b7efb70f2",
+      "sha256": "c582b9df4ca9155b27d71f82da06dd1e204fe9d8e1198cdb7d94a4a892c7f9a1",
+      "bytes": 9412
+    },
+    {
+      "source_sha": "214b4031deb38ca7dfd35ee86396089eb48157d5",
+      "source_path": ".github/workflows/package-artifacts.yml",
+      "git_blob": "a4f3a0cbe020d96d56215a9ef64c23611b307661",
+      "sha256": "86a37c551a29aa65f5df1871f92c35326c92d8a50253665f22de8e034fa49911",
+      "bytes": 3917
+    },
+    {
+      "source_sha": "214b4031deb38ca7dfd35ee86396089eb48157d5",
+      "source_path": "scripts/ci.sh",
+      "git_blob": "7d1780c71d9e1a79b2d24ed4b0c54d7afd01df26",
+      "sha256": "8caac9961cffa3aa4de726c5a33961b2985e4cdaf6aa9862827dc15edc3fceae",
+      "bytes": 6565
+    },
+    {
+      "source_sha": "214b4031deb38ca7dfd35ee86396089eb48157d5",
+      "source_path": "scripts/verify.sh",
+      "git_blob": "88d143984e85bff719891cec7a4a97c5595353a6",
+      "sha256": "16e4d4d4383a86c4baf0a8e2d83a88c9583f945ffc174d6bb1bcc06ae0ac20b2",
+      "bytes": 2856
+    },
+    {
+      "source_sha": "214b4031deb38ca7dfd35ee86396089eb48157d5",
+      "source_path": "scripts/doctor.sh",
+      "git_blob": "7883b40e7fb5b4d0c96c43dd7752c32a6433d75d",
+      "sha256": "d3839bdc9b6238e048f15fa7155cc04fbd8b059bb556186091593cc5fd466427",
+      "bytes": 12037
+    },
+    {
+      "source_sha": "214b4031deb38ca7dfd35ee86396089eb48157d5",
+      "source_path": "scripts/package_artifacts/package.py",
+      "git_blob": "aca73a82fd43b33d9d0c4644c60aaf66ee277737",
+      "sha256": "82cca3fc7a3e5219a6ffbfff4fddba24fa841912a2234f6d30247405e4a38d6b",
+      "bytes": 8197
+    },
+    {
+      "source_sha": "214b4031deb38ca7dfd35ee86396089eb48157d5",
+      "source_path": "scripts/package_artifacts/README.md",
+      "git_blob": "1273e42987ea2670950815e3e0a8479f1dd0e8d6",
+      "sha256": "5ecd9a765b92df9f509b7f946fc1e974c8d34a479fda68d6bacaaf21b0c83590",
+      "bytes": 7278
+    },
+    {
+      "source_sha": "214b4031deb38ca7dfd35ee86396089eb48157d5",
+      "source_path": "scripts/redesign/supplier-name-reference/oracle.dart",
+      "git_blob": "b15dff8108812979a9081b56062ecfa50170f220",
+      "sha256": "bd3645e6a0a1dae939bb44be4cbc11d8dc9ce225fd6967753065479ced3882d2",
+      "bytes": 2993
+    },
+    {
+      "source_sha": "214b4031deb38ca7dfd35ee86396089eb48157d5",
+      "source_path": "scripts/redesign/supplier-name-reference/reference-observations.json",
+      "git_blob": "21a9ef23611e0626096ad9334e9db603d0dd91fc",
+      "sha256": "2565b1a97c98a6ac5e9ad4a8a9155cc703f010a245b7a67d20cebd88dd6d7208",
+      "bytes": 54189
+    },
+    {
+      "source_sha": "214b4031deb38ca7dfd35ee86396089eb48157d5",
+      "source_path": "experiments/redesign/device-deferred/rust-domain/tests/differential.py",
+      "git_blob": "b33bf0e543be4b57bd7fa7c97552c1c973c80cea",
+      "sha256": "b970bcbcbc0f61d89e2e686eef7695ff15606b95011be72ed578feca8c735973",
+      "bytes": 5203
+    },
+    {
+      "source_sha": "214b4031deb38ca7dfd35ee86396089eb48157d5",
+      "source_path": "experiments/redesign/core-agent-lab/host-checks/host_inverses.py",
+      "git_blob": "a2b78a4fea88eba37aa4578026c6c12de3327c87",
+      "sha256": "3a849dc6f8272e848a86040a7657d2b1c2132891ded33172fa237173fd428790",
+      "bytes": 14861
+    },
+    {
+      "source_sha": "214b4031deb38ca7dfd35ee86396089eb48157d5",
+      "source_path": "experiments/redesign/plugin-contract-lab/checks/ci_evidence.py",
+      "git_blob": "e29968598b6c8572cc9b1c5dc75a7eba8c468c45",
+      "sha256": "0849d1b9c24fe724dbd97a7a53e84d36c438c489e5c675c8c99cc67929b5564b",
+      "bytes": 10686
+    },
+    {
+      "source_sha": "214b4031deb38ca7dfd35ee86396089eb48157d5",
+      "source_path": "crates/muyon-core/Cargo.toml",
+      "git_blob": "04071e255443a6e4696a45cbb0dddcad89f1b7e0",
+      "sha256": "bb55e4414275bd1ba50d4e66f54dae4a300b7c58725a4de21471c70669676a81",
+      "bytes": 585
+    },
+    {
+      "source_sha": "214b4031deb38ca7dfd35ee86396089eb48157d5",
+      "source_path": "pubspec.yaml",
+      "git_blob": "361d8650e7cd70016ee3574e641e6ea74e90d703",
+      "sha256": "6dd991753da384fb9e660f0d0df9c0149f3f690aa56c16b90b99bc0193b27b76",
+      "bytes": 295
+    },
+    {
+      "source_sha": "214b4031deb38ca7dfd35ee86396089eb48157d5",
+      "source_path": "pubspec.lock",
+      "git_blob": "c0bba098f4096c5698413fd05a1c6dc90a72be9c",
+      "sha256": "5f4efa0bfe5062b64247b199830833286a57843d64a3e2b0d85052f6e9d0072d",
+      "bytes": 36685
+    },
+    {
+      "source_sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+      "source_path": "packages/supplier_core/lib/src/values.dart",
+      "git_blob": "d969dba9535771d7720a720c2518d5ddabb07f8b",
+      "sha256": "047230bc6de12ac9bd4a3c6c5b8800146fb2cb40ff8a44bb99c569a7565f278d",
+      "bytes": 9593
+    },
+    {
+      "source_sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+      "source_path": "packages/supplier_core/lib/src/entities.dart",
+      "git_blob": "00c5e1d0e7393c13c823b6beff4402dc527f08be",
+      "sha256": "aa9980a6cb84150d773e012c7a79e13ffda28efb1e170d78b86db01c9a052a46",
+      "bytes": 6862
+    },
+    {
+      "source_sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+      "source_path": "packages/supplier_core/lib/src/inquiry.dart",
+      "git_blob": "3df1162245df37cf75e5f5b4b2d22a51ed8d8ce4",
+      "sha256": "afbf9ad3ee708159f0d1194922570423661ddcd9205a3691db78c32450877722",
+      "bytes": 1718
+    },
+    {
+      "source_sha": "8c5995515fa14ca3592a1c33c71afb4e4c1e5def",
+      "source_path": "fixtures/redesign/supplier-name-v1/name-domain-vectors.json",
+      "git_blob": "04bd2985813cd20df272ddb82746510e51cfe4ef",
+      "sha256": "164cb94b4d5f585d13a6c87358fdbca61d8b52d568156b27d8d720b8f58f5178",
+      "bytes": 25994
+    }
+  ],
+  "historical_oracles": {
+    "normalization": {
+      "product_sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+      "fixture_sha": "8c5995515fa14ca3592a1c33c71afb4e4c1e5def",
+      "dependency": "unorm_dart 0.3.1, reference-observations.json lib hashes",
+      "global_unicode_equivalence": "NOT_PROVEN"
+    },
+    "host_inverse": {
+      "source_sha": "214b4031deb38ca7dfd35ee86396089eb48157d5",
+      "status": "NOT_RUN; missing tracked oracle entrypoint at this pin",
+      "missing_source_paths": [
+        "apps/muyon/test_host/core_agent_host_inverse_oracles_test.dart"
+      ]
+    }
+  }
+}

@@ -29,13 +29,6 @@ jobs:
       - name: Analyze and test every package
         run: bash scripts/verify.sh 2>&1 | tee verify.log; exit "${PIPESTATUS[0]}"
 
-      - name: Laya script tests (no network, no .env)
-        working-directory: scripts/laya
-        run: |
-          for t in test_stage1_contract test_stage2_data test_stage2_threshold test_kaggle_submit; do
-            python3 "$t.py"
-          done
-
       - name: Keep the log
         if: always()
         uses: actions/upload-artifact@v4
@@ -43,3 +36,14 @@ jobs:
           name: verify-log
           path: verify.log
           if-no-files-found: ignore
+
+  # Independent from Flutter success/failure; a failed test fails this job.
+  laya-offline:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Existing four synthetic Laya tests (no Flutter or user credentials)
+        run: bash scripts/check_laya_offline.sh
