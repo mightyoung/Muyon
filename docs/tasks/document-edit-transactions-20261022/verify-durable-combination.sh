@@ -2,7 +2,7 @@
 # Offline exact-owner combination, no checkout mutation or dependency downloads.
 set -euo pipefail
 repo=$(git rev-parse --show-toplevel)
-core_sha=${DOCUMENT_CORE_SHA:-8802bf555bfce1265296318d83a2f8a1fb2b787e}
+core_sha=${DOCUMENT_CORE_SHA:-faeef3aec3a9407d7c15490dcdb33866413e7453}
 combination=$(mktemp -d "${TMPDIR:-/tmp}/muyon-document-durable-check.XXXXXXXX")
 echo "Exact core dependency: $core_sha"
 echo "Combination directory: $combination"

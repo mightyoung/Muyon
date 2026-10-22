@@ -7,6 +7,33 @@ Exact core initially b49ed859c331b4bd8004d8d3be5b8e12e7c7ff3e, then
 pagination test). Read actual CANDIDATE-INTERFACE/REPORT and candidate.rs/blobs.rs.
 No owner-file/worker/lib/FFI modification. Temporary library export only as before.
 
+## Final fixed-dependency result (supersedes earlier worker blocker)
+
+Locked actual core faeef3aec3a9407d7c15490dcdb33866413e7453, source
+cab23b69b2aa56f55f3b44e0fe248f026da9c08d. Read WORKER-COMPILE-FIX-HANDOFF.md;
+owner adds real documents module to worker, preserves GC policy, formats source.
+Our production source57c326a5 remains byte-identical. Verifier now defaults to faeef.
+
+`bash docs/tasks/document-edit-transactions-20261022/verify-durable-combination.sh -p muyon-core`
+actually exited0 (raw13), **321 passed,0 failed**,25 distinct target summaries including
+0doctests. Library49 and worker48 duplicate some same-source tests, so this is321
+executions, NOT321 unique behaviors. New real Cargo bridge target8 passed within321.
+Raw14 worker `cargo check --offline --locked ... -p muyon-core --bin business_worker`
+exit0. Raw15 exact seven changed core files scopedfmt skip_children=true exit0;
+our ownedfmt12exit0. Raw16 has per-target counts,17 fixed source SHA256/env.
+
+Fresh independent reviewer repeated entire core321/0fail, Cargo bridge8, worker check
+and scopedfmt; independent5 probes passed, no Important. Final source/probes/raw logs
+under bridge-evidence/independent-core-bridge-final/. These overlapping results are
+not summed. Original8802 worker E0599 failure02/09 is preserved unchanged and now
+actually resolved by the owner fix, not bypassed by the library-only fallback.
+
+Core production unused methods and worker CandidateState/CandidateStatus re-export
+warnings remain in logs; this is NOT zero-warning or strict-Dwarnings completion.
+Raw18 full workspace still exits101: cargo-platform0.3.3 requires Rust1.91/current1.90.
+Flutter remains NOT_RUN. No dependency/toolchain update or engine execution occurred.
+
+
 ## Connected behavior
 
 `EditedCandidateJournal::prepare_core_candidate_trusted(binding,access)` now obtains
@@ -44,7 +71,7 @@ by SQL rollback; recovery only queries. Core currently has no gateway cancel cal
 so no claim of immediate physical interruption is made. No source/ref/revision changes
 or success receipt occur; canceled bytes cannot be delivered by edited journal gate.
 
-## Actual checks so far (fixed8802)
+## Earlier checks (fixed8802, retained history)
 
 - Raw01 exactb49 core candidate unit12 actually passed, not author's cargo127.
 - Raw04 exact8802 candidate13 actually passed, including new160-reservation keyset GC
