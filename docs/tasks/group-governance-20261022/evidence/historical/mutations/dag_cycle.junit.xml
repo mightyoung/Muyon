@@ -1,0 +1,33 @@
+<?xml version='1.0' encoding='utf-8'?>
+<testsuite name="historical/mutations/dag_cycle.log" tests="20" failures="1" errors="0" skipped="0">
+  <properties>
+    <property name="origin" value="derived from retained raw libtest output; not native JUnit" />
+    <property name="raw_sha256" value="f5f38f7b3883d7f7a99a6fac9336d68c88796fb103bdc14dfd859ea992455d41" />
+  </properties>
+  <testcase classname="dag_cycle" name="all_duplicate_states_only_lookup_and_submitted_blocks_new_dispatch" />
+  <testcase classname="dag_cycle" name="budget_overflow_and_exhaustion_never_become_zero_cost" />
+  <testcase classname="dag_cycle" name="depth_two_and_foreign_parent_are_rejected" />
+  <testcase classname="dag_cycle" name="deterministic_ready_order_uses_node_identity_and_dependencies" />
+  <testcase classname="dag_cycle" name="duplicate_command_returns_only_original_receipt_even_when_unknown" />
+  <testcase classname="dag_cycle" name="duplicate_request_identity_and_stale_config_are_not_valid_host_views" />
+  <testcase classname="dag_cycle" name="eight_lifetime_children_and_two_active_slots_are_hard_caps" />
+  <testcase classname="dag_cycle" name="every_authority_layer_and_member_scope_must_allow_the_request" />
+  <testcase classname="dag_cycle" name="failed_dependencies_do_not_run_and_cancelled_children_keep_lifetime_slots" />
+  <testcase classname="dag_cycle" name="human_admin_can_only_narrow_existing_grant" />
+  <testcase classname="dag_cycle" name="ledger_corruption_and_unsupported_status_fail_closed" />
+  <testcase classname="dag_cycle" name="modes_roundtrip_by_explicit_name_and_unknown_fails_closed" />
+  <testcase classname="dag_cycle" name="non_member_is_rejected" />
+  <testcase classname="dag_cycle" name="represented_coordinator_modes_never_execute" />
+  <testcase classname="dag_cycle" name="rounds_count_original_dispatch_history_across_restarts_and_stops" />
+  <testcase classname="dag_cycle" name="stale_host_epoch_leader_epoch_or_configuration_never_executes" />
+  <testcase classname="dag_cycle" name="unknown_budget_keeps_reserve_and_blocks_new_command" />
+  <testcase classname="dag_cycle" name="unsupported_versions_and_ownerless_groups_are_rejected" />
+  <testcase classname="dag_cycle" name="cycles_missing_dependencies_and_duplicate_nodes_are_rejected">
+    <failure message="libtest reported FAILED; see sibling raw log">thread 'cycles_missing_dependencies_and_duplicate_nodes_are_rejected' (4359) panicked at /tmp/muyon-group-mutations/dag_cycle/tests/group_governance.rs:220:9:
+assertion `left == right` failed
+  left: Err(NotNextReady)
+ right: Err(InvalidPlan)
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace</failure>
+  </testcase>
+  <testcase classname="dag_cycle" name="collaborator_cannot_self_authorize_even_as_coordinator" />
+</testsuite>

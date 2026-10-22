@@ -1,0 +1,94 @@
+<?xml version='1.0' encoding='utf-8'?>
+<testsuite name="historical/red.log" tests="17" failures="14" errors="0" skipped="0">
+  <properties>
+    <property name="origin" value="derived from retained raw libtest output; not native JUnit" />
+    <property name="raw_sha256" value="bdced993067fcf657d7a210067aca3290e9481a1f785534e78c3496df82e658d" />
+  </properties>
+  <testcase classname="red" name="depth_two_and_foreign_parent_are_rejected" />
+  <testcase classname="red" name="cycles_missing_dependencies_and_duplicate_nodes_are_rejected" />
+  <testcase classname="red" name="budget_overflow_and_exhaustion_never_become_zero_cost">
+    <failure message="libtest reported FAILED; see sibling raw log">thread 'budget_overflow_and_exhaustion_never_become_zero_cost' (2980) panicked at crates/muyon-core/tests/group_governance.rs:103:45:
+assertion `left == right` failed
+  left: Err(InvalidPlan)
+ right: Err(BudgetLimit)</failure>
+  </testcase>
+  <testcase classname="red" name="collaborator_cannot_self_authorize_even_as_coordinator">
+    <failure message="libtest reported FAILED; see sibling raw log">thread 'collaborator_cannot_self_authorize_even_as_coordinator' (2981) panicked at crates/muyon-core/tests/group_governance.rs:22:2:
+assertion `left == right` failed
+  left: Ok(())
+ right: Err(ManagementDenied)
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace</failure>
+  </testcase>
+  <testcase classname="red" name="deterministic_ready_order_uses_node_identity_and_dependencies">
+    <failure message="libtest reported FAILED; see sibling raw log">thread 'deterministic_ready_order_uses_node_identity_and_dependencies' (2984) panicked at crates/muyon-core/tests/group_governance.rs:49:2:
+assertion `left == right` failed
+  left: Err(InvalidPlan)
+ right: Ok(Eligible { child_id: "a" })</failure>
+  </testcase>
+  <testcase classname="red" name="duplicate_command_returns_only_original_receipt_even_when_unknown">
+    <failure message="libtest reported FAILED; see sibling raw log">thread 'duplicate_command_returns_only_original_receipt_even_when_unknown' (2985) panicked at crates/muyon-core/tests/group_governance.rs:88:24:
+assertion `left == right` failed
+  left: Err(InvalidPlan)
+ right: Ok(LookupOriginal { request_id: "original-request", state: Unknown })</failure>
+  </testcase>
+  <testcase classname="red" name="eight_lifetime_children_and_two_active_slots_are_hard_caps">
+    <failure message="libtest reported FAILED; see sibling raw log">thread 'eight_lifetime_children_and_two_active_slots_are_hard_caps' (2986) panicked at crates/muyon-core/tests/group_governance.rs:76:2:
+assertion `left == right` failed
+  left: Err(InvalidPlan)
+ right: Err(ChildLimit)</failure>
+  </testcase>
+  <testcase classname="red" name="human_admin_can_only_narrow_existing_grant">
+    <failure message="libtest reported FAILED; see sibling raw log">thread 'human_admin_can_only_narrow_existing_grant' (2988) panicked at crates/muyon-core/tests/group_governance.rs:29:47:
+assertion failed: validate_narrowing(&amp;config(), &amp;Principal::Human(actor.into()), &amp;grant(),
+        &amp;widened).is_err()</failure>
+  </testcase>
+  <testcase classname="red" name="every_authority_layer_and_member_scope_must_allow_the_request">
+    <failure message="libtest reported FAILED; see sibling raw log">thread 'every_authority_layer_and_member_scope_must_allow_the_request' (2987) panicked at crates/muyon-core/tests/group_governance.rs:65:70:
+assertion `left == right` failed
+  left: Err(InvalidPlan)
+ right: Err(ScopeDenied)</failure>
+  </testcase>
+  <testcase classname="red" name="modes_roundtrip_by_explicit_name_and_unknown_fails_closed" />
+  <testcase classname="red" name="ledger_corruption_and_unsupported_status_fail_closed">
+    <failure message="libtest reported FAILED; see sibling raw log">thread 'ledger_corruption_and_unsupported_status_fail_closed' (2989) panicked at crates/muyon-core/tests/group_governance.rs:82:108:
+assertion `left == right` failed
+  left: Err(InvalidPlan)
+ right: Err(InvalidLedger)</failure>
+  </testcase>
+  <testcase classname="red" name="non_member_and_cross_scope_dependency_are_rejected">
+    <failure message="libtest reported FAILED; see sibling raw log">thread 'non_member_and_cross_scope_dependency_are_rejected' (2991) panicked at crates/muyon-core/tests/group_governance.rs:71:58:
+assertion `left == right` failed
+  left: Err(InvalidPlan)
+ right: Err(ScopeDenied)</failure>
+  </testcase>
+  <testcase classname="red" name="represented_coordinator_modes_never_execute">
+    <failure message="libtest reported FAILED; see sibling raw log">thread 'represented_coordinator_modes_never_execute' (2992) panicked at crates/muyon-core/tests/group_governance.rs:44:147:
+assertion `left == right` failed
+  left: Err(InvalidPlan)
+ right: Err(UnsupportedMode)</failure>
+  </testcase>
+  <testcase classname="red" name="stale_host_epoch_leader_epoch_or_configuration_never_executes">
+    <failure message="libtest reported FAILED; see sibling raw log">thread 'stale_host_epoch_leader_epoch_or_configuration_never_executes' (2994) panicked at crates/muyon-core/tests/group_governance.rs:93:326:
+assertion `left == right` failed
+  left: Err(InvalidPlan)
+ right: Err(StaleIdentity)</failure>
+  </testcase>
+  <testcase classname="red" name="rounds_count_original_dispatch_history_across_restarts_and_stops">
+    <failure message="libtest reported FAILED; see sibling raw log">thread 'rounds_count_original_dispatch_history_across_restarts_and_stops' (2993) panicked at crates/muyon-core/tests/group_governance.rs:109:26:
+assertion `left == right` failed
+  left: Err(InvalidPlan)
+ right: Err(RoundLimit)</failure>
+  </testcase>
+  <testcase classname="red" name="unknown_budget_keeps_reserve_and_blocks_new_command">
+    <failure message="libtest reported FAILED; see sibling raw log">thread 'unknown_budget_keeps_reserve_and_blocks_new_command' (2995) panicked at crates/muyon-core/tests/group_governance.rs:98:24:
+assertion `left == right` failed
+  left: Err(InvalidPlan)
+ right: Err(ReconcileOriginal)</failure>
+  </testcase>
+  <testcase classname="red" name="unsupported_versions_and_ownerless_groups_are_rejected">
+    <failure message="libtest reported FAILED; see sibling raw log">thread 'unsupported_versions_and_ownerless_groups_are_rejected' (2996) panicked at crates/muyon-core/tests/group_governance.rs:38:42:
+assertion `left == right` failed
+  left: Ok(())
+ right: Err(InvalidConfig)</failure>
+  </testcase>
+</testsuite>

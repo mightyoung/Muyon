@@ -1,0 +1,139 @@
+
+running 17 tests
+test depth_two_and_foreign_parent_are_rejected ... ok
+test cycles_missing_dependencies_and_duplicate_nodes_are_rejected ... ok
+test budget_overflow_and_exhaustion_never_become_zero_cost ... FAILED
+test collaborator_cannot_self_authorize_even_as_coordinator ... FAILED
+test deterministic_ready_order_uses_node_identity_and_dependencies ... FAILED
+test duplicate_command_returns_only_original_receipt_even_when_unknown ... FAILED
+test eight_lifetime_children_and_two_active_slots_are_hard_caps ... FAILED
+test human_admin_can_only_narrow_existing_grant ... FAILED
+test every_authority_layer_and_member_scope_must_allow_the_request ... FAILED
+test modes_roundtrip_by_explicit_name_and_unknown_fails_closed ... ok
+test ledger_corruption_and_unsupported_status_fail_closed ... FAILED
+test non_member_and_cross_scope_dependency_are_rejected ... FAILED
+test represented_coordinator_modes_never_execute ... FAILED
+test stale_host_epoch_leader_epoch_or_configuration_never_executes ... FAILED
+test rounds_count_original_dispatch_history_across_restarts_and_stops ... FAILED
+test unknown_budget_keeps_reserve_and_blocks_new_command ... FAILED
+test unsupported_versions_and_ownerless_groups_are_rejected ... FAILED
+
+failures:
+
+---- budget_overflow_and_exhaustion_never_become_zero_cost stdout ----
+
+thread 'budget_overflow_and_exhaustion_never_become_zero_cost' (2980) panicked at crates/muyon-core/tests/group_governance.rs:103:45:
+assertion `left == right` failed
+  left: Err(InvalidPlan)
+ right: Err(BudgetLimit)
+
+---- collaborator_cannot_self_authorize_even_as_coordinator stdout ----
+
+thread 'collaborator_cannot_self_authorize_even_as_coordinator' (2981) panicked at crates/muyon-core/tests/group_governance.rs:22:2:
+assertion `left == right` failed
+  left: Ok(())
+ right: Err(ManagementDenied)
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+---- deterministic_ready_order_uses_node_identity_and_dependencies stdout ----
+
+thread 'deterministic_ready_order_uses_node_identity_and_dependencies' (2984) panicked at crates/muyon-core/tests/group_governance.rs:49:2:
+assertion `left == right` failed
+  left: Err(InvalidPlan)
+ right: Ok(Eligible { child_id: "a" })
+
+---- duplicate_command_returns_only_original_receipt_even_when_unknown stdout ----
+
+thread 'duplicate_command_returns_only_original_receipt_even_when_unknown' (2985) panicked at crates/muyon-core/tests/group_governance.rs:88:24:
+assertion `left == right` failed
+  left: Err(InvalidPlan)
+ right: Ok(LookupOriginal { request_id: "original-request", state: Unknown })
+
+---- eight_lifetime_children_and_two_active_slots_are_hard_caps stdout ----
+
+thread 'eight_lifetime_children_and_two_active_slots_are_hard_caps' (2986) panicked at crates/muyon-core/tests/group_governance.rs:76:2:
+assertion `left == right` failed
+  left: Err(InvalidPlan)
+ right: Err(ChildLimit)
+
+---- human_admin_can_only_narrow_existing_grant stdout ----
+
+thread 'human_admin_can_only_narrow_existing_grant' (2988) panicked at crates/muyon-core/tests/group_governance.rs:29:47:
+assertion failed: validate_narrowing(&config(), &Principal::Human(actor.into()), &grant(),
+        &widened).is_err()
+
+---- every_authority_layer_and_member_scope_must_allow_the_request stdout ----
+
+thread 'every_authority_layer_and_member_scope_must_allow_the_request' (2987) panicked at crates/muyon-core/tests/group_governance.rs:65:70:
+assertion `left == right` failed
+  left: Err(InvalidPlan)
+ right: Err(ScopeDenied)
+
+---- ledger_corruption_and_unsupported_status_fail_closed stdout ----
+
+thread 'ledger_corruption_and_unsupported_status_fail_closed' (2989) panicked at crates/muyon-core/tests/group_governance.rs:82:108:
+assertion `left == right` failed
+  left: Err(InvalidPlan)
+ right: Err(InvalidLedger)
+
+---- non_member_and_cross_scope_dependency_are_rejected stdout ----
+
+thread 'non_member_and_cross_scope_dependency_are_rejected' (2991) panicked at crates/muyon-core/tests/group_governance.rs:71:58:
+assertion `left == right` failed
+  left: Err(InvalidPlan)
+ right: Err(ScopeDenied)
+
+---- represented_coordinator_modes_never_execute stdout ----
+
+thread 'represented_coordinator_modes_never_execute' (2992) panicked at crates/muyon-core/tests/group_governance.rs:44:147:
+assertion `left == right` failed
+  left: Err(InvalidPlan)
+ right: Err(UnsupportedMode)
+
+---- stale_host_epoch_leader_epoch_or_configuration_never_executes stdout ----
+
+thread 'stale_host_epoch_leader_epoch_or_configuration_never_executes' (2994) panicked at crates/muyon-core/tests/group_governance.rs:93:326:
+assertion `left == right` failed
+  left: Err(InvalidPlan)
+ right: Err(StaleIdentity)
+
+---- rounds_count_original_dispatch_history_across_restarts_and_stops stdout ----
+
+thread 'rounds_count_original_dispatch_history_across_restarts_and_stops' (2993) panicked at crates/muyon-core/tests/group_governance.rs:109:26:
+assertion `left == right` failed
+  left: Err(InvalidPlan)
+ right: Err(RoundLimit)
+
+---- unknown_budget_keeps_reserve_and_blocks_new_command stdout ----
+
+thread 'unknown_budget_keeps_reserve_and_blocks_new_command' (2995) panicked at crates/muyon-core/tests/group_governance.rs:98:24:
+assertion `left == right` failed
+  left: Err(InvalidPlan)
+ right: Err(ReconcileOriginal)
+
+---- unsupported_versions_and_ownerless_groups_are_rejected stdout ----
+
+thread 'unsupported_versions_and_ownerless_groups_are_rejected' (2996) panicked at crates/muyon-core/tests/group_governance.rs:38:42:
+assertion `left == right` failed
+  left: Ok(())
+ right: Err(InvalidConfig)
+
+
+failures:
+    budget_overflow_and_exhaustion_never_become_zero_cost
+    collaborator_cannot_self_authorize_even_as_coordinator
+    deterministic_ready_order_uses_node_identity_and_dependencies
+    duplicate_command_returns_only_original_receipt_even_when_unknown
+    eight_lifetime_children_and_two_active_slots_are_hard_caps
+    every_authority_layer_and_member_scope_must_allow_the_request
+    human_admin_can_only_narrow_existing_grant
+    ledger_corruption_and_unsupported_status_fail_closed
+    non_member_and_cross_scope_dependency_are_rejected
+    represented_coordinator_modes_never_execute
+    rounds_count_original_dispatch_history_across_restarts_and_stops
+    stale_host_epoch_leader_epoch_or_configuration_never_executes
+    unknown_budget_keeps_reserve_and_blocks_new_command
+    unsupported_versions_and_ownerless_groups_are_rejected
+
+test result: FAILED. 3 passed; 14 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
