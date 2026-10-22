@@ -15,5 +15,7 @@
 - Display-retaining reader/PFD and other Office/newGroup unreviewed sources remain
   separate. Do not turn current rawEOF ID active or silently openlatestsource.
 
-Priority remaining candidate297 ownerqualityfix, nativefmt owneradoption and actual
+Candidate297 owner7557 is applied and library strict passes; all-target now needs
+owner minimal fix for document_edit_candidates.rs:175/200/240 drop(g).
+Priority remaining this test lint fix, nativefmt owneradoption and actual
 Hostpolicy/Android gates. No develop/main move until actual acceptedfixedgates.
