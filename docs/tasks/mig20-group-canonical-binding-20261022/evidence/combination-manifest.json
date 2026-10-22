@@ -1,0 +1,66 @@
+{
+  "pin": "863ece54c3d9ba0fc9900d71ec310a4764b9e1a4",
+  "overlay": [
+    "src/agent/owner.rs",
+    "src/agent/workflow.rs",
+    "src/group_runtime/store.rs",
+    "src/group_runtime/bridge.rs",
+    "src/group_runtime/binding.rs",
+    "tests/group_request_binding.rs"
+  ],
+  "runs": [
+    {
+      "name": "tests",
+      "command": [
+        "cargo",
+        "test",
+        "--manifest-path",
+        "/tmp/mig20-canonical-B-zv1jx8uf/snapshot/crates/Cargo.toml",
+        "-p",
+        "muyon-core",
+        "--offline",
+        "--locked",
+        "--test",
+        "group_request_binding",
+        "--test",
+        "group_runtime_store",
+        "--test",
+        "group_runtime_bridge"
+      ],
+      "start_utc": "2026-10-22T08:16:24.072196+00:00",
+      "end_utc": "2026-10-22T08:17:19.796661+00:00",
+      "exit_code": 0,
+      "status": "PASS"
+    },
+    {
+      "name": "clippy-arguments",
+      "command": [
+        "cargo",
+        "clippy",
+        "--manifest-path",
+        "/tmp/mig20-canonical-B-zv1jx8uf/snapshot/crates/Cargo.toml",
+        "-p",
+        "muyon-core",
+        "--offline",
+        "--locked",
+        "--all-targets",
+        "--",
+        "-D",
+        "clippy::too_many_arguments"
+      ],
+      "start_utc": "2026-10-22T08:17:19.797096+00:00",
+      "end_utc": "2026-10-22T08:17:19.808922+00:00",
+      "exit_code": 101,
+      "status": "NOT_RUN",
+      "reason": "cargo clippy unavailable in selected toolchain; invocation exited101 before source analysis"
+    }
+  ],
+  "source_sha256": {
+    "src/agent/owner.rs": "d8a3d40676f0a4f9777ccf9aa1fb7c426b1d876135d2510c7bc1ebded2ce639e",
+    "src/agent/workflow.rs": "605c553185a467d0bae4ea1b9e67e87b8ad2aa7fdafe4b38b5b654dfd91fb13d",
+    "src/group_runtime/store.rs": "a0d80c3cf27761dab591c86c1e594197769ce5d8992cd183070a6d5691e16c18",
+    "src/group_runtime/bridge.rs": "836507e862b3ddbd720a68662702cd34df781cce24aadb21d6ea7b77b6bdfaae",
+    "src/group_runtime/binding.rs": "da5814f087ff30a185e7aeffc784ed32177b86782711e102bb0f418000f7298e",
+    "tests/group_request_binding.rs": "7b6976f45836c50ad3678e700e6d3bde5dc7f0503c98bebe93dd96396170b8b8"
+  }
+}

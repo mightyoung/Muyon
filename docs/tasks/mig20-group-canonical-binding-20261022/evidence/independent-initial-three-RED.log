@@ -1,0 +1,57 @@
+COMMAND: cargo test --offline --manifest-path /tmp/mig20-canonical-independent-review/Cargo.toml independent_ -- --nocapture
+EXIT: 101
+warning: suspicious definition of the runtime `read` symbol used by the standard library
+   --> /workspace/mig20/experiments/redesign/core-agent-lab/core/src/host_session.rs:132:124
+    |
+132 | ...ount: usize, timeout: i32) -> i32; fn read(fd: i32, buffer: *mut u8, count: usize) -> isize; fn write(fd: i32, buffer: *const u8...
+    |                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = note: expected `unsafe extern "C" fn(i32, *mut c_void, usize) -> isize` (for the current target)
+            found    `unsafe extern "C" fn(i32, *mut u8, usize) -> isize`
+    = help: either fix the signature or remove any attributes like `#[unsafe(no_mangle)]`, `#[unsafe(export_name = "read")]`, or `#[link_name = "read"]`
+    = help: allow this lint if the signature is compatible
+    = note: `#[warn(suspicious_runtime_symbol_definitions)]` on by default
+
+warning: suspicious definition of the runtime `write` symbol used by the standard library
+   --> /workspace/mig20/experiments/redesign/core-agent-lab/core/src/host_session.rs:132:182
+    |
+132 | ... *mut u8, count: usize) -> isize; fn write(fd: i32, buffer: *const u8, count: usize) -> isize; }
+    |                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = note: expected `unsafe extern "C" fn(i32, *const c_void, usize) -> isize` (for the current target)
+            found    `unsafe extern "C" fn(i32, *const u8, usize) -> isize`
+    = help: either fix the signature or remove any attributes like `#[unsafe(no_mangle)]`, `#[unsafe(export_name = "write")]`, or `#[link_name = "write"]`
+    = help: allow this lint if the signature is compatible
+
+warning: `muyon-core-agent-lab` (lib) generated 2 warnings
+    Finished `test` profile [unoptimized] target(s) in 0.03s
+     Running review.rs (/tmp/mig20-target/debug/deps/review-93b5c049d39255b5)
+
+running 3 tests
+CANONICAL_RUN_UI=Err(ScopeMismatch)
+
+thread 'independent_canonical_run_remains_readable_in_existing_ui' (29255) panicked at review.rs:455:93:
+actual canonical child mapping must remain readable
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+DUPLICATE_ORIGINAL_FACTS=Ok(Object {"active_child_count": Number(2), "children": Array [Object {"arguments_digest": String("6cfad4c45c68e5d0140f8fa7cef6c798175d1e69bc6bc9c4258f34b3c9861de5"), "cancel_requested": Bool(false), "conversation_id": String("child-e93b0d5404e9386ae24ee5ececd5e49b"), "created_seq": String("2"), "host_session": String("session"), "id": String("8c361659d0592c3f045fc189f4025dff"), "native_context_current": Bool(true), "observations": Array [Object {"answer": Null, "attempted": Bool(false), "blocked_reason": Null, "cancelled": Bool(false), "charged_micro_cny": String("0"), "failure_stage": Null, "http_status": Null, "recovery_action": String("none"), "request_id": String("8a24e1030c31a65ad4ad269f67b3038c"), "reserved_micro_cny": String("3024"), "status": String("prepared")}], "originals": Array [Object {"configuration_id": String("c735e9130d9d4d9d9d29ede0b2c76f81"), "conversation_id": String("child-e93b0d5404e9386ae24ee5ececd5e49b"), "payload_digest": String("443ab8865b2404124b29f7bf3f353f08c1a618aa1447a32a602969c30c0dffde"), "purpose": String("chat"), "request_epoch": String("epoch"), "request_id": String("8a24e1030c31a65ad4ad269f67b3038c"), "workspace_id": String("ws")}], "owner_epoch": String("epoch"), "project_id": String("project"), "root_id": String("5725960ecc652f0425dc0db5dc2a9088"), "skill_current": Bool(true), "skill_digest": String("6a04822d58cadf1b20f8b677f16ef1573e82302cdffe467642eb11cbbed1636a"), "status": String("waiting_confirmation"), "updated_seq": String("4")}, Object {"arguments_digest": String("6cfad4c45c68e5d0140f8fa7cef6c798175d1e69bc6bc9c4258f34b3c9861de5"), "cancel_requested": Bool(false), "conversation_id": String("child-e93b0d5404e9386ae24ee5ececd5e49b"), "created_seq": String("5"), "host_session": String("session"), "id": String("9211a692c660c0e3817efb0984148cd6"), "native_context_current": Bool(true), "observations": Array [Object {"answer": Null, "attempted": Bool(false), "blocked_reason": Null, "cancelled": Bool(false), "charged_micro_cny": String("0"), "failure_stage": Null, "http_status": Null, "recovery_action": String("none"), "request_id": String("8a24e1030c31a65ad4ad269f67b3038c"), "reserved_micro_cny": String("3024"), "status": String("prepared")}], "originals": Array [Object {"configuration_id": String("c735e9130d9d4d9d9d29ede0b2c76f81"), "conversation_id": String("child-e93b0d5404e9386ae24ee5ececd5e49b"), "payload_digest": String("443ab8865b2404124b29f7bf3f353f08c1a618aa1447a32a602969c30c0dffde"), "purpose": String("chat"), "request_epoch": String("epoch"), "request_id": String("8a24e1030c31a65ad4ad269f67b3038c"), "workspace_id": String("ws")}], "owner_epoch": String("epoch"), "project_id": String("project"), "root_id": String("5725960ecc652f0425dc0db5dc2a9088"), "skill_current": Bool(true), "skill_digest": String("6a04822d58cadf1b20f8b677f16ef1573e82302cdffe467642eb11cbbed1636a"), "status": String("waiting_confirmation"), "updated_seq": String("6")}], "complete_lifetime_children": Bool(true), "cross_owner_atomic": Bool(false), "execution_authority": Bool(false), "host_session": String("session"), "owner_epoch": String("epoch"), "root": Object {"arguments_digest": String("44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"), "cancel_requested": Bool(false), "conversation_id": String("conversation"), "created_seq": String("1"), "host_session": String("session"), "id": String("5725960ecc652f0425dc0db5dc2a9088"), "native_context_current": Bool(true), "observations": Array [], "originals": Array [], "owner_epoch": String("epoch"), "project_id": String("project"), "root_id": String("5725960ecc652f0425dc0db5dc2a9088"), "skill_current": Bool(true), "skill_digest": Null, "status": String("waiting_confirmation"), "updated_seq": String("6")}, "root_budget_available": Bool(false), "workspace_id": String("ws")})
+
+thread 'independent_actual_facts_reject_duplicate_original_identity_across_children' (29254) panicked at review.rs:472:147:
+one owner request cannot be attributed to two workflow children
+test independent_canonical_run_remains_readable_in_existing_ui ... FAILED
+test independent_actual_facts_reject_duplicate_original_identity_across_children ... FAILED
+HIDDEN_CHILD_FACTS=Ok(Object {"active_child_count": Number(1), "children": Array [Object {"arguments_digest": String("6cfad4c45c68e5d0140f8fa7cef6c798175d1e69bc6bc9c4258f34b3c9861de5"), "cancel_requested": Bool(false), "conversation_id": String("child-9a51f334977a8487a84ebc97a5a0222a"), "created_seq": String("2"), "host_session": String("session"), "id": String("d13b53da91c0f74da6f24291da5a578a"), "native_context_current": Bool(true), "observations": Array [Object {"answer": Null, "attempted": Bool(false), "blocked_reason": Null, "cancelled": Bool(false), "charged_micro_cny": String("0"), "failure_stage": Null, "http_status": Null, "recovery_action": String("none"), "request_id": String("771a3567ae1ea43bfe57c473d672cf5c"), "reserved_micro_cny": String("3024"), "status": String("prepared")}], "originals": Array [Object {"configuration_id": String("450f6c24f3c8cbf84234f56b7655e744"), "conversation_id": String("child-9a51f334977a8487a84ebc97a5a0222a"), "payload_digest": String("443ab8865b2404124b29f7bf3f353f08c1a618aa1447a32a602969c30c0dffde"), "purpose": String("chat"), "request_epoch": String("epoch"), "request_id": String("771a3567ae1ea43bfe57c473d672cf5c"), "workspace_id": String("ws")}], "owner_epoch": String("epoch"), "project_id": String("project"), "root_id": String("692f71d01ec841a08481eb69a339905e"), "skill_current": Bool(true), "skill_digest": String("6a04822d58cadf1b20f8b677f16ef1573e82302cdffe467642eb11cbbed1636a"), "status": String("waiting_confirmation"), "updated_seq": String("4")}], "complete_lifetime_children": Bool(true), "cross_owner_atomic": Bool(false), "execution_authority": Bool(false), "host_session": String("session"), "owner_epoch": String("epoch"), "root": Object {"arguments_digest": String("44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"), "cancel_requested": Bool(false), "conversation_id": String("conversation"), "created_seq": String("1"), "host_session": String("session"), "id": String("692f71d01ec841a08481eb69a339905e"), "native_context_current": Bool(true), "observations": Array [], "originals": Array [], "owner_epoch": String("epoch"), "project_id": String("project"), "root_id": String("692f71d01ec841a08481eb69a339905e"), "skill_current": Bool(true), "skill_digest": Null, "status": String("waiting_confirmation"), "updated_seq": String("6")}, "root_budget_available": Bool(false), "workspace_id": String("ws")})
+
+thread 'independent_actual_facts_must_not_hide_physically_misrooted_children' (29253) panicked at review.rs:462:141:
+inconsistent physical root must not silently disappear from complete lifetime facts
+test independent_actual_facts_must_not_hide_physically_misrooted_children ... FAILED
+
+failures:
+
+failures:
+    independent_actual_facts_must_not_hide_physically_misrooted_children
+    independent_actual_facts_reject_duplicate_original_identity_across_children
+    independent_canonical_run_remains_readable_in_existing_ui
+
+test result: FAILED. 0 passed; 3 failed; 0 ignored; 0 measured; 23 filtered out; finished in 0.03s
+
+error: test failed, to rerun pass `--test review`

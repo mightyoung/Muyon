@@ -1,0 +1,55 @@
+COMMAND: cargo test --offline --manifest-path /tmp/mig20-canonical-independent-review/Cargo.toml --test review --test late_review independent_ -- --nocapture
+EXIT: 0
+warning: suspicious definition of the runtime `read` symbol used by the standard library
+   --> /workspace/mig20/experiments/redesign/core-agent-lab/core/src/host_session.rs:132:124
+    |
+132 | ...ount: usize, timeout: i32) -> i32; fn read(fd: i32, buffer: *mut u8, count: usize) -> isize; fn write(fd: i32, buffer: *const u8...
+    |                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = note: expected `unsafe extern "C" fn(i32, *mut c_void, usize) -> isize` (for the current target)
+            found    `unsafe extern "C" fn(i32, *mut u8, usize) -> isize`
+    = help: either fix the signature or remove any attributes like `#[unsafe(no_mangle)]`, `#[unsafe(export_name = "read")]`, or `#[link_name = "read"]`
+    = help: allow this lint if the signature is compatible
+    = note: `#[warn(suspicious_runtime_symbol_definitions)]` on by default
+
+warning: suspicious definition of the runtime `write` symbol used by the standard library
+   --> /workspace/mig20/experiments/redesign/core-agent-lab/core/src/host_session.rs:132:182
+    |
+132 | ... *mut u8, count: usize) -> isize; fn write(fd: i32, buffer: *const u8, count: usize) -> isize; }
+    |                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = note: expected `unsafe extern "C" fn(i32, *const c_void, usize) -> isize` (for the current target)
+            found    `unsafe extern "C" fn(i32, *const u8, usize) -> isize`
+    = help: either fix the signature or remove any attributes like `#[unsafe(no_mangle)]`, `#[unsafe(export_name = "write")]`, or `#[link_name = "write"]`
+    = help: allow this lint if the signature is compatible
+
+warning: `muyon-core-agent-lab` (lib) generated 2 warnings
+   Compiling mig20-canonical-independent-review v0.1.0 (/tmp/mig20-canonical-independent-review)
+    Finished `test` profile [unoptimized] target(s) in 4.93s
+     Running late-review.rs (/tmp/mig20-target/debug/deps/late_review-54cbfbb3ac9a664d)
+
+running 4 tests
+PENDING_CANONICAL_UNKNOWN_HANDOFF=LocalReceipt { intent_id: "handoff-with-pending-canonical", status: Rejected, revision: Revision("3"), result: Object {"error": String("unknown"), "execution_authority": Bool(false)} } EPOCH=1
+CANONICAL_SOURCE_PLAN_TAIL=LocalReceipt { intent_id: "canonical-bind", status: PendingOriginal, revision: Revision("3"), result: Object {"execution_authority": Bool(false), "recovery_action": String("query_original_local_intent")} } REREAD=Err(NotFound)
+test independent_canonical_tail_preserves_the_actual_source_plan_provenance ... ok
+test independent_pending_canonical_unknown_still_blocks_handoff_checkpoint ... ok
+ALL_PENDING_CHAIN_HANDOFF=LocalReceipt { intent_id: "handoff-all-pending", status: Rejected, revision: Revision("4"), result: Object {"error": String("unknown"), "execution_authority": Bool(false)} } EPOCH=1
+test independent_handoff_checks_all_pending_canonical_chains_not_only_first ... ok
+MISSING_PENDING_IDENTITY_ADVICE=Err(Storage)
+MISSING_PENDING_IDENTITY_HANDOFF=LocalReceipt { intent_id: "handoff-missing-pending-source", status: PendingOriginal, revision: Revision("3"), result: Object {"execution_authority": Bool(false), "recovery_action": String("query_original_local_intent")} }
+test independent_pending_canonical_missing_identity_does_not_restore_admission_or_handoff ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 35 filtered out; finished in 0.04s
+
+     Running review.rs (/tmp/mig20-target/debug/deps/review-93b5c049d39255b5)
+
+running 3 tests
+HIDDEN_CHILD_FACTS=Err("workflow_storage_invalid")
+test independent_actual_facts_must_not_hide_physically_misrooted_children ... ok
+DUPLICATE_ORIGINAL_FACTS=Err("workflow_remote_binding_invalid")
+test independent_actual_facts_reject_duplicate_original_identity_across_children ... ok
+CANONICAL_RUN_UI=Ok(Object {"execution_authority": Bool(false), "operation": String("run"), "run": Object {"canonical_payload_binding": String("requires_durable_group_binding"), "coordination_mode": String("per_task"), "coordinator_epoch": String("1"), "coordinator_id": String("a"), "deadline_ms": String("18446744073709551615"), "deadline_reached": Bool(false), "execution_authority": Bool(false), "handoffs": String("0"), "live_state": String("reconciling"), "max_handoffs": String("2"), "max_rounds": String("8"), "members": Object {"a": Object {"permissions": Array [String("read")], "scopes": Array [String("project")]}, "b": Object {"permissions": Array [String("read")], "scopes": Array [String("project")]}}, "nodes": Array [Object {"canonical_binding": Object {"authorized_group_revision": String("3"), "binding_owner_epoch": String("epoch"), "capabilities": Object {"permissions": Array [String("read")], "scopes": Array [String("project")]}, "configuration_id": String("7d1e9b62b73c236cc2843d6cb29c6466"), "conversation_id": String("child-7b595de79b467497d686b9d9f4bc4abb"), "coordinator_epoch": String("1"), "execution_authority": Bool(false), "group_id": String("group"), "host_session": String("session"), "local_authority": Object {"generation": String("1"), "grant_id": String("grant-ind-bind"), "owner_epoch": String("epoch")}, "local_intent_id": String("ind-bind"), "member_id": String("a"), "node_id": String("node"), "payload_digest": String("443ab8865b2404124b29f7bf3f353f08c1a618aa1447a32a602969c30c0dffde"), "project_id": String("project"), "purpose": String("chat"), "registered_revision": String("4"), "request_epoch": String("epoch"), "request_id": String("ddab8055a68ab3e737af94ed0949b14e"), "root_task_id": String("d2d0d7d5ef897722fb0e3ea0fd389062"), "run_id": String("run"), "workflow_arguments_digest": String("6cfad4c45c68e5d0140f8fa7cef6c798175d1e69bc6bc9c4258f34b3c9861de5"), "workflow_owner_epoch": String("epoch"), "workflow_revision": String("4"), "workflow_run_id": String("4b3efefc42c2920ccd9d4c4c5ab06e9b"), "workflow_skill_digest": String("6a04822d58cadf1b20f8b677f16ef1573e82302cdffe467642eb11cbbed1636a"), "workspace_id": String("ws")}, "canonical_verified_now": Bool(true), "coordinator_epoch": String("1"), "dependencies": Array [], "member_id": String("a"), "node_id": String("node"), "original": Object {"actual_cost_scope": String("current_request"), "actual_micro_cny": Null, "actual_usage_known": Bool(false), "attempted": Bool(false), "cancel_requested": Bool(false), "chain": Array [Object {"actual_micro_cny": Null, "attempted": Bool(false), "request_id": String("ddab8055a68ab3e737af94ed0949b14e"), "reserved_micro_cny_original": String("3024"), "status": String("prepared")}], "current_request_id": String("ddab8055a68ab3e737af94ed0949b14e"), "lookup_status": String("available"), "original_chain_resolved": Bool(false), "original_request_id": String("ddab8055a68ab3e737af94ed0949b14e"), "recovery_action": String("none"), "status": String("prepared")}, "payload_digest": String("443ab8865b2404124b29f7bf3f353f08c1a618aa1447a32a602969c30c0dffde"), "persisted_state": String("unknown")}], "original_owner_status": String("available"), "owner_budget": Object {"cap_micro_cny": String("100000"), "charged_micro_cny": String("0"), "held_micro_cny": String("0"), "max_calls": String("10"), "scope": String("workspace_owner"), "used_calls": String("0")}, "owner_budget_status": String("available"), "persisted_summary": Object {"claims": Object {}, "execution_authority": Bool(false), "majority_is_truth": Bool(false), "nodes": Array [Object {"capabilities": Object {"permissions": Array [String("read")], "scopes": Array [String("project")]}, "dependencies": Array [], "epoch": String("1"), "evidence": Array [], "member_id": String("a"), "node_id": String("node"), "payload_digest": String("443ab8865b2404124b29f7bf3f353f08c1a618aa1447a32a602969c30c0dffde"), "request_id": String("ddab8055a68ab3e737af94ed0949b14e"), "state": String("unknown")}]}, "root_task_id": String("d2d0d7d5ef897722fb0e3ea0fd389062"), "run_id": String("run"), "stopped": Bool(false)}, "schema_version": Number(1)})
+test independent_canonical_run_remains_readable_in_existing_ui ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 23 filtered out; finished in 0.03s
+

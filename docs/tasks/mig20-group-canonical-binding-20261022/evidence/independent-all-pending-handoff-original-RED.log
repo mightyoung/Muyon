@@ -1,0 +1,17 @@
+COMMAND: env PATH=/tmp/mig20-rust/bin:$PATH CARGO_HOME=/tmp/mig20-cargo CARGO_TARGET_DIR=/tmp/mig20-target RUSTFLAGS='-L native=/tmp/mig20-native-libs' cargo test --offline --manifest-path /tmp/mig20-canonical-independent-review/Cargo.toml --test late_review independent_handoff_checks_all -- --nocapture
+EXIT: 101
+Captured first-run completion from exec session 92846, before the pending-original Handoff repair was compiled. Original test assertions unchanged.
+
+Finished test profile in 4.57s
+Running late-review.rs
+running 1 test
+thread 'independent_handoff_checks_all_pending_canonical_chains_not_only_first' (30676) panicked at late-review.rs:864:2:
+assertion `left != right` failed: the first pending original is terminal, but a second actual chain is still Unknown
+  left: Committed
+ right: Committed
+ALL_PENDING_CHAIN_HANDOFF=LocalReceipt { intent_id: "handoff-all-pending", status: Committed, revision: Revision("5"), result: Object {"execution_authority": Bool(false), "group_id": String("group"), "run_id": String("run")} } EPOCH=2
+test independent_handoff_checks_all_pending_canonical_chains_not_only_first ... FAILED
+failures:
+ independent_handoff_checks_all_pending_canonical_chains_not_only_first
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 36 filtered out; finished in 0.02s
+error: test failed, to rerun pass --test late_review

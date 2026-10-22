@@ -1,0 +1,34 @@
+# Native integration boundary
+
+No owner lib.rs, FFI, Android or host files edited. `group_runtime/store.rs` exports its new child `pub mod binding` without changing core exports. Existing B exports suffice. Native additions to AgentOwner and RunLedger are additive; their existing claim_dispatch/allowed/bind_remote_plan behavior is unchanged. AgentOwner::request_binding and RunLedger::admission_facts return opaque, Serialize-only facts read from actual SQLite, never supplied by UI JSON.
+
+## Exact calls and tables
+
+- `AgentOwner::request_binding(&self, request_id: &str) -> agent::owner::Result<OriginalRequestBinding>` recomputes SHA256 of actual stored canonical payload and returns actual request/workspace/conversation/purpose/configuration/request epoch/digest. No credential or raw payload. `owner_epoch()` exposes the actual current native owner's epoch.
+- `RunLedger::admission_facts(&self, scope: &RunScope, root_id: &str, owner: &AgentOwner) -> workflow::Result<RunAdmissionFacts>` validates physical index/record consistency before selecting the full root, real child associations and Owner chains, private epoch/session, enabled skill/digest, sequence/argument digest. Complete lifetime includes terminal/Unknown rows and ignores display-event truncation. Reports `cross_owner_atomic=false`, `root_budget_available=false`, `execution_authority=false`; active child count is an observation, not admission permission.
+- `BusinessStore::initialize_group_request_bindings()` explicitly adds only `group_request_binding_schema(workspace TEXT PRIMARY KEY,version TEXT NOT NULL)` version1 and `group_request_bindings(request_id TEXT PRIMARY KEY,node_id TEXT NOT NULL UNIQUE REFERENCES group_runtime_nodes(node_id),workflow_run_id TEXT NOT NULL UNIQUE,record TEXT NOT NULL)` to an initialized group schema2 store. No registration/account/default selection is invented.
+- `execute_group_canonical_local(&self,c:&GroupCommand,owner:&AgentOwner,ledger:&RunLedger,scope:&RunScope)` invokes the SAME grant/journal/CAS/effect/receipt/tail mutation mechanism. Existing execute_group_local has no fabricated owner context and cannot perform BindCanonical successfully.
+- `group_request_binding(&self,group_scope:&GroupScope,run_id:&str,node_id:&str)` reads actual association and validates actual Plan + local binding journal/receipt/event provenance and node/run/group identity. `group_recheck_request_binding(&self,group_scope,run_id,node_id,owner,ledger,workflow_scope)` reconciles actual Owner/RunLedger facts, current config/epoch/session/skill/revision/deadline/stop. Missing sources preserve original identity with query_original/source_error; no ready permit.
+
+The record stores workspace/project/group/run/root/node/member/request/workflow IDs, canonical digest/config/conversation/purpose, request/coordinator/native epochs, authorized and committed group revisions, workflow session/sequence/arguments/skill digest, exact local intent/authority, and planned capabilities. Association, node/run/group effects, event, receipt and exact local grant consumption share one BusinessStore SQLite transaction. Pre-write witnesses freeze intended mapping/node/run/group plus complete actual source Plan journal/command/event bytes; final reads follow all trigger-capable writes. A fault rolls the entire effect transaction back, retaining prior pending journal. Existing pending is never replayed.
+
+## FFI/host owner hook required (not implemented here)
+
+A proposed native bridge operation `bind_canonical` needs only these client selectors:
+
+```json
+{"schema_version":1,"change":{"operation":"bind_canonical","intent_id":"<unique>","group_id":"<actual>","run_id":"<actual>","node_id":"<actual>","workflow_run_id":"<actual child>","request_id":"<actual original>","expected_revision":"3","expected_epoch":"1"}}
+```
+
+This is a precise requested bridge schema, NOT a claim the current FFI accepts it. The FFI owner must resolve trusted workspace/project/human/group visibility and actual root conversation/session to existing GroupUiScope/RunScope, derive GroupActor and grant via the current explicit confirmation flow, then construct `GroupOperation::BindCanonical {run_id,node_id,workflow_run_id,request_id}`. Revision in native GroupCommand is decimal Revision; epoch is u64 (bridge string requires checked parse). Do not accept client payload/digest/config/epoch-owner/member/capability JSON as canonical proof. Native scope construction and actual identity/project authorization remain existing owner responsibilities. No standalone new grant issuance or remote dispatch bridge is provided.
+
+Read hooks can serialize `group_request_binding` and `group_recheck_request_binding`; existing group run UI now includes canonical_binding and verifies the real child's conversation for original lookups. Missing owner preserves read-only availability. Host-only remains conservative before explicit selection; fixed/per_task modes stay explicit. Roles confer coordination only.
+
+## Cross-database consumption/recovery protocol
+
+1. Existing host prepares actual Owner request and binds it through existing RunLedger writer. Persist actual group Plan digest from Owner reread, then user-confirmed local BindCanonical associates that already-existing request. No new external request, lease or budget reservation is created here.
+2. Before/after local association failure, query actual original through its exact pending command identity. Pending canonical originals gate further admission advice and ALL Handoff checkpoints; real Unknown refuses local Handoff, failed chain/identity reads remain Pending/inconclusive. Missing metadata never means absence. Local retry with the same intent returns its prior pending receipt, without effect replay.
+3. After restart, read stored mapping and actual Owner chain. Owner identity and holds survive; native configuration/session/epoch can be stale. New configuration/context is not permission to replay old original. Stop preserves read-only historical mapping/original query.
+4. Before any future outbound consumption, the SINGLE existing host claim_dispatch/allowed gateway must revalidate current actual facts and perform its existing original request transition/reservation consumption. These are separate SQLite databases: the local mapping commit and RunLedger snapshot DO NOT make an atomic outbound admission, and a mutex cannot make them one. No new gateway or execution claim is delivered. If original transition happened but provider result is uncertain, query that original, never resend or replace it.
+
+Remaining native-host work: wire trusted bridge selection and sole gateway recheck/consumption policy under their respective owners, and supply any real root-wide budget/attempt constraints absent from current RunLedger. Publication/engine isolation/real external execution remain HOLD. These gaps do not prevent the implemented durable local association and read/recovery tests.

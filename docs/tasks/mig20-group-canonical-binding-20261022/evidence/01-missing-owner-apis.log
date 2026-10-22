@@ -1,0 +1,100 @@
+warning: suspicious definition of the runtime `read` symbol used by the standard library
+   --> /workspace/mig20/experiments/redesign/core-agent-lab/core/src/host_session.rs:132:124
+    |
+132 | ...ount: usize, timeout: i32) -> i32; fn read(fd: i32, buffer: *mut u8, count: usize) -> isize; fn write(fd: i32, buffer: *const u8...
+    |                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = note: expected `unsafe extern "C" fn(i32, *mut c_void, usize) -> isize` (for the current target)
+            found    `unsafe extern "C" fn(i32, *mut u8, usize) -> isize`
+    = help: either fix the signature or remove any attributes like `#[unsafe(no_mangle)]`, `#[unsafe(export_name = "read")]`, or `#[link_name = "read"]`
+    = help: allow this lint if the signature is compatible
+    = note: `#[warn(suspicious_runtime_symbol_definitions)]` on by default
+
+warning: suspicious definition of the runtime `write` symbol used by the standard library
+   --> /workspace/mig20/experiments/redesign/core-agent-lab/core/src/host_session.rs:132:182
+    |
+132 | ... *mut u8, count: usize) -> isize; fn write(fd: i32, buffer: *const u8, count: usize) -> isize; }
+    |                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = note: expected `unsafe extern "C" fn(i32, *const c_void, usize) -> isize` (for the current target)
+            found    `unsafe extern "C" fn(i32, *const u8, usize) -> isize`
+    = help: either fix the signature or remove any attributes like `#[unsafe(no_mangle)]`, `#[unsafe(export_name = "write")]`, or `#[link_name = "write"]`
+    = help: allow this lint if the signature is compatible
+
+warning: `muyon-core-agent-lab` (lib) generated 2 warnings
+   Compiling muyon-core v0.1.0 (/workspace/mig20/crates/muyon-core)
+error[E0599]: no method named `request_binding` found for struct `owner::AgentOwner` in the current scope
+   --> muyon-core/tests/group_request_binding.rs:234:19
+    |
+234 |     let binding=o.request_binding(&id).unwrap();
+    |                   ^^^^^^^^^^^^^^^
+    |
+   ::: muyon-core/tests/../src/agent/owner.rs:157:1
+    |
+157 | pub struct AgentOwner {
+    | --------------------- method `request_binding` not found for this struct
+    |
+help: there is a method `request_chain` with a similar name
+    |
+234 -     let binding=o.request_binding(&id).unwrap();
+234 +     let binding=o.request_chain(&id).unwrap();
+    |
+
+error[E0599]: no method named `request_binding` found for struct `owner::AgentOwner` in the current scope
+   --> muyon-core/tests/group_request_binding.rs:246:18
+    |
+246 |     assert_eq!(o.request_binding(&p.request_id).unwrap_err(),"agent_request_binding_mismatch");
+    |                  ^^^^^^^^^^^^^^^
+    |
+   ::: muyon-core/tests/../src/agent/owner.rs:157:1
+    |
+157 | pub struct AgentOwner {
+    | --------------------- method `request_binding` not found for this struct
+    |
+help: there is a method `request_chain` with a similar name
+    |
+246 -     assert_eq!(o.request_binding(&p.request_id).unwrap_err(),"agent_request_binding_mismatch");
+246 +     assert_eq!(o.request_chain(&p.request_id).unwrap_err(),"agent_request_binding_mismatch");
+    |
+
+error[E0599]: no method named `request_binding` found for struct `owner::AgentOwner` in the current scope
+   --> muyon-core/tests/group_request_binding.rs:255:50
+    |
+255 |     let before=o.budget().unwrap();let binding=o.request_binding(&id).unwrap();
+    |                                                  ^^^^^^^^^^^^^^^
+    |
+   ::: muyon-core/tests/../src/agent/owner.rs:157:1
+    |
+157 | pub struct AgentOwner {
+    | --------------------- method `request_binding` not found for this struct
+    |
+help: there is a method `request_chain` with a similar name
+    |
+255 -     let before=o.budget().unwrap();let binding=o.request_binding(&id).unwrap();
+255 +     let before=o.budget().unwrap();let binding=o.request_chain(&id).unwrap();
+    |
+
+error[E0599]: no method named `owner_epoch` found for struct `owner::AgentOwner` in the current scope
+   --> muyon-core/tests/group_request_binding.rs:256:62
+    |
+256 |     assert_eq!(binding.request_epoch(),"epoch");assert_eq!(o.owner_epoch(),"epoch-new");
+    |                                                              ^^^^^^^^^^^ method not found in `owner::AgentOwner`
+    |
+   ::: muyon-core/tests/../src/agent/owner.rs:157:1
+    |
+157 | pub struct AgentOwner {
+    | --------------------- method `owner_epoch` not found for this struct
+
+error[E0599]: no method named `admission_facts` found for struct `RunLedger` in the current scope
+   --> muyon-core/tests/group_request_binding.rs:267:22
+    |
+267 |     let facts=ledger.admission_facts(&scope,&root,&o).unwrap();
+    |                      ^^^^^^^^^^^^^^^ method not found in `RunLedger`
+    |
+   ::: muyon-core/tests/../src/agent/workflow.rs:221:1
+    |
+221 | pub struct RunLedger {
+    | -------------------- method `admission_facts` not found for this struct
+
+For more information about this error, try `rustc --explain E0599`.
+error: could not compile `muyon-core` (test "group_request_binding") due to 5 previous errors

@@ -1,0 +1,88 @@
+warning: suspicious definition of the runtime `read` symbol used by the standard library
+   --> /workspace/mig20/experiments/redesign/core-agent-lab/core/src/host_session.rs:132:124
+    |
+132 | ...ount: usize, timeout: i32) -> i32; fn read(fd: i32, buffer: *mut u8, count: usize) -> isize; fn write(fd: i32, buffer: *const u8...
+    |                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = note: expected `unsafe extern "C" fn(i32, *mut c_void, usize) -> isize` (for the current target)
+            found    `unsafe extern "C" fn(i32, *mut u8, usize) -> isize`
+    = help: either fix the signature or remove any attributes like `#[unsafe(no_mangle)]`, `#[unsafe(export_name = "read")]`, or `#[link_name = "read"]`
+    = help: allow this lint if the signature is compatible
+    = note: `#[warn(suspicious_runtime_symbol_definitions)]` on by default
+
+warning: suspicious definition of the runtime `write` symbol used by the standard library
+   --> /workspace/mig20/experiments/redesign/core-agent-lab/core/src/host_session.rs:132:182
+    |
+132 | ... *mut u8, count: usize) -> isize; fn write(fd: i32, buffer: *const u8, count: usize) -> isize; }
+    |                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = note: expected `unsafe extern "C" fn(i32, *const c_void, usize) -> isize` (for the current target)
+            found    `unsafe extern "C" fn(i32, *const u8, usize) -> isize`
+    = help: either fix the signature or remove any attributes like `#[unsafe(no_mangle)]`, `#[unsafe(export_name = "write")]`, or `#[link_name = "write"]`
+    = help: allow this lint if the signature is compatible
+
+warning: `muyon-core-agent-lab` (lib) generated 2 warnings
+   Compiling muyon-core v0.1.0 (/workspace/mig20/crates/muyon-core)
+    Finished `test` profile [unoptimized] target(s) in 4.47s
+     Running tests/group_request_binding.rs (/tmp/mig20-target/debug/deps/group_request_binding-2e9ca052016f892d)
+
+running 35 tests
+test blobs::tests::failed_ledger_after_solidification_keeps_staging_and_object_independent ... ok
+test blobs::tests::deleting_rejects_new_read_or_same_digest_upload ... ok
+test blobs::tests::corrupt_existing_object_and_dangling_symlink_are_never_replaced ... ok
+test blobs::tests::file_and_upload_logical_length_quotas_precede_hashing_and_writing ... ok
+test blobs::tests::kill_fixture ... ok
+test actual_ledger_admission_facts_include_live_original_and_private_context_without_permission ... ok
+test blobs::tests::gc_and_publish_barrier_preserves_either_upload_pin_or_reference ... ok
+test blobs::tests::gc_and_reader_barrier_covers_reader_after_upload_pin_release ... ok
+test blobs::tests::pinned_state_alone_does_not_replace_a_durable_upload_pin ... ok
+test blobs::tests::publication_binds_expected_bytes_project_revision_and_real_transaction ... ok
+test blobs::tests::partial_publication_copy_is_not_reused_and_unknown_uploads_are_not_cleaned ... ok
+test blobs::tests::rename_then_failed_pin_commit_can_retry_existing_target_without_overwrite ... ok
+test blobs::tests::pending_unknown_never_expire_and_lookup_does_not_recover ... ok
+test canonical_binding_cannot_grow_the_actual_members_task_capabilities ... FAILED
+test canonical_binding_does_not_substitute_another_actual_root_even_with_same_payload_digest ... ok
+test blobs::tests::real_paper_effect_receipt_and_blob_reference_survive_or_roll_back_together ... ok
+test canonical_binding_tail_fault_rolls_back_all_local_effects_and_gates_actual_unknown ... ok
+test canonical_binding_without_real_ledger_context_is_refused_then_real_native_path_works ... ok
+test canonical_context_recheck_detects_real_configuration_replacement ... ok
+test canonical_group_binding_is_real_durable_scoped_and_preserves_original_gate ... ok
+test canonical_mapping_survives_restart_as_readonly_unknown_without_freeing_original_hold ... ok
+test canonical_recheck_source_failure_keeps_registered_original_identity_without_ready_or_known_usage ... ok
+test canonical_registered_mapping_requires_its_actual_committed_original_local_receipt ... FAILED
+test canonical_mapping_event_receipt_and_consume_faults_rollback_and_never_replay ... ok
+test ledger_complete_facts_do_not_omit_a_child_moved_to_another_physical_root ... ok
+test ledger_complete_facts_do_not_omit_a_child_moved_to_another_physical_scope ... ok
+test owner_binding_after_restart_preserves_original_epoch_unknown_and_hold_without_replay ... ok
+test owner_binding_detects_persisted_payload_digest_mismatch ... ok
+test owner_binding_reloads_actual_canonical_bytes_instead_of_caller_plan ... ok
+test review_lifecycle::tests::committed_claims_are_preserved_and_partial_committed_schema_is_refused ... ok
+test review_lifecycle::tests::empty_file_from_interrupted_creation_initializes_without_replacement ... ok
+test review_lifecycle::tests::uncommitted_ddl_reopens_and_initializes_the_original_database ... ok
+test ledger_facts_reject_duplicate_remote_conversations_and_original_chains ... ok
+test blobs::tests::real_sigkill_and_reopen_at_twelve_cross_media_windows ... ok
+test research::resource_tests::real_opaque_uploads_are_not_aggregated_when_sealing_or_importing ... ok
+
+failures:
+
+---- canonical_binding_cannot_grow_the_actual_members_task_capabilities stdout ----
+
+thread 'canonical_binding_cannot_grow_the_actual_members_task_capabilities' (30481) panicked at muyon-core/tests/group_request_binding.rs:804:5:
+assertion `left == right` failed
+  left: Committed
+ right: Rejected
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+---- canonical_registered_mapping_requires_its_actual_committed_original_local_receipt stdout ----
+
+thread 'canonical_registered_mapping_requires_its_actual_committed_original_local_receipt' (30498) panicked at muyon-core/tests/group_request_binding.rs:796:9:
+a mapping alone cannot certify its local origin receipt
+
+
+failures:
+    canonical_binding_cannot_grow_the_actual_members_task_capabilities
+    canonical_registered_mapping_requires_its_actual_committed_original_local_receipt
+
+test result: FAILED. 33 passed; 2 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.05s
+
+error: test failed, to rerun pass `-p muyon-core --test group_request_binding`

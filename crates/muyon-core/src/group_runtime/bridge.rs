@@ -25,6 +25,12 @@ pub struct GroupUiScope {
     owner_epoch: String,
     actor: String,
 }
+struct GroupWorkflowRead<'a> {
+    ui: &'a GroupUiScope,
+    group: &'a GroupScope,
+    group_id: &'a str,
+    run_id: &'a str,
+}
 impl GroupUiScope {
     pub fn current(store: &BusinessStore, project: &str, actor: &str) -> Result<Self> {
         id(project)?;
@@ -317,7 +323,7 @@ impl BusinessStore {
                 let scope = GroupScope::current(self, &s.project, &group_id)?;
                 match workflow {
                     Some((ledger, session)) => {
-                        json!({"workflow":self.group_ui_workflow(s,&scope,&group_id,&run_id,ledger,session,owner)?})
+                        json!({"workflow":self.group_ui_workflow(GroupWorkflowRead{ui:s,group:&scope,group_id:&group_id,run_id:&run_id},ledger,session,owner)?})
                     }
                     None => {
                         json!({"workflow":{"availability":"not_bound","reason":"workflow_owner_not_bound","complete_lifetime_children":false}})
@@ -345,7 +351,6 @@ impl BusinessStore {
         owner: Option<&AgentOwner>,
     ) -> Result<Value> {
         let run = self.group_run(scope, run_id)?;
-        let group = self.group_registration(scope)?;
         let nodes = self.group_nodes(scope, run_id)?;
         let mut lookup_failed = false;
         let mut unresolved = false;
@@ -353,7 +358,10 @@ impl BusinessStore {
         for n in &nodes {
             let original = match (&n.request_id, owner) {
                 (Some(first), Some(owner)) => {
-                    match original_json(owner, first, &group.conversation_id) {
+                    match self
+                        .group_original_conversation(scope, run_id, &n.node_id, owner)
+                        .and_then(|conversation| original_json(owner, first, &conversation))
+                    {
                         Ok(v) => {
                             unresolved |= !v["original_chain_resolved"].as_bool().unwrap_or(false);
                             v
@@ -373,7 +381,14 @@ impl BusinessStore {
                 }
                 _ => Value::Null,
             };
-            view_nodes.push(json!({"node_id":n.node_id,"member_id":n.member_id,"coordinator_epoch":n.epoch.to_string(),"persisted_state":n.state,"dependencies":n.dependencies,"payload_digest":n.payload_digest,"original":original}));
+            let canonical = match self.group_request_binding(scope, run_id, &n.node_id) {
+                Ok(value) => Some(value),
+                Err(ContractError::NotFound) => None,
+                Err(error) => return Err(error),
+            };
+            let canonical_verified =
+                canonical.is_some() && original["lookup_status"] == "available";
+            view_nodes.push(json!({"canonical_binding":canonical,"canonical_verified_now":canonical_verified,"node_id":n.node_id,"member_id":n.member_id,"coordinator_epoch":n.epoch.to_string(),"persisted_state":n.state,"dependencies":n.dependencies,"payload_digest":n.payload_digest,"original":original}));
         }
         let now_ms: u64 = std::time::SystemTime::now()
             .duration_since(std::time::UNIX_EPOCH)
@@ -423,21 +438,24 @@ impl BusinessStore {
             }
         }
         Ok(
-            json!({"run_id":run.run_id,"root_task_id":run.root_task_id,"coordination_mode":run.coordination_mode,"coordinator_id":run.leader,"coordinator_epoch":run.epoch.to_string(),"handoffs":run.handoffs.to_string(),"max_handoffs":run.max_handoffs.to_string(),"max_rounds":run.max_rounds.to_string(),"deadline_ms":run.deadline_ms.to_string(),"stopped":run.stopped,"deadline_reached":deadline_reached,"members":run.members,"live_state":live_state,"original_owner_status":if owner.is_none(){"not_bound"}else if lookup_failed{"unavailable"}else{"available"},"nodes":view_nodes,"persisted_summary":summary,"owner_budget":budget,"owner_budget_status":budget_status,"canonical_payload_binding":"not_available_from_current_owner_api","execution_authority":false}),
+            json!({"run_id":run.run_id,"root_task_id":run.root_task_id,"coordination_mode":run.coordination_mode,"coordinator_id":run.leader,"coordinator_epoch":run.epoch.to_string(),"handoffs":run.handoffs.to_string(),"max_handoffs":run.max_handoffs.to_string(),"max_rounds":run.max_rounds.to_string(),"deadline_ms":run.deadline_ms.to_string(),"stopped":run.stopped,"deadline_reached":deadline_reached,"members":run.members,"live_state":live_state,"original_owner_status":if owner.is_none(){"not_bound"}else if lookup_failed{"unavailable"}else{"available"},"nodes":view_nodes,"persisted_summary":summary,"owner_budget":budget,"owner_budget_status":budget_status,"canonical_payload_binding":"requires_durable_group_binding","execution_authority":false}),
         )
     }
     /// Only the actual owner's scoped snapshot supplies rows. Display events are
     /// deliberately not used to infer lifetime counts, attempts, identity or cost.
     fn group_ui_workflow(
         &self,
-        s: &GroupUiScope,
-        scope: &GroupScope,
-        group_id: &str,
-        run_id: &str,
+        query: GroupWorkflowRead<'_>,
         ledger: &mut RunLedger,
         session: &str,
         owner: Option<&AgentOwner>,
     ) -> Result<Value> {
+        let GroupWorkflowRead {
+            ui: s,
+            group: scope,
+            group_id,
+            run_id,
+        } = query;
         let run = self.group_run(scope, run_id)?;
         let group = self.group_registration(scope)?;
         let native_scope =
@@ -542,7 +560,7 @@ impl BusinessStore {
             }
         }
         Ok(
-            json!({"availability":"available","group_id":group_id,"run_id":run_id,"root":root,"children":children,"lifetime_child_count":rows.len()-1,"active_child_count":active,"original_request_ids":request_ids,"complete_lifetime_children":true,"source":"actual_run_ledger_snapshot","events_are_display_only":true,"display_event_count":raw["events"].as_array().map(Vec::len),"canonical_payload_binding":"not_available_from_current_owner_api","host_dispatch_permission":false,"execution_authority":false}),
+            json!({"availability":"available","group_id":group_id,"run_id":run_id,"root":root,"children":children,"lifetime_child_count":rows.len()-1,"active_child_count":active,"original_request_ids":request_ids,"complete_lifetime_children":true,"source":"actual_run_ledger_snapshot","events_are_display_only":true,"display_event_count":raw["events"].as_array().map(Vec::len),"canonical_payload_binding":"requires_durable_group_binding","host_dispatch_permission":false,"execution_authority":false}),
         )
     }
     /// Builds an exact local command only. Host auth context and native authority

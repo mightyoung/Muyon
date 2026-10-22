@@ -1,0 +1,46 @@
+warning: suspicious definition of the runtime `read` symbol used by the standard library
+   --> /workspace/mig20/experiments/redesign/core-agent-lab/core/src/host_session.rs:132:124
+    |
+132 | ...ount: usize, timeout: i32) -> i32; fn read(fd: i32, buffer: *mut u8, count: usize) -> isize; fn write(fd: i32, buffer: *const u8...
+    |                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = note: expected `unsafe extern "C" fn(i32, *mut c_void, usize) -> isize` (for the current target)
+            found    `unsafe extern "C" fn(i32, *mut u8, usize) -> isize`
+    = help: either fix the signature or remove any attributes like `#[unsafe(no_mangle)]`, `#[unsafe(export_name = "read")]`, or `#[link_name = "read"]`
+    = help: allow this lint if the signature is compatible
+    = note: `#[warn(suspicious_runtime_symbol_definitions)]` on by default
+
+warning: suspicious definition of the runtime `write` symbol used by the standard library
+   --> /workspace/mig20/experiments/redesign/core-agent-lab/core/src/host_session.rs:132:182
+    |
+132 | ... *mut u8, count: usize) -> isize; fn write(fd: i32, buffer: *const u8, count: usize) -> isize; }
+    |                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = note: expected `unsafe extern "C" fn(i32, *const c_void, usize) -> isize` (for the current target)
+            found    `unsafe extern "C" fn(i32, *const u8, usize) -> isize`
+    = help: either fix the signature or remove any attributes like `#[unsafe(no_mangle)]`, `#[unsafe(export_name = "write")]`, or `#[link_name = "write"]`
+    = help: allow this lint if the signature is compatible
+
+warning: `muyon-core-agent-lab` (lib) generated 2 warnings
+   Compiling muyon-core v0.1.0 (/workspace/mig20/crates/muyon-core)
+    Finished `test` profile [unoptimized] target(s) in 4.27s
+     Running tests/group_request_binding.rs (/tmp/mig20-target/debug/deps/group_request_binding-2e9ca052016f892d)
+
+running 1 test
+CONFIGURATION_REPLACED={"binding":{"authorized_group_revision":"3","binding_owner_epoch":"epoch","capabilities":{"permissions":["read"],"scopes":["project"]},"configuration_id":"e38b7124c0a71d34c116e6048d11fb61","conversation_id":"child-e251d2ee6ef240dd1b8238bac31e04a9","coordinator_epoch":"1","execution_authority":false,"group_id":"group","host_session":"session","local_authority":{"generation":"1","grant_id":"grant-canonical-bind","owner_epoch":"epoch"},"local_intent_id":"canonical-bind","member_id":"a","node_id":"node","payload_digest":"443ab8865b2404124b29f7bf3f353f08c1a618aa1447a32a602969c30c0dffde","project_id":"project","purpose":"chat","registered_revision":"4","request_epoch":"epoch","request_id":"41d25aeb27329724a2b0c6f735d8910a","root_task_id":"c0637222dd054b1c7152522681f9a5ae","run_id":"run","workflow_arguments_digest":"6cfad4c45c68e5d0140f8fa7cef6c798175d1e69bc6bc9c4258f34b3c9861de5","workflow_owner_epoch":"epoch","workflow_revision":"4","workflow_run_id":"d927927f5bc97a2dcf13f8b663a15cff","workflow_skill_digest":"6a04822d58cadf1b20f8b677f16ef1573e82302cdffe467642eb11cbbed1636a","workspace_id":"ws"},"canonical_verified_now":true,"context_current":true,"cross_owner_atomic":false,"execution_authority":false,"group_stopped":false,"observations":[{"answer":null,"attempted":false,"blocked_reason":null,"cancelled":false,"charged_micro_cny":"0","failure_stage":null,"http_status":null,"recovery_action":"none","request_id":"41d25aeb27329724a2b0c6f735d8910a","reserved_micro_cny":"3024","status":"prepared"}],"original_chain_resolved":false,"recovery_state":"query_original","source_error":null,"workflow_verified_now":true}
+
+thread 'canonical_context_recheck_detects_real_configuration_replacement' (29513) panicked at muyon-core/tests/group_request_binding.rs:550:5:
+assertion `left == right` failed
+  left: Bool(true)
+ right: false
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test canonical_context_recheck_detects_real_configuration_replacement ... FAILED
+
+failures:
+
+failures:
+    canonical_context_recheck_detects_real_configuration_replacement
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 26 filtered out; finished in 0.02s
+
+error: test failed, to rerun pass `-p muyon-core --test group_request_binding`

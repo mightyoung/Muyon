@@ -1,0 +1,115 @@
+warning: suspicious definition of the runtime `read` symbol used by the standard library
+   --> /workspace/mig20/experiments/redesign/core-agent-lab/core/src/host_session.rs:132:124
+    |
+132 | ...ount: usize, timeout: i32) -> i32; fn read(fd: i32, buffer: *mut u8, count: usize) -> isize; fn write(fd: i32, buffer: *const u8...
+    |                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = note: expected `unsafe extern "C" fn(i32, *mut c_void, usize) -> isize` (for the current target)
+            found    `unsafe extern "C" fn(i32, *mut u8, usize) -> isize`
+    = help: either fix the signature or remove any attributes like `#[unsafe(no_mangle)]`, `#[unsafe(export_name = "read")]`, or `#[link_name = "read"]`
+    = help: allow this lint if the signature is compatible
+    = note: `#[warn(suspicious_runtime_symbol_definitions)]` on by default
+
+warning: suspicious definition of the runtime `write` symbol used by the standard library
+   --> /workspace/mig20/experiments/redesign/core-agent-lab/core/src/host_session.rs:132:182
+    |
+132 | ... *mut u8, count: usize) -> isize; fn write(fd: i32, buffer: *const u8, count: usize) -> isize; }
+    |                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = note: expected `unsafe extern "C" fn(i32, *const c_void, usize) -> isize` (for the current target)
+            found    `unsafe extern "C" fn(i32, *const u8, usize) -> isize`
+    = help: either fix the signature or remove any attributes like `#[unsafe(no_mangle)]`, `#[unsafe(export_name = "write")]`, or `#[link_name = "write"]`
+    = help: allow this lint if the signature is compatible
+
+warning: `muyon-core-agent-lab` (lib) generated 2 warnings
+   Compiling muyon-core v0.1.0 (/workspace/mig20/crates/muyon-core)
+error[E0599]: no method named `initialize_group_request_bindings` found for struct `business::BusinessStore` in the current scope
+   --> muyon-core/tests/group_request_binding.rs:329:43
+    |
+329 |     let f=Fixture::new();let s=f.init();s.initialize_group_request_bindings().unwrap();
+    |                                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+   ::: muyon-core/tests/../src/business.rs:69:1
+    |
+ 69 | pub struct BusinessStore {
+    | ------------------------ method `initialize_group_request_bindings` not found for this struct
+    |
+help: there is a method `initialize_group_runtime` with a similar name
+    |
+329 -     let f=Fixture::new();let s=f.init();s.initialize_group_request_bindings().unwrap();
+329 +     let f=Fixture::new();let s=f.init();s.initialize_group_runtime().unwrap();
+    |
+
+error[E0599]: no variant named `BindCanonical` found for enum `group_runtime_store::GroupOperation`
+   --> muyon-core/tests/group_request_binding.rs:336:57
+    |
+336 |     let c=mutation("canonical-bind",3,1,GroupOperation::BindCanonical{run_id:"run".into(),node_id:"node".into(),workflow_run_id:chi...
+    |                                                         ^^^^^^^^^^^^^ variant not found in `group_runtime_store::GroupOperation`
+    |
+   ::: muyon-core/tests/../src/group_runtime/store.rs:36:1
+    |
+ 36 | pub enum GroupOperation {
+    | ----------------------- variant `BindCanonical` not found here
+
+error[E0599]: no method named `execute_group_canonical_local` found for struct `business::BusinessStore` in the current scope
+   --> muyon-core/tests/group_request_binding.rs:338:18
+    |
+338 |     assert_eq!(s.execute_group_canonical_local(&c,&o,&ledger,&scope).unwrap().status,LocalStatus::Committed);
+    |                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+   ::: muyon-core/tests/../src/business.rs:69:1
+    |
+ 69 | pub struct BusinessStore {
+    | ------------------------ method `execute_group_canonical_local` not found for this struct
+    |
+help: there is a method `execute_group_local` with a similar name, but with different arguments
+   --> muyon-core/tests/../src/group_runtime/store.rs:564:5
+    |
+564 | /     pub fn execute_group_local(
+565 | |         &self,
+566 | |         c: &GroupCommand,
+567 | |         owner: Option<&AgentOwner>,
+568 | |     ) -> Result<LocalReceipt> {
+    | |_____________________________^
+
+error[E0599]: no method named `group_request_binding` found for struct `business::BusinessStore` in the current scope
+   --> muyon-core/tests/group_request_binding.rs:340:19
+    |
+340 |     let binding=s.group_request_binding(&group_scope,"run","node").unwrap();
+    |                   ^^^^^^^^^^^^^^^^^^^^^
+    |
+   ::: muyon-core/tests/../src/business.rs:69:1
+    |
+ 69 | pub struct BusinessStore {
+    | ------------------------ method `group_request_binding` not found for this struct
+    |
+help: there is a method `group_next_pending` with a similar name
+    |
+340 -     let binding=s.group_request_binding(&group_scope,"run","node").unwrap();
+340 +     let binding=s.group_next_pending(&group_scope,"run","node").unwrap();
+    |
+
+error[E0599]: no method named `group_recheck_request_binding` found for struct `business::BusinessStore` in the current scope
+   --> muyon-core/tests/group_request_binding.rs:345:17
+    |
+345 |     let check=s.group_recheck_request_binding(&group_scope,"run","node",&o,&ledger,&scope).unwrap();
+    |                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ method not found in `business::BusinessStore`
+    |
+   ::: muyon-core/tests/../src/business.rs:69:1
+    |
+ 69 | pub struct BusinessStore {
+    | ------------------------ method `group_recheck_request_binding` not found for this struct
+
+error[E0599]: no method named `group_recheck_request_binding` found for struct `business::BusinessStore` in the current scope
+   --> muyon-core/tests/group_request_binding.rs:350:37
+    |
+350 |     let view=serde_json::to_value(s.group_recheck_request_binding(&group_scope,"run","node",&o,&ledger,&scope).unwrap()).unwrap();
+    |                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ method not found in `business::BusinessStore`
+    |
+   ::: muyon-core/tests/../src/business.rs:69:1
+    |
+ 69 | pub struct BusinessStore {
+    | ------------------------ method `group_recheck_request_binding` not found for this struct
+
+For more information about this error, try `rustc --explain E0599`.
+error: could not compile `muyon-core` (test "group_request_binding") due to 6 previous errors

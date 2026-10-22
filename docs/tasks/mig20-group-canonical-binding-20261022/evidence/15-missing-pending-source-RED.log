@@ -1,0 +1,45 @@
+warning: suspicious definition of the runtime `read` symbol used by the standard library
+   --> /workspace/mig20/experiments/redesign/core-agent-lab/core/src/host_session.rs:132:124
+    |
+132 | ...ount: usize, timeout: i32) -> i32; fn read(fd: i32, buffer: *mut u8, count: usize) -> isize; fn write(fd: i32, buffer: *const u8...
+    |                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = note: expected `unsafe extern "C" fn(i32, *mut c_void, usize) -> isize` (for the current target)
+            found    `unsafe extern "C" fn(i32, *mut u8, usize) -> isize`
+    = help: either fix the signature or remove any attributes like `#[unsafe(no_mangle)]`, `#[unsafe(export_name = "read")]`, or `#[link_name = "read"]`
+    = help: allow this lint if the signature is compatible
+    = note: `#[warn(suspicious_runtime_symbol_definitions)]` on by default
+
+warning: suspicious definition of the runtime `write` symbol used by the standard library
+   --> /workspace/mig20/experiments/redesign/core-agent-lab/core/src/host_session.rs:132:182
+    |
+132 | ... *mut u8, count: usize) -> isize; fn write(fd: i32, buffer: *const u8, count: usize) -> isize; }
+    |                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = note: expected `unsafe extern "C" fn(i32, *const c_void, usize) -> isize` (for the current target)
+            found    `unsafe extern "C" fn(i32, *const u8, usize) -> isize`
+    = help: either fix the signature or remove any attributes like `#[unsafe(no_mangle)]`, `#[unsafe(export_name = "write")]`, or `#[link_name = "write"]`
+    = help: allow this lint if the signature is compatible
+
+warning: `muyon-core-agent-lab` (lib) generated 2 warnings
+   Compiling muyon-core v0.1.0 (/workspace/mig20/crates/muyon-core)
+    Finished `test` profile [unoptimized] target(s) in 4.07s
+     Running tests/group_request_binding.rs (/tmp/mig20-target/debug/deps/group_request_binding-2e9ca052016f892d)
+
+running 1 test
+MISSING_PENDING_IDENTITY_ADVICE=Ok(PendingHostAdmission { node_id: "node", payload_digest: "443ab8865b2404124b29f7bf3f353f08c1a618aa1447a32a602969c30c0dffde", epoch: 1 })
+MISSING_PENDING_IDENTITY_HANDOFF=LocalReceipt { intent_id: "handoff-missing-pending-source", status: Committed, revision: Revision("4"), result: Object {"execution_authority": Bool(false), "group_id": String("group"), "run_id": String("run")} }
+
+thread 'pending_canonical_missing_identity_does_not_restore_admission_or_handoff' (31289) panicked at muyon-core/tests/group_request_binding.rs:921:2:
+loss of original pending identity proof must remain inconclusive, never new host-admission advice
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test pending_canonical_missing_identity_does_not_restore_admission_or_handoff ... FAILED
+
+failures:
+
+failures:
+    pending_canonical_missing_identity_does_not_restore_admission_or_handoff
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 36 filtered out; finished in 0.02s
+
+error: test failed, to rerun pass `-p muyon-core --test group_request_binding`

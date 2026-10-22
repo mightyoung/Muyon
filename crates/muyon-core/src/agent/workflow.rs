@@ -1,6 +1,6 @@
 //! Durable, bounded host activity. These events are not model reasoning.
 use super::{
-    owner::{AgentOwner, AgentPlan, Observation},
+    owner::{AgentOwner, AgentPlan, Observation, OriginalRequestBinding},
     read_business, ReadScope,
 };
 use crate::{business::BusinessStore, contract::decode_json, sqlite::Db};
@@ -90,6 +90,114 @@ impl RunScope {
     }
     fn key(&self) -> String {
         json!([self.workspace, self.conversation, self.project]).to_string()
+    }
+}
+/// Native, actual lifetime admission facts. These are not a dispatch capability.
+/// Private fields and no Deserialize prevent caller JSON from manufacturing them.
+#[derive(Clone, Serialize)]
+pub struct AdmissionRun {
+    id: String,
+    root_id: String,
+    conversation_id: String,
+    project_id: Option<String>,
+    owner_epoch: String,
+    host_session: String,
+    status: String,
+    kind: String,
+    cancel_requested: bool,
+    created_seq: crate::contract::Revision,
+    updated_seq: crate::contract::Revision,
+    arguments_digest: String,
+    skill_digest: Option<String>,
+    skill_current: bool,
+    native_context_current: bool,
+    originals: Vec<OriginalRequestBinding>,
+    observations: Vec<Observation>,
+}
+impl AdmissionRun {
+    pub fn id(&self) -> &str {
+        &self.id
+    }
+    pub fn root_id(&self) -> &str {
+        &self.root_id
+    }
+    pub fn conversation_id(&self) -> &str {
+        &self.conversation_id
+    }
+    pub fn project_id(&self) -> Option<&str> {
+        self.project_id.as_deref()
+    }
+    pub fn owner_epoch(&self) -> &str {
+        &self.owner_epoch
+    }
+    pub fn host_session(&self) -> &str {
+        &self.host_session
+    }
+    pub fn status(&self) -> &str {
+        &self.status
+    }
+    pub fn kind(&self) -> &str {
+        &self.kind
+    }
+    pub fn cancel_requested(&self) -> bool {
+        self.cancel_requested
+    }
+    pub fn updated_seq(&self) -> &crate::contract::Revision {
+        &self.updated_seq
+    }
+    pub fn arguments_digest(&self) -> &str {
+        &self.arguments_digest
+    }
+    pub fn skill_digest(&self) -> Option<&str> {
+        self.skill_digest.as_deref()
+    }
+    pub fn skill_current(&self) -> bool {
+        self.skill_current
+    }
+    pub fn native_context_current(&self) -> bool {
+        self.native_context_current
+    }
+    pub fn originals(&self) -> &[OriginalRequestBinding] {
+        &self.originals
+    }
+    pub fn observations(&self) -> &[Observation] {
+        &self.observations
+    }
+}
+#[derive(Clone, Serialize)]
+pub struct RunAdmissionFacts {
+    workspace_id: String,
+    owner_epoch: String,
+    host_session: String,
+    root: AdmissionRun,
+    children: Vec<AdmissionRun>,
+    active_child_count: usize,
+    complete_lifetime_children: bool,
+    cross_owner_atomic: bool,
+    root_budget_available: bool,
+    execution_authority: bool,
+}
+impl RunAdmissionFacts {
+    pub fn workspace_id(&self) -> &str {
+        &self.workspace_id
+    }
+    pub fn owner_epoch(&self) -> &str {
+        &self.owner_epoch
+    }
+    pub fn host_session(&self) -> &str {
+        &self.host_session
+    }
+    pub fn root(&self) -> &AdmissionRun {
+        &self.root
+    }
+    pub fn children(&self) -> &[AdmissionRun] {
+        &self.children
+    }
+    pub fn active_child_count(&self) -> usize {
+        self.active_child_count
+    }
+    pub fn execution_authority(&self) -> bool {
+        self.execution_authority
     }
 }
 struct Skill {
@@ -723,6 +831,179 @@ impl RunLedger {
         }
     }
     /// Host-only composition. This contains no implicit private business records.
+    /// Actual all-lifetime rows, native context and original owner observations.
+    /// Presentation events, caller plans and previews are never the data source.
+    pub fn admission_facts(
+        &self,
+        scope: &RunScope,
+        root_id: &str,
+        owner: &AgentOwner,
+    ) -> Result<RunAdmissionFacts> {
+        self.scope(scope)?;
+        ident(root_id)?;
+        if owner.workspace() != self.workspace || owner.owner_epoch() != self.epoch {
+            return Err("workflow_scope_mismatch");
+        }
+        let tx = sql(self.db.transaction())?;
+        let rows = sql(self
+            .db
+            .query("SELECT id,scope,root,record FROM runs ORDER BY rowid", &[]))?;
+        let mut root = None;
+        let mut children = Vec::new();
+        let mut active = 0;
+        let mut conversations = std::collections::BTreeSet::new();
+        let mut original_ids = std::collections::BTreeSet::new();
+        for row in rows {
+            let run: Run =
+                serde_json::from_str(cell(&row, 3)?).map_err(|_| "workflow_storage_invalid")?;
+            // Read physical and record indexes together BEFORE filtering. A
+            // moved physical key must not silently erase lifetime capacity.
+            let physical_scope: Value =
+                serde_json::from_str(cell(&row, 1)?).map_err(|_| "workflow_storage_invalid")?;
+            if cell(&row, 0)? != run.id
+                || cell(&row, 2)? != run.root_id
+                || physical_scope.as_array().map(Vec::len) != Some(3)
+                || physical_scope[0] != self.workspace
+                || physical_scope[2] != json!(run.project_id)
+                || physical_scope[1].as_str().is_none()
+            {
+                return Err("workflow_storage_invalid");
+            }
+            if run.kind == "remote_chat" {
+                if physical_scope[1] == run.conversation_id
+                    || !conversations.insert(run.conversation_id.clone())
+                {
+                    return Err("workflow_remote_binding_invalid");
+                }
+                let mut ids: std::collections::BTreeSet<_> =
+                    run.remote_request_ids.iter().cloned().collect();
+                if let Some(first) = &run.remote_request_id {
+                    ids.insert(first.clone());
+                }
+                for id in ids {
+                    if !original_ids.insert(id) {
+                        return Err("workflow_remote_binding_invalid");
+                    }
+                }
+            }
+            if run.root_id != root_id
+                && run.parent_id.as_deref() != Some(root_id)
+                && run.id != root_id
+            {
+                continue;
+            }
+            if cell(&row, 1)? != scope.key()
+                || run.root_id != root_id
+                || run.project_id != scope.project
+            {
+                return Err("workflow_scope_mismatch");
+            }
+            ident(&run.id)?;
+            ident(&run.conversation_id)?;
+            ident(&run.epoch)?;
+            ident(&run.session)?;
+            let is_root = run.id == root_id;
+            if (is_root
+                && (run.parent_id.is_some()
+                    || run.depth != 0
+                    || run.kind != "workflow"
+                    || run.remote_request_id.is_some()
+                    || !run.remote_request_ids.is_empty()
+                    || run.conversation_id != scope.conversation))
+                || (!is_root
+                    && (run.parent_id.as_deref() != Some(root_id)
+                        || run.depth != 1
+                        || !matches!(run.kind.as_str(), "remote_chat" | "local_read")
+                        || (run.kind == "local_read"
+                            && (run.remote_request_id.is_some()
+                                || run.conversation_id != scope.conversation))))
+            {
+                return Err("workflow_scope_mismatch");
+            }
+            let skill_current = match run.skill_id.as_deref() {
+                Some(id) => {
+                    let actual = skill(id)?;
+                    self.enabled(scope, id)?
+                        && run.skill_digest.as_deref() == Some(sha(actual.body).as_str())
+                }
+                None => is_root,
+            };
+            let observations = match run.remote_request_id.as_deref() {
+                Some(first) => owner.request_chain(first)?,
+                None => Vec::new(),
+            };
+            let mut originals = Vec::new();
+            for observation in &observations {
+                let binding = owner.request_binding(&observation.request_id)?;
+                if binding.conversation_id() != run.conversation_id || binding.purpose() != "chat" {
+                    return Err("workflow_remote_binding_invalid");
+                }
+                originals.push(binding);
+            }
+            let actual_ids: Vec<_> = observations.iter().map(|o| o.request_id.clone()).collect();
+            if !actual_ids.starts_with(&run.remote_request_ids)
+                || run
+                    .current_request_id
+                    .as_ref()
+                    .is_some_and(|id| run.remote_request_ids.last() != Some(id))
+            {
+                return Err("workflow_remote_chain_invalid");
+            }
+            if !is_root
+                && (matches!(
+                    run.status.as_str(),
+                    "queued" | "running" | "waiting_confirmation" | "unknown"
+                ) || observations.last().is_some_and(|o| {
+                    !matches!(o.status.as_str(), "completed" | "cancelled" | "failed")
+                }))
+            {
+                active += 1;
+            }
+            let fact = AdmissionRun {
+                id: run.id,
+                root_id: run.root_id,
+                conversation_id: run.conversation_id,
+                project_id: run.project_id,
+                native_context_current: run.epoch == scope.epoch && run.session == scope.session,
+                owner_epoch: run.epoch,
+                host_session: run.session,
+                status: run.status,
+                kind: run.kind,
+                cancel_requested: run.cancel_requested,
+                created_seq: crate::contract::Revision::new(run.created_seq),
+                updated_seq: crate::contract::Revision::new(run.updated_seq),
+                arguments_digest: sha(&encoded(&run.arguments)?),
+                skill_digest: run.skill_digest,
+                skill_current,
+                originals,
+                observations,
+            };
+            if is_root {
+                if root.replace(fact).is_some() {
+                    return Err("workflow_storage_invalid");
+                }
+            } else {
+                children.push(fact);
+            }
+        }
+        let root = root.ok_or("workflow_run_not_found")?;
+        if children.len() > 8 {
+            return Err("workflow_storage_invalid");
+        }
+        sql(tx.commit())?;
+        Ok(RunAdmissionFacts {
+            workspace_id: self.workspace.clone(),
+            owner_epoch: self.epoch.clone(),
+            host_session: scope.session.clone(),
+            root,
+            children,
+            active_child_count: active,
+            complete_lifetime_children: true,
+            cross_owner_atomic: false,
+            root_budget_available: false,
+            execution_authority: false,
+        })
+    }
     pub fn remote_context(&self, scope: &RunScope, run_id: &str) -> Result<Value> {
         let run = self.get(scope, run_id, true)?;
         if run.kind != "remote_chat" || run.status != "queued" || run.cancel_requested {

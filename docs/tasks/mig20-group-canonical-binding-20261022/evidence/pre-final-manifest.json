@@ -1,0 +1,78 @@
+{
+  "cwd": "/workspace/mig20",
+  "runs": [
+    {
+      "name": "final-format",
+      "command": [
+        "rustfmt",
+        "--edition",
+        "2021",
+        "--check",
+        "crates/muyon-core/src/agent/owner.rs",
+        "crates/muyon-core/src/agent/workflow.rs",
+        "crates/muyon-core/src/group_runtime/store.rs",
+        "crates/muyon-core/src/group_runtime/bridge.rs",
+        "crates/muyon-core/src/group_runtime/binding.rs",
+        "crates/muyon-core/tests/group_request_binding.rs"
+      ],
+      "start_utc": "2026-10-22T08:14:43.817782+00:00",
+      "end_utc": "2026-10-22T08:14:44.019585+00:00",
+      "exit_code": 0
+    },
+    {
+      "name": "final-core",
+      "command": [
+        "cargo",
+        "test",
+        "--manifest-path",
+        "crates/Cargo.toml",
+        "-p",
+        "muyon-core",
+        "--offline",
+        "--locked"
+      ],
+      "start_utc": "2026-10-22T08:14:44.019963+00:00",
+      "end_utc": "2026-10-22T08:15:32.145727+00:00",
+      "exit_code": 0
+    },
+    {
+      "name": "final-clippy-arguments",
+      "command": [
+        "cargo",
+        "clippy",
+        "--manifest-path",
+        "crates/Cargo.toml",
+        "-p",
+        "muyon-core",
+        "--all-targets",
+        "--offline",
+        "--locked",
+        "--",
+        "-D",
+        "clippy::too_many_arguments"
+      ],
+      "start_utc": "2026-10-22T08:15:32.146076+00:00",
+      "end_utc": "2026-10-22T08:15:32.156725+00:00",
+      "exit_code": 101
+    },
+    {
+      "name": "final-diff",
+      "command": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "start_utc": "2026-10-22T08:15:32.156982+00:00",
+      "end_utc": "2026-10-22T08:15:32.165321+00:00",
+      "exit_code": 0
+    }
+  ],
+  "source_sha256": {
+    "crates/muyon-core/src/agent/owner.rs": "d8a3d40676f0a4f9777ccf9aa1fb7c426b1d876135d2510c7bc1ebded2ce639e",
+    "crates/muyon-core/src/agent/workflow.rs": "605c553185a467d0bae4ea1b9e67e87b8ad2aa7fdafe4b38b5b654dfd91fb13d",
+    "crates/muyon-core/src/group_runtime/store.rs": "a0d80c3cf27761dab591c86c1e594197769ce5d8992cd183070a6d5691e16c18",
+    "crates/muyon-core/src/group_runtime/bridge.rs": "836507e862b3ddbd720a68662702cd34df781cce24aadb21d6ea7b77b6bdfaae",
+    "crates/muyon-core/src/group_runtime/binding.rs": "c420c555908db59128eca9df7c15eec6cdc0bc8b2e24a9465429d0d5d06102a5",
+    "crates/muyon-core/tests/group_request_binding.rs": "5c8b9318d84d6699d99dc63d5cc1eb164219b71e548a192cd61d7208079acd41"
+  }
+}
