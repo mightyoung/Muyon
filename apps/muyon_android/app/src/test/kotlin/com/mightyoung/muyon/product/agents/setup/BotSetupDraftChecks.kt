@@ -106,5 +106,33 @@ fun main() {
         d.editPurpose("补充说明")
         check(d.snapshot().creation.status == CreationStatus.NOT_REQUESTED)
     }
+    test("explicit host choices reject unavailable and cross-scope; version change clears selection") {
+        val d = ready(); d.editRole("研究员")
+        val paper = CapabilityOption("paper-overview", "v1", true, "本地可用", "当前项目论文", "论文概览")
+        val unavailable = CapabilityOption("supplier-overview", "v1", false, "当前未提供", "供应商", "概览")
+        d.offerChoices(listOf(paper, unavailable), listOf(MaterialOption("p1", "account/project", true)))
+        rejects { d.selectChoices(setOf("supplier-overview"), emptySet()) }
+        rejects { d.selectChoices(emptySet(), setOf("other-private-file")) }
+        rejects { d.offerChoices(listOf(paper), listOf(MaterialOption("secret", "other/project", true))) }
+        d.selectChoices(setOf("paper-overview"), setOf("p1")); d.next()
+        check(d.preview().capabilities.single().id == "paper-overview")
+        d.editName("改名不重置技能")
+        check(d.preview().capabilities.single().id == "paper-overview")
+        d.offerChoices(listOf(paper.copy(version = "v2")), listOf(MaterialOption("p1", "account/project", false)))
+        check(d.preview().capabilities.isEmpty() && d.preview().materialScope.isEmpty())
+        check(d.choices().capabilities.single().version == "v2")
+        check(d.choices().materials.single().available == false)
+        check(d.preview().role == "研究员")
+    }
+    test("UTF16 is bounded and malformed input rejected without state loss") {
+        val d = ready()
+        val old = d.snapshot()
+        rejects { d.editName("\uD800") }
+        rejects { d.editRole("x".repeat(161)) }
+        rejects { d.editPurpose("x".repeat(8001)) }
+        check(d.snapshot() == old)
+        d.editName("📚".repeat(30))
+        rejects { d.editName("📚".repeat(31)) }
+    }
     println("PASS $passed offline checks")
 }
