@@ -2,7 +2,7 @@ name: Muyon Android and Rust product
 
 on:
   push:
-    branches: [develop, codex/muyon-android-refactor]
+    branches: [develop, codex/muyon-android-refactor, ci/overall-combination-next-20261022]
     paths: &product_paths
       - 'crates/**'
       - 'apps/muyon_android/**'
