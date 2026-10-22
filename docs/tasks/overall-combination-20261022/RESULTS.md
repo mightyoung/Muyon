@@ -1,3 +1,5 @@
+> Latestc628e23e: authorized save-only documented ABI exception applied; FFI14PASS/FFIall-target strictPASS/current4-method regenerationCMPpass. Workspace strict still only transactions387 needless_update red, original owner fix pending. No next batch started. See ABI-EXCEPTION-RECHECK.md; earlier records below are historical.
+
 > Latest4b98072e: storage repeat_n fixed and15PASS. Core strict per-target audit24commands:23PASS, only transactions.rs387 needless_update fails; full strict also FFIlib181 too_many_arguments. Method-local documented ABI exception authorized, source pending. See CLIPPY-TARGET-AUDIT.md. Earlier records below retain fixed-version history.
 
 > Latest67fd14c4: workspace435 PASS and final fixed-source independent composition review complete. Strict Clippy FAIL101: FFIlib.rs181 too_many_arguments + document_storage.rs685 manual_repeat_n. Prior55 diagnostics cleared. See STRICT-GATE-REMAINING.md; next candidate/provider batch not started. Earlier records below are historical.

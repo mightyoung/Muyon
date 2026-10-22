@@ -1,3 +1,5 @@
+> Updated provider pin:7bb89a713c0ce5678a8c4cae7fc5e24612d88362 precisely includes accepted purefmt. Fifth prepare uses LocalDraftPrepareRequest record; do not use098d positional parameters. FFI compilation/generation still require next-batch actual verification. Old save ABI exception must remain disclosed. Other queued rows below retain their source-version history.
+
 # Deferred fixed inputs — not part of current435
 
 User ordering: close current strict workspace gate first, then start a separate

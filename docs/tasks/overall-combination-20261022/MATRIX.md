@@ -65,3 +65,5 @@ Restrictions: no main/develop mutation/merge, deploy, force push/delete, real mo
 - Gateway test-only2e2cfcdec28c5ecdf4ebc45523fc0885d4b0a9da via67fd14c4 deletes5drop(g); current full fixed-source independent review verified all pins. Fresh workspace435PASS; new strict Clippy targets FFIlib181 too_many_arguments and document_storage685 manual_repeat_n fail. See STRICT-GATE-REMAINING.md. New candidate/provider batch not started until this gate closes.
 
 - Core test lint-only8f24e8f5384489e2ee7d86b8494ee1ca47c0cd8b via4b98072e changes only repeat_n at document_storage685; fresh15PASS. All24core strict target commands scanned:23PASS, onlytransactions387 needless_update failed. FFIABI method exception authorized by parent but pending ownerfixed. See CLIPPY-TARGET-AUDIT.md.
+
+- Method-local fixed-ABI owner patch9ff15871556a4afc8f283a2fbc5d695d7531cd27 via c628e23e: explicitly parent-authorized save-only too_many_arguments allowance+reason; body/signature unchanged. ActualFFI14/FFIstrictalltarget0/bindgenCMPpass; workspace strict onlytransactions387 stillred. Disclose ABIexception, no argument refactor. See ABI-EXCEPTION-RECHECK.md.
