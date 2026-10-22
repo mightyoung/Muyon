@@ -213,16 +213,24 @@ impl ProductCore {
             code: "local_draft_unavailable".into(),
         })?;
         let binding = muyon_core::bot_drafts::DraftBinding {
-            namespace_id, draft_id, expected_generation, expected_stored_revision,
+            namespace_id,
+            draft_id,
+            expected_generation,
+            expected_stored_revision,
         };
         let value = muyon_core::bot_drafts::prepare_save(
-            &state.store, &conversation, project.as_deref(), &binding, &attempt_id,
+            &state.store,
+            &conversation,
+            project.as_deref(),
+            &binding,
+            &attempt_id,
             muyon_core::bot_drafts::SaveRevisions {
                 exported_memory_revision: &exported_memory_revision,
                 host_editor_revision: &host_editor_revision,
             },
             &archive,
-        ).map_err(|code| ProductError::Failure { code: code.into() })?;
+        )
+        .map_err(|code| ProductError::Failure { code: code.into() })?;
         encode(&value)
     }
 
@@ -1803,16 +1811,24 @@ mod local_draft_bridge_tests {
     #[test]
     fn prepared_attempt_is_discovered_and_fenced_after_native_restart() {
         let root = std::env::temp_dir().join(format!(
-            "muyon-local-prepared-ffi-{}-{}", std::process::id(),
+            "muyon-local-prepared-ffi-{}-{}",
+            std::process::id(),
             NEXT.fetch_add(1, Ordering::Relaxed)
         ));
-        let core = ProductCore::open(root.to_str().unwrap().into(),
-            "workspace".into(), "epoch".into(), true).unwrap();
+        let core = ProductCore::open(
+            root.to_str().unwrap().into(),
+            "workspace".into(),
+            "epoch".into(),
+            true,
+        )
+        .unwrap();
         let desc = parse(core.local_draft_resolve(CONVERSATION.into(), None).unwrap());
         let text = |key: &str| desc[key].as_str().unwrap().to_owned();
         let hex = "4d59424400000001000000000000000100000000000000000000000000000000000000fbd7ab6104f8d45a51a4ae9335d359af13ab91abe8747df7952c7ef571c7cd2c";
-        let archive: Vec<u8> = (0..hex.len()).step_by(2)
-            .map(|i| u8::from_str_radix(&hex[i..i + 2], 16).unwrap()).collect();
+        let archive: Vec<u8> = (0..hex.len())
+            .step_by(2)
+            .map(|i| u8::from_str_radix(&hex[i..i + 2], 16).unwrap())
+            .collect();
         core.local_draft_prepare_save(LocalDraftPrepareRequest {
             conversation: CONVERSATION.into(),
             project: None,
@@ -1824,19 +1840,43 @@ mod local_draft_bridge_tests {
             exported_memory_revision: "17".into(),
             host_editor_revision: "42".into(),
             archive: archive.clone(),
-        }).unwrap();
+        })
+        .unwrap();
         drop(core);
-        let core = ProductCore::open(root.to_str().unwrap().into(),
-            "workspace".into(), "next-epoch".into(), false).unwrap();
+        let core = ProductCore::open(
+            root.to_str().unwrap().into(),
+            "workspace".into(),
+            "next-epoch".into(),
+            false,
+        )
+        .unwrap();
         let recovered = parse(core.local_draft_resolve(CONVERSATION.into(), None).unwrap());
         assert_eq!(recovered["save_attempt"]["attempt_id"], ATTEMPT);
         assert_eq!(recovered["save_attempt"]["host_editor_revision"], "42");
-        let result = parse(core.local_draft_lookup_save(CONVERSATION.into(), None,
-            text("namespace_id"), text("draft_id"), ATTEMPT.into()).unwrap());
+        let result = parse(
+            core.local_draft_lookup_save(
+                CONVERSATION.into(),
+                None,
+                text("namespace_id"),
+                text("draft_id"),
+                ATTEMPT.into(),
+            )
+            .unwrap(),
+        );
         assert_eq!(result["status"], "not_committed_local_storage");
-        let error = core.local_draft_save(CONVERSATION.into(), None,
-            text("namespace_id"), text("draft_id"), text("registry_generation"),
-            "0".into(), ATTEMPT.into(), "17".into(), archive).unwrap_err();
+        let error = core
+            .local_draft_save(
+                CONVERSATION.into(),
+                None,
+                text("namespace_id"),
+                text("draft_id"),
+                text("registry_generation"),
+                "0".into(),
+                ATTEMPT.into(),
+                "17".into(),
+                archive,
+            )
+            .unwrap_err();
         assert_eq!(error.to_string(), "local_draft_terminal");
         let unchanged = parse(core.local_draft_resolve(CONVERSATION.into(), None).unwrap());
         assert_eq!(unchanged["stored_revision"], "0");
@@ -1880,18 +1920,21 @@ mod local_draft_bridge_tests {
             .step_by(2)
             .map(|i| u8::from_str_radix(&archive_hex[i..i + 2], 16).unwrap())
             .collect();
-        let prepared = parse(core.local_draft_prepare_save(LocalDraftPrepareRequest {
-            conversation: CONVERSATION.into(),
-            project: None,
-            namespace_id: text("namespace_id"),
-            draft_id: text("draft_id"),
-            expected_generation: text("registry_generation"),
-            expected_stored_revision: "0".into(),
-            attempt_id: ATTEMPT.into(),
-            exported_memory_revision: "17".into(),
-            host_editor_revision: "42".into(),
-            archive: archive.clone(),
-        }).unwrap());
+        let prepared = parse(
+            core.local_draft_prepare_save(LocalDraftPrepareRequest {
+                conversation: CONVERSATION.into(),
+                project: None,
+                namespace_id: text("namespace_id"),
+                draft_id: text("draft_id"),
+                expected_generation: text("registry_generation"),
+                expected_stored_revision: "0".into(),
+                attempt_id: ATTEMPT.into(),
+                exported_memory_revision: "17".into(),
+                host_editor_revision: "42".into(),
+                archive: archive.clone(),
+            })
+            .unwrap(),
+        );
         assert_eq!(prepared["state"], "prepared");
         assert_eq!(prepared["host_editor_revision"], "42");
         let receipt = parse(
