@@ -12,6 +12,7 @@ pub mod sqlite;
 pub mod artifacts;
 
 pub mod bot_drafts;
+pub mod bot_definitions;
 
 pub mod document_edit;
 
