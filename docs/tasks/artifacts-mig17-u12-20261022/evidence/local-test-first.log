@@ -1,0 +1,2 @@
+/bin/bash: line 116: cargo: command not found
+LOCAL_TEST_FIRST_EXIT=127; NOT_RUN if cargo unavailable

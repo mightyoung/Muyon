@@ -13,6 +13,7 @@ use serde::{Deserialize, Serialize};
 mod project_access;
 mod save_journal;
 mod catalog;
+pub mod local_interactions;
 pub use project_access::{ArtifactProjectAccess, ArtifactProjectOperation};
 pub use save_journal::{ArtifactSaveOperation, ArtifactSaveOutcome, ArtifactSaveReceipt, ArtifactSaveStatus};
 pub use catalog::ArtifactCatalogEntry;

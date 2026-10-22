@@ -1,0 +1,2 @@
+NOT_RUN: cargo not installed; no installation attempted
+LOCAL_FINAL_HARNESS_EXIT=127; NOT_RUN if cargo unavailable

@@ -11,7 +11,7 @@ pub(super) const WORKFLOW_SCHEMA: &[(&str, &str)] = &[
 ];
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
-pub enum ArtifactProjectOperation { Discover, Save, LookupOwnSaves }
+pub enum ArtifactProjectOperation { Discover, Save, LookupOwnSaves, LocalDraft, LocalSubmit, LocalFeedback, ReadOwnLocal }
 /// Not deserializable. The host resolves authenticated actor/project identity.
 /// This is a request binding; only the persisted live grant supplies permission.
 #[derive(Clone, Debug)]
@@ -85,7 +85,7 @@ impl BusinessStore {
         let tx = sql(self.database().transaction())?;
         self.artifact_workflow_schema()?; self.artifact_project_live(access)?;
         let now = now_ms()?;
-        if operations.is_empty() || operations.len() > 3 || expires_at_ms <= now
+        if operations.is_empty() || operations.len() > 7 || expires_at_ms <= now
             || expires_at_ms > now.checked_add(30_000).ok_or(ContractError::InvalidAuthority)? {
             return Err(ContractError::InvalidAuthority);
         }
@@ -111,7 +111,7 @@ impl BusinessStore {
         if rows.len() != 1 { return Err(ContractError::InvalidAuthority); }
         let permissions: Vec<ArtifactProjectOperation> = decode(cell(&rows[0], 0)?)?;
         let expires: u64 = cell(&rows[0], 1)?.parse().map_err(|_| ContractError::StorageCorrupt)?;
-        if permissions.len() > 3 || !permissions.contains(&operation) || expires <= now_ms()? { return Err(ContractError::InvalidAuthority); }
+        if permissions.len() > 7 || !permissions.contains(&operation) || expires <= now_ms()? { return Err(ContractError::InvalidAuthority); }
         Ok(())
     }
 }

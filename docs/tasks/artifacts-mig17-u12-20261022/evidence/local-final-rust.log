@@ -1,0 +1,4 @@
+NOT_RUN: cargo not installed; no installation attempted
+LOCAL_FINAL_RUST_EXIT=127; NOT_RUN if cargo unavailable
+/bin/bash: line 26: cargo: command not found
+LOCAL_FINAL_CLIPPY_EXIT=127; NOT_RUN if cargo unavailable

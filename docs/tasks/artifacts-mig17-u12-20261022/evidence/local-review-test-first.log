@@ -1,0 +1,2 @@
+/bin/bash: line 28: cargo: command not found
+LOCAL_REVIEW_REGRESSION_FIRST_EXIT=127; NOT_RUN if cargo unavailable

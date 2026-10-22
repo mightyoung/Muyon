@@ -1,0 +1,2 @@
+/bin/bash: line 15: cargo: command not found
+LOCAL_REVOKE_TEST_FIRST_EXIT=127; NOT_RUN if cargo unavailable
