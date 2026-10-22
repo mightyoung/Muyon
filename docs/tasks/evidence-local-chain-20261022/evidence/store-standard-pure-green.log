@@ -1,0 +1,57 @@
+warning: method `clone_blob_reference_in_transaction` is never used
+   --> muyon-core/src/blobs.rs:646:19
+    |
+313 | impl BusinessStore {
+    | ------------------ method in this implementation
+...
+646 |     pub(crate) fn clone_blob_reference_in_transaction(
+    |                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: methods `historical_grant`, `document_history_access_in_transaction`, `document_access_in_transaction`, `document_grant_in_transaction`, and `document_clone_in_transaction` are never used
+   --> muyon-core/src/documents/storage.rs:117:8
+    |
+ 88 | impl BusinessStore {
+    | ------------------ methods in this implementation
+...
+117 |     fn historical_grant(&self, current: &DocumentAccess, historical: &DocumentRef, required: &[DocumentOperation]) -> Result<()> {
+    |        ^^^^^^^^^^^^^^^^
+...
+162 |     pub(crate) fn document_history_access_in_transaction(&self, tx: &Transaction<'_>, current: &DocumentAccess, historical: &DocumentRef,...
+    |                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+...
+311 |     pub(crate) fn document_access_in_transaction(
+    |                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+...
+327 |     pub(crate) fn document_grant_in_transaction(
+    |                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+...
+449 |     pub(crate) fn document_clone_in_transaction(
+    |                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: `muyon-core` (lib) generated 2 warnings
+   Compiling muyon-core v0.1.0 (/workspace/Muyon/crates/muyon-core)
+    Finished `test` profile [unoptimized] target(s) in 0.26s
+     Running tests/evidence_local.rs (crates/target/debug/deps/evidence_local-1be9f1693f6a1f58)
+
+running 16 tests
+test anchored_request_and_inspect_do_not_expand_to_whole_text ... ok
+test cache_access_rechecks_revision_scope_and_revocation ... ok
+test changed_blob_and_authority_invalidate_existing_derivation ... ok
+test citation_order_is_explicit_and_repeated_processing_has_same_identity ... ok
+test debug_never_discloses_cached_text_after_revocation ... ok
+test every_derived_delivery_rechecks_permission_after_computation ... ok
+test forged_ranges_source_and_page_do_not_resolve ... ok
+test failed_decoding_empty_and_changed_bytes_are_distinct_from_success ... ok
+test no_read_permission_never_gains_whole_text ... ok
+test pdf_and_ocr_never_manufacture_content ... ok
+test revocation_between_checks_never_delivers_extraction ... ok
+test synthetic_text_has_real_receipt_and_bound_utf8_anchor ... ok
+test unknown_format_never_becomes_utf8_by_caller_assertion ... ok
+test body_citations_and_candidates_are_separate_and_citation_numbers_are_stable ... ok
+test source_identity_separates_same_bytes_across_scope_document_and_revision ... ok
+test limits_reject_overlarge_queries_invalid_limits_and_oversized_sources ... ok
+
+test result: ok. 16 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.07s
+
