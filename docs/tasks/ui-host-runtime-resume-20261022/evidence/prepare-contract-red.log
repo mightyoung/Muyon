@@ -1,0 +1,18 @@
+F.s
+======================================================================
+FAIL: test_real_repository_contract (__main__.PrepareBindingContract.test_real_repository_contract)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/Muyon-host-resume-20261022/apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/chat/persistence/check-prepare-binding.py", line 54, in test_real_repository_contract
+    check_contract(SERVICE.read_text(), BINDING.read_text(), FFI.read_text())
+  File "/workspace/Muyon-host-resume-20261022/apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/chat/persistence/check-prepare-binding.py", line 47, in check_contract
+    assert record_call(service) == ''.join(expected_mapping.split()), 'captured original binding drift'
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/Muyon-host-resume-20261022/apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/chat/persistence/check-prepare-binding.py", line 17, in record_call
+    raise AssertionError('Service does not invoke actual generated prepare method')
+AssertionError: Service does not invoke actual generated prepare method
+
+----------------------------------------------------------------------
+Ran 3 tests in 0.003s
+
+FAILED (failures=1, skipped=1)

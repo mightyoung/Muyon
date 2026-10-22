@@ -1,0 +1,66 @@
+HTTP/1.1 200 OK
+date: Thu, 22 Oct 2026 17:44:51 GMT
+server: envoy
+
+HTTP/2 307 
+date: Thu, 22 Oct 2026 17:44:51 GMT
+content-type: text/html; charset=UTF-8
+content-length: 169
+location: https://github.com/gradle/gradle-distributions/releases/download/v8.13.0/gradle-8.13-bin.zip
+strict-transport-security: max-age=31536000; includeSubDomains; preload
+server: envoy
+cf-ray: a4ea4ff95ec2e0fc-ORD
+x-envoy-upstream-service-time: 114
+
+HTTP/1.1 200 OK
+date: Thu, 22 Oct 2026 17:44:51 GMT
+server: envoy
+
+HTTP/2 302 
+date: Thu, 22 Oct 2026 17:42:54 GMT
+content-type: text/html; charset=utf-8
+location: https://release-assets.githubusercontent.com/github-production-release-asset/696192900/ae74b100-f6f6-4fa3-a880-fb419e6074cb?[PUBLIC_REDIRECT_QUERY_REDACTED]
+vary: X-PJAX, X-PJAX-Container, Turbo-Visit, Turbo-Frame, X-Requested-With, X-GitHub-Client-Version, Sec-Fetch-Site,Accept-Encoding, Accept, X-Requested-With
+cache-control: no-cache
+strict-transport-security: max-age=31536000; includeSubdomains; preload
+x-frame-options: deny
+x-content-type-options: nosniff
+x-xss-protection: 0
+referrer-policy: no-referrer-when-downgrade
+server: envoy
+content-length: 0
+x-github-request-id: 930B:448BB:10C176:16A99D:6ADA4B93
+x-github-edge-region: iad
+x-envoy-upstream-service-time: 219
+
+HTTP/1.1 200 OK
+date: Thu, 22 Oct 2026 17:44:51 GMT
+server: envoy
+
+HTTP/2 200 
+last-modified: Tue, 25 Feb 2025 09:33:51 GMT
+etag: "0x8DD557F83E3F218"
+server: envoy
+x-ms-request-id: 589436df-e01e-0040-4be5-f0e66d000000
+x-ms-version: 2018-11-09
+x-ms-creation-time: Tue, 25 Feb 2025 09:33:51 GMT
+x-ms-lease-status: unlocked
+x-ms-lease-state: available
+x-ms-blob-type: BlockBlob
+x-ms-server-encrypted: true
+via: 1.1 varnish, 1.1 varnish
+accept-ranges: bytes
+date: Thu, 22 Oct 2026 17:44:51 GMT
+age: 3121
+x-served-by: cache-iad-kcgs7200105-IAD, cache-chi-klot8100067-CHI
+x-cache: HIT, HIT
+x-cache-hits: 328749, 1
+x-timer: S1792691092.789362,VS0,VE18
+content-disposition: attachment; filename=gradle-8.13-bin.zip
+content-type: application/octet-stream
+content-length: 136983045
+x-envoy-upstream-service-time: 82
+
+
+FINAL_HTTP=200
+Note: public signed redirect query redacted; HTTP status chain preserved.

@@ -677,6 +677,12 @@ internal object IntegrityCheckingUniffiLib {
     }
 
     internal fun ensureInitialized() = Unit
+    external fun uniffi_muyon_android_product_checksum_func_office_extract_text(
+    ): Int
+    external fun uniffi_muyon_android_product_checksum_func_office_replace_docx_run(
+    ): Int
+    external fun uniffi_muyon_android_product_checksum_func_office_set_xlsx_numeric_cell(
+    ): Int
     external fun uniffi_muyon_android_product_checksum_func_product_protocol_version(
     ): Int
     external fun uniffi_muyon_android_product_checksum_method_productcore_abort_upload(
@@ -887,6 +893,12 @@ internal object UniffiLib {
     ): RustBuffer.ByValue
     external fun uniffi_muyon_android_product_fn_method_productcore_supplier(`ptr`: Long,`supplierId`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
+    external fun uniffi_muyon_android_product_fn_func_office_extract_text(`bytes`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    external fun uniffi_muyon_android_product_fn_func_office_replace_docx_run(`bytes`: RustBuffer.ByValue,`expected`: RustBuffer.ByValue,`replacement`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    external fun uniffi_muyon_android_product_fn_func_office_set_xlsx_numeric_cell(`bytes`: RustBuffer.ByValue,`sheet`: RustBuffer.ByValue,`cell`: RustBuffer.ByValue,`expected`: RustBuffer.ByValue,`replacement`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
     external fun uniffi_muyon_android_product_fn_func_product_protocol_version(uniffi_out_err: UniffiRustCallStatus, 
     ): Int
     external fun ffi_muyon_android_product_rustbuffer_alloc(`size`: Long,uniffi_out_err: UniffiRustCallStatus, 
@@ -1008,6 +1020,15 @@ private fun uniffiCheckContractApiVersion(lib: IntegrityCheckingUniffiLib) {
 }
 @Suppress("UNUSED_PARAMETER")
 private fun uniffiCheckApiChecksums(lib: IntegrityCheckingUniffiLib) {
+    if ((lib.uniffi_muyon_android_product_checksum_func_office_extract_text() and 0xFFFF) != 46777) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if ((lib.uniffi_muyon_android_product_checksum_func_office_replace_docx_run() and 0xFFFF) != 8685) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if ((lib.uniffi_muyon_android_product_checksum_func_office_set_xlsx_numeric_cell() and 0xFFFF) != 23464) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
     if ((lib.uniffi_muyon_android_product_checksum_func_product_protocol_version() and 0xFFFF) != 64016) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
@@ -2734,6 +2755,96 @@ public object FfiConverterTypeLocalDraftPrepareRequest: FfiConverterRustBuffer<L
 
 
 
+data class OfficeCandidate (
+    var `candidate`: kotlin.ByteArray
+    , 
+    var `sourceSha256`: kotlin.String
+    , 
+    var `candidateSha256`: kotlin.String
+    , 
+    var `changedPart`: kotlin.String
+    
+){
+    
+
+    
+
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeOfficeCandidate: FfiConverterRustBuffer<OfficeCandidate> {
+    override fun read(buf: ByteBuffer): OfficeCandidate {
+        return OfficeCandidate(
+            FfiConverterByteArray.read(buf),
+            FfiConverterString.read(buf),
+            FfiConverterString.read(buf),
+            FfiConverterString.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: OfficeCandidate) = (
+            FfiConverterByteArray.allocationSize(value.`candidate`) +
+            FfiConverterString.allocationSize(value.`sourceSha256`) +
+            FfiConverterString.allocationSize(value.`candidateSha256`) +
+            FfiConverterString.allocationSize(value.`changedPart`)
+    )
+
+    override fun write(value: OfficeCandidate, buf: ByteBuffer) {
+            FfiConverterByteArray.write(value.`candidate`, buf)
+            FfiConverterString.write(value.`sourceSha256`, buf)
+            FfiConverterString.write(value.`candidateSha256`, buf)
+            FfiConverterString.write(value.`changedPart`, buf)
+    }
+}
+
+
+
+/**
+ * On-device Office engine (pure Rust, no I/O, no state). Results are candidate
+ * bytes plus hashes only: nothing is stored, published or treated as authority.
+ */
+data class OfficeTextSection (
+    var `name`: kotlin.String
+    , 
+    var `text`: kotlin.String
+    
+){
+    
+
+    
+
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeOfficeTextSection: FfiConverterRustBuffer<OfficeTextSection> {
+    override fun read(buf: ByteBuffer): OfficeTextSection {
+        return OfficeTextSection(
+            FfiConverterString.read(buf),
+            FfiConverterString.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: OfficeTextSection) = (
+            FfiConverterString.allocationSize(value.`name`) +
+            FfiConverterString.allocationSize(value.`text`)
+    )
+
+    override fun write(value: OfficeTextSection, buf: ByteBuffer) {
+            FfiConverterString.write(value.`name`, buf)
+            FfiConverterString.write(value.`text`, buf)
+    }
+}
+
+
+
 
 
 sealed class ProductException: kotlin.Exception() {
@@ -2856,7 +2967,77 @@ public object FfiConverterOptionalString: FfiConverterRustBuffer<kotlin.String?>
             FfiConverterString.write(value, buf)
         }
     }
-} fun `productProtocolVersion`(): kotlin.UInt {
+}
+
+
+
+
+/**
+ * @suppress
+ */
+public object FfiConverterSequenceTypeOfficeTextSection: FfiConverterRustBuffer<List<OfficeTextSection>> {
+    override fun read(buf: ByteBuffer): List<OfficeTextSection> {
+        val len = buf.getInt()
+        return List<OfficeTextSection>(len) {
+            FfiConverterTypeOfficeTextSection.read(buf)
+        }
+    }
+
+    override fun allocationSize(value: List<OfficeTextSection>): ULong {
+        val sizeForLength = 4UL
+        val sizeForItems = value.map { FfiConverterTypeOfficeTextSection.allocationSize(it) }.sum()
+        return sizeForLength + sizeForItems
+    }
+
+    override fun write(value: List<OfficeTextSection>, buf: ByteBuffer) {
+        buf.putInt(value.size)
+        value.iterator().forEach {
+            FfiConverterTypeOfficeTextSection.write(it, buf)
+        }
+    }
+}
+    @Throws(ProductException::class) fun `officeExtractText`(`bytes`: kotlin.ByteArray): List<OfficeTextSection> {
+            return FfiConverterSequenceTypeOfficeTextSection.lift(
+    uniffiRustCallWithError(ProductException) { _status ->
+    UniffiLib.uniffi_muyon_android_product_fn_func_office_extract_text(
+    
+        
+        FfiConverterByteArray.lower(`bytes`),_status)
+}
+    )
+    }
+    
+
+    @Throws(ProductException::class) fun `officeReplaceDocxRun`(`bytes`: kotlin.ByteArray, `expected`: kotlin.String, `replacement`: kotlin.String): OfficeCandidate {
+            return FfiConverterTypeOfficeCandidate.lift(
+    uniffiRustCallWithError(ProductException) { _status ->
+    UniffiLib.uniffi_muyon_android_product_fn_func_office_replace_docx_run(
+    
+        
+        FfiConverterByteArray.lower(`bytes`),
+        FfiConverterString.lower(`expected`),
+        FfiConverterString.lower(`replacement`),_status)
+}
+    )
+    }
+    
+
+    @Throws(ProductException::class) fun `officeSetXlsxNumericCell`(`bytes`: kotlin.ByteArray, `sheet`: kotlin.String, `cell`: kotlin.String, `expected`: kotlin.String, `replacement`: kotlin.String): OfficeCandidate {
+            return FfiConverterTypeOfficeCandidate.lift(
+    uniffiRustCallWithError(ProductException) { _status ->
+    UniffiLib.uniffi_muyon_android_product_fn_func_office_set_xlsx_numeric_cell(
+    
+        
+        FfiConverterByteArray.lower(`bytes`),
+        FfiConverterString.lower(`sheet`),
+        FfiConverterString.lower(`cell`),
+        FfiConverterString.lower(`expected`),
+        FfiConverterString.lower(`replacement`),_status)
+}
+    )
+    }
+    
+ fun `productProtocolVersion`(): kotlin.UInt {
             return FfiConverterUInt.lift(
     uniffiRustCall() { _status ->
     UniffiLib.uniffi_muyon_android_product_fn_func_product_protocol_version(

@@ -1,0 +1,42 @@
+[
+  {
+    "package": "platforms;android-36",
+    "revision": "1",
+    "license": "android-sdk-license",
+    "url": "https://dl.google.com/android/repository/platform-36-ext19_r01.zip",
+    "checksum_type": null,
+    "checksum": "52e240c229cf2ad561ee262ebdfff266e180c585"
+  },
+  {
+    "package": "platforms;android-36",
+    "revision": "1",
+    "license": "android-sdk-license",
+    "url": "https://dl.google.com/android/repository/platform-36-ext18_r01.zip",
+    "checksum_type": null,
+    "checksum": "33a7af9f531f6ce67b3ec357f619e69aa0a95c8a"
+  },
+  {
+    "package": "platforms;android-36",
+    "revision": "2",
+    "license": "android-sdk-license",
+    "url": "https://dl.google.com/android/repository/platform-36_r02.zip",
+    "checksum_type": null,
+    "checksum": "2c1a80dd4d9f7d0e6dd336ec603d9b5c55a6f576"
+  },
+  {
+    "package": "build-tools;35.0.0",
+    "revision": "35.0.0",
+    "license": "android-sdk-license",
+    "url": "https://dl.google.com/android/repository/build-tools_r35_linux.zip",
+    "checksum_type": null,
+    "checksum": "2cfaa0bbb2336e9ec18ed3ecea84fa2e2af607bc"
+  },
+  {
+    "package": "cmdline-tools;latest",
+    "revision": "23.0",
+    "license": "android-sdk-license",
+    "url": "https://dl.google.com/android/repository/commandlinetools-linux-16111833_latest.zip",
+    "checksum_type": null,
+    "checksum": "e025545c62a8e64c7559119566a569fb1dec5f60"
+  }
+]

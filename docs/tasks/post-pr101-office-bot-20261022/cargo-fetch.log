@@ -1,0 +1,11 @@
+BEGIN {"argv": ["cargo", "fetch", "--locked", "--manifest-path", "crates/Cargo.toml"], "cwd": "/workspace/Muyon-post-pr101-office-bot-20261022", "source_sha": "bc8fea61744530c1f2e38e65b0273a434c3bd5a8", "dirty_source": false, "start_utc": "2026-10-22T18:57:17.027943+00:00"}
+    Updating crates.io index
+ Downloading crates ...
+  Downloaded cfg_aliases v0.2.2
+  Downloaded zlib-rs v0.6.8
+  Downloaded flate2 v1.1.10
+  Downloaded crc32fast v1.5.3
+  Downloaded typed-path v0.12.4
+  Downloaded zip v9.0.5
+  Downloaded nix v0.31.3
+END {"argv": ["cargo", "fetch", "--locked", "--manifest-path", "crates/Cargo.toml"], "cwd": "/workspace/Muyon-post-pr101-office-bot-20261022", "source_sha": "bc8fea61744530c1f2e38e65b0273a434c3bd5a8", "dirty_source": false, "start_utc": "2026-10-22T18:57:17.027943+00:00", "exit_code": 0, "duration_seconds": 2.744, "end_utc": "2026-10-22T18:57:19.711250+00:00"}
