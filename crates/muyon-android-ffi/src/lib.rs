@@ -178,6 +178,9 @@ impl ProductCore {
     /// A committed receipt acknowledges only its exported snapshot. The host must
     /// compare its live reducer/scope/revision before displaying newer edits as saved.
     /// Any error after dispatch requires original-attempt lookup, never automatic resave.
+    // Preserve the generated UniFFI ABI and the existing positional Service caller.
+    // A request record requires a coordinated protocol/binding migration, not a lint fix.
+    #[allow(clippy::too_many_arguments)]
     pub fn local_draft_save(
         &self,
         conversation: String,
