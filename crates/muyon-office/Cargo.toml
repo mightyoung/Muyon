@@ -1,0 +1,10 @@
+[package]
+name = "muyon-office"
+version = "0.1.0"
+edition = "2021"
+publish = false
+description = "Pure-Rust, dependency-light OOXML package reader and narrow byte-preserving editor (no C, no process spawn, no network)"
+
+[dependencies]
+sha2.workspace = true
+zip = { version = "9.0.5", default-features = false, features = ["deflate-flate2-zlib-rs"] }
