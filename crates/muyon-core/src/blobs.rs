@@ -673,7 +673,12 @@ impl BusinessStore {
         )?;
         sql(self.database().exec(
             "INSERT INTO blob_references(reference_id,project_id,target_id,digest) VALUES(?,?,?,?)",
-            &[new_reference_id, project_id, target_id, &expected_blob.digest],
+            &[
+                new_reference_id,
+                project_id,
+                target_id,
+                &expected_blob.digest,
+            ],
         ))?;
         Ok(expected_blob.clone())
     }
