@@ -1,0 +1,15 @@
+[package]
+name="mig20-independent-store-review"
+version="0.0.0"
+edition="2021"
+[dependencies]
+serde={version="=1.0.229",features=["derive"]}
+serde_json="=1.0.154"
+sha2="=0.11.1"
+unicode-normalization="=0.1.25"
+muyon-rust-agent-host-lab={path="/workspace/mig20/experiments/redesign/rust-agent-host-lab/core"}
+muyon-core-agent-lab={path="/workspace/mig20/experiments/redesign/core-agent-lab/core"}
+muyon-web-search-lab={path="/workspace/mig20/experiments/redesign/web-search-lab/core"}
+[[test]]
+name="independent_store"
+path="review.rs"
