@@ -1,0 +1,12 @@
+# Fixed-source independent combination review
+
+Reviewer source_review inspected8940965ec3957134e4d0d6a2f3e7c57ba45aa796 read-only.
+No newcompositionoverwrite/authoritydefect. Shellactualfilesmatchc0c2dc99, except
+DocumentCapabilities intentionallykeepscurrentwording andonlyaddssurfaceparameters/
+mount. Host/Service/Runtime/Readercomponent/generatedbridge/Rust notrolledback.
+Activityhost=null/catalogempty+unavailable, lifecycle/windowfences onlypreparation,
+no fakeprincipal/grant/readabledocuments. Officewholeownedprefixexact5aed4e4f;
+defaultmissingtrustedruntime/config/bootstrapHOLD, no actualnamespace/worker/engine
+installed/enabled. Reviewer didnotruntests orwritefiles. ActualLinux41/runner28/
+legacy60/PureKotlin/packagepasses are integratorresults withlogs, notnativeisolation/
+realOffice/Android/PFD/Hostreauthorizationacceptance.

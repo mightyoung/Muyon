@@ -1,0 +1,14 @@
+{
+  "paths_exist": {
+    "/opt/android-sdk": false,
+    "/opt/android": false,
+    "/usr/local/lib/android/sdk": false,
+    "/workspace/host-projection-tools/gradle-8.13/bin/gradle": false,
+    "/workspace/ui-shell-tools/gradle-8.13/bin/gradle": false
+  },
+  "tools": {
+    "gradle": null,
+    "adb": null,
+    "sdkmanager": null
+  }
+}

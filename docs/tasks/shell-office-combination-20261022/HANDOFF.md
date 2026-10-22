@@ -1,0 +1,28 @@
+# Shell / Office integration handoff
+
+Branchlab/shell-office-combination-20261022; fixedsource
+8940965ec3957134e4d0d6a2f3e7c57ba45aa796, base42806009.
+Matrix locks Shellc0c2dc994df099c36c83813adf8410dac999d943 preparationdelta8files
+and Office5aed4e4fca940df96bf749053fd96b22c587761c ownedtools prefix/report e4aae.
+ThreewayShellpatchclean; currentcapabilitycopyretained; no Host/Service/Runtime/
+Rust/readercomponent/generated/fixture rollback. Officeprefixhashcheckedexactfixed.
+
+Actual Linux41/runner28/legacy60PASS; pureKotlinreadersurfacePASS; coldHost/Shell
+3mainsPASS; Androidpackage17PASS. Allsafeofflinefake/tempfile/socketpairpaths,
+notnativequalification/namespace/worker/engine. SourcewhitespacePASS.
+No Rustsourcechange; baseGroupsemantic911/probes7/migration5 PASS andfourwrapper
+strictclosedff99 preserved, never relabeledasnewShell/Officeexecutioncoverage.
+Groupstrictclosure report42806009 pushed, oldfourthunusedblock resolved.
+
+StillmissingactualHostcatalog/principal/selection admission/PFD/currentpolicyreauth/
+Androidinstrumentation/device/longreading; productionhost=null/catalogunavailable,
+no inventedrows/URI or fakegrant. Officeconcreteadaptercode defaultHOLD; realengine
+qualification/edit/render/recalc/export remainsNOT_RUN. bwrapreadonlydenial not
+retried orworkedaround; noSDKinstall/system/security/namespacecgroup changes.
+Generatedbinding remains01e1c019501c30a4c2c9ff532b2e82035f3e2442,
+SHA256c71b8062e07da7ee07059557acba768a7193b680fb20bc193a359b919d7dacdb.
+
+Sourceinvalidatione3fa/36b unresolvedABA/COPYtailstillHOLD, notimported. Futurefixed
+hookneedsrealmoduledependencies inall relevant sourceharnesses, no mocks/testremoval.
+No main/develop/CI/PRdeploy/fee/credential/realprovider/I04/old403/historicalUnknown.
+publication/verified/realclaimsend stayHOLD. Writersstopafterreview/seal/push.
