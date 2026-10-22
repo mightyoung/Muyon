@@ -690,3 +690,114 @@ fn host_observations_reject_paths_in_opaque_candidate_and_authority_ids() {
         Err(Error::Authority)
     );
 }
+
+#[test]
+fn commit_and_original_intent_recovery_require_exact_next_revision_without_overflow() {
+    let cases = [
+        (1, 1, false), // same value
+        (1, 0, false), // zero/backwards
+        (9, 2, false), // backwards, numerically not lexicographically ordered
+        (1, 3, false), // skipped revision
+        (0, 1, true),
+        (9, 10, true),
+        (u64::MAX - 1, u64::MAX, true),
+        (u64::MAX, 0, false), // overflow must not wrap
+        (u64::MAX, u64::MAX, false),
+    ];
+    for (base, next, accepted) in cases {
+        for route in 0..3 {
+            // direct, unknown recovery, late cancelled recovery
+            let mut b = binding();
+            b.document = document("project-a", base);
+            let mut t = Transaction::new(b.clone()).unwrap();
+            let f = facts(&b);
+            for command in [
+                Command::Inspect,
+                Command::Read,
+                Command::Propose,
+                Command::Preview,
+            ] {
+                t.execute(command, Some(&f)).unwrap();
+            }
+            let c = Candidate {
+                binding: b.clone(),
+                ..candidate()
+            };
+            t.execute(
+                Command::ApplyCopy {
+                    confirmation: Confirmation {
+                        binding: b.clone(),
+                        authority: f.authority.clone().unwrap(),
+                    },
+                    candidate: Some(c.clone()),
+                },
+                Some(&f),
+            )
+            .unwrap();
+            t.execute(
+                Command::Validate(Some(Validation {
+                    candidate: c.clone(),
+                    ..validation()
+                })),
+                Some(&f),
+            )
+            .unwrap();
+            if route == 1 {
+                t.execute(Command::OutcomeUnknown, Some(&f)).unwrap();
+            }
+            if route == 2 {
+                t.execute(Command::Cancel, Some(&f)).unwrap();
+            }
+            let before = t.state();
+            let r = CommitReceipt {
+                binding: b.clone(),
+                candidate: c.clone(),
+                previous_revision: Revision::new(base),
+                committed_revision: Revision::new(next),
+                cas_succeeded: true,
+                durable: true,
+            };
+            let command = if route == 0 {
+                Command::Commit(Some(r))
+            } else {
+                Command::RecoverCommit(Some(r))
+            };
+            let result = t.execute(command, Some(&f));
+            if accepted {
+                assert_eq!(result, Ok(()), "base={base} next={next} route={route}");
+                assert_eq!(t.state(), State::Committed);
+            } else {
+                assert_eq!(
+                    result,
+                    Err(Error::Binding),
+                    "base={base} next={next} route={route}"
+                );
+                assert_eq!(
+                    t.state(),
+                    before,
+                    "rejected observation cannot change state"
+                );
+                assert_eq!(t.candidate(), Some(&c));
+                assert!(t
+                    .execute(
+                        Command::Export(Some(ExportReceipt {
+                            binding: b.clone(),
+                            candidate: c,
+                            revision: Revision::new(next),
+                            export_id: "rejected-export".into(),
+                            durable: true
+                        })),
+                        Some(&f)
+                    )
+                    .is_err());
+                let rollback = Binding {
+                    document: document("project-a", next),
+                    intent_id: "rejected-rollback".into(),
+                    rollback_target: Some(Revision::new(base)),
+                    ..b
+                };
+                assert_eq!(t.rollback(rollback).unwrap_err(), Error::State);
+            }
+        }
+    }
+}

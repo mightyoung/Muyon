@@ -292,7 +292,10 @@ impl Transaction {
         if !r.durable {
             return Err(Error::MissingFact);
         }
-        if r.committed_revision == r.previous_revision {
+        // Match the shared Revision/business contract: every publication is
+        // exactly one checked increment, including rollback as a NEW revision.
+        let next = r.previous_revision.next().map_err(|_| Error::Binding)?;
+        if r.committed_revision != next {
             return Err(Error::Binding);
         }
         self.receipt = Some(r);
