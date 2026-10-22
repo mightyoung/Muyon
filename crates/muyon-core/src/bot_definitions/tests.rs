@@ -618,3 +618,33 @@ fn tail_original_intent_rename_rolls_back() {
         "UPDATE local_bot_definition_intents SET intent_id='33333333-3333-4333-8333-333333333333'",
     );
 }
+
+#[test]
+fn tail_source_registry_workspace_rolls_back() {
+    check_receipt_tail_trigger("UPDATE local_bot_draft_meta SET workspace='changed'");
+}
+#[test]
+fn tail_source_registry_version_rolls_back() {
+    check_receipt_tail_trigger("UPDATE local_bot_draft_meta SET schema_version='2'");
+}
+#[test]
+fn source_registry_ddl_changed_between_transactions_rejects() {
+    let f = project_fixture();
+    let r = prepare_create(f.store(), CONVERSATION, Some("p1"), &f.binding, INTENT).unwrap();
+    let result = confirm_create_with_boundary(
+        f.store(),
+        CONVERSATION,
+        Some("p1"),
+        INTENT,
+        &r.review_digest,
+        || {
+            sql(f.store().database().exec(
+                "ALTER TABLE local_bot_drafts ADD COLUMN unexpected TEXT",
+                &[],
+            ))?;
+            Ok(())
+        },
+    );
+    assert_eq!(result.unwrap_err(), "bot_query_original");
+    assert_original_pending_zero_definitions(&f);
+}

@@ -13,6 +13,13 @@ const SCHEMA: &[(&str,&str)] = &[
  ("local_bot_definition_intents","CREATE TABLE local_bot_definition_intents(intent_id TEXT PRIMARY KEY,scope_key TEXT NOT NULL,draft_key TEXT NOT NULL,binding_digest TEXT NOT NULL,frozen_json TEXT NOT NULL,owner_epoch TEXT NOT NULL,status TEXT NOT NULL CHECK(status IN('prepared','pending','unknown','committed','rejected')),receipt_json TEXT)"),
  ("local_bot_definitions","CREATE TABLE local_bot_definitions(id TEXT PRIMARY KEY,scope_key TEXT NOT NULL,draft_key TEXT NOT NULL UNIQUE,definition_json TEXT NOT NULL)"),
 ];
+// Exact consumed registry contract from fixed dependency 098d9aca. This is validation,
+// not a second registry or schema initializer; a new owner version requires recombination.
+const DRAFT_REGISTRY_SCHEMA: &[(&str, &str)] = &[
+    ("local_bot_draft_meta", "CREATE TABLE local_bot_draft_meta(id INTEGER PRIMARY KEY CHECK(id=1),schema_version TEXT NOT NULL,workspace TEXT NOT NULL,namespace_id TEXT NOT NULL)"),
+    ("local_bot_drafts", "CREATE TABLE local_bot_drafts(draft_id TEXT PRIMARY KEY,scope_key TEXT NOT NULL UNIQUE,workspace TEXT NOT NULL,conversation_id TEXT NOT NULL,project_id TEXT,registry_generation TEXT NOT NULL,stored_revision TEXT NOT NULL,lifecycle TEXT NOT NULL,archive_hex TEXT,archive_digest TEXT,CHECK((archive_hex IS NULL)=(archive_digest IS NULL)))"),
+    ("local_bot_draft_saves", "CREATE TABLE local_bot_draft_saves(attempt_id TEXT PRIMARY KEY,namespace_id TEXT NOT NULL,draft_id TEXT NOT NULL REFERENCES local_bot_drafts(draft_id),scope_key TEXT NOT NULL,registry_generation TEXT NOT NULL,expected_revision TEXT NOT NULL,stored_revision TEXT NOT NULL,exported_memory_revision TEXT NOT NULL,archive_digest TEXT NOT NULL,receipt_json TEXT NOT NULL)"),
+];
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct BotDefinition {
@@ -248,11 +255,31 @@ fn load(
     // Repeat actual scope checks under the caller's live transaction, including at its tail.
     let key = scope(store, conversation, project)?;
     let rows=sql(store.database().query("SELECT workspace,conversation_id,project_id,registry_generation,stored_revision,lifecycle,CASE WHEN LENGTH(archive_hex)<=65536 THEN archive_hex ELSE NULL END,archive_digest,scope_key FROM local_bot_drafts WHERE draft_id=?",&[&b.draft_id]))?;
-    let ns = sql(store.database().query(
-        "SELECT namespace_id FROM local_bot_draft_meta WHERE id=1",
+    let actual_schema = sql(store.database().query(
+        "SELECT name,sql FROM sqlite_master WHERE type='table' AND name GLOB 'local_bot_draft*'",
         &[],
     ))?;
-    if ns.len() != 1 || cell(&ns[0], 0)? != b.namespace_id || rows.len() != 1 {
+    if actual_schema.len() != DRAFT_REGISTRY_SCHEMA.len()
+        || DRAFT_REGISTRY_SCHEMA.iter().any(|(name, ddl)| {
+            !actual_schema.iter().any(|row| {
+                row.first().and_then(Option::as_deref) == Some(*name)
+                    && row.get(1).and_then(Option::as_deref) == Some(*ddl)
+            })
+        })
+    {
+        return Err("bot_source_registry_changed");
+    }
+    let ns = sql(store.database().query(
+        "SELECT id,schema_version,workspace,namespace_id FROM local_bot_draft_meta",
+        &[],
+    ))?;
+    if ns.len() != 1
+        || cell(&ns[0], 0)? != "1"
+        || cell(&ns[0], 1)? != "1"
+        || cell(&ns[0], 2)? != store.workspace_id()
+        || cell(&ns[0], 3)? != b.namespace_id
+        || rows.len() != 1
+    {
         return Err("bot_scope");
     }
     let r = &rows[0];
