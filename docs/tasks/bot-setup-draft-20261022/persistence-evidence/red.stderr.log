@@ -1,0 +1,69 @@
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupPersistenceChecks.kt:13:56: error: unresolved reference 'exportDraft'.
+    fun encode(d: BotSetupDraft, stored: Long = 9) = d.exportDraft(stored, d.snapshot().revision)
+                                                       ^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupPersistenceChecks.kt:18:38: error: unresolved reference 'restoreDraft'.
+        val restored = BotSetupDraft.restoreDraft(encode(d, 900), "new-account/project", "new-id")
+                                     ^^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupPersistenceChecks.kt:42:38: error: unresolved reference 'restoreDraft'.
+        val restored = BotSetupDraft.restoreDraft(bytes, "new").draft
+                                     ^^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupPersistenceChecks.kt:54:35: error: unresolved reference 'restoreDraft'.
+        val empty = BotSetupDraft.restoreDraft(encode(BotSetupDraft("s")), "host").draft
+                                  ^^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupPersistenceChecks.kt:58:38: error: unresolved reference 'restoreDraft'.
+        val restored = BotSetupDraft.restoreDraft(encode(named), "host").draft
+                                     ^^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupPersistenceChecks.kt:64:21: error: unresolved reference 'exportDraft'.
+        rejects { d.exportDraft(1, d.snapshot().revision - 1) }
+                    ^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupPersistenceChecks.kt:76:33: error: unresolved reference 'restoreDraft'.
+        rejects { BotSetupDraft.restoreDraft(ByteArray(32769), "host") }
+                                ^^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupPersistenceChecks.kt:77:66: error: unresolved reference 'restoreDraft'.
+        for (size in 0 until bytes.size) rejects { BotSetupDraft.restoreDraft(bytes.copyOf(size), "host") }
+                                                                 ^^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupPersistenceChecks.kt:78:33: error: unresolved reference 'restoreDraft'.
+        rejects { BotSetupDraft.restoreDraft(bytes + 0, "host") }
+                                ^^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupPersistenceChecks.kt:79:54: error: cannot infer type for this parameter. Specify it explicitly.
+        val damaged = bytes.copyOf(); damaged[25] = (damaged[25].toInt() xor 1).toByte()
+                                                     ^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupPersistenceChecks.kt:79:54: error: not enough information to infer type argument for 'V'.
+        val damaged = bytes.copyOf(); damaged[25] = (damaged[25].toInt() xor 1).toByte()
+                                                     ^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupPersistenceChecks.kt:80:33: error: unresolved reference 'restoreDraft'.
+        rejects { BotSetupDraft.restoreDraft(damaged, "host") }
+                                ^^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupPersistenceChecks.kt:82:33: error: unresolved reference 'restoreDraft'.
+        rejects { BotSetupDraft.restoreDraft(seal(future), "host") }
+                                ^^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupPersistenceChecks.kt:84:33: error: unresolved reference 'restoreDraft'.
+        rejects { BotSetupDraft.restoreDraft(seal(negativeRevision), "host") }
+                                ^^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupPersistenceChecks.kt:85:33: error: unresolved reference 'restoreDraft'.
+        rejects { BotSetupDraft.restoreDraft(seal(payload + 0), "host") }
+                                ^^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupPersistenceChecks.kt:86:33: error: unresolved reference 'restoreDraft'.
+        rejects { BotSetupDraft.restoreDraft(bytes, " ") }
+                                ^^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupPersistenceChecks.kt:94:37: error: unresolved reference 'restoreDraft'.
+            rejects { BotSetupDraft.restoreDraft(seal(invalid), "host") }
+                                    ^^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupPersistenceChecks.kt:97:33: error: unresolved reference 'restoreDraft'.
+        rejects { BotSetupDraft.restoreDraft(seal(badOrigin), "host") }
+                                ^^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupPersistenceChecks.kt:99:33: error: unresolved reference 'restoreDraft'.
+        rejects { BotSetupDraft.restoreDraft(seal(unlocked), "host") }
+                                ^^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupPersistenceChecks.kt:101:33: error: unresolved reference 'restoreDraft'.
+        rejects { BotSetupDraft.restoreDraft(seal(badUtf8), "host") }
+                                ^^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupPersistenceChecks.kt:103:33: error: unresolved reference 'restoreDraft'.
+        rejects { BotSetupDraft.restoreDraft(seal(oversize), "host") }
+                                ^^^^^^^^^^^^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupPersistenceChecks.kt:104:88: error: argument type mismatch: actual type is 'Int', but 'Char' was expected.
+        val badProvenance = payload.copyOf(); badProvenance[badProvenance.lastIndex] = 1
+                                                                                       ^
+apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupPersistenceChecks.kt:105:33: error: unresolved reference 'restoreDraft'.
+        rejects { BotSetupDraft.restoreDraft(seal(badProvenance), "host") }
+                                ^^^^^^^^^^^^
