@@ -25,3 +25,7 @@ See [engine-evaluation/HANDOFF.md](engine-evaluation/HANDOFF.md) and its report/
 ## Held adapter source continuation
 
 See [adapter-source/HANDOFF.md](adapter-source/HANDOFF.md) for proposed Rust-neutral request/output protocol, fixed openpyxl candidate launch specification, dormant worker and independent single-cell output validator. Source d18636f7f1eb7a54f06b647eae14aa55d0da89d1 passes43 author tests after independent review/fix pass. Fake tests are explicitly simulation only; real engine, host wiring and CAS integration remain HOLD/NOT_RUN. No Rust/Android files modified.
+
+## Current XLSX preview / DOCX-PPTX text subset continuation
+
+See [text-subsets/HANDOFF.md](text-subsets/HANDOFF.md), proposed protocol-v2 and report. Current code b3574ae3d4e69a9e60e9c4c6fb34388f11451251 passes60 author tests after independent57-test review/fix pass. Hidden row/column targets now rejected, superseding old worksheet-only ruling. New DOCX/PPTX requests bind exact part/path/local hash/expected text; complex layouts unsupported, only fake executor used. Real engines and4-format overall completion remain HOLD/NOT_RUN. No Rust/Android edits.
