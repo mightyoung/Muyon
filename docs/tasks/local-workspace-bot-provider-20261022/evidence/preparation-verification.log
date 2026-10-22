@@ -1,0 +1,71 @@
+2026-10-22T06:18:53.764959+00:00
+$ cargo test --offline --locked --manifest-path crates/Cargo.toml -p muyon-core --test bot_drafts
+NOT_RUN: executable absent; no software installed
+$ cargo test --offline --locked --manifest-path crates/Cargo.toml -p muyon-android-ffi --lib local_draft_bridge_tests
+NOT_RUN: executable absent; no software installed
+$ cargo clippy --offline --locked --manifest-path crates/Cargo.toml --workspace --all-targets -- -D warnings
+NOT_RUN: executable absent; no software installed
+$ rustfmt --edition 2021 --check crates/muyon-core/src/bot_drafts.rs crates/muyon-core/tests/bot_drafts.rs crates/muyon-android-ffi/src/lib.rs
+NOT_RUN: executable absent; no software installed
+$ python3 /workspace/Muyon/docs/tasks/local-workspace-bot-provider-20261022/evidence/preparation_sql_smoke.py
+exit=0
+PASS every original+journal source SQL statement parses/binds in actual SQLite
+PASS request-before-dispatch preparation pointer and export/editor binding survive actual DB restart; no saved archive
+PASS lookup fence is durable: conditional late transition from prepared now changes zero rows
+PASS injected terminal journal failure rolls back archive/CAS/original receipt together, prepared pointer retained
+PASS committed exact original/export/editor and prior terminal history survive restart without timestamp search
+PASS journal payload SQL type and byte budget guards reject oversized/BLOB/multibyte corrupt storage
+NOT_RUN Rust state-machine/serialization/FFI/Kotlin/Android: SQL-only diagnostics are not provider acceptance
+
+$ python3 /workspace/Muyon/docs/tasks/local-workspace-bot-provider-20261022/evidence/sql_smoke.py
+exit=0
+PASS actual DDL + initial NULL archive + registry fact + actual bounded projection
+PASS actual archive NULL/text/BLOB/exact65536/oversize65537/multibyte/NUL and digest type projections
+PASS all extracted production SQL parses and parameter counts
+PASS unique structured scope
+PASS injected receipt failure rolls back archive/revision/attempt
+PASS save commit + stale editor CAS refuses
+PASS actual original-receipt text/BLOB/exact4096/oversize4097/byte-length/digest projection bounds
+PASS restart stable registry and exact original receipt after callback loss
+PASS original receipt is not replaced with latest head
+PASS SQL CAS also checks editing_only lifecycle
+PASS bounded archive and receipt SQL projections
+PASS two original unknowns and reservation untouched
+NOT_RUN Rust behavior, FFI compilation/bindings, canonical Kotlin roundtrip, Android: absent toolchain/export integration
+
+$ sha256sum -c SHA256SUMS
+exit=0
+custody.json: OK
+derive-junit-correction.json: OK
+derive-junit-initial.stderr.log: OK
+derive-junit-initial.stdout.log: OK
+derive_junit.py: OK
+format-diff-paths.json: OK
+null-projection-diagnostic.json: OK
+original/core-full.stderr.log: OK
+original/core-full.stdout.junit.xml: OK
+original/core-full.stdout.log: OK
+original/ffi-targeted.stderr.log: OK
+original/ffi-targeted.stdout.log: OK
+original/manifest.json: OK
+original/provider-targeted.stderr.log: OK
+original/provider-targeted.stdout.junit.xml: OK
+original/provider-targeted.stdout.log: OK
+original/scoped-fmt.stderr.log: OK
+original/scoped-fmt.stdout.log: OK
+test-summary.json: OK
+whitespace-check.json: OK
+
+$ git diff --check
+exit=0
+
+$ git apply --check /workspace/Muyon/docs/tasks/local-workspace-bot-provider-20261022/CORE-EXPORT.patch
+exit=0
+
+PASS source counts:26 core tests,2 FFI tests,5 native methods; no runtime PASS implied
+PASS sole-owned core export and dependency/lock files unchanged
+PASS no writes to existing generic intent/grant/request ledgers; no new lint allow
+6514165380738130e639d4be1ab5440e1bcb09c7d82fd0184b22b986e0d3c678  crates/muyon-core/src/bot_drafts.rs
+3a220688234b765578167fda4c48e3d6de342f2e0187b2eb23db3493f931462e  crates/muyon-core/tests/bot_drafts.rs
+ef9ee96b960319e71a2d96a56eea79e2a2f17eb03888f2182cbef1c0a81f9d84  crates/muyon-android-ffi/src/lib.rs
+NOT_RUN Kotlin/Service cold-recovery consumer, regenerated UniFFI, Android/device; HOLD remains

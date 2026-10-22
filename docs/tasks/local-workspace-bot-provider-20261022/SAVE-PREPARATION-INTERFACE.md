@@ -4,7 +4,7 @@ Requirement source: host9d2c4119d0c66d1748955cee1d86e63deb7ce16f,
 SERVICE-BINDING-REPORT.md. This interface extends the existing local_workspace
 provider; it is not an account, execution journal, grant or second store.
 
-## Fixed proposed native signature / host sequence
+## Fixed native signature / host sequence
 
 New private ProductCore method (String arguments except optional project/ByteArray):
 
@@ -75,5 +75,8 @@ unknowns/reservations. Core lib.rs remains B's sole export; no Service/Runtime e
 
 Host upgrade must add prepare-before-save and parse save_attempt/original outcome.
 Until accepted native signatures/bindings/host changes and real Rust/Android checks
-pass, verified remains false. This document is interface-first, not implemented or
-runtime acceptance evidence. Implementation SHA follows on the same owner branch.
+pass, verified remains false. This document was published interface-first at15c65c7c9c1f0af1e73c8092b2de2ac78939eea7;
+implementation follows on the same owner branch. Source delivery is not runtime
+acceptance. New failures are local_draft_not_prepared, local_draft_pending and
+local_draft_terminal; existing stable failures remain. Core groups export/editor
+arguments in SaveRevisions; the native signature above exposes them separately.
