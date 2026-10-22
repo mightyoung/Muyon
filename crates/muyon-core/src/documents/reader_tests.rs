@@ -67,6 +67,34 @@ fn revoked_or_advanced_session_never_delivers_cached_bytes() {
 }
 
 #[test]
+fn generation_epoch_expiry_and_project_deletion_revoke_existing_sessions() {
+    for mutation in [
+        "UPDATE document_grants SET generation='99'",
+        "UPDATE document_grants SET owner_epoch='foreign-epoch'",
+        "UPDATE document_grants SET expires_at_ms='0'",
+        "UPDATE projects SET deleted=1",
+    ] {
+        let (_f, mut host, access) = setup();
+        let opened = host.open(&access, DocumentReadPurpose::ReadText).unwrap();
+        host.store().database().exec(mutation, &[]).unwrap();
+        assert!(host.read_chunk(&opened.session_id, 7).is_err(), "{mutation}");
+        assert_eq!(pins(host.store()), 0);
+    }
+}
+
+#[test]
+fn one_shot_callback_failure_and_cleanup_failure_return_no_success_or_pin() {
+    let (_f, host, access) = setup();
+    let result: std::result::Result<(), _> = host.store().with_document_source(&access, DocumentReadPurpose::ReadText, 1024, |_| Err(ContractError::UnsupportedOperation));
+    assert_eq!(result, Err(DocumentReadError::Core(ContractError::UnsupportedOperation)));
+    assert_eq!(pins(host.store()), 0);
+    host.store().database().exec("CREATE TRIGGER fail_reader_cleanup BEFORE DELETE ON blob_pins WHEN OLD.kind='reader' BEGIN SELECT RAISE(ABORT,'original synthetic cleanup failure'); END", &[]).unwrap();
+    assert!(host.store().with_document_source(&access, DocumentReadPurpose::ReadText, 1024, |_| Ok(())).is_err());
+    // The pin was created in this same rolled-back transaction, not committed.
+    assert_eq!(pins(host.store()), 0);
+}
+
+#[test]
 fn bounded_sessions_idle_absolute_lifetime_and_invalid_chunk_release_pins() {
     let (_f, mut host, access) = setup();
     let mut ids = Vec::new();
