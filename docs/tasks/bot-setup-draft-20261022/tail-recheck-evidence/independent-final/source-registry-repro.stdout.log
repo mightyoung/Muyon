@@ -1,0 +1,15 @@
+
+running 4 tests
+test bot_definitions::tests::independent_tail_source_registry_blob_archive_must_reject ... FAILED
+test bot_definitions::tests::independent_tail_source_registry_blob_digest_must_reject ... FAILED
+test bot_definitions::tests::independent_tail_source_registry_schema_must_reject ... ok
+test bot_definitions::tests::independent_tail_source_registry_workspace_must_reject ... ok
+
+failures:
+
+failures:
+    bot_definitions::tests::independent_tail_source_registry_blob_archive_must_reject
+    bot_definitions::tests::independent_tail_source_registry_blob_digest_must_reject
+
+test result: FAILED. 2 passed; 2 failed; 0 ignored; 0 measured; 45 filtered out; finished in 0.03s
+

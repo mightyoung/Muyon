@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import pathlib,subprocess,tempfile,json,hashlib,os,datetime
 root=pathlib.Path(subprocess.check_output(['git','rev-parse','--show-toplevel'],text=True).strip())
+assert subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip() == 'bdc58460410b4c5b51c52e10516f058a0079092e', 'Historical driver: checkout exact bdc5846; use capture-tail-release.py for current protocol'
 out=root/'docs/tasks/bot-setup-draft-20261022/creation-evidence/author-final';out.mkdir(exist_ok=False)
 module='crates/muyon-core/src/bot_definitions.rs';test='crates/muyon-core/src/bot_definitions/tests.rs';runner='docs/tasks/bot-setup-draft-20261022/run-creation-checks.py'
 def now():return datetime.datetime.now(datetime.timezone.utc).isoformat()
