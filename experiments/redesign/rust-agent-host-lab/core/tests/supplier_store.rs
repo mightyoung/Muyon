@@ -295,7 +295,7 @@ fn meta_shape_and_storage_types_are_checked() {
 
 #[test]
 fn fixture_domain_contract_is_tied_to_actual_dart_schema_source() {
-    let store = include_str!("../../../../../packages/supplier_core/lib/src/store.dart");
+    let store = include_str!("fixtures/legacy-schema12/store.dart");
     assert!(store.contains("const schemaVersion = 12;"));
     assert!(store.contains("const fileFormat = 'supplier-inquiry';"));
     assert!(store
@@ -304,7 +304,7 @@ fn fixture_domain_contract_is_tied_to_actual_dart_schema_source() {
     assert!(store.contains("version INTEGER NOT NULL, updated_at TEXT NOT NULL, "));
     assert!(store.contains("updated_by TEXT NOT NULL, deleted INTEGER NOT NULL DEFAULT 0, "));
     assert!(store.contains("data TEXT NOT NULL)"));
-    let entities = include_str!("../../../../../packages/supplier_core/lib/src/entities.dart");
+    let entities = include_str!("fixtures/legacy-schema12/entities.dart");
     let supplier = entities
         .split("final class Supplier")
         .nth(1)

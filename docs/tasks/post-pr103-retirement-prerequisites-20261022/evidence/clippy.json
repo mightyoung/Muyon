@@ -1,0 +1,25 @@
+{
+  "argv": [
+    "env",
+    "CARGO_HOME=/tmp/muyon-retirement-cargo",
+    "RUSTUP_HOME=/tmp/muyon-retirement-rustup",
+    "CARGO_TARGET_DIR=/tmp/muyon-next-office-target",
+    "RUSTFLAGS=-Lnative=/tmp/muyon-retirement-native",
+    "/tmp/muyon-retirement-cargo/bin/cargo",
+    "clippy",
+    "--workspace",
+    "--all-targets",
+    "--locked",
+    "--offline",
+    "--",
+    "-D",
+    "warnings"
+  ],
+  "cwd": "/workspace/Muyon-post-pr103-retirement-20261022/crates",
+  "source_sha": "50ce62bf7033f63e4632e362ecd95fa7524c3ee0",
+  "dirty_source": false,
+  "start_utc": "2026-10-22T20:35:11.722831+00:00",
+  "exit_code": 0,
+  "duration_seconds": 142.212,
+  "end_utc": "2026-10-22T20:37:33.597094+00:00"
+}

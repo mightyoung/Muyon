@@ -1,0 +1,25 @@
+BEGIN {"argv": ["env", "CARGO_HOME=/tmp/muyon-retirement-cargo", "RUSTUP_HOME=/tmp/muyon-retirement-rustup", "CARGO_TARGET_DIR=/tmp/muyon-next-office-target", "RUSTFLAGS=-Lnative=/tmp/muyon-retirement-native", "/tmp/muyon-retirement-cargo/bin/cargo", "test", "--offline", "--locked", "--manifest-path", "experiments/redesign/rust-agent-host-lab/core/Cargo.toml", "--test", "supplier_store"], "cwd": "/workspace/Muyon-post-pr103-retirement-20261022", "source_sha": "50ce62bf7033f63e4632e362ecd95fa7524c3ee0", "dirty_source": false, "start_utc": "2026-10-22T20:35:09.937079+00:00"}
+    Blocking waiting for file lock on artifact directory
+   Compiling muyon-core-agent-lab v0.1.0 (/workspace/Muyon-post-pr103-retirement-20261022/experiments/redesign/core-agent-lab/core)
+   Compiling muyon-plugin-contract-lab v0.1.0 (/workspace/Muyon-post-pr103-retirement-20261022/experiments/redesign/plugin-contract-lab/core)
+   Compiling muyon-rust-agent-host-lab v0.1.0 (/workspace/Muyon-post-pr103-retirement-20261022/experiments/redesign/rust-agent-host-lab/core)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1m 22s
+     Running tests/supplier_store.rs (/tmp/muyon-next-office-target/debug/deps/supplier_store-a9f3dfa4e6d5fae0)
+
+running 12 tests
+test authority_unavailable_during_registered_dispatch_revokes_publication ... ok
+test fixture_domain_contract_is_tied_to_actual_dart_schema_source ... ok
+test current_reads_reject_pinned_revision_drift_and_pending_or_revoked_authority ... ok
+test identity_and_request_shape_are_not_sql_or_path_authority ... ok
+test current_projection_rereads_name_while_historical_receipt_identity_stays_original ... ok
+test mode_change_and_symlink_ancestor_are_denied ... ok
+test registered_read_yields_business_name_and_original_durable_receipt_without_business_write ... ok
+test replaced_file_symlinks_owner_mode_and_no_create_fail_closed ... ok
+test same_revision_tamper_without_host_source_stamp_change_is_denied ... ok
+test meta_shape_and_storage_types_are_checked ... ok
+test actual_source_mutation_in_each_final_host_sample_denies_publication ... ok
+test unknown_schema_missing_deleted_malformed_and_oversized_sources_fail_closed ... ok
+
+test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 4.93s
+
+END {"argv": ["env", "CARGO_HOME=/tmp/muyon-retirement-cargo", "RUSTUP_HOME=/tmp/muyon-retirement-rustup", "CARGO_TARGET_DIR=/tmp/muyon-next-office-target", "RUSTFLAGS=-Lnative=/tmp/muyon-retirement-native", "/tmp/muyon-retirement-cargo/bin/cargo", "test", "--offline", "--locked", "--manifest-path", "experiments/redesign/rust-agent-host-lab/core/Cargo.toml", "--test", "supplier_store"], "cwd": "/workspace/Muyon-post-pr103-retirement-20261022", "source_sha": "50ce62bf7033f63e4632e362ecd95fa7524c3ee0", "dirty_source": false, "start_utc": "2026-10-22T20:35:09.937079+00:00", "exit_code": 0, "duration_seconds": 88.163, "end_utc": "2026-10-22T20:36:38.024258+00:00"}
