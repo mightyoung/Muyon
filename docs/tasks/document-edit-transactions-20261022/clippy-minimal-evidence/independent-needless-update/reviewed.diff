@@ -1,0 +1,12 @@
+diff --git a/crates/muyon-core/tests/document_edit_transactions.rs b/crates/muyon-core/tests/document_edit_transactions.rs
+index 6c97c4f5..7168203a 100644
+--- a/crates/muyon-core/tests/document_edit_transactions.rs
++++ b/crates/muyon-core/tests/document_edit_transactions.rs
+@@ -384,7 +384,6 @@ fn rollback_is_a_new_bound_transaction_not_a_cancel_side_effect() {
+         intent_id: "rollback-2".into(),
+         patch_digest: [10; 32],
+         rollback_target: Some(Revision::new(1)),
+-        ..binding()
+     };
+     let next = t.rollback(b.clone()).unwrap();
+     assert_eq!(next.state(), State::New);

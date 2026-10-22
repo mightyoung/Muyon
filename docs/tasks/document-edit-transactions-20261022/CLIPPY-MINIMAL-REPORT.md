@@ -1,3 +1,6 @@
+> Latest single-line transaction-test correction: [CLIPPY-NEEDLESS-UPDATE-FOLLOWUP.md](CLIPPY-NEEDLESS-UPDATE-FOLLOWUP.md).
+> Source5959173995b92f55587cf9e201d51a7b2a04cf0e; exact B target28/28 passed.
+
 > Latest test-target follow-up: [CLIPPY-DROP-FOLLOWUP.md](CLIPPY-DROP-FOLLOWUP.md).
 > Source2e2cfcdec28c5ecdf4ebc45523fc0885d4b0a9da removes only five drop(g) lines.
 

@@ -1,0 +1,40 @@
+
+running 28 tests
+test apply_requires_an_immutable_copy_with_a_distinct_identity ... ok
+test cancel_before_late_commit_receipt_or_unknown_keeps_recovery_open ... ok
+test candidate_mismatch_and_missing_validation_do_not_advance ... ok
+test cancellation_preserves_unknown_and_committed_outcomes ... ok
+test commit_needs_durable_matching_receipt_and_cannot_repeat ... ok
+test cross_scope_is_rejected_even_for_read ... ok
+test double_click_does_not_reapply ... ok
+test every_boundary_requires_facts_and_live_authority ... ok
+test each_validation_dimension_and_formula_unknown_fails_closed ... ok
+test host_observations_reject_paths_in_opaque_candidate_and_authority_ids ... ok
+test export_requires_committed_revision_and_matching_copy ... ok
+test identity_requires_all_binding_fields ... ok
+test original_intent_query_with_new_read_authority_does_not_replay_old_confirmation ... ok
+test commit_and_original_intent_recovery_require_exact_next_revision_without_overflow ... ok
+test preview_never_confirms_or_supplies_missing_authority ... ok
+test readonly_capability_is_never_edit_permission ... ok
+test prior_candidate_cannot_be_attached_to_a_different_patch_or_intent ... ok
+test reissued_authority_does_not_reuse_confirmation ... ok
+test revocation_cannot_hide_an_uncertain_original_outcome ... ok
+test revocation_does_not_prevent_local_cancel_request ... ok
+test stale_confirmation_is_rejected ... ok
+test rollback_is_a_new_bound_transaction_not_a_cancel_side_effect ... ok
+test stale_source_and_failed_cas_preserve_candidate_as_conflict ... ok
+test unknown_apply_recovers_original_candidate_without_replay ... ok
+test unknown_capability_or_missing_operation_permission_never_advances ... ok
+test unknown_queries_original_intent_and_never_replays ... ok
+test unvalidated_commit_is_refused ... ok
+test validation_failure_is_terminal_and_cannot_commit ... ok
+
+test result: ok. 28 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Compiling muyon-core-agent-lab v0.1.0 (/tmp/muyon-needless-update-B.qv7t_087/experiments/redesign/core-agent-lab/core)
+   Compiling muyon-plugin-contract-lab v0.1.0 (/tmp/muyon-needless-update-B.qv7t_087/experiments/redesign/plugin-contract-lab/core)
+   Compiling muyon-rust-agent-host-lab v0.1.0 (/tmp/muyon-needless-update-B.qv7t_087/experiments/redesign/rust-agent-host-lab/core)
+   Compiling muyon-web-search-lab v0.1.0 (/tmp/muyon-needless-update-B.qv7t_087/experiments/redesign/web-search-lab/core)
+   Compiling muyon-core v0.1.0 (/tmp/muyon-needless-update-B.qv7t_087/crates/muyon-core)
+    Finished `test` profile [unoptimized] target(s) in 9.02s
+     Running tests/document_edit_transactions.rs (/workspace/document-edit-combination/crates/target/debug/deps/document_edit_transactions-b133d649eba81777)
