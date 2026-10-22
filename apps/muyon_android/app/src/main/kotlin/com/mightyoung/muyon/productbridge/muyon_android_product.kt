@@ -739,6 +739,14 @@ internal object IntegrityCheckingUniffiLib {
     ): Int
     external fun uniffi_muyon_android_product_checksum_method_productcore_list_suppliers(
     ): Int
+    external fun uniffi_muyon_android_product_checksum_method_productcore_local_draft_lookup_save(
+    ): Int
+    external fun uniffi_muyon_android_product_checksum_method_productcore_local_draft_read(
+    ): Int
+    external fun uniffi_muyon_android_product_checksum_method_productcore_local_draft_resolve(
+    ): Int
+    external fun uniffi_muyon_android_product_checksum_method_productcore_local_draft_save(
+    ): Int
     external fun uniffi_muyon_android_product_checksum_method_productcore_lookup_original(
     ): Int
     external fun uniffi_muyon_android_product_checksum_method_productcore_lookup_upload(
@@ -846,6 +854,14 @@ internal object UniffiLib {
     external fun uniffi_muyon_android_product_fn_method_productcore_list_projects(`ptr`: Long,`limit`: Int,`offset`: Int,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
     external fun uniffi_muyon_android_product_fn_method_productcore_list_suppliers(`ptr`: Long,`limit`: Int,`offset`: Int,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    external fun uniffi_muyon_android_product_fn_method_productcore_local_draft_lookup_save(`ptr`: Long,`conversation`: RustBuffer.ByValue,`project`: RustBuffer.ByValue,`namespaceId`: RustBuffer.ByValue,`draftId`: RustBuffer.ByValue,`attemptId`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    external fun uniffi_muyon_android_product_fn_method_productcore_local_draft_read(`ptr`: Long,`conversation`: RustBuffer.ByValue,`project`: RustBuffer.ByValue,`namespaceId`: RustBuffer.ByValue,`draftId`: RustBuffer.ByValue,`expectedGeneration`: RustBuffer.ByValue,`expectedStoredRevision`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    external fun uniffi_muyon_android_product_fn_method_productcore_local_draft_resolve(`ptr`: Long,`conversation`: RustBuffer.ByValue,`project`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    external fun uniffi_muyon_android_product_fn_method_productcore_local_draft_save(`ptr`: Long,`conversation`: RustBuffer.ByValue,`project`: RustBuffer.ByValue,`namespaceId`: RustBuffer.ByValue,`draftId`: RustBuffer.ByValue,`expectedGeneration`: RustBuffer.ByValue,`expectedStoredRevision`: RustBuffer.ByValue,`attemptId`: RustBuffer.ByValue,`exportedMemoryRevision`: RustBuffer.ByValue,`archive`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
     external fun uniffi_muyon_android_product_fn_method_productcore_lookup_original(`ptr`: Long,`intentId`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
@@ -1079,6 +1095,18 @@ private fun uniffiCheckApiChecksums(lib: IntegrityCheckingUniffiLib) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if ((lib.uniffi_muyon_android_product_checksum_method_productcore_list_suppliers() and 0xFFFF) != 12062) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if ((lib.uniffi_muyon_android_product_checksum_method_productcore_local_draft_lookup_save() and 0xFFFF) != 434) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if ((lib.uniffi_muyon_android_product_checksum_method_productcore_local_draft_read() and 0xFFFF) != 65349) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if ((lib.uniffi_muyon_android_product_checksum_method_productcore_local_draft_resolve() and 0xFFFF) != 29826) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if ((lib.uniffi_muyon_android_product_checksum_method_productcore_local_draft_save() and 0xFFFF) != 4781) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if ((lib.uniffi_muyon_android_product_checksum_method_productcore_lookup_original() and 0xFFFF) != 11413) {
@@ -1623,6 +1651,25 @@ public interface ProductCoreInterface {
     fun `listProjects`(`limit`: kotlin.UInt, `offset`: kotlin.UInt): kotlin.String
     
     fun `listSuppliers`(`limit`: kotlin.UInt, `offset`: kotlin.UInt): kotlin.String
+    
+    /**
+     * Queries exactly one original local save. Never retries or queries execution ledgers.
+     */
+    fun `localDraftLookupSave`(`conversation`: kotlin.String, `project`: kotlin.String?, `namespaceId`: kotlin.String, `draftId`: kotlin.String, `attemptId`: kotlin.String): kotlin.String
+    
+    fun `localDraftRead`(`conversation`: kotlin.String, `project`: kotlin.String?, `namespaceId`: kotlin.String, `draftId`: kotlin.String, `expectedGeneration`: kotlin.String, `expectedStoredRevision`: kotlin.String): kotlin.String
+    
+    /**
+     * HOST ONLY: explicit NEW local-workspace registration; no legacy import.
+     */
+    fun `localDraftResolve`(`conversation`: kotlin.String, `project`: kotlin.String?): kotlin.String
+    
+    /**
+     * A committed receipt acknowledges only its exported snapshot. The host must
+     * compare its live reducer/scope/revision before displaying newer edits as saved.
+     * Any error after dispatch requires original-attempt lookup, never automatic resave.
+     */
+    fun `localDraftSave`(`conversation`: kotlin.String, `project`: kotlin.String?, `namespaceId`: kotlin.String, `draftId`: kotlin.String, `expectedGeneration`: kotlin.String, `expectedStoredRevision`: kotlin.String, `attemptId`: kotlin.String, `exportedMemoryRevision`: kotlin.String, `archive`: kotlin.ByteArray): kotlin.String
     
     fun `lookupOriginal`(`intentId`: kotlin.String): kotlin.String
     
@@ -2252,6 +2299,95 @@ open class ProductCore: Disposable, AutoCloseable, ProductCoreInterface
         
         FfiConverterUInt.lower(`limit`),
         FfiConverterUInt.lower(`offset`),_status)
+}
+    }
+    )
+    }
+    
+
+    
+    /**
+     * Queries exactly one original local save. Never retries or queries execution ledgers.
+     */
+    @Throws(ProductException::class)override fun `localDraftLookupSave`(`conversation`: kotlin.String, `project`: kotlin.String?, `namespaceId`: kotlin.String, `draftId`: kotlin.String, `attemptId`: kotlin.String): kotlin.String {
+            return FfiConverterString.lift(
+    callWithHandle {
+    uniffiRustCallWithError(ProductException) { _status ->
+    UniffiLib.uniffi_muyon_android_product_fn_method_productcore_local_draft_lookup_save(
+        it,
+        
+        FfiConverterString.lower(`conversation`),
+        FfiConverterOptionalString.lower(`project`),
+        FfiConverterString.lower(`namespaceId`),
+        FfiConverterString.lower(`draftId`),
+        FfiConverterString.lower(`attemptId`),_status)
+}
+    }
+    )
+    }
+    
+
+    
+    @Throws(ProductException::class)override fun `localDraftRead`(`conversation`: kotlin.String, `project`: kotlin.String?, `namespaceId`: kotlin.String, `draftId`: kotlin.String, `expectedGeneration`: kotlin.String, `expectedStoredRevision`: kotlin.String): kotlin.String {
+            return FfiConverterString.lift(
+    callWithHandle {
+    uniffiRustCallWithError(ProductException) { _status ->
+    UniffiLib.uniffi_muyon_android_product_fn_method_productcore_local_draft_read(
+        it,
+        
+        FfiConverterString.lower(`conversation`),
+        FfiConverterOptionalString.lower(`project`),
+        FfiConverterString.lower(`namespaceId`),
+        FfiConverterString.lower(`draftId`),
+        FfiConverterString.lower(`expectedGeneration`),
+        FfiConverterString.lower(`expectedStoredRevision`),_status)
+}
+    }
+    )
+    }
+    
+
+    
+    /**
+     * HOST ONLY: explicit NEW local-workspace registration; no legacy import.
+     */
+    @Throws(ProductException::class)override fun `localDraftResolve`(`conversation`: kotlin.String, `project`: kotlin.String?): kotlin.String {
+            return FfiConverterString.lift(
+    callWithHandle {
+    uniffiRustCallWithError(ProductException) { _status ->
+    UniffiLib.uniffi_muyon_android_product_fn_method_productcore_local_draft_resolve(
+        it,
+        
+        FfiConverterString.lower(`conversation`),
+        FfiConverterOptionalString.lower(`project`),_status)
+}
+    }
+    )
+    }
+    
+
+    
+    /**
+     * A committed receipt acknowledges only its exported snapshot. The host must
+     * compare its live reducer/scope/revision before displaying newer edits as saved.
+     * Any error after dispatch requires original-attempt lookup, never automatic resave.
+     */
+    @Throws(ProductException::class)override fun `localDraftSave`(`conversation`: kotlin.String, `project`: kotlin.String?, `namespaceId`: kotlin.String, `draftId`: kotlin.String, `expectedGeneration`: kotlin.String, `expectedStoredRevision`: kotlin.String, `attemptId`: kotlin.String, `exportedMemoryRevision`: kotlin.String, `archive`: kotlin.ByteArray): kotlin.String {
+            return FfiConverterString.lift(
+    callWithHandle {
+    uniffiRustCallWithError(ProductException) { _status ->
+    UniffiLib.uniffi_muyon_android_product_fn_method_productcore_local_draft_save(
+        it,
+        
+        FfiConverterString.lower(`conversation`),
+        FfiConverterOptionalString.lower(`project`),
+        FfiConverterString.lower(`namespaceId`),
+        FfiConverterString.lower(`draftId`),
+        FfiConverterString.lower(`expectedGeneration`),
+        FfiConverterString.lower(`expectedStoredRevision`),
+        FfiConverterString.lower(`attemptId`),
+        FfiConverterString.lower(`exportedMemoryRevision`),
+        FfiConverterByteArray.lower(`archive`),_status)
 }
     }
     )
