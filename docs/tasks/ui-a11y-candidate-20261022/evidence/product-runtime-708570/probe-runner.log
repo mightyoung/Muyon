@@ -1,0 +1,49 @@
+Success
+
+INSTRUMENTATION_STATUS: numtests=1
+INSTRUMENTATION_STATUS: stream=
+com.mightyoung.muyon.product.ui.shell.RuntimeHealthSmokeProbe:
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=actualServiceHealthAndNoProviderConfiguration
+INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.product.ui.shell.RuntimeHealthSmokeProbe
+INSTRUMENTATION_STATUS: current=1
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: numtests=1
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=actualServiceHealthAndNoProviderConfiguration
+INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.product.ui.shell.RuntimeHealthSmokeProbe
+INSTRUMENTATION_STATUS: current=1
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_RESULT: stream=
+
+Time: 1.636
+
+OK (1 test)
+
+
+INSTRUMENTATION_CODE: -1
+
+--------- beginning of main
+--------- beginning of system
+10-22 19:45:52.575  3049  3068 I MuyonColdSmoke: HEALTH={"status":"ok","data":{"build_id":"708570d59ea51024ee69bb62c97f63380d490f78:95d79703ba3b05f9af3020118286fb5559f17c7042d183cee394074dc25ae811","epoch":"440b7a8b-7b1f-4bca-abc3-c4170196d312","protocol":1,"synthetic":false,"workspace":"local-workspace","active_clients":1,"service_pid":3070},"request_id":"cc8ec6fc-7ebe-4085-a03d-4723a00c0336"}
+10-22 19:45:52.654  3049  3068 I MuyonColdSmoke: AVAILABILITY={"status":"ok","data":{"chat":{"configured":false,"transport_bound":false,"reason":"provider_owner_not_bound"},"search":{"configured":false,"transport_bound":false,"reason":"search_host_not_bound"},"local_reads":true,"synthetic":false,"configured":false},"request_id":"9f689cc0-7b43-47f3-b232-f174b7b4b319"}
+
+total 236
+drwx------ 3 u0_a67 u0_a67   4096 2026-10-22 19:45 .
+drwxrwx--x 3 u0_a67 u0_a67   4096 2026-10-22 19:43 ..
+-rw------- 1 u0_a67 u0_a67  32768 2026-10-22 19:45 agent-workflows-v1.sqlite
+-rw------- 1 u0_a67 u0_a67      0 2026-10-22 19:43 agent-workflows-v1.sqlite.owner.lock
+-rw------- 1 u0_a67 u0_a67 172032 2026-10-22 19:43 business-v2.sqlite
+drwx------ 4 u0_a67 u0_a67   4096 2026-10-22 19:43 business-v2.sqlite.blobs
+-rw------- 1 u0_a67 u0_a67      0 2026-10-22 19:43 business-v2.sqlite.owner.lock
+-rw------- 1 u0_a67 u0_a67  24576 2026-10-22 19:45 business-v2.sqlite.reviews-v1.sqlite
+-rw------- 1 u0_a67 u0_a67      0 2026-10-22 19:45 business-v2.sqlite.reviews-v1.sqlite-wal
+
+26
+x86_64
+Physical size: 1080x1920
+Physical density: 420
+1.0
+Night mode: yes
+

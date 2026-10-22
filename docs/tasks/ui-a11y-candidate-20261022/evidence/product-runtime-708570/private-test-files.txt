@@ -1,0 +1,10 @@
+total 236
+drwx------ 3 u0_a67 u0_a67   4096 2026-10-22 19:45 .
+drwxrwx--x 3 u0_a67 u0_a67   4096 2026-10-22 19:43 ..
+-rw------- 1 u0_a67 u0_a67  32768 2026-10-22 19:45 agent-workflows-v1.sqlite
+-rw------- 1 u0_a67 u0_a67      0 2026-10-22 19:43 agent-workflows-v1.sqlite.owner.lock
+-rw------- 1 u0_a67 u0_a67 172032 2026-10-22 19:43 business-v2.sqlite
+drwx------ 4 u0_a67 u0_a67   4096 2026-10-22 19:43 business-v2.sqlite.blobs
+-rw------- 1 u0_a67 u0_a67      0 2026-10-22 19:43 business-v2.sqlite.owner.lock
+-rw------- 1 u0_a67 u0_a67  24576 2026-10-22 19:45 business-v2.sqlite.reviews-v1.sqlite
+-rw------- 1 u0_a67 u0_a67      0 2026-10-22 19:45 business-v2.sqlite.reviews-v1.sqlite-wal

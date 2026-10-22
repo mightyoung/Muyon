@@ -1,5 +1,7 @@
 # Minimal UI accessibility candidate from merged develop
 
+Latest follow-up: [actual708570 product runtime minimum smoke](PRODUCT-RUNTIME-SMOKE-708570.md) now passed; provider/inference/complete authorization remain untested. Earlier NOT_RUN statements below describe the previous packaging milestone. Old APK Library upload is held pending parent's new combined candidate.
+
 Branch `task/ui-a11y-candidate-20261022`. Fixed base
 `c130008bbc40d78e85d10058030da9da4aca38f0`; source candidate
 `708570d59ea51024ee69bb62c97f63380d490f78` (direct child, no branch merge).

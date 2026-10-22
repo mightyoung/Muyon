@@ -1,0 +1,7 @@
+CHECK boot.txt
+1
+
+CHECK packages-before.txt
+
+CHECK accounts-before-private.txt
+  Accounts: 0

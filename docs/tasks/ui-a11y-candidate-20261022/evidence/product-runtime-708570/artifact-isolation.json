@@ -1,0 +1,21 @@
+{
+  "artifacts": [
+    {
+      "path": "/workspace/ui-shell-tools/product-smoke/read-only-probe-androidTest.apk",
+      "bytes": 1472465,
+      "sha256": "69088e81773a6f40fb77711200e938dc9cd0ba9a8a19b26ab0aa1f3791d7bcf4"
+    },
+    {
+      "path": "/workspace/ui-shell-tools/product-smoke/original-source-androidTest.apk",
+      "bytes": 1439740,
+      "sha256": "fa0c08ed932d8a28f439601a224e45c0a4854ad73ec3983d6ef396287ba01d1d"
+    },
+    {
+      "path": "apps/muyon_android/app/build/outputs/apk/debug/app-debug.apk",
+      "bytes": 426369208,
+      "sha256": "f1cc240fd981a1ea08841f3964c6422e5b240268984447022406428723ddeb0b"
+    }
+  ],
+  "original_androidTest_output_restored_after_probe": true,
+  "shipping_product_unchanged": true
+}

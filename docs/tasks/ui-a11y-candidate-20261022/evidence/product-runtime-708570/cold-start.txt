@@ -1,0 +1,7 @@
+Starting: Intent { cmp=com.mightyoung.muyon.product/.MainActivity }
+Status: ok
+Activity: com.mightyoung.muyon.product/.MainActivity
+ThisTime: 4404
+TotalTime: 4404
+WaitTime: 4701
+Complete

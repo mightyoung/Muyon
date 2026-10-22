@@ -1,0 +1,6 @@
+26
+x86_64
+Physical size: 1080x1920
+Physical density: 420
+1.0
+Night mode: yes
