@@ -5,19 +5,32 @@
 pub mod anchor;
 pub mod capability;
 pub mod identity;
+use crate::contract::{AuthorityBinding, FileSource};
 pub use anchor::*;
 pub use capability::*;
 pub use identity::DocumentRef;
-use crate::contract::{AuthorityBinding, FileSource};
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum ReadInvalidation {
-    InvalidIdentity, ScopeMismatch, DocumentMismatch, StaleRevision, FormatMismatch,
-    AuthorityUnavailable, PermissionDenied, CapabilityUnavailable, HostUnavailable,
-    InvalidAnchor, AnchorUnresolved, NotAReadOperation,
+    InvalidIdentity,
+    ScopeMismatch,
+    DocumentMismatch,
+    StaleRevision,
+    FormatMismatch,
+    AuthorityUnavailable,
+    PermissionDenied,
+    CapabilityUnavailable,
+    HostUnavailable,
+    InvalidAnchor,
+    AnchorUnresolved,
+    NotAReadOperation,
 }
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub enum AccessState { Active, Revoked, Unknown }
+pub enum AccessState {
+    Active,
+    Revoked,
+    Unknown,
+}
 
 /// Not deserializable. Created by the trusted host from current session/grant
 /// and handle resolution, never from model-produced metadata. Permissions are
@@ -49,20 +62,34 @@ pub trait DocumentHost {
 /// Pure preflight, not a capability token. Each call consults the host afresh.
 /// A future byte-delivery API MUST enforce the same checks atomically at use;
 /// calling this once and later serving cached bytes is explicitly insufficient.
-pub fn validate_read(host: &dyn DocumentHost, request: &ReadRequest, capabilities: &CapabilityMatrix) -> Result<(), ReadInvalidation> {
-    if !request.operation.is_read() { return Err(ReadInvalidation::NotAReadOperation); }
+pub fn validate_read(
+    host: &dyn DocumentHost,
+    request: &ReadRequest,
+    capabilities: &CapabilityMatrix,
+) -> Result<(), ReadInvalidation> {
+    if !request.operation.is_read() {
+        return Err(ReadInvalidation::NotAReadOperation);
+    }
     let current = host.resolve_current(request)?;
     request.document.matches(&current.document)?;
     let binding = &current.authority;
-    if current.access != AccessState::Active || binding != &request.authority
-        || !identity::valid_id(&binding.grant_id) || !identity::valid_id(&binding.owner_epoch)
-        || binding.generation.value() == 0 || current.source.validate().is_err()
+    if current.access != AccessState::Active
+        || binding != &request.authority
+        || !identity::valid_id(&binding.grant_id)
+        || !identity::valid_id(&binding.owner_epoch)
+        || binding.generation.value() == 0
+        || current.source.validate().is_err()
         || current.source.lease.owner_epoch != binding.owner_epoch
     {
         return Err(ReadInvalidation::AuthorityUnavailable);
     }
-    if !current.permissions.contains(&request.operation) { return Err(ReadInvalidation::PermissionDenied); }
-    if !matches!(capabilities.status(current.document.format(), request.operation), CapabilityStatus::Supported | CapabilityStatus::ReadOnly) {
+    if !current.permissions.contains(&request.operation) {
+        return Err(ReadInvalidation::PermissionDenied);
+    }
+    if !matches!(
+        capabilities.status(current.document.format(), request.operation),
+        CapabilityStatus::Supported | CapabilityStatus::ReadOnly
+    ) {
         return Err(ReadInvalidation::CapabilityUnavailable);
     }
     if let Some(anchor) = &request.anchor {
@@ -75,7 +102,11 @@ pub fn validate_read(host: &dyn DocumentHost, request: &ReadRequest, capabilitie
 
 /// DOC-02 interface only. Unknown is not acceptance; no detector is installed.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub enum SafetyStatus { Unknown, Rejected, Accepted }
+pub enum SafetyStatus {
+    Unknown,
+    Rejected,
+    Accepted,
+}
 pub trait DocumentSafety {
     fn check(&self, document: &DocumentRef, source: &FileSource) -> SafetyStatus;
 }

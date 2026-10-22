@@ -2,11 +2,28 @@
 use std::collections::BTreeMap;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]
-pub enum DocumentFormat { Docx, Pptx, Xlsx, Pdf, Doc, Ppt, Xls, Unknown }
+pub enum DocumentFormat {
+    Docx,
+    Pptx,
+    Xlsx,
+    Pdf,
+    Doc,
+    Ppt,
+    Xls,
+    Unknown,
+}
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub enum DocumentOperation {
-    Inspect, ReadText, Render, Annotate, StructuredEdit, Recalculate, Validate, Export, Sync,
+    Inspect,
+    ReadText,
+    Render,
+    Annotate,
+    StructuredEdit,
+    Recalculate,
+    Validate,
+    Export,
+    Sync,
 }
 impl DocumentOperation {
     pub(crate) fn is_read(self) -> bool {
@@ -15,7 +32,14 @@ impl DocumentOperation {
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub enum CapabilityStatus { Supported, ReadOnly, Unsupported, NeedsLicense, NeedsNetwork, Unknown }
+pub enum CapabilityStatus {
+    Supported,
+    ReadOnly,
+    Unsupported,
+    NeedsLicense,
+    NeedsNetwork,
+    Unknown,
+}
 
 /// Host-owned evidence projection. Do not populate from extensions, a model's
 /// claims, MIME routing, or the existence of these enum variants. This module
@@ -25,10 +49,18 @@ pub struct CapabilityMatrix {
     entries: BTreeMap<(DocumentFormat, DocumentOperation), CapabilityStatus>,
 }
 impl CapabilityMatrix {
-    pub fn set(&mut self, format: DocumentFormat, operation: DocumentOperation, status: CapabilityStatus) {
+    pub fn set(
+        &mut self,
+        format: DocumentFormat,
+        operation: DocumentOperation,
+        status: CapabilityStatus,
+    ) {
         self.entries.insert((format, operation), status);
     }
     pub fn status(&self, format: DocumentFormat, operation: DocumentOperation) -> CapabilityStatus {
-        self.entries.get(&(format, operation)).copied().unwrap_or(CapabilityStatus::Unknown)
+        self.entries
+            .get(&(format, operation))
+            .copied()
+            .unwrap_or(CapabilityStatus::Unknown)
     }
 }
