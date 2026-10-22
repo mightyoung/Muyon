@@ -1,5 +1,11 @@
 # Local-workspace Bot provider delivery
 
+**Updated status: HOLD.** Independent Rust verification of the original source
+returned1 PASS/14 FAIL. A NULL/type/byte-bound repair is now implemented but has
+not been re-run in Rust here. See [NULL-PROJECTION-FIX.md](NULL-PROJECTION-FIX.md)
+and the preserved independent failure evidence. Earlier SQL/static results below
+do not establish Rust or product acceptance.
+
 Implemented real SQLite persistence on the existing BusinessStore connection:
 strict module schema, generated persistent namespace/draft UUID registry, structured
 workspace/conversation/project scope, editing_only lifecycle, canonical bounded

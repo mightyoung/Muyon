@@ -1,0 +1,5 @@
+[
+  "crates/muyon-android-ffi/src/lib.rs",
+  "crates/muyon-core/src/bot_drafts.rs",
+  "crates/muyon-core/tests/bot_drafts.rs"
+]

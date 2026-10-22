@@ -1,0 +1,8 @@
+Traceback (most recent call last):
+  File "/workspace/Muyon/docs/tasks/local-workspace-bot-provider-20261022/evidence/sql_smoke.py", line 107, in <module>
+    if __name__ == '__main__': run()
+                               ^^^^^
+  File "/workspace/Muyon/docs/tasks/local-workspace-bot-provider-20261022/evidence/sql_smoke.py", line 45, in run
+    assert db.execute(sql('SELECT draft_id,workspace,conversation_id'),(key,)).fetchone()[7:9] == (None,None)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError

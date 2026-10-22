@@ -138,24 +138,40 @@ impl ProductCore {
     }
     /// HOST ONLY: explicit NEW local-workspace registration; no legacy import.
     pub fn local_draft_resolve(
-        &self, conversation: String, project: Option<String>,
+        &self,
+        conversation: String,
+        project: Option<String>,
     ) -> Result<String, ProductError> {
-        let state = self.state.lock().map_err(|_| ProductError::Failure { code: "local_draft_unavailable".into() })?;
-        let value = muyon_core::bot_drafts::resolve(&state.store, &conversation, project.as_deref())
-            .map_err(|code| ProductError::Failure { code: code.into() })?;
+        let state = self.state.lock().map_err(|_| ProductError::Failure {
+            code: "local_draft_unavailable".into(),
+        })?;
+        let value =
+            muyon_core::bot_drafts::resolve(&state.store, &conversation, project.as_deref())
+                .map_err(|code| ProductError::Failure { code: code.into() })?;
         encode(&value)
     }
 
     pub fn local_draft_read(
-        &self, conversation: String, project: Option<String>, namespace_id: String,
-        draft_id: String, expected_generation: String, expected_stored_revision: String,
+        &self,
+        conversation: String,
+        project: Option<String>,
+        namespace_id: String,
+        draft_id: String,
+        expected_generation: String,
+        expected_stored_revision: String,
     ) -> Result<String, ProductError> {
-        let state = self.state.lock().map_err(|_| ProductError::Failure { code: "local_draft_unavailable".into() })?;
+        let state = self.state.lock().map_err(|_| ProductError::Failure {
+            code: "local_draft_unavailable".into(),
+        })?;
         let binding = muyon_core::bot_drafts::DraftBinding {
-            namespace_id, draft_id, expected_generation, expected_stored_revision,
+            namespace_id,
+            draft_id,
+            expected_generation,
+            expected_stored_revision,
         };
-        let value = muyon_core::bot_drafts::read(&state.store, &conversation, project.as_deref(), &binding)
-            .map_err(|code| ProductError::Failure { code: code.into() })?;
+        let value =
+            muyon_core::bot_drafts::read(&state.store, &conversation, project.as_deref(), &binding)
+                .map_err(|code| ProductError::Failure { code: code.into() })?;
         encode(&value)
     }
 
@@ -163,29 +179,60 @@ impl ProductCore {
     /// compare its live reducer/scope/revision before displaying newer edits as saved.
     /// Any error after dispatch requires original-attempt lookup, never automatic resave.
     pub fn local_draft_save(
-        &self, conversation: String, project: Option<String>, namespace_id: String,
-        draft_id: String, expected_generation: String, expected_stored_revision: String,
-        attempt_id: String, exported_memory_revision: String, archive: Vec<u8>,
+        &self,
+        conversation: String,
+        project: Option<String>,
+        namespace_id: String,
+        draft_id: String,
+        expected_generation: String,
+        expected_stored_revision: String,
+        attempt_id: String,
+        exported_memory_revision: String,
+        archive: Vec<u8>,
     ) -> Result<String, ProductError> {
-        let state = self.state.lock().map_err(|_| ProductError::Failure { code: "local_draft_unavailable".into() })?;
+        let state = self.state.lock().map_err(|_| ProductError::Failure {
+            code: "local_draft_unavailable".into(),
+        })?;
         let binding = muyon_core::bot_drafts::DraftBinding {
-            namespace_id, draft_id, expected_generation, expected_stored_revision,
+            namespace_id,
+            draft_id,
+            expected_generation,
+            expected_stored_revision,
         };
-        let value = muyon_core::bot_drafts::save(&state.store, &conversation, project.as_deref(),
-            &binding, &attempt_id, &exported_memory_revision, &archive)
-            .map_err(|code| ProductError::Failure { code: code.into() })?;
+        let value = muyon_core::bot_drafts::save(
+            &state.store,
+            &conversation,
+            project.as_deref(),
+            &binding,
+            &attempt_id,
+            &exported_memory_revision,
+            &archive,
+        )
+        .map_err(|code| ProductError::Failure { code: code.into() })?;
         encode(&value)
     }
 
     /// Queries exactly one original local save. Never retries or queries execution ledgers.
     pub fn local_draft_lookup_save(
-        &self, conversation: String, project: Option<String>, namespace_id: String,
-        draft_id: String, attempt_id: String,
+        &self,
+        conversation: String,
+        project: Option<String>,
+        namespace_id: String,
+        draft_id: String,
+        attempt_id: String,
     ) -> Result<String, ProductError> {
-        let state = self.state.lock().map_err(|_| ProductError::Failure { code: "local_draft_unavailable".into() })?;
-        let value = muyon_core::bot_drafts::lookup_save(&state.store, &conversation,
-            project.as_deref(), &namespace_id, &draft_id, &attempt_id)
-            .map_err(|code| ProductError::Failure { code: code.into() })?;
+        let state = self.state.lock().map_err(|_| ProductError::Failure {
+            code: "local_draft_unavailable".into(),
+        })?;
+        let value = muyon_core::bot_drafts::lookup_save(
+            &state.store,
+            &conversation,
+            project.as_deref(),
+            &namespace_id,
+            &draft_id,
+            &attempt_id,
+        )
+        .map_err(|code| ProductError::Failure { code: code.into() })?;
         encode(&value)
     }
 
@@ -1694,36 +1741,101 @@ mod local_draft_bridge_tests {
     static NEXT: AtomicUsize = AtomicUsize::new(0);
     const CONVERSATION: &str = "12345678-1234-4234-8234-123456789abc";
     const ATTEMPT: &str = "22345678-1234-4234-8234-123456789abc";
-    fn parse(raw: String) -> Value { serde_json::from_str(&raw).unwrap() }
+    fn parse(raw: String) -> Value {
+        serde_json::from_str(&raw).unwrap()
+    }
 
     #[test]
     fn local_draft_bridge_registers_reads_saves_and_looks_up_original_after_restart() {
-        let root = std::env::temp_dir().join(format!("muyon-local-draft-ffi-{}-{}",
-            std::process::id(), NEXT.fetch_add(1, Ordering::Relaxed)));
-        let core = ProductCore::open(root.to_str().unwrap().into(), "workspace".into(), "epoch".into(), true).unwrap();
+        let root = std::env::temp_dir().join(format!(
+            "muyon-local-draft-ffi-{}-{}",
+            std::process::id(),
+            NEXT.fetch_add(1, Ordering::Relaxed)
+        ));
+        let core = ProductCore::open(
+            root.to_str().unwrap().into(),
+            "workspace".into(),
+            "epoch".into(),
+            true,
+        )
+        .unwrap();
         let desc = parse(core.local_draft_resolve(CONVERSATION.into(), None).unwrap());
         let text = |key: &str| desc[key].as_str().unwrap().to_owned();
-        let loaded = parse(core.local_draft_read(CONVERSATION.into(), None,
-            text("namespace_id"), text("draft_id"), text("registry_generation"), "0".into()).unwrap());
+        let loaded = parse(
+            core.local_draft_read(
+                CONVERSATION.into(),
+                None,
+                text("namespace_id"),
+                text("draft_id"),
+                text("registry_generation"),
+                "0".into(),
+            )
+            .unwrap(),
+        );
         assert_eq!(loaded["status"], "not_saved");
         assert!(loaded.get("saved").is_none());
         // Canonical synthetic empty-fields MYBD v1, stored revision1 (no model/file).
         let archive_hex = "4d59424400000001000000000000000100000000000000000000000000000000000000fbd7ab6104f8d45a51a4ae9335d359af13ab91abe8747df7952c7ef571c7cd2c";
-        let archive: Vec<u8> = (0..archive_hex.len()).step_by(2)
-            .map(|i| u8::from_str_radix(&archive_hex[i..i+2],16).unwrap()).collect();
-        let receipt = parse(core.local_draft_save(CONVERSATION.into(), None,
-            text("namespace_id"), text("draft_id"), text("registry_generation"),
-            "0".into(), ATTEMPT.into(), "17".into(), archive).unwrap());
+        let archive: Vec<u8> = (0..archive_hex.len())
+            .step_by(2)
+            .map(|i| u8::from_str_radix(&archive_hex[i..i + 2], 16).unwrap())
+            .collect();
+        let receipt = parse(
+            core.local_draft_save(
+                CONVERSATION.into(),
+                None,
+                text("namespace_id"),
+                text("draft_id"),
+                text("registry_generation"),
+                "0".into(),
+                ATTEMPT.into(),
+                "17".into(),
+                archive,
+            )
+            .unwrap(),
+        );
         assert_eq!(receipt["status"], "committed_local_storage");
         assert_eq!(receipt["exported_memory_revision"], "17");
-        assert!(core.local_draft_read(CONVERSATION.into(), None,
-            text("namespace_id"), text("draft_id"), text("registry_generation"), "0".into()).is_err());
+        assert!(core
+            .local_draft_read(
+                CONVERSATION.into(),
+                None,
+                text("namespace_id"),
+                text("draft_id"),
+                text("registry_generation"),
+                "0".into()
+            )
+            .is_err());
         drop(core);
-        let core = ProductCore::open(root.to_str().unwrap().into(), "workspace".into(), "next-epoch".into(), false).unwrap();
-        assert_eq!(parse(core.local_draft_lookup_save(CONVERSATION.into(), None,
-            text("namespace_id"), text("draft_id"), ATTEMPT.into()).unwrap()), receipt);
-        assert!(core.local_draft_lookup_save(CONVERSATION.into(), Some("missing".into()),
-            text("namespace_id"), text("draft_id"), ATTEMPT.into()).is_err());
+        let core = ProductCore::open(
+            root.to_str().unwrap().into(),
+            "workspace".into(),
+            "next-epoch".into(),
+            false,
+        )
+        .unwrap();
+        assert_eq!(
+            parse(
+                core.local_draft_lookup_save(
+                    CONVERSATION.into(),
+                    None,
+                    text("namespace_id"),
+                    text("draft_id"),
+                    ATTEMPT.into()
+                )
+                .unwrap()
+            ),
+            receipt
+        );
+        assert!(core
+            .local_draft_lookup_save(
+                CONVERSATION.into(),
+                Some("missing".into()),
+                text("namespace_id"),
+                text("draft_id"),
+                ATTEMPT.into()
+            )
+            .is_err());
         assert!(core.local_draft_resolve("legacy-key".into(), None).is_err());
         drop(core);
         std::fs::remove_dir_all(root).unwrap();
