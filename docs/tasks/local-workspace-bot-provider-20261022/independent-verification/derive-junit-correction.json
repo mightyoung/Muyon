@@ -1,0 +1,5 @@
+{
+  "initial_exit_status": 1,
+  "reason": "Parallel libtest execution order differs between invocations; compare failure name sets rather than list order. No raw log or test expectation changed.",
+  "change": "List equality to set equality in our own evidence converter only."
+}
