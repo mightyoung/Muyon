@@ -19,6 +19,8 @@
 | S2 implementation/wiring | C1/S1/C2 outstanding; workflow ownership handoff and D2 JobSnapshot absent. | NOT_STARTED. No workflow edits; pure validation also awaits contracts. |
 | S3 parser evaluation/selection | Plan requires S1/S2 and explicit evaluation gate; pinned upstream source/license/dependency evidence not supplied here. | NOT_STARTED. No parser installed, fetched or run; no scripts executed. |
 
+Parent update received during preparation: C1 is not implemented; `848ad8bd3797b14008ba5a44e60f0737bfdf56f1` is a Contracts blocker report only, explicitly not an interface dependency. Parent is handling the official toolchain installation permission separately; this task does not repeat that request or install anything. Before later coding, refresh develop again and obtain the actual fixed interface/fixture SHA.
+
 There has been no approval rejection, denied operation, uncertain external write, merge or deployment in this slice. Missing dependencies are not denials.
 
 ## Source inspection, not runtime verification
