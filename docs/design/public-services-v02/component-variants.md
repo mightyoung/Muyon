@@ -6,7 +6,7 @@
 
 - 实施计划与总索引固定为 `64900d4a6a46a9ef2919bcf922fb059413b1ce82`：[U0–U3](https://github.com/mightyoung/Muyon/blob/64900d4a6a46a9ef2919bcf922fb059413b1ce82/docs/superpowers/plans/2026-10-23-intelligent-ui.md)、[总索引](https://github.com/mightyoung/Muyon/blob/64900d4a6a46a9ef2919bcf922fb059413b1ce82/docs/superpowers/plans/2026-10-23-public-services-index.md)、[v0.2 设计](https://github.com/mightyoung/Muyon/blob/64900d4a6a46a9ef2919bcf922fb059413b1ce82/docs/superpowers/specs/2026-10-23-public-services-ui-design.md)。这些文档尚不在本产品基线，链接固定 SHA，不复制另一套合同。
 - 产品检查基线为最新 develop `fd26dcdabcdac996bc2881e8141cac2b519966fc`，隔离分支 `task/publicui-u0-20261023`。初始旧 work/main `cc7c8d14d30e3d3c4c7c6cb2bf2059a99e46e003` 未作基线。扫描 /workspace 和该 develop 树未发现 AGENTS.md。
-- 视觉方向为 [400e206 统一规范](https://github.com/mightyoung/Muyon/blob/400e206135690c284c8402521e3135cfb7bfaee8/docs/design/2026-10-22/ui-v1.0/Muyon-统一UI规范与覆盖-v1.0.md)，完整读取文字；本轮另核看图 02 与 08。其余图片不作本轮逐图核看或运行证据。规范图 03/04/05/06/07 为下文语义映射依据，不把栅格尺寸当 token。
+- 视觉方向为 [400e206 统一规范](https://github.com/mightyoung/Muyon/blob/400e206135690c284c8402521e3135cfb7bfaee8/docs/design/2026-10-22/ui-v1.0/Muyon-统一UI规范与覆盖-v1.0.md)，完整读取文字；本轮另核看图 01、02 与 08。其余图片不作本轮逐图核看或运行证据。规范图 03/04/05/06/07 为下文语义映射依据，不把栅格尺寸当 token。
 - Foundation 实际路径是 `apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/ui/system/`。计划写的 `ui/foundation/` 在基线不存在。读取 FoundationTokens.kt、FoundationComponents.kt、README.md；保持所有者文件不变。
 - Shell 最新只读候选封套 `07aeb5e45fda046446557f5083553ef2c885fc85`，其 REPORT 固定生产源 `d61be4b50c3f4877022008e5493ade1ba78a96ad`。报告区分编译/lint、独立组件 fixture 与完整产品运行；这里未复跑，也未合入该候选。shellFinalSha 尚待父任务/原 owner 正式交接；该字段保持 pending，不把候选当已合基线。
 
@@ -48,12 +48,14 @@ FoundationTheme 将 bodyMedium/bodySmall/labelLarge/labelMedium/labelSmall 设�
 | W2 按钮 | 最小48dp触控，标准视觉最小48dp高，横向内边距16dp，圆角12dp；主操作炭黑（深色反色待审），次操作1dp中性边界，弱操作文字 | ready/pressed/focus/disabled/loading/error/unknown 各有样例；loading/unknown 不重发；有持续原因文本 |
 | W3 输入/选择/标签 | 输入最小56dp高、圆角12dp、标签置顶/错误置下；选择整行最小48dp，勾选与文字同行；非交互标签圆角8dp | 填写、只读、禁用、错误、焦点、长值/多行逐态；选择不提交；标签不伪装按钮 |
 | W4 内容卡片 | 统一候选圆角16dp、内边距16dp、块间12dp；单列；标题/状态→摘要→正文→来源→编辑→动作→历史/错误 | 十族共享层级，不复制十套壳；未知/失败不折叠关键信息；紧凑仅显式摘要态 |
-| W5 菜单/导航 | 更多菜单锚定触发按钮、候选宽240dp且不超视口减32dp、圆角16dp、条目最小48dp；会话菜单主身份/置顶与普通列表分层，置顶采用横向区域或列排的最终选型另审 | 以原参考的主Agent/置顶会话结构为目标；不是项目格。选中标记+语义；遮罩禁穿透，键盘/返回关闭且保留草稿。当前横轨实现不被默认为批准 |
+| W5 菜单/导航 | 更多菜单锚定触发按钮、候选宽240dp且不超视口减32dp、圆角16dp、条目最小48dp；会话菜单主身份/置顶与普通列表分层，按图01提出主Agent+置顶横向区；卡宽不锁112dp，候选最小128dp并由标题完整性决定增宽/换行，320dp可横向滚动而不压缩 | 以原参考的主Agent/置顶会话结构为目标；不是项目格。选中标记+语义；遮罩禁穿透，键盘/返回关闭且保留草稿。主Agent选中以边界+“当前”文本及selected语义标出；图钉候选16dp显示并在卡右上留48dp热区，不占底部大块；当前横轨实现不被默认为批准 |
 | W6 弹窗/确认 | 候选宽=min(360dp,可用宽-32dp)，圆角20dp，内边距20dp；标题→可信对象/差异/范围/成本/到期→返回/批准；窄屏按钮纵排 | 200% 可滚动看完全部内容及操作；focus/disabled/error/expired 明示；关闭不确认；披露与修改独立 |
 | W7 对话气泡 | 用户短气泡候选最大可用宽78%、内边距12dp/16dp、圆角20dp；助手正文占内容宽、不套多层重边框；来源单独卡 | 原答/引文/检索候选分层，不用灰色弱化关键事实；长字/大字可全宽改纵排；不把78%当已验像素比例 |
-| W8 胶囊输入/身份 | 输入候选最小56dp高、圆角28dp，输入/附件/发送触控各>=48dp；头部居中身份，菜单/更多目标各48dp，主角色候选48dp展示，最多一处 | 以400e206图02胶囊与居中身份为目标；键盘弹起不遮来源/停止/错误；Hidden/Static/Animated 分别核看。角色尺寸不是原图测量结论 |
+| W8 胶囊输入/身份 | 输入候选最小56dp高、圆角28dp，输入/附件/发送触控各>=48dp；头部居中身份，菜单/更多采用候选40dp圆形可见容器，内部图标24dp显示、外部热区至少48dp；附件/发送图标24dp显示且热区>=48dp，主角色候选48dp展示，最多一处 | 以400e206图02胶囊与居中身份为目标；键盘弹起不遮来源/停止/错误；Hidden/Static/Animated 分别核看。热区与显示尺寸必须分开；单聊候选单气泡24dp、群组双气泡24dp，不以同图标仅换文案区分；角色尺寸不是原图测量结论 |
 | W9 状态/空态/错误 | 图标+明确标题+原因/恢复动作，候选内边距16dp、间距8dp；正常/空/未知/失败/离线/partial/过期并列样例 | unknown 与 failed 不共用成功符号；无 total 不造百分比；加载保留旧内容和版本；错误持久可读 |
 | W10 焦点/动效 | 候选焦点2dp中性外描边、与外形间隔2dp；依系统设置且支持本地 reduceMotion；禁装饰位移/旋转时仍有文本阶段 | 描边对深浅背景辨识待实测，不称已达标；键盘/TalkBack 顺序不随动画变化；控件 press/focus 动效需要实际评审 |
+
+原 Shell 本轮只读复核补充：第二图实际测试宿主含工程说明及 Spacer 大留白，不是目标会话构图；Header/InputDock 缺图02圆形动作与胶囊整体关系；置顶112dp卡宽造成断行，图钉占底部大块、主Agent选中弱、单聊/群组无图标区分；48dp热区被当显示图标尺寸。以上作为用户反馈后的改进输入，不将单个 fixture 问题外推为已证全部产品缺陷。W5/W8 明确图标/热区/选中和置顶布局；页面 S0/P1 要共同复核。默认浮层、表单、禁用、反馈与气泡也必须重审，不能只调颜色。
 
 W 系列与 V 系列有重叠时，W 是本次全套重审的具体视觉候选，V 保留密度/行为条件；实际实现以用户审阅后的明确版本为准。任何原生控件可保留可访问语义与事件门控，外形/排版不能直接默认沿用。尚无 W1–W10 具体视觉批准，设计 GREEN 保持 pending。
 

@@ -1,13 +1,14 @@
 # Public services v0.2：真实页面组合与待验收矩阵
 
-本稿配合 [十族变体](component-variants.md)，全部页面 designStatus=draft，公共组件 codeStatus=absent，integrationStatus=not_connected，acceptanceStatus=NOT_RUN。页面入口“现有”仅说明产品基线源代码有路径；不表示公共 renderer 已接通或设备已测。基线 `fd26dcdabcdac996bc2881e8141cac2b519966fc`；计划 `64900d4a6a46a9ef2919bcf922fb059413b1ce82`；视觉方向 `400e206135690c284c8402521e3135cfb7bfaee8`。用户已否定旧菜单组件外观，全部控件/卡片/菜单/弹窗/气泡按组件文档 W1–W10 重新评审；旧实现只作机制参考。B 暂停旧 UI 候选合入。Shell 只读候选封套 `07aeb5e45fda046446557f5083553ef2c885fc85`，正式 shellFinalSha 待交接。
+本稿配合 [十族变体](component-variants.md)，八个业务页面及 S0 壳组合全部 designStatus=draft，公共组件 codeStatus=absent，integrationStatus=not_connected，acceptanceStatus=NOT_RUN。页面入口“现有”仅说明产品基线源代码有路径；不表示公共 renderer 已接通或设备已测。基线 `fd26dcdabcdac996bc2881e8141cac2b519966fc`；计划 `64900d4a6a46a9ef2919bcf922fb059413b1ce82`；视觉方向 `400e206135690c284c8402521e3135cfb7bfaee8`。用户已否定旧菜单组件外观，全部控件/卡片/菜单/弹窗/气泡按组件文档 W1–W10 重新评审；旧实现只作机制参考。B 暂停旧 UI 候选合入。Shell 只读候选封套 `07aeb5e45fda046446557f5083553ef2c885fc85`，正式 shellFinalSha 待交接。
 
 ## 页面入口与组合候选
 
-以下路径均相对 `apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/`。PublicUI 不修改这些文件；原 Shell owner 接线，领域 owner 提供真实快照、版本、来源与原回执。没有实际入口的页面明确 absent，不用独立组件目录充数。P3/P4/P7 与 P8 的新步骤均是 proposed，不增加导航 tab。
+以下路径均相对 `apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/`。PublicUI 不修改这些文件；原 Shell owner 接线，领域 owner 提供真实快照、版本、来源与原回执。没有实际入口的页面明确 absent，不用独立组件目录充数。S0 为原 Shell 的现有页面组合审阅，PublicUI 仅交设计；P3/P4/P7 与 P8 的新步骤均是 proposed，不增加导航 tab。
 
 | ID / 真实入口现状 | 页面组合（从上到下，按节点槽位读序） | 必须可达的动作与返回 | 接线责任与未接缺口 |
 | --- | --- | --- | --- |
+| S0 会话壳/菜单/设置：MainActivity → ui/shell/ConversationShell.kt、ConversationHeader、ShellInputDock 现有，设置由原 owner 持有 | 图01菜单品牌/搜索/新增/关闭 → 主Agent+置顶横向区 → 普通会话 → 设置入口；收起后图02居中身份/圆形动作/正文与证据/胶囊输入；更多浮层与设置表单按图08统一 | 当前主Agent选中明确；单聊/群组图标区分；图钉不挤标题；菜单遮罩不穿透；返回保留草稿/锚点；设置权限/预算/unknown 回执保留 | Shell 独占产品文件；旧候选暂停合入；W1–W10 外观重审，公共接入未连，不能把测试宿主作产品验收 |
 | P1 聊天正文/资料结果：MainActivity 的 chat → chat/ChatScreen.kt 现有 | Shell 唯一身份 → MessageBlock 原答/独立原文入口 → ResultList 摘要 → SourceCard 引文/版本 → AttachmentCard/TaskProgressCard（有事实才显示）→ ReceiptCard 原请求历史；局部选择可插 ChoiceCard | 查看原答、来源返回原锚点；填草稿只局部编辑；请求动作进入可信确认；unknown 查原意图；停止目标明确 | Shell 接入；公共 renderer absent。保留既有聊天门控与输入；不重排 Shell 当前菜单/设置 |
 | P2 文档处理：MainActivity documents → ui/shell/DocumentCapabilitiesScreen.kt 现有；ui/documents/DocumentReaderScreen.kt 组件 present，公共入口仍未接 | 文档身份/精确版本 → AttachmentCard 四阶段 → TaskProgressCard 数量 → 来源/失败单元列表 → SourceCard 精确锚点 → 原任务 ReceiptCard | 来源可用才打开历史版本；失败单元可读；总量未知无百分比；关闭释放订阅；取消仍向原意图请求 | Documents + Shell；Reader Core 生产 FD 安全 gate 未解除。禁止用 URI、路径或新桥补出“可验页面” |
 | P3 Skill 配置：当前无统一 Skill 注册/绑定页面，入口 absent；未来经现有配置壳提出入口 | 标识/固定版本摘要 → ChoiceCard Skill 选择 → FormCard 输入/绑定 → DraftArtifactCard 未保存 → 能力与成本说明 → ConfirmationCard 可信 prepared → ReceiptCard；如已运行才显示 Progress | 选择/注册/启用/执行分开；返回保留草稿；未知查询原运行；建议不覆盖 userLocked；无能力不显示可执行 | Skills + Shell；入口/绑定事实/C2/C3 缺失；不把已有 workflow 选择器算公共 Skill 页 |
@@ -21,7 +22,7 @@
 
 ## 新外观必须在页面上下文中审阅
 
-P1 必须同屏审阅居中身份、菜单关闭/展开、短用户气泡、宽助手正文、来源卡、胶囊输入与 unknown 原回执；以400e206图02为方向，不能用空白菜单 fixture 替代。P2 必须显示附件四阶段、部分覆盖、来源和停止；P3/P4/P8 必须显示表单标签、错误、选择、未存草稿、弹窗与返回；P5/P6/P7 必须显示领域快照、版本/证据、草稿及确认/回执的真实层级。每页都要亮/暗、标准/摘要、焦点/禁用/加载/错误的实际组合，用户否定的旧组件形态不默认复用。菜单/弹窗/气泡不归 PublicUI 修改，评审后交对应 owner，不能从两份文档直接宣称全 UI 已改完。
+S0 必须从真实应用打开菜单，审阅主Agent选中、单聊/群组图标、置顶长名/图钉/横向区域、普通会话、搜索/新增/设置、遮罩与关闭，再返回对话；设置页实际包含表单、权限、预算与未知回执说明。P1 必须同屏审阅居中身份、菜单关闭/展开、短用户气泡、宽助手正文、来源卡、胶囊输入与 unknown 原回执；以400e206图02为方向，不能用空白菜单 fixture 替代。P2 必须显示附件四阶段、部分覆盖、来源和停止；P3/P4/P8 必须显示表单标签、错误、选择、未存草稿、弹窗与返回；P5/P6/P7 必须显示领域快照、版本/证据、草稿及确认/回执的真实层级。每页都要亮/暗、标准/摘要、焦点/禁用/加载/错误的实际组合，用户否定的旧组件形态不默认复用。菜单/弹窗/气泡不归 PublicUI 修改，评审后交对应 owner，不能从两份文档直接宣称全 UI 已改完。
 
 ## 七状态逐页场景与预期观察（全部 NOT_RUN）
 
@@ -29,6 +30,7 @@ P1 必须同屏审阅居中身份、菜单关闭/展开、短用户气泡、宽�
 
 | 页面 | N 正常 | E 空 | U 未知 | F 失败 | O 离线 | P 部分 | X 过期 |
 | --- | --- | --- | --- | --- | --- | --- | --- |
+| S0 | 主身份/置顶/普通会话分层 | 无置顶不造示例会话 | 保留原回执与预算说明 | 设置/导航错误持久显示 | 离线仍可关菜单，不伪造连接 | 不完整目录说明范围 | 失效会话不可静默改指其他身份 |
 | P1 | 原答/结果/来源独立 | 无结果不说无资料 | 原 IntentId 查询，无重发 | 留原答和原因 | 快照注明离线/版本 | 只读已验证内容，断流无事件 | 旧来源注明历史；读权失效清文 |
 | P2 | 四阶段各自可读 | 无文档不隐式导入 | 阶段/总量未知，无百分比 | 显示失败单元，不换引擎 | 留可读缓存且说明范围 | 明确成功/缺失页与索引覆盖 | 历史版本可辨，原件不可用说明 |
 | P3 | Skill 版本/需求可核 | 无 Skill 不自动注册 | 运行未知查原意图 | 留输入与依赖错误 | 已有目录可读，不联网刷新 | 缺依赖阻止运行，保留配置 | 版本/绑定变更使旧确认失效 |
@@ -44,6 +46,7 @@ P1 必须同屏审阅居中身份、菜单关闭/展开、短用户气泡、宽�
 
 | 页面 | 320dp / 200%（各自及交叉） | TalkBack / 键盘焦点 | 减少动效 / 身份 | 组件代码 | 页面接入 | 实测证据 |
 | --- | --- | --- | --- | --- | --- | --- |
+| S0 | NOT_RUN：置顶长名不被112dp挤碎；图标显示与48dp热区分开；200%菜单/设置可滚动 | NOT_RUN：主Agent/单聊/群组/置顶/当前状态可读；遮罩不穿透，关闭回原焦点 | NOT_RUN：主角色最多一处，菜单无装饰动效也可用 | 旧壳 present；新外观未实施 | not_connected；旧候选暂停 | NOT_RUN；无产品截图/树/设备 |
 | P1 | NOT_RUN：原文/来源/停止可达，输入不遮卡尾 | NOT_RUN：原答→来源→请求→原回执，返回锚点 | NOT_RUN：Shell 最多一个角色，文本阶段保留 | 旧聊天 present；公共 absent | not_connected | NOT_RUN；无截图/树/设备 |
 | P2 | NOT_RUN：长文件名/四阶段换行，关闭/取消/来源可达 | NOT_RUN：版本→各阶段→失败单元→原查询 | NOT_RUN：无旋转动画也可读 processed | 旧阅读/附件 present；公共 absent | not_connected，FD gate | NOT_RUN；无截图/树/设备 |
 | P3 | NOT_RUN：表单错误/能力/成本完整，按钮纵排 | NOT_RUN：标签/锁定/错误关联，步骤返回聚焦原项 | NOT_RUN：无需角色或进度动画 | 通用表单/公共 Skill absent | not_connected；入口 absent | NOT_RUN；无截图/树/设备 |
