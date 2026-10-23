@@ -1,6 +1,6 @@
 use contract::{CommandEnvelope, ExecutionResult, Operation, Revision, Scope};
 use muyon_core::{
-    contract, documents,
+    contract,
     services::{self, skill_runtime, skills},
 };
 use serde_json::json;
