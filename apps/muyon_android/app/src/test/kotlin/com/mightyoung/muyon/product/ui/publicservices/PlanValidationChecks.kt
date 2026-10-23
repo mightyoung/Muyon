@@ -90,11 +90,15 @@ fun main(args: Array<String>) {
         check(parsePublicDigest("a".repeat(64)) == "a".repeat(64))
         for (raw in listOf("A".repeat(64), "g".repeat(64), "a".repeat(63))) rejects { parsePublicDigest(raw) }
     }
-    checkCase("C1 missing coverage total and optional-null normalization") {
+    checkCase("C1 coverage requires explicit total") {
         rejects { decodePublicValue("coverage", """{"state":"unknown","processed":"0","failed_units":[]}""") }
+    }
+    checkCase("C1 omitted scope options normalize to null") {
         val scope = JSONObject(decodePublicValue("scope", """{"scope":{"workspace_id":"w"},"scope_generation":"1"}"""))
         check(scope.has("account_id") && scope.isNull("account_id"))
         check(scope.getJSONObject("scope").has("project_id") && scope.getJSONObject("scope").isNull("project_id"))
+    }
+    checkCase("C1 omitted error options normalize to null") {
         val error = JSONObject(decodePublicValue("error", """{"code":"unknown_outcome","phase":"host_call","retryability":"after_lookup","effect_knowledge":"unknown","safe_message":"unknown"}"""))
         check(error.has("original_intent_id") && error.isNull("original_intent_id"))
         check(error.has("details_ref") && error.isNull("details_ref"))
