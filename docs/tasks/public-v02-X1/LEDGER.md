@@ -13,3 +13,5 @@ X1 RED source c8fbca09f60832ec4ef4fbe92d07e2a74bb4833e: 0 passed/7 failed (compi
 X2/C1 ruling: permission strings are kind-qualified tool:name, resource:name, prompt:name — same-name capabilities must not share a grant — callers using legacy bare names will be denied until explicitly adapted. This is a Connector-local key convention, not a shared C1 type.
 
 X1 is implemented as local module source; independent review and Contracts registration still pending. No transport/credential store/production dispatch.
+
+Final review: independent reviewer /root/review_connectors_x12, fixed source86534f4126835b46af3c7ec818de184491128be9; no P0-P2 findings, separate-target focused13/13. Final minor (deferred): actual disconnect/remote failed-revoke transition coverage is absent; fake flag/counter do not establish live lifecycle behavior, which remains gated/NOT_RUN. Whole workspace632/632, strict core Clippy and changed-file format pass. This completes the local source slice only; Contracts registration and production host gates remain pending.

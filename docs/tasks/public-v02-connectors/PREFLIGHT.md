@@ -1,5 +1,7 @@
 # Connectors X1/X2 — dependency hold and independent preparation
 
+Later update: parent released fixed Contracts candidate 4d49a580cb518d9b0b80c9df3df1ff564194a639. X1/X2 local implementation and actual verification now appear in [X1 REPORT](../public-v02-X1/REPORT.md) and [X2 REPORT](../public-v02-X2/REPORT.md). Historical dependency-hold text below describes its original stage, not current source availability. Contracts registration/production host gates remain pending.
+
 Follow-up: the user subsequently authorized official Rust toolchain and locked
 cache setup. See [TOOLCHAIN.md](TOOLCHAIN.md) for the later actual results. The
 missing-toolchain observations below describe the original preflight only;
