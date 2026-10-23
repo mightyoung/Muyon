@@ -38,6 +38,8 @@ Python只核验固定输入的字节/JSON元数据，不实现另一份业务cod
 
 当前工具缺失阻断U1编译、行为RED/GREEN及回归；后续由父任务安排已有获授权可用工具，不能自行套用Contracts的Rust安装授权。C1缺少呈现/来源区间共享fixture的部分已列清单，向owner提出而不猜语义。Contracts候选仍待B独审/CI/合入，U1生产入口关闭；具体U0设计、C2/C3消费接线与Shell交接仍为U2/U3前置。
 
-只交两份任务文档；没有ChatScreen、旧卡片、Foundation、Shell、services/mod.rs、core lib.rs或FFI改动。无真实模型/付费实验/Connector授权/第三方程序执行或新依赖。当前没有拒绝或结果不明的写入；独立审查pending。仅正常push独立候选，B保持唯一合入者，不创建合入/部署动作。
+只交两份任务文档；没有ChatScreen、旧卡片、Foundation、Shell、services/mod.rs、core lib.rs或FFI改动。无真实模型/付费实验/Connector授权/第三方程序执行或新依赖。当前没有拒绝或结果不明的写入。非作者 `/root/review_publicui_u0` 独立审查固定 `6428d741860f46b7476cab1160771e1d261607ce` 及一行身份边界修正 `eacdc43c6887dee950e07e03ccb2816b7556abde`：8case/6向量、三fixture摘要、五份外部证据摘要与原源码相符；指定文档检查和完整diff-check exit0，无Important。Minor为固定输入表两个路径缩写不完整，本封套补齐真实路径；只是证据引用修正，不影响产品行为。仅正常push独立候选，B保持唯一合入者，不创建合入/部署动作。
 
 文档核验原始输出 `/tmp/publicui-u1-evidence/docs-check.log` SHA256=`b1693a13d42608fe87c5a66e6a7dfc35ecae86e8d4c8745ceb87cceff9592c5c`；外部核验脚本 check-preparation.py SHA256=`2b13aea97d2757638cf06cb55a828e56946b16f60497b2fa453ed9e713ac8500`。首片固定源 `32d1de81757b7ccbdb8ae12a467b345e4f5ce5ad`；此后仅补证据封套，不冒充U1实现。
+
+本准备切片已按父任务授权读取固定Contracts候选，仍因kotlinc缺失无法开始可编译行为RED；没有U1实现或GREEN，不拿文档审查替代产品验收。最终封套仅补独审结论与精确计划路径，后续由父任务协调工具前置。

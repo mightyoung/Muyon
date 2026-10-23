@@ -7,7 +7,7 @@
 | 输入 | 完整 SHA / 路径 | 使用边界 |
 | --- | --- | --- |
 | 最新 develop / 本隔离分支起点 | `fd26dcdabcdac996bc2881e8141cac2b519966fc` | 2026-10-23 重 fetch；Contracts 尚未合入 |
-| 已批准 U0–U3 计划/总索引/设计 | `64900d4a6a46a9ef2919bcf922fb059413b1ce82`，docs/superpowers/plans/2026-10-23-intelligent-ui.md、public-services-index.md；对应 specs/public-services-ui-design | U1 纯模型与校验；具体外观 U0 未认可，U2/U3不开始 |
+| 已批准 U0–U3 计划/总索引/设计 | `64900d4a6a46a9ef2919bcf922fb059413b1ce82`，docs/superpowers/plans/2026-10-23-intelligent-ui.md、docs/superpowers/plans/2026-10-23-public-services-index.md；docs/superpowers/specs/2026-10-23-public-services-ui-design.md | U1 纯模型与校验；具体外观 U0 未认可，U2/U3不开始 |
 | C1 公共值 | `6e7f774b1559a0a9693eeb195ba13c9ded561993`，crates/muyon-core/src/services/types.rs | 已固定候选，不是 develop；Revision/Scope 仍复用既有 contract，DocumentRef 复用 documents/identity.rs |
 | C2 原回执 | `b626c18a5dff184519e59bb866e5ed37362ac84e`，services/commands.rs | 只读理解边界；不在 U1 实现 dispatch/账本/取消 |
 | C3 最终源码 | `bf264bc62f5d2d65fa7d50b27a26ffee3c0ba6d9`，services/drafts.rs | 只读理解草稿确认/恢复；不是 U1 提前实现 U2 |
