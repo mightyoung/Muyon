@@ -1,0 +1,47 @@
+[
+  {
+    "name": "snapshot",
+    "command": [
+      "bash",
+      "apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/ui/shell/run-snapshot-checks.sh"
+    ],
+    "exit_code": 0
+  },
+  {
+    "name": "host-shell",
+    "command": [
+      "bash",
+      "apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/ui/shell/run-host-shell-checks.sh"
+    ],
+    "exit_code": 0
+  },
+  {
+    "name": "configuration",
+    "command": [
+      "bash",
+      "apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/ui/configuration/run-offline-checks.sh"
+    ],
+    "exit_code": 0
+  },
+  {
+    "name": "bot",
+    "command": [
+      "bash",
+      "apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/agents/setup/run-offline-checks.sh"
+    ],
+    "exit_code": 0
+  },
+  {
+    "name": "contrast",
+    "command": [
+      "python3",
+      "-m",
+      "unittest",
+      "discover",
+      "-s",
+      "apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/ui/system/checks",
+      "-v"
+    ],
+    "exit_code": 0
+  }
+]

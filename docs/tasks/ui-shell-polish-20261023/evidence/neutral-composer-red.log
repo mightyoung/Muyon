@@ -1,0 +1,41 @@
+INSTRUMENTATION_STATUS: numtests=1
+INSTRUMENTATION_STATUS: stream=
+com.mightyoung.muyon.product.ui.shell.ConversationShellTest:
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=neutralComposerActionUsesThemeTextInsteadOfErrorInk
+INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.product.ui.shell.ConversationShellTest
+INSTRUMENTATION_STATUS: current=1
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: numtests=1
+INSTRUMENTATION_STATUS: stream=
+Error in neutralComposerActionUsesThemeTextInsteadOfErrorInk(com.mightyoung.muyon.product.ui.shell.ConversationShellTest):
+java.lang.AssertionError: a neutral composer action must render in neutral host text ink
+	at org.junit.Assert.fail(Assert.java:89)
+	at org.junit.Assert.assertTrue(Assert.java:42)
+	at com.mightyoung.muyon.product.ui.shell.ConversationShellTest.neutralComposerActionUsesThemeTextInsteadOfErrorInk(ConversationShellTest.kt:223)
+
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=neutralComposerActionUsesThemeTextInsteadOfErrorInk
+INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.product.ui.shell.ConversationShellTest
+INSTRUMENTATION_STATUS: stack=java.lang.AssertionError: a neutral composer action must render in neutral host text ink
+	at org.junit.Assert.fail(Assert.java:89)
+	at org.junit.Assert.assertTrue(Assert.java:42)
+	at com.mightyoung.muyon.product.ui.shell.ConversationShellTest.neutralComposerActionUsesThemeTextInsteadOfErrorInk(ConversationShellTest.kt:223)
+
+INSTRUMENTATION_STATUS: current=1
+INSTRUMENTATION_STATUS_CODE: -2
+INSTRUMENTATION_RESULT: stream=
+
+Time: 8.281
+There was 1 failure:
+1) neutralComposerActionUsesThemeTextInsteadOfErrorInk(com.mightyoung.muyon.product.ui.shell.ConversationShellTest)
+java.lang.AssertionError: a neutral composer action must render in neutral host text ink
+	at org.junit.Assert.fail(Assert.java:89)
+	at org.junit.Assert.assertTrue(Assert.java:42)
+	at com.mightyoung.muyon.product.ui.shell.ConversationShellTest.neutralComposerActionUsesThemeTextInsteadOfErrorInk(ConversationShellTest.kt:223)
+
+FAILURES!!!
+Tests run: 1,  Failures: 1
+
+
+INSTRUMENTATION_CODE: -1

@@ -20,7 +20,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.input.PasswordVisualTransformation
+import com.mightyoung.muyon.product.ui.shell.ProductSettingsFields
 import androidx.compose.ui.unit.dp
 import com.mightyoung.muyon.product.agentipc.ProductClient
 import com.mightyoung.muyon.product.design.ClaudeReplyFont
@@ -55,6 +55,7 @@ private fun ChatConversation(client: ProductClient, projectId: String?, conversa
     var originalDisplayName by remember { mutableStateOf(saved.getString("original_request_display_name", null)) }
     var settingsOpen by remember { mutableStateOf(false) }
     var moreOpen by remember { mutableStateOf(false) }
+    var attachmentsOpen by remember { mutableStateOf(false) }
     var workflowOpen by remember { mutableStateOf(false) }
     var historyOpen by remember { mutableStateOf(false) }
     var requestDetailsOpen by remember { mutableStateOf(false) }
@@ -318,7 +319,34 @@ private fun ChatConversation(client: ProductClient, projectId: String?, conversa
     }
 
     Column(Modifier.fillMaxSize().imePadding()) {
-        ConversationHeader(displayName, onOpenMenu, onMore = { moreOpen = true }, mainAgent = conversationKey == "default")
+        ConversationHeader(displayName, onOpenMenu, onMore = { attachmentsOpen = false; moreOpen = true }, mainAgent = conversationKey == "default", moreMenu = {
+                DropdownMenu(expanded = moreOpen, onDismissRequest = { moreOpen = false }) {
+                    DropdownMenuItem(text = { Text("任务与技能") }, enabled = scopeReady, onClick = { moreOpen = false; workflowOpen = true })
+                    DropdownMenuItem(text = { Text("模型与预算设置") }, onClick = { moreOpen = false; settingsOpen = true })
+                    DropdownMenuItem(text = { Text("开始新会话") }, onClick = {
+                        moreOpen = false
+                        val next = java.util.UUID.randomUUID().toString()
+                        if (saved.edit().putString(conversationPreference, next).commit()) {
+                            callbacks.invalidate()
+                            review?.optString("request_id")?.takeIf { it.isNotBlank() }?.let {
+                                client.call("chat_cancel", JSONObject().put("request_id", it)) {}
+                            }
+                            conversation = next; submittedInput = ""; submittedRequest = ""; submittedConversation = ""; reviewInput = ""; review = null; reviewConversationKey = null; reviewDisplayName = null
+                            pendingTool = null; disclosure = null; suggestion = null; followupReady = false
+                            resultText = ""; requestObservation = null; usageDetails = ""; searchResults = emptyList(); records = emptyList(); source = ""; historyOpen = false
+                            conversationNotice = "已开始新会话；原请求仍可独立查询。"
+                        }
+                    })
+                    DropdownMenuItem(text = { Text("刷新连接状态") }, onClick = { moreOpen = false; refreshStatus() })
+                    DropdownMenuItem(text = { Text("预览搜索请求") }, enabled = configured && scopeReady && draft.isNotBlank(), onClick = { moreOpen = false; preview(true) })
+                    DropdownMenuItem(text = { Text("读取供应商") }, enabled = !loading, onClick = { moreOpen = false; read("supplier_list", 0) })
+                    DropdownMenuItem(text = { Text("读取项目论文") }, enabled = !loading && projectId != null, onClick = { moreOpen = false; read("paper_list", 0) })
+                    DropdownMenuItem(text = { Text("历史业务回执") }, enabled = businessOriginalText.isNotEmpty() || businessIntent != null, onClick = {
+                        moreOpen = false; historyOpen = true
+                        if (businessIntent != null) queryBusinessOriginal()
+                    })
+                }
+        })
         Column(Modifier.weight(1f).fillMaxWidth().verticalScroll(rememberScrollState())) {
         Column(Modifier.fillMaxWidth().padding(18.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
         if (resultText.isEmpty() && source.isEmpty() && businessIntent == null && !historyOpen) {
@@ -425,50 +453,24 @@ private fun ChatConversation(client: ProductClient, projectId: String?, conversa
             draftSaveError = if (localDrafts.write(conversationKey, projectId, draft)) ""
                 else "草稿尚未写入本机，当前输入仍保留；请勿离开页面。"
         }, configured && scopeReady && draft.isNotBlank(),
-            onChat = { preview(false) }, onMore = { moreOpen = true }, moreMenu = {
-                DropdownMenu(expanded = moreOpen, onDismissRequest = { moreOpen = false }) {
-                    DropdownMenuItem(text = { Text("任务与技能") }, enabled = scopeReady, onClick = { moreOpen = false; workflowOpen = true })
-                    DropdownMenuItem(text = { Text("模型与预算设置") }, onClick = { moreOpen = false; settingsOpen = true })
-                    DropdownMenuItem(text = { Text("开始新会话") }, onClick = {
-                        moreOpen = false
-                        val next = java.util.UUID.randomUUID().toString()
-                        if (saved.edit().putString(conversationPreference, next).commit()) {
-                            callbacks.invalidate()
-                            review?.optString("request_id")?.takeIf { it.isNotBlank() }?.let {
-                                client.call("chat_cancel", JSONObject().put("request_id", it)) {}
-                            }
-                            conversation = next; submittedInput = ""; submittedRequest = ""; submittedConversation = ""; reviewInput = ""; review = null; reviewConversationKey = null; reviewDisplayName = null
-                            pendingTool = null; disclosure = null; suggestion = null; followupReady = false
-                            resultText = ""; requestObservation = null; usageDetails = ""; searchResults = emptyList(); records = emptyList(); source = ""; historyOpen = false
-                            conversationNotice = "已开始新会话；原请求仍可独立查询。"
-                        }
-                    })
-                    DropdownMenuItem(text = { Text("刷新连接状态") }, onClick = { moreOpen = false; refreshStatus() })
-                    DropdownMenuItem(text = { Text("预览搜索请求") }, enabled = configured && scopeReady && draft.isNotBlank(), onClick = { moreOpen = false; preview(true) })
-                    DropdownMenuItem(text = { Text("读取供应商") }, enabled = !loading, onClick = { moreOpen = false; read("supplier_list", 0) })
-                    DropdownMenuItem(text = { Text("读取项目论文") }, enabled = !loading && projectId != null, onClick = { moreOpen = false; read("paper_list", 0) })
-                    DropdownMenuItem(text = { Text("历史业务回执") }, enabled = businessOriginalText.isNotEmpty() || businessIntent != null, onClick = {
-                        moreOpen = false; historyOpen = true
-                        if (businessIntent != null) queryBusinessOriginal()
-                    })
+            onChat = { preview(false) }, onAttachments = { moreOpen = false; attachmentsOpen = true }, attachmentsMenu = {
+                DropdownMenu(expanded = attachmentsOpen, onDismissRequest = { attachmentsOpen = false }) {
+                    DropdownMenuItem(text = { Text("附件尚未接入") }, enabled = false, onClick = {})
+                    Text("暂不能选择或上传文件。", Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.bodySmall)
                 }
             })
     }
     if (settingsOpen) AlertDialog(
         shape = RoundedCornerShape(32.dp),
         onDismissRequest = { settingsOpen = false; key = "" },
-        title = { Text("确认新的产品配置") },
-        text = { Column(Modifier.verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            Text(if (availability == null) "连接状态未读取" else "本地读取已连接；实际外发仍需通过计费证明与预算检查", Modifier.testTag("chat-availability"))
-            if (accounting.isNotEmpty()) Text(accounting)
-            Text("DeepSeek · 独立产品配置与累计预算。所有助手与群组共享此工作台的模型配置和累计预算；成员资料不会自动发送给模型，也不会自动调度成员。")
-            Text("配置不会发出请求。凭据仅保留在当前 Service 内存，重启后需重新输入。当前托管聊天计费上界与搜索价格证明尚未安装，预览会明确阻止外发。")
-            Text("供应商：DeepSeek；端点固定为 api.deepseek.com。不会读取历史凭据或预算。")
-            OutlinedTextField(value = key, onValueChange = { key = it.take(512) }, label = { Text("新凭据（仅当前进程）") }, visualTransformation = PasswordVisualTransformation())
-            OutlinedTextField(value = cap, onValueChange = { cap = it.filter(Char::isDigit).take(13) }, label = { Text("累计上限（微人民币）") })
-            OutlinedTextField(value = calls, onValueChange = { calls = it.filter(Char::isDigit).take(6) }, label = { Text("累计请求数上限") })
-            Text("1 元 = 1,000,000 微人民币。每次确认先保留经可信证明的请求成本上界；未知结果保留占额。更换配置不会清零已用费用或未知保留。填写预算不能替代真实计费证明。")
-        } },
+        title = { Text("模型与预算") },
+        text = {
+            ProductSettingsFields(key, { key = it.take(512) }, cap, { cap = it.filter(Char::isDigit).take(13) },
+                calls, { calls = it.filter(Char::isDigit).take(6) },
+                if (availability == null) "连接状态未读取" else "本地读取已连接；实际外发仍需通过计费证明与预算检查",
+                accounting)
+        },
         confirmButton = { TextButton(onClick = {
             val input = key.toCharArray(); key = ""; settingsOpen = false
             // In-flight status replies belong to the previous configuration.

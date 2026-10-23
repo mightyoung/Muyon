@@ -4,6 +4,7 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -62,7 +63,7 @@ fun ConversationShell(
                 Box(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.scrim.copy(alpha = .42f))
                     .clickable(onClickLabel = "关闭菜单") { menuOpen = false })
                 Surface(Modifier.width(menuWidth).fillMaxHeight().testTag("shell-menu")
-                    .semantics { paneTitle = "工作空间导航" }, color = MaterialTheme.colorScheme.background) {
+                    .semantics { paneTitle = "工作空间导航" }, color = MaterialTheme.colorScheme.background, contentColor = MaterialTheme.colorScheme.onBackground) {
                     Column(Modifier.safeDrawingPadding().verticalScroll(rememberScrollState()).padding(12.dp),
                         verticalArrangement = Arrangement.spacedBy(8.dp)) {
                         Row(Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically,
@@ -73,9 +74,12 @@ fun ConversationShell(
                         }
                         if (notice.isNotBlank()) Text(notice, Modifier.padding(12.dp).semantics { liveRegion = LiveRegionMode.Polite }, color = MaterialTheme.colorScheme.error)
                         Text("主 Agent 与置顶", Modifier.padding(12.dp).semantics { heading() }, style = MaterialTheme.typography.titleSmall)
-                        conversations.filter { it.main || it.pinned }.forEach { item ->
-                            ConversationEntry(item, destination == "chat" && selectedConversation == item.key,
-                                { onSelectConversation(item.key); menuOpen = false }, { onTogglePin(item.key) })
+                        Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            conversations.filter { it.main || it.pinned }.sortedBy { !it.main }.forEach { item ->
+                                PinnedConversationCard(item, destination == "chat" && selectedConversation == item.key,
+                                    { onSelectConversation(item.key); menuOpen = false }, { onTogglePin(item.key) })
+                            }
                         }
                         HorizontalDivider(Modifier.padding(vertical = 8.dp))
                         Text("最近会话", Modifier.padding(12.dp).semantics { heading() }, style = MaterialTheme.typography.titleSmall)
@@ -95,7 +99,7 @@ fun ConversationShell(
                 }
                 IconButton(onClick = { menuOpen = false }, modifier = Modifier.align(Alignment.TopEnd)
                     .statusBarsPadding().padding(4.dp).size(48.dp)) {
-                    Surface(shape = RoundedCornerShape(24.dp), color = MaterialTheme.colorScheme.surface) {
+                    Surface(shape = RoundedCornerShape(24.dp), color = MaterialTheme.colorScheme.surface, contentColor = MaterialTheme.colorScheme.onSurface) {
                         Box(Modifier.size(48.dp), contentAlignment = Alignment.Center) {
                             Text("×", Modifier.semantics { contentDescription = "关闭菜单" }, style = MaterialTheme.typography.headlineSmall)
                         }
@@ -106,11 +110,41 @@ fun ConversationShell(
     }
 }
 
+/** Only host-provided, already opened identities appear here. Pinning remains a host callback. */
+@Composable
+private fun PinnedConversationCard(item: ShellConversation, active: Boolean, onOpen: () -> Unit, onPin: () -> Unit) {
+    Surface(color = if (active) MaterialTheme.colorScheme.surfaceVariant else MaterialTheme.colorScheme.surface,
+        contentColor = MaterialTheme.colorScheme.onSurface, shape = RoundedCornerShape(20.dp)) {
+        Column(Modifier.width(112.dp)) {
+            Column(Modifier.fillMaxWidth().heightIn(min = 144.dp)
+                .testTag(if (item.main) "nav-chat" else "shell-conversation-${item.key}")
+                .semantics {
+                    selected = active
+                    contentDescription = "${item.title}，${if (active) "当前会话，" else ""}${if (item.main) "主 Agent" else "已置顶"}${if (item.group) "，群组，仅本地组织" else ""}"
+                }.clickable(role = Role.Tab, onClick = onOpen).padding(12.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                if (item.main) Image(painterResource(R.drawable.muyon_brand_mascot_front), contentDescription = null,
+                    modifier = Modifier.size(48.dp), contentScale = ContentScale.Fit)
+                else Icon(painterResource(R.drawable.wb_chat), contentDescription = null, modifier = Modifier.size(48.dp))
+                Text((if (active) "• " else "") + item.title, style = MaterialTheme.typography.bodyLarge,
+                    textAlign = androidx.compose.ui.text.style.TextAlign.Center, maxLines = 3, overflow = TextOverflow.Ellipsis)
+                Text(if (item.main) "主 Agent" else if (item.group) "群组 · 已置顶" else "单聊 · 已置顶",
+                    style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+            if (!item.main) IconButton(onClick = onPin, modifier = Modifier.align(Alignment.End).size(48.dp)) {
+                Text("◆", Modifier.semantics { contentDescription = "取消置顶${item.title}" })
+            } else Spacer(Modifier.height(48.dp))
+        }
+    }
+}
+
 @Composable
 private fun ConversationEntry(item: ShellConversation, active: Boolean, onOpen: () -> Unit, onPin: () -> Unit) {
     Surface(color = if (active) MaterialTheme.colorScheme.surfaceVariant else MaterialTheme.colorScheme.surface,
-        shape = RoundedCornerShape(20.dp)) {
+        contentColor = MaterialTheme.colorScheme.onSurface, shape = RoundedCornerShape(20.dp)) {
         Row(Modifier.fillMaxWidth().heightIn(min = 64.dp), verticalAlignment = Alignment.CenterVertically) {
+            Icon(painterResource(R.drawable.wb_chat), contentDescription = null,
+                modifier = Modifier.padding(start = 12.dp).size(32.dp))
             Column(Modifier.weight(1f).testTag(if (item.main) "nav-chat" else "shell-conversation-${item.key}")
                 .semantics { selected = active; contentDescription = "${item.title}，${if (active) "当前会话，" else ""}${if (item.main) "主 Agent" else if (item.pinned) "已置顶" else "普通会话"}" }
                 .clickable(role = Role.Tab, onClick = onOpen).padding(12.dp)) {
@@ -129,7 +163,7 @@ private fun ConversationEntry(item: ShellConversation, active: Boolean, onOpen: 
 
 /** Natural height at large font sizes; body is laid out below, never behind the header. */
 @Composable
-fun ConversationHeader(title: String, onOpenMenu: () -> Unit, onMore: (() -> Unit)? = null, mainAgent: Boolean = false) {
+fun ConversationHeader(title: String, onOpenMenu: () -> Unit, onMore: (() -> Unit)? = null, mainAgent: Boolean = false, moreMenu: @Composable () -> Unit = {}) {
     Row(Modifier.fillMaxWidth().heightIn(min = 64.dp).testTag("shell-header").padding(horizontal = 8.dp), verticalAlignment = Alignment.CenterVertically) {
         IconButton(onClick = onOpenMenu, modifier = Modifier.size(48.dp)) {
             Icon(painterResource(R.drawable.wb_menu), "打开工作空间导航")
@@ -140,8 +174,11 @@ fun ConversationHeader(title: String, onOpenMenu: () -> Unit, onMore: (() -> Uni
             Text(title, modifier = Modifier.semantics { heading() }, style = MaterialTheme.typography.titleMedium,
                 textAlign = androidx.compose.ui.text.style.TextAlign.Center, maxLines = 3, overflow = TextOverflow.Ellipsis)
         }
-        if (onMore != null) IconButton(onClick = onMore, modifier = Modifier.size(48.dp).testTag("chat-more")) {
-            Text("···", Modifier.semantics { contentDescription = "更多聊天操作" }, style = MaterialTheme.typography.titleLarge)
+        if (onMore != null) Box {
+            IconButton(onClick = onMore, modifier = Modifier.size(48.dp).testTag("chat-more")) {
+                Text("···", Modifier.semantics { contentDescription = "更多会话操作" }, style = MaterialTheme.typography.titleLarge)
+            }
+            moreMenu()
         } else Spacer(Modifier.width(48.dp))
     }
 }

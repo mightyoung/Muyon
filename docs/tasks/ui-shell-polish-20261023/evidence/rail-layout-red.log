@@ -1,0 +1,44 @@
+INSTRUMENTATION_STATUS: numtests=1
+INSTRUMENTATION_STATUS: stream=
+com.mightyoung.muyon.product.ui.shell.ConversationShellTest:
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=realPinnedConversationsShareTopRailAndOrdinaryStaysBelow
+INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.product.ui.shell.ConversationShellTest
+INSTRUMENTATION_STATUS: current=1
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: numtests=1
+INSTRUMENTATION_STATUS: stream=
+Error in realPinnedConversationsShareTopRailAndOrdinaryStaysBelow(com.mightyoung.muyon.product.ui.shell.ConversationShellTest):
+java.lang.AssertionError: main and pinned share a horizontal rail expected:<423.0> but was:<613.0>
+	at org.junit.Assert.fail(Assert.java:89)
+	at org.junit.Assert.failNotEquals(Assert.java:835)
+	at org.junit.Assert.assertEquals(Assert.java:577)
+	at com.mightyoung.muyon.product.ui.shell.ConversationShellTest.realPinnedConversationsShareTopRailAndOrdinaryStaysBelow(ConversationShellTest.kt:201)
+
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=realPinnedConversationsShareTopRailAndOrdinaryStaysBelow
+INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.product.ui.shell.ConversationShellTest
+INSTRUMENTATION_STATUS: stack=java.lang.AssertionError: main and pinned share a horizontal rail expected:<423.0> but was:<613.0>
+	at org.junit.Assert.fail(Assert.java:89)
+	at org.junit.Assert.failNotEquals(Assert.java:835)
+	at org.junit.Assert.assertEquals(Assert.java:577)
+	at com.mightyoung.muyon.product.ui.shell.ConversationShellTest.realPinnedConversationsShareTopRailAndOrdinaryStaysBelow(ConversationShellTest.kt:201)
+
+INSTRUMENTATION_STATUS: current=1
+INSTRUMENTATION_STATUS_CODE: -2
+INSTRUMENTATION_RESULT: stream=
+
+Time: 12.004
+There was 1 failure:
+1) realPinnedConversationsShareTopRailAndOrdinaryStaysBelow(com.mightyoung.muyon.product.ui.shell.ConversationShellTest)
+java.lang.AssertionError: main and pinned share a horizontal rail expected:<423.0> but was:<613.0>
+	at org.junit.Assert.fail(Assert.java:89)
+	at org.junit.Assert.failNotEquals(Assert.java:835)
+	at org.junit.Assert.assertEquals(Assert.java:577)
+	at com.mightyoung.muyon.product.ui.shell.ConversationShellTest.realPinnedConversationsShareTopRailAndOrdinaryStaysBelow(ConversationShellTest.kt:201)
+
+FAILURES!!!
+Tests run: 1,  Failures: 1
+
+
+INSTRUMENTATION_CODE: -1
