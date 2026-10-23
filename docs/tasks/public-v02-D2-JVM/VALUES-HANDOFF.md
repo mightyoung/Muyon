@@ -10,13 +10,13 @@
 - 完整读取修订计划 `db2964a42d3d882f3fe6285601f6b41e137c0367` 的 document-pipeline / public-services-index；前者文档 SHA256 `175de9bc0c8c720e9ff2facc1b9ed2569cbb95924e17a0070846b7c8ebd14310`。同时核其继承的 pipeline.rs guard 与原 JVM 测试 / runner / fixture。
 - 旧 JVM 验证 `3c72963a1adcb47fe82819a70310465e3eb8aeb4` 和 Documents 交接 `6e79be12fb537655454e8f28265439da02550530` 保持历史状态：缺生产文件 / 符号，只有结构失败，未取得行为 RED/GREEN。
 
-两份新输入仍明确：方案 A / B 未裁定、`IndexCompatibility.kt` 原 owner 为 Documents、具体交接未完成；修订计划写明本轮不补未决接口实现。父任务本轮授权可分工实施已确定值检查，没有给出该生产文件的明确转交。因此已请求明确生产文件分工，同时先完成本切片的独立诊断 / 测试矩阵。**没有把提案签名直接冻结成代码。**
+两份固定输入将生产文件交接列为未决；阅读后父任务补充 Contracts 已核准的明确分工：**PublicUI 唯一负责 Kotlin 生产文件 / 测试 / runner，Documents 负责 Rust / 共享fixture / 语义对拍，发布固定 fixture SHA 后本线消费，不互改文件。**该新交接解除文件 owner 待定，但不冻结可信宿主解析成功语义。本轮仅已确定的离线兼容比较进入实施范围，先完成本切片的独立诊断 / 测试矩阵，等待 Documents 新固定 fixture 后再实施，不抢写共同事实。
 
-Ruling：先交测试材料与实际平台差异，不创建另一套 VectorDescriptor / LegacyIndexEntry 或同名生产实现——保持单一 owner 与共同事实源——代价是当前仍没有 D2 Kotlin 行为 GREEN，需要明确分工后才能续接。
+Ruling：在收到固定 fixture 前先交测试材料与实际平台差异，不创建另一套 VectorDescriptor / LegacyIndexEntry 或抢写共同 fixture——保持单一 owner 与共同事实源——代价是当前仍没有 D2 Kotlin 行为 GREEN，需要 Documents 固定输入后续接。生产文件 owner 现已明确，不再为此重复索批。
 
 ## 已实测：Kotlin 默认空白不能直接代替 Rust trim-empty
 
-在已有批准工具 `/workspace/publicui-tools/kotlin-2.2.20/kotlinc/bin/kotlinc`、现有 Java 21.0.12.1 下运行本地诊断脚本，exit0，输出35个指定码点的 `isBlank` / `trim().isEmpty` 观察值；这不是35项生产断言，也不是产品测试 GREEN。未安装新工具 / 库。
+在已有批准工具 `/workspace/publicui-tools/kotlin-2.2.20/kotlinc/bin/kotlinc`、现有 Java 21.0.12.1 下运行本地诊断脚本，exit0，输出34个指定码点的 `isBlank` / `trim().isEmpty` 观察值；这不是34项生产断言，也不是产品测试 GREEN。未安装新工具 / 库。
 
 Rust 1.93.1 的 [char::is_whitespace 实现](https://github.com/rust-lang/rust/blob/1.93.1/library/core/src/char/methods.rs#L869) 与 [固定 Unicode White_Space 表](https://github.com/rust-lang/rust/blob/1.93.1/library/core/src/unicode/unicode_data.rs#L706) 已只读核对。下表 Rust 结果是**固定源码推导**，本环境未运行 Rust；Kotlin 两列为实际运行结果。
 
@@ -65,7 +65,7 @@ for (point in points) {
 | 字符串编码 | 单独高 / 低 surrogate、成对emoji、JSON转义与解码后字节边界 | JVM String可含非Unicode标量；Rust String不能，codec必须拒绝替换损坏输入；当前typed候选语义留共同确认 |
 | fixture入口 | major / synthetic / 必填字段 / 描述符类型 / 维数lexeme | 原Regex读取器不能证明这些条件；最终解析方式由owner与承接者确定，不新增依赖或用缺字段默认值换通过 |
 
-未来 RED 必须在最终签名和 owner 明确后，用可编译不可用桩观察真实正向断言失败，再实施。当前不创建假stub / 恒false实现，不把这份矩阵、旧符号不存在或诊断日志称作行为RED。
+未来 RED 必须在 Documents 新 fixture 固定、纯兼容签名与之核对后，用可编译不可用桩观察真实正向断言失败，再实施。当前不创建假stub / 恒false实现，不把这份矩阵、旧符号不存在或诊断日志称作行为RED。
 
 ## 可信解析与授权边界
 
@@ -73,6 +73,8 @@ for (point in points) {
 
 `validateCompatibility` 只比两份声明；未来可信搜索仍需原 owner 解析真实 EmbeddingResult，逐条核 descriptor、输入集合与 IndexSnapshotRef，再在搜索返回和来源打开处重验授权。不能用 legacy paper / digest 猜 ResultId；不能用 wire `resolved=true` 或 callback布尔值代替可信来源。`isPubliclyResolvable` 的宿主成功语义继续 UNFROZEN / NOT_IMPLEMENTED。
 
-未完成项：方案 / 文件转交、共同fixture新向量、最终签名、Kotlin生产实现和行为RED/GREEN；Android / 设备 / 引擎 / Reader / FD / 真实业务全部 NOT_RUN。没有可注入引擎端口，因此不报告 engine invocation=0。U0外观未认可，U2/U3未启动。
+未完成项：共同fixture新向量与固定SHA、纯兼容签名和输入核对、Kotlin生产实现和行为RED/GREEN；可信形状筛查 / 宿主完整解析不是本轮已冻结成功能力；Android / 设备 / 引擎 / Reader / FD / 真实业务全部 NOT_RUN。没有可注入引擎端口，因此不报告 engine invocation=0。U0外观未认可，U2/U3未启动。
 
-待定 action=`实施 D2 Kotlin 生产纯函数`；target=`product/services/documents/IndexCompatibility.kt`；reason=固定计划仍要求 Documents owner 与父任务明确选择 / 交接；outcome=**待交接，未执行，非审批拒绝**。独立诊断和材料已完成；没有绕过 Reader / FD、安装SDK / 新依赖、改旧PR108、合入或部署。
+待定 action=`实施 D2 Kotlin 生产纯函数`；target=`product/services/documents/IndexCompatibility.kt`；reason=父任务要求等待 Documents 发布固定共享fixture SHA 后消费；outcome=**待依赖，未执行，非审批拒绝**。独立诊断和材料已完成；没有绕过 Reader / FD、安装SDK / 新依赖、改旧PR108、合入或部署。
+
+文档检查记录：初稿将诊断行数误写35，行数断言实际exit1，未记通过；已按实际34个码点更正文档，再运行围栏 / 行数检查。原始探针与日志未改写。
