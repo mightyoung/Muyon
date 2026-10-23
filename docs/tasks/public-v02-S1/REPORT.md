@@ -2,6 +2,8 @@
 
 2026-10-23 UTC. This is a preparation slice, not S1 completion.
 
+Follow-up: the user subsequently authorized official toolchain/cache installation. See [TOOLCHAIN-RESTORATION.md](TOOLCHAIN-RESTORATION.md) for current tool availability and fresh baseline results; the exit-127 records below remain the original preparation history. C1 remains a separate pending dependency.
+
 ## Fixed inputs and isolation
 
 - Approved plan/spec source: `64900d4a6a46a9ef2919bcf922fb059413b1ce82`, `docs/superpowers/plans/2026-10-23-skill-runtime.md`, full `2026-10-23-public-services-index.md`, and `docs/superpowers/specs/2026-10-23-public-services-ui-design.md`; read from that object, not copied onto the product branch.
