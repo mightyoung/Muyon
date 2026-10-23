@@ -1,7 +1,4 @@
-#[path = "../src/domains/development/repository_evidence.rs"]
-mod repository_evidence;
-
-use repository_evidence::*;
+use muyon_core::domains::development::repository_evidence::*;
 
 fn fixtures() -> Vec<RepositorySnapshot> {
     serde_json::from_str(include_str!(
