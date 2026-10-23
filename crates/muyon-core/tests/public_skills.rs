@@ -145,6 +145,7 @@ fn fixture_roundtrip_and_unknown_authority_rejection() {
     assert_eq!(fixture["schema_major"], 1);
     let s = decode_strict::<SkillRegistrySnapshot>(&fixture["snapshot"].to_string()).unwrap();
     assert!(validate_catalog(&s).is_ok());
+    assert_eq!(s.skills, builtin_descriptors());
     assert_eq!(serde_json::to_value(s).unwrap(), fixture["snapshot"]);
     for field in ["approved", "allowed_tools", "granted_capabilities"] {
         let mut wire = fixture["snapshot"]["bindings"][0].clone();

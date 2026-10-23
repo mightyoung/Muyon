@@ -95,28 +95,114 @@ pub(crate) fn builtin_input_schema() -> Value {
 pub(crate) fn builtin_output_schema() -> Value {
     json!({"type":"object","required":["records"],"properties":{"records":{"type":"array"}}})
 }
-pub fn validate_catalog(_: &SkillRegistrySnapshot) -> Result<(), ServiceError> {
-    Err(error(ErrorCode::CapabilityUnavailable))
+fn identity(raw: &str) -> bool {
+    !raw.is_empty()
+        && raw.len() <= 128
+        && raw
+            .bytes()
+            .all(|b| b.is_ascii_alphanumeric() || b"-_.:".contains(&b))
 }
-pub fn list_skills(_: &SkillRegistrySnapshot) -> Vec<SkillRef> {
-    vec![]
+fn valid_ref(reference: &SkillRef) -> bool {
+    identity(&reference.skill_id) && identity(&reference.version)
+}
+/// Validates candidate metadata only; callers still require trusted current scope.
+pub fn validate_catalog(snapshot: &SkillRegistrySnapshot) -> Result<(), ServiceError> {
+    for (i, d) in snapshot.skills.iter().enumerate() {
+        if !valid_ref(&d.reference)
+            || !identity(&d.owner_plugin_id)
+            || d.required_capabilities.iter().any(|c| !identity(c))
+            || snapshot.skills[..i].iter().any(|p| {
+                p.reference.skill_id == d.reference.skill_id
+                    && p.reference.version == d.reference.version
+            })
+        {
+            return Err(error(ErrorCode::InvalidArgument));
+        }
+        if d.contract_major != 1 {
+            return Err(error(ErrorCode::UnsupportedVersion));
+        }
+        if d.input_schema != builtin_input_schema() || d.output_schema != builtin_output_schema() {
+            return Err(error(ErrorCode::CapabilityUnavailable));
+        }
+    }
+    for (i, binding) in snapshot.bindings.iter().enumerate() {
+        if !identity(&binding.binding_id)
+            || !valid_ref(&binding.skill)
+            || binding.bot_id.as_deref().is_some_and(|id| !identity(id))
+            || snapshot.bindings[..i]
+                .iter()
+                .any(|b| b.binding_id == binding.binding_id)
+            || !snapshot.skills.iter().any(|d| d.reference == binding.skill)
+        {
+            return Err(error(ErrorCode::InvalidArgument));
+        }
+    }
+    Ok(())
+}
+/// Invalid candidates yield no catalog; validate_catalog supplies diagnostics.
+pub fn list_skills(snapshot: &SkillRegistrySnapshot) -> Vec<SkillRef> {
+    if validate_catalog(snapshot).is_err() {
+        return vec![];
+    }
+    snapshot
+        .skills
+        .iter()
+        .map(|d| d.reference.clone())
+        .collect()
 }
 pub fn get_descriptor<'a>(
-    _: &'a SkillRegistrySnapshot,
-    _: &SkillRef,
+    snapshot: &'a SkillRegistrySnapshot,
+    reference: &SkillRef,
 ) -> Result<&'a SkillDescriptor, ServiceError> {
-    Err(error(ErrorCode::CapabilityUnavailable))
+    validate_catalog(snapshot)?;
+    let d = snapshot
+        .skills
+        .iter()
+        .find(|d| {
+            d.reference.skill_id == reference.skill_id && d.reference.version == reference.version
+        })
+        .ok_or_else(|| error(ErrorCode::CapabilityUnavailable))?;
+    if d.reference != *reference {
+        return Err(error(ErrorCode::StaleRevision));
+    }
+    Ok(d)
 }
 pub fn get_binding<'a>(
-    _: &'a SkillRegistrySnapshot,
-    _: &str,
+    snapshot: &'a SkillRegistrySnapshot,
+    binding_id: &str,
 ) -> Result<&'a SkillBinding, ServiceError> {
-    Err(error(ErrorCode::CapabilityUnavailable))
+    validate_catalog(snapshot)?;
+    snapshot
+        .bindings
+        .iter()
+        .find(|b| b.binding_id == binding_id)
+        .ok_or_else(|| error(ErrorCode::CapabilityUnavailable))
 }
+/// CAS candidate check, not a storage command or execution permit.
+/// Resolve replacement.skill against the reviewed catalog before persisting.
 pub fn validate_binding_update(
-    _: &SkillBinding,
-    _: &Revision,
-    _: &SkillBinding,
+    current: &SkillBinding,
+    expected: &Revision,
+    replacement: &SkillBinding,
 ) -> Result<(), ServiceError> {
-    Err(error(ErrorCode::CapabilityUnavailable))
+    if expected != &current.revision
+        || current.revision.next().ok().as_ref() != Some(&replacement.revision)
+    {
+        return Err(error(ErrorCode::StaleRevision));
+    }
+    if current.scope != replacement.scope {
+        return Err(error(ErrorCode::ScopeChanged));
+    }
+    if current.binding_id != replacement.binding_id
+        || current.bot_id != replacement.bot_id
+        || !identity(&replacement.binding_id)
+        || !valid_ref(&replacement.skill)
+        || replacement
+            .bot_id
+            .as_deref()
+            .is_some_and(|id| !identity(id))
+    {
+        return Err(error(ErrorCode::InvalidArgument));
+    }
+    Ok(())
 }
