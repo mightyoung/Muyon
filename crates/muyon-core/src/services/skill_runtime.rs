@@ -196,7 +196,5 @@ pub struct SkillRunSnapshot {
 }
 /// Copies supplied original facts only; does not create a task or refresh authorization.
 pub fn get_run_snapshot(original: &SkillRunSnapshot) -> SkillRunSnapshot {
-    let mut placeholder = original.clone();
-    placeholder.job.phase = super::pipeline::JobPhase::Accepted;
-    placeholder
+    original.clone()
 }
