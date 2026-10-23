@@ -1,4 +1,7 @@
 use muyon_core::{contract, documents, services};
+#[path = "../src/services/pipeline.rs"]
+#[allow(dead_code)] // Real Documents-owned type; pipeline behavior has its own target.
+mod pipeline;
 #[path = "../src/services/skill_runtime.rs"]
 mod skill_runtime;
 #[path = "../src/services/skills.rs"]
@@ -566,5 +569,78 @@ fn lookup_error_after_unknown_cancellation_never_invents_stopped_state() {
     assert_eq!(
         *owner.calls.borrow(),
         vec![("cancel", original.clone()), ("lookup", original)]
+    );
+}
+
+fn document_step_snapshot() -> SkillRunSnapshot {
+    let (_, binding) = context();
+    SkillRunSnapshot {
+        // A synthetic reference for presentation of an already existing document step;
+        // it is not installed in the compiled catalog and cannot start any Skill.
+        skill: SkillRef {
+            skill_id: "synthetic-document-step".into(),
+            version: "fixture-v1".into(),
+            content_digest: Digest::parse(&"a".repeat(64)).unwrap(),
+        },
+        binding_revision: Revision::parse("9007199254740993").unwrap(),
+        job: pipeline::JobSnapshot {
+            job_id: JobId::parse("job:document-step").unwrap(),
+            original_intent_id: IntentId::parse("intent:original").unwrap(),
+            scope: binding.scope,
+            stage: pipeline::PipelineStage::Parse,
+            attempt: 3,
+            phase: pipeline::JobPhase::UnknownOutcome,
+            coverage: Coverage {
+                state: CoverageState::Unknown,
+                processed: 1,
+                total: None,
+                failed_units: vec![],
+            },
+        },
+    }
+}
+#[test]
+fn run_snapshot_copies_exact_existing_job_without_changing_phase_attempt_or_binding() {
+    let original = document_step_snapshot();
+    let before = original.clone();
+    let mut projected = get_run_snapshot(&original);
+    assert_eq!(projected, original);
+    assert_eq!(projected.binding_revision.as_str(), "9007199254740993");
+    assert_eq!(projected.job.phase, pipeline::JobPhase::UnknownOutcome);
+    projected.job.phase = pipeline::JobPhase::Cancelled;
+    projected.job.attempt = 9;
+    projected.job.scope.scope_generation = Revision::new(99);
+    projected.skill.version = "other".into();
+    assert_eq!(original, before);
+    assert_eq!(get_run_snapshot(&original), before);
+}
+#[test]
+fn document_step_snapshot_recovery_keeps_original_intent_and_never_starts_work() {
+    let original = document_step_snapshot();
+    let owner = recovery_owner(Ok(recovery_result(contract::ExecutionStatus::Unknown)));
+    for _ in 0..3 {
+        let view = get_run_snapshot(&original);
+        assert_eq!(view.job.phase, pipeline::JobPhase::UnknownOutcome);
+        assert_eq!(view.job.attempt, 3);
+        assert_eq!(view.job.original_intent_id, original.job.original_intent_id);
+        assert!(
+            owner.calls.borrow().is_empty(),
+            "projection alone invokes no host operation"
+        );
+    }
+    // Only this explicit, pre-authorized host action calls C2 cancelOriginal.
+    let target = pipeline::cancellation_target(&get_run_snapshot(&original).job);
+    assert_eq!(
+        cancel_original_run(&owner, &target).unwrap().status,
+        contract::ExecutionStatus::Unknown
+    );
+    assert_eq!(
+        lookup_original_run(&owner, &target).unwrap(),
+        owner.lookup_reply.clone().unwrap()
+    );
+    assert_eq!(get_run_snapshot(&original), original);
+    assert_eq!(
+        *owner.calls.borrow(),
+        vec![("cancel", target.clone()), ("lookup", target)]
     );
 }
