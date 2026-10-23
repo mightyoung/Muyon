@@ -1,5 +1,7 @@
 # Skills candidate follow-up — checked listing and original-query fault coverage
 
+Latest partial S2 update: [original cancellation and actual Documents JobSnapshot projection](RECOVERY-SNAPSHOT.md), fixed source4ce50debd39c6dc4ca39dae7f76fd113b5856047. Earlier remaining-scope tables and counts below are historical; the latest report distinguishes implemented pure adapters from pending production/Operation work.
+
 2026-10-23 UTC. Parent requested the previous Minor be covered and malformed catalogs be distinguishable from real empty catalogs. This is a pure lower-level candidate revision; it is not a completed catalog service or production runtime.
 
 ## Fixed source and interface change for Contracts
