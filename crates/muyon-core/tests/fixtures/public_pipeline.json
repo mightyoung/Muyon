@@ -1,0 +1,12 @@
+{
+  "contract_major": 1,
+  "schema_major": 1,
+  "synthetic": true,
+  "descriptor": {
+    "model_version": "synthetic-model-v1",
+    "tokenizer_version": "synthetic-tokenizer-v1",
+    "dimensions": 768,
+    "chunk_version": "synthetic-chunk-v1"
+  },
+  "legacy_paper_only_publicly_resolvable": false
+}
