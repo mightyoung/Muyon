@@ -35,9 +35,9 @@ fn fixture() -> SkillRegistrySnapshot {
 fn catalog_is_read_only() {
     let s = fixture();
     let before = s.clone();
-    assert_eq!(list_skills(&s).len(), 2);
+    assert_eq!(list_skills(&s).unwrap().len(), 2);
     assert!(validate_catalog(&s).is_ok());
-    for r in list_skills(&s) {
+    for r in list_skills(&s).unwrap() {
         assert_eq!(get_descriptor(&s, &r).unwrap().reference, r);
     }
     assert_eq!(get_binding(&s, "binding:1").unwrap(), &s.bindings[0]);
@@ -97,7 +97,10 @@ fn exact_versions_coexist_and_digest_substitution_is_rejected() {
         validate_catalog(&s).unwrap_err().code,
         ErrorCode::InvalidArgument
     );
-    assert!(list_skills(&s).is_empty());
+    assert_eq!(
+        list_skills(&s).unwrap_err().code,
+        ErrorCode::InvalidArgument
+    );
     assert!(get_binding(&s, "binding:1").is_err());
 }
 #[test]
@@ -166,4 +169,15 @@ fn malformed_catalog_is_distinct_from_a_valid_empty_catalog() {
     assert!(validate_catalog(&empty).is_ok());
     assert!(validate_catalog(&malformed).is_err());
     assert_ne!(list_skills(&empty), list_skills(&malformed));
+    assert_eq!(list_skills(&empty).unwrap(), Vec::<SkillRef>::new());
+    assert_eq!(
+        list_skills(&malformed).unwrap_err().code,
+        ErrorCode::InvalidArgument
+    );
+    let mut unknown_schema = fixture();
+    unknown_schema.skills[0].input_schema = json!({"type":"any"});
+    assert_eq!(
+        list_skills(&unknown_schema).unwrap_err().code,
+        ErrorCode::CapabilityUnavailable
+    );
 }

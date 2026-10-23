@@ -139,16 +139,15 @@ pub fn validate_catalog(snapshot: &SkillRegistrySnapshot) -> Result<(), ServiceE
     }
     Ok(())
 }
-/// Invalid candidates yield no catalog; validate_catalog supplies diagnostics.
-pub fn list_skills(snapshot: &SkillRegistrySnapshot) -> Vec<SkillRef> {
-    if validate_catalog(snapshot).is_err() {
-        return vec![];
-    }
-    snapshot
+/// Checked candidate read: malformed metadata is never reported as an empty catalog.
+/// This validates shape only, not the caller's authority or any runnable service.
+pub fn list_skills(snapshot: &SkillRegistrySnapshot) -> Result<Vec<SkillRef>, ServiceError> {
+    validate_catalog(snapshot)?;
+    Ok(snapshot
         .skills
         .iter()
         .map(|d| d.reference.clone())
-        .collect()
+        .collect())
 }
 pub fn get_descriptor<'a>(
     snapshot: &'a SkillRegistrySnapshot,
