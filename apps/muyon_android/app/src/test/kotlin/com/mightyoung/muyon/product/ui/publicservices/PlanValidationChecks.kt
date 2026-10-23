@@ -187,7 +187,7 @@ private fun planSafetyChecks() {
     checkCase("raw unknown component action and approved fields degrade without dispatch") {
         val raw = """{"schemaVersion":1,"surfaceId":"surface:1","planRevision":"1","snapshotRef":{"id":"snapshot:1","revision":"9007199254740993"},"root":"root","nodes":[{"id":"root","componentType":"MessageBlock","typedProps":{"text":"answer","answerRef":{"id":"answer:1","revision":"1"}},"bindingRefs":[],"children":[],"eventBindings":[]}]}"""
         check(validateEncodedPlan(request, raw, context()).plan != null)
-        val malformed = listOf(raw.replace("MessageBlock", "Script"), raw.replace(""text":"answer"", ""text":"answer","approved":true"), raw.replace(""eventBindings":[]", ""eventBindings":[{"eventKind":"DomainRequest","actionRef":"unknown"}]"), raw.dropLast(2))
+        val malformed = listOf(raw.replace("MessageBlock", "Script"), raw.replace(""""text":"answer"""", """"text":"answer","approved":true"""), raw.replace(""""eventBindings":[]""", """"eventBindings":[{"eventKind":"DomainRequest","actionRef":"unknown"}]"""), raw.dropLast(2))
         // The production validator has no command port; rejection cannot issue a command.
         for (bad in malformed) check(validateEncodedPlan(request, bad, context()).decision == Decision.TextOnly)
     }
