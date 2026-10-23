@@ -397,3 +397,454 @@ fn malformed_requests_and_untrusted_authority_fields_are_rejected() {
     v["method"] = json!("arbitrary_ipc");
     assert!(decode_strict::<RemoteRequest>(&v.to_string()).is_err());
 }
+
+fn ready_connection() -> ConnectionSnapshot {
+    ConnectionSnapshot {
+        connection_id: current().connection_id,
+        connector: ConnectorRef {
+            connector_id: "synthetic:adapter".into(),
+            adapter_version: "1".into(),
+            descriptor_digest: digest('a'),
+        },
+        scope: scope(),
+        endpoint: "https://example.invalid/mcp".into(),
+        external_identity: Some(current().external_identity),
+        config_revision: Revision::new(1),
+        authorization_generation: Revision::new(1),
+        auth: AuthState::Authorized,
+        catalog: CatalogState::Ready,
+        network: NetworkState::Connected,
+        availability: Availability::Available,
+    }
+}
+fn current_for(snapshot: &ConnectionSnapshot) -> CallBinding {
+    CallBinding {
+        authorization_generation: snapshot.authorization_generation.clone(),
+        config_revision: snapshot.config_revision.clone(),
+        ..current()
+    }
+}
+fn admit_snapshot(
+    expected: &CallBinding,
+    now: &CallBinding,
+    snapshot: &ConnectionSnapshot,
+    enabled: bool,
+) -> Result<(), types::ServiceError> {
+    let c = catalog();
+    let b = binding("research", "tool:read");
+    let allowed = host("tool:read");
+    let scope = scope();
+    validate_admission(
+        expected,
+        &tool("read"),
+        &ConnectionAdmission {
+            current: now,
+            scope: &scope,
+            connection: snapshot,
+            enabled,
+            catalog: &c,
+            plugin_binding: &b,
+            host_allowed: &allowed,
+        },
+    )
+}
+fn disconnected(before: &ConnectionSnapshot) -> ConnectionSnapshot {
+    ConnectionSnapshot {
+        network: NetworkState::Disconnected,
+        availability: Availability::Unavailable,
+        authorization_generation: before.authorization_generation.next().unwrap(),
+        ..before.clone()
+    }
+}
+fn disabled(before: &ConnectionSnapshot) -> ConnectionSnapshot {
+    ConnectionSnapshot {
+        availability: Availability::Unavailable,
+        authorization_generation: before.authorization_generation.next().unwrap(),
+        ..before.clone()
+    }
+}
+fn revoke_unknown(before: &ConnectionSnapshot) -> ConnectionSnapshot {
+    ConnectionSnapshot {
+        auth: AuthState::Unknown,
+        availability: Availability::Unknown,
+        authorization_generation: before.authorization_generation.next().unwrap(),
+        ..before.clone()
+    }
+}
+
+#[test]
+fn connection_admission_requires_all_independent_ready_axes() {
+    let ready = ready_connection();
+    assert!(admit_snapshot(&current(), &current(), &ready, true).is_ok());
+    assert_eq!(
+        admit_snapshot(&current(), &current(), &ready, false)
+            .unwrap_err()
+            .code,
+        ErrorCode::PermissionDenied
+    );
+    for auth in [
+        AuthState::NotConfigured,
+        AuthState::ConsentRequired,
+        AuthState::Expired,
+        AuthState::Revoked,
+        AuthState::Unknown,
+    ] {
+        let s = ConnectionSnapshot {
+            auth,
+            ..ready.clone()
+        };
+        assert_eq!(
+            admit_snapshot(&current(), &current(), &s, true)
+                .unwrap_err()
+                .code,
+            ErrorCode::CapabilityUnavailable
+        );
+    }
+    for catalog in [
+        CatalogState::NotReady,
+        CatalogState::Partial,
+        CatalogState::Failed,
+        CatalogState::Unknown,
+    ] {
+        let s = ConnectionSnapshot {
+            catalog,
+            ..ready.clone()
+        };
+        assert!(admit_snapshot(&current(), &current(), &s, true).is_err());
+    }
+    for network in [NetworkState::Disconnected, NetworkState::Unknown] {
+        assert!(admit_snapshot(
+            &current(),
+            &current(),
+            &ConnectionSnapshot {
+                network,
+                ..ready.clone()
+            },
+            true
+        )
+        .is_err());
+    }
+    for availability in [Availability::Unavailable, Availability::Unknown] {
+        assert!(admit_snapshot(
+            &current(),
+            &current(),
+            &ConnectionSnapshot {
+                availability,
+                ..ready.clone()
+            },
+            true
+        )
+        .is_err());
+    }
+}
+
+#[test]
+fn connection_admission_cross_checks_snapshot_identity_and_original_call_guards() {
+    let ready = ready_connection();
+    assert!(admit_snapshot(&current(), &current(), &ready, true).is_ok());
+    for change in 0..6 {
+        let mut changed = ready.clone();
+        match change {
+            0 => changed.connection_id = "other".into(),
+            1 => changed.external_identity = Some("other".into()),
+            2 => changed.config_revision = Revision::new(2),
+            3 => changed.authorization_generation = Revision::new(2),
+            4 => changed.scope.scope_generation = Revision::new(2),
+            5 => changed.external_identity = None,
+            _ => unreachable!(),
+        }
+        assert!(
+            admit_snapshot(&current(), &current(), &changed, true).is_err(),
+            "snapshot change {change}"
+        );
+    }
+    let c = catalog();
+    let b = binding("research", "tool:read");
+    let scope = scope();
+    let now = current();
+    let host = ConnectionAdmission {
+        current: &now,
+        scope: &scope,
+        connection: &ready,
+        enabled: true,
+        catalog: &c,
+        plugin_binding: &b,
+        host_allowed: &[],
+    };
+    assert_eq!(
+        validate_admission(&now, &tool("read"), &host)
+            .unwrap_err()
+            .code,
+        ErrorCode::PermissionDenied
+    );
+    let allowed = ["tool:read".into()];
+    let host = ConnectionAdmission {
+        host_allowed: &allowed,
+        ..host
+    };
+    assert!(validate_admission(&now, &tool("quote"), &host).is_err());
+    let mut stale = now.clone();
+    stale.endpoint_digest = digest('c');
+    assert!(validate_admission(&stale, &tool("read"), &host).is_err());
+}
+
+#[test]
+fn local_disconnect_preserves_auth_but_invalidates_prepared_across_reconnect() {
+    let before = ready_connection();
+    let after = disconnected(&before);
+    let original = IntentId::parse("intent:synthetic-original").unwrap();
+    assert!(validate_lifecycle_change(
+        &before,
+        &after,
+        true,
+        true,
+        ConnectionChange::LocalDisconnect,
+        Some(&original)
+    )
+    .is_ok());
+    assert_eq!(after.auth, AuthState::Authorized);
+    let now = current_for(&after);
+    assert!(admit_snapshot(&current(), &now, &after, true).is_err());
+    // A host-supplied reconnect observation cannot revive a prepared binding from before disconnect.
+    let reconnected = ConnectionSnapshot {
+        network: NetworkState::Connected,
+        availability: Availability::Available,
+        ..after.clone()
+    };
+    assert_eq!(
+        admit_snapshot(&current(), &now, &reconnected, true)
+            .unwrap_err()
+            .code,
+        ErrorCode::StaleRevision
+    );
+    assert!(admit_snapshot(&now, &now, &reconnected, true).is_ok()); // pure admission, never an automatic replay.
+    let mut fabricated = after.clone();
+    fabricated.auth = AuthState::Revoked;
+    let error = validate_lifecycle_change(
+        &before,
+        &fabricated,
+        true,
+        true,
+        ConnectionChange::LocalDisconnect,
+        Some(&original),
+    )
+    .unwrap_err();
+    assert_eq!(error.original_intent_id, Some(original));
+    assert_eq!(error.effect_knowledge, EffectKnowledge::Unknown);
+}
+
+#[test]
+fn failed_revoke_and_disable_do_not_claim_remote_cleanup() {
+    let before = ready_connection();
+    let original = IntentId::parse("intent:synthetic-original").unwrap();
+    let uncertain = revoke_unknown(&before);
+    assert!(validate_lifecycle_change(
+        &before,
+        &uncertain,
+        true,
+        true,
+        ConnectionChange::RevokeUnknown,
+        Some(&original)
+    )
+    .is_ok());
+    assert_eq!(uncertain.auth, AuthState::Unknown);
+    assert!(admit_snapshot(
+        &current_for(&uncertain),
+        &current_for(&uncertain),
+        &uncertain,
+        true
+    )
+    .is_err());
+    let mut revoked = uncertain.clone();
+    revoked.auth = AuthState::Revoked;
+    let error = validate_lifecycle_change(
+        &before,
+        &revoked,
+        true,
+        true,
+        ConnectionChange::RevokeUnknown,
+        Some(&original),
+    )
+    .unwrap_err();
+    assert_eq!(error.effect_knowledge, EffectKnowledge::Unknown);
+    assert_eq!(error.retryability, Retryability::AfterLookup);
+    assert_eq!(error.original_intent_id.as_ref(), Some(&original));
+    let off = disabled(&before);
+    assert!(
+        validate_lifecycle_change(&before, &off, true, false, ConnectionChange::Disable, None)
+            .is_ok()
+    );
+    assert_eq!(off.auth, before.auth);
+    assert_eq!(off.network, before.network);
+    assert_eq!(
+        admit_snapshot(&current_for(&off), &current_for(&off), &off, false)
+            .unwrap_err()
+            .code,
+        ErrorCode::PermissionDenied
+    );
+}
+
+#[test]
+fn lifecycle_changes_cannot_hide_identity_changes_reenable_or_overflow() {
+    let before = ready_connection();
+    let after = disconnected(&before);
+    assert!(validate_lifecycle_change(
+        &before,
+        &after,
+        true,
+        true,
+        ConnectionChange::LocalDisconnect,
+        None
+    )
+    .is_ok());
+    for change in 0..9 {
+        let mut invalid = after.clone();
+        match change {
+            0 => invalid.authorization_generation = before.authorization_generation.clone(),
+            1 => invalid.connection_id = "other".into(),
+            2 => invalid.external_identity = Some("other".into()),
+            3 => invalid.endpoint = "https://other.invalid/".into(),
+            4 => invalid.config_revision = Revision::new(2),
+            5 => invalid.connector.adapter_version = "2".into(),
+            6 => invalid.scope.scope_generation = Revision::new(2),
+            7 => invalid.catalog = CatalogState::Failed,
+            8 => invalid.availability = Availability::Available,
+            _ => unreachable!(),
+        }
+        let error = validate_lifecycle_change(
+            &before,
+            &invalid,
+            true,
+            true,
+            ConnectionChange::LocalDisconnect,
+            None,
+        )
+        .unwrap_err();
+        assert_eq!(error.effect_knowledge, EffectKnowledge::Unknown, "{change}");
+    }
+    assert!(validate_lifecycle_change(
+        &before,
+        &after,
+        false,
+        true,
+        ConnectionChange::LocalDisconnect,
+        None
+    )
+    .is_err());
+    let max = ConnectionSnapshot {
+        authorization_generation: Revision::new(u64::MAX),
+        ..before
+    };
+    let next = ConnectionSnapshot {
+        network: NetworkState::Disconnected,
+        availability: Availability::Unavailable,
+        ..max.clone()
+    };
+    assert!(validate_lifecycle_change(
+        &max,
+        &next,
+        true,
+        true,
+        ConnectionChange::LocalDisconnect,
+        None
+    )
+    .is_err());
+    assert_eq!(max.authorization_generation.value(), u64::MAX);
+}
+
+#[test]
+fn fake_owner_applies_validated_lifecycle_without_redispatching_original() {
+    struct FakeOwner {
+        snapshot: ConnectionSnapshot,
+        enabled: bool,
+        dispatch_count: usize,
+        lookup_count: usize,
+    }
+    impl FakeOwner {
+        fn change(
+            &mut self,
+            next: ConnectionSnapshot,
+            enabled: bool,
+            change: ConnectionChange,
+            intent: &IntentId,
+        ) -> Result<(), types::ServiceError> {
+            validate_lifecycle_change(
+                &self.snapshot,
+                &next,
+                self.enabled,
+                enabled,
+                change,
+                Some(intent),
+            )?;
+            self.snapshot = next;
+            self.enabled = enabled;
+            Ok(())
+        }
+        fn dispatch(
+            &mut self,
+            expected: &CallBinding,
+        ) -> Result<RemoteEffect, types::ServiceError> {
+            admit_snapshot(
+                expected,
+                &current_for(&self.snapshot),
+                &self.snapshot,
+                self.enabled,
+            )?;
+            self.dispatch_count += 1;
+            Ok(RemoteEffect::Unknown)
+        }
+        fn lookup(&mut self, intent: &IntentId) -> OriginalLookup {
+            self.lookup_count += 1;
+            decode_original(r#"{"status":"unknown","receipt":null,"error":"not_found","recovery_action":"query_original"}"#,intent).unwrap()
+        }
+    }
+    let original = IntentId::parse("intent:synthetic-original").unwrap();
+    let mut owner = FakeOwner {
+        snapshot: ready_connection(),
+        enabled: true,
+        dispatch_count: 0,
+        lookup_count: 0,
+    };
+    let effect = owner.dispatch(&current()).unwrap();
+    let pending = recovery_for(effect, &original).unwrap_err();
+    assert_eq!(pending.original_intent_id.as_ref(), Some(&original));
+    owner
+        .change(
+            disconnected(&owner.snapshot),
+            true,
+            ConnectionChange::LocalDisconnect,
+            &original,
+        )
+        .unwrap();
+    assert!(owner.dispatch(&current()).is_err());
+    owner
+        .change(
+            disabled(&owner.snapshot),
+            false,
+            ConnectionChange::Disable,
+            &original,
+        )
+        .unwrap();
+    assert!(owner.dispatch(&current_for(&owner.snapshot)).is_err());
+    owner
+        .change(
+            revoke_unknown(&owner.snapshot),
+            false,
+            ConnectionChange::RevokeUnknown,
+            &original,
+        )
+        .unwrap();
+    for _ in 0..2 {
+        let OriginalLookup::Execution(result) =
+            owner.lookup(pending.original_intent_id.as_ref().unwrap())
+        else {
+            panic!("unknown became not submitted")
+        };
+        assert_eq!(result.status, ExecutionStatus::Unknown);
+        assert!(result.receipt.is_none());
+    }
+    assert_eq!(owner.dispatch_count, 1);
+    assert_eq!(owner.lookup_count, 2);
+    assert_eq!(owner.snapshot.auth, AuthState::Unknown);
+    assert!(!owner.enabled);
+}
