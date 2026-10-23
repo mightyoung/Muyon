@@ -69,3 +69,7 @@ cargo test --manifest-path crates/Cargo.toml -p muyon-core --offline --locked --
 Final: minor (deferred): REPORT顶部已解释新授权/验证覆盖旧状态，但后文历史段仍使用“最新/当前”字样；跳读时需结合顶部说明。保留原始报告，当前工具就绪状态以本补充为准。原准备片路径缩写Minor继续保留。
 
 Ruling：旧Python harness在编译前路径解析断言失败，未改其模块生成逻辑；改用当前正式导出模块的原生Cargo目标验证相同既有owner测试 — 避免触碰Contracts独占登记文件或生成替代接线 — 代价是旧harness的兼容性仍未修复，失败日志明确保留。
+
+## D1/D2实施阶段官方质量工具补充
+
+同一已授权官方Rust1.93.1 manifest另核验并安装rustfmt-preview/clippy-preview到原任务prefix，均用disable-ldconfig，不改系统；组件来自 `https://static.rust-lang.org/dist/2026-02-12/`。rustfmt-1.93.1-x86_64-unknown-linux-gnu.tar.xz SHA256：`2ad6fa7ad2b5e42e1ca39299039ea0110b8cb2a45847553e4cbab82181a351e0`；clippy-1.93.1-x86_64-unknown-linux-gnu.tar.xz SHA256：`60c0ce83ecc1700de724404a928c30d096c178a610c6707d4f06cee25284cc02`。均与官方manifest逐项匹配后才运行包内install.sh，记录在仓库外 `/workspace/documents-v02-tools/downloads/quality-components.json`。Kotlin没有随此授权安装。

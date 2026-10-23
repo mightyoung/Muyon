@@ -1,6 +1,6 @@
 # Documents D1/D2 独立准备与接口交接
 
-状态：PREPARATION_ONLY；D1/D2 未实施，公共接口/fixture 等父任务固定 SHA。
+历史准备说明；本片原作于C1/C2未交付时。当前Rust候选交付与剩余登记/验证项以 [D1报告](REPORT.md) 和 [D2报告](../public-v02-D2/REPORT.md) 为准；工具准备以 [TOOLCHAIN.md](TOOLCHAIN.md) 为准。下方“待交付/未实施”为原准备阶段记录，不作为当前完成状态。
 
 代码基线：`fd26dcdabcdac996bc2881e8141cac2b519966fc`（2026-10-23 从远端 develop 获取，PR107 已合入）。环境初始 `work` 为旧 main 合并点 `cc7c8d14d30e3d3c4c7c6cb2bf2059a99e46e003`，未用作产品基线。独立工作区 `/workspace/muyon-documents-v02`，分支 `task/public-v02-documents-20261023`。
 

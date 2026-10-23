@@ -1,19 +1,19 @@
 # 公共资料管线工程 gate — 阻断登记草案
 
-状态：BLOCKED。本文是 D1/D2 依赖到达前的独立准备，不是 D3 完成、批准申请或生产接线授权。固定计划 `64900d4a6a46a9ef2919bcf922fb059413b1ce82`；静态源码基线 `fd26dcdabcdac996bc2881e8141cac2b519966fc`。D1/D2 尚未实施；Reader Core 原安全阻断没有收到解除 SHA/批准记录。
+状态：BLOCKED。本文起于D1/D2依赖到达前，现更新候选交付状态，不是 D3 完成、批准申请或生产接线授权。固定计划 `64900d4a6a46a9ef2919bcf922fb059413b1ce82`；静态源码基线 `fd26dcdabcdac996bc2881e8141cac2b519966fc`。D1/D2的Rust候选源码及离线验证已交付，公共登记仍PENDING_OWNER、D2 Kotlin实现/验证BLOCKED，详见 [D1](../tasks/public-v02-D1/REPORT.md) 与 [D2](../tasks/public-v02-D2/REPORT.md)；Reader Core 原安全阻断没有收到解除 SHA/批准记录。
 
 Documents 只复用既有合法 StoreEvidence 文本 owner，不实现替代 FD 桥、URI/路径读取、引擎启动或外部资料接入。真实模型、付费实验、真实 Connector、凭据配置、第三方程序下载/执行及新依赖禁止。
 
 ## 状态定义和逐端口清单
 
-present 表示源码已有特定内部能力，绝不表示公共端口已接通；contract_only 表示只有固定计划中的候选合同；blocked 表示缺强制前置不得生产接线；deferred 表示后续单独确定。本表按方法逐项登记，公共方法目前没有 present 项。
+present 表示源码已有特定内部能力，绝不表示公共端口已接通；contract_only 表示只有固定计划中的候选合同；blocked 表示缺强制前置不得生产接线；deferred 表示后续单独确定。本表按方法逐项登记，present包含本分支可编译源码候选，公共模块登记和宿主/FFI接线仍未完成，不表示生产可用。
 
 | 阶段 | 公共 getter / command | 状态 | 既有事实与欠缺 |
 | --- | --- | --- | --- |
-| 1 Document | getMetadata | contract_only | 内部 BusinessStore::read_document present；公共错误/scope 适配等 C1/C2/D1 |
+| 1 Document | getMetadata | present | 本分支D1源码委托原read_document；公共登记/宿主接线待owner |
 | 1 Document | listVersions | deferred | D1 不提供完整公开版本枚举与历史授权 |
-| 1 Document | readBlocks | contract_only | 原 StoreEvidence::open present；D1 只开放原 find_literal 命中的已绑定引用，不等于任意范围/全文分页 |
-| 1 Document | resolveAnchor | contract_only | 原 open present；精确 ResultId/textDigest/normalization 校验等 D1 |
+| 1 Document | readBlocks | present | D1源码逐条委托原open；非空且最多100条，不等于任意范围/全文分页或生产配额 |
+| 1 Document | resolveAnchor | present | D1源码先校验ResultId/textDigest/normalization/source，再走原open；公共登记待owner |
 | 1 Document | openReadHandle | blocked | ResourceHandle 仅候选；不签发 FD，等原 Reader Core 解除及宿主 lease/release |
 | 2 Document | importDocument | blocked | 原 owner/Operation/幂等回执映射未交接；不另建入口 |
 | 2 Document | createVersion | blocked | 精确版本、授权、候选/确认发布路径须原 owner 支持 |
@@ -39,7 +39,7 @@ present 表示源码已有特定内部能力，绝不表示公共端口已接通
 
 | 前置 | 当前证据 | 解除所需 |
 | --- | --- | --- |
-| D1/D2 与 C1/C2 固定合同/fixture | 未收到父任务交付 SHA；无产品实现 | 完整源/fixture SHA、独审、实际 RED/GREEN 与回归 |
+| D1/D2 与 C1/C2 固定合同/fixture | 父任务已交付Contracts候选4d49a580；本分支Rust验证629次通过，仍非develop验收 | B审查/合入与模块登记固定SHA；动态计数和Kotlin剩余验收；不能以纯校验替代生产接线 |
 | 原 Reader Core FD 安全解除 | 未收到，保持原阻断 | 原任务完整通过 SHA、批准记录、准确覆盖与剩余限制；不能用本文件解除 |
 | 引擎固定版本/模型摘要 | 仅静态观察源码引用 | 原 owner 给可审版本、模型与 tokenizer/config 摘要和输入输出签名 |
 | 许可证/NOTICE/分发条件 | NOT_VERIFIED | 固定版本许可、NOTICE、模型与字典许可分别核验；不能仅凭库依赖存在推断 |
