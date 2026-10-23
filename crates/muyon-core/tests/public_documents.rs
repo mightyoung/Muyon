@@ -1,5 +1,17 @@
 //! Actual owner reads, with candidate adapters compiled before Contracts registration.
-pub use muyon_core::{business, contract, documents, evidence, services};
+pub use muyon_core::{business, contract, documents, services};
+#[path = "support/read_owner_spy.rs"]
+pub mod read_owner_spy;
+// The actual adapter source resolves this test-only import. Existing synthetic
+// setup below keeps using muyon_core::evidence directly; only adapter work
+// requests are intercepted, and every text read still calls the real owner.
+pub mod evidence {
+    pub use muyon_core::evidence::{EvidenceError, EvidenceRef, InputKind, ProcessingState};
+    pub mod store {
+        pub use crate::read_owner_spy::StoreEvidence;
+        pub use muyon_core::evidence::store::{StoreEvidenceError, StoredProcessing};
+    }
+}
 pub mod adapters {
     pub mod documents {
         include!(concat!(
@@ -315,4 +327,77 @@ fn unsupported_and_failed_results_never_claim_text_coverage() {
             "ReadText is not Inspect"
         );
     }
+}
+
+#[test]
+fn processing_spy_is_active_and_never_runs_a_processor() {
+    let (_fixture, store) = Fixture::new();
+    let (access, _processing, _hits) = text(&store);
+    read_owner_spy::reset();
+    let owner = read_owner_spy::StoreEvidence::new(&store);
+    for kind in [InputKind::Utf8Text, InputKind::Pdf, InputKind::Ocr] {
+        assert_eq!(
+            owner.process(&access, kind).unwrap_err(),
+            StoreEvidenceError::Processing(EvidenceError::NotAvailable)
+        );
+    }
+    assert_eq!(
+        read_owner_spy::counts(),
+        read_owner_spy::Counts {
+            open: 0,
+            processing: 3,
+            parse_requests: 2,
+            ocr_requests: 1
+        }
+    );
+}
+
+#[test]
+fn adapter_getters_make_zero_processing_requests_on_success_and_denial() {
+    let (_fixture, store) = Fixture::new();
+    let (access, processing, hits) = text(&store);
+    read_owner_spy::reset();
+    assert_eq!(
+        get_metadata(&store, &access).unwrap().document,
+        access.document
+    );
+    assert_eq!(
+        describe_processing(&processing)
+            .unwrap()
+            .reference
+            .input_document_ref,
+        access.document
+    );
+    let locator = source_locator(&processing, &hits[0]).unwrap();
+    assert_eq!(
+        read_blocks(&store, &access, &processing, &hits).unwrap(),
+        vec!["😀"]
+    );
+    assert_eq!(
+        resolve_anchor(&store, &access, &processing, &locator)
+            .unwrap()
+            .quote,
+        "😀"
+    );
+    assert_eq!(
+        read_owner_spy::counts(),
+        read_owner_spy::Counts {
+            open: 2,
+            ..Default::default()
+        }
+    );
+    store
+        .revoke_document_grant_trusted(&access.authority)
+        .unwrap();
+    read_owner_spy::reset();
+    assert!(get_metadata(&store, &access).is_err());
+    assert!(read_blocks(&store, &access, &processing, &hits).is_err());
+    assert!(resolve_anchor(&store, &access, &processing, &locator).is_err());
+    assert_eq!(
+        read_owner_spy::counts(),
+        read_owner_spy::Counts {
+            open: 2,
+            ..Default::default()
+        }
+    );
 }
