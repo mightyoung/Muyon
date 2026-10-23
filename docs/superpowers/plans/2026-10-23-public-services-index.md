@@ -14,7 +14,7 @@
 - 注册不执行、不授权；Skill 只能收窄能力，包中脚本不执行。
 - 只读请求不得顺带启动解析、OCR、下载模型、索引构建或付费模型调用。
 - Reader Core 生产 FD 桥保持原安全检查阻断，不以 URI、路径或另建桥绕过。
-- 历史真实请求 unknown 与费用未知保持；本轮不安装依赖、不调用模型、不连接真实账户、不部署。
+- 历史真实请求 unknown 与费用未知保持；除用户明确批准的官方 Rust 1.93.1 工具链和 Cargo.lock 锁定依赖缓存准备外，不安装其他依赖、不下载模型、不调用模型、不连接真实账户、不部署。
 - 计划中的类型、路径和测试若注明“新增”，均尚不存在；接口是评审候选，不能据此宣称已冻结或完成。
 - 本计划整体经用户评审并批准执行后，范围内任务按已选并行方式推进，不逐任务重复索批；新增范围、独立工程决定、受阻操作或必须逐次确认的行为另行处理。本分支只允许 docs 下的 Markdown。
 
@@ -32,6 +32,8 @@
 
 `7aa852ab8134545c6312cd71de5c12cd49f66b5b`
 
+当前执行补记：B 已合入 [PR #107](https://github.com/mightyoung/Muyon/pull/107)，重新 fetch 的执行基线为 `fd26dcdabcdac996bc2881e8141cac2b519966fc`；上方 `7aa852ab8134545c6312cd71de5c12cd49f66b5b` 保留为设计/文档分支的历史产品基线。#107 合入不替代 FFI/workflow 现 owner 的具体接线交接，也不授权复制其他未审候选。
+
 候选分支：`docs/public-services-v02-plans-20261023`。未切换或修改 main/develop。扫描 /workspace 及 develop 文件树未发现 AGENTS.md，已读 `docs/tasks/README.md`、`REVIEW.md`、`CURRENT-STATUS-2026-10-10.md`、`HANDOVER-LEADER.md`、`android-agent-handoff-owner-20261018.md`，以及 `evidence-local-chain-20261022/HANDOFF.md`、`ui-action-cards-20261022/REPORT.md` 和卡片 README；另读 `ui-shell-20261022/REPORT.md` 及普通聊天 `ordinary-chat-live-20261019/REMOTE-CREDENTIAL-HANDOVER.md`，保留已记 unknown/charge unknown。旧交接中 Flutter 阶段、角色、已通过记录均是历史，不恢复旧执行授权。
 
 评审页：[v0.2](https://chatgpt.com/space/page_1ec6e1b403bc8191a625c4b74011409d)；补充研究：[Connector/Skill](https://chatgpt.com/space/page_40345e6f0bdc8191808b06392911ebb7)、[Linear 领域生命周期](https://chatgpt.com/space/page_e3d95dbf83c08191b1c8e006bd1ff23a)、[研发独立设计提案](https://chatgpt.com/space/page_c3e02abcc00c8191a4353c4338faa0ea)（待评审、未实施）。均已只读获取；设计全文保留页面的用户认可记录。研究中的 operationId/Outbox 建议由后来的 v0.2 原 IntentId/Receipt 约束覆盖，不引入新账本。
@@ -42,10 +44,10 @@
 
 | 计划 | 任务与 owner | 文件唯一归属 | 依赖 |
 | --- | --- | --- | --- |
-| [公共合同与原回执](2026-10-23-public-contracts.md) | C1/C2/C3，Contracts | 新 services/types.rs、commands.rs、drafts.rs、mod.rs；types/commands/drafts fixtures；core lib.rs 模块登记；FFI lib.rs 唯一接线修改者 | C1 → C2 → C3；FFI 接线等 B 的内核审查完成 |
+| [公共合同与原回执](2026-10-23-public-contracts.md) | C1/C2/C3，Contracts | 新 services/types.rs、commands.rs、drafts.rs、mod.rs；types/commands/drafts fixtures；core lib.rs 模块登记；FFI lib.rs 唯一接线修改者 | C1 → C2 → C3；#107 已合；FFI 接线仍须现 owner 交接 |
 | [统一 UI 与 Intelligent UI](2026-10-23-intelligent-ui.md) | U0/U1/U2/U3，PublicUI | 新 UI 设计/页面验收文档、product/ui/publicservices 与同路径测试；现有 cards 与 foundation 文件的后续变更 | C1、C2、U0 具体变体评审；Shell 所有权交接后才接页面 |
 | [资料处理与来源](2026-10-23-document-pipeline.md) | D1/D2/D3，Documents | 新 services/documents.rs、pipeline.rs、sources.rs；新 product/services/documents；既有 ml 引擎文件；文档测试 | C1/C2；D3 生产 FD 前置阻断 |
-| [Skill 注册与运行](2026-10-23-skill-runtime.md) | S1/S2/S3，Skills | 新 services/skills.rs、skill_runtime.rs 与 skills fixture；新测试；现有 agent/workflow.rs 的后续接线 | C1/C2；与内核 owner 交接后才改 workflow |
+| [Skill 注册与运行](2026-10-23-skill-runtime.md) | S1/S2/S3，Skills | 新 services/skills.rs、skill_runtime.rs 与 skills fixture；新测试；现有 agent/workflow.rs 的后续接线 | C1/C2；即使 #107 已合，仍在内核 owner 交接后才改 workflow |
 | [Connector 与 MCP](2026-10-23-connectors.md) | X1/X2/X3/X4，Connectors | 新 services/connectors.rs、connections.rs、后续 mcp.rs 与 connectors fixture；新测试与候选评估记录 | C1/C2；SDK 与凭据设计 gate；GitHub/GitLab/Gitee 同步先做能力/事件设计，真实连接后置 |
 | [三业务插件与研发全周期](2026-10-23-business-plugins.md) | B1/B2/B3/B4，Domain | 新 domains/ 下科研/询价模块与测试、plugins fixture；研发设计/依赖文档；research.rs/business.rs 的后续适配；领域 migration | C1/C2/U1/D1；自动化再依赖 S2/X2；研发 B3 提案评审后才写一期执行计划 |
 
@@ -82,7 +84,7 @@ Shell 任务 `01a161b7-eeb1-7502-943d-1f8309a4b012` 继续修现有页面，本�
 
 ## 执行与证据协议
 
-每个任务使用独立分支，开始时重新读取 develop 和上游任务最终完整 SHA；发现接口漂移先更新计划，不从 main 或未审候选开产品基线。输入只允许本地合成 fixture，清除真实模型执行开关；命令使用 `--offline --locked`，缓存/toolchain 不足即标 BLOCKED，不安装。
+每个任务使用独立分支，开始时重新读取 develop 和上游任务最终完整 SHA；当前执行基线 fd26dcd 不改变历史引用，发现接口漂移先更新计划，不从 main 或未审候选开产品基线。输入只允许本地合成 fixture，清除真实模型执行开关；命令使用 `--offline --locked`，缓存/toolchain 不足先核对用户批准的官方 Rust 1.93.1 和 Cargo.lock 缓存准备范围；仅该例外可准备，随后仍用 --offline --locked。其他安装或来源不明组件保持 BLOCKED。
 
 每任务均按 RED → GREEN → 回归 → 独立审查提交。RED 必须在测试存在且导入/编译通过后观察目标行为失败；新增 API 初次“符号不存在”仅是结构 RED，不能代替行为 RED。必要时先加明确返回 unavailable 的最小 stub，提交测试/stub，再观察具体断言失败。GREEN 不能通过弱化断言或把 unknown 改 success 达成。Rust 命令从仓库根执行；Kotlin 新纯 JVM 检查复用现有 run-offline.sh 编译器发现方式，缺工具停止。所有表中 Expected 是未来预期，不是本轮结果。
 
@@ -104,3 +106,10 @@ Shell 任务 `01a161b7-eeb1-7502-943d-1f8309a4b012` 继续修现有页面，本�
 - 全文规格覆盖见上表；所有未实现项明确写入阶段/gate；研发新增设计保持 proposed，三方持续同步和渐进对话建项只列依赖与评审场景。
 - 本轮只运行 Git/文件/Markdown 静态检查。RED/GREEN、Rust/Kotlin 编译、真实模型、设备、Connector、CI、部署全部没有在本轮执行；计划中的预期通过不记为结果。
 - 独立审查仍待用户/合入者；本分支未申请自动合入。当前没有自动审批拒绝或结果不明的写入动作。
+
+## 已定执行澄清与未冻结规范
+
+- ProductError 现仅 Failure { code }，无可信派发证据时公共适配默认 unknown_outcome / effectKnowledge=unknown / after_lookup；not_started 只用于适配器本地调用前校验或原 owner 明确证明未派发，不能凭错误枚举或 phase 标签推断。不扩大 ProductCore ABI。
+- 公共 ID parser 不代替原 CommandEnvelope::validate。C1 fixture 覆盖原 intent:32hex（39 字节）/plan:32hex（37 字节）、128/129 字节、多字节边界及原校验的 ASCII 限制。
+- ResultId 仅适配 ProcessingReceipt 所标识的处理结果；ProcessingReceipt 不是原业务 Receipt，不构成执行/去重账本。具体映射由 Contracts/Documents 一致审阅，不混用身份空间。
+- Money/Quantity、ServiceError.phase 枚举的新规范先提交精确合同建议并独立审查，再由协调者裁定；当前 C1 已确定的纯值工作不因此整体暂停。该事实修订不采纳全 Rust PDF、napi-rs、整套 UI validator 迁 Rust、生成器选型或批量分支删除。

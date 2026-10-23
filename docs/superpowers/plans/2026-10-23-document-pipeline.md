@@ -63,7 +63,7 @@ fn resolve_anchor(store: &BusinessStore, access: &DocumentAccess,
     processing: &StoredProcessing, locator: &SourceLocator) -> Result<OpenedSource, ServiceError>;
 ```
 
-上述 imports 为 C1 公共类型、既有 documents/business 类型及 evidence::store::StoredProcessing、evidence::local::EvidenceRef。describe_processing 仅适配已有 Utf8Text 且 extraction=Available 的处理结果：result_id 沿用原 receipt_id，producer_version 沿用 processor，input_document_ref 与 content_digest 分别取 source.document/source.blob.digest，上游列表为空；parameters_digest 对固定输入种类 Utf8Text 的规范编码求摘要。其他种类返回 capability_unavailable，不把未解析内容标全文。
+上述 imports 为 C1 公共类型、既有 documents/business 类型及 evidence::store::StoredProcessing、evidence::local::EvidenceRef。describe_processing 仅适配已有 Utf8Text 且 extraction=Available 的处理结果：result_id 只适配 ProcessingReceipt.receipt_id 所标识的处理结果，具体编码映射在 Contracts/Documents 一致审阅后确定；它不是原业务 Receipt，也不形成执行账本。producer_version 沿用 processor，input_document_ref 与 content_digest 分别取 source.document/source.blob.digest，上游列表为空；parameters_digest 对固定输入种类 Utf8Text 的规范编码求摘要。其他种类返回 capability_unavailable，不把未解析内容标全文。
 
 TextResult 不含明文缓存，不授予权限。P1 read_blocks 只打开原 find_literal 返回的已绑定 EvidenceRef，逐个调用原 StoreEvidence::open；resolve_anchor 也使用该原入口，每次重验 bytes/digest/grant，禁止构造“可信 host”或直接读本地缓存。source_locator 先检查 evidence.source 与 processing.receipt().source 一致；text_digest 对此原样 Utf8Text 使用 blob.digest，normalization_version 固定 `utf8-original-v1`。EvidenceRef 已有 start_byte/end_byte/quote_digest/page_index_zero_based，半开 UTF-8 字节范围不重定义。测试中篡改范围或伪造引用必须被原 open 拒绝。任意范围读取、全篇分页和新解析结果持久注册放 D3，不能误称 P1 已完成全部 readBlocks。
 

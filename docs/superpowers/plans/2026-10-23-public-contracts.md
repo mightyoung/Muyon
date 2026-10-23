@@ -48,7 +48,7 @@ prepare 返回 CommandEnvelope；confirm/cancel 返回 ExecutionResult。lookup_
 **Interfaces，新增且由 C1 完整定义：**
 
 - 复用 `contract::{Revision, Scope, AuthorityBinding, ContractError, Receipt, ExecutionResult, Operation, CommandEnvelope}`、`documents::{DocumentRef, DocumentFormat}`，不复制。
-- `ResultId/JobId/IntentId` 分别为私有 String 字段 newtype；`parse(raw: &str) -> Result<Self, ServiceError>` 拒绝空串、NUL、超过 128 UTF-8 字节；不把新 IntentId 解析器当签发器。
+- `ResultId/JobId/IntentId` 分别为私有 String 字段 newtype；`parse(raw: &str) -> Result<Self, ServiceError>` 拒绝空串、NUL、超过 128 UTF-8 字节；不把新 IntentId 解析器当签发器，也不替代 CommandEnvelope::validate。原合同另要求 ASCII 字母数字及 -_.:，原 intent:32hex=39 字节、plan:32hex=37 字节；fixture 覆盖生成格式、128/129 字节与多字节反例。
 - `Digest(String)`：64 位小写 hex；`UnixMs(String)`：规范有符号 i64 十进制，无 +、-0、前导零。
 - `ScopeRef { scope: Scope, account_id: Option<String>, scope_generation: Revision }` 是选择/展示投影，不是权限。当前宿主不提供账户绑定时 account_id=None；要求账户级能力的命令拒绝 capability_unavailable，不能信任调用方补账号。
 - `ResultRef { result_id: ResultId, input_document_ref: DocumentRef, input_result_refs: Vec<ResultId>, content_digest: Digest, producer_version: String, parameters_digest: Digest }`；直接上游仅 ID，解析必须按 scope 回查完整结果，不把它当全局可读 ID。
@@ -67,7 +67,7 @@ prepare 返回 CommandEnvelope；confirm/cancel 返回 ExecutionResult。lookup_
 
 ## C2：HostCommandPort 与回执/任务只读投影
 
-**Owner:** Contracts。**Files:** 新增 `services/commands.rs`、`tests/public_service_commands.rs`、`docs/contracts/public-services-v02/fixtures/commands.json`；C1 owner 登记 mod.rs。FFI 接线仅在 B 审查完成、核对新 develop 后由 Contracts 修改原 lib.rs。依赖 C1。本片先提供类型与解码器，真实 dispatch 不因模块存在自动开放。
+**Owner:** Contracts。**Files:** 新增 `services/commands.rs`、`tests/public_service_commands.rs`、`docs/contracts/public-services-v02/fixtures/commands.json`；C1 owner 登记 mod.rs。#107 已合入执行基线 fd26dcdabcdac996bc2881e8141cac2b519966fc；FFI 接线仍须现 owner 明确交接、核对新 develop 后才由 Contracts 修改原 lib.rs。依赖 C1。本片先提供类型与解码器，真实 dispatch 不因模块存在自动开放。
 
 **Interfaces：**
 
@@ -110,6 +110,8 @@ project_execution 从 command.intent_id 投影原身份，成功前调用 Receip
 | Cancelled | cancelled / never / confirmed，仅原终态证据存在时 |
 | NotFound/Unknown | unknown_outcome / after_lookup / unknown |
 | Storage/StorageBusy/StorageConstraint/StorageCorrupt/StorageIo | unknown_outcome / after_lookup / unknown；不给数据库错误详情到 UI |
+
+当前 ProductError 仅 Failure { code: String }，不携带可信阶段/派发证据。若适配层不能证明未派发，默认 unknown_outcome / effectKnowledge=unknown / retryability=after_lookup，并保留原 IntentId；不能从下表错误枚举自行判定阶段，也不为此扩大 ProductCore ABI。not_started 仅用于本地调用前校验或原 owner 明确证明未派发。
 
 上述 not_started 是错误发生在可信 preflight 且原 owner 确认未派发时的投影。相同原因若从 post-dispatch/IPC 丢失路径观察到，一律 effectKnowledge=unknown、retryability=after_lookup；不能仅凭错误枚举证明未发生。C2 加参数化测试逐枚举覆盖此表，未知未来变体 fail closed 并记录 detailsRef，不猜成功。无效输入但原 pending 已存在也不能再次 prepare。
 
@@ -162,3 +164,5 @@ content 是所属插件 schema 校验后的封套内容，不是任意命令。a
 ## 回退与验收
 
 按总索引正常 revert 本片，保留原 Receipt；纯 codec 回退不迁移原数据库。验收需要共享 fixture 摘要、旧合同回归及 ProductCore 实际适配证据分别列出。新领域写命令、账户级宿主绑定、泛领域草稿持久化尚未授权实施，不得因为本计划存在而启用。
+
+执行事实补记：历史设计基线仍为 7aa852ab；本轮执行采用已合 #107 的 fd26dcd，FFI/workflow 所有权交接仍独立检查。仅官方 Rust 1.93.1 与 Cargo.lock 锁定缓存准备获准，产品验证随后维持 offline/locked。Money/Quantity 与 phase 枚举的新规范尚未冻结，先独立审查精确建议；不阻断已定纯值编解码候选。
