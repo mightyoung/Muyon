@@ -59,6 +59,6 @@ error: source file or directory not found: /workspace/muyon-documents-jvm-review
 | structural-red.log | `c1a9d493feba2c5474884ad87b20d773839f004316d3a6dbfebc446fdc576241` |
 | inputs.log | `192651863cc0ec17f0155519ac94c82455ba1d54c71bda5f235e446880a68fe8` |
 
-独立验证/报告审查pending；报告静态核验与固定SHA随完成封套补充。未运行Rust、全项目Gradle、Android/设备、真实index/host解析/生产dispatch。U0仍draft，U2/U3与Reader原安全gate保持。
+非作者 `/root/review_publicui_u0` 已对固定报告 `27f416d4c6fab44625b1f7d061d4c99b4bc8d000` 独立审查：亲自在6e79验证树重跑原命令exit1，确认只有结构RED、输入及三份日志摘要匹配、原测试未改、owner/true语义gate归因准确；完整diff-check exit0，无Important/Minor，可作为结构验证与未冻结gate报告交付。此封套只登记结论，不将结构失败改记GREEN。未运行Rust、全项目Gradle、Android/设备、真实index/host解析/生产dispatch。U0仍draft，U2/U3与Reader原安全gate保持。
 
 当前阻断不是审批拒绝或不明写入：精确action为编译固定D2测试；target为缺失的IndexCompatibility.kt与四个符号；reason为生产接口/文件未交付且owner/true语义未冻结；outcome=编译exit1、没有测试执行。仅正常push独立报告候选，无合入、强推、删分支或部署。
