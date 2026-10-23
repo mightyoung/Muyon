@@ -1,5 +1,10 @@
 # Connectors X1/X2 — dependency hold and independent preparation
 
+Follow-up: the user subsequently authorized official Rust toolchain and locked
+cache setup. See [TOOLCHAIN.md](TOOLCHAIN.md) for the later actual results. The
+missing-toolchain observations below describe the original preflight only;
+the C1/C2 interface release hold still applies.
+
 2026-10-23 UTC. This is preparation only: X1/X2 implementation, behavioral
 RED/GREEN, regression and product acceptance are **NOT_RUN**.
 
