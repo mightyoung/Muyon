@@ -1,0 +1,11 @@
+
+running 1 test
+test request_authorization_rejects_an_owner_from_another_workspace_without_side_effects ... FAILED
+
+failures:
+
+failures:
+    request_authorization_rejects_an_owner_from_another_workspace_without_side_effects
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 16 filtered out; finished in 0.01s
+

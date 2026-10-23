@@ -1,0 +1,26 @@
+{
+  "head": "8e018ad6e67d73ad58ff6ee80d3cfa898da697ce",
+  "started_utc": "2026-10-23T04:22:38.080556+00:00",
+  "argv": [
+    "/workspace/bot-core-tools/cargo/bin/cargo",
+    "test",
+    "--offline",
+    "--locked",
+    "--manifest-path",
+    "crates/Cargo.toml",
+    "--workspace",
+    "--all-targets",
+    "--",
+    "--test-threads=1"
+  ],
+  "environment_override": {
+    "RUSTUP_HOME": "/workspace/bot-core-tools/rustup",
+    "CARGO_HOME": "/workspace/bot-core-tools/cargo",
+    "CARGO_TARGET_DIR": "/workspace/bot-core-tools/target-baseline",
+    "RUSTFLAGS": "-Lnative=/workspace/bot-core-tools/native-links"
+  },
+  "stdout_sha256": "23c2ebfbc2803baa0405b1ce459712e89aa8f827878a14d69643838ac6aedd92",
+  "stderr_sha256": "7a3a7b940d7db87450c21fc71cf71eda37d8768d8bf60557e5267536dd3766a3",
+  "ended_utc": "2026-10-23T04:24:07.632570+00:00",
+  "exit_code": 0
+}

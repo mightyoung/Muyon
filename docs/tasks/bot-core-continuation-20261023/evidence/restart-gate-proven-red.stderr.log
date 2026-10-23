@@ -1,0 +1,8 @@
+   Compiling muyon-android-ffi v0.1.0 (/workspace/bot-core-continuation/crates/muyon-android-ffi)
+    Finished `test` profile [unoptimized] target(s) in 1.08s
+     Running unittests src/lib.rs (/workspace/bot-core-tools/target-baseline/debug/deps/muyon_android_product-0ce23b60ea514f54)
+
+thread 'tests::another_root_and_ordinary_chat_cannot_bypass_an_unknown_child' (3705) panicked at muyon-android-ffi/src/lib.rs:1327:9:
+Ok("{\"request_id\":\"394e18f462acfd480be68417454799bf\",\"status\":\"reserved\",\"reserved_micro_cny\":\"33792\",\"charged_micro_cny\":\"0\",\"cancelled\":false,\"answer\":null,\"recovery_action\":\"none\",\"attempted\":false,\"failure_stage\":null,\"http_status\":null,\"blocked_reason\":null}")
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+error: test failed, to rerun pass `-p muyon-android-ffi --lib`

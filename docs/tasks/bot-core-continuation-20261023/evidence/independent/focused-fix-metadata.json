@@ -1,0 +1,103 @@
+{
+  "kind": "independent_focused_fix_verification",
+  "head": "8e018ad6e67d73ad58ff6ee80d3cfa898da697ce",
+  "base": "7aa852ab8134545c6312cd71de5c12cd49f66b5b",
+  "cwd": "/workspace/bot-core-continuation",
+  "environment_override": {
+    "RUSTUP_HOME": "/workspace/bot-core-tools/rustup",
+    "CARGO_HOME": "/workspace/bot-core-tools/cargo",
+    "CARGO_TARGET_DIR": "/workspace/bot-core-tools/target-independent",
+    "RUSTFLAGS": "-Lnative=/workspace/bot-core-tools/native-links"
+  },
+  "source_sha256_before": {
+    "crates/muyon-core/src/agent/workflow.rs": "ef875db8bb09a2c4952849e2bbad02d318651f3d89c5f4d71f651b5cd83319e6",
+    "crates/muyon-core/tests/agent_workflow.rs": "75346bb17018872208153a12d8260054ab15f40f8b5709110dbe46773f8f4b2e",
+    "crates/muyon-android-ffi/src/lib.rs": "81590d6ba20964a0a74834fc9819262715ce6b9ad6f38fa1ccdf0239676749dc"
+  },
+  "steps": [
+    {
+      "label": "workspace-guard",
+      "argv": [
+        "/workspace/bot-core-tools/cargo/bin/cargo",
+        "test",
+        "--offline",
+        "--manifest-path",
+        "crates/Cargo.toml",
+        "-p",
+        "muyon-core",
+        "--test",
+        "agent_workflow",
+        "request_authorization_rejects_an_owner_from_another_workspace_without_side_effects",
+        "--",
+        "--exact",
+        "--nocapture"
+      ],
+      "started_utc": "2026-10-23T04:23:30.231010+00:00",
+      "ended_utc": "2026-10-23T04:23:42.450791+00:00",
+      "exit_code": 0
+    },
+    {
+      "label": "restart-child-guard",
+      "argv": [
+        "/workspace/bot-core-tools/cargo/bin/cargo",
+        "test",
+        "--offline",
+        "--manifest-path",
+        "crates/Cargo.toml",
+        "-p",
+        "muyon-android-ffi",
+        "--lib",
+        "tests::another_root_and_ordinary_chat_cannot_bypass_an_unknown_child",
+        "--",
+        "--exact",
+        "--nocapture"
+      ],
+      "started_utc": "2026-10-23T04:23:42.450978+00:00",
+      "ended_utc": "2026-10-23T04:23:58.549264+00:00",
+      "exit_code": 0
+    },
+    {
+      "label": "invalid-ledger",
+      "argv": [
+        "/workspace/bot-core-tools/cargo/bin/cargo",
+        "test",
+        "--offline",
+        "--manifest-path",
+        "crates/Cargo.toml",
+        "-p",
+        "muyon-android-ffi",
+        "--lib",
+        "tests::open_refuses_an_invalid_existing_workflow_ledger_without_replacing_it",
+        "--",
+        "--exact",
+        "--nocapture"
+      ],
+      "started_utc": "2026-10-23T04:23:58.549436+00:00",
+      "ended_utc": "2026-10-23T04:23:58.615295+00:00",
+      "exit_code": 0
+    }
+  ],
+  "head_after": "8e018ad6e67d73ad58ff6ee80d3cfa898da697ce",
+  "source_sha256_after": {
+    "crates/muyon-core/src/agent/workflow.rs": "ef875db8bb09a2c4952849e2bbad02d318651f3d89c5f4d71f651b5cd83319e6",
+    "crates/muyon-core/tests/agent_workflow.rs": "75346bb17018872208153a12d8260054ab15f40f8b5709110dbe46773f8f4b2e",
+    "crates/muyon-android-ffi/src/lib.rs": "81590d6ba20964a0a74834fc9819262715ce6b9ad6f38fa1ccdf0239676749dc"
+  },
+  "logs_sha256": {
+    "workspace-guard.stdout.log": "d024b85d5a10b4f65314861452a370efaf2424b90095c2078d99ca4e91fbbfe2",
+    "workspace-guard.stderr.log": "8f79c012eba49608a3c89f59c9eb7f34fef4551805e6d07d8be291dc92b6c1b9",
+    "restart-child-guard.stdout.log": "f6f8397426f70c63f480658bdb414afaf4bd483ed851eacbf069d5562cad4a7b",
+    "restart-child-guard.stderr.log": "25b769a8bcef0b0787d1739c915ad2b7a0b88992c49f5908807d09aef0adc92f",
+    "invalid-ledger.stdout.log": "636721dc7457f30e9b564d043223e795df0fa5fd69c288cbe926a3dca74dcea5",
+    "invalid-ledger.stderr.log": "bd2194be886c0e7787c931747fe9be56559fc42e8267716267363717edcd8837"
+  },
+  "rust_version": {
+    "argv": [
+      "/workspace/bot-core-tools/cargo/bin/rustc",
+      "--version"
+    ],
+    "exit_code": 0,
+    "stdout_sha256": "ab618f0332ef360846e240d76633d486a18701c2fb3cc3951334ce03a6ca5793",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

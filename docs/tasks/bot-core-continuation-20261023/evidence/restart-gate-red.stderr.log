@@ -1,0 +1,28 @@
+   Compiling serde_core v1.0.229
+   Compiling memchr v2.8.3
+   Compiling zlib-rs v0.6.8
+   Compiling thiserror v2.0.21
+   Compiling crc32fast v1.5.3
+   Compiling bytes v1.12.1
+   Compiling static_assertions v1.1.0
+   Compiling typed-path v0.12.4
+   Compiling uniffi_core v0.32.2
+   Compiling serde_json v1.0.154
+   Compiling serde v1.0.229
+   Compiling semver v1.0.28
+   Compiling cargo-platform v0.3.3
+   Compiling camino v1.2.6
+   Compiling cargo_metadata v0.23.1
+   Compiling muyon-core v0.1.0 (/workspace/bot-core-continuation/crates/muyon-core)
+   Compiling uniffi v0.32.2
+   Compiling flate2 v1.1.10
+   Compiling zip v9.0.5
+   Compiling muyon-office v0.1.0 (/workspace/bot-core-continuation/crates/muyon-office)
+   Compiling muyon-android-ffi v0.1.0 (/workspace/bot-core-continuation/crates/muyon-android-ffi)
+    Finished `test` profile [unoptimized] target(s) in 9.21s
+     Running unittests src/lib.rs (/workspace/bot-core-tools/target-baseline/debug/deps/muyon_android_product-0ce23b60ea514f54)
+
+thread 'tests::another_root_and_ordinary_chat_cannot_bypass_an_unknown_child' (3536) panicked at muyon-android-ffi/src/lib.rs:1312:18:
+called `Result::unwrap()` on an `Err` value: Failure { code: "agent_credential_reinstall_required" }
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+error: test failed, to rerun pass `-p muyon-android-ffi --lib`

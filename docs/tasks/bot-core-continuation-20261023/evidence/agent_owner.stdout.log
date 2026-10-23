@@ -1,0 +1,16 @@
+
+running 11 tests
+test cancel_before_attempt_releases_only_held_identity_and_is_not_replayable ... ok
+test cancelled_claim_with_empty_response_never_refunds_attempt_count_after_restart ... ok
+test complete_chat_usage_settles_once_and_restores_bounded_conversation_history ... ok
+test config_or_credential_changes_deny_dispatch_and_suppress_revoked_disclosure ... ok
+test cumulative_budget_survives_reconfiguration_and_unknown_is_not_refunded ... ok
+test fixed_transport_diagnostic_survives_reopen_without_settlement_or_raw_text ... ok
+test fresh_product_settings_and_blocked_chat_plan_do_not_inherit_canary_authority ... ok
+test malformed_or_over_bound_usage_keeps_unknown_hold_without_answer ... ok
+test process_death_after_reservation_or_claim_keeps_original_hold_without_replay ... ok
+test reserve_claim_exactly_once_and_unknown_never_resends_after_reopen ... ok
+test validated_search_sources_and_empty_result_follow_existing_settlement_contract ... ok
+
+test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+

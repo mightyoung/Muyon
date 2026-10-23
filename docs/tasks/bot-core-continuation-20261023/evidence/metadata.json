@@ -1,0 +1,248 @@
+{
+  "head": "7aa852ab8134545c6312cd71de5c12cd49f66b5b",
+  "started_utc": "2026-10-23T04:17:37.331750+00:00",
+  "cwd": "/workspace/bot-core-continuation",
+  "environment_override": {
+    "RUSTUP_HOME": "/workspace/bot-core-tools/rustup",
+    "CARGO_HOME": "/workspace/bot-core-tools/cargo",
+    "CARGO_TARGET_DIR": "/workspace/bot-core-tools/target-baseline",
+    "RUSTFLAGS": "-Lnative=/workspace/bot-core-tools/native-links"
+  },
+  "commands": [
+    {
+      "label": "rustc",
+      "argv": [
+        "/workspace/bot-core-tools/cargo/bin/rustc",
+        "--version"
+      ],
+      "started_utc": "2026-10-23T04:17:37.331775+00:00",
+      "ended_utc": "2026-10-23T04:17:37.341485+00:00",
+      "exit_code": 0
+    },
+    {
+      "label": "initial-offline-bot",
+      "argv": [
+        "/workspace/bot-core-tools/cargo/bin/cargo",
+        "test",
+        "--offline",
+        "--locked",
+        "--manifest-path",
+        "crates/Cargo.toml",
+        "-p",
+        "muyon-core",
+        "--lib",
+        "bot_definitions",
+        "--",
+        "--test-threads=1",
+        "--nocapture"
+      ],
+      "started_utc": "2026-10-23T04:17:37.341563+00:00",
+      "ended_utc": "2026-10-23T04:17:37.375985+00:00",
+      "exit_code": 101
+    },
+    {
+      "label": "cargo-fetch",
+      "argv": [
+        "/workspace/bot-core-tools/cargo/bin/cargo",
+        "fetch",
+        "--locked",
+        "--manifest-path",
+        "crates/Cargo.toml"
+      ],
+      "started_utc": "2026-10-23T04:17:37.376026+00:00",
+      "ended_utc": "2026-10-23T04:17:38.871536+00:00",
+      "exit_code": 0
+    },
+    {
+      "label": "bot-baseline",
+      "argv": [
+        "/workspace/bot-core-tools/cargo/bin/cargo",
+        "test",
+        "--offline",
+        "--locked",
+        "--manifest-path",
+        "crates/Cargo.toml",
+        "-p",
+        "muyon-core",
+        "--lib",
+        "bot_definitions",
+        "--",
+        "--test-threads=1",
+        "--nocapture"
+      ],
+      "started_utc": "2026-10-23T04:17:38.871579+00:00",
+      "ended_utc": "2026-10-23T04:17:48.100589+00:00",
+      "exit_code": 0
+    },
+    {
+      "label": "bot_drafts",
+      "argv": [
+        "/workspace/bot-core-tools/cargo/bin/cargo",
+        "test",
+        "--offline",
+        "--locked",
+        "--manifest-path",
+        "crates/Cargo.toml",
+        "-p",
+        "muyon-core",
+        "--test",
+        "bot_drafts",
+        "--",
+        "--test-threads=1",
+        "--nocapture"
+      ],
+      "started_utc": "2026-10-23T04:17:48.100630+00:00",
+      "ended_utc": "2026-10-23T04:17:56.073704+00:00",
+      "exit_code": 0
+    },
+    {
+      "label": "agent_owner",
+      "argv": [
+        "/workspace/bot-core-tools/cargo/bin/cargo",
+        "test",
+        "--offline",
+        "--locked",
+        "--manifest-path",
+        "crates/Cargo.toml",
+        "-p",
+        "muyon-core",
+        "--test",
+        "agent_owner",
+        "--",
+        "--test-threads=1",
+        "--nocapture"
+      ],
+      "started_utc": "2026-10-23T04:17:56.073744+00:00",
+      "ended_utc": "2026-10-23T04:17:56.358712+00:00",
+      "exit_code": 0
+    },
+    {
+      "label": "agent_product",
+      "argv": [
+        "/workspace/bot-core-tools/cargo/bin/cargo",
+        "test",
+        "--offline",
+        "--locked",
+        "--manifest-path",
+        "crates/Cargo.toml",
+        "-p",
+        "muyon-core",
+        "--test",
+        "agent_product",
+        "--",
+        "--test-threads=1",
+        "--nocapture"
+      ],
+      "started_utc": "2026-10-23T04:17:56.358751+00:00",
+      "ended_utc": "2026-10-23T04:17:56.613893+00:00",
+      "exit_code": 0
+    },
+    {
+      "label": "agent_workflow",
+      "argv": [
+        "/workspace/bot-core-tools/cargo/bin/cargo",
+        "test",
+        "--offline",
+        "--locked",
+        "--manifest-path",
+        "crates/Cargo.toml",
+        "-p",
+        "muyon-core",
+        "--test",
+        "agent_workflow",
+        "--",
+        "--test-threads=1",
+        "--nocapture"
+      ],
+      "started_utc": "2026-10-23T04:17:56.613933+00:00",
+      "ended_utc": "2026-10-23T04:17:57.379049+00:00",
+      "exit_code": 0
+    },
+    {
+      "label": "agent_tools",
+      "argv": [
+        "/workspace/bot-core-tools/cargo/bin/cargo",
+        "test",
+        "--offline",
+        "--locked",
+        "--manifest-path",
+        "crates/Cargo.toml",
+        "-p",
+        "muyon-core",
+        "--test",
+        "agent_tools",
+        "--",
+        "--test-threads=1",
+        "--nocapture"
+      ],
+      "started_utc": "2026-10-23T04:17:57.379144+00:00",
+      "ended_utc": "2026-10-23T04:17:57.777353+00:00",
+      "exit_code": 0
+    },
+    {
+      "label": "agent_child_tools",
+      "argv": [
+        "/workspace/bot-core-tools/cargo/bin/cargo",
+        "test",
+        "--offline",
+        "--locked",
+        "--manifest-path",
+        "crates/Cargo.toml",
+        "-p",
+        "muyon-core",
+        "--test",
+        "agent_child_tools",
+        "--",
+        "--test-threads=1",
+        "--nocapture"
+      ],
+      "started_utc": "2026-10-23T04:17:57.777397+00:00",
+      "ended_utc": "2026-10-23T04:17:57.969161+00:00",
+      "exit_code": 0
+    },
+    {
+      "label": "strict-current",
+      "argv": [
+        "/workspace/bot-core-tools/cargo/bin/cargo",
+        "clippy",
+        "--offline",
+        "--locked",
+        "--manifest-path",
+        "crates/Cargo.toml",
+        "--workspace",
+        "--all-targets",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "started_utc": "2026-10-23T04:17:57.969202+00:00",
+      "ended_utc": "2026-10-23T04:18:16.939951+00:00",
+      "exit_code": 0
+    }
+  ],
+  "ended_utc": "2026-10-23T04:18:16.939995+00:00",
+  "log_sha256": {
+    "agent_child_tools.stderr.log": "ebb517dc959dabf0f22492c50031b35eea19aad8a76e3816cd987a1bd0304b36",
+    "agent_child_tools.stdout.log": "deeb817ee8d33678955cf8e9cb74e68c1cb605d49570b5a684c34bf373d16706",
+    "agent_owner.stderr.log": "59cbce21ad06ab85b9fb9b43a189f385c0245fe3d9ff248e48cfa61d8eccd3e2",
+    "agent_owner.stdout.log": "9f87bff6e77c212cc4f928a496e122d26e7675eddcfb5ab7ce78d4f92a5ffdb0",
+    "agent_product.stderr.log": "df6537f14542133c202ea13dada811b3626eb2f1ae18ab8578f3f29a5f3b1073",
+    "agent_product.stdout.log": "55d17d34811b3bedbcc559d24d6f98659dc2bde3e7b45a111b388b616d731cc0",
+    "agent_tools.stderr.log": "7d80e638b4d97b240120a5454dfad159bc9b0fc17e40c3cb213b6a96f967e7dc",
+    "agent_tools.stdout.log": "935ecca9af0bbb50441392879c7accb7cf6c9e556b24b324c24ba27e0c1ada4d",
+    "agent_workflow.stderr.log": "ea169f065c56b28bf84679cf823071ce886e70a76120cb301ddfa889abd223d2",
+    "agent_workflow.stdout.log": "e840db3b19923de1e0b826a6f1ee86bf5d656a82f463b8cd149bc26130db333b",
+    "bot-baseline.stderr.log": "516ee46d28d8cee0c9bc8378178bfa120d878b30e90fe1d70a648741db38135c",
+    "bot-baseline.stdout.log": "0df77327c1f459dbe899c3bd45133b983a366e65f00de238c765596aff449b2e",
+    "bot_drafts.stderr.log": "32ba39ec804e3c56638045fc2c2c50ca246768f771858f6ce662924e235aae69",
+    "bot_drafts.stdout.log": "1fa31fb616991521486f2369d75d9ad187de30ffc8fd066656a6aa67d7e7d246",
+    "cargo-fetch.stderr.log": "576271289c842f037ac9b9f198479581685319373cd0ebf785c594f0b4275a8e",
+    "cargo-fetch.stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "initial-offline-bot.stderr.log": "a971166dbde6c2501b18b0430ddbbe0cd234001ec8425da46d11430552dbd147",
+    "initial-offline-bot.stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "rustc.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "rustc.stdout.log": "ab618f0332ef360846e240d76633d486a18701c2fb3cc3951334ce03a6ca5793",
+    "strict-current.stderr.log": "67ca6251262ae17e86f2d8e6e0d1355f6797c0517478b876dd26623473566fa8",
+    "strict-current.stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

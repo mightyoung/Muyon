@@ -1,0 +1,29 @@
+{
+  "head": "16318a296e2f1efbdbc952d2e3e29cec680fb5e0",
+  "started_utc": "2026-10-23T04:22:02.076461+00:00",
+  "argv": [
+    "/workspace/bot-core-tools/cargo/bin/cargo",
+    "test",
+    "--offline",
+    "--locked",
+    "--manifest-path",
+    "crates/Cargo.toml",
+    "-p",
+    "muyon-android-ffi",
+    "--lib",
+    "tests::another_root_and_ordinary_chat_cannot_bypass_an_unknown_child",
+    "--",
+    "--exact",
+    "--nocapture"
+  ],
+  "environment_override": {
+    "RUSTUP_HOME": "/workspace/bot-core-tools/rustup",
+    "CARGO_HOME": "/workspace/bot-core-tools/cargo",
+    "CARGO_TARGET_DIR": "/workspace/bot-core-tools/target-baseline",
+    "RUSTFLAGS": "-Lnative=/workspace/bot-core-tools/native-links"
+  },
+  "stdout_sha256": "670c226ace4a7f33c83e3b06943728ec089e95f62f508229933105c81d1355fc",
+  "stderr_sha256": "b2a1cc8839148d505190429cd49564c65ef5bf700097de5c2955ff8d0a1d22f6",
+  "ended_utc": "2026-10-23T04:22:03.194047+00:00",
+  "exit_code": 101
+}
