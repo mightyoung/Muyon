@@ -1,0 +1,6 @@
+# Pinned to the version used by .github/workflows/muyon-product.yml.
+# Decided 2026-10-23: see docs/reviews/2026-10-23-public-services-v02-plan-review.md
+[toolchain]
+channel = "1.93.1"
+profile = "minimal"
+components = ["clippy", "rustfmt"]
