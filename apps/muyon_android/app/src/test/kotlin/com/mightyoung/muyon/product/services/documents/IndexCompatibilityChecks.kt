@@ -136,6 +136,15 @@ fun main(args: Array<String>) {
             check(!hasPublicReferenceCandidate(LegacyIndexEntry("doc", "result", bad)))
         }
     }
+    checkCase("unsupported unpaired UTF16 never obtains a Boolean success") {
+        // Rust String cannot express these. This is an input-domain precondition,
+        // not a shared false/success verdict or a production wire codec policy.
+        for (bad in listOf("\uD800", "\uDC00", "x\uD800y")) {
+            for (d in listOf(base.copy(modelVersion = bad), base.copy(tokenizerVersion = bad), base.copy(chunkVersion = bad)))
+                rejects { validateCompatibility(d, d) }
+            rejects { hasPublicReferenceCandidate(LegacyIndexEntry("doc", bad, base)) }
+        }
+    }
     projectionRejections(bytes)
     println("COVERAGE D typed=$dTyped outsideInt=$dOutside /81; C combinedTyped=$cTyped outsideInt=$cOutside /28; W=25")
     println("SUMMARY $passed passed / $failed failed; offline compatibility/shape only; trusted host/Android/engine NOT_RUN")
