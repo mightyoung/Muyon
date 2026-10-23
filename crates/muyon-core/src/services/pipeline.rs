@@ -127,6 +127,12 @@ pub fn validate_embedding_search(
     query_descriptor: &VectorDescriptor,
     inputs: &[EmbeddingResult],
 ) -> Result<(), ServiceError> {
+    if inputs
+        .iter()
+        .any(|input| input.descriptor != snapshot.descriptor)
+    {
+        return Err(failure(ErrorCode::InvalidArgument));
+    }
     let references: Vec<_> = inputs.iter().map(|input| input.reference.clone()).collect();
     validate_search(snapshot, query_descriptor, &references)
 }
