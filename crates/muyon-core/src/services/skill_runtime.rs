@@ -161,3 +161,12 @@ pub fn lookup_original_run(
     }
     Ok(result)
 }
+
+/// Pure adapter to C2 cancel_original; this is not a production host or stop proof.
+/// The trusted caller must authorize the original current scope before use.
+pub fn cancel_original_run(
+    _: &dyn HostCommandPort,
+    intent: &IntentId,
+) -> Result<crate::contract::ExecutionResult, ServiceError> {
+    Err(crate::services::commands::unphased_host_error(intent))
+}
