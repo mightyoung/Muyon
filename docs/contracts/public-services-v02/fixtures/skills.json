@@ -1,0 +1,122 @@
+{
+  "contract_major": 1,
+  "schema_major": 1,
+  "snapshot": {
+    "catalog_revision": "1",
+    "skills": [
+      {
+        "reference": {
+          "skill_id": "supplier-overview",
+          "version": "builtin-v1",
+          "content_digest": "6a04822d58cadf1b20f8b677f16ef1573e82302cdffe467642eb11cbbed1636a"
+        },
+        "owner_plugin_id": "inquiry",
+        "contract_major": 1,
+        "input_schema": {
+          "type": "object",
+          "properties": {
+            "limit": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50
+            },
+            "offset": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 10000
+            }
+          },
+          "required": [
+            "limit",
+            "offset"
+          ],
+          "additionalProperties": false
+        },
+        "output_schema": {
+          "type": "object",
+          "required": [
+            "records"
+          ],
+          "properties": {
+            "records": {
+              "type": "array"
+            }
+          }
+        },
+        "required_capabilities": [
+          "supplier_list"
+        ],
+        "resource_manifest": [
+          "SKILL.md"
+        ]
+      },
+      {
+        "reference": {
+          "skill_id": "paper-overview",
+          "version": "builtin-v1",
+          "content_digest": "a579c7bd9a1fd90b7cb8f0aaa14535fe2aaee2276f7d215b65197efbb807a058"
+        },
+        "owner_plugin_id": "research",
+        "contract_major": 1,
+        "input_schema": {
+          "type": "object",
+          "properties": {
+            "limit": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50
+            },
+            "offset": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 10000
+            }
+          },
+          "required": [
+            "limit",
+            "offset"
+          ],
+          "additionalProperties": false
+        },
+        "output_schema": {
+          "type": "object",
+          "required": [
+            "records"
+          ],
+          "properties": {
+            "records": {
+              "type": "array"
+            }
+          }
+        },
+        "required_capabilities": [
+          "paper_list"
+        ],
+        "resource_manifest": [
+          "SKILL.md"
+        ]
+      }
+    ],
+    "bindings": [
+      {
+        "binding_id": "binding:1",
+        "scope": {
+          "scope": {
+            "workspace_id": "w",
+            "project_id": "p"
+          },
+          "account_id": "a",
+          "scope_generation": "1"
+        },
+        "bot_id": null,
+        "revision": "1",
+        "skill": {
+          "skill_id": "supplier-overview",
+          "version": "builtin-v1",
+          "content_digest": "6a04822d58cadf1b20f8b677f16ef1573e82302cdffe467642eb11cbbed1636a"
+        },
+        "enabled": true
+      }
+    ]
+  }
+}
