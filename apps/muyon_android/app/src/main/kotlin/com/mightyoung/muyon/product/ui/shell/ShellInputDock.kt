@@ -14,15 +14,15 @@ import androidx.compose.ui.unit.dp
 /** Uses host typography/colors so the foundation branch remains the sole token owner. */
 @Composable
 fun ShellInputDock(draft: String, onDraft: (String) -> Unit, enabled: Boolean,
-    onChat: () -> Unit, onMore: () -> Unit, moreMenu: @Composable () -> Unit) {
+    onChat: () -> Unit, onAttachments: () -> Unit, attachmentsMenu: @Composable () -> Unit) {
     Surface(Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp),
         shape = RoundedCornerShape(32.dp), color = MaterialTheme.colorScheme.surface) {
         Row(Modifier.padding(6.dp), verticalAlignment = Alignment.Bottom) {
             Box {
-                IconButton(onClick = onMore, modifier = Modifier.size(48.dp)) {
-                    Text("+", Modifier.semantics { contentDescription = "更多聊天操作" })
+                IconButton(onClick = onAttachments, modifier = Modifier.size(48.dp)) {
+                    Text("+", Modifier.semantics { contentDescription = "添加附件" })
                 }
-                moreMenu()
+                attachmentsMenu()
             }
             TextField(value = draft, onValueChange = onDraft,
                 modifier = Modifier.weight(1f).heightIn(max = 192.dp).testTag("chat-draft")
