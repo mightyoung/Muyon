@@ -59,3 +59,9 @@ After the parent supplies C1 full source/fixture SHA and usable preinstalled too
 Implement S1 test/stub → behavioral RED → implementation → GREEN → agent_workflow regression → independent review. Registry mutations remain reviewable candidate metadata only; no new Operation, persistent registry, permission grant or runnable entry point. S2 host wiring stays blocked until the original owner hands it over and the exact Operation/binding/input variant is reviewed. Unknown outcomes always keep original IntentId and original lookup/cancel owner.
 
 Only this report and test preparation are delivered. No runtime module/fixture, workflow, shared registration, UI Shell, Cargo.toml/lock, credentials, real Connector/model, Reader bridge, schema migration or second execution ledger changed. This preparation does not satisfy S1 acceptance and must not be integrated as a completed feature.
+
+## Independent preparation review
+
+Fresh reviewer `/root/review_skills_preparation` reviewed `28ea12e6fb443b73b6cb02f171268b079297ec36` (including initial preparation `5f43f1a5a09d50199973ae62b96ae441bdaae639`) against base `fd26dcdabcdac996bc2881e8141cac2b519966fc`. No blocking or required-change findings. Reviewer independently checked the two-file scope, source assertions, resource/evidence hashes, test names and no false completion claims. `git diff --check` exited 0; both documented Cargo test attempts and toolchain check each exited 127. Reviewer performed no modifications, installation, external actions, push or merge.
+
+Conclusion is limited to handing off preparation documents; S1 feature acceptance remains unmet. C1 and toolchain dependencies remain pending and all runtime tests remain NOT_RUN. The parent-reported dependency/authorization status was checked for document consistency, not independently authenticated by the reviewer. No deferred minor findings or implementation rulings.
