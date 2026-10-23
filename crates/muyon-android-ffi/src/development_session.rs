@@ -22,7 +22,7 @@ pub struct DevelopmentSession {
     draft: ConversationDraft,
 }
 
-fn scope_path(owner: &ProductCore, scope: &ScopeRef) -> Result<PathBuf, ProductError> {
+pub(crate) fn scope_path(owner: &ProductCore, scope: &ScopeRef) -> Result<PathBuf, ProductError> {
     if scope.scope.workspace_id != owner.workspace {
         return Err(ContractError::ScopeMismatch.into());
     }

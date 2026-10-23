@@ -1,5 +1,7 @@
 # 生产缺口推进与验证结果
 
+此文件记录首个候选 `b899a326` 的底层切片。后续 Android Service/UI 和开发模型提案接线、双 CI 跟进及当前验收边界见 [ANDROID-REPORT.md](ANDROID-REPORT.md)；下表中的“尚未接入”是该首个候选当时的状态。
+
 日期：2026-10-23（Asia/Shanghai）。基线：`e16af808620488a7be0b3b4a10b91190d18f1177`。实时 GitHub develop 分支查询与该基线一致；主工作区原有改动未动。本轮为独立候选，未合入 develop。
 
 ## 本轮实际实现

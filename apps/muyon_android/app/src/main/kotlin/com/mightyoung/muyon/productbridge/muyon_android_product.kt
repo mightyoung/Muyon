@@ -707,6 +707,8 @@ internal object IntegrityCheckingUniffiLib {
     ): Int
     external fun uniffi_muyon_android_product_checksum_method_productcore_agent_prepare(
     ): Int
+    external fun uniffi_muyon_android_product_checksum_method_productcore_agent_prepare_development_scoped(
+    ): Int
     external fun uniffi_muyon_android_product_checksum_method_productcore_agent_prepare_scoped(
     ): Int
     external fun uniffi_muyon_android_product_checksum_method_productcore_agent_read(
@@ -775,7 +777,35 @@ internal object IntegrityCheckingUniffiLib {
     ): Int
     external fun uniffi_muyon_android_product_checksum_method_productcore_supplier(
     ): Int
+    external fun uniffi_muyon_android_product_checksum_method_developmentdrafthost_accept_proposal(
+    ): Int
+    external fun uniffi_muyon_android_product_checksum_method_developmentdrafthost_add_item(
+    ): Int
+    external fun uniffi_muyon_android_product_checksum_method_developmentdrafthost_choose_new_project(
+    ): Int
+    external fun uniffi_muyon_android_product_checksum_method_developmentdrafthost_confirm_project(
+    ): Int
+    external fun uniffi_muyon_android_product_checksum_method_developmentdrafthost_edit_item(
+    ): Int
+    external fun uniffi_muyon_android_product_checksum_method_developmentdrafthost_prepare_project(
+    ): Int
+    external fun uniffi_muyon_android_product_checksum_method_developmentdrafthost_preview_proposal(
+    ): Int
+    external fun uniffi_muyon_android_product_checksum_method_developmentdrafthost_recover_original(
+    ): Int
+    external fun uniffi_muyon_android_product_checksum_method_developmentdrafthost_recover_proposal(
+    ): Int
+    external fun uniffi_muyon_android_product_checksum_method_developmentdrafthost_reject_proposal(
+    ): Int
+    external fun uniffi_muyon_android_product_checksum_method_developmentdrafthost_revoke(
+    ): Int
+    external fun uniffi_muyon_android_product_checksum_method_developmentdrafthost_set_project_name(
+    ): Int
+    external fun uniffi_muyon_android_product_checksum_method_developmentdrafthost_snapshot(
+    ): Int
     external fun uniffi_muyon_android_product_checksum_constructor_productcore_open(
+    ): Int
+    external fun uniffi_muyon_android_product_checksum_constructor_developmentdrafthost_open(
     ): Int
     external fun ffi_muyon_android_product_uniffi_contract_version(
     ): Int
@@ -824,6 +854,8 @@ internal object UniffiLib {
     external fun uniffi_muyon_android_product_fn_method_productcore_agent_lookup(`ptr`: Long,`request`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
     external fun uniffi_muyon_android_product_fn_method_productcore_agent_prepare(`ptr`: Long,`conversation`: RustBuffer.ByValue,`text`: RustBuffer.ByValue,`search`: Byte,`count`: Int,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    external fun uniffi_muyon_android_product_fn_method_productcore_agent_prepare_development_scoped(`ptr`: Long,`conversation`: RustBuffer.ByValue,`text`: RustBuffer.ByValue,`session`: RustBuffer.ByValue,`project`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
     external fun uniffi_muyon_android_product_fn_method_productcore_agent_prepare_scoped(`ptr`: Long,`conversation`: RustBuffer.ByValue,`text`: RustBuffer.ByValue,`search`: Byte,`count`: Int,`session`: RustBuffer.ByValue,`project`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
@@ -892,6 +924,38 @@ internal object UniffiLib {
     external fun uniffi_muyon_android_product_fn_method_productcore_seal_snapshot(`ptr`: Long,`projectId`: RustBuffer.ByValue,`entriesJson`: RustBuffer.ByValue,`archiveUploadId`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
     external fun uniffi_muyon_android_product_fn_method_productcore_supplier(`ptr`: Long,`supplierId`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    external fun uniffi_muyon_android_product_fn_clone_developmentdrafthost(`handle`: Long,uniffi_out_err: UniffiRustCallStatus, 
+    ): Long
+    external fun uniffi_muyon_android_product_fn_free_developmentdrafthost(`handle`: Long,uniffi_out_err: UniffiRustCallStatus, 
+    ): Unit
+    external fun uniffi_muyon_android_product_fn_constructor_developmentdrafthost_open(`core`: Long,`conversation`: RustBuffer.ByValue,`project`: RustBuffer.ByValue,`draftId`: RustBuffer.ByValue,`create`: Byte,uniffi_out_err: UniffiRustCallStatus, 
+    ): Long
+    external fun uniffi_muyon_android_product_fn_method_developmentdrafthost_accept_proposal(`ptr`: Long,`request`: RustBuffer.ByValue,`session`: RustBuffer.ByValue,`generation`: RustBuffer.ByValue,`reviewDigest`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    external fun uniffi_muyon_android_product_fn_method_developmentdrafthost_add_item(`ptr`: Long,`kind`: RustBuffer.ByValue,`text`: RustBuffer.ByValue,`expectedRevision`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    external fun uniffi_muyon_android_product_fn_method_developmentdrafthost_choose_new_project(`ptr`: Long,`expectedRevision`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    external fun uniffi_muyon_android_product_fn_method_developmentdrafthost_confirm_project(`ptr`: Long,`planId`: RustBuffer.ByValue,`bindingDigest`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    external fun uniffi_muyon_android_product_fn_method_developmentdrafthost_edit_item(`ptr`: Long,`itemId`: RustBuffer.ByValue,`text`: RustBuffer.ByValue,`expectedRevision`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    external fun uniffi_muyon_android_product_fn_method_developmentdrafthost_prepare_project(`ptr`: Long,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    external fun uniffi_muyon_android_product_fn_method_developmentdrafthost_preview_proposal(`ptr`: Long,`request`: RustBuffer.ByValue,`session`: RustBuffer.ByValue,`generation`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    external fun uniffi_muyon_android_product_fn_method_developmentdrafthost_recover_original(`ptr`: Long,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    external fun uniffi_muyon_android_product_fn_method_developmentdrafthost_recover_proposal(`ptr`: Long,`request`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    external fun uniffi_muyon_android_product_fn_method_developmentdrafthost_reject_proposal(`ptr`: Long,`request`: RustBuffer.ByValue,`session`: RustBuffer.ByValue,`generation`: RustBuffer.ByValue,`reviewDigest`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    external fun uniffi_muyon_android_product_fn_method_developmentdrafthost_revoke(`ptr`: Long,uniffi_out_err: UniffiRustCallStatus, 
+    ): Unit
+    external fun uniffi_muyon_android_product_fn_method_developmentdrafthost_set_project_name(`ptr`: Long,`name`: RustBuffer.ByValue,`expectedRevision`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    external fun uniffi_muyon_android_product_fn_method_developmentdrafthost_snapshot(`ptr`: Long,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
     external fun uniffi_muyon_android_product_fn_func_office_extract_text(`bytes`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
@@ -1065,6 +1129,9 @@ private fun uniffiCheckApiChecksums(lib: IntegrityCheckingUniffiLib) {
     if ((lib.uniffi_muyon_android_product_checksum_method_productcore_agent_prepare() and 0xFFFF) != 23553) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
+    if ((lib.uniffi_muyon_android_product_checksum_method_productcore_agent_prepare_development_scoped() and 0xFFFF) != 63885) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
     if ((lib.uniffi_muyon_android_product_checksum_method_productcore_agent_prepare_scoped() and 0xFFFF) != 26129) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
@@ -1167,7 +1234,49 @@ private fun uniffiCheckApiChecksums(lib: IntegrityCheckingUniffiLib) {
     if ((lib.uniffi_muyon_android_product_checksum_method_productcore_supplier() and 0xFFFF) != 40569) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
+    if ((lib.uniffi_muyon_android_product_checksum_method_developmentdrafthost_accept_proposal() and 0xFFFF) != 53366) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if ((lib.uniffi_muyon_android_product_checksum_method_developmentdrafthost_add_item() and 0xFFFF) != 43255) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if ((lib.uniffi_muyon_android_product_checksum_method_developmentdrafthost_choose_new_project() and 0xFFFF) != 56992) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if ((lib.uniffi_muyon_android_product_checksum_method_developmentdrafthost_confirm_project() and 0xFFFF) != 58690) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if ((lib.uniffi_muyon_android_product_checksum_method_developmentdrafthost_edit_item() and 0xFFFF) != 27429) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if ((lib.uniffi_muyon_android_product_checksum_method_developmentdrafthost_prepare_project() and 0xFFFF) != 41726) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if ((lib.uniffi_muyon_android_product_checksum_method_developmentdrafthost_preview_proposal() and 0xFFFF) != 23448) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if ((lib.uniffi_muyon_android_product_checksum_method_developmentdrafthost_recover_original() and 0xFFFF) != 22831) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if ((lib.uniffi_muyon_android_product_checksum_method_developmentdrafthost_recover_proposal() and 0xFFFF) != 45491) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if ((lib.uniffi_muyon_android_product_checksum_method_developmentdrafthost_reject_proposal() and 0xFFFF) != 50748) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if ((lib.uniffi_muyon_android_product_checksum_method_developmentdrafthost_revoke() and 0xFFFF) != 42563) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if ((lib.uniffi_muyon_android_product_checksum_method_developmentdrafthost_set_project_name() and 0xFFFF) != 55206) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if ((lib.uniffi_muyon_android_product_checksum_method_developmentdrafthost_snapshot() and 0xFFFF) != 35120) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
     if ((lib.uniffi_muyon_android_product_checksum_constructor_productcore_open() and 0xFFFF) != 43494) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if ((lib.uniffi_muyon_android_product_checksum_constructor_developmentdrafthost_open() and 0xFFFF) != 7970) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
 }
@@ -1595,6 +1704,535 @@ public object FfiConverterByteArray: FfiConverterRustBuffer<ByteArray> {
 //
 
 
+/**
+ * Native capability owned by the private Service, never the model dispatcher.
+ * All methods use one lock order: this object, then ProductCore; no core method
+ * calls back into this object while retaining the core mutex.
+ */
+public interface DevelopmentDraftHostInterface {
+    
+    /**
+     * Explicit local acceptance freezes the original request before saving.
+     * The model never invokes this entry or any project confirmation entry.
+     */
+    fun `acceptProposal`(`request`: kotlin.String, `session`: kotlin.String, `generation`: kotlin.String, `reviewDigest`: kotlin.String): kotlin.String
+    
+    fun `addItem`(`kind`: kotlin.String, `text`: kotlin.String, `expectedRevision`: kotlin.String): kotlin.String
+    
+    fun `chooseNewProject`(`expectedRevision`: kotlin.String): kotlin.String
+    
+    /**
+     * Called only by the private Service's visible project review action.
+     */
+    fun `confirmProject`(`planId`: kotlin.String, `bindingDigest`: kotlin.String): kotlin.String
+    
+    fun `editItem`(`itemId`: kotlin.String, `text`: kotlin.String, `expectedRevision`: kotlin.String): kotlin.String
+    
+    fun `prepareProject`(): kotlin.String
+    
+    /**
+     * A proposal is a source-bound local preview, not a business plan.
+     */
+    fun `previewProposal`(`request`: kotlin.String, `session`: kotlin.String, `generation`: kotlin.String): kotlin.String
+    
+    fun `recoverOriginal`(): kotlin.String
+    
+    /**
+     * New Binder/epoch recovery checks only the original save acknowledgement.
+     * It cannot apply a proposal, save another envelope or call a provider.
+     */
+    fun `recoverProposal`(`request`: kotlin.String): kotlin.String
+    
+    fun `rejectProposal`(`request`: kotlin.String, `session`: kotlin.String, `generation`: kotlin.String, `reviewDigest`: kotlin.String): kotlin.String
+    
+    /**
+     * Revocation invalidates even a leaked old generated Kotlin handle.
+     */
+    fun `revoke`()
+    
+    fun `setProjectName`(`name`: kotlin.String, `expectedRevision`: kotlin.String): kotlin.String
+    
+    fun `snapshot`(): kotlin.String
+    
+    companion object
+}
+
+/**
+ * Native capability owned by the private Service, never the model dispatcher.
+ * All methods use one lock order: this object, then ProductCore; no core method
+ * calls back into this object while retaining the core mutex.
+ */
+open class DevelopmentDraftHost: Disposable, AutoCloseable, DevelopmentDraftHostInterface
+{
+
+    @Suppress("UNUSED_PARAMETER")
+    /**
+     * @suppress
+     */
+    constructor(withHandle: UniffiWithHandle, handle: Long) {
+        this.handle = handle
+        this.cleanable = UniffiLib.CLEANER.register(this, UniffiCleanAction(handle))
+    }
+
+    /**
+     * @suppress
+     *
+     * This constructor can be used to instantiate a fake object. Only used for tests. Any
+     * attempt to actually use an object constructed this way will fail as there is no
+     * connected Rust object.
+     */
+    @Suppress("UNUSED_PARAMETER")
+    constructor(noHandle: NoHandle) {
+        this.handle = 0
+        this.cleanable = null
+    }
+
+    protected val handle: Long
+    protected val cleanable: UniffiCleaner.Cleanable?
+
+    private val wasDestroyed = AtomicBoolean(false)
+    private val callCounter = AtomicLong(1)
+
+    /**
+     * Whether the current object has been destroyed and its reference is gone in the Rust side.
+     */
+    val uniffiIsDestroyed: Boolean get() = wasDestroyed.get()
+
+    override fun destroy() {
+        // Only allow a single call to this method.
+        // TODO: maybe we should log a warning if called more than once?
+        if (this.wasDestroyed.compareAndSet(false, true)) {
+            // This decrement always matches the initial count of 1 given at creation time.
+            if (this.callCounter.decrementAndGet() == 0L) {
+                cleanable?.clean()
+            }
+        }
+    }
+
+    @Synchronized
+    override fun close() {
+        this.destroy()
+    }
+
+    internal inline fun <R> callWithHandle(block: (handle: Long) -> R): R {
+        // Check and increment the call counter, to keep the object alive.
+        // This needs a compare-and-set retry loop in case of concurrent updates.
+        do {
+            val c = this.callCounter.get()
+            if (c == 0L) {
+                throw IllegalStateException("${this.javaClass.simpleName} object has already been destroyed")
+            }
+            if (c == Long.MAX_VALUE) {
+                throw IllegalStateException("${this.javaClass.simpleName} call counter would overflow")
+            }
+        } while (! this.callCounter.compareAndSet(c, c + 1L))
+        // Now we can safely do the method call without the handle being freed concurrently.
+        try {
+            return block(this.uniffiCloneHandle())
+        } finally {
+            // This decrement always matches the increment we performed above.
+            if (this.callCounter.decrementAndGet() == 0L) {
+                cleanable?.clean()
+            }
+        }
+    }
+
+    // Use a static inner class instead of a closure so as not to accidentally
+    // capture `this` as part of the cleanable's action.
+    private class UniffiCleanAction(private val handle: Long) : Runnable {
+        override fun run() {
+            if (handle == 0.toLong()) {
+                // Fake object created with `NoHandle`, don't try to free.
+                return;
+            }
+            uniffiRustCall { status ->
+                UniffiLib.uniffi_muyon_android_product_fn_free_developmentdrafthost(handle, status)
+            }
+        }
+    }
+
+    /**
+     * @suppress
+     */
+    fun uniffiCloneHandle(): Long {
+        if (handle == 0.toLong()) {
+            throw InternalException("uniffiCloneHandle() called on NoHandle object");
+        }
+        return uniffiRustCall() { status ->
+            UniffiLib.uniffi_muyon_android_product_fn_clone_developmentdrafthost(handle, status)
+        }
+    }
+
+    
+    /**
+     * Explicit local acceptance freezes the original request before saving.
+     * The model never invokes this entry or any project confirmation entry.
+     */
+    @Throws(ProductException::class)override fun `acceptProposal`(`request`: kotlin.String, `session`: kotlin.String, `generation`: kotlin.String, `reviewDigest`: kotlin.String): kotlin.String {
+            return FfiConverterString.lift(
+    callWithHandle {
+    uniffiRustCallWithError(ProductException) { _status ->
+    UniffiLib.uniffi_muyon_android_product_fn_method_developmentdrafthost_accept_proposal(
+        it,
+        
+        FfiConverterString.lower(`request`),
+        FfiConverterString.lower(`session`),
+        FfiConverterString.lower(`generation`),
+        FfiConverterString.lower(`reviewDigest`),_status)
+}
+    }
+    )
+    }
+    
+
+    
+    @Throws(ProductException::class)override fun `addItem`(`kind`: kotlin.String, `text`: kotlin.String, `expectedRevision`: kotlin.String): kotlin.String {
+            return FfiConverterString.lift(
+    callWithHandle {
+    uniffiRustCallWithError(ProductException) { _status ->
+    UniffiLib.uniffi_muyon_android_product_fn_method_developmentdrafthost_add_item(
+        it,
+        
+        FfiConverterString.lower(`kind`),
+        FfiConverterString.lower(`text`),
+        FfiConverterString.lower(`expectedRevision`),_status)
+}
+    }
+    )
+    }
+    
+
+    
+    @Throws(ProductException::class)override fun `chooseNewProject`(`expectedRevision`: kotlin.String): kotlin.String {
+            return FfiConverterString.lift(
+    callWithHandle {
+    uniffiRustCallWithError(ProductException) { _status ->
+    UniffiLib.uniffi_muyon_android_product_fn_method_developmentdrafthost_choose_new_project(
+        it,
+        
+        FfiConverterString.lower(`expectedRevision`),_status)
+}
+    }
+    )
+    }
+    
+
+    
+    /**
+     * Called only by the private Service's visible project review action.
+     */
+    @Throws(ProductException::class)override fun `confirmProject`(`planId`: kotlin.String, `bindingDigest`: kotlin.String): kotlin.String {
+            return FfiConverterString.lift(
+    callWithHandle {
+    uniffiRustCallWithError(ProductException) { _status ->
+    UniffiLib.uniffi_muyon_android_product_fn_method_developmentdrafthost_confirm_project(
+        it,
+        
+        FfiConverterString.lower(`planId`),
+        FfiConverterString.lower(`bindingDigest`),_status)
+}
+    }
+    )
+    }
+    
+
+    
+    @Throws(ProductException::class)override fun `editItem`(`itemId`: kotlin.String, `text`: kotlin.String, `expectedRevision`: kotlin.String): kotlin.String {
+            return FfiConverterString.lift(
+    callWithHandle {
+    uniffiRustCallWithError(ProductException) { _status ->
+    UniffiLib.uniffi_muyon_android_product_fn_method_developmentdrafthost_edit_item(
+        it,
+        
+        FfiConverterString.lower(`itemId`),
+        FfiConverterString.lower(`text`),
+        FfiConverterString.lower(`expectedRevision`),_status)
+}
+    }
+    )
+    }
+    
+
+    
+    @Throws(ProductException::class)override fun `prepareProject`(): kotlin.String {
+            return FfiConverterString.lift(
+    callWithHandle {
+    uniffiRustCallWithError(ProductException) { _status ->
+    UniffiLib.uniffi_muyon_android_product_fn_method_developmentdrafthost_prepare_project(
+        it,
+        _status)
+}
+    }
+    )
+    }
+    
+
+    
+    /**
+     * A proposal is a source-bound local preview, not a business plan.
+     */
+    @Throws(ProductException::class)override fun `previewProposal`(`request`: kotlin.String, `session`: kotlin.String, `generation`: kotlin.String): kotlin.String {
+            return FfiConverterString.lift(
+    callWithHandle {
+    uniffiRustCallWithError(ProductException) { _status ->
+    UniffiLib.uniffi_muyon_android_product_fn_method_developmentdrafthost_preview_proposal(
+        it,
+        
+        FfiConverterString.lower(`request`),
+        FfiConverterString.lower(`session`),
+        FfiConverterString.lower(`generation`),_status)
+}
+    }
+    )
+    }
+    
+
+    
+    @Throws(ProductException::class)override fun `recoverOriginal`(): kotlin.String {
+            return FfiConverterString.lift(
+    callWithHandle {
+    uniffiRustCallWithError(ProductException) { _status ->
+    UniffiLib.uniffi_muyon_android_product_fn_method_developmentdrafthost_recover_original(
+        it,
+        _status)
+}
+    }
+    )
+    }
+    
+
+    
+    /**
+     * New Binder/epoch recovery checks only the original save acknowledgement.
+     * It cannot apply a proposal, save another envelope or call a provider.
+     */
+    @Throws(ProductException::class)override fun `recoverProposal`(`request`: kotlin.String): kotlin.String {
+            return FfiConverterString.lift(
+    callWithHandle {
+    uniffiRustCallWithError(ProductException) { _status ->
+    UniffiLib.uniffi_muyon_android_product_fn_method_developmentdrafthost_recover_proposal(
+        it,
+        
+        FfiConverterString.lower(`request`),_status)
+}
+    }
+    )
+    }
+    
+
+    
+    @Throws(ProductException::class)override fun `rejectProposal`(`request`: kotlin.String, `session`: kotlin.String, `generation`: kotlin.String, `reviewDigest`: kotlin.String): kotlin.String {
+            return FfiConverterString.lift(
+    callWithHandle {
+    uniffiRustCallWithError(ProductException) { _status ->
+    UniffiLib.uniffi_muyon_android_product_fn_method_developmentdrafthost_reject_proposal(
+        it,
+        
+        FfiConverterString.lower(`request`),
+        FfiConverterString.lower(`session`),
+        FfiConverterString.lower(`generation`),
+        FfiConverterString.lower(`reviewDigest`),_status)
+}
+    }
+    )
+    }
+    
+
+    
+    /**
+     * Revocation invalidates even a leaked old generated Kotlin handle.
+     */
+    @Throws(ProductException::class)override fun `revoke`()
+        = 
+    callWithHandle {
+    uniffiRustCallWithError(ProductException) { _status ->
+    UniffiLib.uniffi_muyon_android_product_fn_method_developmentdrafthost_revoke(
+        it,
+        _status)
+}
+    }
+    
+    
+
+    
+    @Throws(ProductException::class)override fun `setProjectName`(`name`: kotlin.String, `expectedRevision`: kotlin.String): kotlin.String {
+            return FfiConverterString.lift(
+    callWithHandle {
+    uniffiRustCallWithError(ProductException) { _status ->
+    UniffiLib.uniffi_muyon_android_product_fn_method_developmentdrafthost_set_project_name(
+        it,
+        
+        FfiConverterString.lower(`name`),
+        FfiConverterString.lower(`expectedRevision`),_status)
+}
+    }
+    )
+    }
+    
+
+    
+    @Throws(ProductException::class)override fun `snapshot`(): kotlin.String {
+            return FfiConverterString.lift(
+    callWithHandle {
+    uniffiRustCallWithError(ProductException) { _status ->
+    UniffiLib.uniffi_muyon_android_product_fn_method_developmentdrafthost_snapshot(
+        it,
+        _status)
+}
+    }
+    )
+    }
+    
+
+    
+
+    
+
+
+    
+    companion object {
+        
+    @Throws(ProductException::class) fun `open`(`core`: ProductCore, `conversation`: kotlin.String, `project`: kotlin.String?, `draftId`: kotlin.String?, `create`: kotlin.Boolean): DevelopmentDraftHost {
+            return FfiConverterTypeDevelopmentDraftHost.lift(
+    uniffiRustCallWithError(ProductException) { _status ->
+    UniffiLib.uniffi_muyon_android_product_fn_constructor_developmentdrafthost_open(
+    
+        
+        FfiConverterTypeProductCore.lower(`core`),
+        FfiConverterString.lower(`conversation`),
+        FfiConverterOptionalString.lower(`project`),
+        FfiConverterOptionalString.lower(`draftId`),
+        FfiConverterBoolean.lower(`create`),_status)
+}
+    )
+    }
+    
+
+        
+    }
+    
+}
+
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeDevelopmentDraftHost: FfiConverter<DevelopmentDraftHost, Long> {
+    override fun lower(value: DevelopmentDraftHost): Long {
+        return value.uniffiCloneHandle()
+    }
+
+    override fun lift(value: Long): DevelopmentDraftHost {
+        return DevelopmentDraftHost(UniffiWithHandle, value)
+    }
+
+    override fun read(buf: ByteBuffer): DevelopmentDraftHost {
+        return lift(buf.getLong())
+    }
+
+    override fun allocationSize(value: DevelopmentDraftHost) = 8UL
+
+    override fun write(value: DevelopmentDraftHost, buf: ByteBuffer) {
+        buf.putLong(lower(value))
+    }
+}
+
+
+// This template implements a class for working with a Rust struct via a handle
+// to the live Rust struct on the other side of the FFI.
+//
+// There's some subtlety here, because we have to be careful not to operate on a Rust
+// struct after it has been dropped, and because we must expose a public API for freeing
+// theq Kotlin wrapper object in lieu of reliable finalizers. The core requirements are:
+//
+//   * Each instance holds an opaque handle to the underlying Rust struct.
+//     Method calls need to read this handle from the object's state and pass it in to
+//     the Rust FFI.
+//
+//   * When an instance is no longer needed, its handle should be passed to a
+//     special destructor function provided by the Rust FFI, which will drop the
+//     underlying Rust struct.
+//
+//   * Given an instance, calling code is expected to call the special
+//     `destroy` method in order to free it after use, either by calling it explicitly
+//     or by using a higher-level helper like the `use` method. Failing to do so risks
+//     leaking the underlying Rust struct.
+//
+//   * We can't assume that calling code will do the right thing, and must be prepared
+//     to handle Kotlin method calls executing concurrently with or even after a call to
+//     `destroy`, and to handle multiple (possibly concurrent!) calls to `destroy`.
+//
+//   * We must never allow Rust code to operate on the underlying Rust struct after
+//     the destructor has been called, and must never call the destructor more than once.
+//     Doing so may trigger memory unsafety.
+//
+//   * To mitigate many of the risks of leaking memory and use-after-free unsafety, a `Cleaner`
+//     is implemented to call the destructor when the Kotlin object becomes unreachable.
+//     This is done in a background thread. This is not a panacea, and client code should be aware that
+//      1. the thread may starve if some there are objects that have poorly performing
+//     `drop` methods or do significant work in their `drop` methods.
+//      2. the thread is shared across the whole library. This can be tuned by using `android_cleaner = true`,
+//         or `android = true` in the [`kotlin` section of the `uniffi.toml` file](https://mozilla.github.io/uniffi-rs/kotlin/configuration.html).
+//
+// If we try to implement this with mutual exclusion on access to the handle, there is the
+// possibility of a race between a method call and a concurrent call to `destroy`:
+//
+//    * Thread A starts a method call, reads the value of the handle, but is interrupted
+//      before it can pass the handle over the FFI to Rust.
+//    * Thread B calls `destroy` and frees the underlying Rust struct.
+//    * Thread A resumes, passing the already-read handle value to Rust and triggering
+//      a use-after-free.
+//
+// One possible solution would be to use a `ReadWriteLock`, with each method call taking
+// a read lock (and thus allowed to run concurrently) and the special `destroy` method
+// taking a write lock (and thus blocking on live method calls). However, we aim not to
+// generate methods with any hidden blocking semantics, and a `destroy` method that might
+// block if called incorrectly seems to meet that bar.
+//
+// So, we achieve our goals by giving each instance an associated `AtomicLong` counter to track
+// the number of in-flight method calls, and an `AtomicBoolean` flag to indicate whether `destroy`
+// has been called. These are updated according to the following rules:
+//
+//    * The initial value of the counter is 1, indicating a live object with no in-flight calls.
+//      The initial value for the flag is false.
+//
+//    * At the start of each method call, we atomically check the counter.
+//      If it is 0 then the underlying Rust struct has already been destroyed and the call is aborted.
+//      If it is nonzero them we atomically increment it by 1 and proceed with the method call.
+//
+//    * At the end of each method call, we atomically decrement and check the counter.
+//      If it has reached zero then we destroy the underlying Rust struct.
+//
+//    * When `destroy` is called, we atomically flip the flag from false to true.
+//      If the flag was already true we silently fail.
+//      Otherwise we atomically decrement and check the counter.
+//      If it has reached zero then we destroy the underlying Rust struct.
+//
+// Astute readers may observe that this all sounds very similar to the way that Rust's `Arc<T>` works,
+// and indeed it is, with the addition of a flag to guard against multiple calls to `destroy`.
+//
+// The overall effect is that the underlying Rust struct is destroyed only when `destroy` has been
+// called *and* all in-flight method calls have completed, avoiding violating any of the expectations
+// of the underlying Rust code.
+//
+// This makes a cleaner a better alternative to _not_ calling `destroy()` as
+// and when the object is finished with, but the abstraction is not perfect: if the Rust object's `drop`
+// method is slow, and/or there are many objects to cleanup, and it's on a low end Android device, then the cleaner
+// thread may be starved, and the app will leak memory.
+//
+// In this case, `destroy`ing manually may be a better solution.
+//
+// The cleaner can live side by side with the manual calling of `destroy`. In the order of responsiveness, uniffi objects
+// with Rust peers are reclaimed:
+//
+// 1. By calling the `destroy` method of the object, which calls `rustObject.free()`. If that doesn't happen:
+// 2. When the object becomes unreachable, AND the Cleaner thread gets to call `rustObject.free()`. If the thread is starved then:
+// 3. The memory is reclaimed when the process terminates.
+//
+// [1] https://stackoverflow.com/questions/24376768/can-java-finalize-an-object-when-it-is-still-in-scope/24380219
+//
+
+
 public interface ProductCoreInterface {
     
     fun `abortUpload`(`uploadId`: kotlin.String)
@@ -1624,6 +2262,12 @@ public interface ProductCoreInterface {
     fun `agentLookup`(`request`: kotlin.String): kotlin.String
     
     fun `agentPrepare`(`conversation`: kotlin.String, `text`: kotlin.String, `search`: kotlin.Boolean, `count`: kotlin.UInt): kotlin.String
+    
+    /**
+     * Explicit development mode advertises only the local draft-proposal tool.
+     * It retains the original request owner, budget proof and visible-send gates.
+     */
+    fun `agentPrepareDevelopmentScoped`(`conversation`: kotlin.String, `text`: kotlin.String, `session`: kotlin.String, `project`: kotlin.String?): kotlin.String
     
     /**
      * Host UI facade. Project comes from the live selected session, not action JSON.
@@ -2009,6 +2653,28 @@ open class ProductCore: Disposable, AutoCloseable, ProductCoreInterface
         FfiConverterString.lower(`text`),
         FfiConverterBoolean.lower(`search`),
         FfiConverterUInt.lower(`count`),_status)
+}
+    }
+    )
+    }
+    
+
+    
+    /**
+     * Explicit development mode advertises only the local draft-proposal tool.
+     * It retains the original request owner, budget proof and visible-send gates.
+     */
+    @Throws(ProductException::class)override fun `agentPrepareDevelopmentScoped`(`conversation`: kotlin.String, `text`: kotlin.String, `session`: kotlin.String, `project`: kotlin.String?): kotlin.String {
+            return FfiConverterString.lift(
+    callWithHandle {
+    uniffiRustCallWithError(ProductException) { _status ->
+    UniffiLib.uniffi_muyon_android_product_fn_method_productcore_agent_prepare_development_scoped(
+        it,
+        
+        FfiConverterString.lower(`conversation`),
+        FfiConverterString.lower(`text`),
+        FfiConverterString.lower(`session`),
+        FfiConverterOptionalString.lower(`project`),_status)
 }
     }
     )

@@ -10,6 +10,8 @@ import com.mightyoung.muyon.product.chat.persistence.LocalSavePhase
 import com.mightyoung.muyon.product.chat.persistence.ProductLocalDraftPort
 import org.json.JSONArray
 import org.json.JSONObject
+import com.mightyoung.muyon.product.development.DevelopmentController
+import com.mightyoung.muyon.product.development.DevelopmentDraftPort
 import java.util.UUID
 import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicBoolean
@@ -19,6 +21,7 @@ interface ProductChatPort {
     fun configure(settings: JSONObject): JSONObject
     fun prepare(conversation: String, text: String, search: Boolean, count: Int): JSONObject
     fun prepareScoped(conversation: String, text: String, search: Boolean, count: Int, session: String, project: String?): JSONObject = prepare(conversation, text, search, count)
+    fun prepareDevelopmentScoped(conversation: String, text: String, session: String, project: String?): JSONObject = throw UnsupportedOperationException()
     fun confirm(request: String, configuration: String): JSONObject
     fun claim(request: String, configuration: String, generation: String): JSONObject
     fun allowed(request: String, configuration: String, generation: String): Boolean
@@ -74,7 +77,8 @@ internal fun interface ProductChatExchange {
 class ProductChatRuntime internal constructor(private val port: ProductChatPort,
     private val transport: ProductChatExchange = ProductChatExchange { payload, credential, purpose, allowed, write ->
         ProductHttpsTransport().exchange(payload, credential, purpose, allowed, write)
-    }, private val localDraftPort: ProductLocalDraftPort? = null) : AutoCloseable {
+    }, private val localDraftPort: ProductLocalDraftPort? = null,
+    developmentPort: DevelopmentDraftPort? = null) : AutoCloseable {
     private val control = Executors.newSingleThreadExecutor()
     private val network = Executors.newSingleThreadExecutor()
     private val closed = AtomicBoolean(false)
@@ -83,6 +87,7 @@ class ProductChatRuntime internal constructor(private val port: ProductChatPort,
     private data class Plan(val session: String, val data: JSONObject)
     private data class ToolOrigin(val session: String, val generation: String, val project: String?, val scopeGeneration: Long, val skillId: String? = null, val conversation: String? = null)
     private val scopes = ProductScopeRegistry() // control only
+    private val development = developmentPort?.let { DevelopmentController(it, scopes) }
     private val toolOrigins = mutableMapOf<String, ToolOrigin>() // control only
     private val businessPreviews = mutableMapOf<String, JSONObject>() // exact host plan per request
     private val plans = mutableMapOf<String, Plan>() // control thread only
@@ -162,6 +167,35 @@ class ProductChatRuntime internal constructor(private val port: ProductChatPort,
         plans[request] = Plan(session, JSONObject(result.toString()))
         rememberReadOrigin(session, conversation, result)
         result
+    }
+    fun prepareDevelopment(session: String, conversation: String, text: String, project: String?, scopeGeneration: Long, callback: (JSONObject) -> Unit) = submit(callback) {
+        require(session.isNotEmpty() && plans.size < 128 && toolOrigins.size < 256)
+        val scope = checkNotNull(scopes.get(session)); check(scopes.matches(session, project, scopeGeneration))
+        val generation = checkNotNull(credentials.current())
+        val result = port.prepareDevelopmentScoped(conversation, text, session, project)
+        val request = result.getString("request_id")
+        port.bindScope(request, session, generation, project)
+        toolOrigins[request] = ToolOrigin(session, generation, project, scope.generation, conversation = conversation)
+        plans[request] = Plan(session, JSONObject(result.toString()))
+        rememberReadOrigin(session, conversation, result)
+        result
+    }
+    fun development(session: String, method: String, input: JSONObject, callback: (JSONObject) -> Unit) {
+        // Keep numeric types: stringify would normalize Double(1.0) to Int(1),
+        // incorrectly turning a malformed captured lease into a valid token.
+        val frozen = JSONObject().also { copy -> input.keys().forEach { key -> copy.put(key, input.get(key)) } }
+        submit(callback) { checkNotNull(development).execute(session, method, frozen) }
+    }
+    fun developmentProposal(session: String, method: String, input: JSONObject, callback: (JSONObject) -> Unit) {
+        val frozen = JSONObject().also { copy -> input.keys().forEach { key -> copy.put(key, input.get(key)) } }
+        submit(callback) {
+            val request = frozen.getString("request_id")
+            val origin = toolOrigin(session, request)
+            check(origin.conversation == frozen.getString("conversation_id"))
+            val project = frozen.opt("project_id").let { if (it == null || it === JSONObject.NULL) null else it as String }
+            check(origin.project == project)
+            checkNotNull(development).execute(session, method, frozen, origin.generation)
+        }
     }
     /** Workflow scope is obtained from this same serialized, selected session. */
     fun workflow(session: String, conversation: String, action: JSONObject, callback: (JSONObject) -> Unit) = submit(callback) {
@@ -478,9 +512,14 @@ class ProductChatRuntime internal constructor(private val port: ProductChatPort,
         check(origin.session == session && origin.generation == credentials.current() && scopes.matches(session, origin.project, origin.scopeGeneration))
         return origin
     }
+    fun currentScope(session: String, project: String?, callback: (JSONObject) -> Unit) = submit(callback) {
+        val scope = checkNotNull(scopes.get(session)); check(scope.project == project)
+        JSONObject().put("status", "scope_current").put("project_id", project ?: JSONObject.NULL).put("scope_generation", scope.generation)
+    }
     fun updateScope(session: String, project: String?, callback: (JSONObject) -> Unit) = submit(callback) {
         require(session.isNotEmpty())
         if (scopes.get(session)?.project != project || scopes.get(session) == null) {
+            development?.release(session)
             sendGate.invalidateSessionScope(session)
             readOrigins.entries.removeAll { it.value.session == session }
             setupDrafts.entries.removeAll { it.key.session == session }
@@ -567,6 +606,7 @@ class ProductChatRuntime internal constructor(private val port: ProductChatPort,
         val requests = active.filterValues { it == session }.keys.toList()
         requests.forEach { cancelled.add(it) }
         if (!closed.get()) submit({}) {
+            development?.release(session)
             (requests + plans.filterValues { it.session == session }.keys).distinct().forEach { request ->
                 try { port.cancel(request) } catch (_: Exception) { /* Unknown remains held. */ }
             }
@@ -584,6 +624,7 @@ class ProductChatRuntime internal constructor(private val port: ProductChatPort,
     override fun close() {
         sendGate.close()
         if (!closed.compareAndSet(false, true)) return
+        development?.close()
         active.keys.forEach { cancelled.add(it) }
         credentials.close()
         control.shutdown(); network.shutdown()

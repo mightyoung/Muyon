@@ -86,7 +86,7 @@ fun ConversationShell(
                                 { onSelectConversation(item.key); menuOpen = false }, { onTogglePin(item.key) })
                         }
                         HorizontalDivider(Modifier.padding(vertical = 8.dp))
-                        listOf("agents" to "智能体与群组", "supplier" to "供应商", "research" to "科研工作台", "configuration" to "配置预览（未保存）", "documents" to "公共文档").forEach { (id, label) ->
+                        listOf("agents" to "智能体与群组", "supplier" to "供应商", "research" to "科研工作台", "development" to "开发草稿", "configuration" to "配置预览（未保存）", "documents" to "公共文档").forEach { (id, label) ->
                             TextButton(onClick = { onSelectDestination(id); menuOpen = false },
                                 modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp).testTag("nav-$id")
                                     .semantics { selected = destination == id }) { Text(label) }
