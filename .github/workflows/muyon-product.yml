@@ -4,6 +4,7 @@ on:
   push:
     branches: [develop, codex/muyon-android-refactor, ci/overall-combination-next-20261022]
     paths: &product_paths
+      - 'rust-toolchain.toml'
       - 'crates/**'
       - 'apps/muyon_android/**'
       - 'experiments/redesign/rust-agent-host-lab/core/**'
