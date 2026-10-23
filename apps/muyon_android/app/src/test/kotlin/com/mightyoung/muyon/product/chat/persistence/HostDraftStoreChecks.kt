@@ -101,7 +101,7 @@ fun main(args: Array<String>) {
         check(found().storedRevision == Long.MAX_VALUE)
         check((store().save(ownerA, draftId, Long.MAX_VALUE, 3, archive(Long.MAX_VALUE)) as DraftStoreWrite.Rejected).code == "draft_revision_exhausted")
         check(found().storedRevision == Long.MAX_VALUE)
-        Files.writeString(path, original)
+        path.toFile().writeText(original, Charsets.UTF_8)
         check(found().storedRevision == 3L)
         // Process death before atomic publication leaves the previous committed bytes intact.
         val crash = child("crash", "BEFORE_MOVE", 3)
