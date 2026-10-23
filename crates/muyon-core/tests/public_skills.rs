@@ -62,7 +62,10 @@ fn catalog_is_read_only() {
             .unwrap();
         assert_eq!(
             d.reference.content_digest.as_str(),
-            format!("{:x}", Sha256::digest(bytes))
+            Sha256::digest(bytes)
+                .iter()
+                .map(|b| format!("{b:02x}"))
+                .collect::<String>()
         );
         assert_eq!(d.required_capabilities, vec![capability]);
         let wire = serde_json::to_value(d).unwrap();
