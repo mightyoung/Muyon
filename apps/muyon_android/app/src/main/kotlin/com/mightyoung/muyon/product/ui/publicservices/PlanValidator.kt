@@ -56,6 +56,7 @@ private fun inspect(request: PresentationRequest, plan: UIPlan, context: Validat
     require(request.snapshotRef == plan.snapshotRef && context.snapshotRef == plan.snapshotRef) { "snapshot_mismatch" }
     require(plan.nodes.map { it.id }.distinct().size == plan.nodes.size) { "duplicate_node" }
     val nodes = plan.nodes.associateBy { it.id }; require(plan.root in nodes) { "missing_root" }
+    val parents = nodes.keys.associateWith { 0 }.toMutableMap()
     var bytes = 0L
     fun display(value: String) { require(validUnicode(value)); bytes += value.toByteArray(Charsets.UTF_8).size; require(bytes <= 65536) { "text_limit" } }
     fun ids(values: Collection<String>) { values.forEach(::parsePublicId) }
@@ -64,6 +65,11 @@ private fun inspect(request: PresentationRequest, plan: UIPlan, context: Validat
         parsePublicId(n.id)
         require(n.children.size <= 32 && n.children.distinct().size == n.children.size) { "invalid_children" }
         require(n.children.all { it in nodes }) { "dangling_child" }
+        for (child in n.children) {
+            val count = parents.getValue(child) + 1
+            require(count <= 1) { "shared_child" }
+            parents[child] = count
+        }
         require(n.bindingRefs.all { it in context.sources }) { "unresolved_binding" }
         for (e in n.eventBindings) {
             parsePublicId(e.actionRef); require(e.actionRef in context.allowedActions) { "unknown_action" }
@@ -112,6 +118,7 @@ private fun inspect(request: PresentationRequest, plan: UIPlan, context: Validat
         }
         require(n.componentType == expected) { "component_props_mismatch" }
     }
+    require(parents.getValue(plan.root) == 0 && parents.all { (id, count) -> id == plan.root || count == 1 }) { "not_a_rooted_tree" }
     val visiting = HashSet<String>(); val heights = HashMap<String,Int>()
     fun height(id: String, depth: Int): Int {
         require(depth <= 16) { "depth_limit" }

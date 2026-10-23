@@ -123,11 +123,13 @@ private fun nullableText(o: JSONObject, key: String): String? = if (!o.has(key) 
 private fun scope(o: JSONObject, restricted: Boolean = false) {
     fields(o, setOf("workspace_id"), setOf("project_id"))
     val ids = listOfNotNull(text(o, "workspace_id"), nullableText(o, "project_id"))
+    if (!o.has("project_id")) o.put("project_id", JSONObject.NULL)
     if (restricted) require(ids.all { it.isNotEmpty() && it.length <= 128 && it.all { c -> c in 'a'..'z' || c in 'A'..'Z' || c in '0'..'9' || c in "-_.:" } })
 }
 private fun scopeRef(o: JSONObject) {
     fields(o, setOf("scope", "scope_generation"), setOf("account_id"))
     scope(obj(o, "scope")); parseRevision(text(o, "scope_generation")); nullableText(o, "account_id")
+    if (!o.has("account_id")) o.put("account_id", JSONObject.NULL)
 }
 private fun documentRef(o: JSONObject) {
     fields(o, setOf("scope", "document_id", "revision", "format"))
@@ -150,7 +152,7 @@ fun decodePublicValue(kind: String, raw: String): String {
                 parsePublicDigest(text(o, "content_digest")); parsePublicDigest(text(o, "parameters_digest")); text(o, "producer_version")
             }
             "coverage" -> {
-                fields(o, setOf("state", "processed", "failed_units"), setOf("total"))
+                fields(o, setOf("state", "processed", "failed_units", "total"))
                 val state = text(o, "state"); require(state in setOf("complete", "partial", "failed", "unknown"))
                 val processed = parseRevision(text(o, "processed"))
                 val total = nullableText(o, "total")?.let(::parseRevision)
@@ -166,6 +168,7 @@ fun decodePublicValue(kind: String, raw: String): String {
                 require(text(o, "effect_knowledge") in setOf("not_started", "confirmed", "unknown"))
                 text(o, "phase"); text(o, "safe_message")
                 nullableText(o, "original_intent_id")?.let(::parsePublicId); nullableText(o, "details_ref")
+                for (key in listOf("original_intent_id", "details_ref")) if (!o.has(key)) o.put(key, JSONObject.NULL)
             }
             else -> throw IllegalArgumentException("unknown C1 fixture kind")
         }
