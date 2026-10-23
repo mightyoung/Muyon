@@ -2,11 +2,16 @@ name: Android compile only exact source
 
 on:
   push:
-    branches: ['task/android-u1-d2-host-compat-20261023']
+    branches:
+      - 'task/android-u1-d2-host-compat-20261023'
+      - 'codex/dm02-repository-evidence-20261023'
+      - 'codex/dm01-domain-drafts-20261023'
+      - develop
     paths:
       - '.github/workflows/android-compile-only.yml'
       - 'tools/ci/android_compile_only.py'
       - 'apps/muyon_android/**'
+      - 'crates/**'
 
 permissions:
   contents: read
@@ -36,7 +41,7 @@ jobs:
       - name: Record exact source and provision compiler tools only
         run: |
           test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
-          printf 'source_sha=%s\nhistorical_validation_base_sha=8a8b0319e12aa898d7b2c862b9213374488aefba\nintegration_base_sha=d2c56a626736fa85a95cbf8f52d5dba85fc04be3\n' "$GITHUB_SHA"
+          printf 'source_sha=%s\nhistorical_validation_base_sha=8a8b0319e12aa898d7b2c862b9213374488aefba\nreviewed_develop_base_sha=10936edb5f21e1af2c7ce45fb5b3d5496219be5d\n' "$GITHUB_SHA"
           java -version
           mkdir -p "$RUNNER_TEMP/android-compile-tools"
           curl --fail --location https://services.gradle.org/distributions/gradle-8.13-bin.zip -o "$RUNNER_TEMP/android-compile-tools/gradle.zip"
