@@ -21,3 +21,5 @@ Ruling: add a borrowed host admission view plus pure candidate-transition valida
 Ruling: local disconnect and disable preserve auth/token knowledge but increment the existing authorization_generation exactly once to invalidate old prepared bindings; overflow rejects without applying state — no second session epoch introduced — a later host integration must adopt or explicitly adapt this generation policy.
 
 Ruling: unsuccessful remote revocation is represented as auth Unknown, never Revoked; lifecycle validation errors carry unknown/after_lookup and optional original IntentId, rather than proving a remote action was not dispatched — actual server revoke stays NOT_RUN.
+
+Lifecycle complete at local pure/fake scope: RED e1bbeadfa2800bd64bf58aad199279c8e110c8f4 (6new failures), GREEN1afb93e47114b052411b7ccac1fbf175380cdedb (19/19 focused); clean-source workspace638/638, strict Clippy/fmt exit0. Independent review /root/review_connector_lifecycle: noP0-P2, separate-target19/19. No new deferred code finding. Real lifecycle/host/Operation remains gated.
