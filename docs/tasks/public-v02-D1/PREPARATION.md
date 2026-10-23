@@ -25,6 +25,14 @@
 
 完整处理身份投影候选（待 C1 实际签名核对）：ResultId 沿用 receipt_id，producerVersion 沿用 processor，inputDocumentRef 取 receipt.source.document，contentDigest/textDigest 对原样 Utf8Text 取 source.blob.digest，直接上游为空，normalizationVersion 固定 `utf8-original-v1`。parametersDigest 的 Utf8Text 规范编码与 Digest constructor 等 C1 fixture 冻结，当前不选择另一种编码。ResultRef 不携带原文缓存。
 
+## F6.4 处理身份澄清（父任务审查结论，源码已核对）
+
+`evidence/local.rs::ProcessingReceipt.receipt_id` 的注释明确为 deterministic processing identity，非业务 intent/commit receipt。生成值为 `processing-<64hex>`，ASCII共75字节；摘要输入包含 processor、source_id与InputKind，source_id又对完整SourceVersion序列化取摘要，包含文档scope/身份/版本和blob信息。不得因字段名receipt_id而把它当作业务回执。
+
+D1可将该legacy processing identity一对一受检适配为typed ResultId，并显式保留ResultRef.inputDocumentRef与source/scope关联；读取/打开仍重验原owner权限。不得转成IntentId、业务Receipt或授予执行/取消权限，不另建结果账本。外部审查“混用业务回执”的措辞不能作为否定该ResultId适配的依据；真正要阻止的是跨身份类型替换、遗漏来源关联或绕过授权。
+
+C1交接时需核对ResultId受检构造能否原样容纳75字节标识及共享fixture的编码；不截断、重编号或自行放宽公共类型。待写测试应覆盖同一处理的稳定映射、不同scope/文档/版本的来源区分，以及该标识不被解释成业务意图/回执；这些均未实施，不记录PASS。C1固定SHA仍为编码前置。
+
 ## D1 测试与精确合成输入映射（待写测试，非测试结果）
 
 | 计划目标 | 已有可参考用例 | 新公共边界需证明 |

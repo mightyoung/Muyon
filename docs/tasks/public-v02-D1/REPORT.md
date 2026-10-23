@@ -63,3 +63,11 @@ D1：未开始实现；D2：未开始实现；D3：仅前置阻断登记草案�
 Final: minor (deferred): PREPARATION 的“路径相对仓库根”描述下，部分 `documents/`、`evidence/`、`product/ml/` 使用前缀缩写，影响直接定位便利性；完整首项路径及源码文件名保留。无产品正确性或授权放行结论。
 
 独审不是 B 的集成验收；本片没有解除任何工程 gate。
+
+## F6.4 身份澄清补充
+
+父任务转交外部审查核查结论后，已对照原源码注释、processing_key和source_id构造，补充PREPARATION中的处理身份说明：`processing-<64hex>`为75字节的确定性处理身份，可一对一适配typed ResultId并关联完整source/scope；不是业务IntentId/Receipt，不另建结果账本。C1实际ResultId编码/长度校验与fixture仍须等固定SHA核对，不因本结论预先实现。
+
+本片仅更新准备文档，无产品源码/测试变化；不增加产品PASS或行为RED/GREEN。
+
+F6.4准备补充已由非作者 `documents_preparation_review` 对照源码独审，Important/Minor均无；两份Markdown围栏/空白及 `git diff --check` 实际通过。未运行公共API产品测试。
