@@ -1297,8 +1297,66 @@ mod tests {
         );
         drop(state);
         drop(core);
+        // Reopen without invoking a workflow/scoped entry first. The legacy
+        // transport entry must still consult the durable child request chain.
+        let core = ProductCore::open(
+            path.clone(),
+            "workspace".into(),
+            "next-epoch".into(),
+            false,
+        )
+        .unwrap();
+        // Synthetic host reinstall only; no credential or transport is used.
+        core.agent_configure(json!({"credential_generation":"generation","cap_micro_cny":"1000000","max_calls":"10","chat":true,"search":false,"price_revision":muyon_core::agent::owner::PRICE_REVISION}).to_string()).unwrap();
+        let plan: Value = serde_json::from_str(
+            &core
+                .agent_prepare("parent-chat".into(), "fixture lookup".into(), false, 1)
+                .unwrap(),
+        )
+        .unwrap();
+        assert_eq!(plan["blocked_reason"], "hosted_cost_proof_unavailable");
+        // Existing host cost-proof fixture; no transport/provider is called.
+        let plan = core.state.lock().unwrap().agent.as_ref().unwrap()
+            .prepare_chat("parent-chat", "fixture proof", Some(&FixtureProof)).unwrap();
+        let plan = serde_json::to_value(plan).unwrap();
+        let held_before = core.state.lock().unwrap().agent.as_ref().unwrap().budget().unwrap().held_micro_cny;
+        let confirmation = core.agent_confirm(
+            plan["request_id"].as_str().unwrap().into(),
+            plan["configuration_id"].as_str().unwrap().into(),
+        );
+        assert!(matches!(&confirmation, Err(e) if e.to_string().contains("conversation_original_outcome_required")), "{confirmation:?}");
+        assert!(core
+            .agent_claim(
+                plan["request_id"].as_str().unwrap().into(),
+                plan["configuration_id"].as_str().unwrap().into(),
+                "generation".into(),
+            )
+            .unwrap_err()
+            .to_string()
+            .contains("conversation_original_outcome_required"));
+        let state = core.state.lock().unwrap();
+        let owner = state.agent.as_ref().unwrap();
+        assert_eq!(owner.lookup(&original.request_id).unwrap().status, "unknown");
+        assert_eq!(owner.lookup(plan["request_id"].as_str().unwrap()).unwrap().status, "prepared");
+        assert_eq!(owner.budget().unwrap().held_micro_cny, held_before);
+        assert_eq!(held_before, original.reserved_micro_cny);
+        drop(state);
+        drop(core);
         std::fs::remove_dir_all(path).unwrap();
     }
+    #[test]
+    fn open_refuses_an_invalid_existing_workflow_ledger_without_replacing_it() {
+        let path = root();
+        let core = ProductCore::open(path.clone(), "workspace".into(), "epoch".into(), true).unwrap();
+        drop(core);
+        let ledger = Path::new(&path).join("agent-workflows-v1.sqlite");
+        let invalid = b"synthetic invalid workflow ledger";
+        std::fs::write(&ledger, invalid).unwrap();
+        assert!(ProductCore::open(path.clone(), "workspace".into(), "next-epoch".into(), false).is_err());
+        assert_eq!(std::fs::read(&ledger).unwrap(), invalid);
+        std::fs::remove_dir_all(path).unwrap();
+    }
+
     #[test]
     fn child_plan_stays_blocked_and_cannot_bypass_an_unknown_root_request() {
         use muyon_core::agent::owner::{HostedCostBound, HostedCostVerifier};
