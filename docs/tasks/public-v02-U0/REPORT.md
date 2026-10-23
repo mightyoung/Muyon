@@ -87,3 +87,5 @@ print('U0 visual approval: absent; acceptance NOT_RUN.')
 已补独立资源映射和显示/热区表；此前仅有关键结果时保持完整盘点待交接，没有据此声称全部完成，现已收到最终路径依据。按固定 develop 源本地确认：58个 product Kotlin 文件中 ChatInputDock 只有定义，当前壳是文字+、↑、◆/◇、···；AgentLibrary引用陶瓷环muyon_avatar（本执行者已view_image），Manifest无android:icon。三份原品牌PNG与固定 d61be4b5 候选逐字节相同，SHA256已列组件文档。旧图形精确计数为102种唯一几何/110个映射键，catalog fixture有102项；AppIcon在旧Flutter业务页有调用，不能当已迁原生。注释指向的生产生成catalog路径缺失、样本source为imagegen；来源/许可及最终路径现已补核（见下），不恢复Dart运行时、不新增依赖、不在此修改资源或产品页。
 
 最终图标依据已收并只读复核：`app/src/main/assets/notices/UI_RESOURCES.txt` 明确五个wb_*为Muyon原创基本几何、不能恢复早期提取路径；inquiry_module/LICENSE为MIT，NOTICE保留上游来源；Material名仅兼容key，不是Material原图。catalog为102图形，生成映射含别名共110键。无pin是局部素材缺口，ShellConversation缺身份图是接线缺口；原生launcher未配置，mascot_views只作参考；旧蓝折页与生成笔刷不是正式品牌。具体外观及资产映射继续draft，未恢复Flutter、改原生页面或新增依赖。
+
+最终非作者增补复核：`/root/review_publicui_u0` 审查固定资源内容 `e9c8d381c6dd8ceb4293521f0579012f1905488f` 及报告措辞修正 `3609a3b6637837019b3c268de899a955cca8b866`，独立确认资源哈希/候选逐字节一致、110键/102几何/catalog102、引用/身份图/launcher缺口和NOTICE来源均准确；重跑文档检查和两个固定范围diff-check均exit 0，apps/packages无源码变化，无未关闭Important/Minor，可作待用户评审U0候选。本封套只记该结论；具体外观仍draft，产品/设备/TalkBack NOT_RUN，C1依赖继续阻断U1。
