@@ -1,6 +1,6 @@
 # U1 固定 Contracts 候选消费与测试设计
 
-状态：准备文档，产品 codeStatus=absent，behavior RED/GREEN=NOT_RUN。已收到 C1 固定依赖；当前阻断由“缺固定 C1”更新为“本环境缺 Kotlin 编译器”。本稿不定义另一套共享 types，不复制 JSON fixture，不改 Contracts 登记文件，不启用 renderer 或业务动作。
+历史准备文档，后续实际实施见REPORT。用户已批准最小工具安装并完成；当前codec/模型/校验纯JVM已有RED/GREEN，不能沿用旧codeStatus=absent或工具阻断描述作为最新状态。完整项目/Android及可信ref解析仍受阻。本稿不定义另一套共享 types，不复制 JSON fixture，不改 Contracts 登记文件，不启用 renderer 或业务动作。
 
 ## 固定输入
 
@@ -43,7 +43,7 @@
 
 ## 原始 wire 与 codec 检查点
 
-以下依据固定 Rust 源及现有 contract.rs，不凭接口名字猜规则。实际实现与行为测试仍 NOT_RUN。
+以下依据固定 Rust 源及现有 contract.rs，不凭接口名字猜规则。这些约束后续已部分实施验证；具体固定source、计数和未验范围以REPORT为准。
 
 | 项目 | 现有真源 / 测试设计 |
 | --- | --- |
@@ -60,7 +60,7 @@ org.json 具体缓存版本、编译classpath与重复key行为尚未在本环�
 
 ## UIPlan 专属校验的后续 RED 顺序
 
-这些是已批准 U1 测试场景；不属于目前 C1 fixture 的字段，不将测试名字或伪造JSON当共享合同。测试未编写、未运行；编译缺失不能用Python重写一份Kotlin算法来宣称GREEN。
+这些是已批准 U1 测试场景；不属于目前 C1 fixture 的字段，不将测试名字或伪造JSON当共享合同。下列是准备时的执行顺序；后续实际已写测试并取得纯JVM结果，详见REPORT；未运行部分不补填PASS。
 
 1. 工具到位后，先建立计划指定 T/PlanValidationChecks.kt 与无下载run-offline.sh；T为 app/src/test/kotlin/com/mightyoung/muyon/product/ui/publicservices。先校验编译器、JDK及实际org.json缓存；只编译相应P源码和T检查，缺前置即退出BLOCKED。
 2. 如新API不存在，结构RED单列；仅为目标校验加最小明确unavailable桩，再观察具体行为断言失败，固定RED source SHA和原始日志，禁止仅拿“符号缺失”作TDD证据。
