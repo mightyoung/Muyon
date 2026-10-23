@@ -918,6 +918,9 @@ impl RunLedger {
     /// Host-only check across all task roots for both normal and child plans.
     /// The owner supplies chain identities; action JSON cannot nominate a scope.
     pub fn authorize_request(&self, owner: &AgentOwner, request: &str) -> Result<()> {
+        if owner.workspace() != self.workspace {
+            return Err("workflow_scope_mismatch");
+        }
         let conversation = owner.request_conversation(request)?;
         let rows = sql(self
             .db
