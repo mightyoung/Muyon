@@ -37,7 +37,7 @@
 | coverage-complete / coverage | valid=true | processed/total均“2”、failed_units空；只读显示该事实 |
 | error-preserves-unknown / error | valid=true | unknown_outcome/after_lookup/unknown/original:1保持，phase原字串不作派发证明 |
 
-六个真实 legacy id：ffi-intent-format、ffi-plan-format、ascii-128、ascii-129、utf8-129、public-value-is-not-native-authority。未来 runner 必须按向量字段分别比较 valid_public/valid_native；ffi-plan-format 没有 valid_public，不补默认true。公共不透明值与原命令身份校验不同，不能把公开“甲”可解析误作原命令可以执行。Kotlin校验 byte_length 要用UTF-8，不用String.length。
+六个真实 legacy id：ffi-intent-format、ffi-plan-format、ascii-128、ascii-129、utf8-129、public-value-is-not-native-authority。未来 Kotlin runner 仅执行公共值解析并比较明确存在的 valid_public；valid_native 是原 Rust 命令校验的上游预期元数据，不在 Kotlin 重建第二个原命令校验器，也不把它当授权。需核 native 行为时调用原 owner 测试/可信桥另验，不能用纯 JVM 结果替代。ffi-plan-format 没有 valid_public，仅核元数据/字节长度，不补默认true。公共不透明值与原命令身份校验不同，不能把公开“甲”可解析误作原命令可以执行。Kotlin校验 byte_length 要用UTF-8，不用String.length。
 
 拒绝未知kind、未知vector field或缺必要valid/expected元数据，不能跳过样本计作通过；运行时报告实际消费ID集合与计数。该规则是测试完整性，不另建产品授权或类型注册。
 
