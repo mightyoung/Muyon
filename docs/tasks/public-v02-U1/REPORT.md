@@ -19,7 +19,7 @@
 | Python hashlib + json读取固定fixture原字节 | exit0；三个摘要匹配上游REPORT，major=1/1；types与C1原SHA逐字节一致，8cases/6vectors，正例原JSON与expected结构一致 |
 | `bash apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/ui/cards/run-offline.sh` | exit127；line8 kotlinc: command not found；未编译、未执行断言，不是行为RED |
 | `shutil.which`及已知缓存路径核对 | kotlinc/cargo/rustc/gradle/adb均不在PATH；java=/usr/bin/java，Python可用；旧Kotlin路径和ui-shell-tools不存在，shared/downloads为空 |
-| Markdown链接/围栏、固定fixture名称映射与diff-check | 待最终文档核验；只是静态检查 |
+| `python3 /tmp/publicui-u1-evidence/check-preparation.py`；`git diff --check fd26dcdabcdac996bc2881e8141cac2b519966fc HEAD` | exit0；2文档链接/围栏、3摘要、8case/6向量ID映射与空白检查；只是静态检查 |
 | U1 runner / Kotlin codec / PlanValidator / cards断言 / Rust回归 | NOT_RUN；未写无法编译验证的产品代码、未建立返回假的测试桩 |
 
 工具链阻断的精确动作：运行原cards离线runner；目标为Kotlin编译；原因kotlinc缺失；outcome=exit127，尚未启动编译。不是审批拒绝。用户未授本线安装权限，未下载/安装、配置凭据或扩大权限，不重复索批。
@@ -39,3 +39,5 @@ Python只核验固定输入的字节/JSON元数据，不实现另一份业务cod
 当前工具缺失阻断U1编译、行为RED/GREEN及回归；后续由父任务安排已有获授权可用工具，不能自行套用Contracts的Rust安装授权。C1缺少呈现/来源区间共享fixture的部分已列清单，向owner提出而不猜语义。Contracts候选仍待B独审/CI/合入，U1生产入口关闭；具体U0设计、C2/C3消费接线与Shell交接仍为U2/U3前置。
 
 只交两份任务文档；没有ChatScreen、旧卡片、Foundation、Shell、services/mod.rs、core lib.rs或FFI改动。无真实模型/付费实验/Connector授权/第三方程序执行或新依赖。当前没有拒绝或结果不明的写入；独立审查pending。仅正常push独立候选，B保持唯一合入者，不创建合入/部署动作。
+
+文档核验原始输出 `/tmp/publicui-u1-evidence/docs-check.log` SHA256=`b1693a13d42608fe87c5a66e6a7dfc35ecae86e8d4c8745ceb87cceff9592c5c`；外部核验脚本 check-preparation.py SHA256=`2b13aea97d2757638cf06cb55a828e56946b16f60497b2fa453ed9e713ac8500`。首片固定源 `32d1de81757b7ccbdb8ae12a467b345e4f5ce5ad`；此后仅补证据封套，不冒充U1实现。
