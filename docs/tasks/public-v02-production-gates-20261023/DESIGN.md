@@ -49,6 +49,7 @@ cancel_original(intent_id)
 4. cancel_requested 后晚到原成功回执：保留真实成功，不伪造成 cancelled 或 rollback。步骤终态不推导整个 Skill 终态。
 5. 同一连接的不同插件仍按各自 binding 过滤；同名 tool/resource/prompt 按种类和 schema digest 分开。
 6. 文档形状检查和引用字符串不证明可信解析/权限。Reader/FD 继续由原受控 reader owner 授权；FD lease 未设计前不可开放。
+7. 首次 prepare 回包丢失：ProductCore 内部生成 plan/intent，并在返回封套前记录 prepare_review_trusted；适配层可能尚无原身份映射。原 owner 必须先设计按可信请求上下文发现原身份的机制和进程重启行为；机制未冻结时明确保持不可恢复、禁止自动重新 prepare 或虚构 IntentId。fake codec 必须覆盖“原 owner 已记录但封套未收到”，不能借 Bot 恢复或按函数名断言未提交。
 
 验收分开：纯 fake 状态/恢复测试 → ProductCore 现有 Operation 适配集成测试 → 进程重启/授权变化测试 → 真实 consent/transport/取消排空。每层保留精确源码 SHA；前一层通过不代替后一层。
 
@@ -60,5 +61,8 @@ cancel_original(intent_id)
 | 可信来源解析 | 来源类型、实例/仓库/对象/SHA身份、权限重新检查、Reader/FD 租约、过期与撤权 | 形状合法仍不可解析/授权 |
 | MCP SDK | 官方包/协议固定版本、维护/许可证、认证/刷新、取消/资源释放、平台支持比较；另交 SDK 决策候选 | 无新 SDK、OAuth、WebHook 或真实 MCP 服务 |
 | SkillRun / 具名 Connector Operation | 原 contract、参数规范摘要、授权/预算、确认、原 owner 恢复 | requestRun / requestCall* 保持不可用 |
+| 首次 prepare 回包丢失 | 原 owner 身份发现、可信请求关联、重启恢复，不能复制另一账本 | 无封套时保留未知且禁止自动重新 prepare |
 
 下一片只做已存在 Operation 的 HostCommandPort 适配设计评审与 fake codec 测试；任何新 Operation 或生产接线都等上述具体接口审查。本文仅静态对照源码；未执行真实模型、网络服务、持久化、Android、生产权限或部署验证。
+
+独立审查：DM02 执行者（非本文作者）对 `c431a91a3a50b9dfd35ea053fdf80a17db6f43b3` 对照实际 ProductCore、HostCommandPort、Operation 及综合候选恢复接口只读审查，未发现授权扩大或绕过 gate；其指出的首次 prepare 回包丢失场景已作为本次新增实施门槛写入第7条与未决表。文档检查仅 `git diff --check`，不记为产品测试。
