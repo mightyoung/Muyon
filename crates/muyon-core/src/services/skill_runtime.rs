@@ -1,7 +1,10 @@
 //! Pure preflight and original lookup. No requestRun, dispatch or second ledger.
-use super::skills::{SkillBinding, SkillDescriptor};
+use super::{
+    pipeline::JobSnapshot,
+    skills::{SkillBinding, SkillDescriptor, SkillRef},
+};
 use crate::{
-    contract::Revision,
+    contract::{ExecutionResult, Revision},
     documents::DocumentRef,
     services::{
         commands::{HostCommandPort, OriginalLookup},
@@ -148,16 +151,50 @@ pub fn lookup_original_run(
     let result = host.lookup_original(intent).map_err(|_| unknown())?;
     match &result {
         OriginalLookup::NotSubmitted { intent_id } if intent_id != intent => return Err(unknown()),
-        OriginalLookup::Execution(r) => {
-            r.validate().map_err(|_| unknown())?;
-            if r.receipt
-                .as_ref()
-                .is_some_and(|r| r.intent_id != intent.as_str())
-            {
-                return Err(unknown());
-            }
-        }
+        OriginalLookup::Execution(r) => validate_original_execution(intent, r)?,
         _ => {}
     }
     Ok(result)
+}
+
+/// Pure adapter to C2 cancel_original; this is not a production host or stop proof.
+/// The trusted caller must authorize the original current scope before use.
+pub fn cancel_original_run(
+    host: &dyn HostCommandPort,
+    intent: &IntentId,
+) -> Result<ExecutionResult, ServiceError> {
+    let result = host
+        .cancel_original(intent)
+        .map_err(|_| crate::services::commands::unphased_host_error(intent))?;
+    validate_original_execution(intent, &result)?;
+    Ok(result)
+}
+
+fn validate_original_execution(
+    intent: &IntentId,
+    result: &ExecutionResult,
+) -> Result<(), ServiceError> {
+    let unknown = || crate::services::commands::unphased_host_error(intent);
+    result.validate().map_err(|_| unknown())?;
+    if result
+        .receipt
+        .as_ref()
+        .is_some_and(|receipt| receipt.intent_id != intent.as_str())
+    {
+        return Err(unknown());
+    }
+    Ok(())
+}
+
+/// Existing document-step facts wrapped for Skill presentation, never run authority.
+/// The host must authorize scope and obtain the original JobSnapshot before use.
+#[derive(Clone, Debug, PartialEq, Eq, Serialize)]
+pub struct SkillRunSnapshot {
+    pub skill: SkillRef,
+    pub binding_revision: Revision,
+    pub job: JobSnapshot,
+}
+/// Copies supplied original facts only; does not create a task or refresh authorization.
+pub fn get_run_snapshot(original: &SkillRunSnapshot) -> SkillRunSnapshot {
+    original.clone()
 }

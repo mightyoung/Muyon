@@ -1,5 +1,7 @@
 # X2 local Connector contract candidate — 2026-10-23
 
+Follow-up: [LIFECYCLE.md](LIFECYCLE.md) records later pure admission/lifecycle validation and new test evidence. The original review limitation below remains accurate for real protocols; synthetic snapshot-transition coverage is now supplemented.
+
 Plan/spec fixed source: `64900d4a6a46a9ef2919bcf922fb059413b1ce82`.
 Develop re-fetched `fd26dcdabcdac996bc2881e8141cac2b519966fc`.
 Parent-released Contracts candidate `4d49a580cb518d9b0b80c9df3df1ff564194a639` ordinarily composed; not merged develop. C1 `6e7f774b1559a0a9693eeb195ba13c9ded561993`, C2 `b626c18a5dff184519e59bb866e5ed37362ac84e`, C3 `bf264bc62f5d2d65fa7d50b27a26ffee3c0ba6d9`. Read source/fixtures/reports before coding; C1 types reused without copies, no Money/Quantity/phase enum changes.

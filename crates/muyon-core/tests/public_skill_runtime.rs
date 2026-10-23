@@ -1,7 +1,7 @@
 use contract::{CommandEnvelope, ExecutionResult, Operation, Revision, Scope};
 use muyon_core::{
     contract,
-    services::{self, skill_runtime, skills},
+    services::{self, pipeline, skill_runtime, skills},
 };
 use serde_json::json;
 use services::{
@@ -370,4 +370,272 @@ fn query_matching_not_submitted_identity_is_preserved() {
     assert_eq!(lookup_original_run(&owner, &original).unwrap(), reply);
     assert_eq!(owner.lookups.get(), 1);
     assert_eq!(owner.last.borrow().as_ref(), Some(&original));
+}
+
+struct RecoveryOwner {
+    lookup_reply: Result<OriginalLookup, ServiceError>,
+    cancel_reply: Result<ExecutionResult, ServiceError>,
+    calls: std::cell::RefCell<Vec<(&'static str, IntentId)>>,
+}
+impl HostCommandPort for RecoveryOwner {
+    fn prepare(
+        &self,
+        _: Operation,
+        _: Option<String>,
+        _: Revision,
+    ) -> Result<CommandEnvelope, ServiceError> {
+        panic!("recovery must not prepare")
+    }
+    fn confirm(&self, _: &str) -> Result<OriginalLookup, ServiceError> {
+        panic!("recovery must not confirm or dispatch")
+    }
+    fn lookup_original(&self, intent: &IntentId) -> Result<OriginalLookup, ServiceError> {
+        self.calls.borrow_mut().push(("lookup", intent.clone()));
+        self.lookup_reply.clone()
+    }
+    fn cancel_original(&self, intent: &IntentId) -> Result<ExecutionResult, ServiceError> {
+        self.calls.borrow_mut().push(("cancel", intent.clone()));
+        self.cancel_reply.clone()
+    }
+}
+fn recovery_command() -> CommandEnvelope {
+    let mut command: CommandEnvelope = serde_json::from_value(json!({
+        "protocol_version":1,"business_version":1,"intent_id":"intent:original",
+        "scope":{"workspace_id":"w","project_id":null},"expected_revision":"0",
+        "authority":{"grant_id":"grant:synthetic","generation":"1","owner_epoch":"epoch:synthetic"},
+        "plan_id":"plan:original","plan_digest":"0".repeat(64),
+        "command":{"operation":"project_create","project_id":"project:synthetic","name":"Synthetic"}
+    }))
+    .unwrap();
+    command.plan_digest = command.expected_plan_digest().unwrap();
+    command
+}
+fn recovery_result(status: contract::ExecutionStatus) -> ExecutionResult {
+    use contract::{ExecutionStatus as Status, RecoveryAction};
+    let command = recovery_command();
+    let result = ExecutionResult {
+        receipt: if status == Status::Committed {
+            Some(contract::Receipt {
+                protocol_version: 1,
+                intent_id: command.intent_id.clone(),
+                binding_digest: command.binding_digest().unwrap(),
+                scope: command.scope.clone(),
+                authority: command.authority.clone(),
+                admission_id: None,
+                target_id: "project:synthetic".into(),
+                revision: Revision::new(1),
+                status: Status::Committed,
+                result: json!({}),
+            })
+        } else {
+            None
+        },
+        error: match status {
+            Status::Rejected => Some(contract::ContractError::RevisionConflict),
+            Status::Cancelled => Some(contract::ContractError::Cancelled),
+            _ => None,
+        },
+        recovery_action: match status {
+            Status::Pending | Status::Unknown => RecoveryAction::QueryOriginal,
+            _ => RecoveryAction::None,
+        },
+        status,
+    };
+    result.validate().unwrap();
+    if let Some(receipt) = &result.receipt {
+        receipt.validate_for(&command).unwrap();
+    }
+    result
+}
+fn recovery_owner(cancel_reply: Result<ExecutionResult, ServiceError>) -> RecoveryOwner {
+    RecoveryOwner {
+        lookup_reply: Ok(OriginalLookup::Execution(Box::new(recovery_result(
+            contract::ExecutionStatus::Unknown,
+        )))),
+        cancel_reply,
+        calls: std::cell::RefCell::new(vec![]),
+    }
+}
+fn assert_original_unknown(error: ServiceError, original: &IntentId) {
+    assert_eq!(error.code, ErrorCode::UnknownOutcome);
+    assert_eq!(error.effect_knowledge, EffectKnowledge::Unknown);
+    assert_eq!(error.retryability, Retryability::AfterLookup);
+    assert_eq!(error.original_intent_id.as_ref(), Some(original));
+}
+#[test]
+fn cancellation_and_recovery_query_keep_original_unknown_without_replay() {
+    use services::commands::{project_execution, ReceiptPhase};
+    let original = IntentId::parse("intent:original").unwrap();
+    let unknown = recovery_result(contract::ExecutionStatus::Unknown);
+    let owner = recovery_owner(Ok(unknown.clone()));
+    assert_eq!(
+        lookup_original_run(&owner, &original).unwrap(),
+        owner.lookup_reply.clone().unwrap()
+    );
+    let cancelled = cancel_original_run(&owner, &original).unwrap();
+    assert_eq!(cancelled, unknown);
+    let view = project_execution(&recovery_command(), &cancelled, true).unwrap();
+    assert_eq!(view.phase, ReceiptPhase::CancelRequested);
+    assert_eq!(view.execution_status, contract::ExecutionStatus::Unknown);
+    assert!(view.cancellation_requested);
+    // A later explicit recovery lookup is the same original query, not a prepare/retry.
+    assert_eq!(
+        lookup_original_run(&owner, &original).unwrap(),
+        owner.lookup_reply.clone().unwrap()
+    );
+    assert_eq!(
+        *owner.calls.borrow(),
+        vec![
+            ("lookup", original.clone()),
+            ("cancel", original.clone()),
+            ("lookup", original)
+        ]
+    );
+}
+#[test]
+fn cancellation_preserves_original_pending_and_terminal_facts() {
+    use contract::ExecutionStatus as Status;
+    use services::commands::{project_execution, ReceiptPhase};
+    let original = IntentId::parse("intent:original").unwrap();
+    for (status, phase) in [
+        (Status::Pending, ReceiptPhase::CancelRequested),
+        (Status::Unknown, ReceiptPhase::CancelRequested),
+        (Status::Committed, ReceiptPhase::Succeeded),
+        (Status::Cancelled, ReceiptPhase::Cancelled),
+        (Status::Rejected, ReceiptPhase::Failed),
+    ] {
+        let expected = recovery_result(status.clone());
+        let owner = recovery_owner(Ok(expected.clone()));
+        let actual = cancel_original_run(&owner, &original).unwrap();
+        assert_eq!(actual, expected);
+        let view = project_execution(&recovery_command(), &actual, true).unwrap();
+        assert_eq!(view.phase, phase);
+        assert_eq!(view.execution_status, status);
+        assert_eq!(view.intent_id, original);
+        assert_eq!(*owner.calls.borrow(), vec![("cancel", original.clone())]);
+    }
+}
+#[test]
+fn cancellation_host_error_is_unknown_for_the_requested_original() {
+    let original = IntentId::parse("intent:original").unwrap();
+    let mut error =
+        services::commands::unphased_host_error(&IntentId::parse("intent:foreign").unwrap());
+    error.code = ErrorCode::InvalidArgument;
+    error.effect_knowledge = EffectKnowledge::NotStarted;
+    error.retryability = Retryability::Never;
+    let owner = recovery_owner(Err(error));
+    assert_original_unknown(
+        cancel_original_run(&owner, &original).unwrap_err(),
+        &original,
+    );
+    assert_eq!(*owner.calls.borrow(), vec![("cancel", original)]);
+}
+#[test]
+fn cancellation_refuses_malformed_and_foreign_owner_results() {
+    let original = IntentId::parse("intent:original").unwrap();
+    let mut malformed = recovery_result(contract::ExecutionStatus::Committed);
+    malformed.receipt = None;
+    assert!(malformed.validate().is_err());
+    let mut foreign = recovery_result(contract::ExecutionStatus::Committed);
+    foreign.receipt.as_mut().unwrap().intent_id = "intent:foreign".into();
+    assert!(foreign.validate().is_ok());
+    for reply in [malformed, foreign] {
+        let owner = recovery_owner(Ok(reply));
+        assert_original_unknown(
+            cancel_original_run(&owner, &original).unwrap_err(),
+            &original,
+        );
+        assert_eq!(*owner.calls.borrow(), vec![("cancel", original.clone())]);
+    }
+}
+#[test]
+fn lookup_error_after_unknown_cancellation_never_invents_stopped_state() {
+    let original = IntentId::parse("intent:original").unwrap();
+    let mut owner = recovery_owner(Ok(recovery_result(contract::ExecutionStatus::Unknown)));
+    owner.lookup_reply = Err(services::commands::unphased_host_error(&original));
+    assert_eq!(
+        cancel_original_run(&owner, &original).unwrap().status,
+        contract::ExecutionStatus::Unknown
+    );
+    assert_original_unknown(
+        lookup_original_run(&owner, &original).unwrap_err(),
+        &original,
+    );
+    assert_eq!(
+        *owner.calls.borrow(),
+        vec![("cancel", original.clone()), ("lookup", original)]
+    );
+}
+
+fn document_step_snapshot() -> SkillRunSnapshot {
+    let (_, binding) = context();
+    SkillRunSnapshot {
+        // A synthetic reference for presentation of an already existing document step;
+        // it is not installed in the compiled catalog and cannot start any Skill.
+        skill: SkillRef {
+            skill_id: "synthetic-document-step".into(),
+            version: "fixture-v1".into(),
+            content_digest: Digest::parse(&"a".repeat(64)).unwrap(),
+        },
+        binding_revision: Revision::parse("9007199254740993").unwrap(),
+        job: pipeline::JobSnapshot {
+            job_id: JobId::parse("job:document-step").unwrap(),
+            original_intent_id: IntentId::parse("intent:original").unwrap(),
+            scope: binding.scope,
+            stage: pipeline::PipelineStage::Parse,
+            attempt: 3,
+            phase: pipeline::JobPhase::UnknownOutcome,
+            coverage: Coverage {
+                state: CoverageState::Unknown,
+                processed: 1,
+                total: None,
+                failed_units: vec![],
+            },
+        },
+    }
+}
+#[test]
+fn run_snapshot_copies_exact_existing_job_without_changing_phase_attempt_or_binding() {
+    let original = document_step_snapshot();
+    let before = original.clone();
+    let mut projected = get_run_snapshot(&original);
+    assert_eq!(projected, original);
+    assert_eq!(projected.binding_revision.as_str(), "9007199254740993");
+    assert_eq!(projected.job.phase, pipeline::JobPhase::UnknownOutcome);
+    projected.job.phase = pipeline::JobPhase::Cancelled;
+    projected.job.attempt = 9;
+    projected.job.scope.scope_generation = Revision::new(99);
+    projected.skill.version = "other".into();
+    assert_eq!(original, before);
+    assert_eq!(get_run_snapshot(&original), before);
+}
+#[test]
+fn document_step_snapshot_recovery_keeps_original_intent_and_never_starts_work() {
+    let original = document_step_snapshot();
+    let owner = recovery_owner(Ok(recovery_result(contract::ExecutionStatus::Unknown)));
+    for _ in 0..3 {
+        let view = get_run_snapshot(&original);
+        assert_eq!(view.job.phase, pipeline::JobPhase::UnknownOutcome);
+        assert_eq!(view.job.attempt, 3);
+        assert_eq!(view.job.original_intent_id, original.job.original_intent_id);
+        assert!(
+            owner.calls.borrow().is_empty(),
+            "projection alone invokes no host operation"
+        );
+    }
+    // Only this explicit, pre-authorized host action calls C2 cancelOriginal.
+    let target = pipeline::cancellation_target(&get_run_snapshot(&original).job);
+    assert_eq!(
+        cancel_original_run(&owner, &target).unwrap().status,
+        contract::ExecutionStatus::Unknown
+    );
+    assert_eq!(
+        lookup_original_run(&owner, &target).unwrap(),
+        owner.lookup_reply.clone().unwrap()
+    );
+    assert_eq!(get_run_snapshot(&original), original);
+    assert_eq!(
+        *owner.calls.borrow(),
+        vec![("cancel", target.clone()), ("lookup", target)]
+    );
 }
