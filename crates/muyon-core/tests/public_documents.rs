@@ -1,4 +1,4 @@
-//! Actual owner reads, with candidate adapters compiled before Contracts registration.
+//! Public library reads plus a separately instrumented source-import spy boundary.
 pub use muyon_core::{business, contract, documents, services};
 #[path = "support/read_owner_spy.rs"]
 pub mod read_owner_spy;
@@ -26,7 +26,9 @@ pub mod adapters {
         ));
     }
 }
-use adapters::{documents::*, sources::*};
+// General contract tests exercise real library exports. The last test explicitly
+// selects the instrumented source imports to retain its processing-request spy.
+use muyon_core::services::{documents::*, sources::*};
 use muyon_core::{
     blobs::BlobKind,
     business::BusinessStore,
@@ -354,6 +356,7 @@ fn processing_spy_is_active_and_never_runs_a_processor() {
 
 #[test]
 fn adapter_getters_make_zero_processing_requests_on_success_and_denial() {
+    use adapters::{documents::*, sources::*};
     let (_fixture, store) = Fixture::new();
     let (access, processing, hits) = text(&store);
     read_owner_spy::reset();

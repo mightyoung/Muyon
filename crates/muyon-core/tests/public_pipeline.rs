@@ -1,11 +1,4 @@
-pub use muyon_core::{contract, documents, services};
-pub mod adapter {
-    include!(concat!(
-        env!("CARGO_MANIFEST_DIR"),
-        "/src/services/pipeline.rs"
-    ));
-}
-use adapter::*;
+use muyon_core::services::pipeline::*;
 use muyon_core::{
     contract::{Revision, Scope},
     documents::{DocumentFormat, DocumentRef},
