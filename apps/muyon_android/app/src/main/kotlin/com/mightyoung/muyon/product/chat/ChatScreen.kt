@@ -457,7 +457,7 @@ private fun ChatConversation(client: ProductClient, projectId: String?, conversa
                 DropdownMenu(expanded = attachmentsOpen, onDismissRequest = { attachmentsOpen = false }) {
                     DropdownMenuItem(text = { Text("附件尚未接入") }, enabled = false, onClick = {})
                     Text("暂不能选择或上传文件。", Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-                        style = MaterialTheme.typography.bodySmall)
+                        color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.bodySmall)
                 }
             })
     }
