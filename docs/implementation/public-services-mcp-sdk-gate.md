@@ -20,9 +20,13 @@ pinned here; no stronger distribution-integrity conclusion is claimed.
 
 ## License/package evidence
 
-The previously missing fixed Rust source license is now readable:
-[rmcp/LICENSE](https://github.com/modelcontextprotocol/rust-sdk/blob/5d6a11f2ae022f513aec0f6e0f10f89a57891a7f/crates/rmcp/LICENSE),
-blob `30cff7403da04711c46979a06f6bf8eb10ee088a`.
+The previously missing fixed Rust source license is now readable at the
+[repository-root LICENSE](https://github.com/modelcontextprotocol/rust-sdk/blob/5d6a11f2ae022f513aec0f6e0f10f89a57891a7f/LICENSE),
+blob `4a93985763241755401a10678395303de4e720ba`.
+The package's `crates/rmcp/LICENSE` entry is a symlink to `../../LICENSE`,
+blob `30cff7403da04711c46979a06f6bf8eb10ee088a`; that symlink blob is not the
+license text. The source-file retrieval dereferenced it, so this assessment now
+cites the independently retrieved root license explicitly.
 [Kotlin LICENSE](https://github.com/modelcontextprotocol/kotlin-sdk/blob/76b8e7d63aac39fe41e03684e3b91a6c3724a8da/LICENSE),
 blob `185054bef9dfb083b7ab2db43908ffa173a0f48e`, is also readable.
 Both describe an MIT-to-Apache transition retaining MIT for contributions lacking

@@ -28,7 +28,14 @@ X3 gate RED/HOLD is a documentary prerequisite assessment, **not a behavioral
 test failure**. No X3 RED/GREEN, SDK unit/integration tests, Android, OAuth or remote
 effects ran. Existing X1/X2 tests do not validate an absent SDK adapter.
 
-Independent review of this document remains pending. No final SDK selection,
-license approval, gate GREEN or product acceptance is claimed. B remains sole
+Independent read-only reviewer `/root/review_connector_lifecycle` checked fixed
+document source `e68479fa512f37df3c7a31da87c67c3acb842a09`, official immutable
+citations and local platform declarations. No P0-P2 findings. One P3 citation
+issue was corrected: the Rust package LICENSE entry is a symlink, while the
+actual license text is in root LICENSE blob
+`4a93985763241755401a10678395303de4e720ba`. The root file was independently
+retrieved before applying this correction. No SDK tests or installs occurred.
+
+No final SDK selection, license approval, gate GREEN or product acceptance is claimed. B remains sole
 merger; Contracts alone registers shared modules. No denied operation or uncertain
 write occurred during these read-only lookups.
