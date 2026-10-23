@@ -972,3 +972,59 @@ fn real_owner_blocked_plan_binds_unique_child_and_cancellation_is_not_fake_compl
     wrong.request_id = "unrelated".into();
     assert!(f.ledger.observe_remote(&f.scope, &child, &wrong).is_err());
 }
+
+#[test]
+fn request_authorization_rejects_an_owner_from_another_workspace_without_side_effects() {
+    let f = Fixture::new();
+    let current = configured_owner(&f);
+    let valid = current
+        .prepare_chat("conversation-a", "local fixture", Some(&FixtureProof))
+        .unwrap();
+    assert!(f
+        .ledger
+        .authorize_request(&current, &valid.request_id)
+        .is_ok());
+
+    let other_path = f.dir.join("other-workspace-owner.sqlite");
+    AgentOwner::initialize(&other_path, "workspace-b").unwrap();
+    let other = AgentOwner::open(&other_path, "workspace-b", "epoch-a").unwrap();
+    other
+        .configure_trusted(Settings {
+            credential_generation: "test-only-generation".into(),
+            cap_micro_cny: Revision::new(1000000),
+            max_calls: Revision::new(5),
+            chat: true,
+            search: false,
+            price_revision: PRICE_REVISION.into(),
+        })
+        .unwrap();
+    // A colliding display conversation is not shared workspace authority.
+    let wrong = other
+        .prepare_chat("conversation-a", "local fixture", Some(&FixtureProof))
+        .unwrap();
+    let before_current = serde_json::to_value(current.budget().unwrap()).unwrap();
+    let before_other = serde_json::to_value(other.budget().unwrap()).unwrap();
+    assert_eq!(
+        f.ledger
+            .authorize_request(&other, &wrong.request_id)
+            .unwrap_err(),
+        "workflow_scope_mismatch"
+    );
+    assert_eq!(
+        serde_json::to_value(current.budget().unwrap()).unwrap(),
+        before_current
+    );
+    assert_eq!(
+        serde_json::to_value(other.budget().unwrap()).unwrap(),
+        before_other
+    );
+    assert_eq!(
+        current.lookup(&valid.request_id).unwrap().status,
+        "prepared"
+    );
+    assert_eq!(other.lookup(&wrong.request_id).unwrap().status, "prepared");
+    assert!(f
+        .ledger
+        .authorize_request(&current, &valid.request_id)
+        .is_ok());
+}
