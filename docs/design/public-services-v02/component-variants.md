@@ -59,6 +59,24 @@ FoundationTheme 将 bodyMedium/bodySmall/labelLarge/labelMedium/labelSmall 设�
 
 W 系列与 V 系列有重叠时，W 是本次全套重审的具体视觉候选，V 保留密度/行为条件；实际实现以用户审阅后的明确版本为准。任何原生控件可保留可访问语义与事件门控，外形/排版不能直接默认沿用。尚无 W1–W10 具体视觉批准，设计 GREEN 保持 pending。
 
+## 现有图标/品牌：入库与引用分开核对
+
+用户要求先查仓库已有 icon。本表仅核对产品基线 `fd26dcdabcdac996bc2881e8141cac2b519966fc` 的 Android 素材与源码引用，不声称已完成仓库历史/其他平台全部盘点；父任务进一步库存映射待交接。优先使用已入库原素材，不自造图标，也不默认用临时 Material 图形代替。新视觉 W5/W8 中的单聊/群组等形状只是语义要求，具体资产选择先等库存核验与用户评审；不能据候选文字新画一套。
+
+根 R 为 `apps/muyon_android/app/src/main/res/`；K 为对应 `src/main/kotlin/com/mightyoung/muyon/product/`。以下 present 表示文件或引用存在，**不是**最终页面视觉 PASS。
+
+| 资产（R 下） | 入库状态 | 当前页面引用状态（K 下） | U0 处理 |
+| --- | --- | --- | --- |
+| drawable-nodpi/muyon_brand_icon.png | present；原品牌资源提交 `11d28aa8c85cfeb41a3efffefa6ab446257fc0c1` | ui/shell/ConversationShell.kt 有 painterResource 引用 | 原样使用，不从生成图导出笔刷变体 |
+| drawable-nodpi/muyon_brand_mascot_front.png | present；同提交 | ConversationHeader 的 mainAgent 分支有引用 | 每屏最多一个主要角色，显示尺寸与点击热区分开 |
+| drawable-nodpi/muyon_brand_mascot_views.png | present；同提交 | 本轮未发现生产 Kotlin 引用 | 不能因已入库就写“页面已用” |
+| drawable/wb_menu.xml | present，24dp VectorDrawable | ConversationHeader/旧 design.Workbench 有引用 | 原几何优先核对；可见24dp与外48dp热区分开 |
+| drawable/wb_add.xml / wb_send.xml | present，24dp VectorDrawable | 旧 chat/ChatPresentation.kt 的 ChatInputDock 有引用；当前 ChatScreen 调用 ShellInputDock，后者为 Text("+")/Text("↑") | 已入库不等于当前输入页实际引用；交 Shell owner 做资产映射，保留原门控 |
+| drawable/wb_chat.xml / wb_document.xml | present，24dp VectorDrawable | 旧 design/Workbench.kt 的 Destination 声明有引用；尚不能证明 S0 当前导航条目引用 | 优先核查可用单聊/文档资产；群组/搜索/关闭/置顶/设置逐一等完整库存，不造缺失事实 |
+| drawable/muyon_avatar.png | present | 本轮未在 S0 的上述文件发现引用 | 旧头像与原角色不混作新品牌定稿 |
+
+参考图中的图标绘制不等于可直接切图资产；即使源码存在默认图标，也仍需在 S0/P1 整页验证图标风格/比例/选中/禁用/焦点。此阶段不复制、重绘、换色或改资源文件。
+
 ## 候选尺寸、密度与共用交互变体
 
 以下 V1–V6 全部 proposed/draft，只是供具体评审的选项，不是已经冻结的 Foundation 值。十族逐项采用 V1–V6，族表写出差异；不能只因采用共用规则就认为该族设备验收通过。
