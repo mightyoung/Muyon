@@ -1,10 +1,10 @@
 // Exercise the public library export, using the shared contract types directly.
+use connectors::*;
+use contract::{Revision, Scope};
 use muyon_core::{
     contract,
     services::{connectors, types},
 };
-use connectors::*;
-use contract::{Revision, Scope};
 use serde_json::{json, Value};
 use types::{decode_strict, Digest, ErrorCode, ScopeRef, UnixMs};
 

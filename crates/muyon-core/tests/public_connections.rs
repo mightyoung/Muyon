@@ -1,12 +1,12 @@
 // Exercise the registered library modules rather than compiling local copies.
-use muyon_core::{
-    contract,
-    services::{commands, connections, connectors, types},
-};
 use commands::{decode_original, OriginalLookup};
 use connections::*;
 use connectors::*;
 use contract::{ExecutionStatus, Revision, Scope};
+use muyon_core::{
+    contract,
+    services::{commands, connections, connectors, types},
+};
 use serde_json::json;
 use types::{
     decode_strict, Digest, EffectKnowledge, ErrorCode, IntentId, Retryability, ScopeRef, UnixMs,
