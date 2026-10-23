@@ -1,7 +1,7 @@
 //! Pure preflight and original lookup. No requestRun, dispatch or second ledger.
 use super::skills::{SkillBinding, SkillDescriptor};
 use crate::{
-    contract::Revision,
+    contract::{ExecutionResult, Revision},
     documents::DocumentRef,
     services::{
         commands::{HostCommandPort, OriginalLookup},
@@ -148,15 +148,7 @@ pub fn lookup_original_run(
     let result = host.lookup_original(intent).map_err(|_| unknown())?;
     match &result {
         OriginalLookup::NotSubmitted { intent_id } if intent_id != intent => return Err(unknown()),
-        OriginalLookup::Execution(r) => {
-            r.validate().map_err(|_| unknown())?;
-            if r.receipt
-                .as_ref()
-                .is_some_and(|r| r.intent_id != intent.as_str())
-            {
-                return Err(unknown());
-            }
-        }
+        OriginalLookup::Execution(r) => validate_original_execution(intent, r)?,
         _ => {}
     }
     Ok(result)
@@ -165,8 +157,28 @@ pub fn lookup_original_run(
 /// Pure adapter to C2 cancel_original; this is not a production host or stop proof.
 /// The trusted caller must authorize the original current scope before use.
 pub fn cancel_original_run(
-    _: &dyn HostCommandPort,
+    host: &dyn HostCommandPort,
     intent: &IntentId,
-) -> Result<crate::contract::ExecutionResult, ServiceError> {
-    Err(crate::services::commands::unphased_host_error(intent))
+) -> Result<ExecutionResult, ServiceError> {
+    let result = host
+        .cancel_original(intent)
+        .map_err(|_| crate::services::commands::unphased_host_error(intent))?;
+    validate_original_execution(intent, &result)?;
+    Ok(result)
+}
+
+fn validate_original_execution(
+    intent: &IntentId,
+    result: &ExecutionResult,
+) -> Result<(), ServiceError> {
+    let unknown = || crate::services::commands::unphased_host_error(intent);
+    result.validate().map_err(|_| unknown())?;
+    if result
+        .receipt
+        .as_ref()
+        .is_some_and(|receipt| receipt.intent_id != intent.as_str())
+    {
+        return Err(unknown());
+    }
+    Ok(())
 }
