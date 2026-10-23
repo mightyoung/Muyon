@@ -2,6 +2,8 @@
 
 状态：PREPARATION_ONLY，D1/D2 BLOCKED（未实施），D3 BLOCKED。2026-10-23。
 
+最新补充：用户新授权后，官方 Rust 1.93.1 与103个锁定包缓存已就绪，既有基线49项及StoreEvidence12项通过，锁文件未变。详见 [TOOLCHAIN.md](TOOLCHAIN.md)。下方退出127/禁止安装/产品测试NOT_RUN为前片当时记录；本次仅更新既有Rust基线验证，新公共服务RED/GREEN仍NOT_RUN。
+
 计划：`64900d4a6a46a9ef2919bcf922fb059413b1ce82`，`docs/superpowers/plans/2026-10-23-document-pipeline.md`；基线/源码 SHA：`fd26dcdabcdac996bc2881e8141cac2b519966fc`。独立分支 `task/public-v02-documents-20261023`，工作区 `/workspace/muyon-documents-v02`。环境初始旧 main `cc7c8d14d30e3d3c4c7c6cb2bf2059a99e46e003` 未用作基线。
 
 父任务最新确认：C1 尚未实现；`848ad8bd3797b14008ba5a44e60f0737bfdf56f1` 只有阻断报告，不能当接口依赖。官方工具链安装由父任务另行处理；本线不重复索批、不安装。编码前必须重新读取 develop 及父任务交付的最终 C1/C2 接口/fixture SHA。
