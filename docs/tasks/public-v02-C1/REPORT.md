@@ -83,3 +83,31 @@ C1 测试/fixture 先写；结构 RED 是 services 模块不存在。最小接�
 C1独立草稿代码审查未发现必修问题；已补超限但合法JSON的大小拒绝断言和fixture.schema_major断言。C2/C3独立草稿审查发现1个取消视图丢失原Unknown信息的缺口；新增回归实际RED，随后保留原ExecutionStatus而转GREEN。C2枚举采用Box<ExecutionResult>消除严格Clippy的large_enum_variant，无wire/FFI ABI变化。其余当前审查意见及跨模块选择不能冒称已批准。
 
 Money/Quantity、phase枚举、ResultId迁移转换的精确提案见 F6-MINIMAL-PROPOSAL.md，等待父任务裁定。本次按父任务裁定先提交已确定的C1纯值源码/fixture，作为待合入候选，不因新规范提案整体暂停。C2/C3仍为未提交工作树草稿，未包含于本次C1源提交。Money/Quantity与phase枚举的新规范尚未冻结；当前phase保持原计划String字段，不将其当可信派发证据。
+
+## C1 已定范围固定交付
+
+源码提交：`6e7f774b1559a0a9693eeb195ba13c9ded561993`。它是待合入候选，其他线可按该完整SHA引用已定公共值/fixture，不能宣称已合入develop；Money/Quantity与phase新规范仍不在冻结范围。C2/C3产品源不在该提交。
+
+在干净的detached工作树 /workspace/muyon-contracts-c1-check 精确检出该SHA后：完整workspace/all-targets回归34个二进制609 passed/0 failed/0 ignored；core all-target Clippy -D warnings exit0。独立reviewer同一固定SHA复跑 public_service_types 6 passed、contract 10 passed，0 failed/ignored，源types.rs与初审内容逐字一致；git diff --check通过，审查前后HEAD不变、工作树干净，必修0。
+
+C1接口文件：crates/muyon-core/src/services/types.rs、services/mod.rs及core lib.rs登记；测试 public_service_types.rs；共享fixture docs/contracts/public-services-v02/fixtures/types.json。
+
+固定SHA独立fixture SHA256：`af0e6170bceb8e1a12e0686ab2855353d257f1ca885b06b3e6dfbad3d81b70f5`。
+
+该固定SHA验证命令（先加载工作目录内env.sh，不改系统）：
+
+```sh
+cargo test --manifest-path crates/Cargo.toml --workspace --all-targets --offline --locked -- --test-threads=1
+cargo clippy --manifest-path crates/Cargo.toml -p muyon-core --all-targets --offline --locked -- -D warnings
+# 独立reviewer另用自己的target目录
+cargo test --manifest-path crates/Cargo.toml -p muyon-core --offline --locked --test public_service_types --test contract
+```
+
+当前只验证合成Rust类型/既有回归，不宣称Android、外部模型、真实连接或新权限可用。
+
+固定源码原始日志仍只在仓库外，摘要如下：
+
+| 日志 | SHA256 |
+| --- | --- |
+| c1-fixed-source-workspace.log | `85630794167e9b9aace248f1ecc9f799dcbc45b2cadefcf0a7b0e6baf81e88b0` |
+| c1-fixed-source-clippy.log | `aaa571d8b39f5a4187e55ebe17ad43849d2b90b51cd5447361473d4c417e5990` |
