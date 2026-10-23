@@ -60,12 +60,26 @@ fn failure(code: ErrorCode) -> ServiceError {
         details_ref: None,
     }
 }
-/// Pure value comparison only; not model loading, lookup, or authorization.
+/// Pure Rust value comparison; no model loading, lookup, or authorization.
+/// Dimensions retain Rust's u32 domain. A JVM projection must reject values
+/// outside its Int domain before conversion, not truncate or wrap them.
 pub fn validate_vector_compatibility(
-    _index: &VectorDescriptor,
-    _query: &VectorDescriptor,
+    index: &VectorDescriptor,
+    query: &VectorDescriptor,
 ) -> Result<(), ServiceError> {
-    Err(failure(ErrorCode::CapabilityUnavailable))
+    if index != query
+        || index.dimensions == 0
+        || [
+            &index.model_version,
+            &index.tokenizer_version,
+            &index.chunk_version,
+        ]
+        .iter()
+        .any(|v| v.trim().is_empty())
+    {
+        return Err(failure(ErrorCode::InvalidArgument));
+    }
+    Ok(())
 }
 /// Pure CAS precondition only. A caller must publish under the existing owner's
 /// lock/transaction; this function cannot atomically update a current pointer.
@@ -92,14 +106,8 @@ pub fn validate_search(
     query_descriptor: &VectorDescriptor,
     inputs: &[ResultRef],
 ) -> Result<(), ServiceError> {
-    let d = &snapshot.descriptor;
-    if d != query_descriptor
-        || d.dimensions == 0
-        || [&d.model_version, &d.tokenizer_version, &d.chunk_version]
-            .iter()
-            .any(|v| v.trim().is_empty())
-        || ResultId::parse(&snapshot.snapshot_id).is_err()
-    {
+    validate_vector_compatibility(&snapshot.descriptor, query_descriptor)?;
+    if ResultId::parse(&snapshot.snapshot_id).is_err() {
         return Err(failure(ErrorCode::InvalidArgument));
     }
     if inputs
