@@ -50,7 +50,7 @@ Workspace regression exited 0: **603 passed / 0 failed / 0 ignored**, 33 test-bi
 
 Raw commands, UTC start/end, explicit environment, stdout/stderr and SHA256 are in `/tmp/muyon-skills-v02-evidence/` as `cargo-fetch.*`, `installed-rustc.*`, `installed-cargo.*`, `restored-agent-workflow.*`, `restored-workspace.*`. The runner `run-toolchain.py` captures output without rewriting it. Package archive hashes are in `locked-package-checksums.json` (SHA256 `51f9840fcadad9ebb9a0cfa9ada923783eef45fd7ec972e653d630b621326840`). Installation archive manifest and log stay in `/workspace/skills-rust-tools/downloads/components.json` and `installation.log`.
 
-Independent review of this follow-up: pending; the earlier review covered preparation only. No merge/deployment or rejected/uncertain action occurred.
+Independent reviewer `/root/review_skills_preparation` reviewed `b78c107be0cc0073071d278ca7b3d55404f542eb..7a01a6ba4353fa2c7ca3d18e88eedfdc0fefcbc2`: no blocking or required-change findings. Reviewer independently verified local official manifest/companion checksum, all five component archives, all 103 cached package checksums, unchanged lockfile, command-output hashes, 603/33 workspace totals and SQLite linkage. Fresh rustc/cargo version checks and offline/locked agent_workflow rerun exited 0 (17 passed / 0 failed / 0 ignored). Entire workspace was not rerun by reviewer. Provenance/authorization review used the parent relay and preserved local artifacts, without network revalidation. Documentation handoff only; no S1 feature acceptance or deferred minor findings. No merge/deployment or rejected/uncertain action occurred.
 
 Captured output hashes (raw logs are not committed):
 
