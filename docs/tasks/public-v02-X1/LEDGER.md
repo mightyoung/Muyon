@@ -8,4 +8,8 @@ Ruling: tests compile the actual unregistered module via #[path] and alias the e
 
 Ruling: P1 config schema is exactly the trusted built-in endpoint/optional label object with additionalProperties=false, no generic JSON schema interpreter — arbitrary descriptor schemas are unavailable — future adapters with other public fields require review.
 
-X1 in progress; no behavioral RED/GREEN yet.
+X1 RED source c8fbca09f60832ec4ef4fbe92d07e2a74bb4833e: 0 passed/7 failed (compiled unavailable stub). GREEN 7 passed/0 failed. Core regression offline/locked exit0; exact count/report follows. Raw output stays outside git.
+
+X2/C1 ruling: permission strings are kind-qualified tool:name, resource:name, prompt:name — same-name capabilities must not share a grant — callers using legacy bare names will be denied until explicitly adapted. This is a Connector-local key convention, not a shared C1 type.
+
+X1 is implemented as local module source; independent review and Contracts registration still pending. No transport/credential store/production dispatch.
