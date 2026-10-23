@@ -22,7 +22,7 @@
 
 1. 原 lookup 特例 not_submitted 不能被当作可重放 unknown：C2 测试固定。
 2. 旧 Long/UI 页码与公共十进制/0 基页码不一致：U1 测试拒绝截断和错误页码。
-3. 旧索引只有 paper/project 身份，不能冒充公共 ResultRef：D2 兼容测试拒绝无来源旧条目。
+3. 旧索引只有 paper/project 身份，不能冒充公共 ResultRef：D2 保留来源拒绝边界；Kotlin 的 `isPubliclyResolvable` 旧候选名不代表能力已实现，未决签名 / 可信解析语义 / 生产文件交接列后续联合设计。本轮不实现该接口，形状候选不等于授权。
 4. Skill/Connector 元数据变化与权限变化不同：S2、X2 测试保持权限交集并拒旧 prepared。
 5. Agent 完成或旧 SHA 的 CI 成功不能代表研发验收：B3 固定 SHA 证据走查与 B4 后续测试。
 
@@ -70,7 +70,7 @@ Shell 任务 `01a161b7-eeb1-7502-943d-1f8309a4b012` 继续修现有页面，本�
 | --- | --- | --- |
 | §1–3 分层、版本、scope、资源、计量 | C1，D1/D2 | 账户级宿主绑定与配额工程 gate |
 | §4 DocumentPort 全清单、Office 能力矩阵 | D1/D3 | 导入/新版本/解析命令及 Office 发布依赖原 owner 扩展，P3 |
-| §4 OCR/Embedding/Index 全清单 | D2/D3 | 引擎生产接线、查询向量授权及快照持久化 P3 |
+| §4 OCR/Embedding/Index 全清单 | D2/D3 | Kotlin 未决解析接口 / 文件交接为后续联合设计，本轮不实现；引擎生产接线、查询向量授权及快照持久化 P3 |
 | §4 TaskPort、DraftPort | C2/C3、D2 | JobId 子任务取消不开放；泛领域持久草稿 rollout P2 |
 | §4 HostCommandPort、§6 回执恢复 | C2、X2、S2 | 新 Operation 不能借 JSON 任意派发 |
 | §4 SkillRegistry 全方法、Runtime 三个 getter/requestRun | S1/S2/S3 | 安装可执行扩展不在本轮架构实施范围 |

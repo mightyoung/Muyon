@@ -80,7 +80,7 @@ ResourceHandle 是合同声明，P1 不签发 FD；宿主临时表管理 lease/�
 
 ## D2：任务、结果图和索引适配的确定性合同
 
-**Owner:** Documents。**Files:** 新增 `services/pipeline.rs`、`tests/public_pipeline.rs`；新增 `apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/services/documents/IndexCompatibility.kt` 与对应 `apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/services/documents/IndexCompatibilityChecks.kt`、同目录 `run-offline.sh`。依赖 D1/C1/C2；本片只测合成结果与任务，不调用真实引擎。
+**Owner:** Documents。**Files:** Rust 片为 `services/pipeline.rs`、`tests/public_pipeline.rs`。Kotlin 原候选路径为 `apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/services/documents/IndexCompatibility.kt` 与对应测试 `IndexCompatibilityChecks.kt`、同目录 `run-offline.sh`；其中生产文件及未决接口改列后续联合设计，不在本轮补实现。依赖 D1/C1/C2；只测合成结果与任务，不调用真实引擎。
 
 **Interfaces，新增 Rust 类型/纯校验：**
 
@@ -105,13 +105,17 @@ fn cancellation_target(job: &JobSnapshot) -> IntentId;
 
 JobSnapshot 是只读公共投影，不新建执行任务账本；attempt 表示原 owner 报告的尝试数，不能 UI 自增以获得重试。TaskPort 后续 getTask/subscribeProgress 消费同 snapshot，requestCancel 只能调用 C2.cancel_original(cancellation_target(job))。任务与原意图映射在可信 owner 保存，不能由 wire JobSnapshot 决定取消目标。
 
-Kotlin 新增 `VectorDescriptor(modelVersion:String,tokenizerVersion:String,dimensions:Int,chunkVersion:String)` 与 `validateCompatibility(index:VectorDescriptor,query:VectorDescriptor):Boolean`；其字段由 Rust fixture 同名语义投影，不是第二事实定义。新 `LegacyIndexEntry(documentId:String?, resultId:String?, model:VectorDescriptor?)` 的 `isPubliclyResolvable(entry:LegacyIndexEntry):Boolean` 只有三者齐全且受宿主解析才可能 true；旧 paper-only 记录必须 false，不填猜测 ID。
+**Kotlin 后续联合设计（UNFROZEN / IMPLEMENTATION_PENDING）：** 原候选 `VectorDescriptor(modelVersion:String,tokenizerVersion:String,dimensions:Int,chunkVersion:String)`、`validateCompatibility(index:VectorDescriptor,query:VectorDescriptor):Boolean` 与 `LegacyIndexEntry(documentId:String?,resultId:String?,model:VectorDescriptor?)` 保留为待明确提案，不是当前已交付生产合同。`isPubliclyResolvable(entry:LegacyIndexEntry):Boolean` 是旧测试候选名，其可信完整解析输入、成功 / 失败语义及生产接线 owner 未冻结；旧名或四个缺字段反例不表示已具备公共解析能力，恒 false 通过反例也不是完成证据。
+
+Documents、PublicUI、Contracts 与原可信宿主 owner 后续联合明确：纯兼容 / 形状筛查和可信宿主解析的边界；最终名称 / 签名；具备来源、精确 revision、scope / grant 与逐 embedding descriptor 核验的成功条件；`IndexCompatibility.kt` 的具体实现承接。Documents 保持原计划文件 owner，未明确交接前不转给 PublicUI。澄清稿 [D2-JVM-CLARIFICATION.md @ b15c7af6](https://github.com/mightyoung/Muyon/blob/b15c7af6d17f79de0eb393fc66aacd8b142118e9/docs/contracts/public-services-v02/D2-JVM-CLARIFICATION.md) 仍为提案；其中 `hasPublicReferenceCandidate` 若以后采用，也只表示形状候选，绝不表示可信可解析或获授权。本轮不实现上述未决接口，也不为消除结构 RED 扩展生产语义。
+
+原 [JVM 结构验证 @ 3c72963a](https://github.com/mightyoung/Muyon/blob/3c72963a1adcb47fe82819a70310465e3eb8aeb4/docs/tasks/public-v02-D2-JVM/REPORT.md) 实际退出 1，原因是缺生产文件 / 符号；没有行为 RED / GREEN。未来 Kotlin 字段仍须消费同一 Rust fixture 真源；旧 paper-only 记录不能猜公共 ID 或冒充 ResultRef。当前优先 U1 修复与已完成 Rust 候选审查合入，Kotlin 联合设计不阻塞这些工作。
 
 - [ ] `late_job_cannot_publish_current`：旧 revision/旧 scopeGeneration → StaleRevision/ScopeChanged；精确相等成功；旧产物保留于旧版本且当前指针不变。
 - [ ] `descriptor_mismatch_is_rejected`：模型、分词、维数、分块各单独变化均拒绝；同摘要跨 scope 输入也拒绝；IndexSnapshotRef 直接 inputs 集合必须精确匹配且无重复。
 - [ ] `job_cancel_maps_original_only`：取消总得到登记的 IntentId；unknown/取消请求不变 succeeded；游标失效只拉快照，关闭订阅不取消任务。
 - [ ] RED/GREEN：`cargo test --manifest-path crates/Cargo.toml -p muyon-core --offline --locked --test public_pipeline`；先 stub 行为失败再实施校验。
-- [ ] Kotlin RED/GREEN：`bash apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/services/documents/run-offline.sh`；断言旧 paper-only 记录不可公开、768 与其他维数不匹配、无查询时 engine invocation=0。
+- [ ] 后续 Kotlin 联合设计完成并明确文件交接后，才更新旧测试候选名与精确签名、补完整正向 / 错误用例，并运行 `bash apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/services/documents/run-offline.sh`。结构 RED、真实行为 RED / GREEN 分列；兼容 / 形状检查不得记成宿主解析通过。未接入 engine / dispatcher 端口时只报告静态无引擎依赖，不虚构 engine invocation=0；原生引擎覆盖与 D3 / Reader / FD gate 保持。本轮不补此实现。
 - [ ] 提交 `feat: validate pipeline provenance and task projections`；审查只交付来源/任务合同，不能说已完成 OCR 或语义检索。
 
 ## D3：生产资料管线工程 gate 与分段接线
