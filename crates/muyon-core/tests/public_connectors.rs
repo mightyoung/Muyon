@@ -1,7 +1,8 @@
-// Compile owner source without editing Contracts-owned registration files.
-use muyon_core::{contract, services::types};
-#[path = "../src/services/connectors.rs"]
-pub mod connectors;
+// Exercise the public library export, using the shared contract types directly.
+use muyon_core::{
+    contract,
+    services::{connectors, types},
+};
 use connectors::*;
 use contract::{Revision, Scope};
 use serde_json::{json, Value};

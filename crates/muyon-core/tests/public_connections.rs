@@ -1,12 +1,8 @@
-// Actual owner source; Contracts retains exclusive registration ownership.
+// Exercise the registered library modules rather than compiling local copies.
 use muyon_core::{
     contract,
-    services::{commands, types},
+    services::{commands, connections, connectors, types},
 };
-#[path = "../src/services/connections.rs"]
-pub mod connections;
-#[path = "../src/services/connectors.rs"]
-pub mod connectors;
 use commands::{decode_original, OriginalLookup};
 use connections::*;
 use connectors::*;
