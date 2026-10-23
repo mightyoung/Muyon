@@ -4,7 +4,7 @@ Plan/spec fixed source: `64900d4a6a46a9ef2919bcf922fb059413b1ce82`.
 Develop re-fetched `fd26dcdabcdac996bc2881e8141cac2b519966fc`.
 Parent-released Contracts candidate `4d49a580cb518d9b0b80c9df3df1ff564194a639` ordinarily composed; not merged develop. C1 `6e7f774b1559a0a9693eeb195ba13c9ded561993`, C2 `b626c18a5dff184519e59bb866e5ed37362ac84e`, C3 `bf264bc62f5d2d65fa7d50b27a26ffee3c0ba6d9`. Read source/fixtures/reports before coding; C1 types reused without copies, no Money/Quantity/phase enum changes.
 
-Rust/Cargo 1.93.1, host x86_64-unknown-linux-gnu. Explicit task-local PATH/CARGO_HOME/CARGO_TARGET_DIR/RUSTFLAGS documented in ../public-v02-connectors/TOOLCHAIN.md. Official rustfmt component additionally installed under the same approved setup: https://static.rust-lang.org/dist/2026-02-12/rustfmt-1.93.1-x86_64-unknown-linux-gnu.tar.xz, official manifest SHA256 `2ad6fa7ad2b5e42e1ca39299039ea0110b8cb2a45847553e4cbab82181a351e0`. No SDK, new product dependency, real model or account.
+Rust/Cargo 1.93.1, host x86_64-unknown-linux-gnu. Explicit task-local PATH/CARGO_HOME/CARGO_TARGET_DIR/RUSTFLAGS documented in ../public-v02-connectors/TOOLCHAIN.md. Official rustfmt component additionally installed under the same approved setup: https://static.rust-lang.org/dist/2026-02-12/rustfmt-1.93.1-x86_64-unknown-linux-gnu.tar.xz, component SHA256 `2ad6fa7ad2b5e42e1ca39299039ea0110b8cb2a45847553e4cbab82181a351e0`. No SDK, new product dependency, real model or account.
 
 ## Scope and interfaces
 
