@@ -139,7 +139,7 @@ fn fixture_covers_the_pinned_rust_whitespace_set_without_normalizing_versions() 
         .as_array()
         .unwrap()
         .iter()
-        .map(|v| v.as_u64().unwrap() as u32)
+        .map(|v| u32::try_from(v.as_u64().unwrap()).unwrap())
         .collect();
     assert_eq!(actual, declared);
     for cp in actual {
@@ -152,4 +152,100 @@ fn fixture_covers_the_pinned_rust_whitespace_set_without_normalizing_versions() 
             .unwrap();
         assert!(!case["expected_rust_compatible"].as_bool().unwrap());
     }
+}
+
+fn hex_string(v: &Value) -> String {
+    v.as_str()
+        .unwrap()
+        .as_bytes()
+        .iter()
+        .map(|b| format!("{b:02x}"))
+        .collect()
+}
+fn nullable_hex(v: &Value) -> String {
+    if v.is_null() {
+        "-".into()
+    } else {
+        hex_string(v)
+    }
+}
+fn descriptor_columns(v: &Value) -> Vec<String> {
+    let d = descriptor(v);
+    vec![
+        hex_string(&v["model_version"]),
+        hex_string(&v["tokenizer_version"]),
+        d.dimensions.to_string(),
+        hex_string(&v["chunk_version"]),
+    ]
+}
+#[test]
+fn jvm_projection_is_lossless_and_complete_derivative_of_shared_json() {
+    let f = fixture();
+    let d = f["compatibility_cases"].as_array().unwrap();
+    let c = f["reference_candidate_cases"].as_array().unwrap();
+    let w = f["rust_whitespace_code_points"].as_array().unwrap();
+    let mut rows = vec![vec![
+        "H".into(),
+        "muyon.public-pipeline-values".into(),
+        "1".into(),
+        "1".into(),
+        "2".into(),
+        "true".into(),
+        "false".into(),
+        "false".into(),
+        "shape_only_not_trusted_resolution".into(),
+        d.len().to_string(),
+        c.len().to_string(),
+        w.len().to_string(),
+    ]];
+    let mut base = vec!["B".into()];
+    base.extend(descriptor_columns(&f["descriptor"]));
+    rows.push(base);
+    for cp in w {
+        rows.push(vec![
+            "W".into(),
+            u32::try_from(cp.as_u64().unwrap()).unwrap().to_string(),
+        ]);
+    }
+    for case in d {
+        let mut row = vec!["D".into(), case["id"].as_str().unwrap().into()];
+        row.extend(descriptor_columns(&case["index"]));
+        row.extend(descriptor_columns(&case["query"]));
+        for key in ["expected_rust_compatible", "jvm_dimensions_supported"] {
+            row.push(case[key].as_bool().unwrap().to_string());
+        }
+        rows.push(row);
+    }
+    for case in c {
+        let mut row = vec![
+            "C".into(),
+            case["id"].as_str().unwrap().into(),
+            nullable_hex(&case["document_id"]),
+            nullable_hex(&case["result_id"]),
+        ];
+        row.extend(if case["model"].is_null() {
+            vec!["-".into(); 4]
+        } else {
+            descriptor_columns(&case["model"])
+        });
+        for key in [
+            "expected_document_id_valid",
+            "expected_result_id_valid",
+            "expected_descriptor_valid_rust",
+            "jvm_dimensions_supported",
+            "expected_rust_shape_candidate",
+            "expected_jvm_shape_candidate",
+        ] {
+            row.push(case[key].as_bool().unwrap().to_string());
+        }
+        rows.push(row);
+    }
+    let expected = rows
+        .into_iter()
+        .map(|row| row.join("\t") + "\n")
+        .collect::<String>();
+    assert_eq!(
+        include_str!("fixtures/public_pipeline.values.tsv"),
+        expected
+    );
 }
