@@ -1,6 +1,8 @@
-# Skills S1 preparation — dependency blocked, no implementation
+# Skills S1 history and current candidate status
 
-2026-10-23 UTC. This is a preparation slice, not S1 completion.
+Current update: parent delivered fixed C1/C2/C3 candidates; see [IMPLEMENTATION.md](IMPLEMENTATION.md) for S1 implementation/TDD and exact limitations. Shared registration and production wiring remain pending.
+
+2026-10-23 UTC. The preparation history below predates that delivery and is not a current dependency status.
 
 Follow-up: the user subsequently authorized official toolchain/cache installation. See [TOOLCHAIN-RESTORATION.md](TOOLCHAIN-RESTORATION.md) for current tool availability and fresh baseline results; the exit-127 records below remain the original preparation history. C1 remains a separate pending dependency.
 
