@@ -1,0 +1,144 @@
+{
+  "contract_major": 1,
+  "schema_major": 1,
+  "cases": [
+    {
+      "id": "scope-exact",
+      "kind": "scope",
+      "json": "{\"scope\":{\"workspace_id\":\"w\",\"project_id\":\"p\"},\"account_id\":null,\"scope_generation\":\"9007199254740993\"}",
+      "valid": true,
+      "expected": {
+        "scope": {
+          "workspace_id": "w",
+          "project_id": "p"
+        },
+        "account_id": null,
+        "scope_generation": "9007199254740993"
+      }
+    },
+    {
+      "id": "scope-no-self-approval",
+      "kind": "scope",
+      "json": "{\"scope\":{\"workspace_id\":\"w\",\"project_id\":\"p\"},\"account_id\":null,\"scope_generation\":\"9007199254740993\",\"approved\":true}",
+      "valid": false
+    },
+    {
+      "id": "result-root",
+      "kind": "result",
+      "json": "{\"result_id\":\"result:1\",\"input_document_ref\":{\"scope\":{\"workspace_id\":\"w\",\"project_id\":\"p\"},\"document_id\":\"doc:1\",\"revision\":\"9007199254740993\",\"format\":\"text\"},\"input_result_refs\":[],\"content_digest\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"producer_version\":\"utf8-original-v1\",\"parameters_digest\":\"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\"}",
+      "valid": true,
+      "expected": {
+        "result_id": "result:1",
+        "input_document_ref": {
+          "scope": {
+            "workspace_id": "w",
+            "project_id": "p"
+          },
+          "document_id": "doc:1",
+          "revision": "9007199254740993",
+          "format": "text"
+        },
+        "input_result_refs": [],
+        "content_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "producer_version": "utf8-original-v1",
+        "parameters_digest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+      }
+    },
+    {
+      "id": "result-empty-id",
+      "kind": "result",
+      "json": "{\"result_id\":\"\",\"input_document_ref\":{\"scope\":{\"workspace_id\":\"w\",\"project_id\":\"p\"},\"document_id\":\"doc:1\",\"revision\":\"9007199254740993\",\"format\":\"text\"},\"input_result_refs\":[],\"content_digest\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"producer_version\":\"utf8-original-v1\",\"parameters_digest\":\"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\"}",
+      "valid": false
+    },
+    {
+      "id": "result-unknown-authority",
+      "kind": "result",
+      "json": "{\"result_id\":\"result:1\",\"input_document_ref\":{\"scope\":{\"workspace_id\":\"w\",\"project_id\":\"p\"},\"document_id\":\"doc:1\",\"revision\":\"9007199254740993\",\"format\":\"text\"},\"input_result_refs\":[],\"content_digest\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"producer_version\":\"utf8-original-v1\",\"parameters_digest\":\"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\",\"grant\":true}",
+      "valid": false
+    },
+    {
+      "id": "coverage-unknown",
+      "kind": "coverage",
+      "json": "{\"state\":\"unknown\",\"processed\":\"0\",\"total\":null,\"failed_units\":[]}",
+      "valid": true,
+      "expected": {
+        "state": "unknown",
+        "processed": "0",
+        "total": null,
+        "failed_units": []
+      }
+    },
+    {
+      "id": "coverage-complete",
+      "kind": "coverage",
+      "json": "{\"state\":\"complete\",\"processed\":\"2\",\"total\":\"2\",\"failed_units\":[]}",
+      "valid": true,
+      "expected": {
+        "state": "complete",
+        "processed": "2",
+        "total": "2",
+        "failed_units": []
+      }
+    },
+    {
+      "id": "error-preserves-unknown",
+      "kind": "error",
+      "json": "{\"code\":\"unknown_outcome\",\"phase\":\"lookup\",\"retryability\":\"after_lookup\",\"effect_knowledge\":\"unknown\",\"original_intent_id\":\"original:1\",\"safe_message\":\"\\u7ed3\\u679c\\u672a\\u77e5\\uff0c\\u8bf7\\u6838\\u5bf9\\u539f\\u8bf7\\u6c42\\u3002\",\"details_ref\":null}",
+      "valid": true,
+      "expected": {
+        "code": "unknown_outcome",
+        "phase": "lookup",
+        "retryability": "after_lookup",
+        "effect_knowledge": "unknown",
+        "original_intent_id": "original:1",
+        "safe_message": "结果未知，请核对原请求。",
+        "details_ref": null
+      }
+    }
+  ],
+  "legacy_identity_vectors": [
+    {
+      "id": "ffi-intent-format",
+      "field": "intent_id",
+      "value": "intent:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "byte_length": 39,
+      "valid_native": true,
+      "valid_public": true
+    },
+    {
+      "id": "ffi-plan-format",
+      "field": "plan_id",
+      "value": "plan:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "byte_length": 37,
+      "valid_native": true
+    },
+    {
+      "id": "ascii-128",
+      "field": "intent_id",
+      "value": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+      "valid_native": true,
+      "valid_public": true
+    },
+    {
+      "id": "ascii-129",
+      "field": "intent_id",
+      "value": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+      "valid_native": false,
+      "valid_public": false
+    },
+    {
+      "id": "utf8-129",
+      "field": "intent_id",
+      "value": "甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲",
+      "valid_native": false,
+      "valid_public": false
+    },
+    {
+      "id": "public-value-is-not-native-authority",
+      "field": "intent_id",
+      "value": "甲",
+      "valid_native": false,
+      "valid_public": true
+    }
+  ]
+}
