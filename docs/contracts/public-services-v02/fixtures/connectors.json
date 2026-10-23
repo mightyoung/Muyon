@@ -1,0 +1,56 @@
+{
+  "contract_major": 1,
+  "schema_major": 1,
+  "evidence_class": "synthetic",
+  "cases": [
+    {
+      "id": "catalog-kind-separated",
+      "kind": "catalog",
+      "json": "{\"connection_id\": \"connection:1\", \"protocol_version\": \"2025-11-25\", \"catalog_revision\": \"9007199254740993\", \"fetched_at_unix_ms\": \"0\", \"fresh\": true, \"entries\": [{\"name\": \"shared\", \"kind\": \"tool\", \"schema_digest\": \"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\"}, {\"name\": \"shared\", \"kind\": \"resource\", \"schema_digest\": \"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\"}, {\"name\": \"shared\", \"kind\": \"prompt\", \"schema_digest\": \"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\"}]}",
+      "valid": true
+    },
+    {
+      "id": "catalog-duplicate-kind-name",
+      "kind": "catalog",
+      "json": "{\"connection_id\": \"connection:1\", \"protocol_version\": \"2025-11-25\", \"catalog_revision\": \"9007199254740993\", \"fetched_at_unix_ms\": \"0\", \"fresh\": true, \"entries\": [{\"name\": \"shared\", \"kind\": \"tool\", \"schema_digest\": \"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\"}, {\"name\": \"shared\", \"kind\": \"tool\", \"schema_digest\": \"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\"}]}",
+      "valid": false
+    },
+    {
+      "id": "catalog-unknown-safety-field",
+      "kind": "catalog",
+      "json": "{\"connection_id\": \"connection:1\", \"protocol_version\": \"2025-11-25\", \"catalog_revision\": \"9007199254740993\", \"fetched_at_unix_ms\": \"0\", \"fresh\": true, \"entries\": [{\"name\": \"shared\", \"kind\": \"tool\", \"schema_digest\": \"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\"}, {\"name\": \"shared\", \"kind\": \"resource\", \"schema_digest\": \"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\"}, {\"name\": \"shared\", \"kind\": \"prompt\", \"schema_digest\": \"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\"}], \"approved\": true}",
+      "valid": false
+    },
+    {
+      "id": "catalog-noncanonical-revision",
+      "kind": "catalog",
+      "json": "{\"connection_id\": \"connection:1\", \"protocol_version\": \"2025-11-25\", \"catalog_revision\": \"01\", \"fetched_at_unix_ms\": \"0\", \"fresh\": true, \"entries\": [{\"name\": \"shared\", \"kind\": \"tool\", \"schema_digest\": \"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\"}, {\"name\": \"shared\", \"kind\": \"resource\", \"schema_digest\": \"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\"}, {\"name\": \"shared\", \"kind\": \"prompt\", \"schema_digest\": \"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\"}]}",
+      "valid": false
+    },
+    {
+      "id": "snapshot-public-projection",
+      "kind": "snapshot",
+      "json": "{\"connection_id\": \"connection:1\", \"connector\": {\"connector_id\": \"connector:local\", \"adapter_version\": \"1\", \"descriptor_digest\": \"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\"}, \"scope\": {\"scope\": {\"workspace_id\": \"workspace:synthetic\", \"project_id\": \"project:1\"}, \"account_id\": null, \"scope_generation\": \"1\"}, \"endpoint\": \"https://user:SYNTHETIC_SECRET_SENTINEL@example.invalid/mcp?token=SYNTHETIC_SECRET_SENTINEL#SYNTHETIC_SECRET_SENTINEL\", \"external_identity\": \"synthetic:account\", \"config_revision\": \"1\", \"authorization_generation\": \"1\", \"auth\": \"authorized\", \"catalog\": \"failed\", \"network\": \"connected\", \"availability\": \"unknown\"}",
+      "valid": true,
+      "expected_endpoint": "https://example.invalid/mcp"
+    },
+    {
+      "id": "snapshot-reject-secret-ref",
+      "kind": "snapshot",
+      "json": "{\"connection_id\": \"connection:1\", \"connector\": {\"connector_id\": \"connector:local\", \"adapter_version\": \"1\", \"descriptor_digest\": \"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\"}, \"scope\": {\"scope\": {\"workspace_id\": \"workspace:synthetic\", \"project_id\": \"project:1\"}, \"account_id\": null, \"scope_generation\": \"1\"}, \"endpoint\": \"https://user:SYNTHETIC_SECRET_SENTINEL@example.invalid/mcp?token=SYNTHETIC_SECRET_SENTINEL#SYNTHETIC_SECRET_SENTINEL\", \"external_identity\": \"synthetic:account\", \"config_revision\": \"1\", \"authorization_generation\": \"1\", \"auth\": \"authorized\", \"catalog\": \"failed\", \"network\": \"connected\", \"availability\": \"unknown\", \"secret_ref\": \"synthetic:secret\"}",
+      "valid": false
+    },
+    {
+      "id": "config-public",
+      "kind": "config",
+      "json": "{\"endpoint\": \"https://example.invalid/mcp\"}",
+      "valid": true
+    },
+    {
+      "id": "config-secret-rejected",
+      "kind": "config",
+      "json": "{\"endpoint\": \"https://example.invalid/mcp\", \"client_secret\": \"SYNTHETIC_SECRET_SENTINEL\"}",
+      "valid": false
+    }
+  ]
+}
