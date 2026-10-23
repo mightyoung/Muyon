@@ -22,6 +22,17 @@ PROVENANCE_PINS = [SOURCE_PIN, '01e56cc2d729dab70e1b1def05c3aa93b28f421a',
                    '8c5995515fa14ca3592a1c33c71afb4e4c1e5def', GATE_BASE]
 
 
+def product_gate_matches_historical(previous, current, root_toolchain_present):
+    """Permit only the reviewed root-input addition; freeze every job byte."""
+    if not root_toolchain_present:
+        return current == previous
+    anchor = b'    paths: &product_paths\n'
+    if previous.count(anchor) != 1:
+        return False
+    expected = previous.replace(anchor, anchor + b"      - 'rust-toolchain.toml'\n", 1)
+    return current == expected
+
+
 class IndependentLaya(unittest.TestCase):
     def test_provenance_is_required_in_both_independent_jobs(self):
         for name in ['ci', 'verify']:
@@ -114,6 +125,36 @@ class IndependentLaya(unittest.TestCase):
 
 
 class FrozenSchema(unittest.TestCase):
+    def test_root_toolchain_is_covered_without_changing_original_product_jobs(self):
+        path = '.github/workflows/muyon-product.yml'
+        previous = subprocess.check_output(['git', 'show', SOURCE_PIN + ':' + path], cwd=ROOT)
+        current = (ROOT / path).read_bytes()
+        self.assertTrue((ROOT / 'rust-toolchain.toml').is_file())
+        self.assertTrue(product_gate_matches_historical(previous, current, True))
+        self.assertTrue(product_gate_matches_historical(previous, previous, False))
+        self.assertFalse(product_gate_matches_historical(previous, previous, True),
+                         'a root toolchain input must not silently skip the product gate')
+
+    def test_product_gate_witness_rejects_unreviewed_changes(self):
+        path = '.github/workflows/muyon-product.yml'
+        previous = subprocess.check_output(['git', 'show', SOURCE_PIN + ':' + path], cwd=ROOT)
+        anchor = b'    paths: &product_paths\n'
+        entry = b"      - 'rust-toolchain.toml'\n"
+        expected = previous.replace(anchor, anchor + entry, 1)
+        mutations = {
+            'missing root path': expected.replace(entry, b'', 1),
+            'duplicate root path': expected.replace(entry, entry + entry, 1),
+            'broader permission': expected.replace(b'contents: read', b'contents: write', 1),
+            'weaker clippy': expected.replace(b'-D warnings', b'-A warnings', 1),
+            'changed aggregate': expected.replace(b'  required-product:', b'  optional-product:', 1),
+            'changed model check': expected.replace(b'model_package_gate.py', b'no_model_gate.py', 1),
+            'missing Rust path': expected.replace(b"      - 'crates/**'\n", b'', 1),
+        }
+        for label, changed in mutations.items():
+            with self.subTest(mutation=label):
+                self.assertNotEqual(changed, expected, 'mutation must actually change its target')
+                self.assertFalse(product_gate_matches_historical(previous, changed, True))
+
     def test_historical_manifest_cannot_remove_all_references(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
@@ -225,7 +266,13 @@ class FrozenSchema(unittest.TestCase):
         for path in ['crates/muyon-core/Cargo.toml', '.github/workflows/muyon-product.yml',
                      'apps/muyon_android/prepare-model-assets.py', 'scripts/coverage/baseline.json']:
             previous = subprocess.check_output(['git', 'show', SOURCE_PIN + ':' + path], cwd=ROOT)
-            self.assertEqual((ROOT / path).read_bytes(), previous)
+            current = (ROOT / path).read_bytes()
+            if path == '.github/workflows/muyon-product.yml':
+                self.assertTrue(product_gate_matches_historical(
+                    previous, current, (ROOT / 'rust-toolchain.toml').is_file()),
+                    'only the root-toolchain path may extend the frozen product gate')
+            else:
+                self.assertEqual(current, previous)
 
     def test_reference_checker_rejects_corruption_and_missing_file(self):
         self.manifest()

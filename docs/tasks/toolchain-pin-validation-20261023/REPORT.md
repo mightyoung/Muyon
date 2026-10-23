@@ -1,6 +1,6 @@
 # Root Rust toolchain validation
 
-Original candidate: `8a3064b207ee5a02374b5cbcb179e419580a56bf`, based on `fd26dcdabcdac996bc2881e8141cac2b519966fc`. Original signed commit and dated review remain unchanged. This isolated integration adds only a one-line product path selector, this report and a separate factual addendum; no Rust/UI/contract implementation changes.
+Original candidate: `8a3064b207ee5a02374b5cbcb179e419580a56bf`, based on `fd26dcdabcdac996bc2881e8141cac2b519966fc`. Original signed commit and dated review remain unchanged. This isolated integration adds a one-line product path selector, its narrowly bounded prerequisite-witness adaptation/tests, this report and a separate factual addendum; no Rust/UI/contract implementation changes.
 
 ## Actual local execution
 
@@ -22,3 +22,11 @@ Independent fixed-source review found C0/I1/M1. Important: the root file did not
 Deferred Minor: legacy lab workflows that use only `rustup default1.99.0` then ordinary cargo are overridden by the new root file; frontend-service-loop's original1.99.0 guard can refuse. Historical SHA without the root file is unaffected; explicit `+version`, RUSTUP_TOOLCHAIN, direct toolchain binaries and more-local toolchain files have their own selection. No old version assertion is removed, no environment workaround or old lab/I04/Reader execution is performed. Production workflow installs1.93.1 already. This slice does not claim all historical lab gates passed.
 
 Final immutable integration review and actual hosted product/legacy checks are pending at report publication. Do not infer merge or C1 delivery from this report. PR108 remains Draft/VISUAL HOLD. Full Rust PDF, Electron/napi, Money/Quantity/phase choices and UI redesign are separate owner decisions. No real model/search/fees/credential operations, branch deletion, main modification or deployment.
+
+## Preserved hosted RED and exact witness correction
+
+First integration head56dda3f78cb78abdf7c71885d7ca77530dcee8c7 failed push39906583450 and PR legacy39906639791: `FrozenSchema.test_historical_reference_manifest_matches_fixed_git_objects` required the current product workflow to equal SOURCE_PIN byte-for-byte and correctly rejected the new path line. Laya failure propagated to the original ci gate; no failure was ignored. Local unchanged-test reproduction also failed1/1 with the same byte mismatch. Original raw logs remain outside the repository.
+
+Keep SOURCE_PIN/GATE_BASE, all23 historical witnesses, manifest hash/blob/size checks, coverage baseline and all original assertions. The current-product comparison now permits exactly the one reviewed root-toolchain path extension when the root file exists; it still requires every other workflow byte to equal the fixed historical source. Absence/duplication of the root path, missing Rust path, broader permission, weaker Clippy, changed aggregate and changed model gate are seven rejected mutation cases. Two added tests also require root inputs actually select the product gate. The original15 plus new2 prerequisite tests pass17/17; independent Laya four suites pass8+4+8+9=29. No baseline is moved, test removed, threshold lowered or original product job altered.
+
+This is local witness GREEN, not a claim that the failed hosted run turned green. The repaired immutable head requires fresh full PR CI; the initial red/superseded runs remain separate. Rust source/root pin/Cargo.lock are unchanged, so local603 is not rerun or added to a new unique-scenario total for a Python witness change.
