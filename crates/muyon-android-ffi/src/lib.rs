@@ -1,5 +1,7 @@
 //! Thin product bridge. Models have no route to `confirm_user_plan`.
 //! The private Android Service calls that method only from the visible review action.
+pub mod command_port;
+pub mod development_session;
 use muyon_core::agent::owner::{AgentOwner, Settings as AgentSettings};
 use muyon_core::agent::tools::{HostPreparedSuggestion, PreparedSuggestion, ToolsContext};
 use muyon_core::{
