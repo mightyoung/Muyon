@@ -81,3 +81,7 @@ print('U0 visual approval: absent; acceptance NOT_RUN.')
 最终 S0/W 系列静态检查命令 `python3 /tmp/publicui-u0-evidence/check-final-docs.py` exit 0；输出 docs-final-check.txt SHA256=`fccc9cf8e8e6a5dfa88009a5f834402e92a6476f69c1de45feb2c7b02669d08f`，脚本 SHA256=`b11d45d6e0a02c05462904782ec70554a28902183bbff803aace35ef955e8a0c`。这不是新增行为测试或产品 PASS。
 
 最终可审阅内容源 `c595304d17339ba0e8c454bab833a6295b030f5f` 已正常推送；develop 远端仍为 `fd26dcdabcdac996bc2881e8141cac2b519966fc`。本次封套提交只登记独审与CI取消终态，不改设计或产品。最终重跑静态文档检查、REPORT相对链接与基线到内容源 diff-check 均 exit 0；工作树干净。后续 push 顶提交含 `[skip ci]`，未手动 dispatch；ci取消不计产品回归通过。
+
+## 父任务图标关键结果补入
+
+已补独立资源映射和显示/热区表，未等完整路径表就冒充全部盘点完成。按固定 develop 源本地确认：58个 product Kotlin 文件中 ChatInputDock 只有定义，当前壳是文字+、↑、◆/◇、···；AgentLibrary引用陶瓷环muyon_avatar（本执行者已view_image），Manifest无android:icon。三份原品牌PNG与固定 d61be4b5 候选逐字节相同，SHA256已列组件文档。旧图形精确计数为102种唯一几何/110个映射键，catalog fixture有102项；AppIcon在旧Flutter业务页有调用，不能当已迁原生。注释指向的生产生成catalog路径缺失、样本source为imagegen；来源/许可和完整路径表仍待核，不恢复Dart运行时、不新增依赖、不在此修改资源或产品页。
