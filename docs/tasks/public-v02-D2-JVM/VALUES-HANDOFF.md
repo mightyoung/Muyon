@@ -7,7 +7,7 @@
 - 新分支 `task/publicui-d2-value-preparation-20261023`；工作树 `/workspace/muyon-publicui-d2-values`。
 - 当前重新获取 develop 基线 `e943856e4b6e2de26a9c2c8e2fa0912713b590e5`（含 PR110 Contracts）；不从旧 main 或 Documents 未审候选建立产品基线。扫描未发现 AGENTS.md。
 - 完整读取提案 `b15c7af6d17f79de0eb393fc66aacd8b142118e9` 的 `docs/contracts/public-services-v02/D2-JVM-CLARIFICATION.md`，文档 SHA256 `16ec27f1c3f53d7895208e3de9dcda3fac6baf0e357cff3fed030ef51d9a7033`。
-- 完整读取修订计划 `db2964a42d3d882f3fe6285601f6b41e137c0367` 的 document-pipeline / public-services-index；前者文档 SHA256 `175de9bc0c8c720e9ff2facc1b9ed2569cbb95924e17a0070846b7c8ebd14310`。同时核其继承的 pipeline.rs guard 与原 JVM 测试 / runner / fixture。
+- 完整读取修订计划 `db2964a42d3d882f3fe6285601f6b41e137c0367` 的 document-pipeline / public-services-index；前者文档 SHA256 `175de9bc0c8c720e9ff2facc1b9ed2569cbb95924e17a0070846b7c8ebd14310`。计划提交本身不含 pipeline.rs；实际 guard 来源为 Documents 组合候选 `f2a3c21fcbb0ef6bd6c84e8c1fca750a990933f7` 的 `crates/muyon-core/src/services/pipeline.rs`，SHA256 `34bd53d3d3dcf1d02f046d404b2210f50eee024e1ec0cf098edf6c1536042e8f`，与提案分支 b15c7af 继承版本字节一致。另核原 JVM 测试 / runner / fixture。
 - 旧 JVM 验证 `3c72963a1adcb47fe82819a70310465e3eb8aeb4` 和 Documents 交接 `6e79be12fb537655454e8f28265439da02550530` 保持历史状态：缺生产文件 / 符号，只有结构失败，未取得行为 RED/GREEN。
 
 两份固定输入将生产文件交接列为未决；阅读后父任务补充 Contracts 已核准的明确分工：**PublicUI 唯一负责 Kotlin 生产文件 / 测试 / runner，Documents 负责 Rust / 共享fixture / 语义对拍，发布固定 fixture SHA 后本线消费，不互改文件。**该新交接解除文件 owner 待定，但不冻结可信宿主解析成功语义。本轮仅已确定的离线兼容比较进入实施范围，先完成本切片的独立诊断 / 测试矩阵，等待 Documents 新固定 fixture 后再实施，不抢写共同事实。
@@ -78,3 +78,7 @@ for (point in points) {
 待定 action=`实施 D2 Kotlin 生产纯函数`；target=`product/services/documents/IndexCompatibility.kt`；reason=父任务要求等待 Documents 发布固定共享fixture SHA 后消费；outcome=**待依赖，未执行，非审批拒绝**。独立诊断和材料已完成；没有绕过 Reader / FD、安装SDK / 新依赖、改旧PR108、合入或部署。
 
 文档检查记录：初稿将诊断行数误写35，行数断言实际exit1，未记通过；已按实际34个码点更正文档，再运行围栏 / 行数检查。原始探针与日志未改写。
+
+独审证据归属修复：原文把 pipeline guard 含混归于修订计划继承源码。非作者指出计划 SHA 不含此文件；考虑本片目的就是提供可固定复核的语义参考，将该项列为必须修的出处问题。实际 `git show db2964a42d3d882f3fe6285601f6b41e137c0367:crates/muyon-core/src/services/pipeline.rs` 退出128（仅资料定位失败，不是软件行为RED）；已更正为实际 Documents 源 `f2a3c21...`，文件提取与摘要核对通过。未改产品 / 测试 / fixture。
+
+独立审查：非作者 `/root/review_publicui_u0` 审查固定 `b55003cd3a5f061684f7a69f161c0c88ccc4ddaf`，实际重跑 Kotlin 探针exit0/34码点、基线diff-check、围栏/行数/关键差异及脚本/日志/输入文档摘要，均符合记录；除上述源码出处问题外未发现其他 Important/Minor。作者完成一次资料归属修复与静态核验，没有把初审冒充修复源二次审查，也没有请求重审。审查不包含生产Kotlin或Android运行。
