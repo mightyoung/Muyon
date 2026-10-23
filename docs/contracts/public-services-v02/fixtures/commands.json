@@ -1,0 +1,38 @@
+{
+  "contract_major": 1,
+  "schema_major": 1,
+  "lookup_cases": [
+    {
+      "id": "owner-special-case",
+      "json": "{\"status\":\"not_submitted\",\"receipt\":null,\"error\":\"confirmation_not_received\",\"recovery_action\":\"edit_new_draft\"}",
+      "valid": true,
+      "kind": "not_submitted"
+    },
+    {
+      "id": "wrong-special-error",
+      "json": "{\"status\":\"not_submitted\",\"receipt\":null,\"error\":\"not_found\",\"recovery_action\":\"edit_new_draft\"}",
+      "valid": false
+    },
+    {
+      "id": "missing-special-receipt",
+      "json": "{\"status\":\"not_submitted\",\"error\":\"confirmation_not_received\",\"recovery_action\":\"edit_new_draft\"}",
+      "valid": false
+    },
+    {
+      "id": "special-approval-field",
+      "json": "{\"status\":\"not_submitted\",\"receipt\":null,\"error\":\"confirmation_not_received\",\"recovery_action\":\"edit_new_draft\",\"approved\":true}",
+      "valid": false
+    },
+    {
+      "id": "unknown-not-found",
+      "json": "{\"status\":\"unknown\",\"receipt\":null,\"error\":\"not_found\",\"recovery_action\":\"query_original\"}",
+      "valid": true,
+      "kind": "unknown"
+    },
+    {
+      "id": "unknown-with-no-recovery",
+      "json": "{\"status\":\"unknown\",\"receipt\":null,\"error\":\"not_found\",\"recovery_action\":\"none\"}",
+      "valid": false
+    }
+  ]
+}
