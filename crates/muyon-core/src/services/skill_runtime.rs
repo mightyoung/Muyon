@@ -1,5 +1,8 @@
 //! Pure preflight and original lookup. No requestRun, dispatch or second ledger.
-use super::skills::{SkillBinding, SkillDescriptor};
+use super::{
+    pipeline::JobSnapshot,
+    skills::{SkillBinding, SkillDescriptor, SkillRef},
+};
 use crate::{
     contract::{ExecutionResult, Revision},
     documents::DocumentRef,
@@ -181,4 +184,19 @@ fn validate_original_execution(
         return Err(unknown());
     }
     Ok(())
+}
+
+/// Existing document-step facts wrapped for Skill presentation, never run authority.
+/// The host must authorize scope and obtain the original JobSnapshot before use.
+#[derive(Clone, Debug, PartialEq, Eq, Serialize)]
+pub struct SkillRunSnapshot {
+    pub skill: SkillRef,
+    pub binding_revision: Revision,
+    pub job: JobSnapshot,
+}
+/// Copies supplied original facts only; does not create a task or refresh authorization.
+pub fn get_run_snapshot(original: &SkillRunSnapshot) -> SkillRunSnapshot {
+    let mut placeholder = original.clone();
+    placeholder.job.phase = super::pipeline::JobPhase::Accepted;
+    placeholder
 }
