@@ -60,6 +60,13 @@ fn failure(code: ErrorCode) -> ServiceError {
         details_ref: None,
     }
 }
+/// Pure value comparison only; not model loading, lookup, or authorization.
+pub fn validate_vector_compatibility(
+    _index: &VectorDescriptor,
+    _query: &VectorDescriptor,
+) -> Result<(), ServiceError> {
+    Err(failure(ErrorCode::CapabilityUnavailable))
+}
 /// Pure CAS precondition only. A caller must publish under the existing owner's
 /// lock/transaction; this function cannot atomically update a current pointer.
 pub fn can_publish_head(

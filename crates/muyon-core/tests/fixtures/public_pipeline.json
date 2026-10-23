@@ -8,5 +8,1566 @@
     "dimensions": 768,
     "chunk_version": "synthetic-chunk-v1"
   },
-  "legacy_paper_only_publicly_resolvable": false
+  "legacy_paper_only_publicly_resolvable": false,
+  "fixture_revision": 2,
+  "candidate_semantics": "shape_only_not_trusted_resolution",
+  "kotlin_api_frozen": false,
+  "trusted_resolution_implemented": false,
+  "rust_whitespace_reference": "Rust 1.93.1 char::is_whitespace / str::trim",
+  "rust_whitespace_code_points": [
+    9,
+    10,
+    11,
+    12,
+    13,
+    32,
+    133,
+    160,
+    5760,
+    8192,
+    8193,
+    8194,
+    8195,
+    8196,
+    8197,
+    8198,
+    8199,
+    8200,
+    8201,
+    8202,
+    8232,
+    8233,
+    8239,
+    8287,
+    12288
+  ],
+  "compatibility_cases": [
+    {
+      "id": "same-valid",
+      "index": {
+        "model_version": "synthetic-model-v1",
+        "tokenizer_version": "synthetic-tokenizer-v1",
+        "dimensions": 768,
+        "chunk_version": "synthetic-chunk-v1"
+      },
+      "query": {
+        "model_version": "synthetic-model-v1",
+        "tokenizer_version": "synthetic-tokenizer-v1",
+        "dimensions": 768,
+        "chunk_version": "synthetic-chunk-v1"
+      },
+      "expected_rust_compatible": true,
+      "jvm_dimensions_supported": true
+    },
+    {
+      "id": "mismatch-model_version",
+      "index": {
+        "model_version": "synthetic-model-v1",
+        "tokenizer_version": "synthetic-tokenizer-v1",
+        "dimensions": 768,
+        "chunk_version": "synthetic-chunk-v1"
+      },
+      "query": {
+        "model_version": "synthetic-model-v1-other",
+        "tokenizer_version": "synthetic-tokenizer-v1",
+        "dimensions": 768,
+        "chunk_version": "synthetic-chunk-v1"
+      },
+      "expected_rust_compatible": false,
+      "jvm_dimensions_supported": true
+    },
+    {
+      "id": "mismatch-tokenizer_version",
+      "index": {
+        "model_version": "synthetic-model-v1",
+        "tokenizer_version": "synthetic-tokenizer-v1",
+        "dimensions": 768,
+        "chunk_version": "synthetic-chunk-v1"
+      },
+      "query": {
+        "model_version": "synthetic-model-v1",
+        "tokenizer_version": "synthetic-tokenizer-v1-other",
+        "dimensions": 768,
+        "chunk_version": "synthetic-chunk-v1"
+      },
+      "expected_rust_compatible": false,
+      "jvm_dimensions_supported": true
+    },
+    {
+      "id": "mismatch-dimensions",
+      "index": {
+        "model_version": "synthetic-model-v1",
+        "tokenizer_version": "synthetic-tokenizer-v1",
+        "dimensions": 768,
+        "chunk_version": "synthetic-chunk-v1"
+      },
+      "query": {
+        "model_version": "synthetic-model-v1",
+        "tokenizer_version": "synthetic-tokenizer-v1",
+        "dimensions": 384,
+        "chunk_version": "synthetic-chunk-v1"
+      },
+      "expected_rust_compatible": false,
+      "jvm_dimensions_supported": true
+    },
+    {
+      "id": "mismatch-chunk_version",
+      "index": {
+        "model_version": "synthetic-model-v1",
+        "tokenizer_version": "synthetic-tokenizer-v1",
+        "dimensions": 768,
+        "chunk_version": "synthetic-chunk-v1"
+      },
+      "query": {
+        "model_version": "synthetic-model-v1",
+        "tokenizer_version": "synthetic-tokenizer-v1",
+        "dimensions": 768,
+        "chunk_version": "synthetic-chunk-v1-other"
+      },
+      "expected_rust_compatible": false,
+      "jvm_dimensions_supported": true
+    },
+    {
+      "id": "same-invalid-model_version-empty",
+      "index": {
+        "model_version": "",
+        "tokenizer_version": "synthetic-tokenizer-v1",
+        "dimensions": 768,
+        "chunk_version": "synthetic-chunk-v1"
+      },
+      "query": {
+        "model_version": "",
+        "tokenizer_version": "synthetic-tokenizer-v1",
+        "dimensions": 768,
+        "chunk_version": "synthetic-chunk-v1"
+      },
+      "expected_rust_compatible": false,
+      "jvm_dimensions_supported": true
+    },
+    {
+      "id": "invalid-index-model_version-empty",
+      "index": {
+        "model_version": "",
+        "tokenizer_version": "synthetic-tokenizer-v1",
+        "dimensions": 768,
+        "chunk_version": "synthetic-chunk-v1"
+      },
+      "query": {
+        "model_version": "synthetic-model-v1",
+        "tokenizer_version": "synthetic-tokenizer-v1",
+        "dimensions": 768,
+        "chunk_version": "synthetic-chunk-v1"
+      },
+      "expected_rust_compatible": false,
+      "jvm_dimensions_supported": true
+    },
+    {
+      "id": "invalid-query-model_version-empty",
+      "index": {
+        "model_version": "synthetic-model-v1",
+        "tokenizer_version": "synthetic-tokenizer-v1",
+        "dimensions": 768,
+        "chunk_version": "synthetic-chunk-v1"
+      },
+      "query": {
+        "model_version": "",
+        "tokenizer_version": "synthetic-tokenizer-v1",
+        "dimensions": 768,
+        "chunk_version": "synthetic-chunk-v1"
+      },
+      "expected_rust_compatible": false,
+      "jvm_dimensions_supported": true
+    },
+    {
+      "id": "same-invalid-model_version-ascii-blank",
+      "index": {
+        "model_version": " \t\r\n",
+        "tokenizer_version": "synthetic-tokenizer-v1",
+        "dimensions": 768,
+        "chunk_version": "synthetic-chunk-v1"
+      },
+      "query": {
+        "model_version": " \t\r\n",
+        "tokenizer_version": "synthetic-tokenizer-v1",
+        "dimensions": 768,
+        "chunk_version": "synthetic-chunk-v1"
+      },
+      "expected_rust_compatible": false,
+      "jvm_dimensions_supported": true
+    },
+    {
+      "id": "invalid-index-model_version-ascii-blank",
+      "index": {
+        "model_version": " \t\r\n",
+        "tokenizer_version": "synthetic-tokenizer-v1",
+        "dimensions": 768,
+        "chunk_version": "synthetic-chunk-v1"
+      },
+      "query": {
+        "model_version": "synthetic-model-v1",
+        "tokenizer_version": "synthetic-tokenizer-v1",
+        "dimensions": 768,
+        "chunk_version": "synthetic-chunk-v1"
+      },
+      "expected_rust_compatible": false,
+      "jvm_dimensions_supported": true
+    },
+    {
+      "id": "invalid-query-model_version-ascii-blank",
+      "index": {
+        "model_version": "synthetic-model-v1",
+        "tokenizer_version": "synthetic-tokenizer-v1",
+        "dimensions": 768,
+        "chunk_version": "synthetic-chunk-v1"
+      },
+      "query": {
+        "model_version": " \t\r\n",
+        "tokenizer_version": "synthetic-tokenizer-v1",
+        "dimensions": 768,
+        "chunk_version": "synthetic-chunk-v1"
+      },
+      "expected_rust_compatible": false,
+      "jvm_dimensions_supported": true
+    },
+    {
+      "id": "same-invalid-tokenizer_version-empty",
+      "index": {
+        "model_version": "synthetic-model-v1",
+        "tokenizer_version": "",
+        "dimensions": 768,
+        "chunk_version": "synthetic-chunk-v1"
+      },
+      "query": {
+        "model_version": "synthetic-model-v1",
+        "tokenizer_version": "",
+        "dimensions": 768,
+        "chunk_version": "synthetic-chunk-v1"
+      },
+      "expected_rust_compatible": false,
+      "jvm_dimensions_supported": true
+    },
+    {
+      "id": "invalid-index-tokenizer_version-empty",
+      "index": {
+        "model_version": "synthetic-model-v1",
+        "tokenizer_version": "",
+        "dimensions": 768,
+        "chunk_version": "synthetic-chunk-v1"
+      },
+      "query": {
+        "model_version": "synthetic-model-v1",
+        "tokenizer_version": "synthetic-tokenizer-v1",
+        "dimensions": 768,
+        "chunk_version": "synthetic-chunk-v1"
+      },
+      "expected_rust_compatible": false,
+      "jvm_dimensions_supported": true
+    },
+    {
+      "id": "invalid-query-tokenizer_version-empty",
+      "index": {
+        "model_version": "synthetic-model-v1",
+        "tokenizer_version": "synthetic-tokenizer-v1",
+        "dimensions": 768,
+        "chunk_version": "synthetic-chunk-v1"
+      },
+      "query": {
+        "model_version": "synthetic-model-v1",
+        "tokenizer_version": "",
+        "dimensions": 768,
+        "chunk_version": "synthetic-chunk-v1"
+      },
+      "expected_rust_compatible": false,
+      "jvm_dimensions_supported": true
+    },
+    {
+      "id": "same-invalid-tokenizer_version-ascii-blank",
+      "index": {
+        "model_version": "synthetic-model-v1",
+        "tokenizer_version": " \t\r\n",
+        "dimensions": 768,
+        "chunk_version": "synthetic-chunk-v1"
+      },
+      "query": {
+        "model_version": "synthetic-model-v1",
+        "tokenizer_version": " \t\r\n",
+        "dimensions": 768,
+        "chunk_version": "synthetic-chunk-v1"
+      },
+      "expected_rust_compatible": false,
+      "jvm_dimensions_supported": true
+    },
+    {
+      "id": "invalid-index-tokenizer_version-ascii-blank",
+      "index": {
+        "model_version": "synthetic-model-v1",
+        "tokenizer_version": " \t\r\n",
+        "dimensions": 768,
+        "chunk_version": "synthetic-chunk-v1"
+      },
+      "query": {
+        "model_version": "synthetic-model-v1",
+        "tokenizer_version": "synthetic-tokenizer-v1",
+        "dimensions": 768,
+        "chunk_version": "synthetic-chunk-v1"
+      },
+      "expected_rust_compatible": false,
+      "jvm_dimensions_supported": true
+    },
+    {
+      "id": "invalid-query-tokenizer_version-ascii-blank",
+      "index": {
+        "model_version": "synthetic-model-v1",
+        "tokenizer_version": "synthetic-tokenizer-v1",
+        "dimensions": 768,
+        "chunk_version": "synthetic-chunk-v1"
+      },
+      "query": {
+        "model_version": "synthetic-model-v1",
+        "tokenizer_version": " \t\r\n",
+        "dimensions": 768,
+        "chunk_version": "synthetic-chunk-v1"
+      },
+      "expected_rust_compatible": false,
+      "jvm_dimensions_supported": true
+    },
+    {
+      "id": "same-invalid-chunk_version-empty",
+      "index": {
+        "model_version": "synthetic-model-v1",
+        "tokenizer_version": "synthetic-tokenizer-v1",
+        "dimensions": 768,
+        "chunk_version": ""
+      },
+      "query": {
+        "model_version": "synthetic-model-v1",
+        "tokenizer_version": "synthetic-tokenizer-v1",
+        "dimensions": 768,
+        "chunk_version": ""
+      },
+      "expected_rust_compatible": false,
+      "jvm_dimensions_supported": true
+    },
+    {
+      "id": "invalid-index-chunk_version-empty",
+      "index": {
+        "model_version": "synthetic-model-v1",
+        "tokenizer_version": "synthetic-tokenizer-v1",
+        "dimensions": 768,
+        "chunk_version": ""
+      },
+      "query": {
+        "model_version": "synthetic-model-v1",
+        "tokenizer_version": "synthetic-tokenizer-v1",
+        "dimensions": 768,
+        "chunk_version": "synthetic-chunk-v1"
+      },
+      "expected_rust_compatible": false,
+      "jvm_dimensions_supported": true
+    },
+    {
+      "id": "invalid-query-chunk_version-empty",
+      "index": {
+        "model_version": "synthetic-model-v1",
+        "tokenizer_version": "synthetic-tokenizer-v1",
+        "dimensions": 768,
+        "chunk_version": "synthetic-chunk-v1"
+      },
+      "query": {
+        "model_version": "synthetic-model-v1",
+        "tokenizer_version": "synthetic-tokenizer-v1",
+        "dimensions": 768,
+        "chunk_version": ""
+      },
+      "expected_rust_compatible": false,
+      "jvm_dimensions_supported": true
+    },
+    {
+      "id": "same-invalid-chunk_version-ascii-blank",
+      "index": {
+        "model_version": "synthetic-model-v1",
+        "tokenizer_version": "synthetic-tokenizer-v1",
+        "dimensions": 768,
+        "chunk_version": " \t\r\n"
+      },
+      "query": {
+        "model_version": "synthetic-model-v1",
+        "tokenizer_version": "synthetic-tokenizer-v1",
+        "dimensions": 768,
+        "chunk_version": " \t\r\n"
+      },
+      "expected_rust_compatible": false,
+      "jvm_dimensions_supported": true
+    },
+    {
+      "id": "invalid-index-chunk_version-ascii-blank",
+      "index": {
+        "model_version": "synthetic-model-v1",
+        "tokenizer_version": "synthetic-tokenizer-v1",
+        "dimensions": 768,
+        "chunk_version": " \t\r\n"
+      },
+      "query": {
+        "model_version": "synthetic-model-v1",
+        "tokenizer_version": "synthetic-tokenizer-v1",
+        "dimensions": 768,
+        "chunk_version": "synthetic-chunk-v1"
+      },
+      "expected_rust_compatible": false,
+      "jvm_dimensions_supported": true
+    },
+    {
+      "id": "invalid-query-chunk_version-ascii-blank",
+      "index": {
+        "model_version": "synthetic-model-v1",
+        "tokenizer_version": "synthetic-tokenizer-v1",
+        "dimensions": 768,
+        "chunk_version": "synthetic-chunk-v1"
+      },
+      "query": {
+        "model_version": "synthetic-model-v1",
+        "tokenizer_version": "synthetic-tokenizer-v1",
+        "dimensions": 768,
+        "chunk_version": " \t\r\n"
+      },
+      "expected_rust_compatible": false,
+      "jvm_dimensions_supported": true
+    },
+    {
+      "id": "same-dimensions-zero",
+      "index": {
+        "model_version": "synthetic-model-v1",
+        "tokenizer_version": "synthetic-tokenizer-v1",
+        "dimensions": 0,
+        "chunk_version": "synthetic-chunk-v1"
+      },
+      "query": {
+        "model_version": "synthetic-model-v1",
+        "tokenizer_version": "synthetic-tokenizer-v1",
+        "dimensions": 0,
+        "chunk_version": "synthetic-chunk-v1"
+      },
+      "expected_rust_compatible": false,
+      "jvm_dimensions_supported": false
+    },
+    {
+      "id": "same-dimensions-one",
+      "index": {
+        "model_version": "synthetic-model-v1",
+        "tokenizer_version": "synthetic-tokenizer-v1",
+        "dimensions": 1,
+        "chunk_version": "synthetic-chunk-v1"
+      },
+      "query": {
+        "model_version": "synthetic-model-v1",
+        "tokenizer_version": "synthetic-tokenizer-v1",
+        "dimensions": 1,
+        "chunk_version": "synthetic-chunk-v1"
+      },
+      "expected_rust_compatible": true,
+      "jvm_dimensions_supported": true
+    },
+    {
+      "id": "same-dimensions-i32-max",
+      "index": {
+        "model_version": "synthetic-model-v1",
+        "tokenizer_version": "synthetic-tokenizer-v1",
+        "dimensions": 2147483647,
+        "chunk_version": "synthetic-chunk-v1"
+      },
+      "query": {
+        "model_version": "synthetic-model-v1",
+        "tokenizer_version": "synthetic-tokenizer-v1",
+        "dimensions": 2147483647,
+        "chunk_version": "synthetic-chunk-v1"
+      },
+      "expected_rust_compatible": true,
+      "jvm_dimensions_supported": true
+    },
+    {
+      "id": "same-dimensions-i32-max-plus-one",
+      "index": {
+        "model_version": "synthetic-model-v1",
+        "tokenizer_version": "synthetic-tokenizer-v1",
+        "dimensions": 2147483648,
+        "chunk_version": "synthetic-chunk-v1"
+      },
+      "query": {
+        "model_version": "synthetic-model-v1",
+        "tokenizer_version": "synthetic-tokenizer-v1",
+        "dimensions": 2147483648,
+        "chunk_version": "synthetic-chunk-v1"
+      },
+      "expected_rust_compatible": true,
+      "jvm_dimensions_supported": false
+    },
+    {
+      "id": "same-dimensions-u32-max",
+      "index": {
+        "model_version": "synthetic-model-v1",
+        "tokenizer_version": "synthetic-tokenizer-v1",
+        "dimensions": 4294967295,
+        "chunk_version": "synthetic-chunk-v1"
+      },
+      "query": {
+        "model_version": "synthetic-model-v1",
+        "tokenizer_version": "synthetic-tokenizer-v1",
+        "dimensions": 4294967295,
+        "chunk_version": "synthetic-chunk-v1"
+      },
+      "expected_rust_compatible": true,
+      "jvm_dimensions_supported": false
+    },
+    {
+      "id": "same-model-U+0009",
+      "index": {
+        "model_version": "\t",
+        "tokenizer_version": "synthetic-tokenizer-v1",
+        "dimensions": 768,
+        "chunk_version": "synthetic-chunk-v1"
+      },
+      "query": {
+        "model_version": "\t",
+        "tokenizer_version": "synthetic-tokenizer-v1",
+        "dimensions": 768,
+        "chunk_version": "synthetic-chunk-v1"
+      },
+      "expected_rust_compatible": false,
+      "jvm_dimensions_supported": true
+    },
+    {
+      "id": "same-model-U+000A",
+      "index": {
+        "model_version": "\n",
+        "tokenizer_version": "synthetic-tokenizer-v1",
+        "dimensions": 768,
+        "chunk_version": "synthetic-chunk-v1"
+      },
+      "query": {
+        "model_version": "\n",
+        "tokenizer_version": "synthetic-tokenizer-v1",
+        "dimensions": 768,
+        "chunk_version": "synthetic-chunk-v1"
+      },
+      "expected_rust_compatible": false,
+      "jvm_dimensions_supported": true
+    },
+    {
+      "id": "same-model-U+000B",
+      "index": {
+        "model_version": "\u000b",
+        "tokenizer_version": "synthetic-tokenizer-v1",
+        "dimensions": 768,
+        "chunk_version": "synthetic-chunk-v1"
+      },
+      "query": {
+        "model_version": "\u000b",
+        "tokenizer_version": "synthetic-tokenizer-v1",
+        "dimensions": 768,
+        "chunk_version": "synthetic-chunk-v1"
+      },
+      "expected_rust_compatible": false,
+      "jvm_dimensions_supported": true
+    },
+    {
+      "id": "same-model-U+000C",
+      "index": {
+        "model_version": "\f",
+        "tokenizer_version": "synthetic-tokenizer-v1",
+        "dimensions": 768,
+        "chunk_version": "synthetic-chunk-v1"
+      },
+      "query": {
+        "model_version": "\f",
+        "tokenizer_version": "synthetic-tokenizer-v1",
+        "dimensions": 768,
+        "chunk_version": "synthetic-chunk-v1"
+      },
+      "expected_rust_compatible": false,
+      "jvm_dimensions_supported": true
+    },
+    {
+      "id": "same-model-U+000D",
+      "index": {
+        "model_version": "\r",
+        "tokenizer_version": "synthetic-tokenizer-v1",
+        "dimensions": 768,
+        "chunk_version": "synthetic-chunk-v1"
+      },
+      "query": {
+        "model_version": "\r",
+        "tokenizer_version": "synthetic-tokenizer-v1",
+        "dimensions": 768,
+        "chunk_version": "synthetic-chunk-v1"
+      },
+      "expected_rust_compatible": false,
+      "jvm_dimensions_supported": true
+    },
+    {
+      "id": "same-model-U+001C",
+      "index": {
+        "model_version": "\u001c",
+        "tokenizer_version": "synthetic-tokenizer-v1",
+        "dimensions": 768,
+        "chunk_version": "synthetic-chunk-v1"
+      },
+      "query": {
+        "model_version": "\u001c",
+        "tokenizer_version": "synthetic-tokenizer-v1",
+        "dimensions": 768,
+        "chunk_version": "synthetic-chunk-v1"
+      },
+      "expected_rust_compatible": true,
+      "jvm_dimensions_supported": true
+    },
+    {
+      "id": "same-model-U+001D",
+      "index": {
+        "model_version": "\u001d",
+        "tokenizer_version": "synthetic-tokenizer-v1",
+        "dimensions": 768,
+        "chunk_version": "synthetic-chunk-v1"
+      },
+      "query": {
+        "model_version": "\u001d",
+        "tokenizer_version": "synthetic-tokenizer-v1",
+        "dimensions": 768,
+        "chunk_version": "synthetic-chunk-v1"
+      },
+      "expected_rust_compatible": true,
+      "jvm_dimensions_supported": true
+    },
+    {
+      "id": "same-model-U+001E",
+      "index": {
+        "model_version": "\u001e",
+        "tokenizer_version": "synthetic-tokenizer-v1",
+        "dimensions": 768,
+        "chunk_version": "synthetic-chunk-v1"
+      },
+      "query": {
+        "model_version": "\u001e",
+        "tokenizer_version": "synthetic-tokenizer-v1",
+        "dimensions": 768,
+        "chunk_version": "synthetic-chunk-v1"
+      },
+      "expected_rust_compatible": true,
+      "jvm_dimensions_supported": true
+    },
+    {
+      "id": "same-model-U+001F",
+      "index": {
+        "model_version": "\u001f",
+        "tokenizer_version": "synthetic-tokenizer-v1",
+        "dimensions": 768,
+        "chunk_version": "synthetic-chunk-v1"
+      },
+      "query": {
+        "model_version": "\u001f",
+        "tokenizer_version": "synthetic-tokenizer-v1",
+        "dimensions": 768,
+        "chunk_version": "synthetic-chunk-v1"
+      },
+      "expected_rust_compatible": true,
+      "jvm_dimensions_supported": true
+    },
+    {
+      "id": "same-model-U+0020",
+      "index": {
+        "model_version": " ",
+        "tokenizer_version": "synthetic-tokenizer-v1",
+        "dimensions": 768,
+        "chunk_version": "synthetic-chunk-v1"
+      },
+      "query": {
+        "model_version": " ",
+        "tokenizer_version": "synthetic-tokenizer-v1",
+        "dimensions": 768,
+        "chunk_version": "synthetic-chunk-v1"
+      },
+      "expected_rust_compatible": false,
+      "jvm_dimensions_supported": true
+    },
+    {
+      "id": "same-model-U+0085",
+      "index": {
+        "model_version": "",
+        "tokenizer_version": "synthetic-tokenizer-v1",
+        "dimensions": 768,
+        "chunk_version": "synthetic-chunk-v1"
+      },
+      "query": {
+        "model_version": "",
+        "tokenizer_version": "synthetic-tokenizer-v1",
+        "dimensions": 768,
+        "chunk_version": "synthetic-chunk-v1"
+      },
+      "expected_rust_compatible": false,
+      "jvm_dimensions_supported": true
+    },
+    {
+      "id": "same-model-U+00A0",
+      "index": {
+        "model_version": " ",
+        "tokenizer_version": "synthetic-tokenizer-v1",
+        "dimensions": 768,
+        "chunk_version": "synthetic-chunk-v1"
+      },
+      "query": {
+        "model_version": " ",
+        "tokenizer_version": "synthetic-tokenizer-v1",
+        "dimensions": 768,
+        "chunk_version": "synthetic-chunk-v1"
+      },
+      "expected_rust_compatible": false,
+      "jvm_dimensions_supported": true
+    },
+    {
+      "id": "same-model-U+1680",
+      "index": {
+        "model_version": " ",
+        "tokenizer_version": "synthetic-tokenizer-v1",
+        "dimensions": 768,
+        "chunk_version": "synthetic-chunk-v1"
+      },
+      "query": {
+        "model_version": " ",
+        "tokenizer_version": "synthetic-tokenizer-v1",
+        "dimensions": 768,
+        "chunk_version": "synthetic-chunk-v1"
+      },
+      "expected_rust_compatible": false,
+      "jvm_dimensions_supported": true
+    },
+    {
+      "id": "same-model-U+180E",
+      "index": {
+        "model_version": "᠎",
+        "tokenizer_version": "synthetic-tokenizer-v1",
+        "dimensions": 768,
+        "chunk_version": "synthetic-chunk-v1"
+      },
+      "query": {
+        "model_version": "᠎",
+        "tokenizer_version": "synthetic-tokenizer-v1",
+        "dimensions": 768,
+        "chunk_version": "synthetic-chunk-v1"
+      },
+      "expected_rust_compatible": true,
+      "jvm_dimensions_supported": true
+    },
+    {
+      "id": "same-model-U+2000",
+      "index": {
+        "model_version": " ",
+        "tokenizer_version": "synthetic-tokenizer-v1",
+        "dimensions": 768,
+        "chunk_version": "synthetic-chunk-v1"
+      },
+      "query": {
+        "model_version": " ",
+        "tokenizer_version": "synthetic-tokenizer-v1",
+        "dimensions": 768,
+        "chunk_version": "synthetic-chunk-v1"
+      },
+      "expected_rust_compatible": false,
+      "jvm_dimensions_supported": true
+    },
+    {
+      "id": "same-model-U+2001",
+      "index": {
+        "model_version": " ",
+        "tokenizer_version": "synthetic-tokenizer-v1",
+        "dimensions": 768,
+        "chunk_version": "synthetic-chunk-v1"
+      },
+      "query": {
+        "model_version": " ",
+        "tokenizer_version": "synthetic-tokenizer-v1",
+        "dimensions": 768,
+        "chunk_version": "synthetic-chunk-v1"
+      },
+      "expected_rust_compatible": false,
+      "jvm_dimensions_supported": true
+    },
+    {
+      "id": "same-model-U+2002",
+      "index": {
+        "model_version": " ",
+        "tokenizer_version": "synthetic-tokenizer-v1",
+        "dimensions": 768,
+        "chunk_version": "synthetic-chunk-v1"
+      },
+      "query": {
+        "model_version": " ",
+        "tokenizer_version": "synthetic-tokenizer-v1",
+        "dimensions": 768,
+        "chunk_version": "synthetic-chunk-v1"
+      },
+      "expected_rust_compatible": false,
+      "jvm_dimensions_supported": true
+    },
+    {
+      "id": "same-model-U+2003",
+      "index": {
+        "model_version": " ",
+        "tokenizer_version": "synthetic-tokenizer-v1",
+        "dimensions": 768,
+        "chunk_version": "synthetic-chunk-v1"
+      },
+      "query": {
+        "model_version": " ",
+        "tokenizer_version": "synthetic-tokenizer-v1",
+        "dimensions": 768,
+        "chunk_version": "synthetic-chunk-v1"
+      },
+      "expected_rust_compatible": false,
+      "jvm_dimensions_supported": true
+    },
+    {
+      "id": "same-model-U+2004",
+      "index": {
+        "model_version": " ",
+        "tokenizer_version": "synthetic-tokenizer-v1",
+        "dimensions": 768,
+        "chunk_version": "synthetic-chunk-v1"
+      },
+      "query": {
+        "model_version": " ",
+        "tokenizer_version": "synthetic-tokenizer-v1",
+        "dimensions": 768,
+        "chunk_version": "synthetic-chunk-v1"
+      },
+      "expected_rust_compatible": false,
+      "jvm_dimensions_supported": true
+    },
+    {
+      "id": "same-model-U+2005",
+      "index": {
+        "model_version": " ",
+        "tokenizer_version": "synthetic-tokenizer-v1",
+        "dimensions": 768,
+        "chunk_version": "synthetic-chunk-v1"
+      },
+      "query": {
+        "model_version": " ",
+        "tokenizer_version": "synthetic-tokenizer-v1",
+        "dimensions": 768,
+        "chunk_version": "synthetic-chunk-v1"
+      },
+      "expected_rust_compatible": false,
+      "jvm_dimensions_supported": true
+    },
+    {
+      "id": "same-model-U+2006",
+      "index": {
+        "model_version": " ",
+        "tokenizer_version": "synthetic-tokenizer-v1",
+        "dimensions": 768,
+        "chunk_version": "synthetic-chunk-v1"
+      },
+      "query": {
+        "model_version": " ",
+        "tokenizer_version": "synthetic-tokenizer-v1",
+        "dimensions": 768,
+        "chunk_version": "synthetic-chunk-v1"
+      },
+      "expected_rust_compatible": false,
+      "jvm_dimensions_supported": true
+    },
+    {
+      "id": "same-model-U+2007",
+      "index": {
+        "model_version": " ",
+        "tokenizer_version": "synthetic-tokenizer-v1",
+        "dimensions": 768,
+        "chunk_version": "synthetic-chunk-v1"
+      },
+      "query": {
+        "model_version": " ",
+        "tokenizer_version": "synthetic-tokenizer-v1",
+        "dimensions": 768,
+        "chunk_version": "synthetic-chunk-v1"
+      },
+      "expected_rust_compatible": false,
+      "jvm_dimensions_supported": true
+    },
+    {
+      "id": "same-model-U+2008",
+      "index": {
+        "model_version": " ",
+        "tokenizer_version": "synthetic-tokenizer-v1",
+        "dimensions": 768,
+        "chunk_version": "synthetic-chunk-v1"
+      },
+      "query": {
+        "model_version": " ",
+        "tokenizer_version": "synthetic-tokenizer-v1",
+        "dimensions": 768,
+        "chunk_version": "synthetic-chunk-v1"
+      },
+      "expected_rust_compatible": false,
+      "jvm_dimensions_supported": true
+    },
+    {
+      "id": "same-model-U+2009",
+      "index": {
+        "model_version": " ",
+        "tokenizer_version": "synthetic-tokenizer-v1",
+        "dimensions": 768,
+        "chunk_version": "synthetic-chunk-v1"
+      },
+      "query": {
+        "model_version": " ",
+        "tokenizer_version": "synthetic-tokenizer-v1",
+        "dimensions": 768,
+        "chunk_version": "synthetic-chunk-v1"
+      },
+      "expected_rust_compatible": false,
+      "jvm_dimensions_supported": true
+    },
+    {
+      "id": "same-model-U+200A",
+      "index": {
+        "model_version": " ",
+        "tokenizer_version": "synthetic-tokenizer-v1",
+        "dimensions": 768,
+        "chunk_version": "synthetic-chunk-v1"
+      },
+      "query": {
+        "model_version": " ",
+        "tokenizer_version": "synthetic-tokenizer-v1",
+        "dimensions": 768,
+        "chunk_version": "synthetic-chunk-v1"
+      },
+      "expected_rust_compatible": false,
+      "jvm_dimensions_supported": true
+    },
+    {
+      "id": "same-model-U+200B",
+      "index": {
+        "model_version": "​",
+        "tokenizer_version": "synthetic-tokenizer-v1",
+        "dimensions": 768,
+        "chunk_version": "synthetic-chunk-v1"
+      },
+      "query": {
+        "model_version": "​",
+        "tokenizer_version": "synthetic-tokenizer-v1",
+        "dimensions": 768,
+        "chunk_version": "synthetic-chunk-v1"
+      },
+      "expected_rust_compatible": true,
+      "jvm_dimensions_supported": true
+    },
+    {
+      "id": "same-model-U+2028",
+      "index": {
+        "model_version": " ",
+        "tokenizer_version": "synthetic-tokenizer-v1",
+        "dimensions": 768,
+        "chunk_version": "synthetic-chunk-v1"
+      },
+      "query": {
+        "model_version": " ",
+        "tokenizer_version": "synthetic-tokenizer-v1",
+        "dimensions": 768,
+        "chunk_version": "synthetic-chunk-v1"
+      },
+      "expected_rust_compatible": false,
+      "jvm_dimensions_supported": true
+    },
+    {
+      "id": "same-model-U+2029",
+      "index": {
+        "model_version": " ",
+        "tokenizer_version": "synthetic-tokenizer-v1",
+        "dimensions": 768,
+        "chunk_version": "synthetic-chunk-v1"
+      },
+      "query": {
+        "model_version": " ",
+        "tokenizer_version": "synthetic-tokenizer-v1",
+        "dimensions": 768,
+        "chunk_version": "synthetic-chunk-v1"
+      },
+      "expected_rust_compatible": false,
+      "jvm_dimensions_supported": true
+    },
+    {
+      "id": "same-model-U+202F",
+      "index": {
+        "model_version": " ",
+        "tokenizer_version": "synthetic-tokenizer-v1",
+        "dimensions": 768,
+        "chunk_version": "synthetic-chunk-v1"
+      },
+      "query": {
+        "model_version": " ",
+        "tokenizer_version": "synthetic-tokenizer-v1",
+        "dimensions": 768,
+        "chunk_version": "synthetic-chunk-v1"
+      },
+      "expected_rust_compatible": false,
+      "jvm_dimensions_supported": true
+    },
+    {
+      "id": "same-model-U+205F",
+      "index": {
+        "model_version": " ",
+        "tokenizer_version": "synthetic-tokenizer-v1",
+        "dimensions": 768,
+        "chunk_version": "synthetic-chunk-v1"
+      },
+      "query": {
+        "model_version": " ",
+        "tokenizer_version": "synthetic-tokenizer-v1",
+        "dimensions": 768,
+        "chunk_version": "synthetic-chunk-v1"
+      },
+      "expected_rust_compatible": false,
+      "jvm_dimensions_supported": true
+    },
+    {
+      "id": "same-model-U+3000",
+      "index": {
+        "model_version": "　",
+        "tokenizer_version": "synthetic-tokenizer-v1",
+        "dimensions": 768,
+        "chunk_version": "synthetic-chunk-v1"
+      },
+      "query": {
+        "model_version": "　",
+        "tokenizer_version": "synthetic-tokenizer-v1",
+        "dimensions": 768,
+        "chunk_version": "synthetic-chunk-v1"
+      },
+      "expected_rust_compatible": false,
+      "jvm_dimensions_supported": true
+    },
+    {
+      "id": "same-model-U+FEFF",
+      "index": {
+        "model_version": "﻿",
+        "tokenizer_version": "synthetic-tokenizer-v1",
+        "dimensions": 768,
+        "chunk_version": "synthetic-chunk-v1"
+      },
+      "query": {
+        "model_version": "﻿",
+        "tokenizer_version": "synthetic-tokenizer-v1",
+        "dimensions": 768,
+        "chunk_version": "synthetic-chunk-v1"
+      },
+      "expected_rust_compatible": true,
+      "jvm_dimensions_supported": true
+    },
+    {
+      "id": "same-untrimmed-model_version",
+      "index": {
+        "model_version": " synthetic-model-v1 ",
+        "tokenizer_version": "synthetic-tokenizer-v1",
+        "dimensions": 768,
+        "chunk_version": "synthetic-chunk-v1"
+      },
+      "query": {
+        "model_version": " synthetic-model-v1 ",
+        "tokenizer_version": "synthetic-tokenizer-v1",
+        "dimensions": 768,
+        "chunk_version": "synthetic-chunk-v1"
+      },
+      "expected_rust_compatible": true,
+      "jvm_dimensions_supported": true
+    },
+    {
+      "id": "same-untrimmed-tokenizer_version",
+      "index": {
+        "model_version": "synthetic-model-v1",
+        "tokenizer_version": " synthetic-tokenizer-v1 ",
+        "dimensions": 768,
+        "chunk_version": "synthetic-chunk-v1"
+      },
+      "query": {
+        "model_version": "synthetic-model-v1",
+        "tokenizer_version": " synthetic-tokenizer-v1 ",
+        "dimensions": 768,
+        "chunk_version": "synthetic-chunk-v1"
+      },
+      "expected_rust_compatible": true,
+      "jvm_dimensions_supported": true
+    },
+    {
+      "id": "same-untrimmed-chunk_version",
+      "index": {
+        "model_version": "synthetic-model-v1",
+        "tokenizer_version": "synthetic-tokenizer-v1",
+        "dimensions": 768,
+        "chunk_version": " synthetic-chunk-v1 "
+      },
+      "query": {
+        "model_version": "synthetic-model-v1",
+        "tokenizer_version": "synthetic-tokenizer-v1",
+        "dimensions": 768,
+        "chunk_version": " synthetic-chunk-v1 "
+      },
+      "expected_rust_compatible": true,
+      "jvm_dimensions_supported": true
+    },
+    {
+      "id": "same-unicode-model",
+      "index": {
+        "model_version": "模型-v1",
+        "tokenizer_version": "synthetic-tokenizer-v1",
+        "dimensions": 768,
+        "chunk_version": "synthetic-chunk-v1"
+      },
+      "query": {
+        "model_version": "模型-v1",
+        "tokenizer_version": "synthetic-tokenizer-v1",
+        "dimensions": 768,
+        "chunk_version": "synthetic-chunk-v1"
+      },
+      "expected_rust_compatible": true,
+      "jvm_dimensions_supported": true
+    }
+  ],
+  "reference_candidate_cases": [
+    {
+      "id": "valid-candidate",
+      "document_id": "doc:synthetic",
+      "result_id": "result:synthetic",
+      "model": {
+        "model_version": "synthetic-model-v1",
+        "tokenizer_version": "synthetic-tokenizer-v1",
+        "dimensions": 768,
+        "chunk_version": "synthetic-chunk-v1"
+      },
+      "expected_document_id_valid": true,
+      "expected_result_id_valid": true,
+      "expected_descriptor_valid_rust": true,
+      "jvm_dimensions_supported": true,
+      "expected_rust_shape_candidate": true,
+      "expected_jvm_shape_candidate": true
+    },
+    {
+      "id": "missing-document",
+      "document_id": null,
+      "result_id": "result:synthetic",
+      "model": {
+        "model_version": "synthetic-model-v1",
+        "tokenizer_version": "synthetic-tokenizer-v1",
+        "dimensions": 768,
+        "chunk_version": "synthetic-chunk-v1"
+      },
+      "expected_document_id_valid": false,
+      "expected_result_id_valid": true,
+      "expected_descriptor_valid_rust": true,
+      "jvm_dimensions_supported": true,
+      "expected_rust_shape_candidate": false,
+      "expected_jvm_shape_candidate": false
+    },
+    {
+      "id": "missing-result",
+      "document_id": "doc:synthetic",
+      "result_id": null,
+      "model": {
+        "model_version": "synthetic-model-v1",
+        "tokenizer_version": "synthetic-tokenizer-v1",
+        "dimensions": 768,
+        "chunk_version": "synthetic-chunk-v1"
+      },
+      "expected_document_id_valid": true,
+      "expected_result_id_valid": false,
+      "expected_descriptor_valid_rust": true,
+      "jvm_dimensions_supported": true,
+      "expected_rust_shape_candidate": false,
+      "expected_jvm_shape_candidate": false
+    },
+    {
+      "id": "missing-model",
+      "document_id": "doc:synthetic",
+      "result_id": "result:synthetic",
+      "model": null,
+      "expected_document_id_valid": true,
+      "expected_result_id_valid": true,
+      "expected_descriptor_valid_rust": false,
+      "jvm_dimensions_supported": false,
+      "expected_rust_shape_candidate": false,
+      "expected_jvm_shape_candidate": false
+    },
+    {
+      "id": "document-empty",
+      "document_id": "",
+      "result_id": "result:synthetic",
+      "model": {
+        "model_version": "synthetic-model-v1",
+        "tokenizer_version": "synthetic-tokenizer-v1",
+        "dimensions": 768,
+        "chunk_version": "synthetic-chunk-v1"
+      },
+      "expected_document_id_valid": false,
+      "expected_result_id_valid": true,
+      "expected_descriptor_valid_rust": true,
+      "jvm_dimensions_supported": true,
+      "expected_rust_shape_candidate": false,
+      "expected_jvm_shape_candidate": false
+    },
+    {
+      "id": "document-space",
+      "document_id": " ",
+      "result_id": "result:synthetic",
+      "model": {
+        "model_version": "synthetic-model-v1",
+        "tokenizer_version": "synthetic-tokenizer-v1",
+        "dimensions": 768,
+        "chunk_version": "synthetic-chunk-v1"
+      },
+      "expected_document_id_valid": false,
+      "expected_result_id_valid": true,
+      "expected_descriptor_valid_rust": true,
+      "jvm_dimensions_supported": true,
+      "expected_rust_shape_candidate": false,
+      "expected_jvm_shape_candidate": false
+    },
+    {
+      "id": "document-slash",
+      "document_id": "dir/doc",
+      "result_id": "result:synthetic",
+      "model": {
+        "model_version": "synthetic-model-v1",
+        "tokenizer_version": "synthetic-tokenizer-v1",
+        "dimensions": 768,
+        "chunk_version": "synthetic-chunk-v1"
+      },
+      "expected_document_id_valid": false,
+      "expected_result_id_valid": true,
+      "expected_descriptor_valid_rust": true,
+      "jvm_dimensions_supported": true,
+      "expected_rust_shape_candidate": false,
+      "expected_jvm_shape_candidate": false
+    },
+    {
+      "id": "document-unicode",
+      "document_id": "文档",
+      "result_id": "result:synthetic",
+      "model": {
+        "model_version": "synthetic-model-v1",
+        "tokenizer_version": "synthetic-tokenizer-v1",
+        "dimensions": 768,
+        "chunk_version": "synthetic-chunk-v1"
+      },
+      "expected_document_id_valid": false,
+      "expected_result_id_valid": true,
+      "expected_descriptor_valid_rust": true,
+      "jvm_dimensions_supported": true,
+      "expected_rust_shape_candidate": false,
+      "expected_jvm_shape_candidate": false
+    },
+    {
+      "id": "document-nul",
+      "document_id": "a\u0000b",
+      "result_id": "result:synthetic",
+      "model": {
+        "model_version": "synthetic-model-v1",
+        "tokenizer_version": "synthetic-tokenizer-v1",
+        "dimensions": 768,
+        "chunk_version": "synthetic-chunk-v1"
+      },
+      "expected_document_id_valid": false,
+      "expected_result_id_valid": true,
+      "expected_descriptor_valid_rust": true,
+      "jvm_dimensions_supported": true,
+      "expected_rust_shape_candidate": false,
+      "expected_jvm_shape_candidate": false
+    },
+    {
+      "id": "document-ascii-128",
+      "document_id": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+      "result_id": "result:synthetic",
+      "model": {
+        "model_version": "synthetic-model-v1",
+        "tokenizer_version": "synthetic-tokenizer-v1",
+        "dimensions": 768,
+        "chunk_version": "synthetic-chunk-v1"
+      },
+      "expected_document_id_valid": true,
+      "expected_result_id_valid": true,
+      "expected_descriptor_valid_rust": true,
+      "jvm_dimensions_supported": true,
+      "expected_rust_shape_candidate": true,
+      "expected_jvm_shape_candidate": true
+    },
+    {
+      "id": "document-ascii-129",
+      "document_id": "ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+      "result_id": "result:synthetic",
+      "model": {
+        "model_version": "synthetic-model-v1",
+        "tokenizer_version": "synthetic-tokenizer-v1",
+        "dimensions": 768,
+        "chunk_version": "synthetic-chunk-v1"
+      },
+      "expected_document_id_valid": false,
+      "expected_result_id_valid": true,
+      "expected_descriptor_valid_rust": true,
+      "jvm_dimensions_supported": true,
+      "expected_rust_shape_candidate": false,
+      "expected_jvm_shape_candidate": false
+    },
+    {
+      "id": "document-ascii-alphabet",
+      "document_id": "D_9.:-",
+      "result_id": "result:synthetic",
+      "model": {
+        "model_version": "synthetic-model-v1",
+        "tokenizer_version": "synthetic-tokenizer-v1",
+        "dimensions": 768,
+        "chunk_version": "synthetic-chunk-v1"
+      },
+      "expected_document_id_valid": true,
+      "expected_result_id_valid": true,
+      "expected_descriptor_valid_rust": true,
+      "jvm_dimensions_supported": true,
+      "expected_rust_shape_candidate": true,
+      "expected_jvm_shape_candidate": true
+    },
+    {
+      "id": "result-empty",
+      "document_id": "doc:synthetic",
+      "result_id": "",
+      "model": {
+        "model_version": "synthetic-model-v1",
+        "tokenizer_version": "synthetic-tokenizer-v1",
+        "dimensions": 768,
+        "chunk_version": "synthetic-chunk-v1"
+      },
+      "expected_document_id_valid": true,
+      "expected_result_id_valid": false,
+      "expected_descriptor_valid_rust": true,
+      "jvm_dimensions_supported": true,
+      "expected_rust_shape_candidate": false,
+      "expected_jvm_shape_candidate": false
+    },
+    {
+      "id": "result-space-valid-public-value",
+      "document_id": "doc:synthetic",
+      "result_id": " ",
+      "model": {
+        "model_version": "synthetic-model-v1",
+        "tokenizer_version": "synthetic-tokenizer-v1",
+        "dimensions": 768,
+        "chunk_version": "synthetic-chunk-v1"
+      },
+      "expected_document_id_valid": true,
+      "expected_result_id_valid": true,
+      "expected_descriptor_valid_rust": true,
+      "jvm_dimensions_supported": true,
+      "expected_rust_shape_candidate": true,
+      "expected_jvm_shape_candidate": true
+    },
+    {
+      "id": "result-nul",
+      "document_id": "doc:synthetic",
+      "result_id": "r\u0000x",
+      "model": {
+        "model_version": "synthetic-model-v1",
+        "tokenizer_version": "synthetic-tokenizer-v1",
+        "dimensions": 768,
+        "chunk_version": "synthetic-chunk-v1"
+      },
+      "expected_document_id_valid": true,
+      "expected_result_id_valid": false,
+      "expected_descriptor_valid_rust": true,
+      "jvm_dimensions_supported": true,
+      "expected_rust_shape_candidate": false,
+      "expected_jvm_shape_candidate": false
+    },
+    {
+      "id": "result-ascii-128",
+      "document_id": "doc:synthetic",
+      "result_id": "rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr",
+      "model": {
+        "model_version": "synthetic-model-v1",
+        "tokenizer_version": "synthetic-tokenizer-v1",
+        "dimensions": 768,
+        "chunk_version": "synthetic-chunk-v1"
+      },
+      "expected_document_id_valid": true,
+      "expected_result_id_valid": true,
+      "expected_descriptor_valid_rust": true,
+      "jvm_dimensions_supported": true,
+      "expected_rust_shape_candidate": true,
+      "expected_jvm_shape_candidate": true
+    },
+    {
+      "id": "result-ascii-129",
+      "document_id": "doc:synthetic",
+      "result_id": "rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr",
+      "model": {
+        "model_version": "synthetic-model-v1",
+        "tokenizer_version": "synthetic-tokenizer-v1",
+        "dimensions": 768,
+        "chunk_version": "synthetic-chunk-v1"
+      },
+      "expected_document_id_valid": true,
+      "expected_result_id_valid": false,
+      "expected_descriptor_valid_rust": true,
+      "jvm_dimensions_supported": true,
+      "expected_rust_shape_candidate": false,
+      "expected_jvm_shape_candidate": false
+    },
+    {
+      "id": "result-emoji-128",
+      "document_id": "doc:synthetic",
+      "result_id": "😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀",
+      "model": {
+        "model_version": "synthetic-model-v1",
+        "tokenizer_version": "synthetic-tokenizer-v1",
+        "dimensions": 768,
+        "chunk_version": "synthetic-chunk-v1"
+      },
+      "expected_document_id_valid": true,
+      "expected_result_id_valid": true,
+      "expected_descriptor_valid_rust": true,
+      "jvm_dimensions_supported": true,
+      "expected_rust_shape_candidate": true,
+      "expected_jvm_shape_candidate": true
+    },
+    {
+      "id": "result-emoji-129",
+      "document_id": "doc:synthetic",
+      "result_id": "😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀a",
+      "model": {
+        "model_version": "synthetic-model-v1",
+        "tokenizer_version": "synthetic-tokenizer-v1",
+        "dimensions": 768,
+        "chunk_version": "synthetic-chunk-v1"
+      },
+      "expected_document_id_valid": true,
+      "expected_result_id_valid": false,
+      "expected_descriptor_valid_rust": true,
+      "jvm_dimensions_supported": true,
+      "expected_rust_shape_candidate": false,
+      "expected_jvm_shape_candidate": false
+    },
+    {
+      "id": "result-cjk-128",
+      "document_id": "doc:synthetic",
+      "result_id": "甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲aa",
+      "model": {
+        "model_version": "synthetic-model-v1",
+        "tokenizer_version": "synthetic-tokenizer-v1",
+        "dimensions": 768,
+        "chunk_version": "synthetic-chunk-v1"
+      },
+      "expected_document_id_valid": true,
+      "expected_result_id_valid": true,
+      "expected_descriptor_valid_rust": true,
+      "jvm_dimensions_supported": true,
+      "expected_rust_shape_candidate": true,
+      "expected_jvm_shape_candidate": true
+    },
+    {
+      "id": "result-cjk-129",
+      "document_id": "doc:synthetic",
+      "result_id": "甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲aaa",
+      "model": {
+        "model_version": "synthetic-model-v1",
+        "tokenizer_version": "synthetic-tokenizer-v1",
+        "dimensions": 768,
+        "chunk_version": "synthetic-chunk-v1"
+      },
+      "expected_document_id_valid": true,
+      "expected_result_id_valid": false,
+      "expected_descriptor_valid_rust": true,
+      "jvm_dimensions_supported": true,
+      "expected_rust_shape_candidate": false,
+      "expected_jvm_shape_candidate": false
+    },
+    {
+      "id": "result-unicode-valid-public-value",
+      "document_id": "doc:synthetic",
+      "result_id": "甲",
+      "model": {
+        "model_version": "synthetic-model-v1",
+        "tokenizer_version": "synthetic-tokenizer-v1",
+        "dimensions": 768,
+        "chunk_version": "synthetic-chunk-v1"
+      },
+      "expected_document_id_valid": true,
+      "expected_result_id_valid": true,
+      "expected_descriptor_valid_rust": true,
+      "jvm_dimensions_supported": true,
+      "expected_rust_shape_candidate": true,
+      "expected_jvm_shape_candidate": true
+    },
+    {
+      "id": "model-zero-dimensions",
+      "document_id": "doc:synthetic",
+      "result_id": "result:synthetic",
+      "model": {
+        "model_version": "synthetic-model-v1",
+        "tokenizer_version": "synthetic-tokenizer-v1",
+        "dimensions": 0,
+        "chunk_version": "synthetic-chunk-v1"
+      },
+      "expected_document_id_valid": true,
+      "expected_result_id_valid": true,
+      "expected_descriptor_valid_rust": false,
+      "jvm_dimensions_supported": false,
+      "expected_rust_shape_candidate": false,
+      "expected_jvm_shape_candidate": false
+    },
+    {
+      "id": "model-outside-jvm-int",
+      "document_id": "doc:synthetic",
+      "result_id": "result:synthetic",
+      "model": {
+        "model_version": "synthetic-model-v1",
+        "tokenizer_version": "synthetic-tokenizer-v1",
+        "dimensions": 2147483648,
+        "chunk_version": "synthetic-chunk-v1"
+      },
+      "expected_document_id_valid": true,
+      "expected_result_id_valid": true,
+      "expected_descriptor_valid_rust": true,
+      "jvm_dimensions_supported": false,
+      "expected_rust_shape_candidate": true,
+      "expected_jvm_shape_candidate": false
+    },
+    {
+      "id": "model-u32-max",
+      "document_id": "doc:synthetic",
+      "result_id": "result:synthetic",
+      "model": {
+        "model_version": "synthetic-model-v1",
+        "tokenizer_version": "synthetic-tokenizer-v1",
+        "dimensions": 4294967295,
+        "chunk_version": "synthetic-chunk-v1"
+      },
+      "expected_document_id_valid": true,
+      "expected_result_id_valid": true,
+      "expected_descriptor_valid_rust": true,
+      "jvm_dimensions_supported": false,
+      "expected_rust_shape_candidate": true,
+      "expected_jvm_shape_candidate": false
+    },
+    {
+      "id": "model-unicode-blank-tokenizer",
+      "document_id": "doc:synthetic",
+      "result_id": "result:synthetic",
+      "model": {
+        "model_version": "synthetic-model-v1",
+        "tokenizer_version": "",
+        "dimensions": 768,
+        "chunk_version": "synthetic-chunk-v1"
+      },
+      "expected_document_id_valid": true,
+      "expected_result_id_valid": true,
+      "expected_descriptor_valid_rust": false,
+      "jvm_dimensions_supported": true,
+      "expected_rust_shape_candidate": false,
+      "expected_jvm_shape_candidate": false
+    }
+  ]
 }
