@@ -23,7 +23,7 @@ gradle --offline --no-daemon --console=plain --init-script <authorized-local-rep
   :app:compileDebugKotlin :app:compileDebugAndroidTestKotlin :app:lintDebug
 ```
 
-Result: exit 0. This is compilation/lint, not a newly built product APK; cached native/model inputs were used without making a new native/build-identity claim. Warnings include unwritable analytics settings and SDK XML v3/v4 parsing compatibility. They were retained, not suppressed.
+Result: exit 0. This is compilation/lint, not a newly built product APK; cached native/model inputs were used without making a new native/build-identity claim. Warnings include unwritable analytics settings and SDK XML v3/v4 parsing compatibility. They were retained, not suppressed. The raw Gradle log also retains the original trailing space on its daemon-stop line: unrestricted `git diff --check` reports that evidence line. The source/docs check excluding raw evidence exits 0; the original output was not rewritten to hide the warning.
 
 Neighboring offline checks all exited 0 using Kotlin 2.2.20/JDK17: shell snapshots; host controller/request-candidate/cold-persistence projection; configuration 5/5; Bot setup 17 checks; palette contrast 1/1. No provider or Reader Core operation was invoked.
 
