@@ -16,8 +16,21 @@ private fun rejects(body: () -> Unit) {
 }
 
 // Test oracle restricted to the JSONObject/JSONArray APIs present on Android.
-private fun sameJson(@Suppress("UNUSED_PARAMETER") a: Any?, @Suppress("UNUSED_PARAMETER") b: Any?): Boolean =
-    throw IllegalStateException("structural oracle not implemented")
+private fun sameJson(a: Any?, b: Any?): Boolean = when {
+    a === b -> true
+    a == null || b == null || a === JSONObject.NULL || b === JSONObject.NULL -> false
+    a is JSONObject && b is JSONObject -> {
+        val keys = a.keys().asSequence().toSet()
+        keys == b.keys().asSequence().toSet() && keys.all { sameJson(a.get(it), b.get(it)) }
+    }
+    a is JSONArray && b is JSONArray ->
+        a.length() == b.length() && (0 until a.length()).all { sameJson(a.get(it), b.get(it)) }
+    // Fixture numbers are integral; tolerate Int/Long boxing without coercing strings.
+    a is Number && b is Number -> a.toString() == b.toString()
+    a is String && b is String -> a == b
+    a is Boolean && b is Boolean -> a == b
+    else -> false
+}
 
 fun main(args: Array<String>) {
     checkCase("portable structural oracle preserves types null keys and array order") {
@@ -139,6 +152,8 @@ fun main(args: Array<String>) {
     check(failed == 0) { "contract checks failed" }
 }
 
+private val rawMessagePlan = """{"schemaVersion":1,"surfaceId":"surface:1","planRevision":"1","snapshotRef":{"id":"snapshot:1","revision":"9007199254740993"},"root":"root","nodes":[{"id":"root","componentType":"MessageBlock","typedProps":{"text":"answer","answerRef":{"id":"answer:1","revision":"1"}},"bindingRefs":[],"children":[],"eventBindings":[]}]}"""
+
 private val snapshot = SnapshotRef("snapshot:1", "9007199254740993")
 private val answer = AnswerRef("answer:1", "1")
 private val request = PresentationRequest("request:1", answer, snapshot, "supplement", "1", "capability:1")
@@ -235,8 +250,27 @@ private fun planSafetyChecks() {
         check(validatePlan(request, plan(listOf(progress)), context()).plan != null)
         rejected(plan(listOf(progress.copy(typedProps = Props.Progress("job:1", "parse", "3", "2")))))
     }
+    checkCase("plan numeric fields reject sign fractions and exponents consistently") {
+        val sourcePlan = JSONObject(rawMessagePlan)
+        val node = sourcePlan.getJSONArray("nodes").getJSONObject(0)
+        node.put("componentType", "SourceCard")
+        node.put("typedProps", JSONObject("""{"sourceBinding":{"resultId":"result:1","documentId":"doc:1","revision":"9007199254740993","textDigest":"${"a".repeat(64)}","startByte":"0","endByte":"4","pageIndex":0},"quote":"甲A","claimRelation":"cited"}"""))
+        val rawSource = sourcePlan.toString()
+        check(validateEncodedPlan(request, rawSource, context()).plan != null)
+        for (token in listOf("-0", "-0.0", "-0e0", "0.0", "0e0")) {
+            val badSchema = rawMessagePlan.replace("\"schemaVersion\":1", "\"schemaVersion\":$token")
+            val badPage = rawSource.replace("\"pageIndex\":0", "\"pageIndex\":$token")
+            for (bad in listOf(badSchema, badPage)) {
+                rejects { decodeUIPlan(bad) }
+                check(validateEncodedPlan(request, bad, context()).decision == Decision.TextOnly)
+            }
+        }
+        val maximum = rawSource.replace("\"pageIndex\":0", "\"pageIndex\":2147483647")
+        check((decodeUIPlan(maximum).nodes.single().typedProps as Props.Source).sourceBinding.pageIndex == Int.MAX_VALUE)
+        rejects { decodeUIPlan(rawSource.replace("\"pageIndex\":0", "\"pageIndex\":2147483648")) }
+    }
     checkCase("raw unknown component action and approved fields degrade without dispatch") {
-        val raw = """{"schemaVersion":1,"surfaceId":"surface:1","planRevision":"1","snapshotRef":{"id":"snapshot:1","revision":"9007199254740993"},"root":"root","nodes":[{"id":"root","componentType":"MessageBlock","typedProps":{"text":"answer","answerRef":{"id":"answer:1","revision":"1"}},"bindingRefs":[],"children":[],"eventBindings":[]}]}"""
+        val raw = rawMessagePlan
         check(validateEncodedPlan(request, raw, context()).plan != null)
         val malformed = listOf(raw.replace("MessageBlock", "Script"), raw.replace(""""text":"answer"""", """"text":"answer","approved":true"""), raw.replace(""""eventBindings":[]""", """"eventBindings":[{"eventKind":"DomainRequest","actionRef":"unknown"}]"""), raw.dropLast(2))
         // The production validator has no command port; rejection cannot issue a command.
