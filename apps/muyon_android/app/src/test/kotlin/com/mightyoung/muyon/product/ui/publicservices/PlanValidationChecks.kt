@@ -1,6 +1,7 @@
 package com.mightyoung.muyon.product.ui.publicservices
 
 import java.io.File
+import org.json.JSONArray
 import org.json.JSONObject
 
 private var passed = 0
@@ -14,7 +15,37 @@ private fun rejects(body: () -> Unit) {
     check(result.exceptionOrNull() is IllegalArgumentException) { "expected input rejection, got $result" }
 }
 
+// Test oracle restricted to the JSONObject/JSONArray APIs present on Android.
+private fun sameJson(@Suppress("UNUSED_PARAMETER") a: Any?, @Suppress("UNUSED_PARAMETER") b: Any?): Boolean =
+    throw IllegalStateException("structural oracle not implemented")
+
 fun main(args: Array<String>) {
+    checkCase("portable structural oracle preserves types null keys and array order") {
+        check(sameJson(JSONObject("""{"a":[1,{"b":null}],"s":"1"}"""), JSONObject("""{"s":"1","a":[1,{"b":null}]}""")))
+        for ((a, b) in listOf(
+            """{"a":null}""" to "{}",
+            """{"a":"1"}""" to """{"a":1}""",
+            """{"a":true}""" to """{"a":"true"}""",
+            """{"a":[1,2]}""" to """{"a":[2,1]}""",
+            """{"a":[1]}""" to """{"a":[1,2]}""",
+            """{"a":{"b":1}}""" to """{"a":{"b":2}}"""
+        )) check(!sameJson(JSONObject(a), JSONObject(b)))
+        check(sameJson(JSONObject.NULL, JSONObject.NULL))
+        check(!sameJson(JSONObject.NULL, "null"))
+    }
+    checkCase("transport rejects numeric negative zero before platform coercion") {
+        for (raw in listOf("""{"n":-0}""", """{"nested":[{"n":-0}]}""")) rejects { strictObject(raw) }
+        check(strictObject("""{"n":0,"text":"-0"}""").getInt("n") == 0)
+        check(strictObject("""{"n":0,"text":"-0"}""").getString("text") == "-0")
+    }
+    checkCase("coverage integer syntax is consistent before numeric coercion") {
+        fun coverage(token: String) = """{"state":"partial","processed":"0","total":null,"failed_units":[$token]}"""
+        for (token in listOf("-0", "-0.0", "-0e0", "0.0", "0e0", "-1", "4294967296")) rejects { decodePublicValue("coverage", coverage(token)) }
+        for (token in listOf("0", "2147483648", "4294967295")) {
+            val decoded = JSONObject(decodePublicValue("coverage", coverage(token)))
+            check(decoded.getJSONArray("failed_units").get(0).toString() == token)
+        }
+    }
     checkCase("u64 exact boundaries and legacy refusal") {
         for (raw in listOf("0", "9007199254740993", "9223372036854775808", "18446744073709551615")) {
             check(parseRevision(raw) == raw)
@@ -45,7 +76,7 @@ fun main(args: Array<String>) {
         checkCase("C1 ${item.getString("id")}") {
             if (item.getBoolean("valid")) {
                 val decoded = JSONObject(decodePublicValue(item.getString("kind"), item.getString("json")))
-                check(decoded.similar(item.getJSONObject("expected")))
+                check(sameJson(decoded, item.getJSONObject("expected")))
             } else rejects { decodePublicValue(item.getString("kind"), item.getString("json")) }
         }
     }
