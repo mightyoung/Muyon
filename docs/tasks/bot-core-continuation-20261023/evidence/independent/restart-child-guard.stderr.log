@@ -1,0 +1,55 @@
+   Compiling proc-macro2 v1.0.107
+   Compiling quote v1.0.47
+   Compiling serde_core v1.0.229
+   Compiling libc v0.2.191
+   Compiling anyhow v1.0.104
+   Compiling equivalent v1.0.3
+   Compiling hashbrown v0.17.1
+   Compiling getrandom v0.4.3
+   Compiling indexmap v2.14.2
+   Compiling rustix v1.1.5
+   Compiling syn v3.0.9
+   Compiling memchr v2.8.3
+   Compiling linux-raw-sys v0.12.1
+   Compiling bitflags v2.13.2
+   Compiling once_cell v1.21.4
+   Compiling serde_derive v1.0.229
+   Compiling syn v2.0.119
+   Compiling autocfg v1.5.1
+   Compiling serde_json v1.0.154
+   Compiling fastrand v2.5.0
+   Compiling tempfile v3.27.0
+   Compiling fs-err v3.3.2
+   Compiling crc32fast v1.5.3
+   Compiling heck v0.5.0
+   Compiling thiserror v2.0.21
+   Compiling camino v1.2.6
+   Compiling winnow v1.0.4
+   Compiling toml_parser v1.1.5+spec-1.1.0
+   Compiling serde v1.0.229
+   Compiling serde_spanned v1.1.2
+   Compiling toml_datetime v1.1.2+spec-1.1.0
+   Compiling thiserror-impl v2.0.21
+   Compiling toml_writer v1.1.3+spec-1.1.0
+   Compiling zlib-rs v0.6.8
+   Compiling siphasher v1.0.4
+   Compiling toml v1.1.8+spec-1.1.0
+   Compiling uniffi_internal_macros v0.32.2
+   Compiling semver v1.0.28
+   Compiling cargo-platform v0.3.3
+   Compiling static_assertions v1.1.0
+   Compiling bytes v1.12.1
+   Compiling typed-path v0.12.4
+   Compiling uniffi_pipeline v0.32.2
+   Compiling uniffi_meta v0.32.2
+   Compiling uniffi_core v0.32.2
+   Compiling cargo_metadata v0.23.1
+   Compiling uniffi_macros v0.32.2
+   Compiling muyon-core v0.1.0 (/workspace/bot-core-continuation/crates/muyon-core)
+   Compiling flate2 v1.1.10
+   Compiling zip v9.0.5
+   Compiling muyon-office v0.1.0 (/workspace/bot-core-continuation/crates/muyon-office)
+   Compiling uniffi v0.32.2
+   Compiling muyon-android-ffi v0.1.0 (/workspace/bot-core-continuation/crates/muyon-android-ffi)
+    Finished `test` profile [unoptimized] target(s) in 16.07s
+     Running unittests src/lib.rs (/workspace/bot-core-tools/target-independent/debug/deps/muyon_android_product-0ce23b60ea514f54)

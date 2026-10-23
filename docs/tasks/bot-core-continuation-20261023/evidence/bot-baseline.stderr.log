@@ -1,0 +1,29 @@
+   Compiling proc-macro2 v1.0.107
+   Compiling unicode-ident v1.0.27
+   Compiling quote v1.0.47
+   Compiling typenum v1.20.1
+   Compiling serde_core v1.0.229
+   Compiling muyon-core-agent-lab v0.1.0 (/workspace/bot-core-continuation/experiments/redesign/core-agent-lab/core)
+   Compiling zmij v1.0.23
+   Compiling hybrid-array v0.4.15
+   Compiling syn v3.0.9
+   Compiling block-buffer v0.12.1
+   Compiling crypto-common v0.2.2
+   Compiling muyon-plugin-contract-lab v0.1.0 (/workspace/bot-core-continuation/experiments/redesign/plugin-contract-lab/core)
+   Compiling serde v1.0.229
+   Compiling serde_json v1.0.154
+   Compiling const-oid v0.10.2
+   Compiling muyon-rust-agent-host-lab v0.1.0 (/workspace/bot-core-continuation/experiments/redesign/rust-agent-host-lab/core)
+   Compiling digest v0.11.3
+   Compiling cfg-if v1.0.5
+   Compiling cpufeatures v0.3.1
+   Compiling itoa v1.0.18
+   Compiling tinyvec v1.13.3
+   Compiling memchr v2.8.3
+   Compiling unicode-normalization v0.1.25
+   Compiling serde_derive v1.0.229
+   Compiling sha2 v0.11.1
+   Compiling muyon-web-search-lab v0.1.0 (/workspace/bot-core-continuation/experiments/redesign/web-search-lab/core)
+   Compiling muyon-core v0.1.0 (/workspace/bot-core-continuation/crates/muyon-core)
+    Finished `test` profile [unoptimized] target(s) in 8.89s
+     Running unittests src/lib.rs (/workspace/bot-core-tools/target-baseline/debug/deps/muyon_core-a6f7afcd18e8bbb3)

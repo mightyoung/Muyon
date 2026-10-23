@@ -1,0 +1,21 @@
+
+running 16 tests
+test actual_owner_settlement_completes_remote_child_without_accepted_answer_shortcut ... ok
+test attempted_unknown_retains_owner_hold_and_late_cancelled_response_is_not_published ... ok
+test cancellation_after_settlement_preserves_answers_and_releases_active_child_slots ... ok
+test disabled_skill_blocks_existing_queued_work_and_invalid_arguments_do_not_create_children ... ok
+test disabling_a_skill_permanently_revokes_its_prepared_remote_plan ... ok
+test large_real_local_results_keep_complete_storage_but_project_bounded_honest_previews ... ok
+test local_child_reads_actual_supplier_and_emits_only_host_activity ... ok
+test paper_skill_reads_selected_project_and_skill_settings_do_not_leak_between_projects ... ok
+test prepared_child_and_normal_chat_are_rechecked_after_another_child_becomes_unknown ... ok
+test real_owner_blocked_plan_binds_unique_child_and_cancellation_is_not_fake_completion ... ok
+test real_owner_followup_chain_tracks_leaf_unknown_and_cancels_every_known_request ... ok
+test recovery_is_read_only_and_never_replays_and_owner_is_exclusive ... ok
+test remote_tool_allowlist_is_compiled_skill_metadata_and_not_instructions_in_task ... ok
+test scope_forgery_unknown_actions_and_fields_are_rejected ... ok
+test skill_toggle_digest_and_child_budgets_are_real ... ok
+test unproven_tool_followup_is_blocked_not_confirmable_and_polling_keeps_original_budget ... ok
+
+test result: ok. 16 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.32s
+

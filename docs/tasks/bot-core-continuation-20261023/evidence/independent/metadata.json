@@ -1,0 +1,14 @@
+{
+  "kind": "independent_static_review_no_test_rerun",
+  "head": "7aa852ab8134545c6312cd71de5c12cd49f66b5b",
+  "utc": "2026-10-23T04:19:57.004346+00:00",
+  "source_sha256": {
+    "crates/muyon-core/src/bot_definitions.rs": "a5e4df8b8d097055a8e7702afb4597ea01372fdf89bf3883e8a3d087a7e7fae9",
+    "crates/muyon-core/src/bot_definitions/tests.rs": "87f5f210db6acd256770f212a904332d4a712df74811d8f5b06129e3fe693564",
+    "crates/muyon-core/src/agent/workflow.rs": "58ffaf35c845772f12634e6169861bb378e6e686ca0d53660b27ebcf72e699a7",
+    "crates/muyon-core/src/agent/owner.rs": "76b0269593b424f7301e86c67cb93205402a4800bf50147c559a299d228c7a66",
+    "crates/muyon-android-ffi/src/lib.rs": "241a69ca996ed80b72f6f0433ff22b303a4dc218dc4e0d56f32a8129b07ac09b"
+  },
+  "report_sha256": "d7778ba11bf623ce6a3d62f24f02a9700cc3b2ac777f2a5eeeb0aa95085a31ea",
+  "tests_run_by_reviewer": false
+}

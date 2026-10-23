@@ -1,0 +1,8 @@
+
+running 3 tests
+test child_tool_subset_is_priced_and_enforced_on_the_actual_model_response ... ok
+test confirmation_preview_contains_the_exact_prior_history_and_wire_fields ... ok
+test preprepared_plan_cannot_bypass_a_later_unknown_request ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+

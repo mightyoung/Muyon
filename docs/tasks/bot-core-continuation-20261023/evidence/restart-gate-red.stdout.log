@@ -1,0 +1,11 @@
+
+running 1 test
+test tests::another_root_and_ordinary_chat_cannot_bypass_an_unknown_child ... FAILED
+
+failures:
+
+failures:
+    tests::another_root_and_ordinary_chat_cannot_bypass_an_unknown_child
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 15 filtered out; finished in 0.01s
+

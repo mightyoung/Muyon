@@ -1,0 +1,6 @@
+
+running 1 test
+test tests::another_root_and_ordinary_chat_cannot_bypass_an_unknown_child ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 16 filtered out; finished in 0.01s
+

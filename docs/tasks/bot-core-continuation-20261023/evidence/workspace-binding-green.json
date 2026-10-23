@@ -1,0 +1,30 @@
+{
+  "head": "f3259d14286577c6afa3427c591fa052a1e5fba5",
+  "started_utc": "2026-10-23T04:20:56.239332+00:00",
+  "argv": [
+    "/workspace/bot-core-tools/cargo/bin/cargo",
+    "test",
+    "--offline",
+    "--locked",
+    "--manifest-path",
+    "crates/Cargo.toml",
+    "-p",
+    "muyon-core",
+    "--test",
+    "agent_workflow",
+    "request_authorization_rejects_an_owner_from_another_workspace_without_side_effects",
+    "--",
+    "--exact",
+    "--nocapture"
+  ],
+  "environment_override": {
+    "RUSTUP_HOME": "/workspace/bot-core-tools/rustup",
+    "CARGO_HOME": "/workspace/bot-core-tools/cargo",
+    "CARGO_TARGET_DIR": "/workspace/bot-core-tools/target-baseline",
+    "RUSTFLAGS": "-Lnative=/workspace/bot-core-tools/native-links"
+  },
+  "stdout_sha256": "d024b85d5a10b4f65314861452a370efaf2424b90095c2078d99ca4e91fbbfe2",
+  "stderr_sha256": "2d5f41be8b9d050c402741f7e4d7ca75fb9abc42cf51548d373f20a6b62fbc8b",
+  "ended_utc": "2026-10-23T04:21:03.651330+00:00",
+  "exit_code": 0
+}

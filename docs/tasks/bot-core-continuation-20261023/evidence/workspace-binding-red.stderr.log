@@ -1,0 +1,8 @@
+   Compiling muyon-core v0.1.0 (/workspace/bot-core-continuation/crates/muyon-core)
+    Finished `test` profile [unoptimized] target(s) in 0.50s
+     Running tests/agent_workflow.rs (/workspace/bot-core-tools/target-baseline/debug/deps/agent_workflow-46a23b5fbaf5781d)
+
+thread 'request_authorization_rejects_an_owner_from_another_workspace_without_side_effects' (2953) panicked at muyon-core/tests/agent_workflow.rs:1010:14:
+called `Result::unwrap_err()` on an `Ok` value: ()
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+error: test failed, to rerun pass `-p muyon-core --test agent_workflow`
