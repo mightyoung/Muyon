@@ -1,0 +1,53 @@
+{
+  "contract_major": 1,
+  "schema_major": 1,
+  "draft": {
+    "draft_ref": {
+      "owner_plugin_id": "research",
+      "draft_id": "draft:1",
+      "scope": {
+        "scope": {
+          "workspace_id": "w",
+          "project_id": "p"
+        },
+        "account_id": null,
+        "scope_generation": "1"
+      },
+      "revision": "1"
+    },
+    "schema_version": 1,
+    "content": {
+      "title": "draft"
+    }
+  },
+  "ack": {
+    "draft_ref": {
+      "owner_plugin_id": "research",
+      "draft_id": "draft:1",
+      "scope": {
+        "scope": {
+          "workspace_id": "w",
+          "project_id": "p"
+        },
+        "account_id": null,
+        "scope_generation": "1"
+      },
+      "revision": "2"
+    },
+    "original_intent_id": "intent:save",
+    "content_digest": "82ef08397c1e555078926bde9d23c6bbbacd3a30ffb01c05c20fbdca9e9c440c"
+  },
+  "lease": {
+    "scope": {
+      "scope": {
+        "workspace_id": "w",
+        "project_id": "p"
+      },
+      "account_id": null,
+      "scope_generation": "1"
+    },
+    "cursor": "cursor:1",
+    "capacity": 256,
+    "expires_at_unix_ms": "9223372036854775807"
+  }
+}
