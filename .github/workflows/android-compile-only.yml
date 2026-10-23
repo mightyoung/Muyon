@@ -1,0 +1,61 @@
+name: Android compile only exact source
+
+on:
+  push:
+    branches: ['lab/android-u1-compile-20261023']
+    paths:
+      - '.github/workflows/android-compile-only.yml'
+      - 'tools/ci/android_compile_only.py'
+      - 'apps/muyon_android/**'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: android-compile-only-${{ github.ref }}
+  cancel-in-progress: false
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  compile-only:
+    if: ${{ github.event.repository.private == false }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Record exact source and provision compiler tools only
+        run: |
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          printf 'source_sha=%s\nbase_sha=8a8b0319e12aa898d7b2c862b9213374488aefba\n' "$GITHUB_SHA"
+          java -version
+          mkdir -p "$RUNNER_TEMP/android-compile-tools"
+          curl --fail --location https://services.gradle.org/distributions/gradle-8.13-bin.zip -o "$RUNNER_TEMP/android-compile-tools/gradle.zip"
+          printf '20f1b1176237254a6fc204d8434196fa11a4cfb387567519c61556e8710aed78  %s\n' "$RUNNER_TEMP/android-compile-tools/gradle.zip" | sha256sum --check
+          unzip -q "$RUNNER_TEMP/android-compile-tools/gradle.zip" -d "$RUNNER_TEMP/android-compile-tools"
+          test -f "$ANDROID_HOME/platforms/android-36/android.jar"
+          test -x "$ANDROID_HOME/build-tools/35.0.0/aapt2"
+          {
+            echo "MUYON_UI_GRADLE=$RUNNER_TEMP/android-compile-tools/gradle-8.13/bin/gradle"
+            echo "GRADLE_USER_HOME=$RUNNER_TEMP/android-compile-gradle"
+          } >> "$GITHUB_ENV"
+      - name: Audit dry-run graphs, compile online, recompile same cache offline
+        run: python3 -B tools/ci/android_compile_only.py
+      - name: Report compile status without uploading outputs
+        if: always()
+        run: |
+          printf 'source_sha=%s\n' "$GITHUB_SHA"
+          if test -f "$RUNNER_TEMP/android-compile-status.json"; then
+            cat "$RUNNER_TEMP/android-compile-status.json"
+          else
+            printf 'compile_status=NOT_RUN (provisioning did not reach compile driver)\n'
+          fi
