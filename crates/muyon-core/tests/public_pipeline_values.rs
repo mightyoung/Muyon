@@ -1,12 +1,5 @@
 //! Shared value vectors, not a resolver, authorization check, or JVM execution.
-pub use muyon_core::{contract, documents, services};
-pub mod adapter {
-    include!(concat!(
-        env!("CARGO_MANIFEST_DIR"),
-        "/src/services/pipeline.rs"
-    ));
-}
-use adapter::{validate_vector_compatibility, VectorDescriptor};
+use muyon_core::services::pipeline::{validate_vector_compatibility, VectorDescriptor};
 use muyon_core::{
     contract::{Revision, Scope},
     documents::{DocumentFormat, DocumentRef},
