@@ -1,5 +1,7 @@
 # S2 partial pure validation and original-query candidate
 
+Current follow-up: [checked-list API, resolved query-test gap and exact remaining scope](../public-v02-S2/REVISION.md). The fixed-source counts/review below describe the earlier candidate and are retained as history; listing no longer returns an empty Vec on error.
+
 2026-10-23 UTC. Partial S2 only, not a runnable Skill service. Same approved plan, base and exact C1/C2/C3 dependency history as [S1](../public-v02-S1/IMPLEMENTATION.md).
 
 ## Scope and TDD
@@ -44,7 +46,7 @@ Source `ea4e3d785658cee6c9aa4eec118ffffbc13bb9b2` (later commits change reports 
 
 Independent reviewer `/root/review_skills_implementation` reviewed exactly `7f9ebf3fe1bc972597e1a97a73851afcd264a8ce..ea4e3d785658cee6c9aa4eec118ffffbc13bb9b2`, fixed plan/spec, all five owned code/test/fixture files and raw RED evidence. Independently reran public_skills/public_skill_runtime/agent_workflow/agent_tools offline locked: exit0, 32 passed/0 failed. Source hashes match fixture references; diff whitespace check passed. Reviewer reused local target cache, did not rerun full workspace, and did not edit sources/install/fetch. Verdict: approve bounded S1/partial S2 candidate handoff, not production integration or develop merge. No Critical/Important finding.
 
-Deferred Minor: original-query fake owner always returns decoded Unknown. Direct tests of host error remapping, mismatched NotSubmitted identity, malformed ExecutionResult and wrong receipt identity are absent; reviewer found conservative code branches, but those guarantees remain statically reviewed rather than independently exercised. Add table-driven cases before production wiring. No claim these paths were tested.
+Historical Minor (resolved by direct tests in REVISION.md): at the earlier reviewed source, original-query fake owner always returned decoded Unknown. Direct tests of host error remapping, mismatched NotSubmitted identity, malformed ExecutionResult and wrong receipt identity are absent; reviewer found conservative code branches, but those guarantees remain statically reviewed rather than independently exercised. Add table-driven cases before production wiring. No claim these paths were tested.
 
 Review rulings on all declined areas:
 

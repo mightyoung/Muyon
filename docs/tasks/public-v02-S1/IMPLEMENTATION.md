@@ -1,5 +1,7 @@
 # S1 pure catalog candidate — 2026-10-23
 
+Current follow-up: [checked-list API, resolved query-test gap and exact remaining scope](../public-v02-S2/REVISION.md). The fixed-source counts/review below describe the earlier candidate and are retained as history; listing no longer returns an empty Vec on error.
+
 ## Fixed dependencies and scope
 
 Approved plan/spec source `64900d4a6a46a9ef2919bcf922fb059413b1ce82`. Refreshed develop remains `fd26dcdabcdac996bc2881e8141cac2b519966fc`. Parent explicitly delivered C1 `6e7f774b1559a0a9693eeb195ba13c9ded561993`, C2 `b626c18a5dff184519e59bb866e5ed37362ac84e`, C3 `bf264bc62f5d2d65fa7d50b27a26ffee3c0ba6d9`, evidence head `4d49a580cb518d9b0b80c9df3df1ff564194a639`. Full sources, three fixtures and C1/C2/C3 reports were read. This candidate dependency is not merged develop. Local merge `7f9ebf3fe1bc972597e1a97a73851afcd264a8ce` consumes its exact history in the isolated Skills branch; no cherry-picked or rewritten common types. C1 fixture hashes match its reports.
@@ -29,7 +31,7 @@ Skills fixture SHA256: `7acc6c66f41ab2b35709fdf93fc0b6677a3eeee35ad4f74d3b7f23b6
 ## Explicit implementation rulings and costs
 
 - Contracts retains exclusive shared module registration. Tests use `#[path]` to compile the owned real modules, with aliases to actual C1 imports. Cost: until Contracts registers modules, no public production library entry point is exposed.
-- The planned `list_skills -> Vec` cannot report malformed catalogs. Added `validate_catalog` provides errors; invalid lists return empty and getters reject. Cost: callers must validate first to distinguish invalid from empty.
+- Superseded historical ruling: the original planned Vec listing mapped invalid catalogs to empty; this ambiguity is now removed by the parent-requested Result-returning listing in REVISION.md. No pre-validation requirement remains for list_skills.
 - P1 schemas are explicit list arguments mirroring original workflow bounds (`limit` integer1..50, `offset` integer0..10000); output declares object/records array, with no general schema interpreter. Both built-ins share this shape. Unknown schemas are capability_unavailable. These declarations do not prove runtime output conformance or grant additional fields/capabilities.
 - Phase remains the existing C1 String diagnostic label `skill_validation`, not a new phase enum or trusted dispatch-stage proof. Money/Quantity and other pending exact choices are untouched.
 
@@ -57,7 +59,7 @@ Source `ea4e3d785658cee6c9aa4eec118ffffbc13bb9b2` (later commits change reports 
 
 Independent reviewer `/root/review_skills_implementation` reviewed exactly `7f9ebf3fe1bc972597e1a97a73851afcd264a8ce..ea4e3d785658cee6c9aa4eec118ffffbc13bb9b2`, fixed plan/spec, all five owned code/test/fixture files and raw RED evidence. Independently reran public_skills/public_skill_runtime/agent_workflow/agent_tools offline locked: exit0, 32 passed/0 failed. Source hashes match fixture references; diff whitespace check passed. Reviewer reused local target cache, did not rerun full workspace, and did not edit sources/install/fetch. Verdict: approve bounded S1/partial S2 candidate handoff, not production integration or develop merge. No Critical/Important finding.
 
-Deferred Minor: original-query fake owner always returns decoded Unknown. Direct tests of host error remapping, mismatched NotSubmitted identity, malformed ExecutionResult and wrong receipt identity are absent; reviewer found conservative code branches, but those guarantees remain statically reviewed rather than independently exercised. Add table-driven cases before production wiring. No claim these paths were tested.
+Historical Minor (resolved by direct tests in REVISION.md): at the earlier reviewed source, original-query fake owner always returned decoded Unknown. Direct tests of host error remapping, mismatched NotSubmitted identity, malformed ExecutionResult and wrong receipt identity are absent; reviewer found conservative code branches, but those guarantees remain statically reviewed rather than independently exercised. Add table-driven cases before production wiring. No claim these paths were tested.
 
 Review rulings on all declined areas:
 

@@ -1,6 +1,8 @@
 # Skills S1 history and current candidate status
 
-Current update: parent delivered fixed C1/C2/C3 candidates; see [IMPLEMENTATION.md](IMPLEMENTATION.md) for S1 implementation/TDD and exact limitations. Shared registration and production wiring remain pending.
+Current follow-up: [REVISION.md](../public-v02-S2/REVISION.md) records the checked Result-returning list and resolved error-branch coverage.
+
+Prior update: parent delivered fixed C1/C2/C3 candidates; see [IMPLEMENTATION.md](IMPLEMENTATION.md) for S1 implementation/TDD and exact limitations. Shared registration and production wiring remain pending.
 
 2026-10-23 UTC. The preparation history below predates that delivery and is not a current dependency status.
 
