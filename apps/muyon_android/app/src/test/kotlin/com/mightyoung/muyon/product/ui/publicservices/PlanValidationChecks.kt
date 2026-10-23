@@ -1,6 +1,7 @@
 package com.mightyoung.muyon.product.ui.publicservices
 
 import java.io.File
+import org.json.JSONArray
 import org.json.JSONObject
 
 private var passed = 0
@@ -14,7 +15,50 @@ private fun rejects(body: () -> Unit) {
     check(result.exceptionOrNull() is IllegalArgumentException) { "expected input rejection, got $result" }
 }
 
+// Test oracle restricted to the JSONObject/JSONArray APIs present on Android.
+private fun sameJson(a: Any?, b: Any?): Boolean = when {
+    a === b -> true
+    a == null || b == null || a === JSONObject.NULL || b === JSONObject.NULL -> false
+    a is JSONObject && b is JSONObject -> {
+        val keys = a.keys().asSequence().toSet()
+        keys == b.keys().asSequence().toSet() && keys.all { sameJson(a.get(it), b.get(it)) }
+    }
+    a is JSONArray && b is JSONArray ->
+        a.length() == b.length() && (0 until a.length()).all { sameJson(a.get(it), b.get(it)) }
+    // Fixture numbers are integral; tolerate Int/Long boxing without coercing strings.
+    a is Number && b is Number -> a.toString() == b.toString()
+    a is String && b is String -> a == b
+    a is Boolean && b is Boolean -> a == b
+    else -> false
+}
+
 fun main(args: Array<String>) {
+    checkCase("portable structural oracle preserves types null keys and array order") {
+        check(sameJson(JSONObject("""{"a":[1,{"b":null}],"s":"1"}"""), JSONObject("""{"s":"1","a":[1,{"b":null}]}""")))
+        for ((a, b) in listOf(
+            """{"a":null}""" to "{}",
+            """{"a":"1"}""" to """{"a":1}""",
+            """{"a":true}""" to """{"a":"true"}""",
+            """{"a":[1,2]}""" to """{"a":[2,1]}""",
+            """{"a":[1]}""" to """{"a":[1,2]}""",
+            """{"a":{"b":1}}""" to """{"a":{"b":2}}"""
+        )) check(!sameJson(JSONObject(a), JSONObject(b)))
+        check(sameJson(JSONObject.NULL, JSONObject.NULL))
+        check(!sameJson(JSONObject.NULL, "null"))
+    }
+    checkCase("transport rejects numeric negative zero before platform coercion") {
+        for (raw in listOf("""{"n":-0}""", """{"nested":[{"n":-0}]}""")) rejects { strictObject(raw) }
+        check(strictObject("""{"n":0,"text":"-0"}""").getInt("n") == 0)
+        check(strictObject("""{"n":0,"text":"-0"}""").getString("text") == "-0")
+    }
+    checkCase("coverage integer syntax is consistent before numeric coercion") {
+        fun coverage(token: String) = """{"state":"partial","processed":"0","total":null,"failed_units":[$token]}"""
+        for (token in listOf("-0", "-0.0", "-0e0", "0.0", "0e0", "-1", "4294967296")) rejects { decodePublicValue("coverage", coverage(token)) }
+        for (token in listOf("0", "2147483648", "4294967295")) {
+            val decoded = JSONObject(decodePublicValue("coverage", coverage(token)))
+            check(decoded.getJSONArray("failed_units").get(0).toString() == token)
+        }
+    }
     checkCase("u64 exact boundaries and legacy refusal") {
         for (raw in listOf("0", "9007199254740993", "9223372036854775808", "18446744073709551615")) {
             check(parseRevision(raw) == raw)
@@ -45,7 +89,7 @@ fun main(args: Array<String>) {
         checkCase("C1 ${item.getString("id")}") {
             if (item.getBoolean("valid")) {
                 val decoded = JSONObject(decodePublicValue(item.getString("kind"), item.getString("json")))
-                check(decoded.similar(item.getJSONObject("expected")))
+                check(sameJson(decoded, item.getJSONObject("expected")))
             } else rejects { decodePublicValue(item.getString("kind"), item.getString("json")) }
         }
     }
@@ -107,6 +151,8 @@ fun main(args: Array<String>) {
     println("SUMMARY $passed passed / $failed failed; pure JVM only")
     check(failed == 0) { "contract checks failed" }
 }
+
+private val rawMessagePlan = """{"schemaVersion":1,"surfaceId":"surface:1","planRevision":"1","snapshotRef":{"id":"snapshot:1","revision":"9007199254740993"},"root":"root","nodes":[{"id":"root","componentType":"MessageBlock","typedProps":{"text":"answer","answerRef":{"id":"answer:1","revision":"1"}},"bindingRefs":[],"children":[],"eventBindings":[]}]}"""
 
 private val snapshot = SnapshotRef("snapshot:1", "9007199254740993")
 private val answer = AnswerRef("answer:1", "1")
@@ -204,8 +250,27 @@ private fun planSafetyChecks() {
         check(validatePlan(request, plan(listOf(progress)), context()).plan != null)
         rejected(plan(listOf(progress.copy(typedProps = Props.Progress("job:1", "parse", "3", "2")))))
     }
+    checkCase("plan numeric fields reject sign fractions and exponents consistently") {
+        val sourcePlan = JSONObject(rawMessagePlan)
+        val node = sourcePlan.getJSONArray("nodes").getJSONObject(0)
+        node.put("componentType", "SourceCard")
+        node.put("typedProps", JSONObject("""{"sourceBinding":{"resultId":"result:1","documentId":"doc:1","revision":"9007199254740993","textDigest":"${"a".repeat(64)}","startByte":"0","endByte":"4","pageIndex":0},"quote":"甲A","claimRelation":"cited"}"""))
+        val rawSource = sourcePlan.toString()
+        check(validateEncodedPlan(request, rawSource, context()).plan != null)
+        for (token in listOf("-0", "-0.0", "-0e0", "0.0", "0e0")) {
+            val badSchema = rawMessagePlan.replace("\"schemaVersion\":1", "\"schemaVersion\":$token")
+            val badPage = rawSource.replace("\"pageIndex\":0", "\"pageIndex\":$token")
+            for (bad in listOf(badSchema, badPage)) {
+                rejects { decodeUIPlan(bad) }
+                check(validateEncodedPlan(request, bad, context()).decision == Decision.TextOnly)
+            }
+        }
+        val maximum = rawSource.replace("\"pageIndex\":0", "\"pageIndex\":2147483647")
+        check((decodeUIPlan(maximum).nodes.single().typedProps as Props.Source).sourceBinding.pageIndex == Int.MAX_VALUE)
+        rejects { decodeUIPlan(rawSource.replace("\"pageIndex\":0", "\"pageIndex\":2147483648")) }
+    }
     checkCase("raw unknown component action and approved fields degrade without dispatch") {
-        val raw = """{"schemaVersion":1,"surfaceId":"surface:1","planRevision":"1","snapshotRef":{"id":"snapshot:1","revision":"9007199254740993"},"root":"root","nodes":[{"id":"root","componentType":"MessageBlock","typedProps":{"text":"answer","answerRef":{"id":"answer:1","revision":"1"}},"bindingRefs":[],"children":[],"eventBindings":[]}]}"""
+        val raw = rawMessagePlan
         check(validateEncodedPlan(request, raw, context()).plan != null)
         val malformed = listOf(raw.replace("MessageBlock", "Script"), raw.replace(""""text":"answer"""", """"text":"answer","approved":true"""), raw.replace(""""eventBindings":[]""", """"eventBindings":[{"eventKind":"DomainRequest","actionRef":"unknown"}]"""), raw.dropLast(2))
         // The production validator has no command port; rejection cannot issue a command.

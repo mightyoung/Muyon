@@ -77,7 +77,11 @@ private class JsonGrammar(private val raw: String) {
             else -> {
                 val start = at
                 while (at < raw.length && raw[at] !in " \r\n\t,]}") at++
-                require(raw.substring(start, at).matches(Regex("-?(0|[1-9][0-9]*)(\\.[0-9]+)?([eE][+-]?[0-9]+)?")))
+                val token = raw.substring(start, at)
+                require(token.matches(Regex("-?(0|[1-9][0-9]*)(\\.[0-9]+)?([eE][+-]?[0-9]+)?")))
+                // Android parses -0 as Int(0), Maven JSON as Double(-0.0).
+                // Reject before either parser can erase its noncanonical sign.
+                require(token != "-0") { "noncanonical integer" }
             }
         }
     }
