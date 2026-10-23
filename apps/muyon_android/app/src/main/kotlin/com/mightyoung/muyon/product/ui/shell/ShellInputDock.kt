@@ -16,7 +16,7 @@ import androidx.compose.ui.unit.dp
 fun ShellInputDock(draft: String, onDraft: (String) -> Unit, enabled: Boolean,
     onChat: () -> Unit, onAttachments: () -> Unit, attachmentsMenu: @Composable () -> Unit) {
     Surface(Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp),
-        shape = RoundedCornerShape(32.dp), color = MaterialTheme.colorScheme.surface) {
+        shape = RoundedCornerShape(32.dp), color = MaterialTheme.colorScheme.surface, contentColor = MaterialTheme.colorScheme.onSurface) {
         Row(Modifier.padding(6.dp), verticalAlignment = Alignment.Bottom) {
             Box {
                 IconButton(onClick = onAttachments, modifier = Modifier.size(48.dp)) {

@@ -63,7 +63,7 @@ fun ConversationShell(
                 Box(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.scrim.copy(alpha = .42f))
                     .clickable(onClickLabel = "关闭菜单") { menuOpen = false })
                 Surface(Modifier.width(menuWidth).fillMaxHeight().testTag("shell-menu")
-                    .semantics { paneTitle = "工作空间导航" }, color = MaterialTheme.colorScheme.background) {
+                    .semantics { paneTitle = "工作空间导航" }, color = MaterialTheme.colorScheme.background, contentColor = MaterialTheme.colorScheme.onBackground) {
                     Column(Modifier.safeDrawingPadding().verticalScroll(rememberScrollState()).padding(12.dp),
                         verticalArrangement = Arrangement.spacedBy(8.dp)) {
                         Row(Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically,
@@ -99,7 +99,7 @@ fun ConversationShell(
                 }
                 IconButton(onClick = { menuOpen = false }, modifier = Modifier.align(Alignment.TopEnd)
                     .statusBarsPadding().padding(4.dp).size(48.dp)) {
-                    Surface(shape = RoundedCornerShape(24.dp), color = MaterialTheme.colorScheme.surface) {
+                    Surface(shape = RoundedCornerShape(24.dp), color = MaterialTheme.colorScheme.surface, contentColor = MaterialTheme.colorScheme.onSurface) {
                         Box(Modifier.size(48.dp), contentAlignment = Alignment.Center) {
                             Text("×", Modifier.semantics { contentDescription = "关闭菜单" }, style = MaterialTheme.typography.headlineSmall)
                         }
@@ -114,7 +114,7 @@ fun ConversationShell(
 @Composable
 private fun PinnedConversationCard(item: ShellConversation, active: Boolean, onOpen: () -> Unit, onPin: () -> Unit) {
     Surface(color = if (active) MaterialTheme.colorScheme.surfaceVariant else MaterialTheme.colorScheme.surface,
-        shape = RoundedCornerShape(20.dp)) {
+        contentColor = MaterialTheme.colorScheme.onSurface, shape = RoundedCornerShape(20.dp)) {
         Column(Modifier.width(112.dp)) {
             Column(Modifier.fillMaxWidth().heightIn(min = 144.dp)
                 .testTag(if (item.main) "nav-chat" else "shell-conversation-${item.key}")
@@ -141,7 +141,7 @@ private fun PinnedConversationCard(item: ShellConversation, active: Boolean, onO
 @Composable
 private fun ConversationEntry(item: ShellConversation, active: Boolean, onOpen: () -> Unit, onPin: () -> Unit) {
     Surface(color = if (active) MaterialTheme.colorScheme.surfaceVariant else MaterialTheme.colorScheme.surface,
-        shape = RoundedCornerShape(20.dp)) {
+        contentColor = MaterialTheme.colorScheme.onSurface, shape = RoundedCornerShape(20.dp)) {
         Row(Modifier.fillMaxWidth().heightIn(min = 64.dp), verticalAlignment = Alignment.CenterVertically) {
             Icon(painterResource(R.drawable.wb_chat), contentDescription = null,
                 modifier = Modifier.padding(start = 12.dp).size(32.dp))

@@ -6,6 +6,8 @@ import androidx.compose.material3.TextField
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.toPixelMap
+import com.mightyoung.muyon.product.ui.system.FoundationTokens
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionOnScreen
@@ -202,6 +204,23 @@ class ConversationShellTest {
         org.junit.Assert.assertTrue("pinned follows main", pinned.left >= main.right)
         org.junit.Assert.assertTrue("ordinary remains below the pinned rail", ordinary.top > pinned.bottom)
         compose.onNodeWithTag("shell-conversation-agent:a").assertIsSelected()
+    }
+
+    @Test fun neutralComposerActionUsesThemeTextInsteadOfErrorInk() {
+        compose.setContent {
+            FoundationTheme(dark = false) {
+                ShellInputDock("", {}, false, {}, {}, {})
+            }
+        }
+        val pixels = compose.onNodeWithContentDescription("添加附件").captureToImage().toPixelMap()
+        val ink = FoundationTokens.light.text
+        var matching = 0
+        for (x in 0 until pixels.width) for (y in 0 until pixels.height) {
+            val p = pixels[x, y]
+            if (kotlin.math.abs(p.red - ink.red) < .015f && kotlin.math.abs(p.green - ink.green) < .015f &&
+                kotlin.math.abs(p.blue - ink.blue) < .015f) matching++
+        }
+        org.junit.Assert.assertTrue("a neutral composer action must render in neutral host text ink", matching > 0)
     }
 
     @Test fun navigationHeadingsAndFailureAnnouncementRemainDiscoverable() {
