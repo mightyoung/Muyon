@@ -1,0 +1,28 @@
+{
+  "baseline_sha": "fd26dcdabcdac996bc2881e8141cac2b519966fc",
+  "c1_source_sha": "6e7f774b1559a0a9693eeb195ba13c9ded561993",
+  "c2_source_sha": "b626c18a5dff184519e59bb866e5ed37362ac84e",
+  "c3_semantic_source_sha": "5d3440d56aeb6b23e75fd3635eb603e7b2d30e3c",
+  "final_product_source_sha": "bf264bc62f5d2d65fa7d50b27a26ffee3c0ba6d9",
+  "source_status": "candidate_not_merged",
+  "contract_tests": {
+    "c1": 6,
+    "c2": 6,
+    "c3": 4
+  },
+  "final_workspace": {
+    "binaries": 36,
+    "passed_executions": 619,
+    "failed": 0,
+    "ignored": 0,
+    "includes_overlapping_target_coverage": true
+  },
+  "scope": "offline Rust only; no dispatch, provider, credentials, Reader, Android/device or real external effects",
+  "locks_unchanged": true,
+  "not_frozen": [
+    "Money/Quantity new specification",
+    "ServicePhase enum",
+    "legacy ProcessingReceipt to ResultId mapping"
+  ],
+  "raw_logs_committed": false
+}
