@@ -2,7 +2,7 @@
 use crate::{
     contract::{
         normalize_text, CommandEnvelope, ContractError, ExecutionResult, ExecutionStatus,
-        Operation, Revision,
+        Operation, Revision, MAX_COMMAND_BYTES,
     },
     services::{
         drafts::{validate_save_ack, DraftEnvelope, DraftRef, SaveAck},
@@ -100,6 +100,8 @@ struct Submission {
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 struct Content {
+    /// Local editor CAS token, separate from DraftRef's confirmed storage baseline.
+    edit_revision: Revision,
     conversation_id: String,
     project_name: Option<DraftText>,
     project: ProjectChoice,
@@ -123,6 +125,7 @@ impl ConversationDraft {
         let draft = Self {
             reference,
             content: Content {
+                edit_revision: Revision::new(0),
                 conversation_id,
                 project_name: None,
                 project: ProjectChoice::Unassigned,
@@ -133,7 +136,12 @@ impl ConversationDraft {
         draft.validate()?;
         Ok(draft)
     }
+    /// Local editing token used by preview/apply/project choice, never storage CAS.
     pub fn revision(&self) -> &Revision {
+        &self.content.edit_revision
+    }
+    /// Last confirmed storage CAS baseline, advanced only by a matching SaveAck.
+    pub fn stored_revision(&self) -> &Revision {
         &self.reference.revision
     }
     pub fn project(&self) -> &ProjectChoice {
@@ -179,9 +187,12 @@ impl ConversationDraft {
         pending: &IntentId,
         ack: &SaveAck,
     ) -> Result<(), ContractError> {
-        validate_save_ack(&self.envelope()?, self.revision(), pending, ack)
+        validate_save_ack(&self.envelope()?, self.stored_revision(), pending, ack)
             .map_err(|_| ContractError::BindingMismatch)?;
-        self.reference = ack.draft_ref.clone();
+        let mut next = self.clone();
+        next.reference = ack.draft_ref.clone();
+        next.validate()?;
+        *self = next;
         Ok(())
     }
 
@@ -325,11 +336,14 @@ impl ConversationDraft {
             return Err(ContractError::IntentConflict);
         }
         self.validate_command(&command)?;
-        self.content.submission = Some(Submission {
+        let mut next = self.clone();
+        next.content.submission = Some(Submission {
             command,
             dispatched: false,
             result: None,
         });
+        next.validate()?;
+        *self = next;
         Ok(())
     }
 
@@ -337,7 +351,8 @@ impl ConversationDraft {
     /// durably save the resulting envelope before executing this command. A crash after
     /// saving the marker but before execution is also recovered by querying, never resend.
     pub fn begin_project_dispatch(&mut self) -> Result<CommandEnvelope, ContractError> {
-        let submission = self
+        let mut next = self.clone();
+        let submission = next
             .content
             .submission
             .as_mut()
@@ -346,11 +361,15 @@ impl ConversationDraft {
             return Err(ContractError::IntentConflict);
         }
         submission.dispatched = true;
-        Ok(submission.command.clone())
+        let command = submission.command.clone();
+        next.validate()?;
+        *self = next;
+        Ok(command)
     }
 
     pub fn observe_project_result(&mut self, result: ExecutionResult) -> Result<(), ContractError> {
-        let submission = self
+        let mut next = self.clone();
+        let submission = next
             .content
             .submission
             .as_mut()
@@ -369,6 +388,8 @@ impl ConversationDraft {
             }
         }
         submission.result = Some(result);
+        next.validate()?;
+        *self = next;
         Ok(())
     }
 
@@ -415,7 +436,7 @@ impl ConversationDraft {
         {
             return Err(ContractError::IntentConflict);
         }
-        self.reference.revision = self.reference.revision.next()?;
+        self.content.edit_revision = self.content.edit_revision.next()?;
         self.content.submission = None; // Any edit invalidates preparation.
         Ok(())
     }
@@ -484,6 +505,14 @@ impl ConversationDraft {
                 validate_result(result, &submission.command)?;
             }
         }
+        // The same complete envelope must fit the existing strict restore decoder,
+        // including JSON escaping, editor metadata, command and receipt payloads.
+        let encoded =
+            serde_json::to_string(&self.envelope()?).map_err(|_| ContractError::InvalidPayload)?;
+        if encoded.len() > MAX_COMMAND_BYTES {
+            return Err(ContractError::RawLimit);
+        }
+        crate::contract::decode_json(&encoded).map_err(|_| ContractError::InvalidPayload)?;
         Ok(())
     }
     fn validate_project_scope(&self, project_id: &str) -> Result<(), ContractError> {

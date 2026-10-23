@@ -412,7 +412,7 @@ fn save_ack_matches_exact_content_scope_intent_and_revision() {
         .acknowledge_save(&IntentId::parse("intent:other").unwrap(), &ack)
         .is_err());
     draft.acknowledge_save(&intent, &ack).unwrap();
-    assert_eq!(draft.revision(), &ack.draft_ref.revision);
+    assert_eq!(draft.stored_revision(), &ack.draft_ref.revision);
     assert!(draft.acknowledge_save(&intent, &ack).is_err());
 }
 
@@ -449,7 +449,7 @@ fn restore_rejects_schema_scope_unknown_fields_and_command_tampering() {
 #[test]
 fn overflow_is_atomic_and_does_not_invalidate_preparation() {
     let mut wire = draft().envelope().unwrap();
-    wire.draft_ref.revision = Revision::new(u64::MAX);
+    wire.content["edit_revision"] = json!(u64::MAX.to_string());
     let mut draft =
         ConversationDraft::restore(&serde_json::to_string(&wire).unwrap(), &scope()).unwrap();
     let before = draft.clone();
@@ -562,4 +562,240 @@ fn host_preparation_is_bound_to_project_name_id_and_scope() {
             .is_err());
         assert!(draft.observe_project_result(unknown()).is_err());
     }
+}
+
+#[test]
+fn local_edits_preserve_storage_baseline_and_first_save_advances_once() {
+    let mut draft = ready();
+    let edited = draft.revision().clone();
+    let envelope = draft.envelope().unwrap();
+    assert_eq!(envelope.draft_ref.revision, Revision::new(0));
+    let intent = IntentId::parse("intent:first-save").unwrap();
+    let mut reference = envelope.draft_ref.clone();
+    reference.revision = Revision::new(1);
+    let ack = SaveAck {
+        draft_ref: reference,
+        original_intent_id: intent.clone(),
+        content_digest: Digest::parse(&stable_digest(&envelope.content).unwrap()).unwrap(),
+    };
+    draft.acknowledge_save(&intent, &ack).unwrap();
+    assert_eq!(
+        draft.envelope().unwrap().draft_ref.revision,
+        Revision::new(1)
+    );
+    assert_eq!(draft.revision(), &edited);
+    assert_eq!(restore(&draft), draft);
+    assert!(draft.acknowledge_save(&intent, &ack).is_err());
+    assert_eq!(draft.revision(), &edited);
+}
+
+fn large_source(bytes: usize, character: char) -> SourceBinding {
+    let mut source = source();
+    source.original_message = character.to_string().repeat(bytes);
+    source.start = 0;
+    source.end = source.original_message.len();
+    source
+}
+
+#[test]
+fn oversized_source_batch_is_rejected_without_losing_prepared_state() {
+    let mut draft = ready();
+    draft
+        .prepare_project(&draft.revision().clone(), command())
+        .unwrap();
+    let before = draft.clone();
+    let mut proposed = item("requirement:large", "大批来源", ItemKind::Requirement);
+    proposed.sources = vec![large_source(65_536, 'x'); 17];
+    assert_eq!(
+        draft.apply(
+            &draft.revision().clone(),
+            patch(None, vec![proposed]),
+            false
+        ),
+        Err(ContractError::RawLimit)
+    );
+    assert_eq!(draft, before);
+    assert_eq!(restore(&draft), draft);
+}
+
+#[test]
+fn encoded_escaping_and_accumulated_edits_share_the_whole_envelope_limit() {
+    let mut accumulated = draft();
+    for index in 0..15 {
+        let mut proposed = item(
+            &format!("requirement:{index}"),
+            "来源",
+            ItemKind::Requirement,
+        );
+        proposed.sources = vec![large_source(65_536, 'x')];
+        apply(&mut accumulated, patch(None, vec![proposed]), false);
+    }
+    let before = accumulated.clone();
+    let mut proposed = item("requirement:overflow", "来源", ItemKind::Requirement);
+    proposed.sources = vec![large_source(65_536, 'x')];
+    assert_eq!(
+        accumulated.apply(
+            &accumulated.revision().clone(),
+            patch(None, vec![proposed]),
+            false
+        ),
+        Err(ContractError::RawLimit)
+    );
+    assert_eq!(accumulated, before);
+    assert_eq!(restore(&accumulated), accumulated);
+
+    let mut escaped = draft();
+    let mut proposed = item("requirement:escaped", "来源", ItemKind::Requirement);
+    proposed.sources = vec![large_source(65_536, '\0'); 3];
+    assert_eq!(
+        escaped.apply(
+            &escaped.revision().clone(),
+            patch(None, vec![proposed]),
+            false
+        ),
+        Err(ContractError::RawLimit)
+    );
+    assert_eq!(escaped.revision(), &Revision::new(0));
+}
+
+#[test]
+fn oversized_receipt_does_not_replace_query_only_original_marker() {
+    let mut draft = ready();
+    let command = command();
+    draft
+        .prepare_project(&draft.revision().clone(), command.clone())
+        .unwrap();
+    draft.begin_project_dispatch().unwrap();
+    let before = draft.clone();
+    let mut result = committed(&command);
+    result.receipt.as_mut().unwrap().result = json!({"padding": "x".repeat(MAX_COMMAND_BYTES)});
+    assert_eq!(
+        draft.observe_project_result(result),
+        Err(ContractError::RawLimit)
+    );
+    assert_eq!(draft, before);
+    assert_eq!(restore(&draft), draft);
+    assert_eq!(
+        draft.begin_project_dispatch(),
+        Err(ContractError::IntentConflict)
+    );
+}
+
+#[test]
+fn deeply_nested_receipt_is_rejected_without_losing_original_marker() {
+    let mut draft = ready();
+    let command = command();
+    draft
+        .prepare_project(&draft.revision().clone(), command.clone())
+        .unwrap();
+    draft.begin_project_dispatch().unwrap();
+    let before = draft.clone();
+    let mut nested = json!(null);
+    for _ in 0..140 {
+        nested = json!({"child": nested});
+    }
+    let mut result = committed(&command);
+    result.receipt.as_mut().unwrap().result = nested;
+    assert_eq!(
+        draft.observe_project_result(result),
+        Err(ContractError::InvalidPayload)
+    );
+    assert_eq!(draft, before);
+    assert_eq!(restore(&draft), draft);
+    assert_eq!(
+        draft.begin_project_dispatch(),
+        Err(ContractError::IntentConflict)
+    );
+}
+
+#[test]
+fn stored_revision_exhaustion_does_not_exhaust_local_editor_revision() {
+    let original = draft();
+    let mut envelope = original.envelope().unwrap();
+    envelope.draft_ref.revision = Revision::new(u64::MAX);
+    let mut restored = ConversationDraft::restore(
+        &serde_json::to_string(&envelope).unwrap(),
+        &envelope.draft_ref.scope,
+    )
+    .unwrap();
+    apply(&mut restored, patch(Some("Local edit"), vec![]), false);
+    assert_eq!(restored.stored_revision(), &Revision::new(u64::MAX));
+    assert_eq!(restored.revision(), &Revision::new(1));
+    assert_eq!(restore(&restored), restored);
+}
+
+#[test]
+fn receipt_at_exact_envelope_limit_restores_and_next_byte_is_atomic() {
+    let mut draft = ready();
+    let mut initial = draft.envelope().unwrap();
+    initial.draft_ref.revision = Revision::new(9);
+    draft =
+        ConversationDraft::restore(&serde_json::to_string(&initial).unwrap(), &scope()).unwrap();
+    let command = command();
+    draft
+        .prepare_project(&draft.revision().clone(), command.clone())
+        .unwrap();
+    draft.begin_project_dispatch().unwrap();
+    let before = draft.clone();
+    let mut result = committed(&command);
+    result.receipt.as_mut().unwrap().result = json!({"padding": ""});
+    let mut prospective = draft.envelope().unwrap();
+    prospective.content["submission"]["result"] = serde_json::to_value(&result).unwrap();
+    let overhead = serde_json::to_vec(&prospective).unwrap().len();
+    result.receipt.as_mut().unwrap().result =
+        json!({"padding": "x".repeat(MAX_COMMAND_BYTES - overhead + 1)});
+    assert_eq!(
+        draft.observe_project_result(result.clone()),
+        Err(ContractError::RawLimit)
+    );
+    assert_eq!(draft, before);
+    result.receipt.as_mut().unwrap().result =
+        json!({"padding": "x".repeat(MAX_COMMAND_BYTES - overhead)});
+    draft.observe_project_result(result).unwrap();
+    assert_eq!(
+        serde_json::to_vec(&draft.envelope().unwrap())
+            .unwrap()
+            .len(),
+        MAX_COMMAND_BYTES
+    );
+    assert_eq!(restore(&draft), draft);
+    let before_ack = draft.clone();
+    let envelope = draft.envelope().unwrap();
+    let intent = IntentId::parse("intent:save-boundary").unwrap();
+    let mut reference = envelope.draft_ref.clone();
+    reference.revision = Revision::new(10);
+    let ack = SaveAck {
+        draft_ref: reference,
+        original_intent_id: intent.clone(),
+        content_digest: Digest::parse(&stable_digest(&envelope.content).unwrap()).unwrap(),
+    };
+    assert_eq!(
+        draft.acknowledge_save(&intent, &ack),
+        Err(ContractError::RawLimit)
+    );
+    assert_eq!(draft, before_ack);
+}
+
+#[test]
+fn preparing_command_near_envelope_limit_is_atomic() {
+    let mut draft = ready();
+    let mut proposed = item("requirement:budget", "来源", ItemKind::Requirement);
+    proposed.sources = vec![large_source(65_536, 'x'); 15];
+    proposed.sources.push(large_source(1, 'x'));
+    apply(&mut draft, patch(None, vec![proposed.clone()]), false);
+    let spare = MAX_COMMAND_BYTES
+        - serde_json::to_vec(&draft.envelope().unwrap())
+            .unwrap()
+            .len();
+    // Replacing byte 1 also increases the byte-offset field from 1 to five digits.
+    proposed.sources[15] = large_source(spare - 20, 'x');
+    let mut draft = ready();
+    apply(&mut draft, patch(None, vec![proposed]), false);
+    let before = draft.clone();
+    assert_eq!(
+        draft.prepare_project(&draft.revision().clone(), command()),
+        Err(ContractError::RawLimit)
+    );
+    assert_eq!(draft, before);
+    assert_eq!(restore(&draft), draft);
 }

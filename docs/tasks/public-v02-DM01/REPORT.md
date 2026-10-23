@@ -30,6 +30,14 @@ Toolchain: existing local Rust/Cargo 1.93.1. `PATH=/Users/muyi/.rustup/toolchain
 
 Initial verification exposed a fake-host command fixture with an invalid hard-coded plan digest; the fixture now derives `expected_plan_digest()` using the existing contract. The final domain tests pass with real contract validation intact.
 
+## Integration review corrections (2026-10-23)
+
+Independent architecture and code review found storage/editor revision conflation and accepted envelopes that the strict recovery decoder could not restore. Local editor CAS now uses required `content.edit_revision`; `DraftRef.revision` remains the confirmed storage baseline and advances only on a matching existing `SaveAck`. This is an unreleased candidate content format correction, not a migration or a new public contract. Earlier candidate content lacking `edit_revision` is rejected; no persisted production data or migration is claimed.
+
+Every state mutation validates the complete encoded envelope against the existing 1 MiB budget and strict JSON decoder before committing its cloned state. This includes source batches, cumulative edits, escaped strings, preparation, dispatch markers, receipts and save acknowledgments. Oversized or excessively nested results retain the original query-only dispatch marker. No shared limit was increased.
+
+Regression evidence includes RED failures for the original revision/size defects and the independently reproduced deep-receipt defect, then GREEN tests for the corrected behavior. Coverage includes exact-budget receipt restoration, one-byte overflow, storage revision 9→10 growth, preparation near capacity, and independent local/storage revision exhaustion. Final commit tests, CI and independent re-review are recorded in the integration delivery report; the earlier 17/35 counts above describe the original candidate only.
+
 ## Remaining gates
 
 Independent review belongs to the integration owner; this author does not claim an independent review. Module registration and tests on the final integrated commit, exact-commit CI, PR organization and any merge belong exclusively to the integration owner.
