@@ -66,16 +66,18 @@ print('U0 visual approval: absent; acceptance NOT_RUN.')
 
 ## 审查与剩余阻断
 
-非作者独立审查者 `/root/review_publicui_u0`：固定 e8294514 发现日志 SHA 缺失 Important 与 diff 结果仍待办 Minor；增补固定 `c79921401ea93d95028ac54ea0cecbf724cba4b4` 后，独立亲算全部摘要、重跑静态检查及全范围 diff-check，确认两项关闭、无新增 Important/Minor，适合作为待用户评审的 U0 文档候选。该结论不代表具体视觉批准，图标库存增补另核。未申请合入；B `01a14fbb-c8ec-7215-9b01-9c8cebf140d7` 保持唯一 develop 合入者。
+非作者独立审查者 `/root/review_publicui_u0`：固定 e8294514 发现日志 SHA 缺失 Important 与 diff 结果仍待办 Minor；增补固定 `c79921401ea93d95028ac54ea0cecbf724cba4b4` 后，独立亲算全部摘要、重跑静态检查及全范围 diff-check，确认两项关闭、无新增 Important/Minor，适合作为待用户评审的 U0 文档候选。该结论不代表具体视觉批准，图标库存增补固定 `c595304d17339ba0e8c454bab833a6295b030f5f` 亦由同一非作者独立核对九份资源、Kotlin 引用、报告摘要、完整 diff 和 Android 源无变更，结论无新增 Important/Minor。未申请合入；B `01a14fbb-c8ec-7215-9b01-9c8cebf140d7` 保持唯一 develop 合入者。
 
 剩余：U0 用户具体外观认可及 shellFinalSha；U1 C1 接口/fixture；U2 C2/C3/U1；U3 真实入口/Android 输入/设备与 TalkBack。没有拒绝或结果不明的写入，本轮缺依赖与缺工具未扩大权限。未触碰 main/develop、ChatScreen/旧卡片/Foundation/Shell、Contracts 登记文件；无真实模型、账户授权、凭据配置、付费实验、第三方程序下载执行、部署、强推或删分支。
 
 ## 固定提交与推送
 
-首片源 `e8294514c3dbe2255e66046e92c20eac9a77caa1` 已正常 push 到 origin/task/publicui-u0-20261023；没有 PR/合入/部署。push 自动产生文档 CI `39903782012`，按已有 docs-only 交接规则提交取消请求，普通取消已提交但 run 因 always() 仍继续；随后 force-cancel API 请求也获接受，终态待核；不把取消算测试通过。后续仅补父任务 Shell 复核输入、S0 场景与证据摘要，固定 SHA 随完成报告另列。
+首片源 `e8294514c3dbe2255e66046e92c20eac9a77caa1` 已正常 push 到 origin/task/publicui-u0-20261023；没有 PR/合入/部署。push 自动产生文档 CI `39903782012`，按已有 docs-only 交接规则提交取消请求，普通取消已提交但 run 因 always() 仍继续；随后 force-cancel API 请求也获接受；最终 `gh run view` 实核 completed/cancelled（固定 e8294514）；不把取消算测试通过。后续仅补父任务 Shell 复核输入、S0 场景与证据摘要，固定 SHA 随完成报告另列。
 
 ## 后续图标核对输入
 
 用户要求优先已有 icon；本环境只读核对 Android res 和 Kotlin 引用，组件文档分表记录“入库”和“当前页面引用”。原品牌资源提交 `11d28aa8c85cfeb41a3efffefa6ab446257fc0c1`；现有 wb_menu/chat/document/add/send VectorDrawable 及原品牌 PNG 均 present，旧 ChatInputDock 对 add/send 的引用不能冒充当前 ShellInputDock 已使用。父任务完整仓库库存映射待交接。未新增图标、默认 Material 替代或改任何产品文件。
 
 最终 S0/W 系列静态检查命令 `python3 /tmp/publicui-u0-evidence/check-final-docs.py` exit 0；输出 docs-final-check.txt SHA256=`fccc9cf8e8e6a5dfa88009a5f834402e92a6476f69c1de45feb2c7b02669d08f`，脚本 SHA256=`b11d45d6e0a02c05462904782ec70554a28902183bbff803aace35ef955e8a0c`。这不是新增行为测试或产品 PASS。
+
+最终可审阅内容源 `c595304d17339ba0e8c454bab833a6295b030f5f` 已正常推送；develop 远端仍为 `fd26dcdabcdac996bc2881e8141cac2b519966fc`。本次封套提交只登记独审与CI取消终态，不改设计或产品。最终重跑静态文档检查、REPORT相对链接与基线到内容源 diff-check 均 exit 0；工作树干净。后续 push 顶提交含 `[skip ci]`，未手动 dispatch；ci取消不计产品回归通过。
