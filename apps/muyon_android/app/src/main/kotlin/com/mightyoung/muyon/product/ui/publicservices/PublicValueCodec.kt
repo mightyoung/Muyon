@@ -172,3 +172,60 @@ fun decodePublicValue(kind: String, raw: String): String {
         return o.toString()
     } catch (e: Exception) { throw IllegalArgumentException("invalid public value", e) }
 }
+
+private fun answerRef(o: JSONObject): AnswerRef {
+    fields(o, setOf("id", "revision")); return AnswerRef(text(o, "id"), text(o, "revision"))
+}
+private fun snapshotRef(o: JSONObject): SnapshotRef {
+    fields(o, setOf("id", "revision")); return SnapshotRef(text(o, "id"), text(o, "revision"))
+}
+private fun sourceBinding(o: JSONObject): SourceBinding {
+    fields(o, setOf("resultId", "documentId", "revision", "textDigest", "startByte", "endByte", "pageIndex"))
+    return SourceBinding(text(o, "resultId"), text(o, "documentId"), text(o, "revision"), text(o, "textDigest"), text(o, "startByte"), text(o, "endByte"),
+        if (o.isNull("pageIndex")) null else unsignedInteger(o.get("pageIndex"), "2147483647").toInt())
+}
+private fun stringMap(o: JSONObject): Map<String,String> = o.keys().asSequence().associateWith { text(o, it) }
+private fun decodeProps(kind: ComponentType, o: JSONObject): Props {
+    fun exact(vararg keys: String) = fields(o, keys.toSet())
+    fun list(key: String) = strings(array(o, key))
+    return when (kind) {
+        ComponentType.MessageBlock -> { exact("text", "answerRef"); Props.Message(text(o, "text"), answerRef(obj(o, "answerRef"))) }
+        ComponentType.ChoiceCard -> {
+            exact("optionIds", "selectedIds", "customText"); val selected = list("selectedIds"); require(selected.distinct().size == selected.size)
+            Props.Choice(list("optionIds"), selected.toSet(), nullableText(o, "customText"))
+        }
+        ComponentType.FormCard -> {
+            exact("fieldIds", "fieldTypes", "values", "validationMessages")
+            Props.Form(list("fieldIds"), stringMap(obj(o, "fieldTypes")), stringMap(obj(o, "values")), stringMap(obj(o, "validationMessages")))
+        }
+        ComponentType.ResultList -> {
+            exact("itemIds", "labels", "sourceBindings"); val values = array(o, "sourceBindings")
+            Props.Results(list("itemIds"), list("labels"), (0 until values.length()).map { sourceBinding(values.getJSONObject(it)) })
+        }
+        ComponentType.SourceCard -> { exact("sourceBinding", "quote", "claimRelation"); Props.Source(sourceBinding(obj(o, "sourceBinding")), text(o, "quote"), text(o, "claimRelation")) }
+        ComponentType.AttachmentCard -> { exact("documentRef", "stageCoverageRefs"); Props.Attachment(text(o, "documentRef"), list("stageCoverageRefs")) }
+        ComponentType.TaskProgressCard -> { exact("jobRef", "stage", "processed", "total"); Props.Progress(text(o, "jobRef"), text(o, "stage"), text(o, "processed"), nullableText(o, "total")) }
+        ComponentType.DraftArtifactCard -> { exact("draftRef", "contentSummary", "saveStatus"); Props.DraftArtifact(text(o, "draftRef"), text(o, "contentSummary"), text(o, "saveStatus")) }
+        ComponentType.ConfirmationCard -> { exact("preparedRef"); Props.Confirmation(text(o, "preparedRef")) }
+        ComponentType.ReceiptCard -> { exact("originalIntentId", "receiptRef"); Props.Receipt(text(o, "originalIntentId"), nullableText(o, "receiptRef")) }
+    }
+}
+/** Presentation wire follows the U1 field names; shared C1 wire keeps its snake_case. */
+fun decodeUIPlan(raw: String): UIPlan {
+    try {
+        val o = strictObject(raw)
+        fields(o, setOf("schemaVersion", "surfaceId", "planRevision", "snapshotRef", "root", "nodes"))
+        val values = array(o, "nodes"); require(values.length() <= 256)
+        val nodes = (0 until values.length()).map { i ->
+            val n = values.getJSONObject(i)
+            fields(n, setOf("id", "componentType", "typedProps", "bindingRefs", "children", "eventBindings"))
+            val kind = ComponentType.valueOf(text(n, "componentType")); val events = array(n, "eventBindings")
+            Node(text(n, "id"), kind, decodeProps(kind, obj(n, "typedProps")), strings(array(n, "bindingRefs")), strings(array(n, "children")),
+                (0 until events.length()).map { j ->
+                    val e = events.getJSONObject(j); fields(e, setOf("eventKind", "actionRef"))
+                    EventBinding(EventKind.valueOf(text(e, "eventKind")), text(e, "actionRef"))
+                })
+        }
+        return UIPlan(unsignedInteger(o.get("schemaVersion"), "2147483647").toInt(), text(o, "surfaceId"), text(o, "planRevision"), snapshotRef(obj(o, "snapshotRef")), text(o, "root"), nodes)
+    } catch (error: Exception) { throw IllegalArgumentException("invalid UIPlan", error) }
+}
