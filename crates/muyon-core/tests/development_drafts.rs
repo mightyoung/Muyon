@@ -1,10 +1,8 @@
-// The integration owner registers the public module. This path also verifies this
-// candidate independently before changing the shared lib.rs registration.
-pub use muyon_core::{contract, services};
-#[path = "../src/development_drafts.rs"]
-mod development_drafts;
+// Verify the registered domain through the actual public library boundary.
 use contract::*;
 use development_drafts::*;
+use muyon_core::development_drafts;
+pub use muyon_core::{contract, services};
 use serde_json::json;
 use services::{drafts::*, types::*};
 
