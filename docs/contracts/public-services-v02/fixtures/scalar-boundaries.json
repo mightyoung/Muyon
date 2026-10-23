@@ -1,0 +1,569 @@
+{
+  "fixture_version": 1,
+  "contract_major": 1,
+  "schema_major": 1,
+  "synthetic": true,
+  "scalar_cases": [
+    {
+      "id": "revision-exact-0",
+      "kind": "revision",
+      "json": "\"0\"",
+      "valid": true,
+      "expected": "0"
+    },
+    {
+      "id": "revision-exact-1",
+      "kind": "revision",
+      "json": "\"9007199254740993\"",
+      "valid": true,
+      "expected": "9007199254740993"
+    },
+    {
+      "id": "revision-exact-2",
+      "kind": "revision",
+      "json": "\"18446744073709551615\"",
+      "valid": true,
+      "expected": "18446744073709551615"
+    },
+    {
+      "id": "revision-invalid-text-0",
+      "kind": "revision",
+      "json": "\"\"",
+      "valid": false
+    },
+    {
+      "id": "revision-invalid-text-1",
+      "kind": "revision",
+      "json": "\"01\"",
+      "valid": false
+    },
+    {
+      "id": "revision-invalid-text-2",
+      "kind": "revision",
+      "json": "\"-0\"",
+      "valid": false
+    },
+    {
+      "id": "revision-invalid-text-3",
+      "kind": "revision",
+      "json": "\"+1\"",
+      "valid": false
+    },
+    {
+      "id": "revision-invalid-text-4",
+      "kind": "revision",
+      "json": "\" 1\"",
+      "valid": false
+    },
+    {
+      "id": "revision-invalid-text-5",
+      "kind": "revision",
+      "json": "\"1 \"",
+      "valid": false
+    },
+    {
+      "id": "revision-invalid-text-6",
+      "kind": "revision",
+      "json": "\"1.0\"",
+      "valid": false
+    },
+    {
+      "id": "revision-invalid-text-7",
+      "kind": "revision",
+      "json": "\"1e3\"",
+      "valid": false
+    },
+    {
+      "id": "revision-invalid-text-8",
+      "kind": "revision",
+      "json": "\"１\"",
+      "valid": false
+    },
+    {
+      "id": "revision-invalid-text-9",
+      "kind": "revision",
+      "json": "\"-1\"",
+      "valid": false
+    },
+    {
+      "id": "revision-invalid-text-10",
+      "kind": "revision",
+      "json": "\"18446744073709551616\"",
+      "valid": false
+    },
+    {
+      "id": "revision-wrong-json-type-0",
+      "kind": "revision",
+      "json": "9007199254740993",
+      "valid": false
+    },
+    {
+      "id": "revision-wrong-json-type-1",
+      "kind": "revision",
+      "json": "null",
+      "valid": false
+    },
+    {
+      "id": "revision-wrong-json-type-2",
+      "kind": "revision",
+      "json": "true",
+      "valid": false
+    },
+    {
+      "id": "unix_ms-exact-0",
+      "kind": "unix_ms",
+      "json": "\"0\"",
+      "valid": true,
+      "expected": "0"
+    },
+    {
+      "id": "unix_ms-exact-1",
+      "kind": "unix_ms",
+      "json": "\"9007199254740993\"",
+      "valid": true,
+      "expected": "9007199254740993"
+    },
+    {
+      "id": "unix_ms-exact-2",
+      "kind": "unix_ms",
+      "json": "\"-1\"",
+      "valid": true,
+      "expected": "-1"
+    },
+    {
+      "id": "unix_ms-exact-3",
+      "kind": "unix_ms",
+      "json": "\"9223372036854775807\"",
+      "valid": true,
+      "expected": "9223372036854775807"
+    },
+    {
+      "id": "unix_ms-exact-4",
+      "kind": "unix_ms",
+      "json": "\"-9223372036854775808\"",
+      "valid": true,
+      "expected": "-9223372036854775808"
+    },
+    {
+      "id": "unix_ms-invalid-text-0",
+      "kind": "unix_ms",
+      "json": "\"\"",
+      "valid": false
+    },
+    {
+      "id": "unix_ms-invalid-text-1",
+      "kind": "unix_ms",
+      "json": "\"01\"",
+      "valid": false
+    },
+    {
+      "id": "unix_ms-invalid-text-2",
+      "kind": "unix_ms",
+      "json": "\"-0\"",
+      "valid": false
+    },
+    {
+      "id": "unix_ms-invalid-text-3",
+      "kind": "unix_ms",
+      "json": "\"+1\"",
+      "valid": false
+    },
+    {
+      "id": "unix_ms-invalid-text-4",
+      "kind": "unix_ms",
+      "json": "\" 1\"",
+      "valid": false
+    },
+    {
+      "id": "unix_ms-invalid-text-5",
+      "kind": "unix_ms",
+      "json": "\"1 \"",
+      "valid": false
+    },
+    {
+      "id": "unix_ms-invalid-text-6",
+      "kind": "unix_ms",
+      "json": "\"1.0\"",
+      "valid": false
+    },
+    {
+      "id": "unix_ms-invalid-text-7",
+      "kind": "unix_ms",
+      "json": "\"1e3\"",
+      "valid": false
+    },
+    {
+      "id": "unix_ms-invalid-text-8",
+      "kind": "unix_ms",
+      "json": "\"１\"",
+      "valid": false
+    },
+    {
+      "id": "unix_ms-invalid-text-9",
+      "kind": "unix_ms",
+      "json": "\"9223372036854775808\"",
+      "valid": false
+    },
+    {
+      "id": "unix_ms-invalid-text-10",
+      "kind": "unix_ms",
+      "json": "\"-9223372036854775809\"",
+      "valid": false
+    },
+    {
+      "id": "unix_ms-wrong-json-type-0",
+      "kind": "unix_ms",
+      "json": "9007199254740993",
+      "valid": false
+    },
+    {
+      "id": "unix_ms-wrong-json-type-1",
+      "kind": "unix_ms",
+      "json": "null",
+      "valid": false
+    },
+    {
+      "id": "unix_ms-wrong-json-type-2",
+      "kind": "unix_ms",
+      "json": "true",
+      "valid": false
+    },
+    {
+      "id": "result_id-plain",
+      "kind": "result_id",
+      "json": "\"id:1\"",
+      "valid": true,
+      "expected": "id:1"
+    },
+    {
+      "id": "result_id-ascii-128",
+      "kind": "result_id",
+      "json": "\"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\"",
+      "valid": true,
+      "expected": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+    },
+    {
+      "id": "result_id-ascii-129",
+      "kind": "result_id",
+      "json": "\"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\"",
+      "valid": false
+    },
+    {
+      "id": "result_id-utf8-128",
+      "kind": "result_id",
+      "json": "\"甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲ab\"",
+      "valid": true,
+      "expected": "甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲ab"
+    },
+    {
+      "id": "result_id-utf8-129",
+      "kind": "result_id",
+      "json": "\"甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲\"",
+      "valid": false
+    },
+    {
+      "id": "result_id-empty",
+      "kind": "result_id",
+      "json": "\"\"",
+      "valid": false
+    },
+    {
+      "id": "result_id-nul",
+      "kind": "result_id",
+      "json": "\"a\\u0000b\"",
+      "valid": false
+    },
+    {
+      "id": "result_id-json-number",
+      "kind": "result_id",
+      "json": "1",
+      "valid": false
+    },
+    {
+      "id": "job_id-plain",
+      "kind": "job_id",
+      "json": "\"id:1\"",
+      "valid": true,
+      "expected": "id:1"
+    },
+    {
+      "id": "job_id-ascii-128",
+      "kind": "job_id",
+      "json": "\"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\"",
+      "valid": true,
+      "expected": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+    },
+    {
+      "id": "job_id-ascii-129",
+      "kind": "job_id",
+      "json": "\"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\"",
+      "valid": false
+    },
+    {
+      "id": "job_id-utf8-128",
+      "kind": "job_id",
+      "json": "\"甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲ab\"",
+      "valid": true,
+      "expected": "甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲ab"
+    },
+    {
+      "id": "job_id-utf8-129",
+      "kind": "job_id",
+      "json": "\"甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲\"",
+      "valid": false
+    },
+    {
+      "id": "job_id-empty",
+      "kind": "job_id",
+      "json": "\"\"",
+      "valid": false
+    },
+    {
+      "id": "job_id-nul",
+      "kind": "job_id",
+      "json": "\"a\\u0000b\"",
+      "valid": false
+    },
+    {
+      "id": "job_id-json-number",
+      "kind": "job_id",
+      "json": "1",
+      "valid": false
+    },
+    {
+      "id": "intent_id-plain",
+      "kind": "intent_id",
+      "json": "\"id:1\"",
+      "valid": true,
+      "expected": "id:1"
+    },
+    {
+      "id": "intent_id-ascii-128",
+      "kind": "intent_id",
+      "json": "\"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\"",
+      "valid": true,
+      "expected": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+    },
+    {
+      "id": "intent_id-ascii-129",
+      "kind": "intent_id",
+      "json": "\"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\"",
+      "valid": false
+    },
+    {
+      "id": "intent_id-utf8-128",
+      "kind": "intent_id",
+      "json": "\"甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲ab\"",
+      "valid": true,
+      "expected": "甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲ab"
+    },
+    {
+      "id": "intent_id-utf8-129",
+      "kind": "intent_id",
+      "json": "\"甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲\"",
+      "valid": false
+    },
+    {
+      "id": "intent_id-empty",
+      "kind": "intent_id",
+      "json": "\"\"",
+      "valid": false
+    },
+    {
+      "id": "intent_id-nul",
+      "kind": "intent_id",
+      "json": "\"a\\u0000b\"",
+      "valid": false
+    },
+    {
+      "id": "intent_id-json-number",
+      "kind": "intent_id",
+      "json": "1",
+      "valid": false
+    },
+    {
+      "id": "digest-hex-64",
+      "kind": "digest",
+      "json": "\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\"",
+      "valid": true,
+      "expected": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    },
+    {
+      "id": "digest-hex-mixed-digits",
+      "kind": "digest",
+      "json": "\"0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef\"",
+      "valid": true,
+      "expected": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+    },
+    {
+      "id": "digest-hex-63",
+      "kind": "digest",
+      "json": "\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\"",
+      "valid": false
+    },
+    {
+      "id": "digest-hex-65",
+      "kind": "digest",
+      "json": "\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\"",
+      "valid": false
+    },
+    {
+      "id": "digest-upper",
+      "kind": "digest",
+      "json": "\"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\"",
+      "valid": false
+    },
+    {
+      "id": "digest-not-hex",
+      "kind": "digest",
+      "json": "\"gggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg\"",
+      "valid": false
+    },
+    {
+      "id": "digest-empty",
+      "kind": "digest",
+      "json": "\"\"",
+      "valid": false
+    },
+    {
+      "id": "digest-json-number",
+      "kind": "digest",
+      "json": "1",
+      "valid": false
+    }
+  ],
+  "negotiation_cases": [
+    {
+      "contract_major": 1,
+      "schema_major": 1,
+      "valid": true
+    },
+    {
+      "contract_major": 0,
+      "schema_major": 1,
+      "valid": false
+    },
+    {
+      "contract_major": 2,
+      "schema_major": 1,
+      "valid": false
+    },
+    {
+      "contract_major": 1,
+      "schema_major": 0,
+      "valid": false
+    },
+    {
+      "contract_major": 1,
+      "schema_major": 2,
+      "valid": false
+    },
+    {
+      "contract_major": 4294967295,
+      "schema_major": 1,
+      "valid": false
+    }
+  ],
+  "strict_scope_cases": [
+    {
+      "id": "scope-valid",
+      "json": "{\"scope\":{\"workspace_id\":\"w\",\"project_id\":null},\"account_id\":null,\"scope_generation\":\"9007199254740993\"}",
+      "valid": true,
+      "expected": {
+        "scope": {
+          "workspace_id": "w",
+          "project_id": null
+        },
+        "account_id": null,
+        "scope_generation": "9007199254740993"
+      }
+    },
+    {
+      "id": "scope-duplicate-generation",
+      "json": "{\"scope\":{\"workspace_id\":\"w\",\"project_id\":null},\"account_id\":null,\"scope_generation\":\"9007199254740993\",\"scope_generation\":\"2\"}",
+      "valid": false
+    },
+    {
+      "id": "scope-duplicate-nested-workspace",
+      "json": "{\"scope\":{\"workspace_id\":\"w\",\"workspace_id\":\"foreign\",\"project_id\":null},\"account_id\":null,\"scope_generation\":\"9007199254740993\"}",
+      "valid": false
+    },
+    {
+      "id": "scope-unknown-authority",
+      "json": "{\"scope\":{\"workspace_id\":\"w\",\"project_id\":null},\"account_id\":null,\"scope_generation\":\"9007199254740993\",\"approved\":true}",
+      "valid": false
+    },
+    {
+      "id": "scope-number-generation",
+      "json": "{\"scope\":{\"workspace_id\":\"w\",\"project_id\":null},\"account_id\":null,\"scope_generation\":9007199254740993}",
+      "valid": false
+    }
+  ],
+  "native_identity_cases": [
+    {
+      "id": "native-intent_id-issued",
+      "field": "intent_id",
+      "value": "intent:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "valid_native": true,
+      "valid_public": true
+    },
+    {
+      "id": "native-intent_id-ascii-128",
+      "field": "intent_id",
+      "value": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+      "valid_native": true,
+      "valid_public": true
+    },
+    {
+      "id": "native-intent_id-ascii-129",
+      "field": "intent_id",
+      "value": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+      "valid_native": false,
+      "valid_public": false
+    },
+    {
+      "id": "native-intent_id-utf8-128",
+      "field": "intent_id",
+      "value": "甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲ab",
+      "valid_native": false,
+      "valid_public": true
+    },
+    {
+      "id": "native-intent_id-nul",
+      "field": "intent_id",
+      "value": "a\u0000b",
+      "valid_native": false,
+      "valid_public": false
+    },
+    {
+      "id": "native-plan_id-issued",
+      "field": "plan_id",
+      "value": "plan:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "valid_native": true
+    },
+    {
+      "id": "native-plan_id-ascii-128",
+      "field": "plan_id",
+      "value": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+      "valid_native": true
+    },
+    {
+      "id": "native-plan_id-ascii-129",
+      "field": "plan_id",
+      "value": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+      "valid_native": false
+    },
+    {
+      "id": "native-plan_id-utf8-128",
+      "field": "plan_id",
+      "value": "甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲甲ab",
+      "valid_native": false
+    },
+    {
+      "id": "native-plan_id-nul",
+      "field": "plan_id",
+      "value": "a\u0000b",
+      "valid_native": false
+    }
+  ]
+}

@@ -1,5 +1,7 @@
 # S2 partial pure validation and original-query candidate
 
+Latest partial S2 update: [original cancellation and actual Documents JobSnapshot projection](RECOVERY-SNAPSHOT.md), fixed source4ce50debd39c6dc4ca39dae7f76fd113b5856047. Earlier remaining-scope tables and counts below are historical; the latest report distinguishes implemented pure adapters from pending production/Operation work.
+
 Current follow-up: [checked-list API, resolved query-test gap and exact remaining scope](../public-v02-S2/REVISION.md). The fixed-source counts/review below describe the earlier candidate and are retained as history; listing no longer returns an empty Vec on error.
 
 2026-10-23 UTC. Partial S2 only, not a runnable Skill service. Same approved plan, base and exact C1/C2/C3 dependency history as [S1](../public-v02-S1/IMPLEMENTATION.md).
