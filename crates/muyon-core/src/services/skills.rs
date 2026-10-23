@@ -1,7 +1,8 @@
 //! Pure candidate metadata; registration, binding and enablement grant no authority.
 use crate::{contract::Revision, services::types::*};
 use serde::{Deserialize, Serialize};
-use serde_json::Value;
+use serde_json::{json, Value};
+use sha2::{Digest as _, Sha256};
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -49,8 +50,50 @@ pub(crate) fn error(code: ErrorCode) -> ServiceError {
         details_ref: None,
     }
 }
+/// Exact compiled resource bytes, never a disk/package scan.
 pub fn builtin_descriptors() -> Vec<SkillDescriptor> {
-    vec![]
+    [
+        (
+            "supplier-overview",
+            "inquiry",
+            "supplier_list",
+            include_str!("../agent/skills/supplier-overview/SKILL.md"),
+        ),
+        (
+            "paper-overview",
+            "research",
+            "paper_list",
+            include_str!("../agent/skills/paper-overview/SKILL.md"),
+        ),
+    ]
+    .into_iter()
+    .map(|(id, owner, capability, body)| SkillDescriptor {
+        reference: SkillRef {
+            skill_id: id.into(),
+            version: "builtin-v1".into(),
+            content_digest: digest_bytes(body.as_bytes()),
+        },
+        owner_plugin_id: owner.into(),
+        contract_major: 1,
+        input_schema: builtin_input_schema(),
+        output_schema: builtin_output_schema(),
+        required_capabilities: vec![capability.into()],
+        resource_manifest: vec!["SKILL.md".into()],
+    })
+    .collect()
+}
+pub(crate) fn digest_bytes(bytes: &[u8]) -> Digest {
+    let hex: String = Sha256::digest(bytes)
+        .iter()
+        .map(|b| format!("{b:02x}"))
+        .collect();
+    Digest::parse(&hex).expect("SHA256 is canonical hexadecimal")
+}
+pub(crate) fn builtin_input_schema() -> Value {
+    json!({"type":"object","properties":{"limit":{"type":"integer","minimum":1,"maximum":50},"offset":{"type":"integer","minimum":0,"maximum":10000}},"required":["limit","offset"],"additionalProperties":false})
+}
+pub(crate) fn builtin_output_schema() -> Value {
+    json!({"type":"object","required":["records"],"properties":{"records":{"type":"array"}}})
 }
 pub fn validate_catalog(_: &SkillRegistrySnapshot) -> Result<(), ServiceError> {
     Err(error(ErrorCode::CapabilityUnavailable))
