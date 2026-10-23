@@ -61,7 +61,7 @@ W 系列与 V 系列有重叠时，W 是本次全套重审的具体视觉候选�
 
 ## 现有图标/品牌：入库与引用分开核对
 
-用户要求先查仓库已有 icon。本表仅核对产品基线 `fd26dcdabcdac996bc2881e8141cac2b519966fc` 的 Android 素材与源码引用，不声称已完成仓库历史/其他平台全部盘点；已接收父任务关键库存结果，完整最终路径表仍待交接。优先使用已入库原素材，不自造图标，也不默认用临时 Material 图形代替。新视觉 W5/W8 中的单聊/群组等形状只是语义要求，具体资产选择先等库存核验与用户评审；不能据候选文字新画一套。
+用户要求先查仓库已有 icon。本表仅核对产品基线 `fd26dcdabcdac996bc2881e8141cac2b519966fc` 的 Android 素材与源码引用，不声称已完成仓库历史/其他平台全部盘点；已接收父任务关键库存结果，最终路径依据已交接，见下方固定路径与 NOTICE。优先使用已入库原素材，不自造图标，也不默认用临时 Material 图形代替。新视觉 W5/W8 中的单聊/群组等形状只是语义要求，具体资产选择仍等用户评审；pin与身份图数据缺口见下表；不能据候选文字新画一套。
 
 根 R 为 `apps/muyon_android/app/src/main/res/`；K 为对应 `src/main/kotlin/com/mightyoung/muyon/product/`。以下 present 表示文件或引用存在，**不是**最终页面视觉 PASS。
 
@@ -72,21 +72,23 @@ W 系列与 V 系列有重叠时，W 是本次全套重审的具体视觉候选�
 | drawable-nodpi/muyon_brand_mascot_views.png | present；同提交 | 本轮未发现生产 Kotlin 引用 | 不能因已入库就写“页面已用” |
 | drawable/wb_menu.xml | present，24dp VectorDrawable | ConversationHeader/旧 design.Workbench 有引用 | 原几何优先核对；可见24dp与外48dp热区分开 |
 | drawable/wb_add.xml / wb_send.xml | present，24dp VectorDrawable | 旧 chat/ChatPresentation.kt 的 ChatInputDock 有引用；当前 ChatScreen 调用 ShellInputDock，后者为 Text("+")/Text("↑") | 已入库不等于当前输入页实际引用；交 Shell owner 做资产映射，保留原门控 |
-| drawable/wb_chat.xml / wb_document.xml | present，24dp VectorDrawable | 旧 design/Workbench.kt 的 Destination 声明有引用；尚不能证明 S0 当前导航条目引用 | 优先核查可用单聊/文档资产；群组/搜索/关闭/置顶/设置逐一等完整库存，不造缺失事实 |
+| drawable/wb_chat.xml / wb_document.xml | present，24dp VectorDrawable | 旧 design/Workbench.kt 的 Destination 声明有引用；尚不能证明 S0 当前导航条目引用 | 优先核查可用单聊/文档资产；群组身份接线、pin缺素材，与已有搜索/关闭/设置候选分别记录 |
 | drawable/muyon_avatar.png | present；本执行者核看为白色陶瓷环形图案 | S0 上述文件未引用，但 agents/AgentLibraryScreen.kt 的头像选择/条目/创建区域仍引用 | 不能当原狗形 mascot；交原 owner 统一品牌，不在本任务改页面 |
 
-父任务关键库存结果已收到并按上述固定基线补核：三份原品牌 PNG 与暂停的 Shell 生产候选 `d61be4b50c3f4877022008e5493ade1ba78a96ad` 字节一致；58 个 product Kotlin 文件中 `ChatInputDock(` 仅定义一次，没有调用点。当前置顶是 Text 的 ◆/◇，更多是 Text 的 ···；均不是已迁移的专用图标。主 AndroidManifest.xml 未设 `android:icon`；这只说明 Manifest 显式品牌入口缺口，不推断 APK 实际默认图标或声称已修。
+父任务关键库存结果已收到并按上述固定基线补核：三份原品牌 PNG 与暂停的 Shell 生产候选 `d61be4b50c3f4877022008e5493ade1ba78a96ad` 字节一致；58 个 product Kotlin 文件中 `ChatInputDock(` 仅定义一次，没有调用点。当前置顶是 Text 的 ◆/◇，更多是 Text 的 ···；均不是已迁移的专用图标。主 AndroidManifest.xml 未设 `android:icon`，原生 res 无 mipmap/adaptive icon；这说明 launcher 品牌入口未接，不推断 APK 实际默认图标或声称已修。
 
-旧图形数据真实路径为 `packages/inquiry_module/lib/src/widgets/icon_paths.g.dart`，由 `AppIcon`（同目录 app_icon.dart）解析，旧 Flutter 业务页如 `src/app/shell.dart`、`src/features/spec/spec_widgets.dart` 仍有真实调用。精确盘点是 **102 种唯一几何、110 个 Icons 键映射**，不是110种不同图形；`packages/inquiry_module/test/fixtures/icons/catalog.json` 有102条目录记录。样本 source 指向 `output/imagegen/icons/sheet-1.png#0` 等生成稿，完整来源/许可/适配保真尚待核，不把生成注释当许可结论。只可评估复用图形数据，不能为此恢复 Dart/Flutter 运行时或新增依赖。主产品根下缺生成注释所写的 docs/design/icons/catalog.json，实际现存 test fixture 目录不能不加核验就当生产生成源。
+旧图形数据真实路径为 `packages/inquiry_module/lib/src/widgets/icon_paths.g.dart`，由 `AppIcon`（同目录 app_icon.dart）解析，旧 Flutter 业务页如 `src/app/shell.dart`、`src/features/spec/spec_widgets.dart` 仍有真实调用。精确盘点是 **102 种唯一几何、110 个 Icons 键映射**，不是110种不同图形；`packages/inquiry_module/test/fixtures/icons/catalog.json` 有102条目录记录。样本 source 指向 `output/imagegen/icons/sheet-1.png#0` 等生成稿，已读取 `packages/inquiry_module/LICENSE`（MIT）及 NOTICE（保留上游来源）；Material 名称仅兼容 key，不是 Material 原图。迁移须保留项目来源/许可记录并核适配保真，不把生成注释扩成对第三方图标的许可结论。只可评估复用图形数据，不能为此恢复 Dart/Flutter 运行时或新增依赖。主产品根下缺生成注释所写的 docs/design/icons/catalog.json，实际现存 test fixture 目录不能不加核验就当生产生成源。
 
 | 语义角色 | 优先现有资源/迁移候选 | 当前实际引用与缺口 | 显示与触控候选（均待审） |
 | --- | --- | --- | --- |
 | 原品牌/主Agent | muyon_brand_icon / mascot_front；views 只作原角色素材 | Shell 部分引用，AgentLibrary 仍引用陶瓷环；Manifest 图标未设 | 图标/角色按用途单独定可见尺寸；可点击身份外层热区>=48dp，不放大动作图形冒充热区 |
 | 菜单/新增/发送 | wb_menu / wb_add / wb_send | 菜单已引用；当前输入仍文字+与↑，旧资源未接当前路径 | W8 动作图标24dp、圆形可见容器40dp、外层热区>=48dp |
 | 来源/文档 | wb_document；旧 catalog 的相关图形需完整映射 | Workbench 声明有引用，不等于公共 SourceCard 已接 | 图形24dp、独立来源动作热区>=48dp；标签包含版本/位置 |
-| 搜索/附件/关闭/更多/设置 | 旧图形映射中 search / attach_file / close / more_horiz / more_vert / settings_outlined | 旧 Flutter 有使用，原生映射尚未接；父最终路径与来源许可待核 | 24dp显示/48dp热区；错误/禁用状态不只降透明度 |
-| 单聊/群组身份 | 原仓库存量先核；目前未冻结可直接复用的单/双气泡原生资产 | S0 仅文字区分；不能把 wb_chat 单图自动当完整群组身份 | 单/双气泡语义保留，24dp仅候选，不据此新画素材 |
-| 置顶/当前选中 | 先核完整库存中真实图钉/选中资产 | 当前◆/◇/文字标记，不宣称已用图钉 | 图钉可见16dp候选、外层48dp；选中需非色彩文本+selected语义 |
+| 搜索/附件/关闭/更多/设置 | 旧图形映射中 search / attach_file / close / more_horiz / more_vert / settings_outlined | 旧 Flutter 有使用，原生映射尚未接；最终路径和MIT/NOTICE已核；迁移与新视觉尚未实施 | 24dp显示/48dp热区；错误/禁用状态不只降透明度 |
+| 单聊/群组身份 | 现有 wb_chat 只是一种通用几何；Agent/群组身份图应由宿主提供 | ShellConversation 缺身份图数据，是接线缺口；不能统一用 wb_chat 充当 Agent/群组品牌 | 单/双气泡语义保留，24dp仅候选，不据此新画素材 |
+| 置顶/当前选中 | 旧102种几何中无 pin；图钉是局部资源缺口 | 当前◆/◇/文字标记，不宣称已用图钉 | 图钉可见16dp候选、外层48dp；选中需非色彩文本+selected语义 |
+
+当前五个 wb_* 的出处固定为 `apps/muyon_android/app/src/main/assets/notices/UI_RESOURCES.txt`：明确它们是 Muyon 自写基本几何，历史资源名仅兼容，不含早期提取的 WorkBuddy 路径；禁止恢复那些旧路径。原品牌来源和原样哈希见 `docs/tasks/ui-brand-resources-20261022/RESOURCE-MAP.json`；mascot_views 是多视角参考，不直接当头像。`apps/muyon/assets/brand/` 的旧蓝色折页及设计生成图笔刷变体均不是本轮正式品牌。父任务全仓库存核验记录无 SVG/iconfont，NotoSansSC 是正文字体，不能当图标源；本表不据此恢复旧 Flutter 界面。
 
 三份原品牌现状 SHA256：icon=`61d3953eba983cbbdb9353a15af2841a2bdd6e663074be0b89930c9b910e9e88`；front=`049b8b9d63c9b03d5fecd2d1306ee660cc9f7d478c273ff7a1e97b57787a46a2`；views=`852ed1c814eb80102af5cb515066786284c04a0e2c8a75066da71ee942cf5643`。它们是字节保真证据，不是页面使用率或视觉验收。
 

@@ -76,7 +76,7 @@ print('U0 visual approval: absent; acceptance NOT_RUN.')
 
 ## 后续图标核对输入
 
-用户要求优先已有 icon；本环境只读核对 Android res 和 Kotlin 引用，组件文档分表记录“入库”和“当前页面引用”。原品牌资源提交 `11d28aa8c85cfeb41a3efffefa6ab446257fc0c1`；现有 wb_menu/chat/document/add/send VectorDrawable 及原品牌 PNG 均 present，旧 ChatInputDock 对 add/send 的引用不能冒充当前 ShellInputDock 已使用。父任务完整仓库库存映射待交接。未新增图标、默认 Material 替代或改任何产品文件。
+用户要求优先已有 icon；本环境只读核对 Android res 和 Kotlin 引用，组件文档分表记录“入库”和“当前页面引用”。原品牌资源提交 `11d28aa8c85cfeb41a3efffefa6ab446257fc0c1`；现有 wb_menu/chat/document/add/send VectorDrawable 及原品牌 PNG 均 present，旧 ChatInputDock 对 add/send 的引用不能冒充当前 ShellInputDock 已使用。父任务完整仓库库存映射随后已交接，最终补充见下。未新增图标、默认 Material 替代或改任何产品文件。
 
 最终 S0/W 系列静态检查命令 `python3 /tmp/publicui-u0-evidence/check-final-docs.py` exit 0；输出 docs-final-check.txt SHA256=`fccc9cf8e8e6a5dfa88009a5f834402e92a6476f69c1de45feb2c7b02669d08f`，脚本 SHA256=`b11d45d6e0a02c05462904782ec70554a28902183bbff803aace35ef955e8a0c`。这不是新增行为测试或产品 PASS。
 
@@ -84,4 +84,6 @@ print('U0 visual approval: absent; acceptance NOT_RUN.')
 
 ## 父任务图标关键结果补入
 
-已补独立资源映射和显示/热区表，未等完整路径表就冒充全部盘点完成。按固定 develop 源本地确认：58个 product Kotlin 文件中 ChatInputDock 只有定义，当前壳是文字+、↑、◆/◇、···；AgentLibrary引用陶瓷环muyon_avatar（本执行者已view_image），Manifest无android:icon。三份原品牌PNG与固定 d61be4b5 候选逐字节相同，SHA256已列组件文档。旧图形精确计数为102种唯一几何/110个映射键，catalog fixture有102项；AppIcon在旧Flutter业务页有调用，不能当已迁原生。注释指向的生产生成catalog路径缺失、样本source为imagegen；来源/许可和完整路径表仍待核，不恢复Dart运行时、不新增依赖、不在此修改资源或产品页。
+已补独立资源映射和显示/热区表，未等完整路径表就冒充全部盘点完成。按固定 develop 源本地确认：58个 product Kotlin 文件中 ChatInputDock 只有定义，当前壳是文字+、↑、◆/◇、···；AgentLibrary引用陶瓷环muyon_avatar（本执行者已view_image），Manifest无android:icon。三份原品牌PNG与固定 d61be4b5 候选逐字节相同，SHA256已列组件文档。旧图形精确计数为102种唯一几何/110个映射键，catalog fixture有102项；AppIcon在旧Flutter业务页有调用，不能当已迁原生。注释指向的生产生成catalog路径缺失、样本source为imagegen；来源/许可及最终路径现已补核（见下），不恢复Dart运行时、不新增依赖、不在此修改资源或产品页。
+
+最终图标依据已收并只读复核：`app/src/main/assets/notices/UI_RESOURCES.txt` 明确五个wb_*为Muyon原创基本几何、不能恢复早期提取路径；inquiry_module/LICENSE为MIT，NOTICE保留上游来源；Material名仅兼容key，不是Material原图。catalog为102图形，生成映射含别名共110键。无pin是局部素材缺口，ShellConversation缺身份图是接线缺口；原生launcher未配置，mascot_views只作参考；旧蓝折页与生成笔刷不是正式品牌。具体外观及资产映射继续draft，未恢复Flutter、改原生页面或新增依赖。
