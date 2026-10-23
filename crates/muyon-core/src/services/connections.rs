@@ -141,3 +141,49 @@ pub fn recovery_for(effect: RemoteEffect, intent: &IntentId) -> Result<IntentId,
         RemoteEffect::NotDispatched | RemoteEffect::Confirmed => Ok(intent.clone()),
     }
 }
+
+/// Borrowed host inputs only: not a serialized grant, persisted state or command.
+pub struct ConnectionAdmission<'a> {
+    pub current: &'a CallBinding,
+    pub scope: &'a ScopeRef,
+    pub connection: &'a super::connectors::ConnectionSnapshot,
+    pub enabled: bool,
+    pub catalog: &'a CapabilityCatalog,
+    pub plugin_binding: &'a ConnectionBinding,
+    pub host_allowed: &'a [String],
+}
+
+/// Additional local readiness gate; successful validation does not dispatch work.
+pub fn validate_admission(
+    _expected: &CallBinding,
+    _request: &RemoteRequest,
+    _host: &ConnectionAdmission<'_>,
+) -> Result<(), ServiceError> {
+    Err(super::connectors::error(
+        super::types::ErrorCode::CapabilityUnavailable,
+    ))
+}
+
+/// Conservative snapshot changes only, not remote protocol/command operations.
+#[derive(Clone, Debug)]
+pub enum ConnectionChange {
+    LocalDisconnect,
+    Disable,
+    RevokeUnknown,
+}
+
+/// Validates a proposed host snapshot. Does not apply, persist or send anything.
+pub fn validate_lifecycle_change(
+    _before: &super::connectors::ConnectionSnapshot,
+    _after: &super::connectors::ConnectionSnapshot,
+    _enabled_before: bool,
+    _enabled_after: bool,
+    _change: ConnectionChange,
+    original: Option<&IntentId>,
+) -> Result<(), ServiceError> {
+    let mut error = super::connectors::error(super::types::ErrorCode::CapabilityUnavailable);
+    error.effect_knowledge = super::types::EffectKnowledge::Unknown;
+    error.retryability = super::types::Retryability::AfterLookup;
+    error.original_intent_id = original.cloned();
+    Err(error)
+}

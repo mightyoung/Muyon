@@ -11,3 +11,13 @@ Ruling: host supplies current binding/scope/per-plugin allowed set within a trus
 Tests use in-memory timeout/lookup fixture, C2's actual decode_original, and production validate_call/recovery_for. Fake assertions do not establish live protocol/lifecycle support. No credential/OAuth/revoke/network/SDK installation or second execution ledger.
 
 Final review: independent reviewer /root/review_connectors_x12, fixed source86534f4126835b46af3c7ec818de184491128be9; no P0-P2 findings, separate-target focused13/13. Final minor (deferred): actual disconnect/remote failed-revoke transition coverage is absent; fake flag/counter do not establish live lifecycle behavior, which remains gated/NOT_RUN. Whole workspace632/632, strict core Clippy and changed-file format pass. This completes the local source slice only; Contracts registration and production host gates remain pending.
+
+## Lifecycle follow-up
+
+Latest develop e943856e4b6e2de26a9c2c8e2fa0912713b590e5 contains reviewed C1-C3/root toolchain. Ordinary merge refreshes this candidate; no shared registration edits. Read the new plan-review addendum; suggested architecture/dependency changes remain suggestions.
+
+Ruling: add a borrowed host admission view plus pure candidate-transition validation, not configure/connect/revoke command APIs or a state store — approved X2 calls for pure lifecycle checks while concrete Operation/host identity/SDK gates remain open — future live integration must still supply trusted provenance and original C2 checks.
+
+Ruling: local disconnect and disable preserve auth/token knowledge but increment the existing authorization_generation exactly once to invalidate old prepared bindings; overflow rejects without applying state — no second session epoch introduced — a later host integration must adopt or explicitly adapt this generation policy.
+
+Ruling: unsuccessful remote revocation is represented as auth Unknown, never Revoked; lifecycle validation errors carry unknown/after_lookup and optional original IntentId, rather than proving a remote action was not dispatched — actual server revoke stays NOT_RUN.
