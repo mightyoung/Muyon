@@ -1,10 +1,8 @@
-use muyon_core::{contract, documents, services};
-#[path = "../src/services/skill_runtime.rs"]
-mod skill_runtime;
-#[path = "../src/services/skills.rs"]
-#[allow(dead_code)] // Catalog functions have their own integration target.
-mod skills;
 use contract::{CommandEnvelope, ExecutionResult, Operation, Revision, Scope};
+use muyon_core::{
+    contract, documents,
+    services::{self, skill_runtime, skills},
+};
 use serde_json::json;
 use services::{
     commands::{decode_original, HostCommandPort, OriginalLookup},

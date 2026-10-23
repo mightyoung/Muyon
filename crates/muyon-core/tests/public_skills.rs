@@ -1,7 +1,8 @@
-use muyon_core::{contract, services};
-#[path = "../src/services/skills.rs"]
-mod skills;
 use contract::{Revision, Scope};
+use muyon_core::{
+    contract,
+    services::{self, skills},
+};
 use serde_json::{json, Value};
 use services::types::{decode_strict, Digest, ErrorCode, ScopeRef};
 use sha2::{Digest as _, Sha256};
