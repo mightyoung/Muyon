@@ -252,3 +252,124 @@ fn unknown_run_queries_original_without_reprepare_or_dispatch() {
     assert_eq!(owner.prepares.get(), 0);
     assert_eq!(owner.dispatches.get(), 0);
 }
+
+/// Only this test seam supplies hostile owner replies. Real shared C2 types are reused.
+struct FaultOwner {
+    reply: Result<OriginalLookup, ServiceError>,
+    lookups: Cell<u32>,
+    last: std::cell::RefCell<Option<IntentId>>,
+}
+impl HostCommandPort for FaultOwner {
+    fn prepare(
+        &self,
+        _: Operation,
+        _: Option<String>,
+        _: Revision,
+    ) -> Result<CommandEnvelope, ServiceError> {
+        panic!("original query must not prepare")
+    }
+    fn confirm(&self, _: &str) -> Result<OriginalLookup, ServiceError> {
+        panic!("original query must not confirm or dispatch")
+    }
+    fn cancel_original(&self, _: &IntentId) -> Result<ExecutionResult, ServiceError> {
+        panic!("original query must not cancel")
+    }
+    fn lookup_original(&self, intent: &IntentId) -> Result<OriginalLookup, ServiceError> {
+        self.lookups.set(self.lookups.get() + 1);
+        *self.last.borrow_mut() = Some(intent.clone());
+        self.reply.clone()
+    }
+}
+fn query_fault(reply: Result<OriginalLookup, ServiceError>) -> ServiceError {
+    let original = IntentId::parse("intent:original").unwrap();
+    let owner = FaultOwner {
+        reply,
+        lookups: Cell::new(0),
+        last: std::cell::RefCell::new(None),
+    };
+    let before = owner.reply.clone();
+    let error = lookup_original_run(&owner, &original).unwrap_err();
+    assert_eq!(owner.lookups.get(), 1);
+    assert_eq!(owner.last.borrow().as_ref(), Some(&original));
+    assert_eq!(owner.reply, before);
+    assert_eq!(error.code, ErrorCode::UnknownOutcome);
+    assert_eq!(error.effect_knowledge, EffectKnowledge::Unknown);
+    assert_eq!(error.retryability, Retryability::AfterLookup);
+    assert_eq!(error.original_intent_id, Some(original));
+    error
+}
+#[test]
+fn query_host_error_retains_requested_original_and_unknown_effect() {
+    let foreign = IntentId::parse("intent:foreign").unwrap();
+    let mut error = services::commands::unphased_host_error(&foreign);
+    error.code = ErrorCode::InvalidArgument;
+    error.effect_knowledge = EffectKnowledge::NotStarted;
+    error.retryability = Retryability::Never;
+    let expected =
+        services::commands::unphased_host_error(&IntentId::parse("intent:original").unwrap());
+    assert_eq!(query_fault(Err(error)), expected);
+}
+#[test]
+fn query_foreign_not_submitted_identity_remains_unknown() {
+    query_fault(Ok(OriginalLookup::NotSubmitted {
+        intent_id: IntentId::parse("intent:foreign").unwrap(),
+    }));
+}
+#[test]
+fn query_malformed_execution_remains_unknown() {
+    let malformed = ExecutionResult {
+        status: contract::ExecutionStatus::Committed,
+        receipt: None,
+        error: None,
+        recovery_action: contract::RecoveryAction::None,
+    };
+    assert!(malformed.validate().is_err());
+    query_fault(Ok(OriginalLookup::Execution(Box::new(malformed))));
+}
+#[test]
+fn query_valid_execution_with_foreign_receipt_identity_remains_unknown() {
+    let foreign = ExecutionResult {
+        status: contract::ExecutionStatus::Committed,
+        receipt: Some(contract::Receipt {
+            protocol_version: 1,
+            intent_id: "intent:foreign".into(),
+            binding_digest: "a".repeat(64),
+            scope: Scope {
+                workspace_id: "w".into(),
+                project_id: None,
+            },
+            authority: contract::AuthorityBinding {
+                grant_id: "grant:synthetic".into(),
+                generation: Revision::new(1),
+                owner_epoch: "epoch:synthetic".into(),
+            },
+            admission_id: None,
+            target_id: "project:synthetic".into(),
+            revision: Revision::new(1),
+            status: contract::ExecutionStatus::Committed,
+            result: json!({}),
+        }),
+        error: None,
+        recovery_action: contract::RecoveryAction::None,
+    };
+    assert!(
+        foreign.validate().is_ok(),
+        "isolate identity guard from shape validation"
+    );
+    query_fault(Ok(OriginalLookup::Execution(Box::new(foreign))));
+}
+#[test]
+fn query_matching_not_submitted_identity_is_preserved() {
+    let original = IntentId::parse("intent:original").unwrap();
+    let reply = OriginalLookup::NotSubmitted {
+        intent_id: original.clone(),
+    };
+    let owner = FaultOwner {
+        reply: Ok(reply.clone()),
+        lookups: Cell::new(0),
+        last: std::cell::RefCell::new(None),
+    };
+    assert_eq!(lookup_original_run(&owner, &original).unwrap(), reply);
+    assert_eq!(owner.lookups.get(), 1);
+    assert_eq!(owner.last.borrow().as_ref(), Some(&original));
+}

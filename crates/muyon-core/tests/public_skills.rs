@@ -153,3 +153,17 @@ fn fixture_roundtrip_and_unknown_authority_rejection() {
         assert!(decode_strict::<SkillBinding>(&wire.to_string()).is_err());
     }
 }
+
+#[test]
+fn malformed_catalog_is_distinct_from_a_valid_empty_catalog() {
+    let empty = SkillRegistrySnapshot {
+        catalog_revision: Revision::new(1),
+        skills: vec![],
+        bindings: vec![],
+    };
+    let mut malformed = fixture();
+    malformed.skills.push(malformed.skills[0].clone());
+    assert!(validate_catalog(&empty).is_ok());
+    assert!(validate_catalog(&malformed).is_err());
+    assert_ne!(list_skills(&empty), list_skills(&malformed));
+}
