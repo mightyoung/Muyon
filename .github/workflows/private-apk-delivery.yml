@@ -1,0 +1,114 @@
+name: Private APK delivery e16af808
+
+on:
+  push:
+    branches: [codex/apk-delivery-e16af808-20261023]
+    paths: ['.github/workflows/private-apk-delivery.yml']
+
+permissions:
+  contents: read
+
+concurrency:
+  group: private-apk-delivery-e16af808
+  cancel-in-progress: true
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  android-product:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    env:
+      MUYON_ML_FETCH: '1'
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: e16af808620488a7be0b3b4a10b91190d18f1177
+          persist-credentials: false
+      - uses: actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Record exact source and initialize task-owned build directories
+        run: |
+          test "$(git rev-parse HEAD)" = e16af808620488a7be0b3b4a10b91190d18f1177
+          mkdir -p "$RUNNER_TEMP/product-evidence"
+          git rev-parse HEAD | tee "$RUNNER_TEMP/product-evidence/source-sha.txt"
+          # Job-level env cannot access runner context. Resolve these paths only
+          # after allocation, then export them for subsequent build steps.
+          {
+            echo "MUYON_NATIVE_OUTPUT=$RUNNER_TEMP/product-native"
+            echo "MUYON_ML_OUTPUT=$RUNNER_TEMP/product-ml"
+            echo "GRADLE_USER_HOME=$RUNNER_TEMP/product-gradle"
+          } >> "$GITHUB_ENV"
+      - name: Provision fixed toolchains and locked dependencies
+        run: |
+          rustup toolchain install 1.93.1 --profile minimal --target aarch64-linux-android --target x86_64-linux-android
+          dirname "$(rustup which --toolchain 1.93.1 rustc)" >> "$GITHUB_PATH"
+          cargo +1.93.1 fetch --locked --manifest-path crates/Cargo.toml
+          "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --install 'platforms;android-36' 'build-tools;35.0.0' 'ndk;28.2.13676358' 'cmake;3.22.1'
+          curl --fail --location --retry 3 https://services.gradle.org/distributions/gradle-8.13-bin.zip -o "$RUNNER_TEMP/gradle.zip"
+          echo "20f1b1176237254a6fc204d8434196fa11a4cfb387567519c61556e8710aed78  $RUNNER_TEMP/gradle.zip" | sha256sum --check
+          unzip -q "$RUNNER_TEMP/gradle.zip" -d "$RUNNER_TEMP/product-tools"
+          echo "MUYON_UI_GRADLE=$RUNNER_TEMP/product-tools/gradle-8.13/bin/gradle" >> "$GITHUB_ENV"
+          python3 -m pip install PyYAML==6.0.3
+      - name: Provision and independently revalidate fixed offline model assets
+        run: |
+          python3 -B apps/muyon_android/checks/ci_model_inputs.py "$RUNNER_TEMP/model-source" "$RUNNER_TEMP/model-assets" --fetch 2>&1 | tee "$RUNNER_TEMP/product-evidence/model-provision.log"
+          python3 -B apps/muyon_android/checks/ci_model_inputs.py "$RUNNER_TEMP/model-source" "$RUNNER_TEMP/model-assets" 2>&1 | tee "$RUNNER_TEMP/product-evidence/model-offline.log"
+      - name: Build real two-ABI product and embedding libraries
+        run: |
+          sh apps/muyon_android/build-native.sh 2>&1 | tee "$RUNNER_TEMP/product-evidence/native-build.log"
+          cp "$MUYON_NATIVE_OUTPUT/build-id.txt" "$MUYON_NATIVE_OUTPUT/SHA256SUMS" "$RUNNER_TEMP/product-evidence/"
+      - name: Generate Android bridge from current Rust source
+        working-directory: crates
+        run: |
+          cargo build --offline --locked --manifest-path Cargo.toml -p muyon-android-ffi --features bindings
+          target/debug/uniffi-bindgen generate --library target/debug/libmuyon_android_product.so --language kotlin --config muyon-android-ffi/uniffi.android.toml --out-dir "$RUNNER_TEMP/generated"
+          cmp "$RUNNER_TEMP/generated/com/mightyoung/muyon/productbridge/muyon_android_product.kt" ../apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/productbridge/muyon_android_product.kt
+      - name: Provision Maven artifacts by compiling the actual product
+        run: |
+          "$MUYON_UI_GRADLE" --no-daemon --console=plain -p apps/muyon_android -PmuyonProductNativeInputs="$MUYON_NATIVE_OUTPUT/jni" -PmuyonModelAssets="$RUNNER_TEMP/model-assets" -PmuyonSource="$(cat "$MUYON_NATIVE_OUTPUT/build-id.txt")" :app:assembleDebug :app:assembleDebugAndroidTest :app:lintDebug 2>&1 | tee "$RUNNER_TEMP/product-evidence/gradle-provision.log"
+      - name: Required clean offline product build, instrumentation compilation and lint
+        run: |
+          "$MUYON_UI_GRADLE" --offline --no-daemon --console=plain -p apps/muyon_android -PmuyonProductNativeInputs="$MUYON_NATIVE_OUTPUT/jni" -PmuyonModelAssets="$RUNNER_TEMP/model-assets" -PmuyonSource="$(cat "$MUYON_NATIVE_OUTPUT/build-id.txt")" :app:clean :app:assembleDebug :app:assembleDebugAndroidTest :app:lintDebug 2>&1 | tee "$RUNNER_TEMP/product-evidence/gradle-offline.log"
+          python3 -B apps/muyon_android/checks/package_gate.py apps/muyon_android/app/build/outputs/apk/debug/app-debug.apk "$MUYON_NATIVE_OUTPUT/jni" "$RUNNER_TEMP/generated/com/mightyoung/muyon/productbridge/muyon_android_product.kt" apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/productbridge/muyon_android_product.kt > "$RUNNER_TEMP/product-evidence/package.json"
+          python3 -B apps/muyon_android/checks/model_package_gate.py apps/muyon_android/app/build/outputs/apk/debug/app-debug.apk "$RUNNER_TEMP/model-assets" "$MUYON_NATIVE_OUTPUT/jni" > "$RUNNER_TEMP/product-evidence/model-package.json"
+          sha256sum apps/muyon_android/app/build/outputs/apk/debug/app-debug.apk apps/muyon_android/app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk > "$RUNNER_TEMP/product-evidence/apk-sha256.txt"
+      - name: Encrypt the verified APK for private local delivery
+        run: |
+          umask 077
+          evidence="$RUNNER_TEMP/product-evidence"
+          apk="apps/muyon_android/app/build/outputs/apk/debug/app-debug.apk"
+          "$ANDROID_HOME/build-tools/35.0.0/apksigner" verify --verbose --print-certs "$apk" > "$evidence/signature.txt"
+          "$ANDROID_HOME/build-tools/35.0.0/aapt" dump badging "$apk" > "$evidence/badging.txt"
+          cat > "$RUNNER_TEMP/delivery-public.pem" <<'PEM'
+          -----BEGIN PUBLIC KEY-----
+          MIIBojANBgkqhkiG9w0BAQEFAAOCAY8AMIIBigKCAYEA2NDP4sobUEcoxj+ysI6T
+          zD2farkXIsw/kf34IV++yxQ62/hBkmQ+3nWGUXvJA6NMGZVAqyPm9iLfI1HJ3PGg
+          jOpexerX1+ZxEB16VoPHsatLG+zUWxVCivns5pkf22NYLYwPQCjnhs3kX+2ZgYsh
+          W3Oi2Q9zXUQDMUu9rwKfjlqkJx+43WWGdoRJLXQqe0DgNvhytaqZaRBZ2/SVTZG7
+          AHKYaRbcG0ukqCd1ig7cCPYGZ3/q1/y2g0Jlt8yiY4beoLDvP5DFvmP5P0yBcP7q
+          +sWU+9qYUiOmvwJNWhvUvVD1Emhvu2sRxQWx8xa55J+t976UHk+E0NNc8J0ZQ1qi
+          vU4282GSwR7GbzNBoMhMpR5vVJlViXy0nQtYmzycLUNfTxi10PvJj1syR5/VavDj
+          HIkJWNaCPPnMqpgPj1EQZAOnMMasHPxEpV5Bp7MjGdxHuwtI/BPEb0hM9JuGEchr
+          weC0dS8ZXGHSwlNPrTyxpU2ZIL62tb5agLLP2p2aBuPtAgMBAAE=
+          -----END PUBLIC KEY-----
+          PEM
+          trap 'rm -f "$RUNNER_TEMP/delivery-key"' EXIT
+          openssl rand -hex -out "$RUNNER_TEMP/delivery-key" 32
+          openssl enc -aes-256-cbc -salt -pbkdf2 -iter 200000 -in "$apk" -out "$evidence/Muyon-e16af808-debug.apk.enc" -pass "file:$RUNNER_TEMP/delivery-key"
+          openssl pkeyutl -encrypt -pubin -inkey "$RUNNER_TEMP/delivery-public.pem" -pkeyopt rsa_padding_mode:oaep -pkeyopt rsa_oaep_md:sha256 -in "$RUNNER_TEMP/delivery-key" -out "$evidence/delivery-key.enc"
+      - name: Retain evidence and encrypted private APK only
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: muyon-private-apk-e16af808
+          path: |
+            ${{ runner.temp }}/product-evidence/
+            apps/muyon_android/app/build/reports/lint-results-debug.*
+          if-no-files-found: error
+          retention-days: 1
+          compression-level: 0
