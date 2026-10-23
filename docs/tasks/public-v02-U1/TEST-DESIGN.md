@@ -56,7 +56,7 @@
 | ServiceError | exact snake_case字段及枚举来自C1；phase当前String，Money/Quantity/phase新规范均未冻结；保持phase原文，不自造enum/decimal parser，不从host_call推not_started |
 | 严格 JSON | Rust先用contract::decode_json查重，再typed decode；重复字段（含嵌套）必须在JSONObject/Map覆盖前拒绝。未知安全字段/错类型/不兼容major拒绝；原transport上限1048576字节与UI文本65536字节是不同限制 |
 
-org.json 具体缓存版本、编译classpath与重复key行为尚未在本环境验证；不得默认“JSONObject会处理”然后丢失重复键证据。后续用现有缓存与已审代码实现，不新增JSON依赖；若现有API不能保留必要信息，先提出最小实现/测试，不能弱化拒绝规则。
+后续经用户批准安装的固定 Maven org.json 20250517 已用于离线验证；正式 Android 仍使用平台 org.json，无新增 app 依赖。重复键在平台解析前拒绝。B 的集成复审指出两者 API/数值解析差异，现已移除测试侧 similar 调用，并在原始词法阶段拒绝数值 -0；详细 RED/GREEN、平台源码分析与尚未完成的正式 Android 验证见 REPORT。
 
 ## UIPlan 专属校验的后续 RED 顺序
 

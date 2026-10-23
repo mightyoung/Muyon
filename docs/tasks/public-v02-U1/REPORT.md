@@ -1,6 +1,6 @@
 # PublicUI U1：纯 JVM codec 与计划校验候选
 
-基线：`fd26dcdabcdac996bc2881e8141cac2b519966fc`（本轮重新fetch develop不变）。分支 `task/publicui-u1-preparation-20261023`，隔离工作树 `/workspace/muyon-publicui-u1`。没有AGENTS.md，未改main/develop。固定计划 `64900d4a6a46a9ef2919bcf922fb059413b1ce82`；U0具体外观仍draft，U2/U3未启动。
+基线：`fd26dcdabcdac996bc2881e8141cac2b519966fc`（首次U1实施基线；最新集成反馈修复见文末）。分支 `task/publicui-u1-preparation-20261023`，隔离工作树 `/workspace/muyon-publicui-u1`。没有AGENTS.md，未改main/develop。固定计划 `64900d4a6a46a9ef2919bcf922fb059413b1ce82`；U0具体外观仍draft，U2/U3未启动。
 
 ## 已获准的环境准备与实际结果
 
@@ -89,3 +89,57 @@ Ruling：拒绝多父节点，把计划限制为单根呈现树；否则241个�
 | final-cards.log | `7c4fdd18b1886ed9eafaf14138f7ec36a26a7758ed3d51f6b1923ee8e2fac02c` |
 
 独审原始输出留仓库外 `/tmp/u1-independent-publicservices.log`、`/tmp/u1-independent-cards.log`、`/tmp/u1-independent-probe.log`；前二摘要分别与初次plan-green.log、cards-green.log一致，探针摘要=`a20019b22cf70a8b80b352b2b23a0b5ec65e6a21624599de97957d63f47f5515`。这些是独立reviewer实跑，不是作者再次生成的假独审。没有待保留Minor。
+
+## B 集成反馈修复：Android JSON API 与负零
+
+本节取代旧候选 `fb4cedf7b4f01f58e335669dbabd0936964384f4` 的可集成性判断；旧候选不得合入。B 报告的正式测试源码 API 编译阻断属有效发现，历史离线 GREEN 仅对 Maven 运行时成立。本环境没有将 B 的编译结果冒充自己复跑。
+
+本轮已 fetch 最新 develop `8a8b0319e12aa898d7b2c862b9213374488aefba`，完整阅读新增计划评审及事实附记；与原基线相比仅根 Rust pin/现有工程 gate 和文档变化，没有改本片/Android Gradle。为保持 B 已审查候选的可比性，本修复在原隔离分支追加提交，未自行合入/变基/强推 develop 或其他候选。新增架构建议未自动执行。
+
+### 实际测试入口与 API
+
+实际阅读 `apps/muyon_android/app/build.gradle.kts`、根插件固定和 `gradlew`。Kotlin/Compose 2.2.20、JVM17、compileSdk36；没有 `testImplementation(org.json)`，本片默认 `src/test` 会参与 Android 测试 Kotlin 编译。原 `JSONObject.similar` 属 Maven JSON 扩展，Android API 无此方法，因而必须从默认测试源码移除，不能加正式依赖或移动测试隐藏失败。
+
+测试 oracle `sameJson` 仅调用 Android 已有 `JSONObject.keys/get`、`JSONArray.length/get`、`JSONObject.NULL`，递归比较对象键集合、数组顺序、类型与值，字符串不会转成数值，缺字段不同于显式 null。固定 fixture 的数字都是整数；数值比较接受 Int/Long 装箱差异，使用其十进制表示，不将 revision 转浮点。不宣称这是覆盖全部 JSON 小数等价关系的通用比较库。新增 oracle 正/反例包括键换序、数组换序/长度、嵌套值、null/缺失、String/Number、Boolean/String。正式依赖和测试目录均保持原样。
+
+### 严格兼容分析
+
+读取固定 Android 16 官方源码（仅下载源码文本供阅读，未编译/执行/安装）：[JSONTokener.java android-16.0.0_r1](https://android.googlesource.com/platform/libcore/+/android-16.0.0_r1/json/src/main/java/org/json/JSONTokener.java)，`readLiteral` 对无小数点文本先 `Long.parseLong`，小范围转 Int。`-0` 因此成为 Int(0)，原先解析后 `unsignedInteger` 无法恢复其负号。[Android JSONObject API](https://developer.android.com/reference/org/json/JSONObject) 确认使用的平台方法集合不包含 similar。上述是源码/API核查，并非本环境 Android 运行结果。
+
+固定 Maven JSON 20250517 用现有批准编译器实跑探针：`-0 → Double(-0.0)`；`0 → Integer(0)`；`-0.0/-0e0 → Double(-0.0)`；`0.0/0e0 → BigDecimal`。Android 源码会把后两者交给 Double 分支。原类型守卫在这些小数/指数上均拒绝，但在 `-0` 上会因平台而分歧。边界 `2147483647 → Integer`、`4294967295 → Long`、`18446744073709551615 → BigInteger`（Maven）；Android 超 Long 可能转 Double，仍拒绝。公共数值字段只接受 schemaVersion/pageIndex/i32 范围及 failed_units/u32 范围，均在 Long 内；u64 revision、计数、偏移、i64时间始终是规范十进制**字符串**，不经过这些转换。
+
+修复在 `JsonGrammar` 仍持有原始数字 token 时拒绝精确数值 `-0`，发生于任何 org.json 转换之前；字符串 `"-0"` 不受词法规则误伤（revision 等自己的规范校验仍会拒绝它）。合法数字 `0` 保留。该守卫只服务本片 wire，非通用 JSON 标准声明；JSON 本身允许 -0，但当前支持的数字字段是规范无符号整数。小数/指数继续在 typed integer 守卫拒绝，未把它们截断/四舍五入。负零嵌套、schemaVersion/pageIndex/failed_units、小数/指数、i32/u32 边界及 TextOnly 降级已补回归。不声称修改了上游 fixture 或已运行 Rust 对照。
+
+### 实际 RED/GREEN 与项目门禁
+
+同一命令：`bash apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/ui/publicservices/run-offline.sh`。
+
+| 固定源 / 阶段 | 实际结果 |
+| --- | --- |
+| `ef3a16dd4a99d029bc0dc466d59a32bceb5bc6ea` RED | 可编译，exit1，30通过/7失败。原始负零 transport 拒绝断言真实失败；新结构 oracle 尚未实现，导致自身及5个正向 fixture 失败。不把已有 Maven typed 拒绝负零当新增行为 RED |
+| 实现后首次 GREEN | exit0，37通过/0失败；随后补齐 schema/page 字段验收边界 |
+| 修复源码 `ce979ce9aab677cb1f3a44eefbfb96abef7ae905` | exit0，38通过/0失败；这38组是纯 Maven JVM检查，不是Android设备结果 |
+| cards 原入口回归 | 使用原命令/同一批准 KOTLINC，exit0，45 checks通过 |
+| `cd apps/muyon_android && bash gradlew --offline --no-daemon :app:compileDebugUnitTestKotlin :app:testDebugUnitTest` | exit2，NOT_RUN：缺已有 Gradle8.13，未进入 Android 编译/测试；未下载SDK/额外依赖 |
+
+本片测试仍是 main 检查入口，无 JUnit 注解；Gradle 编译这些源码可发现 API 错误，但 `testDebugUnitTest` 本身不能当这38组已执行。需 B 在已有 Android 环境复验默认测试源码编译，并按已有可用 Android JSON 运行入口复验解析行为；本环境不伪造 Android API stub 或切换正式依赖来填 PASS。U0仍draft，U2/U3未启动，原可信ref与原文真实性限制继续适用。
+
+### 本轮仓库外证据
+
+日志 `/tmp/publicui-u1-evidence/`；没有新增工具/库安装，无拒绝操作/不明写入。项目 gate action=上述 Gradle命令，target=当前隔离分支Android app，reason=Gradle8.13执行文件缺失，outcome=未运行（非审批拒绝），待B现有环境复验。
+
+| 文件 | SHA256 |
+| --- | --- |
+| android-compat-red.log | `84e3f1bfaa98de0fa2ab851dfcd2e8aeb7fdbe9ac7df389d0c4a8a23ac5503f9` |
+| android-compat-green.log | `27c240a25890856c2187d02c79b9ed776fda3fde2f99b054645e0adec0078a8f` |
+| android-compat-final.log | `cf086828a10985946f258044b4a0ca7ad2d6cf5668eac60e51dcfae70b325373` |
+| android-compat-cards.log | `7c4fdd18b1886ed9eafaf14138f7ec36a26a7758ed3d51f6b1923ee8e2fac02c` |
+| android-compat-gradle.log | `b7512eb8fcf1348379f75c4f42cba6eb1689934c3e287aa6aa364de19db1ef0f` |
+| json-number-probe.log | `f1cf3b0ec37d4ac2fe1f5aa3dd99fc6ff92e2c21a8d1e37507cbb9610d9f0a4b` |
+| Android-16-JSONTokener.java | `744c9ffb50c2472d7269c8d64a7d8331ea1a1691fb6536619ac9590e9ebbbd4b` |
+
+### 本轮独立审查
+
+非作者 `/root/review_u1_implementation` 对固定 `ce979ce9aab677cb1f3a44eefbfb96abef7ae905` 审查兼容修复差异、实际app依赖、Android源码和测试oracle；未发现新增 Critical/Important，允许交B作为本次修复候选，并未批准合入。亲自执行 U1 38/0、cards45、原候选/原基线到修复源两份 diff-check 均exit0。核对 RED 为1项负零真实行为失败+6项oracle桩失败，没有把桩计为产品缺陷。
+
+独审日志 `/tmp/u1-androidcompat-independent-publicservices.log` SHA256=`cf086828a10985946f258044b4a0ca7ad2d6cf5668eac60e51dcfae70b325373`；`/tmp/u1-androidcompat-independent-cards.log` SHA256=`7c4fdd18b1886ed9eafaf14138f7ec36a26a7758ed3d51f6b1923ee8e2fac02c`。审查时仅作者更新两份报告，产品/测试字节保持固定候选。独审同样没有运行Android集成，仍待B已有环境；未安装或改工作树。
