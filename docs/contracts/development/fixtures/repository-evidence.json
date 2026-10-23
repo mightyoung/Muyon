@@ -1,0 +1,32 @@
+[
+  {
+    "key": {"repository": {"provider": "git_hub", "instance": "https://github.synthetic.example", "repository_id": "team/project"}, "object_id": "1"},
+    "authorization_generation": 1,
+    "revision": 1,
+    "head_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "base_sha": "dddddddddddddddddddddddddddddddddddddddd",
+    "state": "open",
+    "ci_capability": "available",
+    "checks": [{"run_id": "run-1", "subject": {"head": {"sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"}}, "conclusion": "success"}]
+  },
+  {
+    "key": {"repository": {"provider": "git_lab", "instance": "https://gitlab.synthetic.example", "repository_id": "team/project"}, "object_id": "1"},
+    "authorization_generation": 1,
+    "revision": 1,
+    "head_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "base_sha": "dddddddddddddddddddddddddddddddddddddddd",
+    "state": "closed",
+    "ci_capability": "available",
+    "checks": [{"run_id": "run-1", "subject": {"head": {"sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"}}, "conclusion": "success"}]
+  },
+  {
+    "key": {"repository": {"provider": "gitee", "instance": "https://gitee.synthetic.example", "repository_id": "team/project"}, "object_id": "1"},
+    "authorization_generation": 1,
+    "revision": 1,
+    "head_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "base_sha": "dddddddddddddddddddddddddddddddddddddddd",
+    "state": "open",
+    "ci_capability": "missing",
+    "checks": []
+  }
+]

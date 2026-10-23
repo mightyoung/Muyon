@@ -26,3 +26,4 @@ pub mod group_runtime_store;
 
 pub mod services;
 pub mod development_drafts;
+pub mod domains;
