@@ -10,7 +10,7 @@
 
 ## 既有真源与只读路径
 
-以下路径均相对仓库根，源码观察固定于上述 develop SHA。
+路径说明：完整路径相对仓库根；表中缩写 `documents/`、`evidence/` 均以 `crates/muyon-core/src/` 为前缀，Android `product/ml/` 以 `apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/` 为前缀。原准备阶段源码观察固定于上述develop SHA。
 
 | 真源/入口 | 已有行为 | D1/D2 适配边界 |
 | --- | --- | --- |

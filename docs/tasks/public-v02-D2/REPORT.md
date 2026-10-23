@@ -25,7 +25,7 @@ bash apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/service
 
 Rust结构RED：缺pipeline.rs退出101，不算行为RED。最小unavailable桩后的行为RED为3 failed/1 passed，退出101；纯fixture用例原已通过，不冒称全红。实施后4 passed。独审发现未读取每条EmbeddingResult.descriptor；新增真实反例在同snapshot/query条件下替换某一输入descriptor，RED为4 passed/1 failed（错误接受），退出101；逐条检查后5 passed，退出0，覆盖两条输入分别变更model/tokenizer/dimensions/chunk。
 
-最终D1/D2 focused各5项通过。完整workspace38个二进制629次执行通过/0失败/0忽略；严格Clippy与格式通过，命令及摘要在D1报告。未运行真实模型/引擎、Android、外部连接、付费或原FD生产路径。
+最终D1/D2 focused各5项通过。4bb47be7阶段完整workspace38个二进制629次执行通过/0失败/0忽略；后续421f7e88仅补D1 spy测试，最新组合为631/0/0，D2仍5项。严格Clippy与格式通过，命令及摘要在D1报告。未运行真实模型/引擎、Android、外部连接、付费或原FD生产路径。
 
 ## Kotlin精确阻断
 
@@ -35,7 +35,7 @@ Rust结构RED：缺pipeline.rs退出101，不算行为RED。最小unavailable桩
 
 ## 独审、裁定与剩余项
 
-非作者 `documents_preparation_review` 独立审查并重跑当时Rust4/4，发现Important：逐条embedding descriptor没有被消费；本轮按下述裁定追加测试/guard完成RED→GREEN，不冒称独立复审修复后的最终源码。D1动态引擎调用计数Minor保留；生产指针原子更新、账户绑定、可信job映射、订阅/取消仍非本纯校验切片交付。
+非作者 `documents_preparation_review` 独立审查并重跑当时Rust4/4，发现Important：逐条embedding descriptor没有被消费；本轮按下述裁定追加测试/guard完成RED→GREEN，不冒称独立复审修复后的最终源码。D1后续已补owner处理请求spy计数，原生引擎不可注入的验证边界见D1新补充；生产指针原子更新、账户绑定、可信job映射、订阅/取消仍非本纯校验切片交付。
 
 Ruling：保留计划validate_search签名，新增validate_embedding_search消费完整EmbeddingResult — 原签名只有ResultRef，不足以拒绝实际向量模型/维数混用 — 若未来owner仅调用较弱metadata校验仍会漏检，故接线必须使用较强guard，当前不宣称生产search已接通。
 
@@ -55,3 +55,7 @@ Ruling：Kotlin缺编译器时只交测试规范、不写未观察行为RED的�
 | d2-embedding-review-red.log | `8b41ab5c42cd89be64c01425fb845c84cfee1f2cbb27a7f9ac52a6bff221e4ad` |
 | d12-final-focused.log | `4913cb21ee904803befb8884a3c2ac3eeef6fa6786b67098ba3b86a02225e398` |
 | d2-kotlin-not-run.log | `0e44d74d1df1711d2355e0c710cc82fdfaa9f2846df4ef361298cd620e6ebb46` |
+
+## PublicUI承接Kotlin规范
+
+测试规范、同一Rust fixture及原阶段验收缺口已整理到 [PUBLICUI-HANDOFF.md](PUBLICUI-HANDOFF.md)，供父任务交PublicUI在其已获准Kotlin环境统一承接；本文不表示对方已收到或执行。Documents不安装/复制Kotlin工具，不把UI环境安装授权扩到本环境。当前Kotlin实现及行为RED/GREEN仍BLOCKED，未补PASS。

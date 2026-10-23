@@ -1,6 +1,6 @@
 # D1 版本绑定文本读取 — Rust 候选交付
 
-2026-10-23。状态：Rust 只读适配源码与离线测试已交付；公共模块登记 PENDING_OWNER，动态引擎调用计数断言未实现，完整公共端口/Android/生产接线未交付。D3 BLOCKED。前片记录保留在 [PREPARATION-REPORT.md](PREPARATION-REPORT.md)，工具来源见 [TOOLCHAIN.md](TOOLCHAIN.md)。本报告取代前片“C1未到/无法编码”的当前状态描述。
+2026-10-23。状态：Rust 只读适配源码与离线测试已交付；公共模块登记PENDING_OWNER，owner处理请求spy计数已补；原生OCR/embedding/build无可注入端口，最小测试边界与代码级证据见 [SPY-BOUNDARY.md](SPY-BOUNDARY.md)。完整公共端口/Android/生产接线未交付。D3 BLOCKED。前片记录保留在 [PREPARATION-REPORT.md](PREPARATION-REPORT.md)，工具来源见 [TOOLCHAIN.md](TOOLCHAIN.md)。本报告取代前片“C1未到/无法编码”的当前状态描述。
 
 ## 固定依赖、源码与范围
 
@@ -28,15 +28,15 @@ CARGO_TARGET_DIR=/workspace/documents-v02-tools/clippy-target cargo clippy --man
 
 覆盖：`甲😀乙`原样10字节，[3,7)精确emoji；[4,7)、伪造range/ID/page、错ResultId/digest/normalization拒绝；跨项目同digest来源不可复用；head升级旧引用拒绝且历史元数据不重绑；撤权、过期、项目删除、原blob不可读拒绝；unsupported/failed结果不标全文，Inspect/ReadText不混权。
 
-指定旧回归15+18+16=49项通过，退出0。另有一次误把 `--lib evidence::store::tests` 过滤词与集成目标放在同命令，日志保留但不以被过滤目标计通过；之后按上面的准确回归命令重跑49项。最终完整workspace为38个测试二进制629 passed/0 failed/0 ignored，包含D1 5项、D2 5项和既有跨target执行，不等于629个独立场景。最终core all-target严格Clippy退出0，rustfmt --check五个新增Rust文件退出0。第一次Clippy有D2测试useless_vec，已机械改array后重跑通过，未allow降门禁。
+指定旧回归15+18+16=49项通过，退出0。另有一次误把 `--lib evidence::store::tests` 过滤词与集成目标放在同命令，日志保留但不以被过滤目标计通过；之后按上面的准确回归命令重跑49项。a815fd5a阶段完整workspace为38个测试二进制629 passed/0 failed/0 ignored，包含D1 5项、D2 5项和既有跨target执行，不等于629个独立场景。最终core all-target严格Clippy退出0，rustfmt --check五个新增Rust文件退出0。第一次Clippy有D2测试useless_vec，已机械改array后重跑通过，未allow降门禁。
 
-限制：测试include实际服务源码，复用真实BusinessStore/StoreEvidence与C1公共types，不复制或伪造host。此方式验证模块源码，不代表正式 `services::documents` 导出/FFI调用点存在。只有实际读取/授权行为通过，不宣称PDF/OCR/embedding/index引擎、Android或真实外部效果通过。getter测试只确认既有receipt未变，不能证明动态parse/ocr/embed/build调用次数；无隐式调用是源码审查结论，动态计数断言仍未实现，未填写“运行计数=0”。
+限制：测试include实际服务源码，复用真实BusinessStore/StoreEvidence与C1公共types，不复制或伪造host。此方式验证模块源码，不代表正式 `services::documents` 导出/FFI调用点存在。只有实际读取/授权行为通过，不宣称PDF/OCR/embedding/index引擎、Android或真实外部效果通过。原getter测试仅确认既有receipt未变，不能证明调用次数；现另加正向控制与突变验证的test-only spy，处理请求0已实际观察，原生engine未提供动态计数。详见SPY-BOUNDARY，不能把请求计数外推为Android原生引擎调用数。
 
 ## 独审、登记要求与裁定
 
 非作者 `documents_preparation_review` 独立重跑D1 5/5和当时D2 4/4，确认原owner授权、UTF-8、source绑定、无历史回退/替代FD/缓存正文入口。D1无Important；D2一个逐输入descriptor Important已新增反例实际RED→GREEN修复，见D2报告。最终629项与修复测试由执行者重跑，未冒称已经独立复审新修复。
 
-Final: minor (deferred): getter的动态parse/ocr/embed/build计数断言未实现，旧receipt相等不能替代；静态审查确无这些调用。此前路径缩写与前片历史时态的可读性Minor保留在历史报告中，不作产品通过依据。
+Final: minor (closed at request boundary): 已由421f7e88的fake/spy正向控制、成功/拒绝场景及两个突变补齐可测owner处理请求边界；旧receipt断言不再被当作计数依据。原生engine不可注入限制明确保留。路径缩写现加完整前缀说明，前片历史状态现显式标注，不作为当前验收依据。
 
 Contracts需串行登记 `pub mod documents; pub mod sources; pub mod pipeline;` 到其独占services/mod.rs；当前core lib.rs已由Contracts登记services且旧evidence已导出。Documents未改services/mod.rs、core lib.rs、FFI lib.rs。登记后需在固定组合SHA复验正式公共路径，host/FFI生产接线仍后置。缺原Reader解除记录时不接FD。
 
@@ -44,7 +44,7 @@ Ruling：仅在集成测试中include本次实际模块源码，不越权登记 
 
 Ruling：Utf8Text parametersDigest使用原contract::stable_digest对精确对象 `{"input_kind":"utf8_text"}` 的规范编码；不重写摘要器或新增共享类型 — 固定本适配的输入参数语义 — 若后续合同选择不同编码，须更新适配/fixture并重验，不能把不兼容产物混用。
 
-Ruling：原计划要求动态调用计数，但原owner无计数hook且不得为本片改其策略/引擎；先交可独立审查的真实只读源码/授权测试 — 不引入测试专用生产旁路 — 代价是该计数验收仍未完成，D1不宣称全部验收已闭合。
+历史Ruling（a815fd5a阶段）：当时先交源码审查并保留计数缺口。父任务随后明确允许fake/spy补证据，现以test-only导入边界补齐处理请求观察；没有修改原owner策略或新增生产旁路。无法注入的原生engine保留代码级证据与生产后续验收，见SPY-BOUNDARY中的当前裁定。
 
 原Reader FD gate、生产派发均未解除；唯一合入者仍为B。本分支只正常提交/push，不合main/develop、强推、删分支或部署。
 
@@ -74,4 +74,8 @@ Ruling：原计划要求动态调用计数，但原owner无计数hook且不得�
 
 非作者 `documents_preparation_review` 另只读审查本轮报告与gate，独立核对27处日志摘要、6文件固定源码manifest、完整workspace/focused计数、官方质量组件校验及Contracts独占文件无本线变更，未发现实质错误/新增Important。此次是报告与证据审查，不是修复代码复审或重跑全套。执行者另运行当前三份报告/gate检查：19个表内日志SHA匹配、全部提交ID可解析、源码manifest未变、629次计数一致；日志 `d12-report-check.log` SHA256 `f95d92adc88b69948b0d47dfe5231eb304fa01687c09da2c0bf1caccebb7d2e4`。
 
-Final: minor (deferred): TOOLCHAIN.md开头还保留工具准备阶段的“D1/D2未实施/C1/C2未到”；gate中getDescriptor行还保留“等D2 fixture”措辞。当前已有Rust合成fixture，生产descriptor仍未接线；本主报告/D2报告明确当前状态，旧文字不作为验收依据。
+Final: minor (closed): TOOLCHAIN开头现明确为工具准备阶段历史快照并链接当前D1/D2报告；gate的getDescriptor现注明已有Rust合成fixture、生产descriptor/getter仍未接线。
+
+## 本轮补充的最新固定验证
+
+测试源 `421f7e88c4e035e44d6cc0c97674a4dc10fce399`。D1从5项增加到7项，成功/撤权getter各观察2次原owner open和0处理请求；两次丢弃处理请求的突变均被抓住。最终完整workspace为38个二进制631/0/0、严格Clippy通过，独审边界及日志SHA见SPY-BOUNDARY。之前629与5项为旧阶段记录，不覆盖本次新增测试。生产模块仍逐字等于4bb47be7；未改Contracts独占文件，公共登记仍PENDING_OWNER。

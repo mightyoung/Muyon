@@ -1,12 +1,12 @@
 # 官方 Rust 工具链与既有基线复验补充
 
-2026-10-23。状态：工具就绪，既有 Rust 基线两组共61项通过；D1/D2 未实施，C1/C2 接口/fixture 仍未交付；Kotlin/Android/D3 仍未验证或受阻。这不是新公共服务的行为 RED/GREEN。
+2026-10-23 工具准备阶段历史快照：当时工具就绪、既有Rust基线61项通过，D1/D2尚未实施且C1/C2未交付。该段不表示当前状态；当前Rust切片及处理请求spy验证见 [D1报告](REPORT.md)，D2/Kotlin剩余范围见 [D2报告](../public-v02-D2/REPORT.md)。Android/D3仍未生产验证。
 
 本次用户明确允许“从官方 Rust 来源安装工具链，并按仓库 Cargo.lock 下载依赖缓存”，由父任务转交。仅在当前已选云环境 `/workspace` 配置，无 sudo、系统安全设置修改、账号凭据、付费、真实模型或新产品依赖。先前禁止安装的执行记录保留为历史，以本次新授权为范围内补充。
 
 ## 版本、来源与校验
 
-工作区 `7ae1a273af3911b7069309083fd8820ffbcc8edc`，产品源码与原基线 `fd26dcdabcdac996bc2881e8141cac2b519966fc` 相同；只含前片 Markdown。远端 develop 本次只读复核仍为该基线。
+工具准备阶段工作区 `7ae1a273af3911b7069309083fd8820ffbcc8edc`，当时产品源码与原基线 `fd26dcdabcdac996bc2881e8141cac2b519966fc` 相同；只含前片 Markdown。当次远端develop只读复核为该基线；当前基线状态以主报告记录为准。
 
 根与 crates workspace 没有适用的 rust-toolchain 文件。`experiments/redesign/spike01-native-lab/rust-toolchain.toml` 的1.99.0仅作用于该 spike，不用来替换公共 crates 工具链。采用 Rust 1.93.1 的仓库依据为 `docs/tasks/evidence-local-chain-20261022/HANDOFF.md` 及 `docs/tasks/overall-combination-20261022/evidence/rust-toolchain-setup.log` 中既有验证记录。
 

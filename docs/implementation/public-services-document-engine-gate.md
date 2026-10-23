@@ -21,7 +21,7 @@ present 表示源码已有特定内部能力，绝不表示公共端口已接通
 | 3 OCR | getResult | contract_only | OcrLine 有 text/points/confidence；缺结果注册与来源封套，不调用引擎 |
 | 3 OCR | getCoverage | contract_only | 未有公共失败单元/部分覆盖投影；未知总量不算百分比 |
 | 3 OCR | requestOcr | blocked | 原 FD 解除、引擎许可与任务命令前置不满足 |
-| 4 Embedding | getDescriptor | contract_only | 768 不足证明 model/tokenizer/chunk 兼容；等 D2 fixture |
+| 4 Embedding | getDescriptor | contract_only | 已有D2 Rust合成descriptor fixture；生产model/tokenizer/chunk真源与getter仍未接线 |
 | 4 Embedding | getCoverage | contract_only | 精确输入文本 ResultRef 和覆盖定义未接线 |
 | 4 Embedding | requestEmbedding | blocked | 本地模型构造即执行 nativeOpen，getter 禁止触发；公共命令未接 |
 | 5 Index | getCoverage | contract_only | 旧 contains 不等于公共覆盖/新鲜度；snapshot/inputs 未接线 |
@@ -39,7 +39,7 @@ present 表示源码已有特定内部能力，绝不表示公共端口已接通
 
 | 前置 | 当前证据 | 解除所需 |
 | --- | --- | --- |
-| D1/D2 与 C1/C2 固定合同/fixture | 父任务已交付Contracts候选4d49a580；本分支Rust验证629次通过，仍非develop验收 | B审查/合入与模块登记固定SHA；动态计数和Kotlin剩余验收；不能以纯校验替代生产接线 |
+| D1/D2 与 C1/C2 固定合同/fixture | 父任务已交付Contracts候选4d49a580；本分支Rust验证631次通过，仍非develop验收 | B审查/合入与模块登记固定SHA；owner处理请求spy已补；原生引擎计数边界及Kotlin剩余验收；不能以纯校验替代生产接线 |
 | 原 Reader Core FD 安全解除 | 未收到，保持原阻断 | 原任务完整通过 SHA、批准记录、准确覆盖与剩余限制；不能用本文件解除 |
 | 引擎固定版本/模型摘要 | 仅静态观察源码引用 | 原 owner 给可审版本、模型与 tokenizer/config 摘要和输入输出签名 |
 | 许可证/NOTICE/分发条件 | NOT_VERIFIED | 固定版本许可、NOTICE、模型与字典许可分别核验；不能仅凭库依赖存在推断 |
