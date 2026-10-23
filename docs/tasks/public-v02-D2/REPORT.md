@@ -1,5 +1,7 @@
 # D2 来源/任务纯校验 — Rust切片与Kotlin阻断
 
+后续状态（2026-10-23）：本页保留原阶段证据与当时阻断。最新Rust/共享值向量、已评审develop基线和独审见 [VALUES-REPORT.md](VALUES-REPORT.md)，PublicUI可消费的固定输入见 [VALUES-FIXTURE-HANDOFF.md](VALUES-FIXTURE-HANDOFF.md)。父任务已明确PublicUI唯一负责Kotlin生产文件/测试/runner；Documents不再等待Kotlin文件归属，也不在本环境安装Kotlin。本页旧fixture摘要对应历史版本，不代表revision=2。可信解析成功语义、Reader/FD与D3生产引擎gate仍未开放。
+
 2026-10-23。状态：Rust纯合同/验证源码与合成测试交付；Kotlin实现/验证BLOCKED，模块登记PENDING_OWNER；不宣称D2全部完成、OCR/语义检索或生产接线完成。依赖及最终回归共享 [D1报告](../public-v02-D1/REPORT.md)。
 
 固定Contracts依赖HEAD `4d49a580cb518d9b0b80c9df3df1ff564194a639`，原develop `fd26dcdabcdac996bc2881e8141cac2b519966fc`。D2测试/不可用桩RED `5aa76369959303584705f3d6e47bcc381a699726`；独审逐输入descriptor回归RED `2c3c34bf9a2426d92332b44f51478edb43f8f8f1`；最终GREEN组合源码 `4bb47be7b3b34ff66da3b2e9bf740e924f56bd1e`。Money/Quantity/公共error phase枚举未实现；新JobPhase仅为计划指定任务投影，ServiceError.phase是调用点标签，不作派发阶段证明。

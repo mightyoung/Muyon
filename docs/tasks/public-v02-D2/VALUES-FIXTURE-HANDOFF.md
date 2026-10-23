@@ -4,9 +4,10 @@
 
 ## 固定输入
 
+- 固定源码/fixture提交：`c95bc6a881bf721a982f907f1bd0bd37031dec40`，已在原任务分支正常push。完整回归与独审证据见 [VALUES-REPORT.md](VALUES-REPORT.md)；后续证据提交不改变此固定输入。
 - 唯一事实JSON：`crates/muyon-core/tests/fixtures/public_pipeline.json`，revision=2，SHA256 `4f7fcb8f988ee390b6f8fffa39603e6b92f8d1e7ccb13667c414906a247d3cf5`。
 - 可直接消费的派生TSV：同目录 `public_pipeline.values.tsv`，SHA256 `547e83849749b77397e460876da78ae1d881e4a58ae6c60151d1a99cc321412c`。Rust测试逐字核其完整投影，不能作为第二事实源单独修改。无需PublicUI安装Python或JSON库来消费该文件。
-- 81个描述符比较向量、28个引用候选值向量；完整25个Rust White_Space码点，包含PublicUI诊断的34个单字符输入。已读取PublicUI固定材料 `b83ffac4606799c9c31989b420e7be02d00e61ed`。
+- 81个描述符比较向量、28个引用候选值向量。81个D向量覆盖PublicUI诊断的全部34个单字符输入，其中25个属于Rust White_Space；W记录列出这25个码点。已读取PublicUI固定材料 `b83ffac4606799c9c31989b420e7be02d00e61ed`。
 - Rust参考提取到 `services/pipeline.rs::validate_vector_compatibility`，既有validate_search复用。仅非零u32维数、Rust trim-empty和四字段原值精确比较；不装模型、不查记录、不授权。
 - DocumentId/ResultId向量分别调用现有DocumentRef::new、C1 ResultId::parse核对；true只表示值形状条件，不表示可信可解析。共享标记 `candidate_semantics=shape_only_not_trusted_resolution`、`kotlin_api_frozen=false`、`trusted_resolution_implemented=false`。
 
