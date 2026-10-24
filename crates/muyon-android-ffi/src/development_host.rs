@@ -6,14 +6,14 @@ use crate::{
     ProductError,
 };
 use muyon_core::{
-    contract::{ContractError, Operation, Revision},
+    contract::{CommandEnvelope, ContractError, Operation, Revision},
     development_drafts::{
         ConversationDraft, DraftItem, DraftPatch, DraftText, ItemKind, ProjectChoice, SourceBinding,
     },
     services::{
         commands::{HostCommandPort, OriginalLookup},
         draft_store::DraftStore,
-        drafts::DraftRef,
+        drafts::{validate_save_ack, DraftEnvelope, DraftRef},
         types::{decode_strict, IntentId, ScopeRef},
     },
 };
@@ -115,10 +115,20 @@ fn conversation_of(draft: &ConversationDraft) -> Result<String, ProductError> {
         .ok_or_else(crate::unavailable)
 }
 
+#[derive(Clone)]
+struct PendingDraftSave {
+    envelope: DraftEnvelope,
+    intent: IntentId,
+    candidates: Vec<CommandEnvelope>,
+    new_plan: Option<CommandEnvelope>,
+}
 struct ActiveDraft {
     session: DevelopmentSession,
     namespace: ScopeRef,
     conversation: String,
+    // Keep the original envelope/intent until its acknowledgement and current
+    // draft can be read. A failed read never permits another preparation.
+    pending_save: Option<PendingDraftSave>,
 }
 
 /// Native capability owned by the private Service, never the model dispatcher.
@@ -174,6 +184,7 @@ impl DevelopmentDraftHost {
                 session,
                 namespace,
                 conversation,
+                pending_save: None,
             })),
         }))
     }
@@ -282,6 +293,7 @@ impl DevelopmentDraftHost {
     pub fn prepare_project(&self) -> Result<String, ProductError> {
         let mut guard = self.active.lock().map_err(|_| crate::unavailable())?;
         let active = guard.as_mut().ok_or(ContractError::InvalidAuthority)?;
+        self.reconcile_pending_save(active)?;
         // Never prepare another identity for an already reviewed original.
         if let Some(command) = active.session.draft().project_command() {
             return Ok(
@@ -298,6 +310,8 @@ impl DevelopmentDraftHost {
             .ok_or(ContractError::Required)?
             .text
             .clone();
+        // Allocate the save identity before creating a new owner preparation.
+        let review_intent = save_intent()?;
         let command = ProductCommandPort::new(self.owner.clone())
             .prepare(
                 Operation::ProjectCreate {
@@ -308,9 +322,34 @@ impl DevelopmentDraftHost {
                 Revision::new(0),
             )
             .map_err(|_| crate::agent_error("development_prepare_unknown_do_not_repeat"))?;
-        active
+        let envelope = (|| -> Result<DraftEnvelope, ProductError> {
+            let mut candidate = active.session.draft().clone();
+            candidate.prepare_project(&candidate.revision().clone(), command.clone())?;
+            Ok(candidate.envelope()?)
+        })();
+        let envelope = match envelope {
+            Ok(envelope) => envelope,
+            Err(error) => {
+                self.discard_unsubmitted_exact(&command)?;
+                return Err(error);
+            }
+        };
+        active.pending_save = Some(PendingDraftSave {
+            envelope,
+            intent: review_intent.clone(),
+            candidates: vec![command.clone()],
+            new_plan: Some(command.clone()),
+        });
+        if let Err(error) = active
             .session
-            .review_prepared(command.clone(), &save_intent()?)?;
+            .review_prepared(command.clone(), &review_intent)
+        {
+            // First query this exact save. None permits retiring the fresh plan;
+            // an unreadable outcome retains both identity and the retry barrier.
+            self.reconcile_pending_save(active)?;
+            return Err(error);
+        }
+        active.pending_save = None;
         Ok(json!({"plan":command,"binding_digest":command.binding_digest()?}).to_string())
     }
 
@@ -322,6 +361,7 @@ impl DevelopmentDraftHost {
     ) -> Result<String, ProductError> {
         let mut guard = self.active.lock().map_err(|_| crate::unavailable())?;
         let active = guard.as_mut().ok_or(ContractError::InvalidAuthority)?;
+        self.reconcile_pending_save(active)?;
         let command = active
             .session
             .draft()
@@ -535,7 +575,66 @@ impl DevelopmentDraftHost {
 }
 
 impl DevelopmentDraftHost {
+    /// Atomically retire only this exact, still-unsubmitted owner preparation.
+    /// Never removes a dispatched original or changes its durable receipt.
+    fn discard_unsubmitted_exact(&self, command: &CommandEnvelope) -> Result<(), ProductError> {
+        let mut state = self.owner.state.lock().map_err(|_| crate::unavailable())?;
+        if state
+            .prepared
+            .get(&command.plan_id)
+            .is_some_and(|prepared| !prepared.dispatched && prepared.command == *command)
+        {
+            state.prepared.remove(&command.plan_id);
+        }
+        Ok(())
+    }
+    fn retire_obsolete(
+        &self,
+        candidates: &[CommandEnvelope],
+        current: Option<&CommandEnvelope>,
+    ) -> Result<(), ProductError> {
+        for command in candidates {
+            if current != Some(command) {
+                self.discard_unsubmitted_exact(command)?;
+            }
+        }
+        Ok(())
+    }
+    fn reconcile_pending_save(&self, active: &mut ActiveDraft) -> Result<(), ProductError> {
+        let Some(pending) = active.pending_save.clone() else {
+            return Ok(());
+        };
+        let unknown = || crate::agent_error("development_save_unknown_do_not_repeat");
+        let ack = active
+            .session
+            .lookup_saved(&pending.envelope.draft_ref, &pending.intent)
+            .map_err(|_| unknown())?;
+        if let Some(ack) = ack {
+            validate_save_ack(
+                &pending.envelope,
+                &pending.envelope.draft_ref.revision,
+                &pending.intent,
+                &ack,
+            )
+            .map_err(|_| unknown())?;
+        } else if let Some(command) = &pending.new_plan {
+            // Only the fresh review command is unreferenced when its save is
+            // known absent. An older edit candidate may still be the current plan.
+            self.discard_unsubmitted_exact(command)?;
+        }
+        let restored = DevelopmentSession::restore(
+            self.owner.clone(),
+            active.namespace.clone(),
+            &pending.envelope.draft_ref.draft_id,
+        )
+        .map_err(|_| unknown())?;
+        self.retire_obsolete(&pending.candidates, restored.draft().project_command())?;
+        active.session = restored;
+        active.pending_save = None;
+        Ok(())
+    }
     fn select_saved(&self, active: &mut ActiveDraft, draft_id: &str) -> Result<(), ProductError> {
+        self.reconcile_pending_save(active)?;
         let restored =
             DevelopmentSession::restore(self.owner.clone(), active.namespace.clone(), draft_id)?;
         if conversation_of(restored.draft())? != active.conversation {
@@ -562,7 +661,15 @@ impl DevelopmentDraftHost {
     ) -> Result<String, ProductError> {
         let mut guard = self.active.lock().map_err(|_| crate::unavailable())?;
         let active = guard.as_mut().ok_or(ContractError::InvalidAuthority)?;
+        self.reconcile_pending_save(active)?;
         let id = active.session.draft().envelope()?.draft_ref.draft_id;
+        let mut candidates: Vec<_> = active
+            .session
+            .draft()
+            .project_command()
+            .cloned()
+            .into_iter()
+            .collect();
         let mut next = ActiveDraft {
             session: DevelopmentSession::restore(
                 self.owner.clone(),
@@ -571,18 +678,37 @@ impl DevelopmentDraftHost {
             )?,
             namespace: active.namespace.clone(),
             conversation: active.conversation.clone(),
+            pending_save: None,
         };
-        let intent = save_intent()?;
-        if let Err(error) = action(&mut next).and_then(|()| next.session.save(&intent)) {
-            match DevelopmentSession::restore(self.owner.clone(), active.namespace.clone(), &id) {
-                Ok(current) => active.session = current,
-                Err(_) => {
-                    guard.take();
-                }
+        if let Some(command) = next.session.draft().project_command() {
+            if !candidates.contains(command) {
+                candidates.push(command.clone());
+            }
+        }
+        if let Err(error) = action(&mut next) {
+            // No save was attempted. Reconcile only with a successfully read
+            // current draft; a failed read is not proof an older plan is obsolete.
+            if let Ok(current) =
+                DevelopmentSession::restore(self.owner.clone(), active.namespace.clone(), &id)
+            {
+                self.retire_obsolete(&candidates, current.draft().project_command())?;
+                active.session = current;
             }
             return Err(error);
         }
+        let intent = save_intent()?;
+        active.pending_save = Some(PendingDraftSave {
+            envelope: next.session.draft().envelope()?,
+            intent: intent.clone(),
+            candidates: candidates.clone(),
+            new_plan: None,
+        });
+        if let Err(error) = next.session.save(&intent) {
+            self.reconcile_pending_save(active)?;
+            return Err(error);
+        }
         *active = next;
+        self.retire_obsolete(&candidates, active.session.draft().project_command())?;
         crate::encode(&active.session.draft().envelope()?)
     }
 }
@@ -1306,11 +1432,15 @@ mod tests {
                 .collect::<Vec<_>>(),
             original
         );
+        // ALTER ... RENAME back changes sqlite_master quoting. Recreate the
+        // exact original schema so recovery still exercises the strict store.
+        db.exec("CREATE TABLE draft_save_intents(intent_id TEXT PRIMARY KEY,request_digest TEXT NOT NULL,ack TEXT NOT NULL)", &[]).unwrap();
         db.exec(
-            "ALTER TABLE temporarily_unavailable RENAME TO draft_save_intents",
+            "INSERT INTO draft_save_intents SELECT * FROM temporarily_unavailable",
             &[],
         )
         .unwrap();
+        db.exec("DROP TABLE temporarily_unavailable", &[]).unwrap();
         let plan: Value = serde_json::from_str(&host.prepare_project().unwrap()).unwrap();
         let state = core.state.lock().unwrap();
         assert_eq!(state.prepared.len(), 1);
@@ -1336,7 +1466,170 @@ mod tests {
         assert!(host
             .set_project_name("Forbidden".into(), revision(&host))
             .is_err());
+        let original = core.state.lock().unwrap().prepared[&plan_id]
+            .command
+            .clone();
+        host.discard_unsubmitted_exact(&original).unwrap();
         assert!(core.state.lock().unwrap().prepared[&plan_id].dispatched);
         assert_eq!(host.recover_original().unwrap(), receipt);
+    }
+
+    #[test]
+    fn lifecycle_stale_edit_cas_preserves_the_other_editors_current_review() {
+        let f = Fixture::new();
+        let core = f.owner("epoch-1", true);
+        let a = lifecycle_ready(core.clone(), "review-cas");
+        let old: Value = serde_json::from_str(&a.prepare_project().unwrap()).unwrap();
+        let old_revision = revision(&a);
+        let b = DevelopmentDraftHost::open(core.clone(), "review-cas".into(), None, None, false)
+            .unwrap();
+        b.set_project_name("Newest".into(), revision(&b)).unwrap();
+        let current: Value = serde_json::from_str(&b.prepare_project().unwrap()).unwrap();
+        assert!(a.set_project_name("Stale".into(), old_revision).is_err());
+        let state = core.state.lock().unwrap();
+        assert!(!state
+            .prepared
+            .contains_key(old["plan"]["plan_id"].as_str().unwrap()));
+        assert!(state
+            .prepared
+            .contains_key(current["plan"]["plan_id"].as_str().unwrap()));
+        assert_eq!(state.prepared.len(), 1);
+        drop(state);
+        assert_eq!(a.prepare_project().unwrap(), b.prepare_project().unwrap());
+    }
+    #[test]
+    fn lifecycle_existing_save_ack_recovers_original_review_without_another_prepare() {
+        let f = Fixture::new();
+        let core = f.owner("epoch-1", true);
+        let host = lifecycle_ready(core.clone(), "lost-ack");
+        let mut guard = host.active.lock().unwrap();
+        let active = guard.as_mut().unwrap();
+        let original_session = DevelopmentSession::restore(
+            core.clone(),
+            active.namespace.clone(),
+            &active
+                .session
+                .draft()
+                .envelope()
+                .unwrap()
+                .draft_ref
+                .draft_id,
+        )
+        .unwrap();
+        let ProjectChoice::New { project_id } = active.session.draft().project() else {
+            panic!("new project fixture")
+        };
+        let command = ProductCommandPort::new(core.clone())
+            .prepare(
+                Operation::ProjectCreate {
+                    project_id: project_id.clone(),
+                    name: "Project".into(),
+                },
+                None,
+                Revision::new(0),
+            )
+            .unwrap();
+        let mut candidate = active.session.draft().clone();
+        candidate
+            .prepare_project(&candidate.revision().clone(), command.clone())
+            .unwrap();
+        let intent = IntentId::parse("save:lost-review-ack").unwrap();
+        active
+            .session
+            .review_prepared(command.clone(), &intent)
+            .unwrap();
+        // Simulate loss of the completion boundary after the real store commit;
+        // retain the exact pending envelope/intent, rather than a new request.
+        active.session = original_session;
+        active.pending_save = Some(PendingDraftSave {
+            envelope: candidate.envelope().unwrap(),
+            intent,
+            candidates: vec![command.clone()],
+            new_plan: Some(command.clone()),
+        });
+        drop(guard);
+        let recovered: Value = serde_json::from_str(&host.prepare_project().unwrap()).unwrap();
+        assert_eq!(recovered["plan"]["plan_id"], command.plan_id);
+        assert_eq!(recovered["plan"]["intent_id"], command.intent_id);
+        assert_eq!(core.state.lock().unwrap().prepared.len(), 1);
+        assert!(host
+            .active
+            .lock()
+            .unwrap()
+            .as_ref()
+            .unwrap()
+            .pending_save
+            .is_none());
+        assert_eq!(host.prepare_project().unwrap(), recovered.to_string());
+    }
+
+    #[test]
+    fn lifecycle_edit_unknown_save_fences_confirm_and_keeps_original_until_lookup() {
+        let f = Fixture::new();
+        let core = f.owner("epoch-1", true);
+        let host = lifecycle_ready(core.clone(), "edit-unknown");
+        let review = host.prepare_project().unwrap();
+        let plan: Value = serde_json::from_str(&review).unwrap();
+        let db = lifecycle_db(&host);
+        let expected = Revision::parse(&revision(&host)).unwrap();
+        assert!(host
+            .mutate(|active| {
+                active.session.apply_patch(
+                    &expected,
+                    DraftPatch {
+                        project_name: Some("Unsaved".into()),
+                        items: vec![],
+                    },
+                    true,
+                )?;
+                db.exec(
+                    "ALTER TABLE draft_save_intents RENAME TO temporarily_unavailable",
+                    &[],
+                )
+                .unwrap();
+                Ok(())
+            })
+            .is_err());
+        assert!(host.prepare_project().is_err());
+        assert!(host
+            .confirm_project(
+                plan["plan"]["plan_id"].as_str().unwrap().into(),
+                plan["binding_digest"].as_str().unwrap().into()
+            )
+            .is_err());
+        assert_eq!(core.state.lock().unwrap().prepared.len(), 1);
+        assert!(core
+            .state
+            .lock()
+            .unwrap()
+            .store
+            .projects(10, 0)
+            .unwrap()
+            .is_empty());
+        db.exec("CREATE TABLE draft_save_intents(intent_id TEXT PRIMARY KEY,request_digest TEXT NOT NULL,ack TEXT NOT NULL)", &[]).unwrap();
+        db.exec(
+            "INSERT INTO draft_save_intents SELECT * FROM temporarily_unavailable",
+            &[],
+        )
+        .unwrap();
+        db.exec("DROP TABLE temporarily_unavailable", &[]).unwrap();
+        assert_eq!(host.prepare_project().unwrap(), review);
+        host.set_project_name("Known edit".into(), revision(&host))
+            .unwrap();
+        assert!(core.state.lock().unwrap().prepared.is_empty());
+    }
+    #[test]
+    fn lifecycle_edit_retires_a_review_loaded_after_the_host_snapshot() {
+        let f = Fixture::new();
+        let core = f.owner("epoch-1", true);
+        let a = lifecycle_ready(core.clone(), "loaded-review");
+        let b = DevelopmentDraftHost::open(core.clone(), "loaded-review".into(), None, None, false)
+            .unwrap();
+        b.prepare_project().unwrap();
+        // Review save advances storage revision but not the edit revision.
+        a.set_project_name("Edited after review".into(), revision(&a))
+            .unwrap();
+        assert!(core.state.lock().unwrap().prepared.is_empty());
+        assert_eq!(value(&a)["content"]["submission"], Value::Null);
     }
 }

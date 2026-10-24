@@ -10,7 +10,7 @@ use muyon_core::{
     services::{
         commands::{project_execution, HostCommandPort, OriginalLookup},
         draft_store::DraftStore,
-        drafts::DraftRef,
+        drafts::{DraftRef, SaveAck},
         types::{IntentId, ScopeRef},
     },
 };
@@ -114,6 +114,15 @@ impl DevelopmentSession {
     pub fn save(&mut self, intent: &IntentId) -> Result<(), ProductError> {
         self.draft.persist(&self.store, intent)?;
         Ok(())
+    }
+
+    /// Query an exact original draft-save identity; never retries a write.
+    pub(crate) fn lookup_saved(
+        &self,
+        original: &DraftRef,
+        intent: &IntentId,
+    ) -> Result<Option<SaveAck>, ProductError> {
+        Ok(self.store.lookup_save(original, intent)?)
     }
 
     /// Accept only the real owner's exact prepared envelope. This cannot create
