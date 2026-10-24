@@ -1176,4 +1176,167 @@ mod tests {
         );
         assert_eq!(std::fs::read_to_string(&namespace_path).unwrap(), original);
     }
+
+    fn lifecycle_ready(core: Arc<ProductCore>, conversation: &str) -> Arc<DevelopmentDraftHost> {
+        let host = DevelopmentDraftHost::open(core, conversation.into(), None, None, true).unwrap();
+        host.set_project_name("Project".into(), revision(&host))
+            .unwrap();
+        host.choose_new_project(revision(&host)).unwrap();
+        host
+    }
+    fn lifecycle_db(host: &DevelopmentDraftHost) -> muyon_core::sqlite::Db {
+        let scope = host
+            .active
+            .lock()
+            .unwrap()
+            .as_ref()
+            .unwrap()
+            .namespace
+            .clone();
+        let path = super::super::development_session::scope_path(&host.owner, &scope).unwrap();
+        muyon_core::sqlite::Db::open(path.to_str().unwrap(), false, false).unwrap()
+    }
+    #[test]
+    fn lifecycle_129_prepare_edit_cycles_do_not_exhaust_global_prepared_capacity() {
+        let f = Fixture::new();
+        let core = f.owner("epoch-1", true);
+        let host = lifecycle_ready(core.clone(), "capacity");
+        for attempt in 0..129 {
+            let plan = host
+                .prepare_project()
+                .unwrap_or_else(|e| panic!("prepare {attempt}: {e:?}"));
+            assert_eq!(host.prepare_project().unwrap(), plan, "duplicate click");
+            host.set_project_name(format!("Project {attempt}"), revision(&host))
+                .unwrap();
+        }
+        assert!(core.state.lock().unwrap().prepared.is_empty());
+        assert!(core
+            .state
+            .lock()
+            .unwrap()
+            .store
+            .projects(10, 0)
+            .unwrap()
+            .is_empty());
+    }
+    #[test]
+    fn lifecycle_edit_retires_only_its_own_unsubmitted_plan() {
+        let f = Fixture::new();
+        let core = f.owner("epoch-1", true);
+        let a = lifecycle_ready(core.clone(), "a");
+        let b = lifecycle_ready(core.clone(), "b");
+        let pa: Value = serde_json::from_str(&a.prepare_project().unwrap()).unwrap();
+        let pb: Value = serde_json::from_str(&b.prepare_project().unwrap()).unwrap();
+        a.add_item("question".into(), "Local edit".into(), revision(&a))
+            .unwrap();
+        let state = core.state.lock().unwrap();
+        assert!(!state
+            .prepared
+            .contains_key(pa["plan"]["plan_id"].as_str().unwrap()));
+        assert!(state
+            .prepared
+            .contains_key(pb["plan"]["plan_id"].as_str().unwrap()));
+        assert_eq!(state.prepared.len(), 1);
+    }
+    #[test]
+    fn lifecycle_failed_review_cas_retires_new_plan_and_restores_current_draft() {
+        let f = Fixture::new();
+        let core = f.owner("epoch-1", true);
+        let winner = lifecycle_ready(core.clone(), "cas");
+        let stale =
+            DevelopmentDraftHost::open(core.clone(), "cas".into(), None, None, false).unwrap();
+        winner
+            .set_project_name("Newest".into(), revision(&winner))
+            .unwrap();
+        assert!(stale.prepare_project().is_err());
+        assert!(core.state.lock().unwrap().prepared.is_empty());
+        assert_eq!(value(&stale), value(&winner));
+        assert!(core
+            .state
+            .lock()
+            .unwrap()
+            .store
+            .projects(10, 0)
+            .unwrap()
+            .is_empty());
+    }
+    #[test]
+    fn lifecycle_failed_review_save_releases_plan_only_after_original_save_lookup() {
+        let f = Fixture::new();
+        let core = f.owner("epoch-1", true);
+        let host = lifecycle_ready(core.clone(), "save-failure");
+        let db = lifecycle_db(&host);
+        db.exec("CREATE TRIGGER reject_review BEFORE INSERT ON draft_save_intents BEGIN SELECT RAISE(ABORT,'fixture'); END", &[]).unwrap();
+        assert!(host.prepare_project().is_err());
+        assert!(core.state.lock().unwrap().prepared.is_empty());
+        db.exec("DROP TRIGGER reject_review", &[]).unwrap();
+        let first = host.prepare_project().unwrap();
+        assert_eq!(host.prepare_project().unwrap(), first);
+        assert_eq!(core.state.lock().unwrap().prepared.len(), 1);
+    }
+    #[test]
+    fn lifecycle_unknown_save_lookup_blocks_new_preparation_until_original_is_resolved() {
+        let f = Fixture::new();
+        let core = f.owner("epoch-1", true);
+        let host = lifecycle_ready(core.clone(), "unknown-save");
+        let db = lifecycle_db(&host);
+        db.exec(
+            "ALTER TABLE draft_save_intents RENAME TO temporarily_unavailable",
+            &[],
+        )
+        .unwrap();
+        assert!(host.prepare_project().is_err());
+        let original = core
+            .state
+            .lock()
+            .unwrap()
+            .prepared
+            .keys()
+            .cloned()
+            .collect::<Vec<_>>();
+        assert_eq!(original.len(), 1);
+        assert!(host.prepare_project().is_err());
+        assert_eq!(
+            core.state
+                .lock()
+                .unwrap()
+                .prepared
+                .keys()
+                .cloned()
+                .collect::<Vec<_>>(),
+            original
+        );
+        db.exec(
+            "ALTER TABLE temporarily_unavailable RENAME TO draft_save_intents",
+            &[],
+        )
+        .unwrap();
+        let plan: Value = serde_json::from_str(&host.prepare_project().unwrap()).unwrap();
+        let state = core.state.lock().unwrap();
+        assert_eq!(state.prepared.len(), 1);
+        assert!(!state.prepared.contains_key(&original[0]));
+        assert!(state
+            .prepared
+            .contains_key(plan["plan"]["plan_id"].as_str().unwrap()));
+        assert!(state.store.projects(10, 0).unwrap().is_empty());
+    }
+    #[test]
+    fn lifecycle_dispatched_original_receipt_is_not_retired_by_rejected_edit() {
+        let f = Fixture::new();
+        let core = f.owner("epoch-1", true);
+        let host = lifecycle_ready(core.clone(), "dispatched");
+        let plan: Value = serde_json::from_str(&host.prepare_project().unwrap()).unwrap();
+        let plan_id = plan["plan"]["plan_id"].as_str().unwrap().to_owned();
+        let receipt = host
+            .confirm_project(
+                plan_id.clone(),
+                plan["binding_digest"].as_str().unwrap().into(),
+            )
+            .unwrap();
+        assert!(host
+            .set_project_name("Forbidden".into(), revision(&host))
+            .is_err());
+        assert!(core.state.lock().unwrap().prepared[&plan_id].dispatched);
+        assert_eq!(host.recover_original().unwrap(), receipt);
+    }
 }
