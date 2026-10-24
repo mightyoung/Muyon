@@ -1,8 +1,8 @@
-use muyon_core::{business, contract, documents, research, services};
-#[path = "../src/domains/inquiry_projection.rs"]
-mod inquiry_projection;
-#[path = "../src/domains/research_projection.rs"]
-mod research_projection;
+use muyon_core::{
+    business, contract, documents,
+    domains::{inquiry_projection, research_projection},
+    research, services,
+};
 
 use business::SupplierRecord;
 use contract::{BlobRef, Revision, Scope, SupplierPayload};
