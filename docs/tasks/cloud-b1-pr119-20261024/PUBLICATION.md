@@ -75,3 +75,24 @@ Evidence SHA256 `pr119-fix-ci-terminal.md`: `35375646b47f0ae8e24bb8951527e91f996
 主日志CI SUMMARY OK：analyze8/8、test8/8 suites，4204次通过执行、207次skip；这是同一组既有包在该受测对象下的执行，不与PR122结果相加宣称新增场景。loaded executable coverage不代表整包分母已知，Linux自跳过/字体/平台/模型条件不构成视觉或设备验收。
 
 至此B1产品CI与PR通用CI成功，PR122的全部已触发CI亦成功。只剩B1分支push通用run40048770932仍在执行；本记录继续将其列为非终态，未人工取消、重跑或用旧head成功替代。
+
+## 最终收束：全部已触发 CI 终态成功
+
+B1最后一条push [40048770932](https://github.com/mightyoung/Muyon/actions/runs/40048770932) 于01:53:03 UTC completed / success。至此：
+
+| 候选 | 已触发运行的最终状态 |
+| --- | --- |
+| B1 / PR121，head=e5ca78cb49cfaa641e5d0e8aa73a7e406e2bbefc | 产品40049205757、PR通用40049205779、push通用40048770932全部success，共3 runs / 7 jobs |
+| PR119补修 / PR122，head=a88b5abaf22590c57d745b6ad1383d0309bc864b | push通用40049039732 success，2 jobs；stacked base未触发产品workflow，不宣称其已跑 |
+
+B1 push实际日志也确认精确head，analyze8/8、test8/8，4204次通过/207 skips；PR通用实际checkout merge4d137ab，产品与push实际checkout head，两者证据分别保留。没有把多个重复run的执行数加成独立场景，也没有把skip、AndroidTest APK编译、model资产校验或loaded-line coverage解释成设备/视觉/推理或全包覆盖通过。
+
+最后只读核对PR121、PR122均open Draft、未merged，head与上表相同；原PR119仍open Draft、head=b08b00bd5c5f0886f3c3c42d573b24e2526804b3，未被本任务覆盖。两棵产品worktree干净。当前没有CI失败需要修复，也没有未决创建审批；首次拒绝已按新增相关历史证据的唯一一次重试完成。
+
+全部只读监测结束。两路终态证据均在 `/workspace/muyon-contracts-evidence/`，GitHub链接和固定source已交叉核查；没有人为取消、dispatch或重跑。较旧不同head dbb42f20的run被系统自行cancelled，不属于本批固定head的成功证明或失败记录。
+
+B仍为唯一合入者。没有merge、main/develop写入、强推、分支删除、部署、凭据配置或新增付费授权。本地复用原已批准工具/缓存，没有重装；真实provider、生产预算/历史费用未知、Reader/FD、视觉和设备门槛保持。下一步为B对两个独立Draft及依赖进行审查；本记录不代替合入授权。
+
+Final evidence SHA256 `b1-ci-terminal.json`: `f596f9570f75b08210f77bc3ec4b87c125a7f8a1c6a2a68c8969c6d87b473a6a`.
+
+Final evidence SHA256 `b1-ci-terminal.md`: `ce3dfdc8da31e7ecdb7fa300bf4afaff3224826b760407ec7f3d6961dc2dadb4`.
