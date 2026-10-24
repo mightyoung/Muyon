@@ -67,3 +67,11 @@ Draft 创建已成功，没有待解除的创建审批阻断。创建前确认�
 Evidence SHA256 `pr119-fix-ci-terminal.json`: `e0862030def84037a93e586d4f885ba16b5ef7ceb48ae647c525ae2229bb2dc2`.
 
 Evidence SHA256 `pr119-fix-ci-terminal.md`: `35375646b47f0ae8e24bb8951527e91f99663699475725b1223ba90fc71a1d87`.
+
+## B1 PR 通用 CI 终态补记
+
+[40049205779](https://github.com/mightyoung/Muyon/actions/runs/40049205779) 已于01:41:15 UTC completed / success，ci与laya-offline均success。实际日志核受测对象为merge `4d137ab66c4c52e5fe21f71a70fa1f277739dcb4`，父链包含develop `e16af808620488a7be0b3b4a10b91190d18f1177` 与精确B1 head `e5ca78cb49cfaa641e5d0e8aa73a7e406e2bbefc`。
+
+主日志CI SUMMARY OK：analyze8/8、test8/8 suites，4204次通过执行、207次skip；这是同一组既有包在该受测对象下的执行，不与PR122结果相加宣称新增场景。loaded executable coverage不代表整包分母已知，Linux自跳过/字体/平台/模型条件不构成视觉或设备验收。
+
+至此B1产品CI与PR通用CI成功，PR122的全部已触发CI亦成功。只剩B1分支push通用run40048770932仍在执行；本记录继续将其列为非终态，未人工取消、重跑或用旧head成功替代。
