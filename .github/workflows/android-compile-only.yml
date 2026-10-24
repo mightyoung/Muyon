@@ -3,6 +3,7 @@ name: Android compile only exact source
 on:
   push:
     branches:
+      - 'lab/android-u2-compile-20261024'
       - 'task/android-u1-d2-host-compat-20261023'
       - 'codex/dm02-repository-evidence-20261023'
       - 'codex/dm01-domain-drafts-20261023'
