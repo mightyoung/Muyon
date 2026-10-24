@@ -1,0 +1,143 @@
+INSTRUMENTATION_STATUS: numtests=7
+INSTRUMENTATION_STATUS: stream=
+com.mightyoung.muyon.product.ui.shell.ConversationShellTest:
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=draftHasStableAccessiblePurposeAfterTypingAndPreviewRemainsDisabled
+INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.product.ui.shell.ConversationShellTest
+INSTRUMENTATION_STATUS: current=1
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: numtests=7
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=draftHasStableAccessiblePurposeAfterTypingAndPreviewRemainsDisabled
+INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.product.ui.shell.ConversationShellTest
+INSTRUMENTATION_STATUS: current=1
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: numtests=7
+INSTRUMENTATION_STATUS: stream=
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=dismissKeepsMountedBodyAndDraft
+INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.product.ui.shell.ConversationShellTest
+INSTRUMENTATION_STATUS: current=2
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: numtests=7
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=dismissKeepsMountedBodyAndDraft
+INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.product.ui.shell.ConversationShellTest
+INSTRUMENTATION_STATUS: current=2
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: numtests=7
+INSTRUMENTATION_STATUS: stream=
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=menuUsesRealEntriesAndSeparatesPinnedFromOrdinary
+INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.product.ui.shell.ConversationShellTest
+INSTRUMENTATION_STATUS: current=3
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: numtests=7
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=menuUsesRealEntriesAndSeparatesPinnedFromOrdinary
+INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.product.ui.shell.ConversationShellTest
+INSTRUMENTATION_STATUS: current=3
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: numtests=7
+INSTRUMENTATION_STATUS: stream=
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=mainHeaderHasOneOriginalMascotAboveTheBody
+INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.product.ui.shell.ConversationShellTest
+INSTRUMENTATION_STATUS: current=4
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: numtests=7
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=mainHeaderHasOneOriginalMascotAboveTheBody
+INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.product.ui.shell.ConversationShellTest
+INSTRUMENTATION_STATUS: current=4
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: numtests=7
+INSTRUMENTATION_STATUS: stream=
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=ordinaryHeaderDoesNotRepeatMainMascot
+INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.product.ui.shell.ConversationShellTest
+INSTRUMENTATION_STATUS: current=5
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: numtests=7
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=ordinaryHeaderDoesNotRepeatMainMascot
+INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.product.ui.shell.ConversationShellTest
+INSTRUMENTATION_STATUS: current=5
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: numtests=7
+INSTRUMENTATION_STATUS: stream=
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=headerAndComposerHaveDistinctActions
+INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.product.ui.shell.ConversationShellTest
+INSTRUMENTATION_STATUS: current=6
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: numtests=7
+INSTRUMENTATION_STATUS: stream=
+Error in headerAndComposerHaveDistinctActions(com.mightyoung.muyon.product.ui.shell.ConversationShellTest):
+java.lang.AssertionError: Failed to inject touch input.
+Reason: Expected exactly '1' node but could not find any node that satisfies: (ContentDescription = '更多会话操作' (ignoreCase: false))
+
+	at androidx.compose.ui.test.SemanticsNodeInteraction.fetchOneOrThrow(SemanticsNodeInteraction.kt:178)
+	at androidx.compose.ui.test.SemanticsNodeInteraction.fetchOneOrThrow$default(SemanticsNodeInteraction.kt:150)
+	at androidx.compose.ui.test.SemanticsNodeInteraction.fetchSemanticsNode(SemanticsNodeInteraction.kt:84)
+	at androidx.compose.ui.test.ActionsKt.performTouchInput(Actions.kt:402)
+	at androidx.compose.ui.test.AndroidActions.performClickImpl(Actions.android.kt:23)
+	at androidx.compose.ui.test.ActionsKt.performClick(Actions.kt:60)
+	at com.mightyoung.muyon.product.ui.shell.ConversationShellTest.headerAndComposerHaveDistinctActions(ConversationShellTest.kt:112)
+
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=headerAndComposerHaveDistinctActions
+INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.product.ui.shell.ConversationShellTest
+INSTRUMENTATION_STATUS: stack=java.lang.AssertionError: Failed to inject touch input.
+Reason: Expected exactly '1' node but could not find any node that satisfies: (ContentDescription = '更多会话操作' (ignoreCase: false))
+
+	at androidx.compose.ui.test.SemanticsNodeInteraction.fetchOneOrThrow(SemanticsNodeInteraction.kt:178)
+	at androidx.compose.ui.test.SemanticsNodeInteraction.fetchOneOrThrow$default(SemanticsNodeInteraction.kt:150)
+	at androidx.compose.ui.test.SemanticsNodeInteraction.fetchSemanticsNode(SemanticsNodeInteraction.kt:84)
+	at androidx.compose.ui.test.ActionsKt.performTouchInput(Actions.kt:402)
+	at androidx.compose.ui.test.AndroidActions.performClickImpl(Actions.android.kt:23)
+	at androidx.compose.ui.test.ActionsKt.performClick(Actions.kt:60)
+	at com.mightyoung.muyon.product.ui.shell.ConversationShellTest.headerAndComposerHaveDistinctActions(ConversationShellTest.kt:112)
+
+INSTRUMENTATION_STATUS: current=6
+INSTRUMENTATION_STATUS_CODE: -2
+INSTRUMENTATION_STATUS: numtests=7
+INSTRUMENTATION_STATUS: stream=
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=navigationHeadingsAndFailureAnnouncementRemainDiscoverable
+INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.product.ui.shell.ConversationShellTest
+INSTRUMENTATION_STATUS: current=7
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: numtests=7
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=navigationHeadingsAndFailureAnnouncementRemainDiscoverable
+INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.product.ui.shell.ConversationShellTest
+INSTRUMENTATION_STATUS: current=7
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_RESULT: stream=
+
+Time: 48.023
+There was 1 failure:
+1) headerAndComposerHaveDistinctActions(com.mightyoung.muyon.product.ui.shell.ConversationShellTest)
+java.lang.AssertionError: Failed to inject touch input.
+Reason: Expected exactly '1' node but could not find any node that satisfies: (ContentDescription = '更多会话操作' (ignoreCase: false))
+
+	at androidx.compose.ui.test.SemanticsNodeInteraction.fetchOneOrThrow(SemanticsNodeInteraction.kt:178)
+	at androidx.compose.ui.test.SemanticsNodeInteraction.fetchOneOrThrow$default(SemanticsNodeInteraction.kt:150)
+	at androidx.compose.ui.test.SemanticsNodeInteraction.fetchSemanticsNode(SemanticsNodeInteraction.kt:84)
+	at androidx.compose.ui.test.ActionsKt.performTouchInput(Actions.kt:402)
+	at androidx.compose.ui.test.AndroidActions.performClickImpl(Actions.android.kt:23)
+	at androidx.compose.ui.test.ActionsKt.performClick(Actions.kt:60)
+	at com.mightyoung.muyon.product.ui.shell.ConversationShellTest.headerAndComposerHaveDistinctActions(ConversationShellTest.kt:112)
+
+FAILURES!!!
+Tests run: 7,  Failures: 1
+
+
+INSTRUMENTATION_CODE: -1

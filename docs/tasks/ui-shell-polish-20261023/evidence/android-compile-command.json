@@ -1,0 +1,15 @@
+[
+  "/workspace/ui-shell-tools/gradle-8.13/bin/gradle",
+  "--offline",
+  "--no-daemon",
+  "--console=plain",
+  "--init-script",
+  "/workspace/ui-shell-tools/maven-offline-restore/local.init.gradle",
+  "-p",
+  "apps/muyon_android",
+  "-PmuyonProductNativeInputs=/workspace/ui-shell-tools/3aae/native/jni",
+  "-PmuyonModelAssets=/workspace/ui-shell-tools/candidate-model-assets",
+  ":app:compileDebugKotlin",
+  ":app:compileDebugAndroidTestKotlin",
+  ":app:lintDebug"
+]

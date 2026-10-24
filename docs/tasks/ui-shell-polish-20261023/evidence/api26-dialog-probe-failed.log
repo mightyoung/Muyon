@@ -1,0 +1,38 @@
+INSTRUMENTATION_STATUS: numtests=1
+INSTRUMENTATION_STATUS: stream=
+com.mightyoung.muyon.product.ui.shell.ConversationShellTest:
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=neutralPinnedActionUsesThemeTextInsteadOfErrorInk
+INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.product.ui.shell.ConversationShellTest
+INSTRUMENTATION_STATUS: current=1
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: numtests=1
+INSTRUMENTATION_STATUS: stream=
+Error in neutralPinnedActionUsesThemeTextInsteadOfErrorInk(com.mightyoung.muyon.product.ui.shell.ConversationShellTest):
+java.lang.IllegalArgumentException: Cannot currently capture dialogs on API lower than 28!
+	at androidx.compose.ui.test.AndroidImageHelpers_androidKt.captureToImage(AndroidImageHelpers.android.kt:72)
+	at com.mightyoung.muyon.product.ui.shell.ConversationShellTest.neutralPinnedActionUsesThemeTextInsteadOfErrorInk(ConversationShellTest.kt:219)
+
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=neutralPinnedActionUsesThemeTextInsteadOfErrorInk
+INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.product.ui.shell.ConversationShellTest
+INSTRUMENTATION_STATUS: stack=java.lang.IllegalArgumentException: Cannot currently capture dialogs on API lower than 28!
+	at androidx.compose.ui.test.AndroidImageHelpers_androidKt.captureToImage(AndroidImageHelpers.android.kt:72)
+	at com.mightyoung.muyon.product.ui.shell.ConversationShellTest.neutralPinnedActionUsesThemeTextInsteadOfErrorInk(ConversationShellTest.kt:219)
+
+INSTRUMENTATION_STATUS: current=1
+INSTRUMENTATION_STATUS_CODE: -2
+INSTRUMENTATION_RESULT: stream=
+
+Time: 11.005
+There was 1 failure:
+1) neutralPinnedActionUsesThemeTextInsteadOfErrorInk(com.mightyoung.muyon.product.ui.shell.ConversationShellTest)
+java.lang.IllegalArgumentException: Cannot currently capture dialogs on API lower than 28!
+	at androidx.compose.ui.test.AndroidImageHelpers_androidKt.captureToImage(AndroidImageHelpers.android.kt:72)
+	at com.mightyoung.muyon.product.ui.shell.ConversationShellTest.neutralPinnedActionUsesThemeTextInsteadOfErrorInk(ConversationShellTest.kt:219)
+
+FAILURES!!!
+Tests run: 1,  Failures: 1
+
+
+INSTRUMENTATION_CODE: -1

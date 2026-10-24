@@ -1,0 +1,26 @@
+[
+  {
+    "source": "apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/ui/shell/ConversationShell.kt",
+    "sha256": "e85c13e2c96d785595e80120c3e38301458d1215757371518673c113117e4a91"
+  },
+  {
+    "source": "apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/ui/shell/ShellInputDock.kt",
+    "sha256": "b5661ff6c96c8cfc6b718e128a886c728da765a929c123020e27b92bb07ce086"
+  },
+  {
+    "source": "apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/ui/shell/ProductSettingsFields.kt",
+    "sha256": "90453bbed0ea67abbc4b1198092fbeabc6064df95626d536ead3a7f9ba66a42b"
+  },
+  {
+    "source": "apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/ui/system/FoundationTokens.kt",
+    "sha256": "b3c3e14ad8bb8dae25b2de62980429d1d482d85b48a76e4fbcc46a9912744bac"
+  },
+  {
+    "source": "apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/ui/system/FoundationComponents.kt",
+    "sha256": "f560b4a356e94ae38b92c7829b46511b9b7a682e12fe6797425ea68b2ebb8b4d"
+  },
+  {
+    "source": "apps/muyon_android/app/src/androidTest/kotlin/com/mightyoung/muyon/product/ui/shell/ConversationShellTest.kt",
+    "sha256": "36ed992d5c9d487cbabde421b828095a9a3104b092614b800bbbe18fb88a5f6f"
+  }
+]

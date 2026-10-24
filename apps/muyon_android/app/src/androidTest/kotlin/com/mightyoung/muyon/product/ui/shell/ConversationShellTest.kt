@@ -1,11 +1,16 @@
 package com.mightyoung.muyon.product.ui.shell
 
-import androidx.compose.material3.MaterialTheme
+import com.mightyoung.muyon.product.ui.system.FoundationTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.toPixelMap
+import com.mightyoung.muyon.product.ui.system.FoundationTokens
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionOnScreen
 import androidx.compose.runtime.*
 import androidx.compose.ui.test.*
 import androidx.compose.ui.semantics.SemanticsProperties
@@ -21,7 +26,7 @@ class ConversationShellTest {
 
     @Test fun mainHeaderHasOneOriginalMascotAboveTheBody() {
         compose.setContent {
-            MaterialTheme {
+            FoundationTheme {
                 Column {
                     ConversationHeader("主助手", {}, mainAgent = true)
                     Text("正文保持可见", Modifier.testTag("test-reading-body"))
@@ -36,7 +41,7 @@ class ConversationShellTest {
     }
 
     @Test fun ordinaryHeaderDoesNotRepeatMainMascot() {
-        compose.setContent { MaterialTheme { ConversationHeader("用户配置的助手", {}) } }
+        compose.setContent { FoundationTheme { ConversationHeader("用户配置的助手", {}) } }
         compose.onNodeWithTag("shell-original-mascot").assertDoesNotExist()
     }
 
@@ -44,7 +49,7 @@ class ConversationShellTest {
         var opened = ""
         var pinned = ""
         compose.setContent {
-            MaterialTheme {
+            FoundationTheme {
                 ConversationShell("chat", "Muyon 助手", "agent:a", listOf(
                     ShellConversation("default", "Muyon 助手", main = true),
                     ShellConversation("agent:a", "真实助手", pinned = true),
@@ -70,7 +75,7 @@ class ConversationShellTest {
 
     @Test fun dismissKeepsMountedBodyAndDraft() {
         compose.setContent {
-            MaterialTheme {
+            FoundationTheme {
                 ConversationShell("chat", "Muyon 助手", "default", emptyList(), {}, {}, {}) { openMenu ->
                     var draft by remember { mutableStateOf("") }
                     Column {
@@ -88,9 +93,9 @@ class ConversationShellTest {
 
     @Test fun draftHasStableAccessiblePurposeAfterTypingAndPreviewRemainsDisabled() {
         compose.setContent {
-            MaterialTheme {
+            FoundationTheme {
                 var draft by remember { mutableStateOf("") }
-                ShellInputDock(draft, { draft = it }, enabled = false, onChat = {}, onMore = {}, moreMenu = {})
+                ShellInputDock(draft, { draft = it }, enabled = false, onChat = {}, onAttachments = {}, attachmentsMenu = {})
             }
         }
         compose.onNodeWithContentDescription("消息草稿").performTextInput("仅本地输入测试")
@@ -98,9 +103,129 @@ class ConversationShellTest {
         compose.onNodeWithTag("chat-send").assertIsNotEnabled()
     }
 
+    @Test fun headerAndComposerHaveDistinctActions() {
+        var headerClicks = 0
+        var attachmentClicks = 0
+        compose.setContent {
+            FoundationTheme {
+                Column {
+                    ConversationHeader("真实会话", {}, onMore = { headerClicks++ })
+                    ShellInputDock("", {}, false, {}, { attachmentClicks++ }, {})
+                }
+            }
+        }
+        compose.onNodeWithContentDescription("更多会话操作").performClick()
+        assertEquals(1, headerClicks)
+        assertEquals(0, attachmentClicks)
+        compose.onNodeWithContentDescription("添加附件").performClick()
+        assertEquals(1, headerClicks)
+        assertEquals(1, attachmentClicks)
+    }
+
+    @Test fun settingsShowFieldsBeforeExpandableDetailsAndKeepEdits() {
+        compose.setContent {
+            FoundationTheme {
+                var credential by remember { mutableStateOf("") }
+                var budget by remember { mutableStateOf("1000000") }
+                var calls by remember { mutableStateOf("10") }
+                androidx.compose.material3.AlertDialog(onDismissRequest = {},
+                    title = { Text("模型与预算") }, confirmButton = {}, text = {
+                        ProductSettingsFields(credential, { credential = it }, budget, { budget = it },
+                            calls, { calls = it }, "连接状态未读取", "未知结果仍保留占额")
+                    })
+            }
+        }
+        compose.onNodeWithTag("settings-credential").assertIsDisplayed()
+        compose.onNodeWithTag("settings-budget").assertIsDisplayed()
+        compose.onNodeWithTag("settings-calls").performScrollTo().assertIsDisplayed()
+        compose.onNodeWithTag("settings-calls").performTextReplacement("12")
+        compose.onNodeWithTag("settings-calls").assertTextContains("12")
+        compose.onNodeWithText("供应商：DeepSeek；端点固定为 api.deepseek.com。不会读取历史凭据或预算。").assertDoesNotExist()
+        compose.onNodeWithText("配置与计费说明").performScrollTo().performClick()
+        compose.onNodeWithText("供应商：DeepSeek；端点固定为 api.deepseek.com。不会读取历史凭据或预算。").performScrollTo().assertIsDisplayed()
+        compose.onNodeWithText("收起说明").performScrollTo().performClick()
+        compose.onNodeWithTag("settings-calls").performScrollTo().assertTextContains("12")
+    }
+
+    @Test fun headerMenuIsAnchoredAboveComposerAndDismissesIndependently() {
+        var popupBottom = Float.NaN
+        var composerTop = Float.NaN
+        compose.setContent {
+            FoundationTheme {
+                var more by remember { mutableStateOf(false) }
+                var attachment by remember { mutableStateOf(false) }
+                Column(Modifier.fillMaxSize()) {
+                    ConversationHeader("真实会话", {}, onMore = { more = true }, moreMenu = {
+                        androidx.compose.material3.DropdownMenu(more, { more = false }) {
+                            androidx.compose.material3.DropdownMenuItem(text = { Text("本地会话设置", Modifier.onGloballyPositioned {
+                                popupBottom = it.positionOnScreen().y + it.size.height
+                            }) }, onClick = { more = false })
+                        }
+                    })
+                    androidx.compose.foundation.layout.Spacer(Modifier.weight(1f))
+                    androidx.compose.foundation.layout.Box(Modifier.onGloballyPositioned { composerTop = it.positionOnScreen().y }) {
+                        ShellInputDock("", {}, false, {}, { attachment = true }, {
+                            androidx.compose.material3.DropdownMenu(attachment, { attachment = false }) {
+                                androidx.compose.material3.DropdownMenuItem(text = { Text("附件尚未接入") }, enabled = false, onClick = {})
+                            }
+                        })
+                    }
+                }
+            }
+        }
+        compose.onNodeWithContentDescription("更多会话操作").performClick()
+        compose.onNodeWithText("本地会话设置").assertIsDisplayed()
+        compose.runOnIdle {
+            org.junit.Assert.assertTrue("compare both windows in screen coordinates", popupBottom.isFinite() && composerTop.isFinite())
+            org.junit.Assert.assertTrue("header menu stays above composer", popupBottom < composerTop)
+        }
+        compose.onNodeWithText("附件尚未接入").assertDoesNotExist()
+        compose.onNodeWithText("本地会话设置").performClick()
+        compose.onNodeWithContentDescription("添加附件").performClick()
+        compose.onNodeWithText("本地会话设置").assertDoesNotExist()
+        compose.onNodeWithText("附件尚未接入").assertIsNotEnabled()
+    }
+
+    @Test fun realPinnedConversationsShareTopRailAndOrdinaryStaysBelow() {
+        compose.setContent {
+            FoundationTheme {
+                ConversationShell("chat", "主助手", "agent:a", listOf(
+                    ShellConversation("default", "主助手", main = true),
+                    ShellConversation("agent:a", "已打开助手", pinned = true),
+                    ShellConversation("group:g", "已打开群组", group = true),
+                ), {}, {}, {}) { open -> ConversationHeader("主助手", open) }
+            }
+        }
+        compose.onNodeWithContentDescription("打开工作空间导航").performClick()
+        val main = compose.onNodeWithTag("nav-chat").fetchSemanticsNode().boundsInRoot
+        val pinned = compose.onNodeWithTag("shell-conversation-agent:a").fetchSemanticsNode().boundsInRoot
+        val ordinary = compose.onNodeWithTag("shell-conversation-group:g").fetchSemanticsNode().boundsInRoot
+        org.junit.Assert.assertEquals("main and pinned share a horizontal rail", main.top, pinned.top, 1f)
+        org.junit.Assert.assertTrue("pinned follows main", pinned.left >= main.right)
+        org.junit.Assert.assertTrue("ordinary remains below the pinned rail", ordinary.top > pinned.bottom)
+        compose.onNodeWithTag("shell-conversation-agent:a").assertIsSelected()
+    }
+
+    @Test fun neutralComposerActionUsesThemeTextInsteadOfErrorInk() {
+        compose.setContent {
+            FoundationTheme(dark = false) {
+                ShellInputDock("", {}, false, {}, {}, {})
+            }
+        }
+        val pixels = compose.onNodeWithContentDescription("添加附件").captureToImage().toPixelMap()
+        val ink = FoundationTokens.light.text
+        var matching = 0
+        for (x in 0 until pixels.width) for (y in 0 until pixels.height) {
+            val p = pixels[x, y]
+            if (kotlin.math.abs(p.red - ink.red) < .015f && kotlin.math.abs(p.green - ink.green) < .015f &&
+                kotlin.math.abs(p.blue - ink.blue) < .015f) matching++
+        }
+        org.junit.Assert.assertTrue("a neutral composer action must render in neutral host text ink", matching > 0)
+    }
+
     @Test fun navigationHeadingsAndFailureAnnouncementRemainDiscoverable() {
         compose.setContent {
-            MaterialTheme {
+            FoundationTheme {
                 ConversationShell("chat", "测试标题", "default", emptyList(), {}, {}, {},
                     notice = "测试：置顶尚未保存") { open -> ConversationHeader("测试标题", open) }
             }

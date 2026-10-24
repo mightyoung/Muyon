@@ -1,0 +1,30 @@
+{
+  "base_sha": "7aa852ab8134545c6312cd71de5c12cd49f66b5b",
+  "source_sha": "d61be4b50c3f4877022008e5493ade1ba78a96ad",
+  "files": [
+    {
+      "path": "apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/chat/ChatScreen.kt",
+      "sha256": "bdbdc614e8d2423eb630e0b32dae6f18e2de7979f931daca71c92cb8a9b07891"
+    },
+    {
+      "path": "apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/ui/shell/ConversationShell.kt",
+      "sha256": "e85c13e2c96d785595e80120c3e38301458d1215757371518673c113117e4a91"
+    },
+    {
+      "path": "apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/ui/shell/ShellInputDock.kt",
+      "sha256": "b5661ff6c96c8cfc6b718e128a886c728da765a929c123020e27b92bb07ce086"
+    },
+    {
+      "path": "apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/ui/shell/ProductSettingsFields.kt",
+      "sha256": "90453bbed0ea67abbc4b1198092fbeabc6064df95626d536ead3a7f9ba66a42b"
+    },
+    {
+      "path": "apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/ui/shell/HostSetupScreen.kt",
+      "sha256": "2b9430b60765916416be3db9ea793fe7640a905fb7c2617898b88c241b70b77b"
+    },
+    {
+      "path": "apps/muyon_android/app/src/androidTest/kotlin/com/mightyoung/muyon/product/ui/shell/ConversationShellTest.kt",
+      "sha256": "36ed992d5c9d487cbabde421b828095a9a3104b092614b800bbbe18fb88a5f6f"
+    }
+  ]
+}
