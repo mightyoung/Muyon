@@ -66,6 +66,24 @@ Review dispositions (each item the reviewer declined to judge):
 | Existing store correctness/dependency behavior/external spec links | Existing types were inspected for local compatibility; no claim of a full dependency audit or external design verification. |
 | Changes after reviewed source SHA/publication | This final change is documentation only. Push, Draft PR and any later code changes require root's separate verification. |
 
-No push or PR yet; root retains publication responsibility. UI, native rendering, permission acquisition, document opening and live host mapping integration were not exercised. No denied operations or execution blockers remain.
+Implementation handoff occurred before publication; root retains publication responsibility. UI, native rendering, permission acquisition, document opening and live host mapping integration were not exercised. No denied operations or execution blockers remain.
 
 Ledger lives outside the worktree because .superpowers is not ignored; no shared ignore rules were changed.
+
+## Root publication follow-up — 2026-10-24
+
+Root rechecked the immutable source, finalized report, independent review artifact and clean worktree, then normally pushed `task/public-domain-projections-b1-20261024` at `dbb42f20ac26385497d0ed09d900e03bcb760e75`. No implementation changed after the reviewed source. GitHub commit-workflow lookup returned no runs at that SHA; this is not hosted CI success.
+
+Creating the requested Draft PR was **rejected by automatic approval review**. The action was GitHub create_pull_request for this B1 branch against develop; the stated reason cited the initial documentation-only task and alleged no product implementation PR authorization. The current parent delegation explicitly transferred B1 implementation and requested separate Draft PRs; that later scope was not reflected in the rejection. The tool returned isError and no PR URL; no PR creation was confirmed. Root did not retry via another tool or bypass the rejection. Draft PR creation remains blocked pending parent clarification of the approval scope; code/testing/push already completed are not rolled back or misreported as pending.
+
+Evidence SHA256 `b1-structural-red.log`: `7161dbfe3ed34842e25487fdf72de572b8def41398457060a8b0ee12cd65cf78`.
+
+Evidence SHA256 `b1-behavior-red.log`: `eb0cacdd033440c7f0391c67e659df5e6090ab38b8f1953d45b9d2de823c6764`.
+
+Evidence SHA256 `b1-public-green-regression.log`: `29599fc1b7ead134f55638292a8b9240ea6bae55c1d6cc17fb97d6a72a6e11c8`.
+
+Evidence SHA256 `b1-workspace.log`: `513dd19340c54580b70829a03a5289a4a0df243cf5ae25721fd39270f6ea5d2d`.
+
+Evidence SHA256 `b1-clippy.log`: `7d121e1cd3f179c0555368b45c576a4ad6665e20d1fc6cb04466485352f272b4`.
+
+Evidence SHA256 `b1-independent-review-18a4e8b7.md`: `fb013e7eec84df74acfbdc56af5316b4a1e8c9380ef0334a4fd8ff8eee9fa9fb`.
