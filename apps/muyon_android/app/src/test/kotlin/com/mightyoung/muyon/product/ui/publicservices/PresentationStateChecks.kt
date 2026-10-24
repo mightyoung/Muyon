@@ -91,6 +91,28 @@ fun main() {
         check(outcome(event(EventKind.DraftEdit, EventPayload.Edit("draft:1", "title", "new")), a = a) == UiEventOutcome.DraftUpdated("draft:1"))
         check(outcome(event(EventKind.DomainRequest, EventPayload.Request("act:submit")), a = a) == UiEventOutcome.Rejected)
     }
+    checkCase("current access cannot elevate an originally read-only validated plan") {
+        val original = input().copy(nodes = input().nodes.map { n -> n.copy(eventBindings = n.eventBindings.filter { it.eventKind != EventKind.DomainRequest }) })
+        val p = validated(original, context().copy(actionAllowed = false))
+        val view = projectPresentation(p, state(), BusinessSnapshot(snap, listOf(source)), access())
+        check(view.plan != null && !view.domainActionsEnabled)
+        check(outcome(p = p) == UiEventOutcome.AppliedLocal)
+        check(outcome(event(EventKind.DomainRequest, EventPayload.Request("act:submit")), p = p) == UiEventOutcome.Rejected)
+    }
+    checkCase("state display budget and malformed strings fail closed") {
+        val p = validated()
+        val snapshot = BusinessSnapshot(snap, listOf(source))
+        val atLimit = state().copy(viewState = (0 until 256).associate { "key:$it" to "x" })
+        check(projectPresentation(p, atLimit, snapshot, access()).plan != null)
+        check(projectPresentation(p, state(), snapshot, access()).domainActionsEnabled)
+        for (s in listOf(state().copy(viewState = (0..256).associate { "key:$it" to "x" }),
+            state().copy(viewState = mapOf("view:expand" to "x".repeat(65537))),
+            state().copy(viewState = mapOf("view:expand" to "\uD800")),
+            state().copy(draftStateRef = ""))) {
+            hidden(projectPresentation(p, s, snapshot, access()))
+            check(outcome(s = s) == UiEventOutcome.Rejected)
+        }
+    }
     checkCase("presentation snapshots copy mutable inputs and preserve independent axes") {
         val map = linkedMapOf("view:expand" to "false")
         val sources = mutableListOf(source)
