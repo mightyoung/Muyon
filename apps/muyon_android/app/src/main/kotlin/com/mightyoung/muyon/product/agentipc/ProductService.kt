@@ -5,6 +5,9 @@ import android.content.Intent
 import android.os.*
 import com.mightyoung.muyon.productbridge.ProductCore
 import com.mightyoung.muyon.productbridge.ProductException
+import com.mightyoung.muyon.productbridge.DevelopmentDraftHost
+import com.mightyoung.muyon.product.development.DevelopmentDraftHandle
+import com.mightyoung.muyon.product.development.DevelopmentDraftPort
 import android.util.Base64
 import com.mightyoung.muyon.product.chat.ProductChatPort
 import com.mightyoung.muyon.product.chat.ProductChatRuntime
@@ -39,6 +42,10 @@ open class ProductService : Service() {
     private val planOwners = java.util.concurrent.ConcurrentHashMap<String, String>()
     private val toolPlans = java.util.concurrent.ConcurrentHashMap.newKeySet<String>()
     private val readerOwners = mutableMapOf<String, String>()
+    private val developmentHandles = mutableMapOf<DevelopmentDraftHost, String>()
+    private fun revokeDevelopmentHost(host: DevelopmentDraftHost) {
+        try { host.revoke() } finally { host.destroy() }
+    }
     @Volatile private var stopped = false
 
     override fun onCreate() {
@@ -57,6 +64,10 @@ open class ProductService : Service() {
             override fun prepareScoped(conversation: String, text: String, search: Boolean, count: Int, session: String, project: String?): JSONObject {
                 check(!stopped && clients.containsValue(session))
                 return data(open(false).agentPrepareScoped(conversation,text,search,count.toUInt(),session,project))
+            }
+            override fun prepareDevelopmentScoped(conversation: String, text: String, session: String, project: String?): JSONObject = synchronized(this@ProductService) {
+                check(!stopped && clients.containsValue(session))
+                data(open(false).agentPrepareDevelopmentScoped(conversation, text, session, project))
             }
             override fun confirm(request: String, configuration: String) = data(open(false).agentConfirm(request, configuration))
             override fun claim(request: String, configuration: String, generation: String) = data(open(false).agentClaim(request, configuration, generation))
@@ -149,6 +160,33 @@ open class ProductService : Service() {
                 data(open(false).localDraftSave(conversation, project, namespace, draft, generation, revision, attempt, exportedMemoryRevision, archive))
             override fun lookup(conversation: String, project: String?, namespace: String, draft: String, attempt: String) =
                 data(open(false).localDraftLookupSave(conversation, project, namespace, draft, attempt))
+        }, developmentPort = object : DevelopmentDraftPort {
+            override fun open(session: String, conversation: String, project: String?, draftId: String?, create: Boolean): DevelopmentDraftHandle = synchronized(this@ProductService) {
+                check(!stopped && clients.containsValue(session))
+                val host = DevelopmentDraftHost.open(open(false), conversation, project, draftId, create)
+                developmentHandles[host] = session
+                object : DevelopmentDraftHandle {
+                    private fun invoke(action: () -> String): JSONObject = synchronized(this@ProductService) {
+                        check(!stopped && clients.containsValue(session) && developmentHandles[host] == session)
+                        nativeData(action()) as JSONObject
+                    }
+                    override fun snapshot() = invoke { host.snapshot() }
+                    override fun setProjectName(name: String, expectedRevision: String) = invoke { host.setProjectName(name, expectedRevision) }
+                    override fun addItem(kind: String, text: String, expectedRevision: String) = invoke { host.addItem(kind, text, expectedRevision) }
+                    override fun editItem(itemId: String, text: String, expectedRevision: String) = invoke { host.editItem(itemId, text, expectedRevision) }
+                    override fun chooseNewProject(expectedRevision: String) = invoke { host.chooseNewProject(expectedRevision) }
+                    override fun prepareProject() = invoke { host.prepareProject() }
+                    override fun confirmProject(planId: String, digest: String) = invoke { host.confirmProject(planId, digest) }
+                    override fun recoverOriginal() = invoke { host.recoverOriginal() }
+                    override fun recoverProposal(request: String) = invoke { host.recoverProposal(request) }
+                    override fun previewProposal(request: String, session: String, generation: String) = invoke { host.previewProposal(request, session, generation) }
+                    override fun acceptProposal(request: String, session: String, generation: String, digest: String) = invoke { host.acceptProposal(request, session, generation, digest) }
+                    override fun rejectProposal(request: String, session: String, generation: String, digest: String) = invoke { host.rejectProposal(request, session, generation, digest) }
+                    override fun close() = synchronized(this@ProductService) {
+                        if (developmentHandles.remove(host) != null) revokeDevelopmentHost(host)
+                    }
+                }
+            }
         })
     }
     override fun onBind(intent: Intent): IBinder = messenger.binder
@@ -171,6 +209,9 @@ open class ProductService : Service() {
     @Synchronized private fun releaseClient(binder: IBinder, session: String) {
         if (clients[binder] != session) return
         clients.remove(binder)
+        developmentHandles.filterValues { it == session }.keys.toList().forEach { host ->
+            developmentHandles.remove(host); runCatching { revokeDevelopmentHost(host) }
+        }
         deaths.remove(binder)?.let { recipient -> runCatching { binder.unlinkToDeath(recipient, 0) } }
         chat.releaseSession(session)
         planOwners.filterValues { it == session }.keys.toList().forEach { plan ->
@@ -221,12 +262,17 @@ open class ProductService : Service() {
                     error("stale_session", "rejected")
                 } else {
                     val session = clients.getValue(reply.binder)
-                    if (method in setOf("agent_availability", "chat_configure", "chat_prepare", "chat_confirm", "chat_lookup", "chat_cancel", "chat_budget", "chat_scope", "chat_snapshot", "chat_card_candidates", "chat_setup_draft", "chat_tool", "agent_workflow", "workflow_prepare")) {
+                    if (method in setOf("development_open", "development_update", "development_prepare_project", "development_confirm_project", "development_lookup_original", "development_lookup_proposal", "development_preview_proposal", "development_accept_proposal", "development_reject_proposal", "chat_prepare_development", "chat_scope_current", "agent_availability", "chat_configure", "chat_prepare", "chat_confirm", "chat_lookup", "chat_cancel", "chat_budget", "chat_scope", "chat_snapshot", "chat_card_candidates", "chat_setup_draft", "chat_tool", "agent_workflow", "workflow_prepare")) {
                         val callback: (JSONObject) -> Unit = { result -> handler.post {
                             if (!stopped && clients[reply.binder] == session) send(reply, request,
                                 JSONObject().put("status", "ok").put("data", result))
                         } }
                         when (method) {
+                            "development_open", "development_update", "development_prepare_project", "development_confirm_project", "development_lookup_original", "development_lookup_proposal" -> chat.development(session, method, payload, callback)
+                            "development_preview_proposal", "development_accept_proposal", "development_reject_proposal" -> chat.developmentProposal(session, method, payload, callback)
+                            "chat_prepare_development" -> chat.prepareDevelopment(session, payload.getString("conversation_id"), payload.getString("text"),
+                                payload.optString("project_id").takeIf { it.isNotEmpty() && it != "null" },
+                                payload.getLong("scope_generation").also { check(it >= 0 && (payload.opt("scope_generation") is Int || payload.opt("scope_generation") is Long)) }, callback)
                             "agent_availability" -> chat.availability(nativeData(open(false).agentAvailability()) as JSONObject, callback)
                             "agent_workflow" -> chat.workflow(session, payload.getString("conversation_id"), payload.getJSONObject("operation"), callback)
                             "workflow_prepare" -> chat.workflowPrepare(session, payload.getString("conversation_id"), payload.getString("run_id"), callback)
@@ -249,6 +295,7 @@ open class ProductService : Service() {
                             "chat_cancel" -> chat.cancel(session, payload.getString("request_id"), callback)
                             "chat_budget" -> chat.budget(callback)
                             "chat_scope" -> chat.updateScope(session, payload.optString("project_id").takeIf { it.isNotEmpty() && it != "null" }, callback)
+                            "chat_scope_current" -> chat.currentScope(session, payload.optString("project_id").takeIf { it.isNotEmpty() && it != "null" }, callback)
                             "chat_tool" -> when (payload.getString("action")) {
                                 "review_read" -> chat.reviewRead(session, payload.getString("request_id"), callback)
                                 "approve_read" -> chat.approveRead(session, payload.getString("request_id"), payload.getString("digest"), callback)
@@ -341,12 +388,15 @@ open class ProductService : Service() {
         } catch (_: RemoteException) { /* The original intent remains in Rust, never resend. */ }
     }
     override fun onDestroy() {
-        stopped = true
+        synchronized(this@ProductService) { stopped = true }
         val drained = java.util.concurrent.CountDownLatch(1)
         retiringOwners[epoch] = drained
         handler.post {
             deaths.forEach { (binder, recipient) -> runCatching { binder.unlinkToDeath(recipient, 0) } }; deaths.clear()
             clients.clear(); planOwners.clear(); toolPlans.clear()
+            synchronized(this@ProductService) {
+                developmentHandles.keys.toList().forEach { runCatching { revokeDevelopmentHost(it) } }; developmentHandles.clear()
+            }
             readerOwners.keys.toList().forEach { runCatching { core?.closeAttachment(it) } }; readerOwners.clear()
             chat.close()
             fun drainAndClose() {

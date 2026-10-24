@@ -1,5 +1,8 @@
 //! Thin product bridge. Models have no route to `confirm_user_plan`.
 //! The private Android Service calls that method only from the visible review action.
+pub mod command_port;
+pub mod development_host;
+pub mod development_session;
 use muyon_core::agent::owner::{AgentOwner, Settings as AgentSettings};
 use muyon_core::agent::tools::{HostPreparedSuggestion, PreparedSuggestion, ToolsContext};
 use muyon_core::{
@@ -413,6 +416,52 @@ impl ProductCore {
             .map_err(agent_error)?,
         )
     }
+    /// Explicit development mode advertises only the local draft-proposal tool.
+    /// It retains the original request owner, budget proof and visible-send gates.
+    pub fn agent_prepare_development_scoped(
+        &self,
+        conversation: String,
+        text: String,
+        session: String,
+        project: Option<String>,
+    ) -> Result<String, ProductError> {
+        use muyon_core::agent::workflow::{RunLedger, RunScope};
+        let mut state = self.state.lock().map_err(|_| unavailable())?;
+        let scope = RunScope::current(&state.store, &session, &conversation, project.as_deref())
+            .map_err(agent_error)?;
+        if state.workflow.is_none() {
+            state.workflow = Some(
+                RunLedger::open(&self.workflow_path, &self.workspace, &self.epoch)
+                    .map_err(agent_error)?,
+            );
+        }
+        let owner = state
+            .agent
+            .as_ref()
+            .ok_or_else(|| agent_error("agent_not_configured"))?;
+        for request in state
+            .workflow
+            .as_ref()
+            .ok_or_else(unavailable)?
+            .remote_requests(&scope)
+            .map_err(agent_error)?
+        {
+            for observation in owner.request_chain(&request).map_err(agent_error)? {
+                if matches!(
+                    observation.status.as_str(),
+                    "reserved" | "unknown" | "tool_pending"
+                ) {
+                    return Err(agent_error("conversation_original_outcome_required"));
+                }
+            }
+        }
+        encode(
+            &owner
+                .prepare_chat_restricted(&conversation, &text, None, &["development_draft_propose"])
+                .map_err(agent_error)?,
+        )
+    }
+
     pub fn agent_workflow(
         &self,
         action: String,

@@ -11,6 +11,7 @@ trap 'rm -rf "$output_dir"' EXIT
   "$repo_root/apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/chat/persistence/HostDraftSaveState.kt" \
   "$repo_root/apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/chat/persistence/NativeLocalDraftCodec.kt" \
   "$repo_root/apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/chat/ProductChatRuntime.kt" \
+  "$repo_root/apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/development/DevelopmentController.kt" \
   "$repo_root/apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/chat/ProductSendGate.kt" \
   "$repo_root/apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/chat/ProductHttpsTransport.kt" \
   "$repo_root/apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/chat/persistence/HostLocalDraftSession.kt" \

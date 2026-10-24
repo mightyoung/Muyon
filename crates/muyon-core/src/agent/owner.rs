@@ -348,7 +348,7 @@ impl AgentOwner {
             messages.push(json!({"role":"assistant","content":answer}));
         }
         messages.push(json!({"role":"user","content":text}));
-        let mut catalog = super::tools::catalog_json()?;
+        let mut catalog = super::tools::catalog_json_for(allowed.is_some())?;
         if let Some(names) = allowed {
             let tools = catalog.as_array_mut().ok_or("tool_catalog_invalid")?;
             for name in names {
