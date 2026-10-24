@@ -1,4 +1,5 @@
-//! DM01 pure conversation drafts. No model, storage, authorization or host implementation.
+//! Development conversation drafts. Persistence uses the host-owned DraftStore;
+//! model suggestions and saved drafts never confer business execution authority.
 use crate::{
     contract::{
         normalize_text, CommandEnvelope, ContractError, ExecutionResult, ExecutionStatus,
@@ -153,6 +154,10 @@ impl ConversationDraft {
     pub fn items(&self) -> &[DraftItem] {
         &self.content.items
     }
+    /// Original owner identity for review/recovery; possession is not authority.
+    pub fn project_command(&self) -> Option<&CommandEnvelope> {
+        self.content.submission.as_ref().map(|s| &s.command)
+    }
 
     pub fn envelope(&self) -> Result<DraftEnvelope, ContractError> {
         Ok(DraftEnvelope {
@@ -194,6 +199,56 @@ impl ConversationDraft {
         next.validate()?;
         *self = next;
         Ok(())
+    }
+
+    /// Persist the complete envelope and advance only its confirmed storage baseline.
+    /// On an uncertain save, keep the same intent/envelope for lookup or exact retry.
+    pub fn persist(
+        &mut self,
+        store: &crate::services::draft_store::DraftStore,
+        intent: &IntentId,
+    ) -> Result<SaveAck, ContractError> {
+        let ack = store.save(&self.envelope()?, intent)?;
+        self.acknowledge_save(intent, &ack)?;
+        Ok(ack)
+    }
+
+    pub fn load_persisted(
+        store: &crate::services::draft_store::DraftStore,
+        draft_id: &str,
+    ) -> Result<Option<Self>, ContractError> {
+        store
+            .load(OWNER_PLUGIN_ID, draft_id)?
+            .map(|envelope| {
+                let raw =
+                    serde_json::to_string(&envelope).map_err(|_| ContractError::InvalidPayload)?;
+                Self::restore(&raw, &envelope.draft_ref.scope)
+            })
+            .transpose()
+    }
+
+    /// Commit the dispatch marker before returning the original command to the
+    /// trusted confirmation host. Save failure returns no command. A process exit
+    /// after this commit is recovered through the original owner, never resubmission.
+    pub fn begin_persisted_project_dispatch(
+        &mut self,
+        store: &crate::services::draft_store::DraftStore,
+        save_intent: &IntentId,
+    ) -> Result<CommandEnvelope, ContractError> {
+        let mut next = self.clone();
+        let command = next.begin_project_dispatch()?;
+        let outcome = store.save_with_outcome(&next.envelope()?, save_intent)?;
+        let (ack, newly_saved) = match outcome {
+            crate::services::draft_store::SaveOutcome::Committed(ack) => (ack, true),
+            crate::services::draft_store::SaveOutcome::Existing(ack) => (ack, false),
+        };
+        next.acknowledge_save(save_intent, &ack)?;
+        *self = next;
+        if newly_saved {
+            Ok(command)
+        } else {
+            Err(ContractError::IntentConflict)
+        }
     }
 
     pub fn preview(

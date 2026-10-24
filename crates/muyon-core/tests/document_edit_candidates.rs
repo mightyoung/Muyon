@@ -444,6 +444,10 @@ fn copy_and_edited_candidates_share_the_same_total_byte_budget() {
     // never loaded as plans, authority, engine output or validation receipts.
     db.exec("WITH RECURSIVE n(i) AS (VALUES(1) UNION ALL SELECT i+1 FROM n WHERE i<18) INSERT INTO edit_candidate_intents SELECT 'quota-'||i,binding_json,source_json,request_json,state,authority_json,expires_ms,cancel_requested,hex(zeroblob(8388608)),NULL,NULL FROM edit_candidate_intents,n WHERE intent_id='quota-template'",&[]).unwrap();
     db.exec("INSERT INTO edit_candidate_intents SELECT 'quota-final',binding_json,source_json,request_json,state,authority_json,expires_ms,cancel_requested,hex(zeroblob(6291456)),NULL,NULL FROM edit_candidate_intents WHERE intent_id='quota-template'",&[]).unwrap();
+    // Bulk fixture construction is outside the copy authorization lifetime.
+    // Keep the same short production expiry; authorize the exercised operation
+    // only after writing the synthetic quota rows.
+    let a = access(&s, 1, "copy-quota", 1, "epoch-1");
     let copy = DocumentEditGateway::initialize_trusted(&s).unwrap();
     let b = copy.prepare_copy(&a, "copy-over-budget").unwrap().binding;
     copy.confirm_trusted(

@@ -10,6 +10,8 @@ mod blobs;
 mod business;
 #[path = "../src/contract.rs"]
 mod contract;
+#[path = "../src/development_drafts.rs"]
+mod development_drafts;
 #[path = "../src/documents/mod.rs"]
 mod documents;
 #[path = "../src/group_runtime/store.rs"]
@@ -20,6 +22,12 @@ mod research;
 mod review_lifecycle;
 #[path = "../src/sqlite.rs"]
 mod sqlite;
+#[path = "../src/services"]
+mod services {
+    pub mod draft_store;
+    pub mod drafts;
+    pub mod types;
+}
 use business::BusinessStore;
 use contract::*;
 use group_runtime_store::*;

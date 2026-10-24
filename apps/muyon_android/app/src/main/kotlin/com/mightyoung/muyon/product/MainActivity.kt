@@ -23,6 +23,7 @@ import com.mightyoung.muyon.product.agentipc.ProductClient
 import com.mightyoung.muyon.product.supplier.SupplierScreen
 import com.mightyoung.muyon.product.research.ResearchScreen
 import com.mightyoung.muyon.product.chat.ChatScreen
+import com.mightyoung.muyon.product.development.DevelopmentScreen
 import com.mightyoung.muyon.product.agents.AgentCatalog
 import com.mightyoung.muyon.product.agents.AgentLibraryScreen
 import com.mightyoung.muyon.product.agents.visibleName
@@ -86,6 +87,7 @@ class MainActivity : ComponentActivity() {
                     "agents" -> "智能体与群组"
                     "configuration" -> "配置预览"
                     "documents" -> "公共文档"
+                    "development" -> "开发草稿"
                     else -> conversationTitle
                 }
                 ConversationShell(tab, title, conversationKey, conversations,
@@ -139,6 +141,15 @@ class MainActivity : ComponentActivity() {
                                 "supplier" -> SupplierScreen(client)
                                 "research" -> ResearchScreen(client)
                                 "documents" -> DocumentCapabilitiesScreen { tab = "research" }
+                                "development" -> {
+                                    val project = getSharedPreferences("muyon_product_research_v2", 0).getString("project_id", null)
+                                    val preference = if (conversationKey == "default") "conversation" else "conversation:$conversationKey"
+                                    val conversation = getSharedPreferences("product-chat-state", 0).getString(preference, null)?.takeIf { it.isNotBlank() }
+                                    if (conversation == null) {
+                                        Text("开发草稿缺少已核实的会话身份，请先打开对应对话。", Modifier.padding(20.dp))
+                                        TextButton(onClick = { tab = "chat" }) { Text("返回对话") }
+                                    } else DevelopmentScreen(client, conversation, project)
+                                }
                                 "configuration" -> {
                                     val project = getSharedPreferences("muyon_product_research_v2", 0).getString("project_id", null)
                                     val preference = if (conversationKey == "default") "conversation" else "conversation:$conversationKey"
