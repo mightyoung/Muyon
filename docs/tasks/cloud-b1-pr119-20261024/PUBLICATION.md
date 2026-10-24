@@ -53,3 +53,17 @@ Draft 创建已成功，没有待解除的创建审批阻断。创建前确认�
 截至此阶段未有已报告失败步骤，未手动取消/dispatch/重跑。进行中通用job日志正常读取返回BlobNotFound时只记录可观察性限制，不重复强取，也不把404当CI测试失败。B1已完成Rust job日志通过现有GitHub connector正常读取，避免从artifact文件名中的merge SHA误判实际head checkout。
 
 以上是阶段快照，不把in_progress、编译或Linux自跳过计为完成验收。两路只读监控仍在继续，最终终态将追加记录；产品分支head不会为更新这份报告而改变。
+
+## PR122 通用 CI 终态补记
+
+[40049039732](https://github.com/mightyoung/Muyon/actions/runs/40049039732) 已于2026-10-24T01:38:56Z completed / success，精确head为 `a88b5abaf22590c57d745b6ad1383d0309bc864b`，该head查询到的唯一run。laya-offline及ci两个job、全部可见steps均success；没有失败、取消或重跑。
+
+主日志 `CI SUMMARY: OK (analyze 8/8, test 8/8 suites)`；八suite合计4204次通过执行、207次skip。它不是唯一测试定义数；Linux字体/平台/模型条件自跳过不构成设备、模型运行或视觉验收。独立Laya的17项和8/4/8/9 synthetic检查不混入Flutter合计。
+
+只读监控另核PR122仍OPEN Draft，原PR119仍为b08b00bd；没有编辑PR或原owner分支。产品workflow未触发的原因与验收限制保持上一节所述，不把通用CI成功记成产品CI成功。
+
+终态证据保存在工作区 `/workspace/muyon-contracts-evidence/pr119-fix-ci-terminal.json` / `.md`；未提交完整大日志或下载artifact/依赖。进行中日志一次404仅为暂不可读，终态后通过现有connector正常读取，未配凭据或强取signed blob。B1的两条通用CI仍继续跟踪，阶段记录不宣称全部结束。
+
+Evidence SHA256 `pr119-fix-ci-terminal.json`: `e0862030def84037a93e586d4f885ba16b5ef7ceb48ae647c525ae2229bb2dc2`.
+
+Evidence SHA256 `pr119-fix-ci-terminal.md`: `35375646b47f0ae8e24bb8951527e91f99663699475725b1223ba90fc71a1d87`.
