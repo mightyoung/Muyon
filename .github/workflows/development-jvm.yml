@@ -1,0 +1,73 @@
+name: Development pure JVM checks
+
+on:
+  push:
+    branches: [develop, lab/development-jvm-ci-20261025]
+    paths: &jvm_paths
+      - '.github/workflows/development-jvm.yml'
+      - 'apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/chat/ProductChatRuntime.kt'
+      - 'apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/chat/ProductSendGate.kt'
+      - 'apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/chat/ProductHttpsTransport.kt'
+      - 'apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/development/DevelopmentController.kt'
+      - 'apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/development/DevelopmentUiState.kt'
+      - 'apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/chat/persistence/HostDraftSaveState.kt'
+      - 'apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/chat/persistence/NativeLocalDraftCodec.kt'
+      - 'apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/chat/persistence/HostLocalDraftSession.kt'
+      - 'apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/agents/setup/BotSetupDraft.kt'
+      - 'apps/muyon_android/app/src/main/kotlin/com/mightyoung/muyon/product/agents/setup/SetupDraftArchive.kt'
+      - 'apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/development/DevelopmentControllerChecks.kt'
+      - 'apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/development/DevelopmentUiStateChecks.kt'
+      - 'apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/development/run-offline.sh'
+  pull_request:
+    branches: [develop]
+    paths: *jvm_paths
+
+permissions:
+  contents: read
+
+concurrency:
+  group: development-jvm-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: false
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  development-jvm:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Record exact source and provision checksum-pinned JVM tools only
+        env:
+          EXPECTED_SOURCE: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$EXPECTED_SOURCE"
+          printf 'source_sha=%s\n' "$EXPECTED_SOURCE"
+          tools_dir="$RUNNER_TEMP/development-jvm-tools"
+          mkdir -p "$tools_dir"
+          curl --proto '=https' --tlsv1.2 --fail --location https://github.com/JetBrains/kotlin/releases/download/v2.2.20/kotlin-compiler-2.2.20.zip -o "$tools_dir/kotlin.zip"
+          printf '81f0264c9073b5cbbdb3ff8418cf2c5dac076879fc156fa1a6462f5a5acc4420  %s\n' "$tools_dir/kotlin.zip" | sha256sum --check
+          curl --proto '=https' --tlsv1.2 --fail --location https://repo.maven.apache.org/maven2/org/json/json/20250517/json-20250517.jar -o "$tools_dir/json-20250517.jar"
+          printf '3ea61b2a06e31edf1c91134fe9106b0ebb16628be169f3db75bc7a2b06b45796  %s\n' "$tools_dir/json-20250517.jar" | sha256sum --check
+          unzip -q "$tools_dir/kotlin.zip" -d "$tools_dir"
+          java -version
+          "$tools_dir/kotlinc/bin/kotlinc" -version
+      - name: Run only DevelopmentControllerChecks and DevelopmentUiStateChecks
+        run: |
+          set -euo pipefail
+          export KOTLINC="$RUNNER_TEMP/development-jvm-tools/kotlinc/bin/kotlinc"
+          export JSON_JAR="$RUNNER_TEMP/development-jvm-tools/json-20250517.jar"
+          bash apps/muyon_android/app/src/test/kotlin/com/mightyoung/muyon/product/development/run-offline.sh | tee "$RUNNER_TEMP/development-jvm.log"
+          grep -F 'PASS development controller/runtime:' "$RUNNER_TEMP/development-jvm.log"
+          grep -F '6/6 PASS' "$RUNNER_TEMP/development-jvm.log"
+          git diff --exit-code
