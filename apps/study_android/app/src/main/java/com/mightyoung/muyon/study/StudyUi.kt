@@ -44,8 +44,8 @@ import java.time.LocalDate
     val tasks=state.items("tasks")
     val settings=state.optJSONObject("settings")?:JSONObject()
     val dark=settings.optBoolean("dark",false)
-    StudyTheme(dark){Scaffold(bottomBar={NavigationBar{
-        listOf("今天","学习","项目","收件箱","我的").forEachIndexed{i,label->NavigationBarItem(selected=tab==i,onClick={tab=i;showSchedule=false;attemptId=null},icon={GeneratedIcon(listOf(R.drawable.gpt_today,R.drawable.gpt_learning,R.drawable.gpt_projects,R.drawable.gpt_inbox,R.drawable.gpt_profile)[i],null)},label={Text(label)})}
+    StudyTheme(dark){Scaffold(bottomBar={NavigationBar(containerColor=MaterialTheme.colorScheme.surface){
+        listOf("今天","学习","项目","收件箱","我的").forEachIndexed{i,label->NavigationBarItem(colors=NavigationBarItemDefaults.colors(selectedIconColor=MaterialTheme.colorScheme.primary,selectedTextColor=MaterialTheme.colorScheme.primary,indicatorColor=MaterialTheme.colorScheme.secondaryContainer),selected=tab==i,onClick={tab=i;showSchedule=false;attemptId=null},icon={GeneratedIcon(listOf(R.drawable.gpt_today,R.drawable.gpt_learning,R.drawable.gpt_projects,R.drawable.gpt_inbox,R.drawable.gpt_profile)[i],null)},label={Text(label)})}
     }}){padding->Column(Modifier.padding(padding).fillMaxSize()){
         if(busy)LinearProgressIndicator(Modifier.fillMaxWidth())
         Text(notice,Modifier.fillMaxWidth().padding(horizontal=20.dp,vertical=6.dp),style=MaterialTheme.typography.labelSmall,color=MaterialTheme.colorScheme.onSurfaceVariant)

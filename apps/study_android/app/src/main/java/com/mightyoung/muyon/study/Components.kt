@@ -19,8 +19,8 @@ val Terracotta=Color(0xFFA84B27)
 val Paper=Color(0xFFF4F1EA)
 val Ink=Color(0xFF2B2621)
 @Composable fun StudyTheme(dark:Boolean=false,content: @Composable () -> Unit) {
-    val colors=if(dark) darkColorScheme(primary=Color(0xFFE8946D),background=Color(0xFF1C1917),surface=Color(0xFF26221F),onSurface=Color(0xFFEFE9E1))
-    else lightColorScheme(primary=Terracotta,background=Paper,surface=Color(0xFFFBF9F4),surfaceVariant=Color(0xFFECE7DD),onSurface=Ink,onBackground=Ink,outlineVariant=Color(0xFFE3DDD0))
+    val colors=if(dark) darkColorScheme(primary=Color(0xFFE8946D),background=Color(0xFF1C1917),surface=Color(0xFF26221F),onSurface=Color(0xFFEFE9E1),secondaryContainer=Color(0xFF55382B),onSecondaryContainer=Color(0xFFF3C7AF),surfaceTint=Color(0xFFE8946D),primaryContainer=Color(0xFF5B321F),onPrimaryContainer=Color(0xFFF8DECA),secondary=Color(0xFFDABBA6),tertiary=Color(0xFFBBC89B),onSurfaceVariant=Color(0xFFD6C5B5),surfaceContainerLowest=Color(0xFF171411),surfaceContainerLow=Color(0xFF211D19),surfaceContainer=Color(0xFF2A231E),surfaceContainerHigh=Color(0xFF322A24),surfaceContainerHighest=Color(0xFF3C3129))
+    else lightColorScheme(primary=Terracotta,background=Paper,surface=Color(0xFFFBF9F4),surfaceVariant=Color(0xFFECE7DD),onSurface=Ink,onBackground=Ink,outlineVariant=Color(0xFFE3DDD0),secondaryContainer=Color(0xFFEED9CB),onSecondaryContainer=Terracotta,surfaceTint=Terracotta,primaryContainer=Color(0xFFF5DFD0),onPrimaryContainer=Color(0xFF522B19),secondary=Color(0xFF7D5D4C),tertiary=Color(0xFF6A744B),onSurfaceVariant=Color(0xFF74675D),surfaceContainerLowest=Color.White,surfaceContainerLow=Color(0xFFF7F3EB),surfaceContainer=Color(0xFFF1EADF),surfaceContainerHigh=Color(0xFFEDE5D9),surfaceContainerHighest=Color(0xFFE7DFD3))
     MaterialTheme(colorScheme=colors,typography=Typography(headlineLarge=androidx.compose.ui.text.TextStyle(fontFamily=FontFamily.Serif,fontSize=30.sp),headlineSmall=androidx.compose.ui.text.TextStyle(fontFamily=FontFamily.Serif,fontSize=24.sp)),content=content)
 }
 @OptIn(ExperimentalLayoutApi::class)

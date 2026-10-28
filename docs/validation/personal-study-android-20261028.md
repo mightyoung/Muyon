@@ -38,3 +38,11 @@ APK 字节数：90739683；SHA-256：`0169d63ef224ff63383f8b44f7aabc91bda22ac0bb
 ## 私人资源与发布范围
 
 GitHub 仅发布程序源码和 GPT 生成图标；用户提供的 MEM 题库不进入公开提交。个人 APK 保留题库，源码构建可通过 `MUYON_MEM_PAPERS` 本机配置。模拟器全局 System UI 出现 ANR，设备界面验收未通过；不将构建成功视作设备验收。
+
+## 1.0.2 与 Android 运行时检查
+
+统一导航、对话框与深色模式的暖色容器；18 项 JVM 测试通过，lint 0 错误、16 警告，应用 APK 构建成功。1.0.2 APK 为 90,998,809 字节，SHA-256 `264995352d7acecf04189ad6f46eb4d1676bf8d1d44e0a99dd7f07286e0d37e9`，沿用原签名。
+
+Android 8.0 软件模拟器已识别并启动 1.0.1，人工截图确认五个 GPT 导航图标、新增和语音图标实际显示，Rust 状态加载成功。相同原生库及模型的独立 NativeSmokeTest 3/3 通过，耗时 72.989 秒：真实 Vosk SDK 成功加载完整中文模型、7 个 MEM 题包经 Android JNI 导入并保留作答、模型声学权重确实存在。
+
+Compose 界面自动化未通过：先出现 Compose-Espresso idling 超时，随后在同一测试类下一用例出现 `updateRootConstraints called while measuring`。原先两个非 UI 用例也使用 Activity 规则，拆分后原生测试独立通过；这不表示界面问题已解决。模拟器无 KVM 且发生全局 System UI ANR，尚不能确认界面超时的最终根因。真机 UI 流程、麦克风识别准确率、通知、省电策略及个人账号同步仍需验收。

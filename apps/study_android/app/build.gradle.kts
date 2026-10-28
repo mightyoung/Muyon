@@ -5,7 +5,7 @@ android {
     namespace = "com.mightyoung.muyon.study"
     compileSdk = 36
     buildToolsVersion = "35.0.0"
-    defaultConfig { applicationId = "com.mightyoung.muyon.study"; minSdk = 26; targetSdk = 36; versionCode = 2; versionName = "1.0.1"; ndk { abiFilters += listOf("arm64-v8a", "x86_64") }; testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner" }
+    defaultConfig { applicationId = "com.mightyoung.muyon.study"; minSdk = 26; targetSdk = 36; versionCode = 3; versionName = "1.0.2"; ndk { abiFilters += listOf("arm64-v8a", "x86_64") }; testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner" }
     buildFeatures { compose = true; buildConfig = true }
     androidResources { noCompress += "zip" }
     compileOptions { sourceCompatibility = JavaVersion.VERSION_17; targetCompatibility = JavaVersion.VERSION_17 }
