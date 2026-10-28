@@ -1,0 +1,1 @@
+<bitmap xmlns:android="http://schemas.android.com/apk/res/android" android:src="@drawable/gpt_launcher" android:filter="true" android:antialias="true" android:gravity="fill" />
