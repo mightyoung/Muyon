@@ -66,8 +66,8 @@ Files: study app adapters/{Calendar,Drive,Maimemo,DeepSeek,Reminders,Speech}.
 
 ## Task 6: Whole-app verification and delivery
 - [x] Run Rust workspace tests, Android unit checks, lint and APK assembly.
-- [ ] Complete device interaction checks; software emulator cold boot is still pending.
+- [x] Complete emulator checks: 4/4 black-box/native tests passed; real-device/account gates documented.
 - [x] Independently review diff, fix important findings, repeat relevant verification.
-- [ ] Commit final review fixes and deliver APK; keep the isolated branch for review.
+- [x] Commit final review fixes and deliver APK; preserve the isolated source branch for review.
   External repository publication is not required for this delivery. Deliver
   build identity, setup guide and explicit remaining account/device prerequisites.
