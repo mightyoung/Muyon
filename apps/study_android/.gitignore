@@ -1,0 +1,10 @@
+.gradle/
+.kotlin/
+**/build/
+local.properties
+app/src/main/jniLibs/
+app/src/main/assets/asr-model/
+app/src/main/assets/model.zip
+
+# Personal question packages must not be published.
+app/src/main/assets/mem-papers.json

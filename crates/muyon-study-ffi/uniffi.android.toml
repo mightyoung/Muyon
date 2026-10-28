@@ -1,0 +1,5 @@
+[defaults.bindings.kotlin]
+package_name = "uniffi.muyon_study"
+cdylib_name = "muyon_study"
+android = true
+disable_java_cleaner = true

@@ -1,0 +1,12 @@
+[package]
+name = "muyon-study-ffi"
+version = "0.1.0"
+edition = "2021"
+publish = false
+[lib]
+name = "muyon_study"
+crate-type = ["rlib", "cdylib"]
+[dependencies]
+muyon-core = { path = "../muyon-core" }
+serde_json.workspace = true
+uniffi = "=0.32.2"

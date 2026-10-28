@@ -1,0 +1,106 @@
+{
+  "generator": "Built-in GPT Image tool",
+  "original_images_unmodified": true,
+  "assets": [
+    {
+      "file": "apps/study_android/app/src/main/res/drawable-nodpi/gpt_add.png",
+      "size": [
+        1254,
+        1254
+      ],
+      "mode": "RGBA",
+      "bytes": 303364,
+      "sha256": "837db5e7d83d5defcd0e8479d7a44bfb39639e80dc0fa3c3e2cd84ab35cba0de"
+    },
+    {
+      "file": "apps/study_android/app/src/main/res/drawable-nodpi/gpt_import.png",
+      "size": [
+        1254,
+        1254
+      ],
+      "mode": "RGBA",
+      "bytes": 401623,
+      "sha256": "4779a2bf1139e39596197445a8e503117e81dc4459021762c9b2f1a1df6277aa"
+    },
+    {
+      "file": "apps/study_android/app/src/main/res/drawable-nodpi/gpt_inbox.png",
+      "size": [
+        1254,
+        1254
+      ],
+      "mode": "RGBA",
+      "bytes": 390669,
+      "sha256": "471a0aeae50078747dc4b2fe771661d124d7bbdfac2536853954f51f3b336464"
+    },
+    {
+      "file": "apps/study_android/app/src/main/res/drawable-nodpi/gpt_launcher.png",
+      "size": [
+        1254,
+        1254
+      ],
+      "mode": "RGB",
+      "bytes": 1180286,
+      "sha256": "73eeb6c7f4209090d3a34e51e69f4ac71a09e01083f372a388328692f447b12d"
+    },
+    {
+      "file": "apps/study_android/app/src/main/res/drawable-nodpi/gpt_learning.png",
+      "size": [
+        1254,
+        1254
+      ],
+      "mode": "RGBA",
+      "bytes": 451961,
+      "sha256": "9a367cc1722e332fe74331cf408905057040886df942d7c643ae37cb14c40ceb"
+    },
+    {
+      "file": "apps/study_android/app/src/main/res/drawable-nodpi/gpt_profile.png",
+      "size": [
+        1254,
+        1254
+      ],
+      "mode": "RGBA",
+      "bytes": 408203,
+      "sha256": "3122414c8ae1e3ae5d9380eed1e09d9ad018c22ed4129c10033ce8f416e92627"
+    },
+    {
+      "file": "apps/study_android/app/src/main/res/drawable-nodpi/gpt_projects.png",
+      "size": [
+        1254,
+        1254
+      ],
+      "mode": "RGBA",
+      "bytes": 426884,
+      "sha256": "5ec8e380e9f1f87f263bc55f0b93d7ee381294c165401b07413b4cc23334c9bf"
+    },
+    {
+      "file": "apps/study_android/app/src/main/res/drawable-nodpi/gpt_reminder.png",
+      "size": [
+        1254,
+        1254
+      ],
+      "mode": "RGBA",
+      "bytes": 398222,
+      "sha256": "fafbe81077c9b0211e6082c5e0ba0bdf0d92cbabf2cdcf14d53c634961e0d274"
+    },
+    {
+      "file": "apps/study_android/app/src/main/res/drawable-nodpi/gpt_today.png",
+      "size": [
+        1254,
+        1254
+      ],
+      "mode": "RGBA",
+      "bytes": 394278,
+      "sha256": "f4a0ced8b4fe2ea626ccc4e212419f009e5cca7520e74db29683b8859569f124"
+    },
+    {
+      "file": "apps/study_android/app/src/main/res/drawable-nodpi/gpt_voice.png",
+      "size": [
+        1254,
+        1254
+      ],
+      "mode": "RGBA",
+      "bytes": 321388,
+      "sha256": "88c0d809f84fbf4579243c3848327c5286f3beffa54651ae2e3167a973e32096"
+    }
+  ]
+}
